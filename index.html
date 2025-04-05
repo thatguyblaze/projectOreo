@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Name - Creative Professional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: 'LucideIcons';
+        /* Ensure this URL is correct and accessible */
+        src: url(https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf) format('truetype');
+      }
+      .lucide {
+        font-family: 'LucideIcons';
+        font-size: 1.1rem;
+        line-height: 1;
+        vertical-align: middle;
+        margin-right: 0.35rem;
+        font-style: normal; /* Ensure icons render correctly */
+        display: inline-block; /* Prevent layout shifts */
+      }
+      /* Basic body styling */
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #111827; /* Primary dark background */
+        color: #d1d5db;
+        scroll-behavior: smooth; /* Enable smooth scrolling globally */
+      }
+      /* Lucide Icon Mappings (Verify these codes if icons don't appear) */
+      .icon-skills::before { content: '\e9ee'; } /* Code */
+      .icon-artwork::before { content: '\e9a1'; } /* Image */
+      .icon-about::before { content: '\e9cb'; } /* User */
+      .icon-contact::before { content: '\ea5a'; } /* Mail */
+      .icon-menu::before { content: '\ea48'; } /* Menu */
+      .icon-close::before { content: '\e9f0'; } /* X */
+
+      /* Circular Progress Bar Styles */
+      .progress-circle {
+        transform: rotate(-90deg);
+      }
+      .progress-circle-bg {
+        fill: none;
+        stroke: #4b5563; /* Slightly lighter bg for contrast */
+        stroke-width: 10;
+      }
+      .progress-circle-fg {
+        fill: none;
+        stroke: #3b82f6; /* Default color, can be overridden */
+        stroke-width: 10;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.6s ease-out;
+      }
+      .progress-text {
+        font-size: 1.4em;
+        font-weight: 600;
+        fill: #e5e7eb;
+        text-anchor: middle;
+        dominant-baseline: middle;
+        transform: rotate(90deg); /* Counter-rotate text */
+        transform-origin: center;
+      }
+      .skill-label {
+         font-size: 0.85em;
+         fill: #9ca3af;
+         text-anchor: middle;
+         dominant-baseline: middle;
+         transform: rotate(90deg); /* Counter-rotate text */
+         transform-origin: center;
+      }
+      /* Section padding helper */
+      .section-padding {
+        padding: 4rem 1rem; /* Default padding */
+      }
+      @media (min-width: 768px) {
+        .section-padding {
+          padding: 6rem 2rem; /* More padding on larger screens */
+        }
+      }
+      /* Subtle gradient for buttons */
+      .btn-gradient {
+        background-image: linear-gradient(to right, #3b82f6, #6366f1);
+      }
+      .btn-gradient:hover {
+        background-image: linear-gradient(to right, #2563eb, #4f46e5);
+      }
+       /* Mobile Menu Styling */
+      .mobile-menu {
+        transition: transform 0.3s ease-in-out;
+      }
+      .mobile-menu.hidden {
+          transform: translateX(100%);
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="text-gray-300">
+
+    <nav class="bg-gray-800/80 backdrop-blur-sm sticky top-0 z-50 shadow-md border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-white text-xl font-bold">Your Name</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#skills" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">Skills</a>
+                        <a href="#portfolio" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">Portfolio</a>
+                        <a href="#about" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">About</a>
+                        <a href="#contact" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">Contact</a>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobile-menu-button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <span class="lucide icon-menu block h-6 w-6"></span>
+                        <span class="lucide icon-close hidden h-6 w-6"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-menu hidden md:hidden fixed inset-y-0 right-0 w-64 bg-gray-800 p-4 transform transition duration-300 ease-in-out z-40" id="mobile-menu">
+            <div class="flex justify-end mb-4">
+                 <button type="button" id="mobile-close-button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                     <span class="sr-only">Close menu</span>
+                     <span class="lucide icon-close h-6 w-6"></span>
+                 </button>
+            </div>
+            <a href="#skills" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">Skills</a>
+            <a href="#portfolio" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">Portfolio</a>
+            <a href="#about" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">About</a>
+            <a href="#contact" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">Contact</a>
+        </div>
+    </nav>
+
+    <section id="hero" class="bg-gradient-to-br from-gray-900 to-gray-800 section-padding text-center border-b border-gray-700">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+             <img
+                src="https://placehold.co/160x160/374151/e5e7eb?text=Your+Image"
+                alt="Your Name"
+                class="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover mb-6 border-4 border-gray-600 shadow-lg mx-auto"
+                onerror="this.onerror=null; this.src='https://placehold.co/160x160/374151/e5e7eb?text=Error';"
+            >
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">Your Name</h1>
+            <p class="text-xl md:text-2xl text-indigo-400 font-medium mb-8">
+                Creative Artist & Developer </p>
+            <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
+                Passionate about crafting beautiful digital experiences, from stunning visuals to functional code. Explore my work and skills below.
+            </p>
+            <a href="#portfolio" class="btn-gradient text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-0.5 inline-block">
+                View My Portfolio
+            </a>
+        </div>
+    </section>
+
+    <main>
+
+        <section id="skills" class="section-padding bg-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white">Technical & Creative Skills</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 text-center">
+                    <div class="flex flex-col items-center" data-skill-percent="85">
+                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
+                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
+                            <circle class="progress-circle-fg stroke-blue-500" cx="60" cy="60" r="50"></circle>
+                            <text class="progress-text" x="60" y="60">0%</text>
+                            <text class="skill-label" x="60" y="85">Programming</text>
+                        </svg>
+                        <p class="text-gray-400 mt-1">Web Development, Scripting</p>
+                    </div>
+                    <div class="flex flex-col items-center" data-skill-percent="75">
+                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
+                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
+                            <circle class="progress-circle-fg stroke-cyan-500" cx="60" cy="60" r="50"></circle>
+                            <text class="progress-text" x="60" y="60">0%</text>
+                            <text class="skill-label" x="60" y="85">Photoshop</text>
+                        </svg>
+                         <p class="text-gray-400 mt-1">Photo Editing, Digital Painting</p>
+                    </div>
+                    <div class="flex flex-col items-center" data-skill-percent="60">
+                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
+                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
+                            <circle class="progress-circle-fg stroke-orange-500" cx="60" cy="60" r="50"></circle>
+                            <text class="progress-text" x="60" y="60">0%</text>
+                            <text class="skill-label" x="60" y="85">Illustrator</text>
+                        </svg>
+                         <p class="text-gray-400 mt-1">Vector Graphics, Logo Design</p>
+                    </div>
+                    <div class="flex flex-col items-center" data-skill-percent="70">
+                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
+                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
+                            <circle class="progress-circle-fg stroke-red-500" cx="60" cy="60" r="50"></circle>
+                            <text class="progress-text" x="60" y="60">0%</text>
+                            <text class="skill-label" x="60" y="85">3D Modeling</text>
+                        </svg>
+                         <p class="text-gray-400 mt-1">Blender, Asset Creation</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="portfolio" class="section-padding bg-gray-900">
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white">Portfolio Showcase</h2>
+                <p class="text-center text-gray-400 mb-10 max-w-2xl mx-auto">Here's a selection of my recent projects. Click on any item to learn more (functionality to be added).</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden group cursor-pointer">
+                        <img src="https://placehold.co/600x400/4b5563/e5e7eb?text=Project+1" alt="Portfolio Item 1" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/4b5563/e5e7eb?text=Error';">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-white mb-2">Project Title 1</h3>
+                            <p class="text-gray-400 text-sm">Brief description of the project and technologies/tools used.</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden group cursor-pointer">
+                        <img src="https://placehold.co/600x400/52525b/e5e7eb?text=Project+2" alt="Portfolio Item 2" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/52525b/e5e7eb?text=Error';">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-white mb-2">Project Title 2</h3>
+                            <p class="text-gray-400 text-sm">Another project description goes here.</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden group cursor-pointer">
+                        <img src="https://placehold.co/600x400/6b7280/e5e7eb?text=Project+3" alt="Portfolio Item 3" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/6b7280/e5e7eb?text=Error';">
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold text-white mb-2">Project Title 3</h3>
+                            <p class="text-gray-400 text-sm">Details about the third creative piece.</p>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </section>
+
+        <section id="about" class="section-padding bg-gray-800">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-8 text-white">About Me</h2>
+                <img
+                    src="https://placehold.co/120x120/374151/e5e7eb?text=Me"
+                    alt="Your Name - Casual"
+                    class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover mb-6 border-4 border-gray-600 shadow-md mx-auto"
+                    onerror="this.onerror=null; this.src='https://placehold.co/120x120/374151/e5e7eb?text=Error';"
+                >
+                <p class="text-lg text-gray-400 mb-6 leading-relaxed">
+                    Replace this with a more detailed description about yourself. Talk about your journey, your passion for art and technology, what drives you, and what you enjoy working on. You could also mention your interests (like music or gaming) here in a more narrative format.
+                </p>
+                <p class="text-lg text-gray-400 leading-relaxed">
+                    Mention your approach to projects, collaboration style, or future aspirations. Make it engaging and authentic!
+                </p>
+                <div class="mt-8 flex justify-center gap-4">
+                     <a href="#music-placeholder" class="text-indigo-400 hover:text-indigo-300 transition duration-150">Favorite Music</a>
+                     <span class="text-gray-600">|</span>
+                     <a href="#steam-placeholder" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 transition duration-150">Steam Profile</a>
+                 </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section-padding bg-gradient-to-br from-gray-900 to-gray-800">
+             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-8 text-white">Get In Touch</h2>
+                <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+                    Interested in collaborating or have a question? Feel free to reach out!
+                </p>
+                <div class="space-y-4 text-lg">
+                     <p><span class="lucide icon-contact mr-2 text-indigo-400"></span> <a href="mailto:your.email@example.com" class="hover:text-indigo-300 transition duration-150">your.email@example.com</a></p>
+                     </div>
+                </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 bg-gray-900 text-gray-500 text-sm border-t border-gray-700">
+        <p>&copy; <span id="current-year"></span> Your Name. All Rights Reserved.</p>
+        </footer>
+
+    <script>
+      // Wait for the DOM to be fully loaded before running scripts
+      document.addEventListener('DOMContentLoaded', () => {
+
+        // --- Set current year in footer ---
+        const yearSpan = document.getElementById('current-year');
+        if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+        }
+
+        // --- Mobile Menu Toggle ---
+        const menuButton = document.getElementById('mobile-menu-button');
+        const closeButton = document.getElementById('mobile-close-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = menuButton ? menuButton.querySelector('.icon-menu') : null;
+        const closeIcon = menuButton ? menuButton.querySelector('.icon-close') : null;
+
+        function toggleMenu(open) {
+            if (!mobileMenu || !menuIcon || !closeIcon || !menuButton) return; // Exit if elements are missing
+            mobileMenu.classList.toggle('hidden', !open);
+            menuIcon.classList.toggle('hidden', open);
+            closeIcon.classList.toggle('hidden', !open);
+            menuButton.setAttribute('aria-expanded', String(open)); // Use String() for attribute
+        }
+
+        if (menuButton && closeButton && mobileMenu) {
+            menuButton.addEventListener('click', () => {
+                // Use current attribute state to decide action
+                const isOpen = menuButton.getAttribute('aria-expanded') === 'false';
+                toggleMenu(isOpen);
+            });
+
+            closeButton.addEventListener('click', () => {
+                toggleMenu(false);
+            });
+
+            // Close menu when a link inside it is clicked
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    toggleMenu(false);
+                    // Smooth scroll is handled by CSS scroll-behavior: smooth
+                });
+            });
+        } else {
+            console.warn("Mobile menu elements not found.");
+        }
+
+
+        // --- Animate Progress Circles ---
+        function animateProgressBars() {
+            const skillElements = document.querySelectorAll('[data-skill-percent]');
+            if (skillElements.length === 0) return; // Exit if no skill elements found
+
+            skillElements.forEach(el => {
+                const percentage = parseInt(el.getAttribute('data-skill-percent'), 10) || 0; // Default to 0 if invalid
+                const circleFg = el.querySelector('.progress-circle-fg');
+                const textElement = el.querySelector('.progress-text');
+
+                if (!circleFg || !textElement) {
+                    console.warn("Progress bar elements missing for a skill.", el);
+                    return; // Skip this skill if elements are missing
+                }
+
+                const radius = circleFg.r.baseVal.value;
+                if (!radius) {
+                     console.warn("Progress bar radius is invalid.", circleFg);
+                     return; // Skip if radius is invalid
+                }
+                const circumference = 2 * Math.PI * radius;
+                const offset = circumference - (percentage / 100) * circumference;
+
+                // Ensure initial state is set
+                circleFg.style.strokeDasharray = `${circumference} ${circumference}`;
+                circleFg.style.strokeDashoffset = circumference;
+                textElement.textContent = `0%`;
+
+                // Debounce or ensure animation doesn't restart unnecessarily if already visible
+                if (el.dataset.animated === 'true') return;
+                el.dataset.animated = 'true'; // Mark as animating/animated
+
+                // Trigger the animation after a brief delay
+                setTimeout(() => {
+                    circleFg.style.strokeDashoffset = offset;
+
+                    // Animate the text percentage
+                    let currentPercent = 0;
+                    const stepTime = 20;
+                    const duration = 600; // Match CSS transition duration in ms
+                    const steps = Math.max(1, Math.floor(duration / stepTime));
+                    const increment = percentage / steps;
+                    let stepCount = 0;
+
+                    const interval = setInterval(() => {
+                        currentPercent += increment;
+                        stepCount++;
+                        if (stepCount >= steps) {
+                            clearInterval(interval);
+                            currentPercent = percentage; // Ensure final value is exact
+                        }
+                        // Use requestAnimationFrame for smoother text updates if needed, but setInterval is often fine
+                        textElement.textContent = `${Math.round(currentPercent)}%`;
+                    }, stepTime);
+
+                }, 150);
+            });
+        }
+
+        // --- Intersection Observer for Animations ---
+        const skillsSection = document.getElementById('skills');
+        let observer; // Declare observer variable
+
+        // Function to handle intersection changes
+        function handleIntersection(entries) {
+             entries.forEach(entry => {
+                // Find the skill elements within the intersecting section
+                const skillElements = entry.target.querySelectorAll('[data-skill-percent]');
+                const alreadyAnimated = Array.from(skillElements).some(el => el.dataset.animated === 'true');
+
+                if (entry.isIntersecting && !alreadyAnimated) {
+                    console.log("Skills section intersecting, animating progress bars.");
+                    animateProgressBars();
+                    // Optionally unobserve after animating once
+                    // if (observer) { // Check if observer exists
+                    //    observer.unobserve(entry.target);
+                    // }
+                }
+                // Optional: Reset animation if it scrolls out
+                /* else if (!entry.isIntersecting) {
+                    skillElements.forEach(el => {
+                        el.dataset.animated = 'false'; // Allow re-animation
+                        const circleFg = el.querySelector('.progress-circle-fg');
+                        const textElement = el.querySelector('.progress-text');
+                        if(circleFg && textElement) {
+                           const radius = circleFg.r.baseVal.value;
+                           const circumference = 2 * Math.PI * radius;
+                           circleFg.style.strokeDashoffset = circumference; // Reset visually
+                           textElement.textContent = `0%`;
+                        }
+                    });
+                } */
+            });
+        }
+
+        if (skillsSection) {
+             // Set observer options
+             const observerOptions = {
+                root: null, // Use the viewport as the root
+                rootMargin: '0px',
+                threshold: 0.3 // Trigger when 30% visible
+             };
+             // Create and start the observer
+             observer = new IntersectionObserver(handleIntersection, observerOptions);
+             observer.observe(skillsSection);
+        } else {
+             console.warn("Skills section not found for Intersection Observer. Animating on load.");
+             // Fallback: Animate immediately if observer setup fails
+             animateProgressBars();
+        }
+
+      }); // End of DOMContentLoaded
+    </script>
+</body>
+</html>
