@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Name - Creative Professional</title>
+    <title>Blazinik - Creative Professional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @font-face {
         font-family: 'LucideIcons';
-        /* Ensure this URL is correct and accessible */
         src: url(https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf) format('truetype');
       }
       .lucide {
@@ -17,419 +16,408 @@
         line-height: 1;
         vertical-align: middle;
         margin-right: 0.35rem;
-        font-style: normal; /* Ensure icons render correctly */
-        display: inline-block; /* Prevent layout shifts */
+        font-style: normal;
+        display: inline-block;
       }
-      /* Basic body styling */
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #111827; /* Primary dark background */
-        color: #d1d5db;
-        scroll-behavior: smooth; /* Enable smooth scrolling globally */
+        background-color: #0a0a0a; /* Slightly off-black */
+        color: #e5e7eb; /* Lighter gray text */
+        scroll-behavior: smooth;
+        /* Subtle noise texture */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%231f2937' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
       }
-      /* Lucide Icon Mappings (Verify these codes if icons don't appear) */
-      .icon-skills::before { content: '\e9ee'; } /* Code */
-      .icon-artwork::before { content: '\e9a1'; } /* Image */
-      .icon-about::before { content: '\e9cb'; } /* User */
-      .icon-contact::before { content: '\ea5a'; } /* Mail */
-      .icon-menu::before { content: '\ea48'; } /* Menu */
-      .icon-close::before { content: '\e9f0'; } /* X */
+      body.modal-open { overflow: hidden; }
 
-      /* Circular Progress Bar Styles */
-      .progress-circle {
-        transform: rotate(-90deg);
+      /* Icons */
+      .icon-skills::before { content: '\e9ee'; }
+      .icon-artwork::before { content: '\e9a1'; }
+      .icon-menu::before { content: '\ea48'; }
+      .icon-close::before { content: '\e9f0'; }
+      .icon-link::before { content: '\e9ff'; }
+      .icon-prev::before { content: '\e96a'; } /* Chevron Left */
+      .icon-next::before { content: '\e96e'; } /* Chevron Right */
+
+
+      .section-padding { padding: 4rem 1rem; }
+      @media (min-width: 768px) { .section-padding { padding: 6rem 2rem; } }
+
+      .mobile-menu { transition: transform 0.3s ease-in-out; }
+      .mobile-menu.hidden { transform: translateX(100%); }
+
+      /* Skill bar - Initial state & base transition */
+      .skill-bar-inner {
+        width: 0%; /* Start at 0 width */
+        transition-property: width; /* Animate only width */
+        transition-timing-function: ease-out; /* Smooth easing */
+        /* Duration and Delay set by JS */
       }
-      .progress-circle-bg {
-        fill: none;
-        stroke: #4b5563; /* Slightly lighter bg for contrast */
-        stroke-width: 10;
+
+      /* Modal styles */
+      .modal { transition: opacity 0.3s ease-in-out; }
+      .modal.hidden { opacity: 0; pointer-events: none; }
+      .modal:not(.hidden) { opacity: 1; }
+
+      /* Carousel button styles */
+      .carousel-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(17, 24, 39, 0.6); /* Darker gray bg */
+        color: #d1d5db; /* Lighter gray icon */
+        border: 1px solid rgba(55, 65, 81, 0.6); /* Subtle border */
+        padding: 0.5rem;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+        z-index: 10;
       }
-      .progress-circle-fg {
-        fill: none;
-        stroke: #3b82f6; /* Default color, can be overridden */
-        stroke-width: 10;
-        stroke-linecap: round;
-        transition: stroke-dashoffset 0.6s ease-out;
+      .carousel-button:hover {
+        background-color: rgba(31, 41, 55, 0.8); /* Slightly lighter gray bg on hover */
+        border-color: rgba(75, 85, 99, 0.8);
       }
-      .progress-text {
-        font-size: 1.4em;
-        font-weight: 600;
-        fill: #e5e7eb;
-        text-anchor: middle;
-        dominant-baseline: middle;
-        transform: rotate(90deg); /* Counter-rotate text */
-        transform-origin: center;
+      .carousel-button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
       }
-      .skill-label {
-         font-size: 0.85em;
-         fill: #9ca3af;
-         text-anchor: middle;
-         dominant-baseline: middle;
-         transform: rotate(90deg); /* Counter-rotate text */
-         transform-origin: center;
+      .carousel-button.prev { left: 0.75rem; }
+      .carousel-button.next { right: 0.75rem; }
+
+      /* Section fade-in animation */
+      .fade-in-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
       }
-      /* Section padding helper */
-      .section-padding {
-        padding: 4rem 1rem; /* Default padding */
+      .fade-in-section.visible {
+        opacity: 1;
+        transform: translateY(0);
       }
-      @media (min-width: 768px) {
-        .section-padding {
-          padding: 6rem 2rem; /* More padding on larger screens */
-        }
+
+      /* Accent border for section titles */
+      .section-title-accent::after {
+          content: '';
+          display: block;
+          width: 50px; /* Width of the accent line */
+          height: 3px; /* Thickness of the line */
+          background: linear-gradient(to right, #3b82f6, #6366f1); /* Gradient color */
+          margin: 0.75rem auto 0; /* Spacing below title, centered */
+          border-radius: 99px;
       }
-      /* Subtle gradient for buttons */
-      .btn-gradient {
-        background-image: linear-gradient(to right, #3b82f6, #6366f1);
+
+      /* Style for the fallback error message */
+      #style-error-message {
+          background-color: #ef4444; /* Red background */
+          color: white;
+          text-align: center;
+          padding: 1rem;
+          font-weight: bold;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          z-index: 10000; /* Ensure it's on top */
+          display: none; /* Hidden by default */
       }
-      .btn-gradient:hover {
-        background-image: linear-gradient(to right, #2563eb, #4f46e5);
-      }
-       /* Mobile Menu Styling */
-      .mobile-menu {
-        transition: transform 0.3s ease-in-out;
-      }
-      .mobile-menu.hidden {
-          transform: translateX(100%);
-      }
+
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="text-gray-300">
+<body class="text-gray-200">
 
-    <nav class="bg-gray-800/80 backdrop-blur-sm sticky top-0 z-50 shadow-md border-b border-gray-700">
+    <div id="style-error-message">
+        Error: Styles did not load correctly. Please check the browser console (F12) for network errors or script issues.
+    </div>
+
+    <nav class="bg-gray-900/70 backdrop-blur-lg sticky top-0 z-50 shadow-md border-b border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0">
-                    <a href="#" class="text-white text-xl font-bold">Your Name</a>
-                </div>
+                <div class="flex-shrink-0"><a href="#" class="text-white text-xl font-bold">Blazinik</a></div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#skills" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">Skills</a>
                         <a href="#portfolio" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">Portfolio</a>
-                        <a href="#about" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">About</a>
-                        <a href="#contact" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out">Contact</a>
                     </div>
                 </div>
                 <div class="-mr-2 flex md:hidden">
                     <button type="button" id="mobile-menu-button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Open main menu</span>
-                        <span class="lucide icon-menu block h-6 w-6"></span>
-                        <span class="lucide icon-close hidden h-6 w-6"></span>
+                        <span class="sr-only">Open main menu</span><span class="lucide icon-menu block h-6 w-6"></span><span class="lucide icon-close hidden h-6 w-6"></span>
                     </button>
                 </div>
             </div>
         </div>
-
-        <div class="mobile-menu hidden md:hidden fixed inset-y-0 right-0 w-64 bg-gray-800 p-4 transform transition duration-300 ease-in-out z-40" id="mobile-menu">
-            <div class="flex justify-end mb-4">
-                 <button type="button" id="mobile-close-button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
-                     <span class="sr-only">Close menu</span>
-                     <span class="lucide icon-close h-6 w-6"></span>
-                 </button>
-            </div>
+        <div class="mobile-menu hidden md:hidden fixed inset-y-0 right-0 w-64 bg-gray-900 p-4 transform transition duration-300 ease-in-out z-40" id="mobile-menu">
+            <div class="flex justify-end mb-4"><button type="button" id="mobile-close-button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none"><span class="sr-only">Close menu</span><span class="lucide icon-close h-6 w-6"></span></button></div>
             <a href="#skills" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">Skills</a>
             <a href="#portfolio" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">Portfolio</a>
-            <a href="#about" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">About</a>
-            <a href="#contact" class="block text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-base font-medium">Contact</a>
         </div>
     </nav>
 
-    <section id="hero" class="bg-gradient-to-br from-gray-900 to-gray-800 section-padding text-center border-b border-gray-700">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-             <img
-                src="https://placehold.co/160x160/374151/e5e7eb?text=Your+Image"
-                alt="Your Name"
-                class="w-36 h-36 md:w-44 md:h-44 rounded-full object-cover mb-6 border-4 border-gray-600 shadow-lg mx-auto"
-                onerror="this.onerror=null; this.src='https://placehold.co/160x160/374151/e5e7eb?text=Error';"
-            >
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">Your Name</h1>
-            <p class="text-xl md:text-2xl text-indigo-400 font-medium mb-8">
-                Creative Artist & Developer </p>
-            <p class="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
-                Passionate about crafting beautiful digital experiences, from stunning visuals to functional code. Explore my work and skills below.
-            </p>
-            <a href="#portfolio" class="btn-gradient text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-0.5 inline-block">
-                View My Portfolio
-            </a>
+    <section id="hero" class="bg-gradient-to-br from-black to-gray-900 section-padding border-b border-gray-800 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                <div class="flex-shrink-0 w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
+                     <img src="https://placehold.co/256x256/111827/e5e7eb?text=Blaze" alt="Blazinik" class="w-full h-full rounded-full object-cover shadow-lg border-4 border-gray-700" onerror="this.onerror=null; this.src='https://placehold.co/256x256/374151/e5e7eb?text=Error';">
+                </div>
+                <div class="text-center md:text-left flex-grow">
+                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3">Blazinik</h1>
+                     <p class="text-xl text-indigo-400 font-medium mb-4">Hey, I'm Blaze 👋</p>
+                     <p class="text-lg text-gray-300 mb-8">📚 | Programmer</p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-3 sm:gap-4">
+                        <a href="#portfolio" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">View Portfolio</a>
+                        <a href="#music-placeholder" class="inline-block bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">Favorite Music</a>
+                        <a href="#steam-placeholder" target="_blank" rel="noopener noreferrer" class="inline-block bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">Steam</a>
+                        <a href="#youtube-placeholder" target="_blank" rel="noopener noreferrer" class="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">YouTube</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     <main>
-
-        <section id="skills" class="section-padding bg-gray-800">
+        <section id="skills" class="section-padding bg-gray-900 border-b border-gray-800 fade-in-section">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white">Technical & Creative Skills</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 text-center">
-                    <div class="flex flex-col items-center" data-skill-percent="85">
-                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
-                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
-                            <circle class="progress-circle-fg stroke-blue-500" cx="60" cy="60" r="50"></circle>
-                            <text class="progress-text" x="60" y="60">0%</text>
-                            <text class="skill-label" x="60" y="85">Programming</text>
-                        </svg>
-                        <p class="text-gray-400 mt-1">Web Development, Scripting</p>
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white section-title-accent">Technical & Creative Skills</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-indigo-400 mb-6 border-b border-gray-700 pb-2">Technical</h3>
+                        <div class="space-y-5">
+                            <div data-skill-percent="90"> <p class="font-medium text-white mb-1 text-lg">Scripting & Logic</p> <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600"></div> </div> <p class="text-sm text-gray-400 mt-1">Game mechanics, UI interactions, backend logic</p> </div>
+                            <div data-skill-percent="85"> <p class="font-medium text-white mb-1 text-lg">UI Design & Implementation</p> <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"></div> </div> <p class="text-sm text-gray-400 mt-1">Interface layout, visual styling, user experience</p> </div>
+                            <div data-skill-percent="75"> <p class="font-medium text-white mb-1 text-lg">Performance Optimization</p> <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-400"></div> </div> <p class="text-sm text-gray-400 mt-1">Code efficiency, memory management, debugging</p> </div>
+                            <div data-skill-percent="70"> <p class="font-medium text-white mb-1 text-lg">System Architecture</p> <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-300 to-indigo-300"></div> </div> <p class="text-sm text-gray-400 mt-1">Modular code design, event handling, data management</p> </div>
+                        </div>
                     </div>
-                    <div class="flex flex-col items-center" data-skill-percent="75">
-                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
-                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
-                            <circle class="progress-circle-fg stroke-cyan-500" cx="60" cy="60" r="50"></circle>
-                            <text class="progress-text" x="60" y="60">0%</text>
-                            <text class="skill-label" x="60" y="85">Photoshop</text>
-                        </svg>
-                         <p class="text-gray-400 mt-1">Photo Editing, Digital Painting</p>
-                    </div>
-                    <div class="flex flex-col items-center" data-skill-percent="60">
-                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
-                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
-                            <circle class="progress-circle-fg stroke-orange-500" cx="60" cy="60" r="50"></circle>
-                            <text class="progress-text" x="60" y="60">0%</text>
-                            <text class="skill-label" x="60" y="85">Illustrator</text>
-                        </svg>
-                         <p class="text-gray-400 mt-1">Vector Graphics, Logo Design</p>
-                    </div>
-                    <div class="flex flex-col items-center" data-skill-percent="70">
-                        <svg class="w-40 h-40 progress-circle mb-3" viewBox="0 0 120 120">
-                            <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
-                            <circle class="progress-circle-fg stroke-red-500" cx="60" cy="60" r="50"></circle>
-                            <text class="progress-text" x="60" y="60">0%</text>
-                            <text class="skill-label" x="60" y="85">3D Modeling</text>
-                        </svg>
-                         <p class="text-gray-400 mt-1">Blender, Asset Creation</p>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-cyan-400 mb-6 border-b border-gray-700 pb-2">Creative</h3>
+                        <div class="space-y-5">
+                            <div data-skill-percent="75"> <p class="font-medium text-white mb-1 text-lg">Texture & Asset Design</p> <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-cyan-500 to-sky-500"></div> </div> <p class="text-sm text-gray-400 mt-1">Creating textures, icons, and visual assets</p> </div>
+                            <div data-skill-percent="60"> <p class="font-medium text-white mb-1 text-lg">Vector Art & UI Elements</p> <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-500"></div> </div> <p class="text-sm text-gray-400 mt-1">Scalable graphics, interface components</p> </div>
+                            <div data-skill-percent="70"> <p class="font-medium text-white mb-1 text-lg">3D Modeling</p> <div class="h-2 w-full bg-gray-700 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-red-500 to-rose-500"></div> </div> <p class="text-sm text-gray-400 mt-1">Creating models, props, and environments</p> </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="portfolio" class="section-padding bg-gray-900">
+        <section id="portfolio" class="section-padding bg-gray-900 fade-in-section">
              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white">Portfolio Showcase</h2>
-                <p class="text-center text-gray-400 mb-10 max-w-2xl mx-auto">Here's a selection of my recent projects. Click on any item to learn more (functionality to be added).</p>
+                <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white section-title-accent">Portfolio Showcase</h2>
+                <p class="text-center text-gray-400 mb-10 max-w-2xl mx-auto">Here's a selection of my recent projects. Click on any item to learn more.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden group cursor-pointer">
-                        <img src="https://placehold.co/600x400/4b5563/e5e7eb?text=Project+1" alt="Portfolio Item 1" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/4b5563/e5e7eb?text=Error';">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Project Title 1</h3>
-                            <p class="text-gray-400 text-sm">Brief description of the project and technologies/tools used.</p>
+                    <a href="#" class="block group portfolio-item-link"
+                       data-title="Advanced UI System"
+                       data-images='["https://placehold.co/800x600/4b5563/e5e7eb?text=UI+System+1", "https://placehold.co/800x600/52525b/e5e7eb?text=UI+System+2", "https://placehold.co/800x600/6b7280/e5e7eb?text=UI+System+3"]'
+                       data-description="Designed and implemented a complex user interface system featuring modal popups, dynamic inventory display, and interactive elements. Focused on responsive design and intuitive navigation."
+                       data-link="#"
+                       data-tags="UI Design,Scripting,UX">
+                        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition duration-300 ease-in-out transform hover:scale-[1.03] border-2 border-transparent group-hover:border-indigo-500">
+                            <img src="https://placehold.co/600x400/4b5563/e5e7eb?text=UI+System" alt="Advanced UI System" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/4b5563/e5e7eb?text=Error';">
+                            <div class="p-6"> <h3 class="text-xl font-semibold text-white mb-2">Advanced UI System</h3> <p class="text-gray-400 text-sm mb-3">Complex interface with interactive elements & responsive layout.</p> <div class="flex flex-wrap gap-2"> <span class="inline-block bg-indigo-500/20 text-indigo-300 text-xs font-medium px-2.5 py-0.5 rounded-full">UI Design</span> <span class="inline-block bg-blue-500/20 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Scripting</span> <span class="inline-block bg-purple-500/20 text-purple-300 text-xs font-medium px-2.5 py-0.5 rounded-full">UX</span> </div> </div>
                         </div>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden group cursor-pointer">
-                        <img src="https://placehold.co/600x400/52525b/e5e7eb?text=Project+2" alt="Portfolio Item 2" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/52525b/e5e7eb?text=Error';">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Project Title 2</h3>
-                            <p class="text-gray-400 text-sm">Another project description goes here.</p>
+                    </a>
+                    <a href="#" class="block group portfolio-item-link"
+                       data-title="Procedural Environment Generation"
+                       data-images='["https://placehold.co/800x600/52525b/e5e7eb?text=ProcGen+1", "https://placehold.co/800x600/4b5563/e5e7eb?text=ProcGen+2"]'
+                       data-description="Developed a system for procedurally generating terrain and placing assets like trees and rocks. Focused on creating natural-looking, varied environments efficiently using noise algorithms and placement rules."
+                       data-link="#"
+                       data-tags="Scripting,Optimization,3D Modeling">
+                        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition duration-300 ease-in-out transform hover:scale-[1.03] border-2 border-transparent group-hover:border-indigo-500">
+                            <img src="https://placehold.co/600x400/52525b/e5e7eb?text=ProcGen+Map" alt="Procedural Environment" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/52525b/e5e7eb?text=Error';">
+                            <div class="p-6"> <h3 class="text-xl font-semibold text-white mb-2">Procedural Environment</h3> <p class="text-gray-400 text-sm mb-3">Algorithmically generated terrain and asset placement.</p> <div class="flex flex-wrap gap-2"> <span class="inline-block bg-blue-500/20 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Scripting</span> <span class="inline-block bg-green-500/20 text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Optimization</span> <span class="inline-block bg-red-500/20 text-red-300 text-xs font-medium px-2.5 py-0.5 rounded-full">3D Modeling</span> </div> </div>
                         </div>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden group cursor-pointer">
-                        <img src="https://placehold.co/600x400/6b7280/e5e7eb?text=Project+3" alt="Portfolio Item 3" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/6b7280/e5e7eb?text=Error';">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Project Title 3</h3>
-                            <p class="text-gray-400 text-sm">Details about the third creative piece.</p>
+                    </a>
+                    <a href="#" class="block group portfolio-item-link"
+                       data-title="Custom Physics Interactions"
+                       data-images='["https://placehold.co/800x600/6b7280/e5e7eb?text=Physics+1"]'
+                       data-description="Implemented custom physics-based interactions for objects, including realistic collisions, constraints, and forces, going beyond default engine capabilities."
+                       data-link="#"
+                       data-tags="Scripting,Physics,System Design">
+                        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition duration-300 ease-in-out transform hover:scale-[1.03] border-2 border-transparent group-hover:border-indigo-500">
+                            <img src="https://placehold.co/600x400/6b7280/e5e7eb?text=Physics+Demo" alt="Custom Physics" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/6b7280/e5e7eb?text=Error';">
+                            <div class="p-6"> <h3 class="text-xl font-semibold text-white mb-2">Custom Physics Interactions</h3> <p class="text-gray-400 text-sm mb-3">Scripted unique object behaviors and interactions.</p> <div class="flex flex-wrap gap-2"> <span class="inline-block bg-blue-500/20 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Scripting</span> <span class="inline-block bg-yellow-500/20 text-yellow-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Physics</span> <span class="inline-block bg-purple-500/20 text-purple-300 text-xs font-medium px-2.5 py-0.5 rounded-full">System Design</span> </div> </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
              </div>
         </section>
-
-        <section id="about" class="section-padding bg-gray-800">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold mb-8 text-white">About Me</h2>
-                <img
-                    src="https://placehold.co/120x120/374151/e5e7eb?text=Me"
-                    alt="Your Name - Casual"
-                    class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover mb-6 border-4 border-gray-600 shadow-md mx-auto"
-                    onerror="this.onerror=null; this.src='https://placehold.co/120x120/374151/e5e7eb?text=Error';"
-                >
-                <p class="text-lg text-gray-400 mb-6 leading-relaxed">
-                    Replace this with a more detailed description about yourself. Talk about your journey, your passion for art and technology, what drives you, and what you enjoy working on. You could also mention your interests (like music or gaming) here in a more narrative format.
-                </p>
-                <p class="text-lg text-gray-400 leading-relaxed">
-                    Mention your approach to projects, collaboration style, or future aspirations. Make it engaging and authentic!
-                </p>
-                <div class="mt-8 flex justify-center gap-4">
-                     <a href="#music-placeholder" class="text-indigo-400 hover:text-indigo-300 transition duration-150">Favorite Music</a>
-                     <span class="text-gray-600">|</span>
-                     <a href="#steam-placeholder" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:text-indigo-300 transition duration-150">Steam Profile</a>
-                 </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section-padding bg-gradient-to-br from-gray-900 to-gray-800">
-             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold mb-8 text-white">Get In Touch</h2>
-                <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
-                    Interested in collaborating or have a question? Feel free to reach out!
-                </p>
-                <div class="space-y-4 text-lg">
-                     <p><span class="lucide icon-contact mr-2 text-indigo-400"></span> <a href="mailto:your.email@example.com" class="hover:text-indigo-300 transition duration-150">your.email@example.com</a></p>
-                     </div>
-                </div>
-        </section>
-
     </main>
 
-    <footer class="text-center p-6 bg-gray-900 text-gray-500 text-sm border-t border-gray-700">
-        <p>&copy; <span id="current-year"></span> Your Name. All Rights Reserved.</p>
-        </footer>
+    <footer class="text-center p-6 bg-black text-gray-500 text-sm border-t border-gray-800">
+         <p>&copy; <span id="current-year"></span> Blazinik. All Rights Reserved.</p>
+    </footer>
+
+    <div id="portfolio-modal" class="modal hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-gray-900 p-6 md:p-8 rounded-lg shadow-2xl max-w-4xl w-full relative max-h-[90vh] flex flex-col border border-gray-700">
+            <button id="modal-close-button" class="absolute top-3 right-3 text-gray-400 hover:text-white transition duration-150 ease-in-out z-20" aria-label="Close modal">
+                <span class="lucide icon-close text-3xl"></span>
+            </button>
+            <h2 id="modal-title" class="text-2xl md:text-3xl font-bold text-white mb-4 pr-10 flex-shrink-0">Project Title</h2>
+            <div class="relative mb-4">
+                 <img id="modal-carousel-image" src="https://placehold.co/800x600/374151/9ca3af?text=Loading..." alt="Project Image" class="w-full object-contain rounded-md bg-black max-h-[60vh]" onerror="this.onerror=null; this.src='https://placehold.co/800x600/374151/9ca3af?text=Image+Error';">
+                 <button id="modal-prev-button" class="carousel-button prev" aria-label="Previous image"> <span class="lucide icon-prev text-2xl"></span> </button>
+                 <button id="modal-next-button" class="carousel-button next" aria-label="Next image"> <span class="lucide icon-next text-2xl"></span> </button>
+            </div>
+            <div class="flex-shrink-0 overflow-y-auto">
+                <div class="text-center text-gray-400 text-sm mb-4" id="modal-image-counter">1 / 1</div>
+                <p id="modal-description" class="text-gray-300 mb-4 leading-relaxed">Project description goes here...</p>
+                <div id="modal-tags-container" class="mb-6 flex flex-wrap gap-2"></div>
+                <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105 hidden">
+                    <span class="lucide icon-link mr-2"></span> View Live Demo
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script>
-      // Wait for the DOM to be fully loaded before running scripts
       document.addEventListener('DOMContentLoaded', () => {
+        console.log("DOM Loaded. Initializing scripts...");
 
-        // --- Set current year in footer ---
-        const yearSpan = document.getElementById('current-year');
-        if (yearSpan) {
+        try {
+            // --- Style Load Check ---
+            const styleErrorMessage = document.getElementById('style-error-message');
+            const bodyElement = document.body; // Element known to have Tailwind classes applied early
+
+            // Check after a short delay to give Tailwind time to potentially initialize
+            setTimeout(() => {
+                // Check if a fundamental Tailwind class (like for font) has taken effect
+                // Note: This check isn't foolproof but can catch complete failures.
+                const bodyFontFamily = window.getComputedStyle(bodyElement).fontFamily;
+                if (!bodyFontFamily || !bodyFontFamily.toLowerCase().includes('inter')) { // Check if Inter font applied by Tailwind base styles
+                    console.error("Tailwind styles might not have loaded correctly!");
+                    if (styleErrorMessage) {
+                        styleErrorMessage.style.display = 'block'; // Show the error message
+                    }
+                } else {
+                    console.log("Tailwind styles appear to be loaded.");
+                }
+            }, 1500); // Check after 1.5 seconds
+
+            // --- Essential Element Checks ---
+            // (Keep these checks as they are still useful)
+            const essentialIds = [ /* ... list of IDs ... */ 'current-year', 'mobile-menu-button', 'mobile-close-button', 'mobile-menu', 'portfolio-modal', 'modal-close-button', 'modal-title', 'modal-carousel-image', 'modal-description', 'modal-link', 'modal-prev-button', 'modal-next-button', 'modal-image-counter', 'skills', 'modal-tags-container' ];
+            let allEssentialsFound = true;
+            essentialIds.forEach(id => { if (!document.getElementById(id)) { console.error(`Essential element with ID '${id}' not found!`); allEssentialsFound = false; } });
+            const portfolioLinksExist = document.querySelectorAll('.portfolio-item-link').length > 0; if (!portfolioLinksExist) console.warn("No portfolio item links found.");
+            const skillElementsExist = document.querySelectorAll('[data-skill-percent]').length > 0; if (!skillElementsExist) console.warn("No skill elements found.");
+            if (!allEssentialsFound) { console.error("Halting script execution due to missing essential elements."); return; }
+
+            // --- Set current year ---
+            const yearSpan = document.getElementById('current-year');
             yearSpan.textContent = new Date().getFullYear();
-        }
 
-        // --- Mobile Menu Toggle ---
-        const menuButton = document.getElementById('mobile-menu-button');
-        const closeButton = document.getElementById('mobile-close-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuIcon = menuButton ? menuButton.querySelector('.icon-menu') : null;
-        const closeIcon = menuButton ? menuButton.querySelector('.icon-close') : null;
+            // --- Mobile Menu Toggle ---
+            const menuButton = document.getElementById('mobile-menu-button');
+            const closeButton = document.getElementById('mobile-close-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = menuButton.querySelector('.icon-menu');
+            const closeIcon = menuButton.querySelector('.icon-close');
+            function toggleMenu(open) { if (!mobileMenu || !menuIcon || !closeIcon || !menuButton) return; mobileMenu.classList.toggle('hidden', !open); menuIcon.classList.toggle('hidden', open); closeIcon.classList.toggle('hidden', !open); menuButton.setAttribute('aria-expanded', String(open)); }
+            menuButton.addEventListener('click', () => { const isOpen = menuButton.getAttribute('aria-expanded') === 'false'; toggleMenu(isOpen); });
+            closeButton.addEventListener('click', () => { toggleMenu(false); });
+            mobileMenu.querySelectorAll('a').forEach(link => { link.addEventListener('click', () => { toggleMenu(false); }); });
 
-        function toggleMenu(open) {
-            if (!mobileMenu || !menuIcon || !closeIcon || !menuButton) return; // Exit if elements are missing
-            mobileMenu.classList.toggle('hidden', !open);
-            menuIcon.classList.toggle('hidden', open);
-            closeIcon.classList.toggle('hidden', !open);
-            menuButton.setAttribute('aria-expanded', String(open)); // Use String() for attribute
-        }
+            // --- Portfolio Modal Carousel Logic ---
+            const modal = document.getElementById('portfolio-modal');
+            const modalCloseBtn = document.getElementById('modal-close-button');
+            const modalTitle = document.getElementById('modal-title');
+            const modalCarouselImage = document.getElementById('modal-carousel-image');
+            const modalDescription = document.getElementById('modal-description');
+            const modalLink = document.getElementById('modal-link');
+            const modalPrevButton = document.getElementById('modal-prev-button');
+            const modalNextButton = document.getElementById('modal-next-button');
+            const modalImageCounter = document.getElementById('modal-image-counter');
+            const modalTagsContainer = document.getElementById('modal-tags-container');
+            const portfolioLinks = document.querySelectorAll('.portfolio-item-link');
 
-        if (menuButton && closeButton && mobileMenu) {
-            menuButton.addEventListener('click', () => {
-                // Use current attribute state to decide action
-                const isOpen = menuButton.getAttribute('aria-expanded') === 'false';
-                toggleMenu(isOpen);
-            });
+            let currentImages = [];
+            let currentImageIndex = 0;
 
-            closeButton.addEventListener('click', () => {
-                toggleMenu(false);
-            });
+            function showModalImage(index) {
+                if (!modalCarouselImage || !modalPrevButton || !modalNextButton || !modalImageCounter || !currentImages || currentImages.length === 0) return;
+                if (index < 0 || index >= currentImages.length) { console.error("Invalid image index:", index); return; }
+                currentImageIndex = index;
+                modalCarouselImage.src = currentImages[currentImageIndex];
+                modalImageCounter.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
+                modalPrevButton.disabled = currentImageIndex === 0;
+                modalNextButton.disabled = currentImageIndex === currentImages.length - 1;
+            }
 
-            // Close menu when a link inside it is clicked
-            mobileMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    toggleMenu(false);
-                    // Smooth scroll is handled by CSS scroll-behavior: smooth
-                });
-            });
-        } else {
-            console.warn("Mobile menu elements not found.");
-        }
-
-
-        // --- Animate Progress Circles ---
-        function animateProgressBars() {
-            const skillElements = document.querySelectorAll('[data-skill-percent]');
-            if (skillElements.length === 0) return; // Exit if no skill elements found
-
-            skillElements.forEach(el => {
-                const percentage = parseInt(el.getAttribute('data-skill-percent'), 10) || 0; // Default to 0 if invalid
-                const circleFg = el.querySelector('.progress-circle-fg');
-                const textElement = el.querySelector('.progress-text');
-
-                if (!circleFg || !textElement) {
-                    console.warn("Progress bar elements missing for a skill.", el);
-                    return; // Skip this skill if elements are missing
-                }
-
-                const radius = circleFg.r.baseVal.value;
-                if (!radius) {
-                     console.warn("Progress bar radius is invalid.", circleFg);
-                     return; // Skip if radius is invalid
-                }
-                const circumference = 2 * Math.PI * radius;
-                const offset = circumference - (percentage / 100) * circumference;
-
-                // Ensure initial state is set
-                circleFg.style.strokeDasharray = `${circumference} ${circumference}`;
-                circleFg.style.strokeDashoffset = circumference;
-                textElement.textContent = `0%`;
-
-                // Debounce or ensure animation doesn't restart unnecessarily if already visible
-                if (el.dataset.animated === 'true') return;
-                el.dataset.animated = 'true'; // Mark as animating/animated
-
-                // Trigger the animation after a brief delay
-                setTimeout(() => {
-                    circleFg.style.strokeDashoffset = offset;
-
-                    // Animate the text percentage
-                    let currentPercent = 0;
-                    const stepTime = 20;
-                    const duration = 600; // Match CSS transition duration in ms
-                    const steps = Math.max(1, Math.floor(duration / stepTime));
-                    const increment = percentage / steps;
-                    let stepCount = 0;
-
-                    const interval = setInterval(() => {
-                        currentPercent += increment;
-                        stepCount++;
-                        if (stepCount >= steps) {
-                            clearInterval(interval);
-                            currentPercent = percentage; // Ensure final value is exact
-                        }
-                        // Use requestAnimationFrame for smoother text updates if needed, but setInterval is often fine
-                        textElement.textContent = `${Math.round(currentPercent)}%`;
-                    }, stepTime);
-
-                }, 150);
-            });
-        }
-
-        // --- Intersection Observer for Animations ---
-        const skillsSection = document.getElementById('skills');
-        let observer; // Declare observer variable
-
-        // Function to handle intersection changes
-        function handleIntersection(entries) {
-             entries.forEach(entry => {
-                // Find the skill elements within the intersecting section
-                const skillElements = entry.target.querySelectorAll('[data-skill-percent]');
-                const alreadyAnimated = Array.from(skillElements).some(el => el.dataset.animated === 'true');
-
-                if (entry.isIntersecting && !alreadyAnimated) {
-                    console.log("Skills section intersecting, animating progress bars.");
-                    animateProgressBars();
-                    // Optionally unobserve after animating once
-                    // if (observer) { // Check if observer exists
-                    //    observer.unobserve(entry.target);
-                    // }
-                }
-                // Optional: Reset animation if it scrolls out
-                /* else if (!entry.isIntersecting) {
-                    skillElements.forEach(el => {
-                        el.dataset.animated = 'false'; // Allow re-animation
-                        const circleFg = el.querySelector('.progress-circle-fg');
-                        const textElement = el.querySelector('.progress-text');
-                        if(circleFg && textElement) {
-                           const radius = circleFg.r.baseVal.value;
-                           const circumference = 2 * Math.PI * radius;
-                           circleFg.style.strokeDashoffset = circumference; // Reset visually
-                           textElement.textContent = `0%`;
+            function displayModalTags(tagsString) {
+                modalTagsContainer.innerHTML = '';
+                if (tagsString) {
+                    const tags = tagsString.split(',');
+                    tags.forEach(tag => {
+                        if (tag.trim()) {
+                            const tagElement = document.createElement('span');
+                            tagElement.textContent = tag.trim();
+                            tagElement.className = 'inline-block bg-gray-700 text-gray-300 text-xs font-medium mr-2 mb-2 px-2.5 py-0.5 rounded-full';
+                            modalTagsContainer.appendChild(tagElement);
                         }
                     });
-                } */
-            });
-        }
+                }
+            }
 
-        if (skillsSection) {
-             // Set observer options
-             const observerOptions = {
-                root: null, // Use the viewport as the root
-                rootMargin: '0px',
-                threshold: 0.3 // Trigger when 30% visible
-             };
-             // Create and start the observer
-             observer = new IntersectionObserver(handleIntersection, observerOptions);
-             observer.observe(skillsSection);
-        } else {
-             console.warn("Skills section not found for Intersection Observer. Animating on load.");
-             // Fallback: Animate immediately if observer setup fails
-             animateProgressBars();
+            function openModal(title, imagesJson, description, linkHref, tagsString) {
+                console.log("Opening modal for:", title);
+                try { currentImages = JSON.parse(imagesJson || '[]'); } catch (e) { console.error("Failed to parse images JSON:", imagesJson, e); currentImages = []; }
+                modalTitle.textContent = title;
+                modalDescription.textContent = description;
+                displayModalTags(tagsString);
+                if (linkHref && linkHref !== '#') { modalLink.href = linkHref; modalLink.classList.remove('hidden'); } else { modalLink.classList.add('hidden'); }
+                if (currentImages.length > 0) { showModalImage(0); } else { modalCarouselImage.src = 'https://placehold.co/800x600/374151/9ca3af?text=No+Images'; modalImageCounter.textContent = '0 / 0'; if(modalPrevButton) modalPrevButton.disabled = true; if(modalNextButton) modalNextButton.disabled = true; }
+                modal.classList.remove('hidden'); document.body.classList.add('modal-open');
+            }
+
+            function closeModal() { console.log("Closing modal"); modal.classList.add('hidden'); document.body.classList.remove('modal-open'); currentImages = []; currentImageIndex = 0; modalTagsContainer.innerHTML = ''; }
+            portfolioLinks.forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); const title = link.dataset.title || 'Project Details'; const imagesJson = link.dataset.images; const description = link.dataset.description || 'No description available.'; const linkHref = link.dataset.link; const tagsString = link.dataset.tags; openModal(title, imagesJson, description, linkHref, tagsString); }); });
+            modalCloseBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            modalPrevButton.addEventListener('click', () => { if (currentImageIndex > 0) showModalImage(currentImageIndex - 1); });
+            modalNextButton.addEventListener('click', () => { if (currentImageIndex < currentImages.length - 1) showModalImage(currentImageIndex + 1); });
+
+            // --- Animate Skill Bars with Staggered Delay/Speed ---
+            const skillElements = document.querySelectorAll('[data-skill-percent]');
+            function triggerSkillAnimation(element) {
+                const percentage = element.getAttribute('data-skill-percent') || 0;
+                const bar = element.querySelector('.skill-bar-inner');
+                if (bar && bar.style.width !== `${percentage}%`) {
+                    const randomDuration = (Math.random() * 0.6 + 0.6).toFixed(2);
+                    const randomDelay = (Math.random() * 0.4).toFixed(2);
+                    bar.style.transitionDuration = `${randomDuration}s`;
+                    bar.style.transitionDelay = `${randomDelay}s`;
+                    bar.style.width = `${percentage}%`;
+                    element.dataset.animated = 'true';
+                } else if (!bar) { console.warn("Inner skill bar not found:", element); }
+            }
+
+            // --- Intersection Observer Setup ---
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.5 };
+            const skillsSection = document.getElementById('skills');
+            let skillObserver;
+            function handleSkillIntersection(entries, observer) { entries.forEach(entry => { const skillElement = entry.target; if (entry.isIntersecting && skillElement.dataset.animated !== 'true') { triggerSkillAnimation(skillElement); observer.unobserve(skillElement); } }); }
+            if (skillElements.length > 0) { // Check if elements exist before creating observer
+                 console.log(`Initializing Skill Observer for ${skillElements.length} elements.`);
+                 skillObserver = new IntersectionObserver(handleSkillIntersection, observerOptions);
+                 skillElements.forEach(el => { const bar = el.querySelector('.skill-bar-inner'); if(bar) bar.style.width = '0%'; skillObserver.observe(el); });
+            } // No need for else, already warned if elements don't exist
+
+            // Observer for Section Fade-in animations
+            const sectionsToFade = document.querySelectorAll('.fade-in-section');
+            let fadeObserver;
+            function handleFadeIntersection(entries, observer) { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }
+            if (sectionsToFade.length > 0) { console.log(`Initializing Fade Observer for ${sectionsToFade.length} sections.`); fadeObserver = new IntersectionObserver(handleFadeIntersection, { threshold: 0.2 }); sectionsToFade.forEach(section => fadeObserver.observe(section)); } else { console.warn("No sections found for fade-in effect."); }
+
+        } catch (error) {
+             console.error("Error during script initialization:", error);
+             // Display fallback error message if initialization fails
+             const styleErrorMessage = document.getElementById('style-error-message');
+             if (styleErrorMessage) {
+                 styleErrorMessage.textContent = 'A critical error occurred during page load. Please check console (F12).';
+                 styleErrorMessage.style.display = 'block';
+             }
         }
 
       }); // End of DOMContentLoaded
