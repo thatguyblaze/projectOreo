@@ -4,93 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blazinik - Programmer & Designer</title>
-
     <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
     <meta name="description" content="Blazinik's personal portfolio showcasing programming, design, and creative projects.">
-
     <meta property="og:title" content="Blazinik - Programmer & Designer" />
     <meta property="og:description" content="Blazinik's personal portfolio showcasing programming, design, and creative projects." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://blazinik.xyz/" />
-    <meta property="og:image" content="https://blazinik.xyz/images/DenoLogo3D-Anim.gif" />
     <meta property="og:image:alt" content="Blazinik Logo" />
-
-    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Blazinik - Programmer & Designer">
     <meta name="twitter:description" content="Blazinik's personal portfolio showcasing programming, design, and creative projects.">
-    <meta name="twitter:image" content="https://blazinik.xyz/images/DenoLogo3D-Anim.gif">
     <meta name="twitter:image:alt" content="Blazinik Logo">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      /* Font-face and base styles */
-      @font-face {
-        font-family: 'LucideIcons';
-        src: url(https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf) format('truetype');
-      }
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #0a0a0a;
+        background-color: #161b22; /* GitHub-like dark bg */
         color: #e5e7eb;
         scroll-behavior: smooth;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%231f2937' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
       }
       body.modal-open { overflow: hidden; }
-
-      /* Section padding */
       .section-padding { padding: 4rem 1rem; }
       @media (min-width: 768px) { .section-padding { padding: 6rem 2rem; } }
-
-      /* Skill bar */
       .skill-bar-inner {
         width: 0%;
-        transition-property: width;
+        transition-property: width, box-shadow;
         transition-timing-function: ease-out;
       }
-
-      /* Modal */
+       [data-skill-percent] .skill-bar-inner {
+         transition-duration: 0.8s;
+         transition-delay: 0.2s;
+       }
       .modal { transition: opacity 0.3s ease-in-out; }
       .modal.hidden { opacity: 0; pointer-events: none; }
       .modal:not(.hidden) { opacity: 1; }
-
-      /* Modal Carousel buttons */
-      .carousel-button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: rgba(17, 24, 39, 0.6);
-        color: #d1d5db;
-        border: 1px solid rgba(55, 65, 81, 0.6);
-        padding: 0.5rem;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: background-color 0.2s ease, border-color 0.2s ease;
-        z-index: 10;
-      }
-      .carousel-button:hover {
-        background-color: rgba(31, 41, 55, 0.8);
-        border-color: rgba(75, 85, 99, 0.8);
-      }
+      .carousel-button { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(17, 24, 39, 0.6); color: #d1d5db; border: 1px solid rgba(55, 65, 81, 0.6); padding: 0.5rem; border-radius: 50%; cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease; z-index: 10; }
+      .carousel-button:hover { background-color: rgba(31, 41, 55, 0.8); border-color: rgba(75, 85, 99, 0.8); }
       .carousel-button:disabled { opacity: 0.3; cursor: not-allowed; }
       .carousel-button.prev { left: 0.75rem; }
       .carousel-button.next { right: 0.75rem; }
-
-      /* Section fade-in */
       .fade-in-section { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out 0.3s, transform 0.6s ease-out 0.3s; }
       .fade-in-section.visible { opacity: 1; transform: translateY(0); }
-
-      /* Section title accent */
       .section-title-accent::after { content: ''; display: block; width: 50px; height: 3px; background: linear-gradient(to right, #3b82f6, #6366f1); margin: 0.75rem auto 0; border-radius: 99px; }
-
-      /* Animated Background */
-      @keyframes gradientShiftSlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-      .animated-gradient-background { background: linear-gradient(-45deg, #0a0a0a, #111827, #1f2937, #111827, #0a0a0a); background-size: 300% 300%; animation: gradientShiftSlow 35s ease infinite; }
-
-      /* SMP Image Fade */
       #smp-image { transition: opacity 0.7s ease-in-out; }
-
-      /* Audio player styling removed */
-
+      audio { border-radius: 0.375rem; display: block; width: 100%; filter: invert(1) grayscale(1) contrast(90%); }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,7 +59,7 @@
         Error: Styles did not load correctly. Please check the browser console (F12) for network errors or script issues.
     </div>
 
-    <section id="hero" class="animated-gradient-background section-padding border-b border-gray-800 overflow-hidden pt-24 md:pt-32">
+    <section id="hero" class="bg-[#1f2937] section-padding border-b border-gray-800 overflow-hidden pt-24 md:pt-32">
          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
                 <div class="flex-shrink-0 w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
@@ -118,19 +75,19 @@
                      <p class="text-xl text-indigo-400 font-medium mb-4">Hey, I'm Blaze 👋</p>
                      <p class="text-lg text-gray-300 mb-8">📚 | Programmer</p>
                     <div class="flex flex-wrap justify-center md:justify-start gap-3 sm:gap-4">
-                        <a href="#portfolio" onclick="document.getElementById('portfolio').scrollIntoView({behavior:'smooth'}); return false;" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                        <a href="#portfolio" onclick="document.getElementById('portfolio').scrollIntoView({behavior:'smooth'}); return false;" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:[box-shadow:0_0_12px_3px_rgba(59,130,246,0.35)]">
                             <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
                             View Portfolio
                         </a>
-                        <a href="https://music.youtube.com/playlist?list=PLcYrqWxUJIZNjQLBnOzUoAWFidx--usLN&si=-vDl2bhv4rkagBf8" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                        <a href="https://music.youtube.com/playlist?list=PLcYrqWxUJIZNjQLBnOzUoAWFidx--usLN&si=-vDl2bhv4rkagBf8" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:[box-shadow:0_0_12px_3px_rgba(236,72,153,0.35)]">
                             <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
                             Favorite Music
                         </a>
-                        <a href="https://steamcommunity.com/profiles/76561199821469314/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                        <a href="https://steamcommunity.com/profiles/76561199821469314/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:[box-shadow:0_0_12px_3px_rgba(107,114,128,0.35)]">
                             <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 12a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0Z"/><path d="M17.5 12h-11"/><path d="M5 12a7.5 7.5 0 1 0 15 0 7.5 7.5 0 0 0-15 0Z"/><path d="M12 5a7.5 7.5 0 1 0 0 15Z"/></svg>
                             Steam
                         </a>
-                        <a href="https://www.youtube.com/@1.blazeIT" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                        <a href="https://www.youtube.com/@1.blazeIT" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:[box-shadow:0_0_12px_3px_rgba(239,68,68,0.35)]">
                             <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
                             YouTube
                         </a>
@@ -141,43 +98,43 @@
     </section>
 
     <main>
-        <section id="skills" class="section-padding border-b border-gray-800 fade-in-section animated-gradient-background">
+        <section id="skills" class="section-padding border-b border-gray-800 fade-in-section bg-[#1f2937]">
              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white section-title-accent">Technical & Creative Skills</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
                     <div>
                         <h3 class="text-2xl font-semibold text-indigo-400 mb-6 border-b border-gray-700 pb-2">Technical</h3>
                         <div class="space-y-5">
-                            <div data-skill-percent="90"> <p class="font-medium text-white mb-1 text-lg">Scripting & Logic</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600" style="width: 90%;"></div> </div> <p class="text-sm text-gray-400 mt-1">Game mechanics, UI interactions, backend logic</p> </div>
-                            <div data-skill-percent="85"> <p class="font-medium text-white mb-1 text-lg">UI Design & Implementation</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500" style="width: 85%;"></div> </div> <p class="text-sm text-gray-400 mt-1">Interface layout, visual styling, user experience</p> </div>
-                            <div data-skill-percent="75"> <p class="font-medium text-white mb-1 text-lg">Performance Optimization</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-400" style="width: 75%;"></div> </div> <p class="text-sm text-gray-400 mt-1">Code efficiency, memory management, debugging</p> </div>
-                            <div data-skill-percent="70"> <p class="font-medium text-white mb-1 text-lg">System Architecture</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-300 to-indigo-300" style="width: 70%;"></div> </div> <p class="text-sm text-gray-400 mt-1">Modular code design, event handling, data management</p> </div>
+                            <div data-skill-percent="90"> <p class="font-medium text-white mb-1 text-lg">Scripting & Logic</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-[0_0_15px_4px_rgba(99,102,241,0.6)]"></div> </div> <p class="text-sm text-gray-400 mt-1">Game mechanics, UI interactions, backend logic</p> </div>
+                            <div data-skill-percent="85"> <p class="font-medium text-white mb-1 text-lg">UI Design & Implementation</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-[0_0_15px_4px_rgba(79,70,229,0.6)]"></div> </div> <p class="text-sm text-gray-400 mt-1">Interface layout, visual styling, user experience</p> </div>
+                            <div data-skill-percent="75"> <p class="font-medium text-white mb-1 text-lg">Performance Optimization</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 shadow-[0_0_15px_4px_rgba(96,165,250,0.6)]"></div> </div> <p class="text-sm text-gray-400 mt-1">Code efficiency, memory management, debugging</p> </div>
+                            <div data-skill-percent="70"> <p class="font-medium text-white mb-1 text-lg">System Architecture</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-blue-300 to-indigo-300 shadow-[0_0_15px_4px_rgba(129,140,248,0.6)]"></div> </div> <p class="text-sm text-gray-400 mt-1">Modular code design, event handling, data management</p> </div>
                         </div>
                     </div>
                     <div>
                         <h3 class="text-2xl font-semibold text-cyan-400 mb-6 border-b border-gray-700 pb-2">Creative</h3>
                         <div class="space-y-5">
-                            <div data-skill-percent="75"> <p class="font-medium text-white mb-1 text-lg">Texture & Asset Design</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-cyan-500 to-sky-500" style="width: 75%;"></div> </div> <p class="text-sm text-gray-400 mt-1">Creating textures, icons, and visual assets</p> </div>
-                            <div data-skill-percent="60"> <p class="font-medium text-white mb-1 text-lg">Vector Art & UI Elements</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-500" style="width: 60%;"></div> </div> <p class="text-sm text-gray-400 mt-1">Scalable graphics, interface components</p> </div>
-                            <div data-skill-percent="70"> <p class="font-medium text-white mb-1 text-lg">3D Modeling</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-red-500 to-rose-500" style="width: 70%;"></div> </div> <p class="text-sm text-gray-400 mt-1">Creating models, props, and environments</p> </div>
+                            <div data-skill-percent="75"> <p class="font-medium text-white mb-1 text-lg">Texture & Asset Design</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-cyan-500 to-sky-500 shadow-[0_0_15px_4px_rgba(34,211,238,0.6)]"></div> </div> <p class="text-sm text-gray-400 mt-1">Creating textures, icons, and visual assets</p> </div>
+                            <div data-skill-percent="60"> <p class="font-medium text-white mb-1 text-lg">Vector Art & UI Elements</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-500 shadow-[0_0_15px_4px_rgba(249,115,22,0.6)]"></div> </div> <p class="text-sm text-gray-400 mt-1">Scalable graphics, interface components</p> </div>
+                            <div data-skill-percent="70"> <p class="font-medium text-white mb-1 text-lg">3D Modeling</p> <div class="h-2 w-full bg-gray-700/50 rounded-full overflow-hidden"> <div class="skill-bar-inner h-full rounded-full bg-gradient-to-r from-red-500 to-rose-500 shadow-[0_0_15px_4px_rgba(239,68,68,0.6)]"></div> </div> <p class="text-sm text-gray-400 mt-1">Creating models, props, and environments</p> </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="portfolio" class="section-padding fade-in-section animated-gradient-background">
+        <section id="portfolio" class="section-padding fade-in-section bg-[#1f2937]">
              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white section-title-accent">Portfolio Showcase</h2>
                 <p class="text-center text-gray-400 mb-10 max-w-2xl mx-auto">Here's a selection of my recent projects. Click on any item to learn more.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                     <a href="#" class="block group portfolio-item-link"
                        data-title="Stargate: Horizon"
-                       data-images='["images/pS1.png", "images/pS2.jpeg", "images/pS3.png"]'
+                       data-images='["images/pS1.png", "images/pS2.jpg", "images/pS3.png"]'
                        data-description="A science-fiction project involving complex scripting for ship systems, UI design, and potentially 3D modeling elements. Focused on creating an immersive experience."
                        data-link="https://www.roblox.com/games/3901984129/Stargate-Horizons"
                        data-tags="Ui Design,3D art">
-                        <div class="bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden transition duration-300 ease-in-out transform hover:scale-[1.03] border-2 border-transparent group-hover:border-indigo-500">
+                        <div class="bg-[#282e33] border border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-[1.03] group-hover:border-indigo-500">
                             <img src="images/pS1.png" alt="Stargate: Horizon Thumbnail" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/4b5563/e5e7eb?text=Stargate';">
                             <div class="p-6"> <h3 class="text-xl font-semibold text-white mb-2">Stargate: Horizon</h3> <p class="text-gray-400 text-sm mb-3">Sci-fi game project with complex systems and UI.</p> <div class="flex flex-wrap gap-2"> <span class="inline-block bg-indigo-500/20 text-indigo-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Ui Design</span> <span class="inline-block bg-red-500/20 text-red-300 text-xs font-medium px-2.5 py-0.5 rounded-full">3D art</span> </div> </div>
                         </div>
@@ -188,7 +145,7 @@
                        data-description="This was a passion project I did for fun on Roblox Studio, released for free"
                        data-link="#"
                        data-tags="Assets,Modeling,3D Design,Blender">
-                        <div class="bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden transition duration-300 ease-in-out transform hover:scale-[1.03] border-2 border-transparent group-hover:border-indigo-500">
+                       <div class="bg-[#282e33] border border-gray-700 rounded-lg shadow-lg overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-[1.03] group-hover:border-indigo-500">
                             <img src="images/pR1.png" alt="Project Franklin Thumbnail" class="w-full h-48 object-cover group-hover:opacity-80 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/600x400/52525b/e5e7eb?text=Franklin';">
                             <div class="p-6"> <h3 class="text-xl font-semibold text-white mb-2">Project Franklin</h3> <p class="text-gray-400 text-sm mb-3">This was a passion project I did for fun on Roblox Studio, released for free</p> <div class="flex flex-wrap gap-2"> <span class="inline-block bg-green-500/20 text-green-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Assets</span> <span class="inline-block bg-red-500/20 text-red-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Modeling</span> <span class="inline-block bg-cyan-500/20 text-cyan-300 text-xs font-medium px-2.5 py-0.5 rounded-full">3D Design</span> <span class="inline-block bg-orange-500/20 text-orange-300 text-xs font-medium px-2.5 py-0.5 rounded-full">Blender</span> </div> </div>
                         </div>
@@ -197,7 +154,7 @@
              </div>
         </section>
 
-        <section id="smp-section" class="section-padding border-t border-gray-800 fade-in-section animated-gradient-background">
+        <section id="smp-section" class="section-padding border-t border-gray-800 fade-in-section bg-[#1f2937]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center text-white section-title-accent">Extreme Juicers SMP</h2>
                 <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
@@ -213,7 +170,7 @@
                         <p class="text-lg text-gray-400 leading-relaxed mb-6">
                             We pride ourselves on having an amazing and very mature community. If you're looking for a great place to build, collaborate, and have fun, this is it. Applications are reviewed carefully to maintain our community spirit.
                         </p>
-                        <a href="https://discord.gg/6AhfhTYnqv" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                        <a href="https://discord.gg/6AhfhTYnqv" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105 hover:[box-shadow:0_0_12px_3px_rgba(99,102,241,0.35)]">
                             <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                              Apply to Join
                         </a>
@@ -224,18 +181,18 @@
 
     </main>
 
-    <footer class="text-center p-6 bg-black text-gray-500 text-sm border-t border-gray-800">
+    <footer class="text-center p-6 bg-[#0d1117] text-gray-500 text-sm border-t border-gray-800"> {/* Darker footer */}
          <p>© <span id="current-year"></span> Blazinik. All Rights Reserved.</p>
     </footer>
 
     <div id="portfolio-modal" class="modal hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-         <div class="bg-gray-900 p-6 md:p-8 rounded-lg shadow-2xl max-w-4xl w-full relative max-h-[90vh] flex flex-col border border-gray-700">
+         <div class="bg-[#161b22] p-6 md:p-8 rounded-lg shadow-2xl max-w-4xl w-full relative max-h-[90vh] flex flex-col border border-gray-700"> {/* Updated bg */}
             <button id="modal-close-button" class="absolute top-3 right-3 text-gray-400 hover:text-white transition duration-150 ease-in-out z-20" aria-label="Close modal">
                  <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
             </button>
             <h2 id="modal-title" class="text-2xl md:text-3xl font-bold text-white mb-4 pr-10 flex-shrink-0">Project Title</h2>
             <div class="relative mb-4">
-                 <img id="modal-carousel-image" src="https://placehold.co/800x600/374151/9ca3af?text=Loading..." alt="Project Image" class="w-full object-contain rounded-md bg-black max-h-[60vh]" onerror="this.onerror=null; this.src='https://placehold.co/800x600/374151/9ca3af?text=Image+Error';">
+                 <img id="modal-carousel-image" src="https://placehold.co/800x600/374151/9ca3af?text=Loading..." alt="Project Image" class="w-full object-contain rounded-md bg-[#0d1117] max-h-[60vh]" onerror="this.onerror=null; this.src='https://placehold.co/800x600/374151/9ca3af?text=Image+Error';"> {/* Updated bg */}
                  <button id="modal-prev-button" class="carousel-button prev" aria-label="Previous image"> <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> </button>
                  <button id="modal-next-button" class="carousel-button next" aria-label="Next image"> <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg> </button>
             </div>
@@ -255,23 +212,15 @@
     </div>
 
     <script>
-      // Wrap everything in the DOMContentLoaded listener
       document.addEventListener('DOMContentLoaded', () => {
         console.log("DOM Loaded. Initializing scripts...");
-
         try {
-            // --- Style Load Check (Keep commented out unless actively debugging style load) ---
-            /* ... */
-
-            // --- Essential Element Checks ---
-            const essentialIds = [ 'current-year', /* Removed mobile menu checks */ 'portfolio-modal', 'modal-close-button', 'modal-title', 'modal-carousel-image', 'modal-description', 'modal-link', 'modal-prev-button', 'modal-next-button', 'modal-image-counter', 'skills', 'modal-tags-container', 'smp-section', 'smp-image' ];
+            const essentialIds = [ 'current-year', 'portfolio-modal', 'modal-close-button', 'modal-title', 'modal-carousel-image', 'modal-description', 'modal-link', 'modal-prev-button', 'modal-next-button', 'modal-image-counter', 'skills', 'modal-tags-container', 'smp-section', 'smp-image' ];
             essentialIds.forEach(id => { if (!document.getElementById(id)) { throw new Error(`Essential element missing: #${id}`); } });
 
-            // --- Set current year ---
             const yearSpan = document.getElementById('current-year');
             yearSpan.textContent = new Date().getFullYear();
 
-            // --- Portfolio Modal Carousel Logic ---
             const modal = document.getElementById('portfolio-modal');
             const modalCloseBtn = document.getElementById('modal-close-button');
             const modalTitle = document.getElementById('modal-title');
@@ -295,17 +244,14 @@
                 modalCloseBtn.addEventListener('click', closeModal); modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); }); modalPrevButton.addEventListener('click', () => { if (currentImageIndex > 0) showModalImage(currentImageIndex - 1); }); modalNextButton.addEventListener('click', () => { if (currentImageIndex < currentImages.length - 1) showModalImage(currentImageIndex + 1); });
             } else { console.warn("Portfolio links not found."); }
 
-            // --- Animate Skill Bars ---
             const skillElements = document.querySelectorAll('[data-skill-percent]');
             function triggerSkillAnimation(element) { const percentage = element.getAttribute('data-skill-percent') || 0; const bar = element.querySelector('.skill-bar-inner'); if (bar && bar.style.width !== `${percentage}%`) { const randomDuration = (Math.random() * 0.6 + 0.6).toFixed(2); const randomDelay = (Math.random() * 0.4).toFixed(2); bar.style.transitionDuration = `${randomDuration}s`; bar.style.transitionDelay = `${randomDelay}s`; bar.style.width = `${percentage}%`; element.dataset.animated = 'true'; } }
             const skillsSection = document.getElementById('skills');
             if (skillsSection && skillElements.length > 0) { const skillObserver = new IntersectionObserver((entries, observer) => { entries.forEach(entry => { if (entry.isIntersecting && entry.target.dataset.animated !== 'true') { triggerSkillAnimation(entry.target); observer.unobserve(entry.target); } }); }, { threshold: 0.5 }); skillElements.forEach(el => { const bar = el.querySelector('.skill-bar-inner'); if(bar) bar.style.width = '0%'; skillObserver.observe(el); }); }
 
-            // --- Section Fade-in Animation ---
             const sectionsToFade = document.querySelectorAll('.fade-in-section');
             if (sectionsToFade.length > 0) { const fadeObserver = new IntersectionObserver((entries, observer) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.2 }); sectionsToFade.forEach(section => fadeObserver.observe(section)); }
 
-            // --- SMP Image Carousel ---
             const smpImageElement = document.getElementById('smp-image');
             const smpImages = [ 'images/smp1.png', 'images/smp2.png', 'images/smp3.png', 'images/smp4.png' ];
             let currentSmpImageIndex = 0; let smpIntervalId = null;
@@ -318,7 +264,7 @@
              if (styleErrorMessage) { styleErrorMessage.textContent = 'A critical error occurred. Please check console (F12). Error: ' + error.message; styleErrorMessage.style.display = 'block'; }
         }
 
-      }); // End of DOMContentLoaded
+      });
     </script>
 </body>
 </html>
