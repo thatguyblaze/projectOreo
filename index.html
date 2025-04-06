@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blazinik - Programmer & Designer [Showcase Path Fix]</title> <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
+    <title>Blazinik - Programmer & Designer [Final Image Fix]</title> <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
     <meta name="description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
-    <meta property="og:title" content="Blazinik - Programmer & Designer [Showcase Path Fix]" />
+    <meta property="og:title" content="Blazinik - Programmer & Designer [Final Image Fix]" />
     <meta property="og:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://blazinik.xyz/" />
     <meta property="og:image" content="https://placehold.co/1200x630/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
     <meta property="og:image:alt" content="Blazinik Logo" />
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Blazinik - Programmer & Designer [Showcase Path Fix]">
+    <meta name="twitter:title" content="Blazinik - Programmer & Designer [Final Image Fix]">
     <meta name="twitter:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
     <meta name="twitter:image" content="https://placehold.co/1200x600/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
     <meta name="twitter:image:alt" content="Blazinik Logo">
@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-      /* CSS Styles (remain the same) */
+      /* CSS Styles */
       :root {
         --bg-dark: #0a0e12; --bg-medium: #111827; --border-color: rgba(55, 65, 81, 0.6);
         --text-primary: #e5e7eb; --text-secondary: #9ca3af; --text-on-accent: #ffffff;
@@ -80,8 +80,8 @@
       #portfolio-showcase-display { background-color: var(--bg-medium); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 2.5rem; display: grid; grid-template-columns: repeat(1, 1fr); gap: 1.25rem; }
       @media (min-width: lg) { #portfolio-showcase-display { grid-template-columns: repeat(5, 1fr); gap: 1.5rem; padding: 2rem; } #showcase-image-container { grid-column: span 2 / span 2; } #showcase-details { grid-column: span 3 / span 3; } }
       #showcase-image-container { position: relative; background-color: rgba(0,0,0,0.2); border-radius: 0.5rem; overflow: hidden; border: 1px solid var(--border-color); min-height: 250px; display: flex; align-items: center; justify-content: center; }
-      #showcase-image { display: block; max-width: 100%; max-height: 50vh; object-fit: contain; opacity: 1; transition: opacity 0.3s ease-in-out; }
-      #showcase-image.loading { opacity: 0; }
+      #showcase-image { display: block; max-width: 100%; max-height: 50vh; object-fit: contain; /* Removed opacity transition */ }
+      /* #showcase-image.loading { opacity: 0; } */ /* REMOVED loading class style */
       #showcase-details { display: flex; flex-direction: column; }
       #showcase-title { font-size: 1.5rem; font-weight: 600; color: white; margin-bottom: 0.75rem; }
       #showcase-description { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; font-size: 0.95rem; flex-grow: 1; }
@@ -184,7 +184,7 @@
                  </div>
                  <div id="portfolio-showcase-display">
                     <div id="showcase-image-container">
-                        <img id="showcase-image" src="images/pS1.png" alt="Project Image" class="loading" onerror="this.onerror=null; this.src='https://placehold.co/100x100/111827/9ca3af?text=Error';">
+                        <img id="showcase-image" src="images/pS1.png" alt="Project Image" onerror="this.onerror=null; this.src='https://placehold.co/100x100/111827/9ca3af?text=Error';">
                         <button id="showcase-prev" class="carousel-button prev" aria-label="Previous image"> <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg> </button>
                         <button id="showcase-next" class="carousel-button next" aria-label="Next image"> <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg> </button>
                         <div id="showcase-counter">1 / 3</div>
@@ -253,19 +253,24 @@
           const smpImageElement = document.getElementById('smp-image');
           const styleErrorMessage = document.getElementById('style-error-message');
 
-          // --- Check Essential Elements ---
-          if (!portfolioGrid) console.error('[Debug] Portfolio grid container not found!');
-          if (!showcaseImage) console.error('[Debug] Showcase image element not found!');
-          if (!showcaseTitle) console.error('[Debug] Showcase title element not found!');
-          if (!showcaseDescription) console.error('[Debug] Showcase description element not found!');
-          // Add more checks if needed
+          // --- Strict Element Check ---
+          if (!portfolioGrid || !showcaseImage || !showcaseTitle || !showcaseDescription || !showcaseTagsContainer || !showcaseLink || !showcasePrevBtn || !showcaseNextBtn || !showcaseCounter || !projectPrevBtn || !projectNextBtn) {
+              console.error("[Debug] FATAL: One or more essential showcase/nav elements are missing from the HTML! Cannot initialize showcase.");
+              if(styleErrorMessage) {
+                  styleErrorMessage.textContent = 'Error: Essential page elements missing. Portfolio cannot load.';
+                  styleErrorMessage.style.display = 'block';
+              }
+              return; // Stop script execution
+          } else {
+              console.log("[Debug] All essential showcase/nav elements checked/found.");
+          }
 
           // --- Project Data - UPDATED Paths ---
           const projects = [
             {
               title: "Stargate: Horizon",
               // ** Using Corrected Paths from User **
-              images: [ "images/pS1.png", "images/pS2.jpeg", "images/pS3.png" ],
+              images: [ "images/pS1.png", "images/pS2.jpeg", "images/pS3.png" ], // Corrected pS2
               description: "A science-fiction project involving complex scripting...",
               link: "https://www.roblox.com/games/3901984129/Stargate-Horizons",
               tags: ["Ui Design", "3D art", "Scripting", "Roblox"],
@@ -286,41 +291,131 @@
           console.log("[Debug] Projects data defined with LATEST relative paths:", projects);
 
           // --- Populate Portfolio Grid ---
-          function populateGrid() { /* ... same as previous version ... */ }
+          function populateGrid() {
+              if (!portfolioGrid) { console.error("[Debug] Cannot populate grid, container not found."); return; }
+              console.log("[Debug] Populating portfolio grid...");
+              portfolioGrid.innerHTML = '';
+              projects.forEach((project, index) => {
+                  const gridItem = document.createElement('div');
+                  gridItem.className = 'portfolio-grid-item'; // No animation class needed
+                  gridItem.dataset.projectIndex = index;
+
+                  const imgContainer = document.createElement('div');
+                  imgContainer.className = 'aspect-w-16 aspect-h-9';
+                  const img = document.createElement('img');
+                  img.src = project.thumbnail;
+                  img.alt = `${project.title} Thumbnail`;
+                  img.className = 'w-full h-full object-cover';
+                  img.onerror = () => { img.src='https://placehold.co/100x100/111827/9ca3af?text=Error'; };
+
+                  const titleDiv = document.createElement('div');
+                  titleDiv.className = 'portfolio-item-title';
+                  titleDiv.textContent = project.title;
+
+                  imgContainer.appendChild(img);
+                  gridItem.appendChild(imgContainer);
+                  gridItem.appendChild(titleDiv);
+
+                  gridItem.addEventListener('click', () => {
+                      console.log(`[Debug] Grid item ${index} clicked.`);
+                      if (displayProjectDetails) displayProjectDetails(index);
+                  });
+                  portfolioGrid.appendChild(gridItem);
+              });
+              console.log("[Debug] Portfolio grid populated.");
+          }
 
           // --- Display Logic ---
-          function displayProjectDetails(index) { /* ... same logic ... */ }
+          function displayProjectDetails(index) {
+              console.log(`[Debug] Displaying project index: ${index}`);
+              if (index < 0 || index >= projects.length || !projects[index]) { console.error(`[Debug] Invalid project index: ${index}`); return; }
+              const project = projects[index];
+              currentProjectIndex = index;
+              currentImageIndex = 0;
 
-          // ** UPDATED displayShowcaseImage Function - Simplified **
+              // Check elements again just before use
+              const titleEl = document.getElementById('showcase-title');
+              const descEl = document.getElementById('showcase-description');
+              const tagsEl = document.getElementById('showcase-tags');
+              const linkEl = document.getElementById('showcase-link');
+              const linkTextEl = document.getElementById('showcase-link-text');
+              const linkIconContainerEl = document.getElementById('showcase-link-icon-container');
+
+              if (titleEl) titleEl.textContent = project.title; else console.error("[Debug] showcaseTitle missing in displayProjectDetails");
+              if (descEl) descEl.textContent = project.description; else console.error("[Debug] showcaseDescription missing in displayProjectDetails");
+
+              if (tagsEl) {
+                  tagsEl.innerHTML = '';
+                  project.tags.forEach(tagText => {
+                      const tag = tagText.trim();
+                      const t = document.createElement('span');
+                      t.textContent = tag;
+                      t.className = 'portfolio-tag';
+                      const lowerTag = tag.toLowerCase();
+                      let tagType = 'default';
+                      if (lowerTag.includes('ui') || lowerTag.includes('design')) tagType = 'ui';
+                      else if (lowerTag.includes('3d') || lowerTag.includes('blender')) tagType = '3d';
+                      else if (lowerTag.includes('model')) tagType = 'modeling';
+                      else if (lowerTag.includes('script') || lowerTag.includes('lua') || lowerTag.includes('javascript')) tagType = 'scripting';
+                      else if (lowerTag.includes('roblox')) tagType = 'platform';
+                      else if (lowerTag.includes('asset')) tagType = 'assets';
+                      else if (lowerTag.includes('html') || lowerTag.includes('css')) tagType = 'web';
+                      t.dataset.tagType = tagType;
+                      tagsEl.appendChild(t);
+                  });
+              } else { console.error("[Debug] showcaseTagsContainer missing in displayProjectDetails"); }
+
+              const playIcon = linkIconContainerEl?.querySelector('.icon-play');
+              const linkIcon = linkIconContainerEl?.querySelector('.icon-link');
+              if (linkEl && linkTextEl && playIcon && linkIcon) { /* ... update link ... */ } else { console.log("[Debug] Showcase link elements potentially missing"); }
+
+              if (displayShowcaseImage) { console.log("[Debug] Calling displayShowcaseImage(0)"); displayShowcaseImage(currentImageIndex); } else console.error("[Debug] displayShowcaseImage function missing");
+
+              if (projectPrevBtn) projectPrevBtn.disabled = currentProjectIndex === 0;
+              if (projectNextBtn) projectNextBtn.disabled = currentProjectIndex === projects.length - 1;
+
+              if (portfolioGrid) { /* ... update active thumbnail ... */ }
+              console.log(`[Debug] Finished displaying project index: ${index}`);
+          }
+
+          // ** Simplified displayShowcaseImage Function **
           function displayShowcaseImage(imgIndex) {
               console.log(`[Debug] Attempting display image index: ${imgIndex} for project index: ${currentProjectIndex}`);
               const project = projects[currentProjectIndex];
-              if (!project || !project.images || project.images.length === 0) { console.error(`[Debug] No project data or images for project index: ${currentProjectIndex}`); if(showcaseImage) showcaseImage.style.display = 'none'; return; }
-              if (imgIndex < 0 || imgIndex >= project.images.length || !showcaseImage) { console.error(`[Debug] Invalid image index (${imgIndex}) or showcaseImage element missing.`); if(showcaseImage) showcaseImage.style.display = 'none'; return; }
+              const showcaseImgEl = document.getElementById('showcase-image'); // Get element inside function
 
-              showcaseImage.style.display = 'block';
+              // ** Stricter Checks **
+              if (!project || !project.images || project.images.length === 0) { console.error(`[Debug] No project data or images for project index: ${currentProjectIndex}`); if(showcaseImgEl) showcaseImgEl.style.display = 'none'; return; }
+              if (imgIndex < 0 || imgIndex >= project.images.length) { console.error(`[Debug] Invalid image index (${imgIndex})`); return; }
+              if (!showcaseImgEl) { console.error("[Debug] showcaseImage element missing!"); return; }
+
+              showcaseImgEl.style.display = 'block'; // Ensure visible
               currentImageIndex = imgIndex;
               const imageUrl = project.images[currentImageIndex]; // Use relative path
               console.log(`[Debug] Setting showcase image src directly to: ${imageUrl}`);
 
-              // ** Set src directly **
-              showcaseImage.src = imageUrl;
+              // Set src directly
+              showcaseImgEl.src = imageUrl;
 
-              // ** Add onerror directly to the main image element **
-              showcaseImage.onerror = () => {
+              // Add onerror directly to the main image element
+              showcaseImgEl.onerror = () => {
                   console.error(`[Debug] Image failed to load: ${imageUrl}`);
-                  showcaseImage.src = 'https://placehold.co/100x100/111827/9ca3af?text=Load+Error';
+                  showcaseImgEl.src = 'https://placehold.co/100x100/111827/9ca3af?text=Load+Error';
               };
 
-              // Update Counter and Buttons
+              // Update Counter and Buttons (Get elements inside or ensure they exist)
+              const counterEl = document.getElementById('showcase-counter');
+              const prevBtnEl = document.getElementById('showcase-prev');
+              const nextBtnEl = document.getElementById('showcase-next');
               const numImages = project.images.length;
-              if (showcaseCounter) showcaseCounter.textContent = `${currentImageIndex + 1} / ${numImages}`;
-              if (showcasePrevBtn) showcasePrevBtn.disabled = currentImageIndex === 0;
-              if (showcaseNextBtn) showcaseNextBtn.disabled = currentImageIndex === numImages - 1;
+
+              if (counterEl) counterEl.textContent = `${currentImageIndex + 1} / ${numImages}`;
+              if (prevBtnEl) prevBtnEl.disabled = currentImageIndex === 0;
+              if (nextBtnEl) nextBtnEl.disabled = currentImageIndex === numImages - 1;
               const showButtons = numImages > 1;
-              if (showcasePrevBtn) showcasePrevBtn.style.display = showButtons ? 'block' : 'none';
-              if (showcaseNextBtn) showcaseNextBtn.style.display = showButtons ? 'block' : 'none';
-              if (showcaseCounter) showcaseCounter.style.display = showButtons ? 'block' : 'none';
+              if (prevBtnEl) prevBtnEl.style.display = showButtons ? 'block' : 'none';
+              if (nextBtnEl) nextBtnEl.style.display = showButtons ? 'block' : 'none';
+              if (counterEl) counterEl.style.display = showButtons ? 'block' : 'none';
           }
 
           // --- Skill Bar Animation Trigger ---
@@ -342,22 +437,25 @@
 
           // --- Initial Setup ---
           console.log("[Debug] Running initial setup...");
-          populateGrid();
+          if (typeof populateGrid === 'function') {
+              populateGrid();
+          } else { console.error("[Debug] populateGrid function not defined!"); }
+
           if (projects.length > 0) {
               // ** Call directly **
               if (typeof displayProjectDetails === 'function') {
                   console.log("[Debug] Calling displayProjectDetails(0) directly.");
-                  displayProjectDetails(0);
+                  // Use setTimeout 0 to push to end of event queue, ensuring DOM is fully ready
+                  setTimeout(() => displayProjectDetails(0), 0);
               } else { console.error('[Debug] Initial displayProjectDetails function not defined'); }
           } else { console.log("[Debug] No projects found."); /* ... handle no projects ... */ }
 
           // ** Trigger ALL skill animations on load **
           console.log("[Debug] Triggering all skill animations on load.");
           document.querySelectorAll('.skill-item[data-skill-percent]').forEach(skillItem => {
-              // ** Removed setTimeout **
               if (typeof triggerSkillAnimation === 'function') {
-                  triggerSkillAnimation(skillItem);
-                  if (!skillItem.dataset.animated) { setTimeout(() => triggerSkillAnimation(skillItem), 200); } // Fallback delay
+                  // Use setTimeout to allow initial render before animating width
+                  setTimeout(() => triggerSkillAnimation(skillItem), 100);
               }
           });
 
@@ -371,4 +469,3 @@
     </script>
 </body>
 </html>
-    
