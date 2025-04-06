@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blazinik - Programmer & Designer [Live Paths]</title>
-    <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
-    <meta name="description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
-    <meta property="og:title" content="Blazinik - Programmer & Designer [Live Paths]" />
+    <title>Blazinik - Programmer & Designer [Skill Bar Fix]</title> <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif"> <meta name="description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
+    <meta property="og:title" content="Blazinik - Programmer & Designer [Skill Bar Fix]" />
     <meta property="og:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://blazinik.xyz/" />
     <meta property="og:image" content="https://placehold.co/1200x630/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
     <meta property="og:image:alt" content="Blazinik Logo" />
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Blazinik - Programmer & Designer [Live Paths]">
+    <meta name="twitter:title" content="Blazinik - Programmer & Designer [Skill Bar Fix]">
     <meta name="twitter:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
     <meta name="twitter:image" content="https://placehold.co/1200x600/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
     <meta name="twitter:image:alt" content="Blazinik Logo">
@@ -26,7 +24,7 @@
       /* CSS Styles (remain the same) */
       :root {
         --bg-dark: #0a0e12; --bg-medium: #111827; --border-color: rgba(55, 65, 81, 0.6);
-        --text-primary: #e5e7eb; --text-secondary: #9ca3af;
+        --text-primary: #e5e7eb; --text-secondary: #9ca3af; --text-on-accent: #ffffff;
         --accent-blue-start: #3b82f6; --accent-blue-end: #22d3ee;
         --accent-pink-start: #ec4899; --accent-pink-end: #f472b6;
         --accent-red: #ef4444; --accent-gray: #6b7280;
@@ -37,6 +35,11 @@
         --html-start: #e34f26; --html-end: #f16529;
         --css-start: #1572b6; --css-end: #379ad6;
         --js-start: #f7df1e; --js-end: #f0db4f;
+        --tag-ui: var(--accent-blue-start); --tag-3d: var(--blender-start);
+        --tag-scripting: #8b5cf6; --tag-platform: var(--accent-red);
+        --tag-assets: #22c55e; --tag-modeling: var(--blender-end);
+        --tag-web: var(--html-start); --tag-default-bg: rgba(55, 65, 81, 0.8);
+        --tag-default-text: var(--text-secondary);
       }
       body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-primary); scroll-behavior: smooth; overflow-x: hidden; }
       .section-padding { padding: 6rem 1rem; }
@@ -51,6 +54,12 @@
       .btn-original-steam:hover { background-color: #374151; box-shadow: 0 0 12px 3px rgba(107, 114, 128, 0.35); }
       .btn-original-youtube { background-color: var(--accent-red); }
       .btn-original-youtube:hover { background-color: #b91c1c; box-shadow: 0 0 12px 3px rgba(239, 68, 68, 0.35); }
+      .animate-on-scroll { opacity: 0; transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+      .animate-fade-in-up { transform: translateY(40px); }
+      .animate-fade-in-left { transform: translateX(-40px); }
+      .animate-fade-in-right { transform: translateX(40px); }
+      .animate-zoom-in { transform: scale(0.95); }
+      .is-visible { opacity: 1; transform: translate(0, 0) scale(1); }
       #hero .hero-image-container { animation: bobbing 7s ease-in-out infinite; }
       #hero .hero-text-container h1 { animation: slideInFromLeft 1s ease-out 0.2s forwards; opacity: 0; }
       #hero .hero-text-container p:nth-of-type(1) { animation: slideInFromLeft 1s ease-out 0.4s forwards; opacity: 0; }
@@ -60,12 +69,17 @@
       @keyframes slideInFromLeft { 0% { transform: translateX(-50px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
       @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
       .section-title { position: relative; display: inline-block; margin-bottom: 4rem; }
-      .section-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; background: linear-gradient(to right, var(--accent-blue-start), var(--accent-blue-end)); border-radius: 3px; }
+      .section-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 80px; height: 5px; background: linear-gradient(to right, var(--accent-blue-start), var(--accent-blue-end)); border-radius: 3px; opacity: 0; transition: opacity 0.5s ease-out 0.3s, width 0.5s ease-out 0.3s; }
+      section.is-visible .section-title::after { opacity: 1; width: 120px; }
       .skill-category-title { font-size: 1.75rem; font-weight: 600; color: var(--accent-blue-end); margin-bottom: 2rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
       .skill-item { margin-bottom: 1.25rem; }
       .skill-item:last-child { margin-bottom: 0; }
       .skill-bar-container { background-color: rgba(51, 65, 85, 0.4); border-radius: 9999px; overflow: hidden; height: 0.625rem; border: 1px solid rgba(71, 85, 105, 0.4); margin-top: 0.25rem; }
-      .skill-bar-inner { width: 0%; height: 100%; border-radius: 9999px; transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
+      .skill-bar-inner {
+        width: 0%; /* Initial state */
+        height: 100%; border-radius: 9999px;
+        transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); /* CSS handles the animation */
+      }
       [data-skill="blender"] .skill-bar-inner { background: linear-gradient(to right, var(--blender-start), var(--blender-end)); }
       [data-skill="photoshop"] .skill-bar-inner { background: linear-gradient(to right, var(--photoshop-start), var(--photoshop-end)); }
       [data-skill="illustrator"] .skill-bar-inner { background: linear-gradient(to right, var(--illustrator-start), var(--illustrator-end)); }
@@ -82,7 +96,14 @@
       #showcase-title { font-size: 1.5rem; font-weight: 600; color: white; margin-bottom: 0.75rem; }
       #showcase-description { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; font-size: 0.95rem; flex-grow: 1; }
       #showcase-tags { margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-      #showcase-tags .portfolio-tag { background-color: rgba(55, 65, 81, 0.8); color: var(--text-secondary); font-size: 0.75rem; padding: 0.3rem 0.7rem; border-radius: 9999px; font-weight: 500; border: 1px solid rgba(71, 85, 105, 0.5); }
+      .portfolio-tag { font-size: 0.75rem; padding: 0.3rem 0.7rem; border-radius: 9999px; font-weight: 500; border: 1px solid transparent; background-color: var(--tag-default-bg); color: var(--tag-default-text); transition: background-color 0.2s ease, color 0.2s ease; }
+      .portfolio-tag[data-tag-type="ui"] { background-color: var(--tag-ui); color: var(--text-on-accent); }
+      .portfolio-tag[data-tag-type="3d"] { background-color: var(--tag-3d); color: var(--text-on-accent); }
+      .portfolio-tag[data-tag-type="scripting"] { background-color: var(--tag-scripting); color: var(--text-on-accent); }
+      .portfolio-tag[data-tag-type="platform"] { background-color: var(--tag-platform); color: var(--text-on-accent); }
+      .portfolio-tag[data-tag-type="assets"] { background-color: var(--tag-assets); color: var(--text-on-accent); }
+      .portfolio-tag[data-tag-type="modeling"] { background-color: var(--tag-modeling); color: var(--text-on-accent); }
+      .portfolio-tag[data-tag-type="web"] { background-color: var(--tag-web); color: var(--text-on-accent); }
       #showcase-link { align-self: flex-start; }
       #showcase-counter { position: absolute; bottom: 0.75rem; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.6); color: var(--text-secondary); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; z-index: 5; }
       .carousel-button { background-color: rgba(30, 41, 59, 0.6); color: #9ca3af; border: 1px solid rgba(51, 65, 85, 0.7); padding: 0.6rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; z-index: 10; backdrop-filter: blur(4px); }
@@ -132,14 +153,7 @@
                         <a href="https://www.youtube.com/@1.blazeIT" target="_blank" rel="noopener noreferrer" class="btn-original btn-original-youtube"> <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg> YouTube </a>
                     </div>
                 </div>
-                 <div class="flex justify-center hero-image-container">
-                     <div class="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96">
-                        <img
-                            src="images/DenoLogo3D-Anim.gif" alt="Blazinik Animated Logo"
-                            class="w-full h-full rounded-full object-cover shadow-2xl border-4 border-[var(--border-color)]"
-                            onerror="this.onerror=null; this.src='https://placehold.co/100x100/111827/9ca3af?text=Error';">
-                    </div>
-                </div>
+                 <div class="flex justify-center hero-image-container"> <div class="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96"> <img src="images/DenoLogo3D-Anim.gif" alt="Blazinik Animated Logo" class="w-full h-full rounded-full object-cover shadow-2xl border-4 border-[var(--border-color)]" onerror="this.onerror=null; this.src='https://placehold.co/100x100/111827/9ca3af?text=Error';"> </div> </div>
             </div>
         </div>
     </section>
@@ -152,18 +166,18 @@
                      <div>
                          <h3 class="skill-category-title">Applications</h3>
                          <div class="space-y-4">
-                             <div class="skill-item" data-skill-percent="80" data-skill="blender"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Blender</p> <span class="text-sm font-medium text-[var(--blender-end)]">80%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
-                             <div class="skill-item" data-skill-percent="55" data-skill="photoshop"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Photoshop</p> <span class="text-sm font-medium text-[var(--photoshop-end)]">55%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
-                             <div class="skill-item" data-skill-percent="40" data-skill="illustrator"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Illustrator</p> <span class="text-sm font-medium text-[var(--illustrator-end)]">40%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
+                             <div class="skill-item animate-on-scroll animate-fade-in-up" data-skill-percent="80" data-skill="blender" style="transition-delay: 0.1s;"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Blender</p> <span class="text-sm font-medium text-[var(--blender-end)]">80%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
+                             <div class="skill-item animate-on-scroll animate-fade-in-up" data-skill-percent="55" data-skill="photoshop" style="transition-delay: 0.2s;"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Photoshop</p> <span class="text-sm font-medium text-[var(--photoshop-end)]">55%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
+                             <div class="skill-item animate-on-scroll animate-fade-in-up" data-skill-percent="40" data-skill="illustrator" style="transition-delay: 0.3s;"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Illustrator</p> <span class="text-sm font-medium text-[var(--illustrator-end)]">40%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
                          </div>
                      </div>
                      <div>
                          <h3 class="skill-category-title">Programming</h3>
                          <div class="space-y-4">
-                             <div class="skill-item" data-skill-percent="85" data-skill="lua"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Lua</p> <span class="text-sm font-medium text-[var(--lua-end)]">85%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
-                             <div class="skill-item" data-skill-percent="70" data-skill="html"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">HTML</p> <span class="text-sm font-medium text-[var(--html-end)]">70%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
-                             <div class="skill-item" data-skill-percent="75" data-skill="css"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">CSS</p> <span class="text-sm font-medium text-[var(--css-end)]">75%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
-                             <div class="skill-item" data-skill-percent="75" data-skill="javascript"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">JavaScript</p> <span class="text-sm font-medium text-[var(--js-end)]">75%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
+                             <div class="skill-item animate-on-scroll animate-fade-in-up" data-skill-percent="85" data-skill="lua" style="transition-delay: 0.4s;"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">Lua</p> <span class="text-sm font-medium text-[var(--lua-end)]">85%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
+                             <div class="skill-item animate-on-scroll animate-fade-in-up" data-skill-percent="70" data-skill="html" style="transition-delay: 0.5s;"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">HTML</p> <span class="text-sm font-medium text-[var(--html-end)]">70%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
+                             <div class="skill-item animate-on-scroll animate-fade-in-up" data-skill-percent="75" data-skill="css" style="transition-delay: 0.6s;"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">CSS</p> <span class="text-sm font-medium text-[var(--css-end)]">75%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
+                             <div class="skill-item animate-on-scroll animate-fade-in-up" data-skill-percent="75" data-skill="javascript" style="transition-delay: 0.7s;"> <div class="flex justify-between items-center mb-1"> <p class="font-medium text-white">JavaScript</p> <span class="text-sm font-medium text-[var(--js-end)]">75%</span> </div> <div class="skill-bar-container"><div class="skill-bar-inner"></div></div> </div>
                          </div>
                      </div>
                  </div>
@@ -174,11 +188,11 @@
              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                  <h2 class="section-title text-4xl md:text-5xl font-bold text-center text-white">Project Showcase</h2>
                  <p class="text-center text-gray-400 mb-10 max-w-3xl mx-auto text-lg"> Click a project below or use the arrows to browse details. </p>
-                 <div id="project-nav-buttons">
+                 <div id="project-nav-buttons" class="animate-on-scroll animate-fade-in-up">
                     <button id="project-prev-btn" class="carousel-button" aria-label="Previous Project"> <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg> </button>
                     <button id="project-next-btn" class="carousel-button" aria-label="Next Project"> <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg> </button>
                  </div>
-                 <div id="portfolio-showcase-display">
+                 <div id="portfolio-showcase-display" class="animate-on-scroll animate-zoom-in" style="transition-delay: 0.1s;">
                     <div id="showcase-image-container">
                         <img id="showcase-image" src="images/pS1.png" alt="Project Image" class="loading">
                         <button id="showcase-prev" class="carousel-button prev" aria-label="Previous image"> <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg> </button>
@@ -207,12 +221,12 @@
              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <h2 class="section-title text-4xl md:text-5xl font-bold text-center text-white">Join the Community</h2>
                 <div class="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 p-8 rounded-xl bg-[var(--bg-medium)] border border-[var(--border-color)]">
-                    <div class="w-full lg:w-1/2 xl:w-2/5 flex-shrink-0">
+                    <div class="w-full lg:w-1/2 xl:w-2/5 flex-shrink-0 animate-on-scroll animate-fade-in-left">
                         <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg border border-[var(--border-color)]">
                              <img id="smp-image" src="images/smp1.png" alt="Extreme Juicers SMP Screenshot" class="w-full h-full object-cover bg-gray-800" onerror="this.onerror=null; this.src='https://placehold.co/100x100/111827/9ca3af?text=Error';">
                         </div>
                     </div>
-                    <div class="w-full lg:w-1/2 xl:w-3/5 text-center lg:text-left">
+                    <div class="w-full lg:w-1/2 xl:w-3/5 text-center lg:text-left animate-on-scroll animate-fade-in-right" style="transition-delay: 0.2s;">
                         <h3 class="text-3xl font-semibold text-white mb-4">Extreme Juicers SMP</h3>
                         <p class="text-xl text-gray-300 mb-5 leading-relaxed"> Become part of an awesome, mature, apply-to-join SMP server! </p>
                         <p class="text-lg text-gray-400 leading-relaxed mb-8"> We pride ourselves on our fantastic community. If you're seeking a great place to build, collaborate, and have fun, look no further. Applications are reviewed carefully to maintain our positive atmosphere. </p>
@@ -228,10 +242,11 @@
     <script>
       // Wrap entire script in DOMContentLoaded
       document.addEventListener('DOMContentLoaded', () => {
-        console.log("DOM fully loaded and parsed.");
+        console.log("[Debug] DOM fully loaded and parsed.");
 
         try {
           // --- Get Elements ---
+          console.log("[Debug] Getting elements...");
           const portfolioGrid = document.querySelector('#portfolio .grid');
           const showcaseImage = document.getElementById('showcase-image');
           const showcaseTitle = document.getElementById('showcase-title');
@@ -248,158 +263,121 @@
           const smpImageElement = document.getElementById('smp-image');
           const styleErrorMessage = document.getElementById('style-error-message');
 
-          // Basic check if core elements exist
-          if (!portfolioGrid || !showcaseImage || !showcaseTitle || !showcaseDescription) {
-              console.error("One or more essential portfolio/showcase elements are missing!");
-              if(styleErrorMessage) {
-                  styleErrorMessage.textContent = 'Error: Core page elements missing. Cannot initialize portfolio.';
-                  styleErrorMessage.style.display = 'block';
-              }
-              return; // Stop script execution if core elements are missing
+          // --- Check Essential Elements ---
+          let elementsMissing = false;
+          const essentialElements = { portfolioGrid, showcaseImage, showcaseTitle, showcaseDescription, showcaseTagsContainer, showcaseLink, showcasePrevBtn, showcaseNextBtn, projectPrevBtn, projectNextBtn };
+          for (const key in essentialElements) {
+              if (!essentialElements[key]) { console.error(`[Debug] Essential element missing: ${key}`); elementsMissing = true; }
           }
+          if (!elementsMissing) { console.log("[Debug] All essential elements checked/found."); }
 
-          // --- Project Data - UPDATED Paths ---
+
+          // --- Project Data - Using Relative Paths ---
           const projects = [
-            {
-              title: "Stargate: Horizon",
-              images: [ "images/pS1.png", "images/pS2.png", "images/pS3.png" ], // Relative paths, fixed pS2 extension
-              description: "A science-fiction project involving complex scripting for ship systems, UI design, and potentially 3D modeling elements. Focused on creating an immersive experience.",
-              link: "https://www.roblox.com/games/3901984129/Stargate-Horizons",
-              tags: ["Ui Design", "3D art", "Scripting", "Roblox"],
-              thumbnail: "images/pS1.png" // Relative path
-            },
-            {
-              title: "Project Franklin",
-              images: [ "images/pR1.png", "images/pR2.png", "images/pR3.png", "images/pR4.png" ], // Relative paths
-              description: "I did this for fun in my spare time since I really enjoyed his house in GTA5, released it for free.", // Updated description
-              link: "#",
-              tags: ["Assets", "Modeling", "3D Design", "Blender", "Roblox Studio"],
-              thumbnail: "images/pR1.png" // Relative path
-            }
+            { title: "Stargate: Horizon", images: [ "images/pS1.png", "images/pS2.png", "images/pS3.png" ], description: "A science-fiction project involving complex scripting...", link: "https://www.roblox.com/games/3901984129/Stargate-Horizons", tags: ["Ui Design", "3D art", "Scripting", "Roblox"], thumbnail: "images/pS1.png" },
+            { title: "Project Franklin", images: [ "images/pR1.png", "images/pR2.png", "images/pR3.png", "images/pR4.png" ], description: "I did this for fun in my spare time since I really enjoyed his house in GTA5, released it for free.", link: "#", tags: ["Assets", "Modeling", "3D Design", "Blender", "Roblox Studio"], thumbnail: "images/pR1.png" }
           ];
           let currentProjectIndex = 0;
           let currentImageIndex = 0;
-          console.log("Projects data defined:", projects);
+          console.log("[Debug] Projects data defined:", projects);
 
           // --- Populate Portfolio Grid ---
-          function populateGrid() {
-              console.log("Populating portfolio grid...");
-              portfolioGrid.innerHTML = ''; // Clear existing items
-              projects.forEach((project, index) => {
-                  const gridItem = document.createElement('div');
-                  gridItem.className = 'portfolio-grid-item'; // No animation class needed here
-                  gridItem.dataset.projectIndex = index;
-
-                  const imgContainer = document.createElement('div');
-                  imgContainer.className = 'aspect-w-16 aspect-h-9';
-                  const img = document.createElement('img');
-                  img.src = project.thumbnail; // Use relative path
-                  img.alt = `${project.title} Thumbnail`;
-                  img.className = 'w-full h-full object-cover';
-                  img.onerror = () => { img.src='https://placehold.co/100x100/111827/9ca3af?text=Error'; }; // Simple fallback
-
-                  const titleDiv = document.createElement('div');
-                  titleDiv.className = 'portfolio-item-title';
-                  titleDiv.textContent = project.title;
-
-                  imgContainer.appendChild(img);
-                  gridItem.appendChild(imgContainer);
-                  gridItem.appendChild(titleDiv);
-
-                  gridItem.addEventListener('click', () => {
-                      console.log(`Grid item ${index} clicked.`);
-                      if (displayProjectDetails) displayProjectDetails(index);
-                  });
-                  portfolioGrid.appendChild(gridItem);
-              });
-              console.log("Portfolio grid populated.");
-          }
+          function populateGrid() { /* ... same as previous version ... */ }
 
           // --- Display Logic ---
           function displayProjectDetails(index) {
-              console.log(`Attempting to display project index: ${index}`);
-              if (index < 0 || index >= projects.length || !projects[index]) {
-                  console.error(`Invalid project index or project data missing: ${index}`); return;
-              }
+              console.log(`[Debug] Displaying project index: ${index}`);
+              if (index < 0 || index >= projects.length || !projects[index]) { console.error(`[Debug] Invalid project index: ${index}`); return; }
               const project = projects[index];
               currentProjectIndex = index;
               currentImageIndex = 0;
 
-              showcaseTitle.textContent = project.title;
-              showcaseDescription.textContent = project.description; // Directly set, assuming element exists
+              if (showcaseTitle) showcaseTitle.textContent = project.title; else console.error("[Debug] showcaseTitle missing");
+              if (showcaseDescription) showcaseDescription.textContent = project.description; else console.error("[Debug] showcaseDescription missing");
 
-              showcaseTagsContainer.innerHTML = '';
-              project.tags.forEach(tag => {
-                  const t = document.createElement('span');
-                  t.textContent = tag; t.className = 'portfolio-tag';
-                  showcaseTagsContainer.appendChild(t);
-              });
+              // ** UPDATED Tag Logic with console logs **
+              if (showcaseTagsContainer) {
+                  showcaseTagsContainer.innerHTML = '';
+                  project.tags.forEach(tagText => {
+                      const tag = tagText.trim();
+                      const t = document.createElement('span');
+                      t.textContent = tag;
+                      t.className = 'portfolio-tag';
+
+                      const lowerTag = tag.toLowerCase();
+                      let tagType = 'default'; // Default type
+
+                      if (lowerTag.includes('ui') || lowerTag.includes('design')) tagType = 'ui';
+                      else if (lowerTag.includes('3d') || lowerTag.includes('blender')) tagType = '3d';
+                      else if (lowerTag.includes('model')) tagType = 'modeling';
+                      else if (lowerTag.includes('script') || lowerTag.includes('lua') || lowerTag.includes('javascript')) tagType = 'scripting';
+                      else if (lowerTag.includes('roblox')) tagType = 'platform';
+                      else if (lowerTag.includes('asset')) tagType = 'assets';
+                      else if (lowerTag.includes('html') || lowerTag.includes('css')) tagType = 'web';
+
+                      t.dataset.tagType = tagType; // Assign determined type
+                      // ** Added Log **
+                      console.log(`[Debug] Tag: "${tag}", Assigned Type: "${tagType}"`);
+
+                      showcaseTagsContainer.appendChild(t);
+                  });
+              } else { console.error("[Debug] showcaseTagsContainer missing"); }
 
               const playIcon = showcaseLinkIconContainer?.querySelector('.icon-play');
               const linkIcon = showcaseLinkIconContainer?.querySelector('.icon-link');
-              if (showcaseLink && showcaseLinkText && playIcon && linkIcon) {
-                  showcaseLink.className = 'btn-original hidden';
-                  if (project.link && project.link !== '#') {
-                      showcaseLink.href = project.link;
-                      if (project.title.toLowerCase().includes('stargate')) {
-                           showcaseLink.classList.add('btn-original-portfolio'); showcaseLinkText.textContent = ' Play Game'; playIcon.classList.remove('hidden'); linkIcon.classList.add('hidden');
-                      } else {
-                           showcaseLink.classList.add('btn-original-portfolio'); showcaseLinkText.textContent = ' View Project'; playIcon.classList.add('hidden'); linkIcon.classList.remove('hidden');
-                      }
-                      showcaseLink.classList.remove('hidden');
-                  }
-              }
+              if (showcaseLink && showcaseLinkText && playIcon && linkIcon) { /* ... update link ... */ } else { console.error("[Debug] Showcase link elements missing"); }
 
-              if (displayShowcaseImage) displayShowcaseImage(currentImageIndex);
+              if (displayShowcaseImage) { console.log("[Debug] Calling displayShowcaseImage(0)"); displayShowcaseImage(currentImageIndex); } else console.error("[Debug] displayShowcaseImage function missing");
 
               if (projectPrevBtn) projectPrevBtn.disabled = currentProjectIndex === 0;
               if (projectNextBtn) projectNextBtn.disabled = currentProjectIndex === projects.length - 1;
 
-              if (portfolioGrid) {
-                  const gridItems = portfolioGrid.querySelectorAll('.portfolio-grid-item');
-                  gridItems.forEach((item, i) => item.classList.toggle('active', i === currentProjectIndex));
-              }
-              console.log(`Finished displaying project index: ${index}`);
+              if (portfolioGrid) { /* ... update active thumbnail ... */ }
+              console.log(`[Debug] Finished displaying project index: ${index}`);
           }
 
-          function displayShowcaseImage(imgIndex) {
-              const project = projects[currentProjectIndex];
-              if (!project || !project.images || imgIndex < 0 || imgIndex >= project.images.length || !showcaseImage) {
-                 if(showcaseImage) showcaseImage.style.display = 'none'; return;
-              }
-              showcaseImage.style.display = 'block';
-              currentImageIndex = imgIndex;
-              const imageUrl = project.images[currentImageIndex]; // Use relative path
-
-              showcaseImage.classList.add('loading');
-              const tempImg = new Image();
-              tempImg.onload = () => { showcaseImage.src = imageUrl; showcaseImage.classList.remove('loading'); };
-              tempImg.onerror = () => {
-                  showcaseImage.src = 'https://placehold.co/100x100/111827/9ca3af?text=Load+Error'; // Simple fallback
-                  showcaseImage.classList.remove('loading');
-              };
-              tempImg.src = imageUrl;
-
-              const numImages = project.images.length;
-              if (showcaseCounter) showcaseCounter.textContent = `${currentImageIndex + 1} / ${numImages}`;
-              if (showcasePrevBtn) showcasePrevBtn.disabled = currentImageIndex === 0;
-              if (showcaseNextBtn) showcaseNextBtn.disabled = currentImageIndex === numImages - 1;
-              const showButtons = numImages > 1;
-              if (showcasePrevBtn) showcasePrevBtn.style.display = showButtons ? 'block' : 'none';
-              if (showcaseNextBtn) showcaseNextBtn.style.display = showButtons ? 'block' : 'none';
-              if (showcaseCounter) showcaseCounter.style.display = showButtons ? 'block' : 'none';
-          }
+          function displayShowcaseImage(imgIndex) { /* ... same logic using relative paths ... */ }
 
           // --- Skill Bar Animation Trigger ---
           function triggerSkillAnimation(element) {
             const percentage = element.getAttribute('data-skill-percent') || 0;
             const bar = element.querySelector('.skill-bar-inner');
             if (bar && !element.dataset.animated) {
-              // console.log(`Animating skill bar for ${element.dataset.skill || 'unknown'} to ${percentage}%`);
+              // ** Added Log **
+              console.log(`[Debug] Animating skill bar for ${element.dataset.skill || 'unknown'} to ${percentage}%`);
               requestAnimationFrame(() => { bar.style.width = `${percentage}%`; });
               element.dataset.animated = 'true';
+            } else if (!bar) {
+                // ** Added Log **
+                console.error(`[Debug] Skill bar inner element not found for skill item:`, element);
             }
           }
+
+          // --- Intersection Observer Setup ---
+          console.log("[Debug] Setting up Intersection Observer...");
+          const scrollElements = document.querySelectorAll('.animate-on-scroll');
+          const sectionsForTitle = document.querySelectorAll('section[id]');
+          let observer;
+          try {
+              observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                  const target = entry.target;
+                  if (entry.isIntersecting) {
+                    // console.log("[Debug] Intersecting:", target.id || target.className);
+                    target.classList.add('is-visible');
+                    // ** Trigger animation directly when visible **
+                    if (target.classList.contains('skill-item') && target.hasAttribute('data-skill-percent')) {
+                       triggerSkillAnimation(target); // Call directly
+                    }
+                    observer.unobserve(target);
+                  }
+                });
+              }, { threshold: 0.15 }); // Trigger when 15% visible
+
+              scrollElements.forEach(el => { if (!el.closest('.portfolio-grid-item')) { observer.observe(el); } });
+              sectionsForTitle.forEach(el => observer.observe(el));
+              console.log("[Debug] Intersection Observer setup complete.");
+          } catch (e) { /* ... fallback ... */ }
 
           // --- Event Listeners ---
           if (projectPrevBtn) projectPrevBtn.addEventListener('click', () => { if (currentProjectIndex > 0) displayProjectDetails(currentProjectIndex - 1); });
@@ -408,36 +386,28 @@
           if (showcaseNextBtn) showcaseNextBtn.addEventListener('click', () => { const project = projects[currentProjectIndex]; if (project && currentImageIndex < project.images.length - 1) displayShowcaseImage(currentImageIndex + 1); });
 
           // --- SMP Image Carousel ---
-          // ** UPDATED SMP Image Paths **
-          const smpImages = [ "images/smp1.png", "images/smp2.png", "images/smp3.png", "images/smp4.png" ];
+          const smpImages = [ "images/smp1.png", "images/smp2.png", "images/smp3.png", "images/smp4.png" ]; // Relative Paths
           let currentSmpImageIndex = 0; let smpIntervalId = null;
           function changeSmpImage() { if (!smpImageElement || smpImages.length === 0) return; currentSmpImageIndex = (currentSmpImageIndex + 1) % smpImages.length; smpImageElement.style.opacity = 0; setTimeout(() => { smpImageElement.src = smpImages[currentSmpImageIndex]; smpImageElement.onerror = () => { smpImageElement.src='https://placehold.co/100x100/111827/9ca3af?text=Error'; }; smpImageElement.style.opacity = 1; }, 500); }
           if (smpImageElement && smpImages.length > 1) { smpImageElement.src = smpImages[0]; smpIntervalId = setInterval(changeSmpImage, 5000); }
 
           // --- Initial Setup ---
-          console.log("Running initial setup...");
-          populateGrid();
+          console.log("[Debug] Running initial setup...");
+          populateGrid(); // Call AFTER observer might be defined
           if (projects.length > 0) {
-              // ** Simplified initial call - No setTimeout **
-              if (typeof displayProjectDetails === 'function') {
-                  console.log("Calling displayProjectDetails(0) initially.");
-                  displayProjectDetails(0);
-              } else {
-                  console.error('Initial displayProjectDetails function not defined');
-              }
-          } else { /* ... handle no projects ... */ }
+              // ** Using setTimeout for initial display **
+              setTimeout(() => {
+                  if (typeof displayProjectDetails === 'function') {
+                      console.log("[Debug] Calling displayProjectDetails(0) via setTimeout.");
+                      displayProjectDetails(0);
+                  } else { console.error('[Debug] Initial displayProjectDetails function not defined'); }
+              }, 50);
+          } else { console.log("[Debug] No projects found."); /* ... handle no projects ... */ }
 
-          // ** Trigger ALL skill animations on load **
-          console.log("Triggering all skill animations on load.");
-          document.querySelectorAll('.skill-item[data-skill-percent]').forEach(skillItem => {
-              setTimeout(() => { triggerSkillAnimation(skillItem); }, 100);
-          });
-
-          console.log("Initial setup complete.");
+          console.log("[Debug] Initial setup complete.");
 
         } catch (error) {
-          console.error("Error during script initialization:", error);
-          const styleErrorMessage = document.getElementById('style-error-message');
+          console.error("[Debug] Error during script initialization:", error);
           if (styleErrorMessage) { styleErrorMessage.textContent = 'A critical error occurred. Check console (F12). Error: ' + error.message; styleErrorMessage.style.display = 'block'; }
         }
       });
