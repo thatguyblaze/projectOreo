@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         /* GitHub Inspired Dark Theme Variables - Refined + More Color */
         :root {
@@ -47,6 +48,8 @@
             -moz-osx-font-smoothing: grayscale;
             font-size: 16px; /* Base font size */
         }
+        /* Prevent background scroll when modal is open */
+        body.modal-open { overflow: hidden; }
 
         /* Helper for Inline SVG Icons */
         .icon {
@@ -411,6 +414,7 @@
              border-radius: 0.5rem; /* rounded-lg */
              border: 1px solid var(--border-color);
              transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+             cursor: pointer; /* Add cursor pointer for gallery */
          }
          .gallery-image:hover {
              transform: scale(1.05);
@@ -422,6 +426,44 @@
              display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
              gap: 3rem; align-items: center;
          }
+
+         /* Gallery Modal Styles */
+        #galleryModal { display: none; /* Hidden by default */ }
+        #galleryModal .modal-content {
+            max-width: 80vw; /* Wider modal */
+            max-height: 90vh;
+            background: rgba(13, 17, 23, 0.8); /* Darker, more transparent */
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 1rem; /* Less padding */
+            display: flex; flex-direction: column;
+        }
+        #galleryModal .close-button {
+            position: absolute; top: 1rem; right: 1rem; z-index: 10;
+            color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3);
+            border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #galleryModal .close-button:hover { background: rgba(0,0,0,0.6); color: #fff; }
+        .modal-image-container { position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        #modalImage {
+            display: block; max-width: 100%; max-height: calc(90vh - 80px); /* Adjust height accounting for padding/caption */
+            object-fit: contain; border-radius: 0.5rem;
+        }
+        #modalCaption {
+            text-align: center; margin-top: 0.75rem; color: var(--text-secondary); font-size: 0.9rem;
+        }
+        .nav-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+            background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.7);
+            border: none; border-radius: 50%; width: 44px; height: 44px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .nav-arrow:hover { background: rgba(0,0,0,0.6); color: #fff; }
+        .nav-arrow.prev { left: 1rem; }
+        .nav-arrow.next { right: 1rem; }
+        .nav-arrow .icon { margin-right: 0; width: 1.5em; height: 1.5em; }
 
     </style>
 </head>
