@@ -15,10 +15,10 @@
                     },
                     colors: {
                         'gray': { 700: '#374151', 800: '#1F2937', 900: '#111827' },
-                        'highlight-yellow-light': '#FEF9C3',
-                        'highlight-yellow-dark': '#78350F',
-                        'highlight-red-light': '#FEE2E2',
-                        'highlight-red-dark': '#7F1D1D',
+                        'highlight-yellow-light': '#FEF9C3', // yellow-100
+                        'highlight-yellow-dark': '#78350F',  // amber-900
+                        'highlight-red-light': '#FEE2E2',   // red-100
+                        'highlight-red-dark': '#7F1D1D',    // red-900
                     }
                 }
             }
@@ -32,10 +32,11 @@
         main { flex-grow: 1; }
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button { opacity: 0.8; }
-        .dark input:focus, .dark select:focus, .dark input[type=checkbox]:focus, .dark button:focus {
-             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.6);
+        /* Updated focus style for better visibility */
+        .dark input:focus, .dark select:focus, .dark input[type=checkbox]:focus, .dark button:focus, .dark input[type=search]:focus {
+             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); /* Slightly more prominent */
              outline: none;
-             border-color: transparent;
+             /* border-color: transparent; /* Keep border for inputs */
         }
         label { display: block; margin-bottom: 0.25rem; font-weight: 500; }
         .input-group { margin-bottom: 1rem; }
@@ -59,21 +60,48 @@
         input:checked + .slider { background-color: #4F46E5; }
         input:checked + .slider:before { transform: translateX(26px); }
 
-        /* --- Inventory Table Highlighting --- */
+        /* --- Inventory Table Highlighting & Row Styles --- */
+        .inventory-table-row { transition: background-color 0.3s ease-in-out; } /* Smooth highlight transition */
         .highlight-yellow { background-color: #FEF9C3; }
         .dark .highlight-yellow { background-color: #78350F; color: #FEFCE8; }
         .highlight-red { background-color: #FEE2E2; }
         .dark .highlight-red { background-color: #7F1D1D; color: #FEF2F2; }
+        /* Subtle alternating row colors */
+         #inventoryTbody tr:nth-child(even) { background-color: #f9fafb; }
+        .dark #inventoryTbody tr:nth-child(even) { background-color: rgba(31, 41, 55, 0.5); } /* gray-800 with opacity */
+        /* Ensure highlights override alternating colors */
+        #inventoryTbody .highlight-yellow, #inventoryTbody .highlight-red { /* Use more specific selector */
+             /* Background colors defined above */
+        }
+         .dark #inventoryTbody .highlight-yellow, .dark #inventoryTbody .highlight-red {
+             /* Background colors defined above */
+        }
+
 
         /* Header and Footer styles */
         header, footer { width: 100%; padding: 1rem; }
         footer { margin-top: auto; }
 
-        /* Modal Styles - Controlled by JS display property */
+        /* Modal Styles & Animations */
         .modal {
             position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
             overflow-y: auto; height: 100%; width: 100%;
             display: flex; align-items: center; justify-content: center;
+            /* Initial animation state (hidden) */
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            z-index: 50; /* Ensure modal is on top */
+        }
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease-out;
+        }
+        /* Active/Visible state */
+        .modal.active {
+            opacity: 1;
+        }
+         .modal.active .modal-content {
+            transform: scale(1);
         }
 
     </style>
@@ -135,13 +163,18 @@
                  <div>
                      <label class="block text-sm font-medium">Profit:</label>
                      <output id="calculatedProfit" name="calculatedProfit" class="output-value text-amber-600">$0.00</output>
-                      <p class="placeholder-note">(Dist + Fuel - Cost) (Min $0)</p> </div>
+                      <p class="placeholder-note">(Dist + Fuel - Cost) (Min $0)</p>
+                 </div>
             </div>
-        </div><div class="inventory-container bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-7xl mx-auto"> <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold">Lot Inventory</h2>
-                <button id="addCarBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                    Add Car
-                </button>
+        </div><div class="inventory-container bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-7xl mx-auto">
+             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                <h2 class="text-2xl font-bold text-center sm:text-left">Lot Inventory</h2>
+                 <div class="flex items-center w-full sm:w-auto gap-2">
+                     <input type="search" id="searchInput" placeholder="Search Make, Model, Plate, Owner..." class="w-full sm:w-64 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500 dark:focus:border-indigo-500">
+                    <button id="addCarBtn" class="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                        Add Car
+                    </button>
+                 </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -149,18 +182,19 @@
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date In</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Owner Name</th>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Make</th>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Model</th>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Plate</th>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Call Type</th>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Insurance</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Days</th>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Lot #</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Days</th>
                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryTbody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr><td colspan="9" class="text-center py-4 text-gray-500 dark:text-gray-400">No cars in inventory.</td></tr>
+                        <tr><td colspan="10" class="text-center py-4 text-gray-500 dark:text-gray-400">No cars in inventory.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -172,24 +206,20 @@
         </p>
     </footer>
 
-    <div id="addCarModal" class="modal" style="display: none;"> <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-800"> <div class="mt-3 text-center">
+    <div id="addCarModal" class="modal" style="display: none;"> <div class="modal-content relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-800"> <div class="mt-3 text-center">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Add New Car to Inventory</h3>
-                <form id="addCarForm" class="space-y-3"> <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form id="addCarForm" class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="dateIn" class="block text-sm font-medium text-left">Date In:</label>
                             <input type="date" id="dateIn" name="dateIn" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
-                        <div>
-                            <label for="callType" class="block text-sm font-medium text-left">Call Type:</label>
-                            <select id="callType" name="callType" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                <option value="CHP">CHP</option>
-                                <option value="KPD">KPD</option>
-                                <option value="THP">THP</option>
-                                <option value="OWNER REQ">OWNER REQ</option>
-                            </select>
+                         <div>
+                            <label for="ownerName" class="block text-sm font-medium text-left">Owner Name:</label>
+                            <input type="text" id="ownerName" name="ownerName" required placeholder="e.g., John Doe" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          <div>
                             <label for="make" class="block text-sm font-medium text-left">Make:</label>
                             <input type="text" id="make" name="make" required placeholder="e.g., Toyota" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -205,8 +235,20 @@
                             <input type="text" id="plateNumber" name="plateNumber" required placeholder="e.g., ABC-123" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
                          <div>
+                            <label for="callType" class="block text-sm font-medium text-left">Call Type:</label>
+                            <select id="callType" name="callType" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                <option value="CHP">CHP</option>
+                                <option value="KPD">KPD</option>
+                                <option value="THP">THP</option>
+                                <option value="OWNER REQ">OWNER REQ</option>
+                            </select>
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         <div>
                             <label class="block text-sm font-medium text-left mb-1">Insurance:</label>
-                            <div class="flex justify-start space-x-4 pt-2"> <label class="flex items-center">
+                            <div class="flex justify-start space-x-4 pt-2">
+                               <label class="flex items-center">
                                  <input type="radio" name="insurance" value="Yes" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Yes
                                </label>
                                <label class="flex items-center">
@@ -214,17 +256,17 @@
                                </label>
                              </div>
                         </div>
-                    </div>
-                     <div>
-                        <label class="block text-sm font-medium text-left mb-1">Lot Number:</label>
-                         <div class="flex justify-start space-x-4">
-                           <label class="flex items-center">
-                             <input type="radio" name="lotNumber" value="1" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 1
-                           </label>
-                           <label class="flex items-center">
-                             <input type="radio" name="lotNumber" value="2" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 2
-                           </label>
-                         </div>
+                         <div>
+                            <label class="block text-sm font-medium text-left mb-1">Lot Number:</label>
+                             <div class="flex justify-start space-x-4 pt-2">
+                               <label class="flex items-center">
+                                 <input type="radio" name="lotNumber" value="1" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 1
+                               </label>
+                               <label class="flex items-center">
+                                 <input type="radio" name="lotNumber" value="2" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 2
+                               </label>
+                             </div>
+                        </div>
                     </div>
                     <div class="items-center px-4 py-3 border-t border-gray-200 dark:border-gray-700 mt-4">
                         <button id="saveCarBtn" type="submit" class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
@@ -267,20 +309,17 @@
             const totalCost = towTypeCharge + overtimeCharge + timeCost + distanceCost;
             const fuelCostRaw = distance === 0 ? 0 : (distance / 8) * 3.5;
             const fuelCost = Math.round(fuelCostRaw * 100) / 100;
-            const profit = distance + fuelCost - totalCost; // Raw Profit Calc
-
-            // Ensure displayed profit is not negative
+            const profit = totalCost - distance + fuelCost;
             const displayProfit = Math.max(0, profit);
 
             calculatedCostOutput.textContent = `$${totalCost.toFixed(2)}`;
             calculatedFuelCostOutput.textContent = `$${fuelCost.toFixed(2)}`;
-            // Display the adjusted profit (minimum $0.00)
             calculatedProfitOutput.textContent = `$${displayProfit.toFixed(2)}`;
         }
 
         calculatorForm.addEventListener('input', calculateAndDisplayPrice);
         calculatorForm.addEventListener('change', calculateAndDisplayPrice);
-        calculateAndDisplayPrice(); // Initial calculation
+        calculateAndDisplayPrice();
 
         // --- Inventory Elements & Logic ---
         const addCarBtn = document.getElementById('addCarBtn');
@@ -288,6 +327,7 @@
         const addCarForm = document.getElementById('addCarForm');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const inventoryTbody = document.getElementById('inventoryTbody');
+        const searchInput = document.getElementById('searchInput'); // Search input element
         const STORAGE_KEY = 'treadzInventory';
 
         let inventory = []; // Global inventory array
@@ -295,12 +335,12 @@
         function loadInventory() {
             const storedInventory = localStorage.getItem(STORAGE_KEY);
             inventory = storedInventory ? JSON.parse(storedInventory) : [];
-            // console.log("Inventory loaded:", inventory); // Debug log
+            inventory.sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn)); // Sort on load
         }
 
         function saveInventory() {
+             // Ensure sorting before saving if needed, or sort on load/render
             localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
-            // console.log("Inventory saved:", inventory); // Debug log
         }
 
         function daysDifference(dateStr1, dateStr2) {
@@ -314,17 +354,16 @@
             } catch (error) { console.error("Error calculating days difference:", error); return NaN; }
         }
 
-        function renderInventory() {
-            // console.log("Rendering inventory. Current count:", inventory.length); // Debug log
-            inventoryTbody.innerHTML = ''; // Clear existing rows
-            if (inventory.length === 0) {
-                 inventoryTbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-gray-500 dark:text-gray-400">No cars in inventory.</td></tr>`;
+        // Modified renderInventory to accept a list of cars to display
+        function renderInventory(carsToRender = inventory) {
+            inventoryTbody.innerHTML = '';
+            if (carsToRender.length === 0) {
+                 inventoryTbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-gray-500 dark:text-gray-400">No cars found matching criteria.</td></tr>`;
                  return;
             }
             const today = new Date().toISOString().split('T')[0];
 
-            inventory.forEach(car => {
-                // console.log("Rendering car:", car); // Debug log
+            carsToRender.forEach(car => {
                 const daysInStorage = car.dateIn ? daysDifference(car.dateIn, today) : NaN;
                 let highlightClass = '';
                 if (!isNaN(daysInStorage)) {
@@ -332,17 +371,20 @@
                     else if (daysInStorage >= 17) { highlightClass = 'highlight-yellow'; }
                 }
                 const row = document.createElement('tr');
-                row.className = `${highlightClass} text-sm`;
+                // Added transition class for row highlighting animation
+                row.className = `${highlightClass} text-sm inventory-table-row`;
 
+                // Reordered columns and added Owner Name
                 row.innerHTML = `
                     <td class="px-3 py-2 whitespace-nowrap">${car.dateIn || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${car.ownerName || 'N/A'}</td>
                     <td class="px-3 py-2 whitespace-nowrap">${car.make || 'N/A'}</td>
                     <td class="px-3 py-2 whitespace-nowrap">${car.model || 'N/A'}</td>
                     <td class="px-3 py-2 whitespace-nowrap">${car.plateNumber || 'N/A'}</td>
                     <td class="px-3 py-2 whitespace-nowrap">${car.callType || 'N/A'}</td>
                     <td class="px-3 py-2 whitespace-nowrap">${typeof car.insurance === 'boolean' ? (car.insurance ? 'Yes' : 'No') : 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${isNaN(daysInStorage) ? 'Error' : daysInStorage}</td>
                     <td class="px-3 py-2 whitespace-nowrap">${car.lotNumber || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${isNaN(daysInStorage) ? 'Error' : daysInStorage}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
                         <button data-id="${car.id}" class="remove-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs font-medium">Remove</button>
                     </td>
@@ -351,43 +393,71 @@
             });
         }
 
-        // Show Add Car Modal
-        addCarBtn.addEventListener('click', () => {
+        // Function to filter and render based on search input
+        function filterAndRenderInventory() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            if (!searchTerm) {
+                renderInventory(inventory); // Render all if search is empty
+                return;
+            }
+
+            const filteredInventory = inventory.filter(car => {
+                return (car.make?.toLowerCase().includes(searchTerm) ||
+                        car.model?.toLowerCase().includes(searchTerm) ||
+                        car.plateNumber?.toLowerCase().includes(searchTerm) ||
+                        car.ownerName?.toLowerCase().includes(searchTerm));
+            });
+            renderInventory(filteredInventory);
+        }
+
+
+        // --- Modal Show/Hide Logic with Animation ---
+        function showModal() {
             addCarForm.reset();
             document.getElementById('dateIn').valueAsDate = new Date();
-            addCarModal.style.display = 'flex';
-        });
-
-        // Hide Add Car Modal
-        function hideModal() {
-             addCarModal.style.display = 'none';
+            addCarModal.style.display = 'flex'; // Make it flex for centering
+            // Timeout needed to allow display change before starting transition
+            setTimeout(() => {
+                 addCarModal.classList.add('active'); // Add class to trigger opacity/scale transition
+            }, 10); // Small delay
         }
+
+        function hideModal() {
+            addCarModal.classList.remove('active'); // Remove class to trigger fade out
+             // Wait for animation to finish before setting display none
+             setTimeout(() => {
+                 addCarModal.style.display = 'none';
+            }, 300); // Should match transition duration
+        }
+
+        addCarBtn.addEventListener('click', showModal);
         closeModalBtn.addEventListener('click', hideModal);
         addCarModal.addEventListener('click', (event) => {
-            // Close if clicking on the modal backdrop itself
             if (event.target === addCarModal) { hideModal(); }
         });
 
+        // --- Event Handlers ---
         // Handle Add Car Form Submission
         addCarForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Prevent default page reload
-            // console.log("Add car form submitted"); // Debug log
-
+            event.preventDefault();
             const dateInValue = document.getElementById('dateIn').value;
+            const ownerNameValue = document.getElementById('ownerName').value.trim(); // Get Owner Name
             const makeValue = document.getElementById('make').value.trim();
             const modelValue = document.getElementById('model').value.trim();
             const plateValue = document.getElementById('plateNumber').value.trim();
             const insuranceChecked = document.querySelector('input[name="insurance"]:checked');
             const lotNumberChecked = document.querySelector('input[name="lotNumber"]:checked');
 
-            if (!dateInValue || !makeValue || !modelValue || !plateValue || !insuranceChecked || !lotNumberChecked) {
-                alert("Please fill out all fields (Date, Make, Model, Plate, Insurance, Lot#).");
-                return; // Stop execution if validation fails
+            // Updated validation including Owner Name
+            if (!dateInValue || !ownerNameValue || !makeValue || !modelValue || !plateValue || !insuranceChecked || !lotNumberChecked) {
+                alert("Please fill out all fields.");
+                return;
             }
 
             const newCar = {
-                id: Date.now(), // Simple unique ID
+                id: Date.now(),
                 dateIn: dateInValue,
+                ownerName: ownerNameValue, // Add Owner Name
                 make: makeValue,
                 model: modelValue,
                 plateNumber: plateValue,
@@ -396,36 +466,36 @@
                 lotNumber: lotNumberChecked.value,
             };
 
-            // console.log("New car object:", newCar); // Debug log
             inventory.push(newCar);
-            inventory.sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn)); // Sort by date desc
-            // console.log("Inventory after push:", inventory); // Debug log
-
-            saveInventory(); // Save the updated array
-            renderInventory(); // Redraw the table with the new car
-            hideModal(); // Hide the form
+            inventory.sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn));
+            saveInventory();
+            filterAndRenderInventory(); // Re-filter and render after adding
+            hideModal();
         });
 
         // Handle Remove Car Button Clicks
         inventoryTbody.addEventListener('click', (event) => {
             if (event.target.classList.contains('remove-btn')) {
                 const carId = parseInt(event.target.getAttribute('data-id'));
-                // console.log("Remove button clicked for ID:", carId); // Debug log
                 if (confirm('Are you sure you want to remove this car?')) {
                     inventory = inventory.filter(car => car.id !== carId);
-                    // console.log("Inventory after filter:", inventory); // Debug log
                     saveInventory();
-                    renderInventory();
+                    filterAndRenderInventory(); // Re-filter and render after removing
                 }
             }
         });
 
+        // Handle Search Input
+        searchInput.addEventListener('input', filterAndRenderInventory);
+
+
         // --- Initial Load ---
         loadInventory();
-        renderInventory();
+        filterAndRenderInventory(); // Initial render (handles empty search)
         // Ensure modal is hidden on initial load
         if (addCarModal) {
              addCarModal.style.display = 'none';
+             addCarModal.classList.remove('active'); // Also remove active class if present
         }
 
     </script>
