@@ -3,1125 +3,914 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blazinik - Programmer & Designer</title>
-    <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
-    <meta name="description" content="Check out my favorite music, steam profile, youtube and information about my recent projects.">
-
-    <meta property="og:title" content="Blazinik - Programmer & Designer" />
-    <meta property="og:description" content="Check out my favorite music, steam profile, youtube and information about my recent projects." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://blazinik.xyz/" />
-    <meta property="og:image" content="https://placehold.co/1200x630/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
-    <meta property="og:image:alt" content="Blazinik Portfolio Preview" />
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Blazinik - Programmer & Designer">
-    <meta name="twitter:description" content="Check out my favorite music, steam profile, youtube and information about my recent projects.">
-    <meta name="twitter:image" content="https://placehold.co/1200x600/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
-    <meta name="twitter:image:alt" content="Blazinik Portfolio Preview">
-
+    <title>Extreme Juicers SMP // Season 5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-      /* --- CSS Variables (Color Palette & Theme) --- */
-      :root {
-        --bg-dark: #0a0e12;
-        --bg-medium: #111827;
-        --border-color: rgba(55, 65, 81, 0.6);
-        --text-primary: #e5e7eb;
-        --text-secondary: #9ca3af;
-        --text-on-accent: #ffffff;
-        --accent-blue-start: #3b82f6;
-        --accent-blue-end: #22d3ee;
-        --accent-pink-start: #ec4899;
-        --accent-pink-end: #f472b6;
-        --accent-red: #ef4444;
-        --accent-gray: #6b7280;
-        /* Skill-specific gradients */
-        --blender-start: #f5792a; --blender-end: #ffb03a;
-        --photoshop-start: #31a8ff; --photoshop-end: #2f69ff;
-        --illustrator-start: #ff7c00; --illustrator-end: #e84c00;
-        --lua-start: #000080; --lua-end: #add8e6; /* Adjusted Lua colors slightly */
-        --html-start: #e34f26; --html-end: #f16529;
-        --css-start: #1572b6; --css-end: #379ad6;
-        --js-start: #f7df1e; --js-end: #f0db4f;
-        /* Tag-specific colors */
-        --tag-ui: var(--accent-blue-start);
-        --tag-3d: var(--blender-start);
-        --tag-scripting: #8b5cf6; /* Violet */
-        --tag-platform: var(--accent-red);
-        --tag-assets: #22c55e; /* Green */
-        --tag-modeling: var(--blender-end);
-        --tag-web: var(--html-start);
-        --tag-default-bg: rgba(55, 65, 81, 0.8);
-        --tag-default-text: var(--text-secondary);
-      }
-
-      /* --- Base Styles --- */
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--bg-dark);
-        color: var(--text-primary);
-        scroll-behavior: smooth;
-        overflow-x: hidden; /* Prevent horizontal scroll */
-      }
-      /* Class added to body when modal is open */
-      body.modal-open {
-        overflow: hidden;
-      }
-
-      /* --- Layout & Spacing --- */
-      .section-padding {
-        padding: 6rem 1rem; /* Default padding */
-      }
-      @media (min-width: 768px) { /* Medium screens and up */
-        .section-padding { padding: 8rem 2rem; }
-      }
-
-      /* --- Button Styles --- */
-      .btn-original {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        padding: 0.625rem 1.5rem;
-        border-radius: 0.5rem; /* Rounded corners */
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        transition: all 0.2s ease-in-out;
-        color: white;
-        transform-origin: center;
-      }
-      .btn-original:hover {
-        transform: scale(1.05); /* Slight scale on hover */
-      }
-      /* Specific Button Colors & Hover Effects */
-      .btn-original-portfolio { background: linear-gradient(to right, var(--accent-blue-start), var(--accent-blue-end)); }
-      .btn-original-portfolio:hover { background: linear-gradient(to right, #2563eb, #06b6d4); box-shadow: 0 0 15px 4px rgba(34, 211, 238, 0.4); }
-      .btn-original-music { background: linear-gradient(to right, var(--accent-pink-start), var(--accent-pink-end)); }
-      .btn-original-music:hover { background: linear-gradient(to right, #db2777, var(--accent-pink-start)); box-shadow: 0 0 12px 3px rgba(236, 72, 153, 0.35); }
-      .btn-original-steam { background-color: #4b5563; } /* Gray */
-      .btn-original-steam:hover { background-color: #374151; box-shadow: 0 0 12px 3px rgba(107, 114, 128, 0.35); }
-      .btn-original-youtube { background-color: var(--accent-red); } /* Red */
-      .btn-original-youtube:hover { background-color: #b91c1c; box-shadow: 0 0 12px 3px rgba(239, 68, 68, 0.35); }
-
-      /* --- Hero Section Animations --- */
-      #hero .hero-image-container {
-        animation: bobbing 7s ease-in-out infinite; /* Bobbing effect for image */
-      }
-      #hero .hero-text-container h1 { animation: slideInFromLeft 1s ease-out 0.2s forwards; opacity: 0; }
-      #hero .hero-text-container p:nth-of-type(1) { animation: slideInFromLeft 1s ease-out 0.4s forwards; opacity: 0; }
-      #hero .hero-text-container p:nth-of-type(2) { animation: slideInFromLeft 1s ease-out 0.6s forwards; opacity: 0; }
-      #hero .hero-buttons { animation: fadeIn 1s ease-out 0.8s forwards; opacity: 0; }
-
-      @keyframes bobbing {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-12px); }
-        100% { transform: translateY(0px); }
-      }
-      @keyframes slideInFromLeft {
-        0% { transform: translateX(-50px); opacity: 0; }
-        100% { transform: translateX(0); opacity: 1; }
-      }
-      @keyframes fadeIn {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
-      }
-
-      /* --- Section Title Styling --- */
-      .section-title {
-        position: relative;
-        display: inline-block; /* Allows centering and pseudo-element positioning */
-        margin-bottom: 4rem;
-      }
-      .section-title::after {
-        content: '';
-        position: absolute;
-        bottom: -15px; /* Position below the text */
-        left: 50%;
-        transform: translateX(-50%); /* Center the underline */
-        width: 120px;
-        height: 5px;
-        background: linear-gradient(to right, var(--accent-blue-start), var(--accent-blue-end));
-        border-radius: 3px;
-      }
-
-      /* --- Skills Section Styling --- */
-      .skill-category-title {
-        font-size: 1.75rem; /* Large title */
-        font-weight: 600;
-        color: var(--accent-blue-end); /* Use accent color */
-        margin-bottom: 2rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--border-color);
-      }
-      .skill-item {
-        margin-bottom: 1.25rem;
-        opacity: 0; /* Start hidden for animation */
-        transform: translateY(20px); /* Start slightly lower */
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* Smooth fade-in/up */
-      }
-      .skill-item.is-visible {
-          opacity: 1;
-          transform: translateY(0);
-      }
-      .skill-item:last-child { margin-bottom: 0; }
-      .skill-bar-container {
-        background-color: rgba(51, 65, 85, 0.4); /* Darker background for bar */
-        border-radius: 9999px; /* Pill shape */
-        overflow: hidden;
-        height: 0.625rem; /* Slim bar */
-        border: 1px solid rgba(71, 85, 105, 0.4);
-        margin-top: 0.25rem;
-      }
-      .skill-bar-inner {
-        width: 0%; /* Start at 0 width for animation */
-        height: 100%;
-        border-radius: 9999px;
-        transition: width 1.2s cubic-bezier(0.25, 1, 0.5, 1); /* Smooth animation */
-      }
-      /* Apply gradient backgrounds based on data attribute */
-      [data-skill="blender"] .skill-bar-inner { background: linear-gradient(to right, var(--blender-start), var(--blender-end)); }
-      [data-skill="photoshop"] .skill-bar-inner { background: linear-gradient(to right, var(--photoshop-start), var(--photoshop-end)); }
-      [data-skill="illustrator"] .skill-bar-inner { background: linear-gradient(to right, var(--illustrator-start), var(--illustrator-end)); }
-      [data-skill="lua"] .skill-bar-inner { background: linear-gradient(to right, var(--lua-start), var(--lua-end)); }
-      [data-skill="html"] .skill-bar-inner { background: linear-gradient(to right, var(--html-start), var(--html-end)); }
-      [data-skill="css"] .skill-bar-inner { background: linear-gradient(to right, var(--css-start), var(--css-end)); }
-      [data-skill="javascript"] .skill-bar-inner { background: linear-gradient(to right, var(--js-start), var(--js-end)); }
-
-      /* --- Portfolio Showcase Display --- */
-      #portfolio-showcase-display {
-        background-color: var(--bg-medium);
-        border: 1px solid var(--border-color);
-        border-radius: 0.75rem; /* Rounded corners */
-        padding: 1.5rem;
-        margin-bottom: 2.5rem;
-        display: grid;
-        grid-template-columns: repeat(1, 1fr); /* Single column on small screens */
-        gap: 1.25rem;
-        opacity: 0; /* Start hidden for animation */
-        transform: scale(0.95); /* Start slightly smaller */
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* Smooth zoom-in */
-      }
-      #portfolio-showcase-display.is-visible {
-          opacity: 1;
-          transform: scale(1);
-      }
-      @media (min-width: 1024px) { /* Large screens and up */
-        #portfolio-showcase-display {
-          grid-template-columns: repeat(5, 1fr); /* 5 columns: 2 for image, 3 for details */
-          gap: 1.5rem;
-          padding: 2rem;
+        /* GitHub Inspired Dark Theme Variables - Refined + More Color */
+        :root {
+            --bg-color: #0d1117; /* GitHub dark background */
+            --surface-color: #161b22; /* GitHub surface color */
+            --surface-hover: #21262d; /* GitHub hover surface */
+            --primary-accent: #238636; /* GitHub green (Used for Join Discord/Gallery) */
+            --primary-accent-hover: #2ea043;
+            --secondary-accent: #58a6ff; /* GitHub blue (Used for Hero Primary/Learn More) */
+            --secondary-accent-hover: #79c0ff; /* Lighter blue */
+            --tertiary-accent: #e3b341; /* Gold/Amber */
+            --text-primary: #c9d1d9; /* GitHub primary text */
+            --text-secondary: #8b949e; /* GitHub secondary text */
+            --text-heading: #f0f6fc; /* GitHub heading text */
+            --border-color: #30363d; /* GitHub border color */
+            --border-hover-color: #8b949e; /* Lighter border on hover */
+            --placeholder-bg: #21262d;
+            --mcm-gold-glow: rgba(227, 179, 65, 0.2); /* Subtle Gold glow for animation */
+            --mcm-gold-border: rgba(227, 179, 65, 0.6);
+            --glow-primary: rgba(35, 134, 54, 0.4); /* Green glow */
+            --glow-secondary: rgba(88, 166, 255, 0.4); /* Blue glow */
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --shadow-hover-color: rgba(0, 0, 0, 0.3);
+            --lore-red: #f43f5e; /* Rose 500 */
+            --lore-gold: var(--tertiary-accent);
+            --lore-blue: #38bdf8; /* Sky 400 */
         }
-        #showcase-image-container { grid-column: span 2 / span 2; }
-        #showcase-details { grid-column: span 3 / span 3; }
-      }
-      #showcase-image-container {
-        position: relative; /* For positioning buttons */
-        background-color: rgba(0,0,0,0.2);
-        border-radius: 0.5rem;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        min-height: 250px; /* Ensure minimum height */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      #showcase-image {
-        display: block;
-        max-width: 100%;
-        max-height: 50vh; /* Limit image height */
-        object-fit: contain; /* Ensure image fits without distortion */
-        transition: opacity 0.3s ease-in-out; /* Fade effect for image change */
-        cursor: zoom-in; /* Indicate image is clickable */
-      }
-      #showcase-details {
-        display: flex;
-        flex-direction: column;
-      }
-      #showcase-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: white;
-        margin-bottom: 0.75rem;
-      }
-      #showcase-description {
-        color: var(--text-secondary);
-        line-height: 1.6;
-        margin-bottom: 1rem;
-        font-size: 0.95rem;
-        flex-grow: 1; /* Allow description to take available space */
-      }
-      #showcase-tags {
-        margin-bottom: 1rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-      .portfolio-tag {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.7rem;
-        border-radius: 9999px; /* Pill shape */
-        font-weight: 500;
-        border: 1px solid transparent;
-        background-color: var(--tag-default-bg);
-        color: var(--tag-default-text);
-        transition: background-color 0.2s ease, color 0.2s ease;
-      }
-      /* Apply specific tag colors */
-      .portfolio-tag[data-tag-type="ui"] { background-color: var(--tag-ui); color: var(--text-on-accent); }
-      .portfolio-tag[data-tag-type="3d"] { background-color: var(--tag-3d); color: var(--text-on-accent); }
-      .portfolio-tag[data-tag-type="scripting"] { background-color: var(--tag-scripting); color: var(--text-on-accent); }
-      .portfolio-tag[data-tag-type="platform"] { background-color: var(--tag-platform); color: var(--text-on-accent); }
-      .portfolio-tag[data-tag-type="assets"] { background-color: var(--tag-assets); color: var(--text-on-accent); }
-      .portfolio-tag[data-tag-type="modeling"] { background-color: var(--tag-modeling); color: var(--text-on-accent); }
-      .portfolio-tag[data-tag-type="web"] { background-color: var(--tag-web); color: var(--text-on-accent); }
 
-      #showcase-link {
-        align-self: flex-start; /* Align button to the start */
-      }
-      #showcase-counter {
-        position: absolute;
-        bottom: 0.75rem;
-        left: 50%;
-        transform: translateX(-50%); /* Center counter */
-        background-color: rgba(0,0,0,0.6);
-        color: var(--text-secondary);
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        z-index: 5;
-      }
-      .carousel-button {
-        background-color: rgba(30, 41, 59, 0.6); /* Semi-transparent background */
-        color: var(--text-secondary);
-        border: 1px solid rgba(51, 65, 85, 0.7);
-        padding: 0.6rem;
-        border-radius: 9999px; /* Circular button */
-        cursor: pointer;
-        transition: all 0.2s ease;
-        z-index: 10; /* Ensure buttons are above image */
-        backdrop-filter: blur(4px); /* Frosted glass effect */
-        position: absolute; /* Position absolutely within container */
-        top: 50%;
-        transform: translateY(-50%);
-      }
-      .carousel-button:hover {
-        background-color: rgba(51, 65, 85, 0.9);
-        color: var(--text-primary);
-        border-color: rgba(71, 85, 105, 0.9);
-        transform: translateY(-50%) scale(1.1); /* Scale on hover */
-      }
-      .carousel-button:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-        transform: translateY(-50%) scale(1); /* No scale when disabled */
-      }
-      #showcase-prev { left: 1rem; }
-      #showcase-next { right: 1rem; }
+        /* Apply base font and background */
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* System font stack */
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 16px; /* Base font size */
+        }
+        /* Prevent background scroll when modal is open */
+        body.modal-open { overflow: hidden; }
 
-      /* --- Portfolio Grid Item Styling --- */
-      .portfolio-grid-item {
-        border: 2px solid transparent; /* Start with transparent border */
-        border-radius: 0.5rem;
-        overflow: hidden; /* Clip image zoom */
-        cursor: pointer;
-        transition: border-color 0.3s ease, transform 0.3s ease;
-        background-color: var(--bg-medium);
-        opacity: 0; /* Start hidden for animation */
-        transform: scale(0.9); /* Start slightly smaller */
-      }
-      .portfolio-grid-item.is-visible {
-          opacity: 1;
-          transform: scale(1);
-      }
-      .portfolio-grid-item:hover {
-        transform: scale(1.03); /* Scale up on hover */
-        border-color: var(--accent-blue-start); /* Highlight border on hover */
-      }
-      .portfolio-grid-item.active {
-        border-color: var(--accent-blue-end); /* Active item border */
-        box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); /* Glow effect for active */
-      }
-      .portfolio-grid-item img {
-        display: block;
-        transition: transform 0.4s ease; /* Smooth image zoom */
-      }
-      .portfolio-grid-item:hover img {
-        transform: scale(1.1); /* Zoom image on hover */
-      }
-      .portfolio-item-title {
-        padding: 0.75rem;
-        text-align: center;
-        font-weight: 500;
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        background-color: var(--bg-medium);
-        border-top: 1px solid var(--border-color);
-      }
-      .portfolio-grid-item.active .portfolio-item-title {
-        color: var(--accent-blue-end); /* Highlight title for active item */
-        font-weight: 600;
-      }
+        /* Helper for Inline SVG Icons */
+        .icon {
+            display: inline-block; width: 1em; height: 1em;
+            stroke-width: 2; stroke: currentColor; fill: none;
+            vertical-align: -0.15em; margin-right: 0.5em; flex-shrink: 0;
+        }
+        .btn .icon { margin-right: 0.4em; width: 1.1em; height: 1.1em; }
+        .footer-icon .icon { width: 1.2em; height: 1.2em; margin-right: 0; stroke-width: 1.5; }
+        h2 .icon { color: var(--secondary-accent); stroke-width: 2; width: 0.9em; height: 0.9em; } /* Blue icon */
+        .lore-summary .icon { font-size: 1.3em; margin-right: 0.75rem;} /* Icon in lore summary */
+        .mcm-award-card h3 .icon { /* Trophy Icon Styling */
+             width: 1.1em; height: 1.1em; margin-right: 0;
+             color: var(--text-secondary);
+             stroke-width: 2;
+             transition: color 0.3s ease-out;
+         }
+        .footer-credit-img {
+             display: inline-block;
+             width: 24px; height: 24px;
+             vertical-align: middle; margin: 0 0.25rem;
+             border-radius: 3px; image-rendering: pixelated;
+             /* Removed background */
+        }
 
-      /* --- SMP Section Styling --- */
-      #smp-image {
-        transition: opacity 1s ease-in-out; /* Fade transition for SMP image */
-      }
-      .animate-on-scroll { /* Base class for scroll animations */
-        opacity: 0;
-        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-      }
-      .animate-fade-in-up { transform: translateY(30px); }
-      .animate-fade-in-left { transform: translateX(-30px); }
-      .animate-fade-in-right { transform: translateX(30px); }
-      .animate-zoom-in { transform: scale(0.9); }
 
-      .animate-on-scroll.is-visible { /* State when element is visible */
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-      }
+        /* --- Hero Section --- */
+        .hero-section {
+            position: relative; min-height: 85vh;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            overflow: hidden; color: var(--text-heading); padding: 6rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .hero-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background-color: var(--bg-color); }
+        .hero-background img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; filter: blur(7px) brightness(0.5);
+            opacity: 0; transition: opacity 2.5s ease-in-out;
+        }
+        .hero-background img.active { opacity: 0.6; }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-content h1 {
+            font-weight: 700; font-size: clamp(3rem, 8vw, 5.5rem);
+            line-height: 1.15; color: var(--text-heading); letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+        }
+        .hero-content p {
+            color: var(--text-secondary); font-size: clamp(1.1rem, 3vw, 1.4rem);
+            max-w-3xl mx-auto; margin-bottom: 2.5rem; line-height: 1.6;
+        }
+        .hero-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+        /* --- End Hero Section --- */
 
-      /* --- Utility Classes --- */
-      .aspect-w-16 { position: relative; padding-bottom: 56.25%; /* 16:9 Aspect Ratio */ }
-      .aspect-h-9 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; object-fit: cover; }
+        /* --- GitHub Inspired Button Styling with Glow --- */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            padding: 0.7rem 1.4rem;
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 500; font-size: 0.9375rem; text-align: center;
+            transition: all 0.2s ease-out; cursor: pointer;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.03); /* Subtle inset */
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--text-secondary);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        .btn:active { transform: scale(0.98) translateY(0px); background-color: var(--surface-color); }
 
-      /* --- Custom Scrollbar (Optional) --- */
-      .scrollbar-thin { scrollbar-width: thin; scrollbar-color: var(--accent-gray) var(--bg-medium); }
-      .scrollbar-thin::-webkit-scrollbar { width: 8px; }
-      .scrollbar-thin::-webkit-scrollbar-track { background: var(--bg-medium); border-radius: 4px; }
-      .scrollbar-thin::-webkit-scrollbar-thumb { background-color: var(--accent-gray); border-radius: 4px; border: 2px solid var(--bg-medium); }
+        /* Primary Button (Blue + Glow) */
+        .btn-primary {
+            background-color: var(--secondary-accent); color: #ffffff;
+            border-color: color-mix(in srgb, var(--secondary-accent) 80%, black);
+        }
+        .btn-primary:hover {
+            background-color: var(--secondary-accent-hover); border-color: var(--secondary-accent);
+            box-shadow: 0 4px 10px var(--shadow-color), 0 0 15px var(--glow-secondary); /* Blue Glow */
+        }
 
-      /* --- Error Message Styling --- */
-      #style-error-message { display: none; /* Hidden by default */ }
+        /* Green Button */
+        .btn-green {
+             background-color: var(--primary-accent); color: #ffffff;
+             border-color: color-mix(in srgb, var(--primary-accent) 80%, black);
+        }
+        .btn-green:hover {
+             background-color: var(--primary-accent-hover); border-color: var(--primary-accent);
+             box-shadow: 0 4px 10px var(--shadow-color), 0 0 15px var(--glow-primary); /* Green Glow */
+        }
 
-      /* --- Image Modal Styles --- */
-      #image-modal {
-        transition: opacity 0.3s ease-in-out; /* Fade transition for modal */
-      }
-      #image-modal img {
-        max-width: 90vw;  /* Limit image width */
-        max-height: 85vh; /* Limit image height */
-        object-fit: contain;
-        border-radius: 0.5rem; /* Optional: rounded corners for modal image */
-      }
-      #image-modal-close {
-         transition: color 0.2s ease, transform 0.2s ease;
-      }
-       #image-modal-close:hover {
-         color: white;
-         transform: scale(1.1);
-      }
+        .btn-link { /* Keep link style */
+             background-color: transparent; color: var(--secondary-accent);
+             border: none; box-shadow: none; padding: 0.6rem 0.5rem;
+        }
+        .btn-link:hover { background-color: transparent; color: var(--primary-accent-hover); text-decoration: underline; transform: none; box-shadow: none;}
+        /* --- End Button Styling --- */
+
+        /* --- MCM Award Styling with Idle Animation & Headshots --- */
+        @keyframes gold-sweep {
+            0% { background-position: -150% 0; }
+            100% { background-position: 150% 0; }
+        }
+        .mcm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.75rem; }
+        .mcm-award-card {
+            background-color: var(--surface-color); border-radius: 0.75rem; /* Nicer rounding */
+            padding: 1.5rem; border: 1px solid var(--border-color);
+            transition: all 0.3s ease-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Slightly more shadow */
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; gap: 1rem; /* Gap between elements */
+        }
+         .winner-headshot-container { /* Container for headshot */
+            width: 48px; height: 48px; flex-shrink: 0;
+            border-radius: 0.375rem; overflow: hidden;
+            /* Removed background color */
+         }
+        .winner-headshot {
+            display: block; width: 100%; height: 100%;
+            object-fit: contain; image-rendering: pixelated;
+        }
+        .mcm-award-card .text-content { text-align: left; flex-grow: 1; }
+        .mcm-award-card h3 { /* Event Name */
+            font-size: 1rem; font-weight: 600; color: var(--text-primary);
+            margin-bottom: 0.2rem;
+            display: flex; align-items: center; gap: 0.4em;
+        }
+         .mcm-award-card h3 .icon { /* Trophy Icon Styling */
+             width: 1.1em; height: 1.1em; margin-right: 0;
+             color: var(--text-secondary);
+             stroke-width: 2;
+             transition: color 0.3s ease-out;
+         }
+        .winner-name { /* Winner Name */
+            font-family: 'Inter', sans-serif; /* Use Inter */
+            font-size: 0.95rem; font-weight: 500;
+            color: var(--text-secondary);
+            transition: color 0.3s ease-out;
+        }
+        .mcm-award-card:hover {
+            transform: translateY(-5px); /* Consistent lift */
+            border-color: var(--secondary-accent);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+         .mcm-award-card:hover h3 .icon { color: var(--secondary-accent); } /* Icon color on hover */
+         .mcm-award-card:hover .winner-name { color: var(--text-primary); }
+
+        /* Gold highlight and animation for 1st place */
+        .mcm-award-card.first-place { border-left: 4px solid var(--tertiary-accent); }
+        .mcm-award-card.first-place h3 .icon { color: var(--tertiary-accent); } /* Gold icon */
+        .mcm-award-card.first-place .winner-name {
+            color: var(--tertiary-accent);
+            text-shadow: 0 0 8px var(--mcm-gold-glow); /* Default subtle glow */
+        }
+        /* Continuous Golden Sweep Animation */
+        .mcm-award-card.first-place::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(110deg, transparent 35%, var(--mcm-gold-glow) 50%, transparent 65%);
+            background-size: 250% 100%;
+            background-position: -150% 0;
+            opacity: 1; animation: gold-sweep 3s linear var(--animation-delay, 0s) infinite;
+            z-index: 0; pointer-events: none;
+        }
+        .mcm-award-card.first-place:hover {
+             border-color: var(--tertiary-accent);
+             animation: none; /* Pause sweep on hover */
+             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), 0 0 20px var(--mcm-gold-glow); /* Static glow */
+        }
+        .mcm-award-card.first-place:hover h3 .icon { color: var(--tertiary-accent); transform: scale(1.1); } /* Scale icon on hover */
+        .mcm-award-card > * { position: relative; z-index: 1; }
+        /* --- End MCM Award Styling --- */
+
+
+        /* --- Lore Dropdown Styling --- */
+        .lore-item details {
+            background-color: var(--surface-color); /* Has background */
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem; /* Rounded Rectangle */
+            margin-bottom: 1rem;
+            transition: background-color 0.2s ease-out, border-color 0.2s ease-out, border-radius 0.3s ease-out;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        .lore-item details:hover {
+             border-color: var(--secondary-accent);
+             background-color: var(--surface-hover);
+        }
+        /* Make square when open */
+        .lore-item details[open] {
+            background-color: var(--surface-hover);
+            border-color: var(--secondary-accent);
+            border-radius: 0.25rem; /* rounded-sm for nearly square */
+        }
+        .lore-summary {
+            padding: 1.25rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: color 0.2s ease-out;
+        }
+        .lore-summary::-webkit-details-marker { display: none; }
+        .lore-summary::marker { display: none; }
+        .lore-summary:hover { color: var(--secondary-accent); }
+        .lore-summary .icon { font-size: 1.3em; margin-right: 0.75rem; }
+        .lore-summary .title-container { display: flex; align-items: center; }
+        /* Custom dropdown arrow */
+        .lore-summary .arrow-marker {
+            margin-left: 1rem;
+            transition: transform 0.3s ease-out;
+            color: var(--text-secondary);
+            width: 1.2em; /* Adjusted size */
+            height: 1.2em;
+            stroke-width: 2.5;
+        }
+        details[open] > summary .arrow-marker {
+            transform: rotate(90deg);
+            color: var(--primary-accent);
+        }
+        .lore-content {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 1rem;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.4s ease-out, opacity 0.3s 0.05s ease-out, padding-top 0.3s ease-out;
+        }
+        details[open] > .lore-content {
+            max-height: 1000px; /* Adjust if needed */
+            opacity: 1;
+            padding-top: 0.5rem;
+            transition: max-height 0.6s ease-in-out, opacity 0.4s 0.1s ease-in, padding-top 0.3s ease-in-out;
+        }
+        /* Specific Lore Icon Colors */
+        .lore-chicken-wars .icon { color: #ef4444; } /* Red */
+        .lore-court-case .icon { color: var(--tertiary-accent); } /* Gold */
+        .lore-dolphin-society .icon { color: #38bdf8; } /* Sky Blue */
+        /* --- End Lore Styling --- */
+
+         /* --- Staff Section Styling --- */
+        .staff-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .staff-card {
+            background-color: var(--surface-color); border-radius: 0.75rem;
+            padding: 1.75rem; border: 1px solid var(--border-color);
+            transition: all 0.3s ease-out;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+        .staff-card:hover {
+            transform: translateY(-5px); border-color: var(--primary-accent); /* Green border */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px var(--glow-primary); /* Green glow */
+        }
+        /* Container for staff headshot */
+        .staff-headshot-container {
+            width: 64px; height: 64px;
+            border-radius: 0.375rem; /* rounded-md (Square) */
+            margin: 0 auto 1rem auto; /* Center */
+            overflow: hidden; /* Needed for image */
+            border: none; /* Removed border */
+            /* Removed background color */
+        }
+        .staff-headshot { /* Image styles */
+            display: block; width: 100%; height: 100%;
+            object-fit: contain; /* Use contain */
+            image-rendering: pixelated;
+        }
+        .staff-name {
+            font-size: 1.05rem; font-weight: 600; color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        .staff-title {
+            font-size: 0.85rem; font-weight: 400; color: var(--primary-accent); /* Green title */
+        }
+        .staff-bio {
+             font-size: 0.875rem; color: var(--text-secondary);
+             margin-top: 0.75rem; line-height: 1.5;
+        }
+        /* --- End Staff Styling --- */
+
+
+        /* Section Styling & Headers */
+        section { padding: 5rem 1rem; }
+        /* Remove alternating backgrounds */
+        section:nth-of-type(even) { background-color: var(--bg-color); }
+
+
+        .section-container { max-width: 64rem; margin-left: auto; margin-right: auto; }
+        h2 {
+            color: var(--text-heading); font-weight: 600; font-size: 2rem;
+            line-height: 1.3; margin-bottom: 2.5rem; display: flex;
+            align-items: center; gap: 0.8rem; letter-spacing: -0.01em;
+            padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);
+        }
+         h2 .icon { color: var(--text-secondary); stroke-width: 2; }
+        .heading-center { justify-content: center; text-align: center; border-bottom: none; }
+
+        /* Modal styling - GitHub Dark */
+        .modal {
+            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(13, 17, 23, 0.9);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); padding-top: 15%;
+        }
+        .modal-content {
+            background-color: var(--surface-color); margin: auto; padding: 1.5rem; border: 1px solid var(--border-color);
+            width: 90%; max-width: 400px; border-radius: 0.5rem; /* rounded-lg */ text-align: center;
+            position: relative; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .close-button {
+            color: var(--text-secondary); position: absolute; top: 0.5rem; right: 0.5rem; font-size: 1.5rem;
+            font-weight: 300; cursor: pointer; transition: color 0.2s ease;
+            background: none; border: none; padding: 0.5rem; line-height: 1;
+        }
+        .close-button:hover { color: var(--text-primary); }
+        #modalMessage { color: var(--text-primary); font-size: 1rem; font-weight: 500; }
+
+        /* Copy Icon */
+        .copy-icon { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; margin-right: 0.5em; stroke-width: 2; stroke: currentColor; fill: none; }
+
+        /* Divider */
+        .divider {
+            border: 0; height: 1px; background-color: var(--border-color);
+            margin-top: 0; margin-bottom: 0; opacity: 0.3;
+        }
+
+        /* Highlights */
+         .highlight-name { color: var(--secondary-accent); font-weight: 500; }
+         .highlight-event { color: var(--tertiary-accent); font-weight: 500; }
+         .highlight-term { color: var(--primary-accent); font-weight: 500; }
+
+         main.container { padding-top: 0; padding-bottom: 0; }
+
+         /* Scroll Animation Base Class - Subtle Fade Up */
+         .reveal {
+             opacity: 0;
+             transform: translateY(15px);
+             transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+             will-change: transform, opacity;
+         }
+         .reveal.visible { opacity: 1; transform: translateY(0); }
+         .reveal-1 { transition-delay: 0.1s; }
+         .reveal-2 { transition-delay: 0.15s; }
+         .reveal-3 { transition-delay: 0.2s; }
+         .reveal-4 { transition-delay: 0.25s; }
+
+         /* Image Styling */
+         .content-image {
+             display: block; width: 100%; height: 100%; /* Fill container height */
+             border-radius: 0.75rem; /* rounded-xl */
+             border: 1px solid var(--border-color);
+             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+             object-fit: cover; /* Keep cover */
+             /* Removed aspect-ratio */
+         }
+         .gallery-image {
+             aspect-ratio: 16 / 9; object-fit: cover;
+             border-radius: 0.5rem; /* rounded-lg */
+             border: 1px solid var(--border-color);
+             transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+             cursor: pointer; /* Add cursor pointer for gallery */
+         }
+         .gallery-image:hover {
+             transform: scale(1.05);
+             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+         }
+
+         /* Layout for text + image */
+         .content-layout {
+             display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+             gap: 3rem; align-items: center;
+         }
+
+         /* Gallery Modal Styles */
+        #galleryModal { display: none; /* Hidden by default */ }
+        #galleryModal .modal-content {
+            max-width: 80vw; /* Wider modal */
+            max-height: 90vh;
+            background: rgba(13, 17, 23, 0.8); /* Darker, more transparent */
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 1rem; /* Less padding */
+            display: flex; flex-direction: column;
+        }
+        #galleryModal .close-button {
+            position: absolute; top: 1rem; right: 1rem; z-index: 10;
+            color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.3);
+            border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #galleryModal .close-button:hover { background: rgba(0,0,0,0.6); color: #fff; }
+        .modal-image-container { position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        #modalImage {
+            display: block; max-width: 100%; max-height: calc(90vh - 80px); /* Adjust height accounting for padding/caption */
+            object-fit: contain; border-radius: 0.5rem;
+        }
+        #modalCaption {
+            text-align: center; margin-top: 0.75rem; color: var(--text-secondary); font-size: 0.9rem;
+        }
+        .nav-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+            background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.7);
+            border: none; border-radius: 50%; width: 44px; height: 44px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .nav-arrow:hover { background: rgba(0,0,0,0.6); color: #fff; }
+        .nav-arrow.prev { left: 1rem; }
+        .nav-arrow.next { right: 1rem; }
+        .nav-arrow .icon { margin-right: 0; width: 1.5em; height: 1.5em; }
 
     </style>
 </head>
-<body class="text-gray-200">
+<body class="antialiased">
 
-    <div id="style-error-message" class="fixed top-0 left-0 w-full bg-red-600 text-white text-center p-4 font-bold z-[10000]">
-        Error: Styles did not load correctly. Please check the browser console (F12) for network errors or script issues.
-    </div>
+    <header class="hero-section">
+        <div class="hero-background" id="hero-bg">
+            <img src="images/smp1.png" alt="Minecraft Server Scenery 1" class="active">
+            <img src="images/smp2.png" alt="Minecraft Server Scenery 2">
+            <img src="images/smp3.png" alt="Minecraft Server Scenery 3">
+        </div>
+        <div class="hero-content container mx-auto px-4">
+            <h1 class="mb-5 reveal"> Extreme Juicers </h1>
+            <p class="mb-10 reveal reveal-1"> Your chill, modern Minecraft SMP destination. Join Season 5! </p>
+            <div class="hero-buttons reveal reveal-2">
+                <a href="#about" class="btn btn-primary">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    Learn More
+                </a>
+                <a href="#gallery-placeholder" class="btn btn-green">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                    View Gallery
+                </a>
+                 <a href="#lore" class="btn">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Server Lore
+                </a>
+            </div>
+        </div>
+    </header>
 
-    <section id="hero" class="section-padding border-b border-[var(--border-color)] overflow-hidden min-h-screen flex items-center relative">
-        <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 60%);"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-10 md:gap-16">
-                <div class="text-center md:text-left hero-text-container">
-                    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-4 tracking-tight leading-tight">Blazinik</h1>
-                    <p class="text-2xl text-[var(--accent-blue-end)] font-semibold mb-5">Hey, I'm Blaze 👋</p>
-                    <p class="text-xl text-gray-300 mb-10">📚 | Creative Programmer & Designer</p>
-                    <div class="flex flex-wrap justify-center md:justify-start gap-4 hero-buttons">
-                        <a href="#portfolio" onclick="document.getElementById('portfolio').scrollIntoView({behavior:'smooth'}); return false;" class="btn-original btn-original-portfolio">
-                            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> View Portfolio
-                        </a>
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="btn-original btn-original-music"> <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Favorite Music
-                        </a>
-                        <a href="https://steamcommunity.com/profiles/76561199821469314/" target="_blank" rel="noopener noreferrer" class="btn-original btn-original-steam">
-                            <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 12a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0Z"/><path d="M17.5 12h-11"/><path d="M5 12a7.5 7.5 0 1 0 15 0 7.5 7.5 0 0 0-15 0Z"/><path d="M12 5a7.5 7.5 0 1 0 0 15Z"/></svg> Steam
-                        </a>
-                        <a href="#" target="_blank" rel="noopener noreferrer" class="btn-original btn-original-youtube"> <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg> YouTube
-                        </a>
-                    </div>
-                </div>
-                <div class="flex justify-center hero-image-container">
-                     <div class="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96">
-                         <img src="images/DenoLogo3D-Anim.gif" alt="Blazinik Animated Logo" class="w-full h-full rounded-full object-cover shadow-2xl border-4 border-[var(--border-color)]" onerror="this.onerror=null; this.src='https://placehold.co/384x384/111827/9ca3af?text=Error';">
+    <main class="container mx-auto px-4">
+
+        <section id="about">
+            <div class="section-container reveal">
+                 <h2 class="mb-8">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                     About Our Community
+                 </h2>
+                 <div class="content-layout">
+                     <div class="reveal reveal-1">
+                        <p class="mb-4 text-lg leading-relaxed text-[var(--text-secondary)]"> Welcome to Extreme Juicers! Our server started somewhat unexpectedly during the peak of COVID. A couple of us had just returned from Hawaii and were stuck in a mandatory two-week quarantine. What began as a way to pass the time with friends quickly grew into something much more. </p>
+                        <p class="mb-4 text-lg leading-relaxed text-[var(--text-secondary)]"> We've fostered a pretty chill community here. You don't need to be a Minecraft pro to join – just bring your enthusiasm for playing, learning, and having fun! We welcome everyone, whether you're an old friend or someone new joining us online. </p>
+                        <p class="text-lg leading-relaxed text-[var(--text-secondary)]"> Our goal is simply to enjoy the game together, build cool things, and maybe get a little better along the way. We host regular events, encourage collaborative builds, and maintain a friendly atmosphere.</p>
+                     </div>
+                     <div class="reveal reveal-2">
+                         <img src="images/smpCropped1.png" alt="Server Community Area" class="content-image">
                      </div>
                  </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <main>
-        <section id="skills" class="section-padding border-b border-[var(--border-color)]">
-             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                 <h2 class="section-title text-4xl md:text-5xl font-bold text-center text-white">My Expertise</h2>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
-                     <div>
-                         <h3 class="skill-category-title">Applications</h3>
-                         <div class="space-y-4">
-                             <div class="skill-item" data-skill-percent="80" data-skill="blender" style="transition-delay: 0.1s;">
-                                 <div class="flex justify-between items-center mb-1">
-                                     <p class="font-medium text-white">Blender</p>
-                                     <span class="text-sm font-medium text-[var(--blender-end)]">80%</span>
-                                 </div>
-                                 <div class="skill-bar-container"><div class="skill-bar-inner"></div></div>
-                             </div>
-                             <div class="skill-item" data-skill-percent="55" data-skill="photoshop" style="transition-delay: 0.2s;">
-                                 <div class="flex justify-between items-center mb-1">
-                                     <p class="font-medium text-white">Photoshop</p>
-                                     <span class="text-sm font-medium text-[var(--photoshop-end)]">55%</span>
-                                 </div>
-                                 <div class="skill-bar-container"><div class="skill-bar-inner"></div></div>
-                             </div>
-                             <div class="skill-item" data-skill-percent="40" data-skill="illustrator" style="transition-delay: 0.3s;">
-                                 <div class="flex justify-between items-center mb-1">
-                                     <p class="font-medium text-white">Illustrator</p>
-                                     <span class="text-sm font-medium text-[var(--illustrator-end)]">40%</span>
-                                 </div>
-                                 <div class="skill-bar-container"><div class="skill-bar-inner"></div></div>
-                             </div>
-                         </div>
+        <section id="events">
+             <div class="section-container reveal">
+                 <h2 class="mb-8">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
+                     Server Events & Activities
+                 </h2>
+                 <div class="content-layout">
+                      <div class="order-last md:order-first reveal reveal-2">
+                          <img src="images/smpCropped2.png" alt="Minecraft Event" class="content-image">
+                      </div>
+                     <div class="reveal reveal-1">
+                        <p class="mb-4 text-lg leading-relaxed text-[var(--text-secondary)]"> We love hosting events! Our biggest one is <strong class="highlight-event">Minecraft Masters (MCM)</strong>, which happens a few times a year and pits players against each other in various challenges designed to test skill, strategy, and creativity. We've had 7 MCM events so far, each with unique themes and champions! </p>
+                        <p class="mb-4 text-lg leading-relaxed text-[var(--text-secondary)]"> Beyond MCM, we often spin up secondary servers, usually featuring mods or unique challenges and goals to keep things fresh. These have included skyblock challenges, hardcore worlds, and themed modpacks like Create Above & Beyond or RLCraft (for the brave!). </p>
+                        <p class="text-lg leading-relaxed text-[var(--text-secondary)]"> Keep an eye out for other one-off events and games too! Players like <strong class="highlight-name">ScaryScoop</strong> are known for building some truly crazy and inventive games by the end of a season. There's always something happening, from build competitions to PvP tournaments! </p>
                      </div>
-                     <div>
-                         <h3 class="skill-category-title">Programming</h3>
-                         <div class="space-y-4">
-                             <div class="skill-item" data-skill-percent="85" data-skill="lua" style="transition-delay: 0.4s;">
-                                 <div class="flex justify-between items-center mb-1">
-                                     <p class="font-medium text-white">Lua</p>
-                                     <span class="text-sm font-medium text-[var(--lua-end)]">85%</span>
-                                 </div>
-                                 <div class="skill-bar-container"><div class="skill-bar-inner"></div></div>
-                             </div>
-                             <div class="skill-item" data-skill-percent="70" data-skill="html" style="transition-delay: 0.5s;">
-                                 <div class="flex justify-between items-center mb-1">
-                                     <p class="font-medium text-white">HTML</p>
-                                     <span class="text-sm font-medium text-[var(--html-end)]">70%</span>
-                                 </div>
-                                 <div class="skill-bar-container"><div class="skill-bar-inner"></div></div>
-                             </div>
-                             <div class="skill-item" data-skill-percent="75" data-skill="css" style="transition-delay: 0.6s;">
-                                 <div class="flex justify-between items-center mb-1">
-                                     <p class="font-medium text-white">CSS</p>
-                                     <span class="text-sm font-medium text-[var(--css-end)]">75%</span>
-                                 </div>
-                                 <div class="skill-bar-container"><div class="skill-bar-inner"></div></div>
-                             </div>
-                             <div class="skill-item" data-skill-percent="75" data-skill="javascript" style="transition-delay: 0.7s;">
-                                 <div class="flex justify-between items-center mb-1">
-                                     <p class="font-medium text-white">JavaScript</p>
-                                     <span class="text-sm font-medium text-[var(--js-end)]">75%</span>
-                                 </div>
-                                 <div class="skill-bar-container"><div class="skill-bar-inner"></div></div>
-                             </div>
+                 </div>
+            </div>
+        </section>
+
+        <hr class="divider reveal">
+
+        <section id="mcm-winners">
+             <h2 class="mb-12 heading-center reveal">
+                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                 MCM Hall of Fame
+             </h2>
+             <div class="section-container">
+                 <div class="mcm-grid">
+                    <div class="mcm-award-card first-place reveal reveal-1">
+                         <div class="winner-headshot-container">
+                             <img src="https://minotar.net/cube/Sal_AMG/48.png" alt="Sal_AMG's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=S'; this.style.display='none';">
                          </div>
+                        <div class="text-content">
+                            <h3>
+                                <svg class="icon mcm-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 1
+                            </h3>
+                            <p class="winner-name"> Sal_AMG </p>
+                        </div>
+                    </div>
+                    <div class="mcm-award-card first-place reveal reveal-2">
+                         <div class="winner-headshot-container">
+                             <img src="https://minotar.net/cube/BirdBakoun/48.png" alt="BirdBakoun's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=B'; this.style.display='none';">
+                         </div>
+                        <div class="text-content">
+                             <h3>
+                                <svg class="icon mcm-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 2
+                            </h3>
+                            <p class="winner-name"> BirdBakoun </p>
+                        </div>
+                    </div>
+                    <div class="mcm-award-card first-place reveal reveal-3">
+                         <div class="winner-headshot-container">
+                             <img src="https://minotar.net/cube/Juicy_7179/48.png" alt="Juicy_7179's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=J'; this.style.display='none';">
+                         </div>
+                        <div class="text-content">
+                             <h3>
+                                <svg class="icon mcm-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 3
+                            </h3>
+                             <p class="winner-name"> Juicy_7179 </p>
+                        </div>
+                    </div>
+                    <div class="mcm-award-card first-place reveal reveal-4">
+                         <div class="winner-headshot-container">
+                             <img src="https://minotar.net/cube/the_perp/48.png" alt="the_perp's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=T'; this.style.display='none';">
+                         </div>
+                        <div class="text-content">
+                             <h3>
+                                <svg class="icon mcm-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 4
+                            </h3>
+                            <p class="winner-name"> the_perp </p>
+                        </div>
+                    </div>
+                     <div class="mcm-award-card first-place reveal reveal-1">
+                         <div class="winner-headshot-container">
+                             <img src="https://minotar.net/cube/Liqhtu/48.png" alt="Liqhtu's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=L'; this.style.display='none';">
+                         </div>
+                        <div class="text-content">
+                             <h3>
+                                <svg class="icon mcm-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 5
+                            </h3>
+                            <p class="winner-name"> Liqhtu </p>
+                        </div>
+                    </div>
+                     <div class="mcm-award-card first-place reveal reveal-2">
+                         <div class="winner-headshot-container">
+                             <img src="https://minotar.net/cube/Backwardsrebel/48.png" alt="Backwardsrebel's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=B';">
+                         </div>
+                         <div class="text-content">
+                              <h3>
+                                <svg class="icon mcm-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 6
+                            </h3>
+                            <p class="winner-name"> Backwardsrebel </p>
+                        </div>
+                    </div>
+                     <div class="mcm-award-card first-place reveal reveal-3">
+                         <div class="winner-headshot-container">
+                             <img src="https://minotar.net/cube/Ramjema/48.png" alt="Ramjema's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=R';">
+                         </div>
+                         <div class="text-content">
+                              <h3>
+                                <svg class="icon mcm-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 7
+                            </h3>
+                            <p class="winner-name"> Ramjema </p>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </section>
+
+        <hr class="divider reveal">
+
+        <section id="staff">
+             <div class="section-container reveal">
+                 <h2 class="mb-12 heading-center reveal">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                     Meet the Team
+                 </h2>
+                 <div class="staff-grid">
+                     <div class="staff-card reveal reveal-1">
+                         <div class="staff-headshot-container">
+                             <img src="https://minotar.net/cube/Juicy_7179/64.png" alt="Juicy_7179 Head" class="staff-headshot" onerror="this.onerror=null; this.src='https://placehold.co/64/161b22/8b949e?text=J'; this.style.display='none';">
+                         </div>
+                         <p class="staff-name">Juicy_7179</p>
+                         <p class="staff-title">Owner</p>
+                         <p class="staff-bio">The original Juicer! Keeps the server running smoothly and the vibes immaculate. Started it all!</p>
+                     </div>
+                     <div class="staff-card reveal reveal-2">
+                         <div class="staff-headshot-container">
+                             <img src="https://minotar.net/cube/the_perp/64.png" alt="the_perp Head" class="staff-headshot" onerror="this.onerror=null; this.src='https://placehold.co/64/161b22/8b949e?text=T'; this.style.display='none';">
+                         </div>
+                         <p class="staff-name">the_perp</p>
+                         <p class="staff-title">Co-Owner</p>
+                         <p class="staff-bio">Co-pilot of the Juice Crew! Helps steer the ship and probably plans things... sometimes.</p>
+                     </div>
+                     <div class="staff-card reveal reveal-3">
+                         <div class="staff-headshot-container">
+                              <img src="https://minotar.net/cube/BirdBakoun/64.png" alt="BirdBakoun Head" class="staff-headshot" onerror="this.onerror=null; this.src='https://placehold.co/64/161b22/8b949e?text=B'; this.style.display='none';">
+                         </div>
+                         <p class="staff-name">BirdBakoun</p>
+                         <p class="staff-title">Co-Owner</p>
+                         <p class="staff-bio">The other Co-pilot! Bringing wisdom (and maybe chaos?) to the server leadership.</p>
+                     </div>
+                     <div class="staff-card reveal reveal-4">
+                         <div class="staff-headshot-container">
+                             <img src="https://minotar.net/cube/Clowngirl7/64.png" alt="Clowngirl7 Head" class="staff-headshot" onerror="this.onerror=null; this.src='https://placehold.co/64/161b22/8b949e?text=C'; this.style.display='none';">
+                         </div>
+                         <p class="staff-name">Clowngirl7</p>
+                         <p class="staff-title">Admin</p>
+                         <p class="staff-bio">Keeping the peace with a smile! Our friendly admin ensuring everyone plays nice.</p>
+                     </div>
+                     <div class="staff-card reveal reveal-1">
+                          <div class="staff-headshot-container">
+                             <img src="https://minotar.net/cube/Ramjema/64.png" alt="Ramjema Head" class="staff-headshot" onerror="this.onerror=null; this.src='https://placehold.co/64/161b22/8b949e?text=R'; this.style.display='none';">
+                         </div>
+                         <p class="staff-name">Ramjema</p>
+                         <p class="staff-title">Moderator</p>
+                          <p class="staff-bio">On watch duty! Making sure the server stays fun and fair for everyone. (Mostly.)</p>
+                     </div>
+                     <div class="staff-card reveal reveal-2">
+                         <div class="staff-headshot-container">
+                             <img src="https://minotar.net/cube/Vaxar/64.png" alt="Vaxar Head" class="staff-headshot" onerror="this.onerror=null; this.src='https://placehold.co/64/161b22/8b949e?text=V'; this.style.display='none';">
+                         </div>
+                         <p class="staff-name">Vaxar</p>
+                         <p class="staff-title">Web Dev</p>
+                         <p class="staff-bio">Code wizard behind the scenes! Making this website look snazzy. 😉</p>
                      </div>
                  </div>
              </div>
         </section>
 
-        <section id="portfolio" class="section-padding border-b border-[var(--border-color)]">
-             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                 <h2 class="section-title text-4xl md:text-5xl font-bold text-center text-white">Project Showcase</h2>
-                 <p class="text-center text-gray-400 mb-10 max-w-3xl mx-auto text-lg"> Click a project thumbnail below to view details. </p>
+        <hr class="divider reveal">
 
-                 <div id="portfolio-showcase-display" class="animate-on-scroll animate-zoom-in">
-                     <div id="showcase-image-container">
-                         <img id="showcase-image" src="images/pS1.png" alt="Project Image" onerror="this.onerror=null; this.src='https://placehold.co/600x400/111827/9ca3af?text=Error';" aria-label="Click to enlarge image">
-                         <button id="showcase-prev" class="carousel-button prev" aria-label="Previous image">
-                             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-                         </button>
-                         <button id="showcase-next" class="carousel-button next" aria-label="Next image">
-                             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                         </button>
-                         <div id="showcase-counter">1 / X</div> </div>
-                     <div id="showcase-details">
-                         <h3 id="showcase-title" class="text-white">Loading Project...</h3>
-                         <p id="showcase-description" class="text-gray-400">Loading description...</p>
-                         <div id="showcase-tags" class="mb-6 flex flex-wrap gap-2"></div> <a id="showcase-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-original btn-original-portfolio hidden"> <span id="showcase-link-icon-container" class="mr-2 inline-block">
-                                 <svg class="w-4 h-4 icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 3l14 9-14 9V3z"/></svg>
-                                 <svg class="w-4 h-4 icon-link hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
-                             </span>
-                             <span id="showcase-link-text">View Project</span> </a>
-                     </div>
-                 </div>
+        <section id="lore">
+             <div class="section-container reveal">
+                <h2 class="mb-10 heading-center">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    Server Lore Archives
+                </h2>
 
-                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mt-10">
-                     </div>
-             </div>
+                <div class="space-y-4">
+                    <details class="lore-item reveal reveal-1">
+                        <summary class="lore-summary">
+                            <div class="title-container">
+                                <span class="icon lore-chicken-wars">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                                </span>
+                                <h3>Incident: The Chicken Wars</h3>
+                            </div>
+                             <svg class="icon arrow-marker" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </summary>
+                        <div class="lore-content">
+                            <p> It all began innocuously with the termination of a chicken entity designated <strong class="highlight-name">Pit</strong>. This action precipitated a server-wide escalation of poultry-themed sabotage operations. In response, the <strong class="highlight-term">"Foxers"</strong> unit was formed, deploying Canis Vulpes assets. The opposing faction initiated systematic vulpine eradication protocols. Operative <strong class="highlight-name">Ramjema</strong> acted as an agent provocateur, exacerbating hostilities. </p>
+                            <p> Conflict resolution occurred following the loss of two high-value companion foxes. A ceasefire agreement between <strong class="highlight-term">Foxer Lead</strong> and <strong class="highlight-name">Panda</strong> concluded the <strong class="highlight-event">Chicken Wars</strong>. </p>
+                        </div>
+                    </details>
+
+                    <details class="lore-item reveal reveal-2">
+                         <summary class="lore-summary">
+                             <div class="title-container">
+                                <span class="icon lore-court-case">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14 13-4 4"/><path d="m18 17 4 4"/><path d="m13 8 5-5"/><path d="m17 12 4-4"/><path d="m3.5 20.5 7-7"/><path d="m10 10-4.5 4.5"/><path d="M14 14 7.5 20.5"/><path d="m3.5 3.5 7 7"/><path d="m10 14 4.5-4.5"/><path d="M14 10 7.5 3.5"/></svg>
+                                </span>
+                                <h3>Case File: State v. Ramjema</h3>
+                            </div>
+                             <svg class="icon arrow-marker" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </summary>
+                         <div class="lore-content">
+                            <p> Following the Chicken Wars, legal action was pursued against <strong class="highlight-name">Ramjema</strong> regarding asset destruction (companion foxes, high-velocity equine). <strong class="highlight-name">Ramjema</strong> represented himself against plaintiff counsel <strong class="highlight-name">Backwards Rebel</strong>. </p>
+                             <p> The verdict was decisively against <strong class="highlight-name">Ramjema</strong>, resulting in a sentence of two weeks' confinement to the Skyblock dimension. </p>
+                            <p class="text-xs mt-4 opacity-70">*VISUAL LOG REF: _Ryann_ - Verification Pending*</p>
+                        </div>
+                    </details>
+
+                     <details class="lore-item reveal reveal-3">
+                         <summary class="lore-summary">
+                             <div class="title-container">
+                                <span class="icon lore-dolphin-society">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.5 5.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1h-3Z"/><path d="M12 15.5a.5.5 0 0 1-.5-.5v-7a.5.5 0 0 1 1 0v7a.5.5 0 0 1-.5.5Z"/><circle cx="12" cy="12" r="10"/><path d="m17 12-2-3-2 3"/><path d="m7 12 2 3 2-3"/></svg>
+                                </span>
+                                <h3>Intel Brief: Anti-Dolphin Society</h3>
+                            </div>
+                             <svg class="icon arrow-marker" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </summary>
+                         <div class="lore-content">
+                            <p> Reports indicate formation of <strong class="highlight-event">"Anti-Dolphin Society"</strong>. Declared objective: Hostility towards Tursiops truncatus entities. Further data corrupted or classified. Motives unknown. Operatives unidentified. </p>
+                        </div>
+                    </details>
+                </div>
+            </div>
         </section>
 
-        <section id="smp-section" class="section-padding">
-             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                 <h2 class="section-title text-4xl md:text-5xl font-bold text-center text-white">Join the Community</h2>
-                 <div class="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 p-8 rounded-xl bg-[var(--bg-medium)] border border-[var(--border-color)]">
-                     <div class="w-full lg:w-1/2 xl:w-2/5 flex-shrink-0 animate-on-scroll animate-fade-in-left">
-                         <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg border border-[var(--border-color)]">
-                             <img id="smp-image" src="images/smp1.png" alt="Extreme Juicers SMP Screenshot" class="w-full h-full object-cover bg-gray-800" onerror="this.onerror=null; this.src='https://placehold.co/1600x900/111827/9ca3af?text=Error';">
-                         </div>
-                     </div>
-                     <div class="w-full lg:w-1/2 xl:w-3/5 text-center lg:text-left animate-on-scroll animate-fade-in-right" style="transition-delay: 0.2s;">
-                         <h3 class="text-3xl font-semibold text-white mb-4">Extreme Juicers SMP</h3>
-                         <p class="text-xl text-gray-300 mb-5 leading-relaxed"> Become part of an awesome, mature, apply-to-join SMP server! </p>
-                         <p class="text-lg text-gray-400 leading-relaxed mb-8"> We pride ourselves on our fantastic community. If you're seeking a great place to build, collaborate, and have fun, look no further. Applications are reviewed carefully to maintain our positive atmosphere. </p>
-                         <a href="https://discord.gg/6AhfhTYnqv" target="_blank" rel="noopener noreferrer" class="btn-original btn-original-portfolio">
-                             <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.7 14.3c.1-.1.1-.3 0-.4l-2.8-2.8c-.1-.1-.3-.1-.4 0l-1.3 1.3c-1.2 1.1-1.1 3.1.1 4.3.9.9 2.1 1.3 3.3 1.3 1.3 0 2.5-.4 3.4-1.4l1.3-1.3c.1-.1.1-.3 0-.4l-2.8-2.8c-.1-.1-.3-.1-.4 0l-1.3 1.3c-.4.4-1.1.4-1.5 0-.4-.4-.4-1.1 0-1.5l1.3-1.3zM19 22a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM16.6 10.1c.2-.2.3-.4.4-.7.1-.2.1-.5 0-.7 0-.1-.1-.2-.1-.3l-1-1.7c-.2-.4-.6-.6-1-.6s-.8.2-1 .6l-1 1.7c-.1.1-.1.2-.1.3 0 .2 0 .5.1.7.1.3.2.5.4.7l1.7 1c.4.2.9.2 1.3 0l1.7-1z"/></svg> Apply via Discord
-                         </a>
-                     </div>
-                 </div>
-             </div>
+        <hr class="divider reveal">
+
+        <section id="gallery-placeholder" class="text-center">
+            <div class="section-container reveal">
+                <h2 class="mb-8 heading-center">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                    Server Gallery
+                </h2>
+                <p class="text-xl mb-12 max-w-xl mx-auto text-[var(--text-secondary)]"> Glimpses into the world of Extreme Juicers. </p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <img src="images/smp1.png" alt="Gallery Image 1" class="gallery-image reveal reveal-1">
+                    <img src="images/smp2.png" alt="Gallery Image 2" class="gallery-image reveal reveal-2">
+                    <img src="images/smp3.png" alt="Gallery Image 3" class="gallery-image reveal reveal-3">
+                    <img src="images/smp1.png" alt="Gallery Image 4" class="gallery-image reveal reveal-4">
+                </div>
+                <a href="#" class="btn mt-10">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                     Explore Gallery
+                </a>
+            </div>
         </section>
+
     </main>
 
-    <footer class="text-center p-8 bg-transparent text-gray-500 text-sm mt-10">
-        <p>Crafted with <span class="text-red-500 animate-pulse">💖</span> by Blazinik</p>
+    <footer class="text-center py-16 mt-16 border-t border-[var(--border-color)] border-opacity-50">
+        <p class="text-sm text-[var(--text-secondary)] flex items-center justify-center">
+            made with <span class="text-red-500 mx-1.5">💖</span> by
+            <img src="https://minotar.net/cube/Vaxar/24.png" alt="Vaxar's head" class="footer-credit-img" onerror="this.onerror=null; this.src='https://placehold.co/24x24/161b22/8b949e?text=V'; this.style.display='none';">
+             <span style="color: var(--secondary-accent); font-weight: 600; margin-left: 0.25rem;">Vaxar</span>
+        </p>
     </footer>
 
-    <div id="image-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[5000] hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-image">
-        <div class="relative">
-            <img id="modal-image" src="" alt="Enlarged project image" class="block">
-            <button id="image-modal-close" class="absolute top-3 right-3 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white rounded-full p-1" aria-label="Close image viewer">
-                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
+    <div id="copyModal" class="modal">
+      <div class="modal-content">
+        <button class="close-button" onclick="closeModal()" aria-label="Close modal">&times;</button>
+        <p id="modalMessage" class="mt-2"></p>
+       </div>
     </div>
 
-
     <script>
-      // Wrap entire script in DOMContentLoaded to ensure HTML is ready
-      document.addEventListener('DOMContentLoaded', () => {
-        console.log("[Debug] DOM fully loaded and parsed.");
+        // --- Hero Background Image Carousel ---
+        const heroBg = document.getElementById('hero-bg');
+        const images = heroBg ? heroBg.getElementsByTagName('img') : [];
+        let currentImageIndex = 0;
+        const intervalTime = 5500;
 
-        // Get reference to the error message div early
-        const styleErrorMessage = document.getElementById('style-error-message');
-
-        try {
-          // --- Get Static Elements ---
-          console.log("[Debug] Getting static elements...");
-          const portfolioGridContainer = document.querySelector('#portfolio .grid');
-          const showcasePrevBtn = document.getElementById('showcase-prev');
-          const showcaseNextBtn = document.getElementById('showcase-next');
-          const smpImageElement = document.getElementById('smp-image');
-          const showcaseImageElement = document.getElementById('showcase-image');
-          const showcaseTitleElement = document.getElementById('showcase-title');
-          const showcaseDescElement = document.getElementById('showcase-description');
-          const showcaseTagsElement = document.getElementById('showcase-tags');
-          const showcaseLinkElement = document.getElementById('showcase-link');
-          const showcaseLinkTextElement = document.getElementById('showcase-link-text');
-          const showcaseLinkIconContainerElement = document.getElementById('showcase-link-icon-container');
-          const showcaseCounterElement = document.getElementById('showcase-counter');
-          // ** NEW: Modal Elements **
-          const imageModal = document.getElementById('image-modal');
-          const modalImage = document.getElementById('modal-image');
-          const modalCloseBtn = document.getElementById('image-modal-close');
-
-
-          // --- Check Essential Static Elements ---
-          if (!portfolioGridContainer) console.error('[Debug] Portfolio grid container not found!');
-          if (!showcasePrevBtn) console.error('[Debug] showcasePrevBtn not found!');
-          if (!showcaseNextBtn) console.error('[Debug] showcaseNextBtn not found!');
-          if (!smpImageElement) console.error('[Debug] smpImageElement not found!');
-          if (!showcaseImageElement) console.error('[Debug] showcaseImageElement not found!');
-          if (!showcaseTitleElement) console.error('[Debug] showcaseTitleElement not found!');
-          // ... (other checks remain the same)
-          // ** NEW: Check Modal Elements **
-          if (!imageModal) console.error('[Debug] imageModal not found!');
-          if (!modalImage) console.error('[Debug] modalImage not found!');
-          if (!modalCloseBtn) console.error('[Debug] modalCloseBtn not found!');
-
-
-          // --- Project Data (Using original relative paths) ---
-          const projects = [
-            {
-              title: "Stargate: Horizon",
-              images: [ "images/pS1.png", "images/pS2.jpeg", "images/pS3.png" ],
-              description: "A science-fiction project involving complex scripting, detailed UI design, and 3D asset creation within the Roblox platform. Focused on creating an immersive experience based on the Stargate franchise.",
-              link: "https://www.roblox.com/games/3901984129/Stargate-Horizons",
-              linkType: "roblox",
-              tags: ["Ui Design", "3D art", "Scripting", "Roblox"],
-              thumbnail: "images/pS1.png"
-            },
-            {
-              title: "Project Franklin",
-              images: [ "images/pR1.png", "images/pR2.png", "images/pR3.png", "images/pR4.png" ],
-              description: "A personal project recreating Franklin's house from GTA V in Blender and importing it into Roblox Studio. This was a modeling and texturing exercise released for free to the community.",
-              link: "#",
-              linkType: "other",
-              tags: ["Assets", "Modeling", "3D Design", "Blender", "Roblox Studio"],
-              thumbnail: "images/pR1.png"
-            },
-            {
-              title: "Project Space",
-              images: [ "images/gsp1.png", "images/gsp2.jpeg", "images/gsp3.jpeg", "images/gsp4.png", "images/gsp5.png" ],
-              description: "Project Space was a true passion project where I poured countless hours into development. As the creator of the Grant Space Program, I focused on building immersive environments, engaging mission systems, and a strong sense of community. This project helped me grow immensely as a developer—especially in environmental design and scripting.",
-              link: "#",
-              linkType: "other",
-              tags: ["Ui Design", "Assets", "Modeling", "Scripting", "3D Design", "Blender", "Roblox Studio"],
-              thumbnail: "images/gsp1.png"
-            }
-          ];
-          let currentProjectIndex = 0;
-          let currentImageIndex = 0;
-          console.log("[Debug] Projects data defined:", projects);
-
-          // --- Populate Portfolio Grid ---
-          function populateGrid() {
-            // ... (rest of populateGrid function remains the same) ...
-            if (!portfolioGridContainer) { console.error("[Debug] Cannot populate grid, container not found."); return; }
-            console.log("[Debug] Populating portfolio grid...");
-            portfolioGridContainer.innerHTML = ''; // Clear existing items before populating
-
-            projects.forEach((project, index) => {
-              const gridItem = document.createElement('div');
-              gridItem.className = 'portfolio-grid-item animate-on-scroll animate-zoom-in';
-              gridItem.style.transitionDelay = `${index * 0.05}s`;
-              gridItem.dataset.projectIndex = index;
-
-              const imgContainer = document.createElement('div');
-              imgContainer.className = 'aspect-w-16 aspect-h-9';
-
-              const img = document.createElement('img');
-              img.src = project.thumbnail; // Use original thumbnail path
-              img.alt = `${project.title} Thumbnail`;
-              img.className = 'w-full h-full object-cover';
-              // Fallback using placeholder if original fails
-              img.onerror = () => { img.src='https://placehold.co/400x225/111827/9ca3af?text=Error'; };
-
-              const titleDiv = document.createElement('div');
-              titleDiv.className = 'portfolio-item-title';
-              titleDiv.textContent = project.title;
-
-              imgContainer.appendChild(img);
-              gridItem.appendChild(imgContainer);
-              gridItem.appendChild(titleDiv);
-
-              gridItem.addEventListener('click', () => {
-                console.log(`[Debug] Grid item ${index} clicked. Calling displayProjectDetails.`);
-                if (typeof displayProjectDetails === 'function') {
-                  displayProjectDetails(index);
-                  const showcaseDisplay = document.getElementById('portfolio-showcase-display');
-                  if (showcaseDisplay) {
-                      showcaseDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
-                } else {
-                  console.error("[Debug] displayProjectDetails function is not defined when grid item clicked!");
-                }
-              });
-              portfolioGridContainer.appendChild(gridItem);
-            });
-            console.log("[Debug] Portfolio grid populated.");
-
-            portfolioGridContainer.querySelectorAll('.animate-on-scroll').forEach(el => {
-              if (observer) {
-                observer.observe(el);
-              } else {
-                console.warn("[Debug] Observer not ready when trying to observe grid items. Making visible manually.");
-                el.classList.add('is-visible');
-              }
-            });
-          }
-
-          // --- Display Project Details Logic ---
-          function displayProjectDetails(index) {
-            // ... (rest of displayProjectDetails function remains the same until image display) ...
-            console.log(`[Debug] Displaying project index: ${index}`);
-            if (index < 0 || index >= projects.length || !projects[index]) {
-              console.error(`[Debug] Invalid project index or missing project data: ${index}`);
-              if(showcaseTitleElement) showcaseTitleElement.textContent = "Error Loading Project";
-              if(showcaseDescElement) showcaseDescElement.textContent = "Could not find the selected project details.";
-              if(showcaseImageElement) showcaseImageElement.src = 'https://placehold.co/600x400/111827/ef4444?text=Project+Error'; // Keep placeholder for error
-              if(showcaseTagsElement) showcaseTagsElement.innerHTML = '';
-              if(showcaseLinkElement) showcaseLinkElement.classList.add('hidden');
-              return;
-            }
-            const project = projects[index];
-            currentProjectIndex = index;
-            currentImageIndex = 0;
-
-            if (!showcaseTitleElement || !showcaseDescElement || !showcaseTagsElement || !showcaseLinkElement || !showcaseLinkTextElement || !showcaseLinkIconContainerElement) {
-              console.error("[Debug] One or more showcase detail elements missing inside displayProjectDetails!");
-              return;
-            }
-
-            showcaseTitleElement.textContent = project.title;
-            showcaseDescElement.textContent = project.description;
-
-            showcaseTagsElement.innerHTML = '';
-            project.tags.forEach(tagText => {
-              const tag = tagText.trim();
-              const t = document.createElement('span');
-              t.textContent = tag;
-              t.className = 'portfolio-tag';
-              const lowerTag = tag.toLowerCase();
-              let tagType = 'default';
-              if (lowerTag.includes('ui') || lowerTag.includes('design')) tagType = 'ui';
-              else if (lowerTag.includes('3d') || lowerTag.includes('blender')) tagType = '3d';
-              else if (lowerTag.includes('model')) tagType = 'modeling';
-              else if (lowerTag.includes('script') || lowerTag.includes('lua') || lowerTag.includes('javascript')) tagType = 'scripting';
-              else if (lowerTag.includes('roblox')) tagType = 'platform';
-              else if (lowerTag.includes('asset')) tagType = 'assets';
-              else if (lowerTag.includes('html') || lowerTag.includes('css') || lowerTag.includes('web')) tagType = 'web';
-              t.dataset.tagType = tagType;
-              showcaseTagsElement.appendChild(t);
-            });
-
-            const playIcon = showcaseLinkIconContainerElement?.querySelector('.icon-play');
-            const linkIcon = showcaseLinkIconContainerElement?.querySelector('.icon-link');
-
-            if (project.link && project.link !== '#') {
-                showcaseLinkElement.href = project.link;
-                showcaseLinkElement.classList.remove('hidden');
-                if (playIcon && linkIcon) {
-                    if (project.linkType === 'roblox' || project.linkType === 'game') {
-                        playIcon.classList.remove('hidden');
-                        linkIcon.classList.add('hidden');
-                        showcaseLinkTextElement.textContent = "Play Game";
-                    } else if (project.linkType === 'web') {
-                        playIcon.classList.add('hidden');
-                        linkIcon.classList.remove('hidden');
-                        showcaseLinkTextElement.textContent = "Visit Website";
-                    } else {
-                        playIcon.classList.add('hidden');
-                        linkIcon.classList.remove('hidden');
-                        showcaseLinkTextElement.textContent = "View Link";
-                    }
-                } else {
-                     console.warn("[Debug] Showcase link icon elements missing.");
-                     showcaseLinkTextElement.textContent = "View Link";
-                }
-            } else {
-                showcaseLinkElement.classList.add('hidden');
-            }
-
-            // Display the first image of the project
-            if (typeof displayShowcaseImage === 'function') {
-              console.log("[Debug] Calling displayShowcaseImage(0) for new project.");
-              displayShowcaseImage(0);
-            } else {
-              console.error("[Debug] displayShowcaseImage function is not defined when changing project.");
-            }
-
-            // Update Active Thumbnail State
-            if (portfolioGridContainer) {
-              const gridItems = portfolioGridContainer.querySelectorAll('.portfolio-grid-item');
-              gridItems.forEach((item, i) => {
-                item.classList.toggle('active', i === currentProjectIndex);
-              });
-            } else {
-              console.warn("[Debug] Portfolio grid container not found for updating active state.");
-            }
-            console.log(`[Debug] Finished displaying project index: ${index}`);
-          }
-
-          // --- Display Specific Showcase Image Logic ---
-          function displayShowcaseImage(imgIndex) {
-            // ... (rest of displayShowcaseImage function remains mostly the same) ...
-            console.log(`[Debug] Attempting display image index: ${imgIndex} for project index: ${currentProjectIndex}`);
-            const project = projects[currentProjectIndex];
-
-            if (!showcaseImageElement || !showcaseCounterElement || !showcasePrevBtn || !showcaseNextBtn) {
-              console.error("[Debug] Showcase image/nav elements missing inside displayShowcaseImage!");
-              return;
-            }
-            if (!project || !project.images || project.images.length === 0) {
-              console.error(`[Debug] No project data or images for project index: ${currentProjectIndex}`);
-              showcaseImageElement.style.opacity = '0';
-              showcaseImageElement.src = 'https://placehold.co/600x400/111827/ef4444?text=No+Images'; // Keep placeholder for error
-              showcaseCounterElement.style.display = 'none';
-              showcasePrevBtn.style.display = 'none';
-              showcaseNextBtn.style.display = 'none';
-              return;
-            }
-            if (imgIndex < 0 || imgIndex >= project.images.length) {
-              console.error(`[Debug] Invalid image index (${imgIndex}) for project with ${project.images.length} images.`);
-              return;
-            }
-
-            currentImageIndex = imgIndex;
-            const imageUrl = project.images[currentImageIndex]; // Use original image path from array
-            console.log(`[Debug] Setting showcase image src to: ${imageUrl}`);
-
-            showcaseImageElement.style.opacity = '0';
-
-            setTimeout(() => {
-                showcaseImageElement.src = imageUrl;
-                showcaseImageElement.onerror = () => {
-                    console.error(`[Debug] Image failed to load: ${imageUrl}`);
-                    showcaseImageElement.src = 'https://placehold.co/600x400/111827/9ca3af?text=Load+Error'; // Use placeholder on error
-                    showcaseImageElement.style.opacity = '1';
-                };
-                showcaseImageElement.onload = () => {
-                    showcaseImageElement.style.opacity = '1';
-                    showcaseImageElement.onerror = null;
-                }
-            }, 150);
-
-            const numImages = project.images.length;
-            if (showcaseCounterElement) {
-              showcaseCounterElement.textContent = `${currentImageIndex + 1} / ${numImages}`;
-            }
-            if (showcasePrevBtn) {
-              showcasePrevBtn.disabled = currentImageIndex === 0;
-            }
-            if (showcaseNextBtn) {
-              showcaseNextBtn.disabled = currentImageIndex === numImages - 1;
-            }
-
-            const showControls = numImages > 1;
-            if (showcasePrevBtn) showcasePrevBtn.style.display = showControls ? 'block' : 'none';
-            if (showcaseNextBtn) showcaseNextBtn.style.display = showControls ? 'block' : 'none';
-            if (showcaseCounterElement) showcaseCounterElement.style.display = showControls ? 'block' : 'none';
-          }
-
-          // --- Skill Bar Animation Trigger ---
-          function triggerSkillAnimation(element) {
-            // ... (triggerSkillAnimation function remains the same) ...
-            const bar = element?.querySelector('.skill-bar-inner');
-            if (!bar) {
-              console.warn("[Debug] Skill bar inner element not found for:", element);
-              return;
-            }
-            if (element.dataset.animated === 'true') {
-                return;
-            }
-            const percentage = element.getAttribute('data-skill-percent') || 0;
-            console.log(`[Debug] Animating skill bar for ${element.dataset.skill || 'unknown'} to ${percentage}%`);
-            bar.style.width = `${percentage}%`;
-            element.dataset.animated = 'true';
-          }
-
-          // --- Intersection Observer Setup for Scroll Animations ---
-          console.log("[Debug] Setting up Intersection Observer...");
-          let observer;
-          // ... (Intersection Observer setup remains the same) ...
-          try {
-            observer = new IntersectionObserver((entries, obs) => {
-              entries.forEach(entry => {
-                const target = entry.target;
-                try {
-                  if (entry.isIntersecting) {
-                    target.classList.add('is-visible');
-                    if (target.classList.contains('skill-item') && target.hasAttribute('data-skill-percent')) {
-                      if (typeof triggerSkillAnimation === 'function') {
-                        triggerSkillAnimation(target);
-                      } else {
-                        console.error("[Debug] triggerSkillAnimation function not defined in observer callback");
-                      }
-                    }
-                    obs.unobserve(target);
-                  }
-                } catch (callbackError) {
-                  console.error("[Debug] Error inside IntersectionObserver callback:", callbackError, "on target:", target);
-                }
-              });
-            }, { threshold: 0.15 });
-
-            document.querySelectorAll('.animate-on-scroll, .skill-item').forEach(el => {
-              if (!el.closest('#portfolio .grid')) {
-                observer.observe(el);
-              }
-            });
-            console.log("[Debug] Intersection Observer setup complete.");
-
-          } catch (e) {
-            console.error("[Debug] Failed to initialize IntersectionObserver:", e);
-            console.warn("[Debug] IntersectionObserver failed. Applying fallback visibility.");
-            document.querySelectorAll('.animate-on-scroll, .skill-item').forEach(el => {
-                el.classList.add('is-visible');
-                if (el.classList.contains('skill-item') && typeof triggerSkillAnimation === 'function') {
-                    triggerSkillAnimation(el);
-                }
-            });
-            if(styleErrorMessage) {
-                styleErrorMessage.textContent = 'Scroll animations may not work correctly. (IntersectionObserver failed)';
-                styleErrorMessage.style.display = 'block';
-                setTimeout(() => { styleErrorMessage.style.display = 'none'; }, 5000);
-            }
-          }
-
-
-          // --- Event Listeners ---
-
-          // Showcase Carousel Buttons
-          if (showcasePrevBtn) {
-            showcasePrevBtn.addEventListener('click', () => {
-              console.log("[Debug] Showcase Prev Arrow Clicked");
-              if (currentImageIndex > 0) {
-                if(typeof displayShowcaseImage === 'function') {
-                  displayShowcaseImage(currentImageIndex - 1);
-                }
-              }
-            });
-            console.log("[Debug] Attached listener to showcasePrevBtn");
-          } else { console.warn("[Debug] showcasePrevBtn listener not attached (element missing)."); }
-
-          if (showcaseNextBtn) {
-            showcaseNextBtn.addEventListener('click', () => {
-              console.log("[Debug] Showcase Next Arrow Clicked");
-              const project = projects[currentProjectIndex];
-              if (project && currentImageIndex < project.images.length - 1) {
-                if(typeof displayShowcaseImage === 'function') {
-                  displayShowcaseImage(currentImageIndex + 1);
-                }
-              }
-            });
-            console.log("[Debug] Attached listener to showcaseNextBtn");
-          } else { console.warn("[Debug] showcaseNextBtn listener not attached (element missing)."); }
-
-          // ** NEW: Image Modal Listeners **
-          function openModal(imageUrl) {
-              if (!imageModal || !modalImage) return;
-              console.log(`[Debug] Opening modal for image: ${imageUrl}`);
-              modalImage.src = imageUrl;
-              modalImage.onerror = () => { // Handle potential error loading full image
-                  console.error(`[Debug] Modal Image failed to load: ${imageUrl}`);
-                  modalImage.src = 'https://placehold.co/800x600/111827/ef4444?text=Load+Error';
-              };
-              imageModal.classList.remove('hidden');
-              // Use setTimeout to allow the display change, then trigger opacity transition
-              setTimeout(() => {
-                  imageModal.classList.remove('opacity-0');
-                  document.body.classList.add('modal-open'); // Prevent background scroll
-              }, 10); // Small delay
-          }
-
-          function closeModal() {
-              if (!imageModal) return;
-              console.log("[Debug] Closing modal.");
-              imageModal.classList.add('opacity-0');
-              // Wait for fade out transition before hiding and removing body class
-              setTimeout(() => {
-                  imageModal.classList.add('hidden');
-                  document.body.classList.remove('modal-open'); // Allow background scroll
-                  if (modalImage) modalImage.src = ""; // Clear src to free memory
-              }, 300); // Match CSS transition duration
-          }
-
-          // Listener for clicking the main showcase image
-          if (showcaseImageElement) {
-              showcaseImageElement.addEventListener('click', () => {
-                  if (showcaseImageElement.src && !showcaseImageElement.src.includes('placehold.co')) { // Don't open modal for placeholders/errors
-                      openModal(showcaseImageElement.src);
-                  } else {
-                      console.log("[Debug] Modal not opened for placeholder/error image.");
-                  }
-              });
-              console.log("[Debug] Attached modal open listener to showcaseImageElement");
-          } else { console.warn("[Debug] showcaseImageElement listener not attached (element missing)."); }
-
-          // Listener for the modal close button
-          if (modalCloseBtn) {
-              modalCloseBtn.addEventListener('click', closeModal);
-              console.log("[Debug] Attached listener to modalCloseBtn");
-          } else { console.warn("[Debug] modalCloseBtn listener not attached (element missing)."); }
-
-          // Listener for clicking the modal background (overlay)
-          if (imageModal) {
-              imageModal.addEventListener('click', (event) => {
-                  // Close only if the click is directly on the overlay (not the image/button inside)
-                  if (event.target === imageModal) {
-                      closeModal();
-                  }
-              });
-              console.log("[Debug] Attached overlay click listener to imageModal");
-          } else { console.warn("[Debug] imageModal overlay listener not attached (element missing)."); }
-
-          // Listener for the Escape key
-          document.addEventListener('keydown', (event) => {
-              if (event.key === 'Escape' && !imageModal.classList.contains('hidden')) {
-                  closeModal();
-              }
-          });
-          console.log("[Debug] Attached Escape key listener for modal");
-
-
-          // --- SMP Image Carousel Logic ---
-          const smpImages = [ "images/smp1.png", "images/smp2.png", "images/smp3.png", "images/smp4.png" ];
-          let currentSmpImageIndex = 0;
-          let smpIntervalId = null;
-
-          function changeSmpImage() {
-            // ... (changeSmpImage function remains the same) ...
-            if (!smpImageElement) return;
-            currentSmpImageIndex = (currentSmpImageIndex + 1) % smpImages.length;
-            smpImageElement.style.opacity = 0;
-            setTimeout(() => {
-              smpImageElement.src = smpImages[currentSmpImageIndex]; // Use original path
-              smpImageElement.alt = `Extreme Juicers SMP Screenshot ${currentSmpImageIndex + 1}`;
-              smpImageElement.onerror = () => {
-                  console.error(`[Debug] SMP Image failed to load: ${smpImages[currentSmpImageIndex]}`);
-                  smpImageElement.src = 'https://placehold.co/1600x900/111827/9ca3af?text=Error'; // Use placeholder on error
-                  smpImageElement.style.opacity = 1;
-              };
-               smpImageElement.onload = () => {
-                    smpImageElement.style.opacity = 1;
-                    smpImageElement.onerror = null; // Reset onerror
-                }
-            }, 500);
-          }
-
-          if (smpImageElement && smpImages.length > 1) {
-            // ... (SMP carousel interval setup remains the same) ...
-            console.log("[Debug] Starting SMP image carousel.");
-            smpIntervalId = setInterval(changeSmpImage, 5000);
-            const smpSection = document.getElementById('smp-section');
-            if (smpSection) {
-                smpSection.addEventListener('mouseenter', () => {
-                    if (smpIntervalId) clearInterval(smpIntervalId);
-                    console.log("[Debug] SMP carousel paused on hover.");
-                });
-                smpSection.addEventListener('mouseleave', () => {
-                    smpIntervalId = setInterval(changeSmpImage, 5000);
-                    console.log("[Debug] SMP carousel resumed on mouse leave.");
-                });
-            }
-          } else {
-              console.log("[Debug] SMP image carousel not started (element missing or only one image).");
-          }
-
-          // --- Initial Page Setup ---
-          console.log("[Debug] Running initial page setup...");
-          if (typeof populateGrid === 'function') {
-            populateGrid();
-          } else {
-            console.error("[Debug] populateGrid function not defined during initial setup!");
-          }
-
-          if (projects.length > 0) {
-            setTimeout(() => {
-              if (typeof displayProjectDetails === 'function') {
-                console.log("[Debug] Calling initial displayProjectDetails(0) via setTimeout.");
-                displayProjectDetails(0);
-              } else {
-                console.error('[Debug] Initial displayProjectDetails function not defined');
-              }
-            }, 50);
-          } else {
-            // ... (Handling for no projects remains the same) ...
-            console.log("[Debug] No projects found to display initially.");
-             if(showcaseTitleElement) showcaseTitleElement.textContent = "No Projects Yet";
-             if(showcaseDescElement) showcaseDescElement.textContent = "Check back later for project updates!";
-             if(showcaseImageElement) showcaseImageElement.src = 'https://placehold.co/600x400/111827/9ca3af?text=No+Projects'; // Keep placeholder for empty state
-             if(showcaseTagsElement) showcaseTagsElement.innerHTML = '';
-             if(showcaseLinkElement) showcaseLinkElement.classList.add('hidden');
-             if(showcaseCounterElement) showcaseCounterElement.style.display = 'none';
-             if(showcasePrevBtn) showcasePrevBtn.style.display = 'none';
-             if(showcaseNextBtn) showcaseNextBtn.style.display = 'none';
-          }
-
-          console.log("[Debug] Initial setup complete.");
-
-        } catch (error) {
-          console.error("[CRITICAL] Error during script initialization:", error);
-          if (styleErrorMessage) {
-            styleErrorMessage.textContent = `A critical error occurred loading the page. Please check the console (F12) for details. Error: ${error.message}`;
-            styleErrorMessage.style.display = 'block';
-          }
+        function showNextImage() {
+            if (!images || images.length === 0) return;
+            images[currentImageIndex].classList.remove('active');
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            images[currentImageIndex].classList.add('active');
         }
-      });
+        if (images.length > 1) {
+            images[0].classList.add('active');
+            setInterval(showNextImage, intervalTime);
+        } else if (images.length === 1) {
+            images[0].classList.add('active');
+        }
+
+        // --- Copy IP Logic (Kept but not used as IP is removed) ---
+        function copyIp() {
+            // Inform user server is invite-only
+             showModal('ℹ️ This server is invite-only. Join Discord for info!');
+        }
+
+        // --- Modal Logic ---
+        function showModal(message) {
+            const modal = document.getElementById('copyModal');
+            const modalMessage = document.getElementById('modalMessage');
+            if (!modal || !modalMessage) return;
+            modalMessage.innerText = message;
+            modal.style.display = "block";
+        }
+        function closeModal() {
+            const modal = document.getElementById('copyModal');
+            if (modal) { modal.style.display = "none"; }
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById('copyModal');
+            if (event.target == modal) { closeModal(); }
+        }
+         window.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') { closeModal(); }
+        });
+
+        // --- Scroll Animation Logic ---
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const delayClass = Array.from(entry.target.classList).find(cls => cls.startsWith('reveal-'));
+                    const delay = delayClass ? parseInt(delayClass.split('-')[1]) * 100 : 50;
+                    entry.target.style.transitionDelay = `${delay}ms`;
+                    entry.target.classList.add('visible');
+                    // revealObserver.unobserve(entry.target); // Keep observing
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => { revealObserver.observe(el); });
+
+        // --- MCM Animation Random Delay ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const mcmCards = document.querySelectorAll('.mcm-award-card.first-place');
+            mcmCards.forEach(card => {
+                // Generate random delay between 0 and animation duration (3s)
+                const randomDelay = -(Math.random() * 3);
+                card.style.setProperty('--animation-delay', `${randomDelay}s`);
+            });
+
+            // --- Smooth Lore Dropdown Animation ---
+            const detailsElements = document.querySelectorAll('.lore-item details');
+            detailsElements.forEach(details => {
+                const summary = details.querySelector('summary');
+                const content = details.querySelector('.lore-content');
+
+                summary.addEventListener('click', (event) => {
+                    if (details.dataset.animating === 'true') {
+                        event.preventDefault(); return;
+                    }
+                    details.dataset.animating = 'true';
+                    if (!details.open) {
+                        event.preventDefault();
+                        details.open = true;
+                        window.requestAnimationFrame(() => { // Ensure content height is calculated after 'open'
+                            const contentHeight = content.scrollHeight;
+                            content.style.maxHeight = `${contentHeight}px`;
+                            content.style.opacity = '1';
+                            content.style.paddingTop = '0.5rem'; // Match CSS padding
+                        });
+                    } else {
+                        event.preventDefault(); // Prevent default close until animation finishes
+                        content.style.maxHeight = `${content.scrollHeight}px`; // Set explicit height before closing
+                         window.requestAnimationFrame(() => { // Allow browser to render before starting close animation
+                             content.style.maxHeight = '0px';
+                             content.style.opacity = '0';
+                             content.style.paddingTop = '0';
+                             // Listen for transition end on max-height
+                            content.addEventListener('transitionend', function handler(e) {
+                                if (e.propertyName === 'max-height') {
+                                    details.open = false; // Actually close after animation
+                                    content.removeEventListener('transitionend', handler);
+                                    delete details.dataset.animating;
+                                }
+                            });
+                         });
+                    }
+                });
+                 // Clean up if transition is cancelled (e.g. user clicks rapidly)
+                 content.addEventListener('transitioncancel', () => {
+                     content.style.maxHeight = details.open ? null : '0px';
+                     delete details.dataset.animating;
+                 });
+
+            });
+        });
+
     </script>
+
 </body>
 </html>
