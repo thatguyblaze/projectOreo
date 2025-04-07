@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treadz Pricing Calculator & Inventory - Staff</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                       sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'gray': { 700: '#374151', 800: '#1F2937', 900: '#111827' },
+                        'highlight-yellow-light': '#FEF9C3',
+                        'highlight-yellow-dark': '#78350F',
+                        'highlight-red-light': '#FEE2E2',
+                        'highlight-red-dark': '#7F1D1D',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; min-height: 100vh;}
+        main { flex-grow: 1; }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { opacity: 0.8; }
+        .dark input:focus, .dark select:focus, .dark input[type=checkbox]:focus, .dark button:focus {
+             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.6);
+             outline: none;
+             border-color: transparent;
+        }
+        label { display: block; margin-bottom: 0.25rem; font-weight: 500; }
+        .input-group { margin-bottom: 1rem; }
+        .output-section { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB; } /* Light mode border */
+        .output-value { font-size: 1.5rem; font-weight: 700; display: block; }
+        .placeholder-note { font-size: 0.875rem; margin-top: 0.25rem; }
+        .dark label { color: #D1D5DB; }
+        .dark .output-section { border-top-color: #4B5563; } /* Dark mode border */
+        .dark .placeholder-note { color: #9CA3AF; }
+        .dark #calculatedCost { color: #34D399; }
+        .dark #calculatedFuelCost { color: #60A5FA; }
+        .dark #calculatedProfit { color: #FBBF24; }
+        .dark #calculatedTime { color: #A78BFA; }
+
+        /* --- Overtime Toggle Switch Style --- */
+        .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .dark .slider { background-color: #4B5563; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4F46E5; }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* --- Inventory Table Highlighting --- */
+        .highlight-yellow { background-color: #FEF9C3; }
+        .dark .highlight-yellow { background-color: #78350F; color: #FEFCE8; }
+        .highlight-red { background-color: #FEE2E2; }
+        .dark .highlight-red { background-color: #7F1D1D; color: #FEF2F2; }
+
+        /* Header and Footer styles */
+        header, footer { width: 100%; padding: 1rem; }
+        footer { margin-top: auto; }
+
+        /* Modal Styles - Controlled by JS display property */
+        .modal {
+            position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
+            overflow-y: auto; height: 100%; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300 text-gray-900 dark:text-gray-100">
+
+    <header class="bg-white dark:bg-gray-800 shadow-md dark:shadow-lg">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <span class="text-xl font-bold">Treadz Tire & Towing</span>
+            <a href="tel:423-357-4551" class="text-lg text-indigo-600 dark:text-indigo-400 hover:underline">
+                423-357-4551
+            </a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 flex-grow">
+
+        <div class="calculator-container bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-center mb-6">
+                Staff Pricing Calculator
+            </h1>
+            <form id="towCalculatorForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <div class="input-group">
+                    <label for="towType">Tow Type:</label>
+                    <select id="towType" name="towType" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        <option value="Easy">Easy (+$0)</option>
+                        <option value="Medium" selected>Medium (+$25)</option>
+                        <option value="Hard">Hard (+$50)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                     <label for="overtimeCheckbox">Overtime Rate ($100):</label>
+                     <label class="toggle-switch mt-2">
+                         <input type="checkbox" id="overtimeCheckbox" name="overtimeCheckbox" checked>
+                         <span class="slider"></span>
+                     </label>
+                     <small class="text-xs text-gray-500 dark:text-gray-400 block mt-1">Off = $85</small>
+                </div>
+                <div class="input-group">
+                    <label for="distance">Distance (miles):</label>
+                    <input type="number" id="distance" name="distance" min="0" step="0.1" placeholder="e.g., 15" value="15" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                </div>
+                <div class="input-group">
+                    <label for="calculatedTime">Calculated Time (min):</label>
+                    <output id="calculatedTime" name="calculatedTime" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-100 dark:bg-gray-700 block text-center font-medium">0</output>
+                    <small class="text-xs text-gray-500 dark:text-gray-400 block mt-1">Based on Distance</small>
+                </div>
+            </form>
+            <div class="output-section grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 items-start">
+                 <div>
+                     <label class="block text-sm font-medium">Estimated Cost:</label>
+                     <output id="calculatedCost" name="calculatedCost" class="output-value text-emerald-600">$0.00</output>
+                 </div>
+                 <div>
+                     <label class="block text-sm font-medium">Fuel Cost:</label>
+                     <output id="calculatedFuelCost" name="calculatedFuelCost" class="output-value text-blue-600">$0.00</output>
+                     <p class="placeholder-note">(Dist / 8) * $3.50</p>
+                 </div>
+                 <div>
+                     <label class="block text-sm font-medium">Profit:</label>
+                     <output id="calculatedProfit" name="calculatedProfit" class="output-value text-amber-600">$0.00</output>
+                      <p class="placeholder-note">(Dist + Fuel - Cost) (Min $0)</p> </div>
+            </div>
+        </div><div class="inventory-container bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-7xl mx-auto"> <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Lot Inventory</h2>
+                <button id="addCarBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                    Add Car
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table id="inventoryTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date In</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Make</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Model</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Plate</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Call Type</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Insurance</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Days</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Lot #</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTbody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr><td colspan="9" class="text-center py-4 text-gray-500 dark:text-gray-400">No cars in inventory.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> </main>
+
+    <footer class="bg-white dark:bg-gray-800 text-center py-4 mt-8">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+            © 2025 All Rights Reserved | Treadz Tire & Towing | 409 Main Street Mount Carmel, Tennessee | treadztnt@gmail.com
+        </p>
+    </footer>
+
+    <div id="addCarModal" class="modal" style="display: none;"> <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-800"> <div class="mt-3 text-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Add New Car to Inventory</h3>
+                <form id="addCarForm" class="space-y-3"> <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="dateIn" class="block text-sm font-medium text-left">Date In:</label>
+                            <input type="date" id="dateIn" name="dateIn" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="callType" class="block text-sm font-medium text-left">Call Type:</label>
+                            <select id="callType" name="callType" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                <option value="CHP">CHP</option>
+                                <option value="KPD">KPD</option>
+                                <option value="THP">THP</option>
+                                <option value="OWNER REQ">OWNER REQ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         <div>
+                            <label for="make" class="block text-sm font-medium text-left">Make:</label>
+                            <input type="text" id="make" name="make" required placeholder="e.g., Toyota" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="model" class="block text-sm font-medium text-left">Model:</label>
+                            <input type="text" id="model" name="model" required placeholder="e.g., Camry" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="plateNumber" class="block text-sm font-medium text-left">Plate Number:</label>
+                            <input type="text" id="plateNumber" name="plateNumber" required placeholder="e.g., ABC-123" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-left mb-1">Insurance:</label>
+                            <div class="flex justify-start space-x-4 pt-2"> <label class="flex items-center">
+                                 <input type="radio" name="insurance" value="Yes" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Yes
+                               </label>
+                               <label class="flex items-center">
+                                 <input type="radio" name="insurance" value="No" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> No
+                               </label>
+                             </div>
+                        </div>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium text-left mb-1">Lot Number:</label>
+                         <div class="flex justify-start space-x-4">
+                           <label class="flex items-center">
+                             <input type="radio" name="lotNumber" value="1" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 1
+                           </label>
+                           <label class="flex items-center">
+                             <input type="radio" name="lotNumber" value="2" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 2
+                           </label>
+                         </div>
+                    </div>
+                    <div class="items-center px-4 py-3 border-t border-gray-200 dark:border-gray-700 mt-4">
+                        <button id="saveCarBtn" type="submit" class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+                            Save Car
+                        </button>
+                        <button id="closeModalBtn" type="button" class="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-800">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Calculator Elements & Logic ---
+        const towTypeSelect = document.getElementById('towType');
+        const overtimeCheckbox = document.getElementById('overtimeCheckbox');
+        const distanceInput = document.getElementById('distance');
+        const calculatedTimeOutput = document.getElementById('calculatedTime');
+        const calculatedCostOutput = document.getElementById('calculatedCost');
+        const calculatedFuelCostOutput = document.getElementById('calculatedFuelCost');
+        const calculatedProfitOutput = document.getElementById('calculatedProfit');
+        const calculatorForm = document.getElementById('towCalculatorForm');
+
+        function calculateAndDisplayPrice() {
+            const towType = towTypeSelect.value;
+            const distance = parseFloat(distanceInput.value) || 0;
+            const isOvertimeChecked = overtimeCheckbox.checked;
+            const overtimeCharge = isOvertimeChecked ? 100 : 85;
+            const calculatedTime = distance === 0 ? 0 : Math.round((distance / 41.25) * 60);
+            calculatedTimeOutput.textContent = calculatedTime;
+
+            let towTypeCharge = 0;
+            if (towType === 'Medium') { towTypeCharge = 25; }
+            else if (towType === 'Hard') { towTypeCharge = 50; }
+
+            const timeCost = calculatedTime * 0.40;
+            const distanceCost = distance * 0.05;
+            const totalCost = towTypeCharge + overtimeCharge + timeCost + distanceCost;
+            const fuelCostRaw = distance === 0 ? 0 : (distance / 8) * 3.5;
+            const fuelCost = Math.round(fuelCostRaw * 100) / 100;
+            const profit = distance + fuelCost - totalCost; // Raw Profit Calc
+
+            // Ensure displayed profit is not negative
+            const displayProfit = Math.max(0, profit);
+
+            calculatedCostOutput.textContent = `$${totalCost.toFixed(2)}`;
+            calculatedFuelCostOutput.textContent = `$${fuelCost.toFixed(2)}`;
+            // Display the adjusted profit (minimum $0.00)
+            calculatedProfitOutput.textContent = `$${displayProfit.toFixed(2)}`;
+        }
+
+        calculatorForm.addEventListener('input', calculateAndDisplayPrice);
+        calculatorForm.addEventListener('change', calculateAndDisplayPrice);
+        calculateAndDisplayPrice(); // Initial calculation
+
+        // --- Inventory Elements & Logic ---
+        const addCarBtn = document.getElementById('addCarBtn');
+        const addCarModal = document.getElementById('addCarModal');
+        const addCarForm = document.getElementById('addCarForm');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const inventoryTbody = document.getElementById('inventoryTbody');
+        const STORAGE_KEY = 'treadzInventory';
+
+        let inventory = []; // Global inventory array
+
+        function loadInventory() {
+            const storedInventory = localStorage.getItem(STORAGE_KEY);
+            inventory = storedInventory ? JSON.parse(storedInventory) : [];
+            // console.log("Inventory loaded:", inventory); // Debug log
+        }
+
+        function saveInventory() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
+            // console.log("Inventory saved:", inventory); // Debug log
+        }
+
+        function daysDifference(dateStr1, dateStr2) {
+            try {
+                if (!dateStr1 || !dateStr2 || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr1) || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr2)) { return NaN; }
+                const date1 = new Date(dateStr1 + 'T00:00:00Z');
+                const date2 = new Date(dateStr2 + 'T00:00:00Z');
+                if (isNaN(date1.getTime()) || isNaN(date2.getTime())) { return NaN; }
+                const differenceInTime = date2.getTime() - date1.getTime();
+                return Math.floor(differenceInTime / (1000 * 3600 * 24));
+            } catch (error) { console.error("Error calculating days difference:", error); return NaN; }
+        }
+
+        function renderInventory() {
+            // console.log("Rendering inventory. Current count:", inventory.length); // Debug log
+            inventoryTbody.innerHTML = ''; // Clear existing rows
+            if (inventory.length === 0) {
+                 inventoryTbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-gray-500 dark:text-gray-400">No cars in inventory.</td></tr>`;
+                 return;
+            }
+            const today = new Date().toISOString().split('T')[0];
+
+            inventory.forEach(car => {
+                // console.log("Rendering car:", car); // Debug log
+                const daysInStorage = car.dateIn ? daysDifference(car.dateIn, today) : NaN;
+                let highlightClass = '';
+                if (!isNaN(daysInStorage)) {
+                    if (daysInStorage >= 30) { highlightClass = 'highlight-red'; }
+                    else if (daysInStorage >= 17) { highlightClass = 'highlight-yellow'; }
+                }
+                const row = document.createElement('tr');
+                row.className = `${highlightClass} text-sm`;
+
+                row.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap">${car.dateIn || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${car.make || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${car.model || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${car.plateNumber || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${car.callType || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${typeof car.insurance === 'boolean' ? (car.insurance ? 'Yes' : 'No') : 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${isNaN(daysInStorage) ? 'Error' : daysInStorage}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">${car.lotNumber || 'N/A'}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <button data-id="${car.id}" class="remove-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs font-medium">Remove</button>
+                    </td>
+                `;
+                inventoryTbody.appendChild(row);
+            });
+        }
+
+        // Show Add Car Modal
+        addCarBtn.addEventListener('click', () => {
+            addCarForm.reset();
+            document.getElementById('dateIn').valueAsDate = new Date();
+            addCarModal.style.display = 'flex';
+        });
+
+        // Hide Add Car Modal
+        function hideModal() {
+             addCarModal.style.display = 'none';
+        }
+        closeModalBtn.addEventListener('click', hideModal);
+        addCarModal.addEventListener('click', (event) => {
+            // Close if clicking on the modal backdrop itself
+            if (event.target === addCarModal) { hideModal(); }
+        });
+
+        // Handle Add Car Form Submission
+        addCarForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent default page reload
+            // console.log("Add car form submitted"); // Debug log
+
+            const dateInValue = document.getElementById('dateIn').value;
+            const makeValue = document.getElementById('make').value.trim();
+            const modelValue = document.getElementById('model').value.trim();
+            const plateValue = document.getElementById('plateNumber').value.trim();
+            const insuranceChecked = document.querySelector('input[name="insurance"]:checked');
+            const lotNumberChecked = document.querySelector('input[name="lotNumber"]:checked');
+
+            if (!dateInValue || !makeValue || !modelValue || !plateValue || !insuranceChecked || !lotNumberChecked) {
+                alert("Please fill out all fields (Date, Make, Model, Plate, Insurance, Lot#).");
+                return; // Stop execution if validation fails
+            }
+
+            const newCar = {
+                id: Date.now(), // Simple unique ID
+                dateIn: dateInValue,
+                make: makeValue,
+                model: modelValue,
+                plateNumber: plateValue,
+                callType: document.getElementById('callType').value,
+                insurance: insuranceChecked.value === 'Yes',
+                lotNumber: lotNumberChecked.value,
+            };
+
+            // console.log("New car object:", newCar); // Debug log
+            inventory.push(newCar);
+            inventory.sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn)); // Sort by date desc
+            // console.log("Inventory after push:", inventory); // Debug log
+
+            saveInventory(); // Save the updated array
+            renderInventory(); // Redraw the table with the new car
+            hideModal(); // Hide the form
+        });
+
+        // Handle Remove Car Button Clicks
+        inventoryTbody.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-btn')) {
+                const carId = parseInt(event.target.getAttribute('data-id'));
+                // console.log("Remove button clicked for ID:", carId); // Debug log
+                if (confirm('Are you sure you want to remove this car?')) {
+                    inventory = inventory.filter(car => car.id !== carId);
+                    // console.log("Inventory after filter:", inventory); // Debug log
+                    saveInventory();
+                    renderInventory();
+                }
+            }
+        });
+
+        // --- Initial Load ---
+        loadInventory();
+        renderInventory();
+        // Ensure modal is hidden on initial load
+        if (addCarModal) {
+             addCarModal.style.display = 'none';
+        }
+
+    </script>
+
+</body>
+</html>
