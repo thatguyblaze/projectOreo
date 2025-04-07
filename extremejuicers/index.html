@@ -142,43 +142,53 @@
             0% { background-position: -150% 0; }
             100% { background-position: 150% 0; }
         }
-        .mcm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .mcm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.75rem; } /* Wider minmax */
         .mcm-award-card {
             background-color: var(--surface-color); border-radius: 0.5rem;
-            padding: 1.75rem; border: 1px solid var(--border-color);
+            padding: 1.5rem; border: 1px solid var(--border-color); /* Thinner border */
             transition: all 0.3s ease-out;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12); /* Adjusted shadow */
             position: relative; overflow: hidden;
             display: flex; align-items: center; gap: 1rem;
         }
-        .mcm-award-card .icon-container {
-            font-size: 2rem; line-height: 1; color: var(--text-secondary); flex-shrink: 0;
+        .mcm-award-card .icon-container { /* Container for trophy icon */
+            font-size: 1.8rem; /* Adjusted icon size */
+            line-height: 1; color: var(--text-secondary); flex-shrink: 0;
             transition: color 0.3s ease-out, transform 0.3s ease-out;
         }
-        .mcm-award-card .text-content { text-align: left; flex-grow: 1; }
-        .mcm-award-card h3 {
-            font-size: 1rem; font-weight: 600; color: var(--text-primary);
-            margin-bottom: 0.25rem;
+         .winner-headshot-container { /* Container for headshot */
+            width: 40px; height: 40px; flex-shrink: 0;
+            border-radius: 4px; overflow: hidden;
+            background-color: var(--border-color);
+            border: 1px solid var(--border-color);
+            margin-left: auto; /* Push headshot to the right */
+         }
+        .winner-headshot {
+            display: block; width: 100%; height: 100%;
+            object-fit: contain; image-rendering: pixelated;
         }
-        .winner-name {
-            font-family: 'Roboto Mono', monospace; font-size: 0.9rem; font-weight: 400;
+        .mcm-award-card .text-content { text-align: left; flex-grow: 1; }
+        .mcm-award-card h3 { /* Event Name */
+            font-size: 0.95rem; font-weight: 600; color: var(--text-primary);
+            margin-bottom: 0.2rem;
+        }
+        .winner-name { /* Winner Name */
+            font-family: 'Inter', sans-serif; /* Use Inter */
+            font-size: 0.9rem; font-weight: 400;
             color: var(--text-secondary);
-            transition: text-shadow 0.3s ease-out;
+            transition: color 0.3s ease-out;
         }
         .mcm-award-card:hover {
             transform: translateY(-4px);
             border-color: var(--secondary-accent); /* Blue border on general hover */
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
-         .mcm-award-card:hover .icon-container { color: var(--secondary-accent); transform: scale(1.05); }
+         .mcm-award-card:hover .icon-container { color: var(--secondary-accent); }
 
         /* Gold highlight and animation for 1st place */
         .mcm-award-card.first-place { border-left: 4px solid var(--tertiary-accent); }
         .mcm-award-card.first-place .icon-container { color: var(--tertiary-accent); }
-        .mcm-award-card.first-place .winner-name {
-            color: var(--tertiary-accent); font-weight: 500;
-            text-shadow: 0 0 8px var(--mcm-gold-glow); /* Default subtle glow */
-        }
+        .mcm-award-card.first-place .winner-name { color: var(--tertiary-accent); font-weight: 500; }
         /* Continuous Golden Sweep Animation */
         .mcm-award-card.first-place::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -186,18 +196,16 @@
             background-size: 250% 100%;
             background-position: -150% 0;
             opacity: 1; /* Always visible */
-            animation: gold-sweep 2.8s linear infinite; /* Apply continuous animation */
+            /* Apply animation directly with random delay set by JS */
+            animation: gold-sweep 3s linear var(--animation-delay, 0s) infinite;
             z-index: 0; pointer-events: none;
         }
         .mcm-award-card.first-place:hover {
              border-color: var(--tertiary-accent); /* Keep gold border */
-             animation: none; /* Pause sweep on hover */
-             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), 0 0 15px var(--mcm-gold-glow); /* Add static glow shadow */
+             /* Keep sweep running, maybe intensify glow via shadow */
+             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), 0 0 15px var(--mcm-gold-glow);
         }
         .mcm-award-card.first-place:hover .icon-container { transform: scale(1.1) rotate(-3deg); }
-        .mcm-award-card.first-place:hover .winner-name {
-             text-shadow: 0 0 12px var(--mcm-gold-glow); /* Intensify glow */
-        }
         .mcm-award-card > * { position: relative; z-index: 1; }
         /* --- End MCM Award Styling --- */
 
@@ -222,7 +230,6 @@
 
         /* Section Styling & Headers */
         section { padding: 5rem 1rem; }
-        /* Add alternating backgrounds */
         section:nth-of-type(even) { background-color: var(--surface-color); }
         .section-container { max-width: 64rem; margin-left: auto; margin-right: auto; }
         h2 {
@@ -288,11 +295,10 @@
              border-radius: 0.75rem; /* rounded-xl */
              border: 1px solid var(--border-color);
              box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-             object-fit: cover; /* Ensure image covers area */
+             object-fit: cover;
          }
          .gallery-image {
-             aspect-ratio: 16 / 9; /* Maintain aspect ratio */
-             object-fit: cover;
+             aspect-ratio: 16 / 9; object-fit: cover;
              border-radius: 0.5rem; /* rounded-lg */
              border: 1px solid var(--border-color);
              transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
@@ -372,7 +378,10 @@
                         </div>
                         <div class="text-content">
                             <h3>Black Market</h3>
-                            <p class="winner-name"> Juicy </p>
+                            <div class="winner-display">
+                                <img src="https://mc-heads.net/isometric/Vaxar/32.png" alt="Vaxar's headshot" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/32x32/161b22/8b949e?text=?';">
+                                <p class="winner-name"> Vaxar </p>
+                            </div>
                         </div>
                     </div>
                     <div class="mcm-award-card first-place reveal reveal-2">
@@ -381,7 +390,10 @@
                         </div>
                         <div class="text-content">
                             <h3>Sands of Time</h3>
-                            <p class="winner-name"> Pandaman </p>
+                            <div class="winner-display">
+                                <img src="https://mc-heads.net/isometric/Vaxar/32.png" alt="Vaxar's headshot" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/32x32/161b22/8b949e?text=?';">
+                                <p class="winner-name"> Vaxar </p>
+                            </div>
                         </div>
                     </div>
                     <div class="mcm-award-card first-place reveal reveal-3">
@@ -390,36 +402,13 @@
                         </div>
                         <div class="text-content">
                             <h3>Ben's Dungeon</h3>
-                             <p class="winner-name"> ScaryScoop </p>
+                             <div class="winner-display">
+                                <img src="https://mc-heads.net/isometric/Vaxar/32.png" alt="Vaxar's headshot" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/32x32/161b22/8b949e?text=?';">
+                                <p class="winner-name"> Vaxar </p>
+                            </div>
                         </div>
                     </div>
-                    <div class="mcm-award-card opacity-70 reveal reveal-4">
-                         <div class="icon-container">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                        </div>
-                        <div class="text-content">
-                            <h3>Past Event IV</h3>
-                            <p class="winner-name"> ??? </p>
-                        </div>
-                    </div>
-                     <div class="mcm-award-card opacity-70 reveal reveal-1">
-                         <div class="icon-container">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                        </div>
-                        <div class="text-content">
-                            <h3>Past Event V</h3>
-                            <p class="winner-name"> ??? </p>
-                        </div>
-                    </div>
-                     <div class="mcm-award-card opacity-70 reveal reveal-2">
-                         <div class="icon-container">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                        </div>
-                         <div class="text-content">
-                             <h3>Past Event VI</h3>
-                            <p class="winner-name"> ??? </p>
-                        </div>
-                    </div>
+                    {/* Removed Filler Cards */}
                 </div>
              </div>
         </section>
@@ -599,6 +588,16 @@
         }, { threshold: 0.1 });
 
         revealElements.forEach(el => { revealObserver.observe(el); });
+
+        // --- MCM Animation Random Delay ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const mcmCards = document.querySelectorAll('.mcm-award-card.first-place');
+            mcmCards.forEach(card => {
+                // Generate random delay between 0 and animation duration (2.8s)
+                const randomDelay = -(Math.random() * 2.8);
+                card.style.setProperty('--animation-delay', `${randomDelay}s`);
+            });
+        });
 
     </script>
 
