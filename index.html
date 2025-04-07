@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blazinik - Programmer & Designer [Observer Isolate]</title>
-    <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
+    <title>Blazinik - Programmer & Designer [Isolated Skill Anim]</title> <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
     <meta name="description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
-    <meta property="og:title" content="Blazinik - Programmer & Designer [Observer Isolate]" />
+    <meta property="og:title" content="Blazinik - Programmer & Designer [Isolated Skill Anim]" />
     <meta property="og:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://blazinik.xyz/" />
     <meta property="og:image" content="https://placehold.co/1200x630/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
     <meta property="og:image:alt" content="Blazinik Logo" />
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Blazinik - Programmer & Designer [Observer Isolate]">
+    <meta name="twitter:title" content="Blazinik - Programmer & Designer [Isolated Skill Anim]">
     <meta name="twitter:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
     <meta name="twitter:image" content="https://placehold.co/1200x600/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
     <meta name="twitter:image:alt" content="Blazinik Logo">
@@ -23,22 +22,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-      /* --- Scroll Animations CSS RE-ADDED --- */
-      .animate-on-scroll {
-        opacity: 0;
-        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-      }
-      .animate-fade-in-up { transform: translateY(40px); }
-      .animate-fade-in-left { transform: translateX(-40px); }
-      .animate-fade-in-right { transform: translateX(40px); }
-      .animate-zoom-in { transform: scale(0.95); }
-      .is-visible {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-      }
-      /* --- End Scroll Animations --- */
-
-      /* Other CSS Styles (remain the same) */
+      /* CSS Styles (No scroll animation classes needed except for skill bar itself) */
       :root {
         --bg-dark: #0a0e12; --bg-medium: #111827; --border-color: rgba(55, 65, 81, 0.6);
         --text-primary: #e5e7eb; --text-secondary: #9ca3af; --text-on-accent: #ffffff;
@@ -80,8 +64,7 @@
       @keyframes slideInFromLeft { 0% { transform: translateX(-50px); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
       @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
       .section-title { position: relative; display: inline-block; margin-bottom: 4rem; }
-      .section-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 80px; height: 5px; background: linear-gradient(to right, var(--accent-blue-start), var(--accent-blue-end)); border-radius: 3px; opacity: 0; transition: opacity 0.5s ease-out 0.3s, width 0.5s ease-out 0.3s; }
-      section.is-visible .section-title::after { opacity: 1; width: 120px; } /* Title animation depends on section visibility */
+      .section-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; background: linear-gradient(to right, var(--accent-blue-start), var(--accent-blue-end)); border-radius: 3px; }
       .skill-category-title { font-size: 1.75rem; font-weight: 600; color: var(--accent-blue-end); margin-bottom: 2rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
       .skill-item { margin-bottom: 1.25rem; }
       .skill-item:last-child { margin-bottom: 0; }
@@ -243,10 +226,22 @@
       document.addEventListener('DOMContentLoaded', () => {
         console.log("[Debug] DOM fully loaded and parsed.");
 
+        // ** Declare styleErrorMessage early for catch block **
+        const styleErrorMessage = document.getElementById('style-error-message');
+
         try {
-          // --- Get Elements (Fetch elements inside functions for robustness) ---
-          console.log("[Debug] Element variables will be fetched inside functions.");
-          const styleErrorMessage = document.getElementById('style-error-message'); // Get error message div early
+          // --- Get Elements (Fetch non-dynamic elements early) ---
+          console.log("[Debug] Getting elements...");
+          const portfolioGrid = document.querySelector('#portfolio .grid');
+          const showcasePrevBtn = document.getElementById('showcase-prev');
+          const showcaseNextBtn = document.getElementById('showcase-next');
+          const smpImageElement = document.getElementById('smp-image');
+
+          // --- Check Essential Elements ---
+          if (!portfolioGrid) console.error('[Debug] Portfolio grid container not found!');
+          if (!showcasePrevBtn) console.error('[Debug] showcasePrevBtn not found!');
+          if (!showcaseNextBtn) console.error('[Debug] showcaseNextBtn not found!');
+          // We will check elements needed inside functions later
 
           // --- Project Data - Relative Paths ---
           const projects = [
@@ -259,14 +254,14 @@
 
           // --- Populate Portfolio Grid ---
           function populateGrid() {
-              const gridContainer = document.querySelector('#portfolio .grid'); // Get grid here
-              if (!gridContainer) { console.error("[Debug] Cannot populate grid, container not found."); return; }
+              // Grid container fetched earlier
+              if (!portfolioGrid) { console.error("[Debug] Cannot populate grid, container not found."); return; }
               console.log("[Debug] Populating portfolio grid...");
-              gridContainer.innerHTML = ''; // Clear existing items
+              portfolioGrid.innerHTML = ''; // Clear existing items
               projects.forEach((project, index) => {
                   const gridItem = document.createElement('div');
                   gridItem.className = 'portfolio-grid-item animate-on-scroll animate-zoom-in'; // Add animation class
-                  gridItem.style.transitionDelay = `${index * 0.05}s`;
+                  gridItem.style.transitionDelay = `${index * 0.05}s`; // Add stagger delay
                   gridItem.dataset.projectIndex = index;
 
                   const imgContainer = document.createElement('div');
@@ -287,17 +282,19 @@
 
                   gridItem.addEventListener('click', () => {
                       console.log(`[Debug] Grid item ${index} clicked. Calling displayProjectDetails.`);
+                      // Check function exists before calling
                       if (typeof displayProjectDetails === 'function') {
                           displayProjectDetails(index);
                       } else { console.error("[Debug] displayProjectDetails function is not defined when grid item clicked!"); }
                   });
-                  gridContainer.appendChild(gridItem);
+                  portfolioGrid.appendChild(gridItem);
               });
               console.log("[Debug] Portfolio grid populated.");
               // Observe newly added grid items using the globally defined observer
-              gridContainer.querySelectorAll('.animate-on-scroll').forEach(el => {
-                  if (observer) observer.observe(el);
-                  else console.warn("[Debug] Observer not ready when trying to observe grid items.");
+              portfolioGrid.querySelectorAll('.animate-on-scroll').forEach(el => {
+                  if (observer) { // Check if observer exists before using
+                      observer.observe(el);
+                  } else { console.warn("[Debug] Observer not ready when trying to observe grid items."); }
               });
           }
 
@@ -316,17 +313,35 @@
               const linkEl = document.getElementById('showcase-link');
               const linkTextEl = document.getElementById('showcase-link-text');
               const linkIconContainerEl = document.getElementById('showcase-link-icon-container');
-              const gridContainer = document.querySelector('#portfolio .grid');
+              const gridContainer = document.querySelector('#portfolio .grid'); // Needed for active state
 
+              // ** Add checks **
               if (!titleEl || !descEl || !tagsEl || !linkEl || !linkTextEl || !linkIconContainerEl) {
-                  console.error("[Debug] One or more showcase detail elements missing inside displayProjectDetails!"); return;
+                  console.error("[Debug] One or more showcase detail elements missing inside displayProjectDetails!");
+                  return; // Stop if elements are missing
               }
 
               titleEl.textContent = project.title;
               descEl.textContent = project.description;
 
               tagsEl.innerHTML = '';
-              project.tags.forEach(tagText => { /* ... same tag logic ... */ });
+              project.tags.forEach(tagText => {
+                  const tag = tagText.trim();
+                  const t = document.createElement('span');
+                  t.textContent = tag;
+                  t.className = 'portfolio-tag';
+                  const lowerTag = tag.toLowerCase();
+                  let tagType = 'default';
+                  if (lowerTag.includes('ui') || lowerTag.includes('design')) tagType = 'ui';
+                  else if (lowerTag.includes('3d') || lowerTag.includes('blender')) tagType = '3d';
+                  else if (lowerTag.includes('model')) tagType = 'modeling';
+                  else if (lowerTag.includes('script') || lowerTag.includes('lua') || lowerTag.includes('javascript')) tagType = 'scripting';
+                  else if (lowerTag.includes('roblox')) tagType = 'platform';
+                  else if (lowerTag.includes('asset')) tagType = 'assets';
+                  else if (lowerTag.includes('html') || lowerTag.includes('css')) tagType = 'web';
+                  t.dataset.tagType = tagType;
+                  tagsEl.appendChild(t);
+              });
 
               const playIcon = linkIconContainerEl?.querySelector('.icon-play');
               const linkIcon = linkIconContainerEl?.querySelector('.icon-link');
@@ -377,14 +392,11 @@
           function triggerSkillAnimation(element) {
             // ** Get bar inside function **
             const bar = element?.querySelector('.skill-bar-inner');
-            if (!bar) { console.error("[Debug] Skill bar inner not found in triggerSkillAnimation for element:", element); return; }
-
+            if (!bar) { console.error("[Debug] Skill bar inner not found for element:", element); return; }
             const percentage = element.getAttribute('data-skill-percent') || 0;
-            // ** Removed dataset.animated check **
             console.log(`[Debug] Animating skill bar for ${element.dataset.skill || 'unknown'} to ${percentage}%`);
-            bar.style.width = `${percentage}%`; // Set width directly
-            // Mark as animated AFTER setting width to potentially avoid race conditions
-            element.dataset.animated = 'true';
+            bar.style.width = `${percentage}%`;
+            element.dataset.animated = 'true'; // Mark as animated
           }
 
           // --- Intersection Observer Setup (Re-added) ---
@@ -405,12 +417,11 @@
                            console.log("[Debug] Triggering skill animation via observer for:", target.dataset.skill);
                            if (typeof triggerSkillAnimation === 'function') {
                                triggerSkillAnimation(target);
-                           } else { console.error("[Debug] triggerSkillAnimation not defined in observer"); }
+                           }
                         }
-
-                        // If it's a section, the title animation triggers via CSS rule `section.is-visible .section-title::after`
+                        // If it's a section, add is-visible for title animation
                         if (target.tagName === 'SECTION') {
-                            // The .is-visible class is already added above
+                            target.classList.add('is-visible');
                         }
                         obs.unobserve(target); // Stop observing after action
                       }
@@ -418,11 +429,11 @@
                       console.error("[Debug] Error inside IntersectionObserver callback:", callbackError, "on target:", target);
                   }
                 });
-              }, { threshold: 0.15 }); // Trigger when 15% visible
+              }, { threshold: 0.15 });
 
-              // Observe elements that exist on initial load
-              document.querySelectorAll('.animate-on-scroll').forEach(el => {
-                  // Exclude portfolio grid items initially, they are observed after creation
+              // Observe elements that exist on initial load + skill items
+              document.querySelectorAll('.animate-on-scroll, .skill-item').forEach(el => {
+                  // Exclude portfolio grid items initially, they are observed after creation in populateGrid
                   if (!el.closest('.portfolio-grid-item')) {
                       observer.observe(el);
                   }
@@ -441,31 +452,27 @@
 
 
           // --- Event Listeners ---
-          // ** Fetch buttons inside listener setup for safety **
-          const prevBtn = document.getElementById('showcase-prev');
-          const nextBtn = document.getElementById('showcase-next');
-
-          if (prevBtn) {
-              prevBtn.addEventListener('click', () => {
+          // ** Use element variables directly **
+          if (showcasePrevBtn) {
+              showcasePrevBtn.addEventListener('click', () => {
                   console.log("[Debug] Showcase Prev Arrow Clicked");
                   if (currentImageIndex > 0) {
                       if(typeof displayShowcaseImage === 'function') displayShowcaseImage(currentImageIndex - 1);
                   }
               });
               console.log("[Debug] Attached listener to showcasePrevBtn");
-          } else { console.error("[Debug] showcasePrevBtn not found for listener."); }
+          }
 
-          if (nextBtn) {
-              nextBtn.addEventListener('click', () => {
+          if (showcaseNextBtn) {
+              showcaseNextBtn.addEventListener('click', () => {
                   console.log("[Debug] Showcase Next Arrow Clicked");
                   const project = projects[currentProjectIndex];
-                  // Check project exists before accessing length
                   if (project && currentImageIndex < project.images.length - 1) {
                       if(typeof displayShowcaseImage === 'function') displayShowcaseImage(currentImageIndex + 1);
                   }
               });
               console.log("[Debug] Attached listener to showcaseNextBtn");
-          } else { console.error("[Debug] showcaseNextBtn not found for listener."); }
+          }
           // Grid item listeners added in populateGrid
 
           // --- SMP Image Carousel ---
@@ -481,7 +488,8 @@
           } else { console.error("[Debug] populateGrid function not defined!"); }
 
           if (projects.length > 0) {
-              setTimeout(() => { // Keep timeout for initial display
+              // ** Use setTimeout for initial display **
+              setTimeout(() => {
                   if (typeof displayProjectDetails === 'function') {
                       console.log("[Debug] Calling displayProjectDetails(0) via setTimeout.");
                       displayProjectDetails(0);
@@ -489,12 +497,13 @@
               }, 50);
           } else { console.log("[Debug] No projects found."); /* ... handle no projects ... */ }
 
-          // ** Skill animations triggered by observer - REMOVED static trigger loop **
+          // ** Skill animations triggered by observer **
 
           console.log("[Debug] Initial setup complete.");
 
         } catch (error) {
           console.error("[Debug] Error during script initialization:", error);
+          // ** Use variable declared at top **
           if (styleErrorMessage) { styleErrorMessage.textContent = 'A critical error occurred. Check console (F12). Error: ' + error.message; styleErrorMessage.style.display = 'block'; }
         }
       });
