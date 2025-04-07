@@ -61,7 +61,7 @@
         .footer-icon .icon { width: 1.2em; height: 1.2em; margin-right: 0; stroke-width: 1.5; }
         h2 .icon { color: var(--secondary-accent); stroke-width: 2; width: 0.9em; height: 0.9em; } /* Blue icon */
         .lore-header .icon { font-size: 1.5rem; color: var(--secondary-accent); } /* Blue icon */
-        .mcm-award-card .icon-container .icon { width: 1em; height: 1em; margin-right: 0; } /* Reset icon margin */
+        /* Removed mcm-award-card .icon-container styles */
 
 
         /* --- Hero Section --- */
@@ -142,7 +142,7 @@
             0% { background-position: -150% 0; }
             100% { background-position: 150% 0; }
         }
-        .mcm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.75rem; } /* Adjusted minmax and gap */
+        .mcm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.75rem; }
         .mcm-award-card {
             background-color: var(--surface-color); border-radius: 0.75rem; /* Nicer rounding */
             padding: 1.5rem; border: 1px solid var(--border-color);
@@ -151,26 +151,28 @@
             position: relative; overflow: hidden;
             display: flex; align-items: center; gap: 1rem; /* Gap between elements */
         }
-        .mcm-award-card .icon-container { /* Container for trophy icon */
-            font-size: 1.8rem; /* Adjusted icon size */
-            line-height: 1; color: var(--text-secondary); flex-shrink: 0;
-            transition: color 0.3s ease-out, transform 0.3s ease-out;
-        }
          .winner-headshot-container { /* Container for headshot */
-            width: 48px; height: 48px; flex-shrink: 0;
-            border-radius: 0.375rem; /* rounded-md */ overflow: hidden;
+            width: 48px; height: 48px; flex-shrink: 0; /* Updated size */
+            border-radius: 0.375rem; overflow: hidden;
             background-color: var(--border-color);
-            /* border: 1px solid var(--border-color); */ /* Can remove inner border */
          }
         .winner-headshot {
             display: block; width: 100%; height: 100%;
-            object-fit: contain; image-rendering: pixelated; /* Keep pixelated for MC heads */
+            object-fit: contain; image-rendering: pixelated;
         }
         .mcm-award-card .text-content { text-align: left; flex-grow: 1; }
         .mcm-award-card h3 { /* Event Name */
             font-size: 1rem; font-weight: 600; color: var(--text-primary);
             margin-bottom: 0.2rem;
+            display: flex; /* Align icon with title */
+            align-items: center;
         }
+         .mcm-award-card h3 .icon { /* Trophy Icon Styling */
+             width: 1.1em; height: 1.1em; margin-right: 0.4em;
+             color: var(--text-secondary); /* Default color */
+             stroke-width: 2;
+             transition: color 0.3s ease-out;
+         }
         .winner-name { /* Winner Name */
             font-family: 'Inter', sans-serif; /* Use Inter */
             font-size: 0.95rem; font-weight: 500; /* Slightly bolder */
@@ -182,12 +184,12 @@
             border-color: var(--secondary-accent);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
-         .mcm-award-card:hover .icon-container { color: var(--secondary-accent); }
+         .mcm-award-card:hover h3 .icon { color: var(--secondary-accent); } /* Icon color on hover */
          .mcm-award-card:hover .winner-name { color: var(--text-primary); } /* Make name primary on hover */
 
         /* Gold highlight and animation for 1st place */
         .mcm-award-card.first-place { border-left: 4px solid var(--tertiary-accent); }
-        .mcm-award-card.first-place .icon-container { color: var(--tertiary-accent); }
+        .mcm-award-card.first-place h3 .icon { color: var(--tertiary-accent); } /* Gold icon */
         .mcm-award-card.first-place .winner-name { color: var(--tertiary-accent); }
         /* Continuous Golden Sweep Animation */
         .mcm-award-card.first-place::before {
@@ -195,16 +197,16 @@
             background: linear-gradient(110deg, transparent 35%, var(--mcm-gold-glow) 50%, transparent 65%);
             background-size: 250% 100%;
             background-position: -150% 0;
-            opacity: 1; animation: gold-sweep 3s linear var(--animation-delay, 0s) infinite; /* Slower sweep */
+            opacity: 1; animation: gold-sweep 3s linear var(--animation-delay, 0s) infinite;
             z-index: 0; pointer-events: none;
         }
         .mcm-award-card.first-place:hover {
-             border-color: var(--tertiary-accent); /* Keep gold border */
+             border-color: var(--tertiary-accent);
              animation: none; /* Pause sweep on hover */
              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25), 0 0 20px var(--mcm-gold-glow); /* Static glow */
         }
-        .mcm-award-card.first-place:hover .icon-container { transform: scale(1.1); }
-        .mcm-award-card > * { position: relative; z-index: 1; } /* Content above sweep */
+        .mcm-award-card.first-place:hover h3 .icon { color: var(--tertiary-accent); transform: scale(1.1); } /* Scale icon on hover */
+        .mcm-award-card > * { position: relative; z-index: 1; }
         /* --- End MCM Award Styling --- */
 
 
@@ -229,7 +231,10 @@
 
         /* Section Styling & Headers */
         section { padding: 5rem 1rem; }
-        section:nth-of-type(even) { background-color: var(--surface-color); }
+        /* Add alternating backgrounds */
+        section:nth-of-type(even):not(#mcm-winners) { background-color: var(--surface-color); } /* Apply to even sections EXCEPT mcm-winners */
+        #mcm-winners { background-color: var(--bg-color); } /* Ensure MCM matches body bg */
+
         .section-container { max-width: 64rem; margin-left: auto; margin-right: auto; }
         h2 {
             color: var(--text-heading); font-weight: 600; font-size: 2rem;
@@ -372,42 +377,90 @@
              <div class="section-container">
                  <div class="mcm-grid">
                     <div class="mcm-award-card first-place reveal reveal-1">
-                        <div class="icon-container">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                        </div>
-                        <div class="winner-headshot-container">
-                             <img src="https://minotar.net/cube/Sal_AMG/125.png" alt="Juicy's headshot" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=?';">
+                         <div class="winner-headshot-container">
+                             <img src="https://mc-heads.net/isometric/Sal_AMG/48.png" alt="Sal_AMG's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=S'; this.style.display='none'; this.parentElement.style.backgroundColor='var(--tertiary-accent)';">
                          </div>
                         <div class="text-content">
-                            <h3>Black Market</h3>
+                            <h3>
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 1
+                            </h3>
                             <p class="winner-name"> Sal_AMG </p>
                         </div>
                     </div>
                     <div class="mcm-award-card first-place reveal reveal-2">
-                         <div class="icon-container">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                        </div>
                          <div class="winner-headshot-container">
-                             <img src="https://minotar.net/cube/BirdBakoun/125.png" alt="Vaxar's headshot" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=?';">
+                             <img src="https://mc-heads.net/isometric/BirdBakoun/48.png" alt="BirdBakoun's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=B'; this.style.display='none'; this.parentElement.style.backgroundColor='var(--tertiary-accent)';">
                          </div>
                         <div class="text-content">
-                            <h3>Sands of Time</h3>
+                             <h3>
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 2
+                            </h3>
                             <p class="winner-name"> BirdBakoun </p>
                         </div>
                     </div>
                     <div class="mcm-award-card first-place reveal reveal-3">
-                         <div class="icon-container">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-                        </div>
                          <div class="winner-headshot-container">
-                             <img src="https://minotar.net/cube/Juicy_7179/125.png" alt="ScaryScoop's headshot" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=?';">
+                             <img src="https://mc-heads.net/isometric/Juicy_7179/48.png" alt="Juicy_7179's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=J'; this.style.display='none'; this.parentElement.style.backgroundColor='var(--tertiary-accent)';">
                          </div>
                         <div class="text-content">
-                            <h3>Ben's Dungeon</h3>
+                             <h3>
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 3
+                            </h3>
                              <p class="winner-name"> Juicy_7179 </p>
                         </div>
                     </div>
-                 </div>
+                    <div class="mcm-award-card first-place reveal reveal-4">
+                         <div class="winner-headshot-container">
+                             <img src="https://mc-heads.net/isometric/the_perp/48.png" alt="the_perp's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=T'; this.style.display='none'; this.parentElement.style.backgroundColor='var(--tertiary-accent)';">
+                         </div>
+                        <div class="text-content">
+                             <h3>
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 4
+                            </h3>
+                            <p class="winner-name"> the_perp </p>
+                        </div>
+                    </div>
+                     <div class="mcm-award-card first-place reveal reveal-1">
+                         <div class="winner-headshot-container">
+                             <img src="https://mc-heads.net/isometric/Liqhtu/48.png" alt="Liqhtu's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=L'; this.style.display='none'; this.parentElement.style.backgroundColor='var(--tertiary-accent)';">
+                         </div>
+                        <div class="text-content">
+                             <h3>
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 5
+                            </h3>
+                            <p class="winner-name"> Liqhtu </p>
+                        </div>
+                    </div>
+                     <div class="mcm-award-card first-place reveal reveal-2">
+                         <div class="winner-headshot-container">
+                             <img src="https://mc-heads.net/isometric/Backwardsrebel/48.png" alt="Backwardsrebel's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=B'; this.style.display='none'; this.parentElement.style.backgroundColor='var(--tertiary-accent)';">
+                         </div>
+                         <div class="text-content">
+                              <h3>
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 6
+                            </h3>
+                            <p class="winner-name"> Backwardsrebel </p>
+                        </div>
+                    </div>
+                     <div class="mcm-award-card first-place reveal reveal-3">
+                         <div class="winner-headshot-container">
+                             <img src="https://mc-heads.net/isometric/Ramjema/48.png" alt="Ramjema's head" class="winner-headshot" onerror="this.onerror=null; this.src='https://placehold.co/48x48/161b22/8b949e?text=R'; this.style.display='none'; this.parentElement.style.backgroundColor='var(--tertiary-accent)';">
+                         </div>
+                         <div class="text-content">
+                              <h3>
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M8 12v-3a4 4 0 0 1 8 0v3"/></svg>
+                                Season 7
+                            </h3>
+                            <p class="winner-name"> Ramjema </p>
+                        </div>
+                    </div>
+                </div>
              </div>
         </section>
 
@@ -591,8 +644,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const mcmCards = document.querySelectorAll('.mcm-award-card.first-place');
             mcmCards.forEach(card => {
-                // Generate random delay between 0 and animation duration (2.8s)
-                const randomDelay = -(Math.random() * 2.8);
+                // Generate random delay between 0 and animation duration (3s)
+                const randomDelay = -(Math.random() * 3);
                 card.style.setProperty('--animation-delay', `${randomDelay}s`);
             });
         });
