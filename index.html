@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blazinik - Programmer & Designer</title>
+    <title>Blazinik - Programmer & Designer [Isolated Skill Anim]</title>
     <link rel="icon" type="image/gif" href="images/DenoLogo3D-Anim.gif">
-    <meta name="description" content="Check out my favorite music, steam profile, youtube and information about my recent projects.">
+    <meta name="description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
 
-    <meta property="og:title" content="Blazinik - Programmer & Designer" />
-    <meta property="og:description" content="Check out my favorite music, steam profile, youtube and information about my recent projects." />
+    <meta property="og:title" content="Blazinik - Programmer & Designer [Isolated Skill Anim]" />
+    <meta property="og:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://blazinik.xyz/" /> <meta property="og:image" content="https://placehold.co/1200x630/0a0e12/e5e7eb?text=Blazinik+Portfolio" /> <meta property="og:image:alt" content="Blazinik Portfolio Preview" />
+    <meta property="og:url" content="https://blazinik.xyz/" />
+    <meta property="og:image" content="https://placehold.co/1200x630/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
+    <meta property="og:image:alt" content="Blazinik Portfolio Preview" />
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Blazinik - Programmer & Designer">
-    <meta name="twitter:description" content="Check out my favorite music, steam profile, youtube and information about my recent projects.">
-    <meta name="twitter:image" content="https://placehold.co/1200x600/0a0e12/e5e7eb?text=Blazinik+Portfolio" /> <meta name="twitter:image:alt" content="Blazinik Portfolio Preview">
+    <meta name="twitter:title" content="Blazinik - Programmer & Designer [Isolated Skill Anim]">
+    <meta name="twitter:description" content="Blazinik's cutting-edge personal portfolio showcasing programming, design, and interactive projects.">
+    <meta name="twitter:image" content="https://placehold.co/1200x600/0a0e12/e5e7eb?text=Blazinik+Portfolio" />
+    <meta name="twitter:image:alt" content="Blazinik Portfolio Preview">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -64,6 +67,10 @@
         color: var(--text-primary);
         scroll-behavior: smooth;
         overflow-x: hidden; /* Prevent horizontal scroll */
+      }
+      /* Class added to body when modal is open */
+      body.modal-open {
+        overflow: hidden;
       }
 
       /* --- Layout & Spacing --- */
@@ -228,6 +235,7 @@
         max-height: 50vh; /* Limit image height */
         object-fit: contain; /* Ensure image fits without distortion */
         transition: opacity 0.3s ease-in-out; /* Fade effect for image change */
+        cursor: zoom-in; /* Indicate image is clickable */
       }
       #showcase-details {
         display: flex;
@@ -389,6 +397,24 @@
       /* --- Error Message Styling --- */
       #style-error-message { display: none; /* Hidden by default */ }
 
+      /* --- Image Modal Styles --- */
+      #image-modal {
+        transition: opacity 0.3s ease-in-out; /* Fade transition for modal */
+      }
+      #image-modal img {
+        max-width: 90vw;  /* Limit image width */
+        max-height: 85vh; /* Limit image height */
+        object-fit: contain;
+        border-radius: 0.5rem; /* Optional: rounded corners for modal image */
+      }
+      #image-modal-close {
+         transition: color 0.2s ease, transform 0.2s ease;
+      }
+       #image-modal-close:hover {
+         color: white;
+         transform: scale(1.1);
+      }
+
     </style>
 </head>
 <body class="text-gray-200">
@@ -498,10 +524,11 @@
         <section id="portfolio" class="section-padding border-b border-[var(--border-color)]">
              <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                  <h2 class="section-title text-4xl md:text-5xl font-bold text-center text-white">Project Showcase</h2>
+                 <p class="text-center text-gray-400 mb-10 max-w-3xl mx-auto text-lg"> Click a project thumbnail below to view details. </p>
 
                  <div id="portfolio-showcase-display" class="animate-on-scroll animate-zoom-in">
                      <div id="showcase-image-container">
-                         <img id="showcase-image" src="images/pS1.png" alt="Project Image" onerror="this.onerror=null; this.src='https://placehold.co/600x400/111827/9ca3af?text=Error';">
+                         <img id="showcase-image" src="images/pS1.png" alt="Project Image" onerror="this.onerror=null; this.src='https://placehold.co/600x400/111827/9ca3af?text=Error';" aria-label="Click to enlarge image">
                          <button id="showcase-prev" class="carousel-button prev" aria-label="Previous image">
                              <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
                          </button>
@@ -551,6 +578,18 @@
         <p>Crafted with <span class="text-red-500 animate-pulse">💖</span> by Blazinik</p>
     </footer>
 
+    <div id="image-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[5000] hidden opacity-0" role="dialog" aria-modal="true" aria-labelledby="modal-image">
+        <div class="relative">
+            <img id="modal-image" src="" alt="Enlarged project image" class="block">
+            <button id="image-modal-close" class="absolute top-3 right-3 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-white rounded-full p-1" aria-label="Close image viewer">
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+
     <script>
       // Wrap entire script in DOMContentLoaded to ensure HTML is ready
       document.addEventListener('DOMContentLoaded', () => {
@@ -560,13 +599,13 @@
         const styleErrorMessage = document.getElementById('style-error-message');
 
         try {
-          // --- Get Static Elements (Fetch non-dynamic elements early) ---
+          // --- Get Static Elements ---
           console.log("[Debug] Getting static elements...");
-          const portfolioGridContainer = document.querySelector('#portfolio .grid'); // Container for grid items
+          const portfolioGridContainer = document.querySelector('#portfolio .grid');
           const showcasePrevBtn = document.getElementById('showcase-prev');
           const showcaseNextBtn = document.getElementById('showcase-next');
           const smpImageElement = document.getElementById('smp-image');
-          const showcaseImageElement = document.getElementById('showcase-image'); // Showcase main image
+          const showcaseImageElement = document.getElementById('showcase-image');
           const showcaseTitleElement = document.getElementById('showcase-title');
           const showcaseDescElement = document.getElementById('showcase-description');
           const showcaseTagsElement = document.getElementById('showcase-tags');
@@ -574,6 +613,11 @@
           const showcaseLinkTextElement = document.getElementById('showcase-link-text');
           const showcaseLinkIconContainerElement = document.getElementById('showcase-link-icon-container');
           const showcaseCounterElement = document.getElementById('showcase-counter');
+          // ** NEW: Modal Elements **
+          const imageModal = document.getElementById('image-modal');
+          const modalImage = document.getElementById('modal-image');
+          const modalCloseBtn = document.getElementById('image-modal-close');
+
 
           // --- Check Essential Static Elements ---
           if (!portfolioGridContainer) console.error('[Debug] Portfolio grid container not found!');
@@ -582,10 +626,11 @@
           if (!smpImageElement) console.error('[Debug] smpImageElement not found!');
           if (!showcaseImageElement) console.error('[Debug] showcaseImageElement not found!');
           if (!showcaseTitleElement) console.error('[Debug] showcaseTitleElement not found!');
-          if (!showcaseDescElement) console.error('[Debug] showcaseDescElement not found!');
-          if (!showcaseTagsElement) console.error('[Debug] showcaseTagsElement not found!');
-          if (!showcaseLinkElement) console.error('[Debug] showcaseLinkElement not found!');
-          if (!showcaseCounterElement) console.error('[Debug] showcaseCounterElement not found!');
+          // ... (other checks remain the same)
+          // ** NEW: Check Modal Elements **
+          if (!imageModal) console.error('[Debug] imageModal not found!');
+          if (!modalImage) console.error('[Debug] modalImage not found!');
+          if (!modalCloseBtn) console.error('[Debug] modalCloseBtn not found!');
 
 
           // --- Project Data (Using original relative paths) ---
@@ -594,16 +639,16 @@
               title: "Stargate: Horizon",
               images: [ "images/pS1.png", "images/pS2.jpeg", "images/pS3.png" ],
               description: "A science-fiction project involving complex scripting, detailed UI design, and 3D asset creation within the Roblox platform. Focused on creating an immersive experience based on the Stargate franchise.",
-              link: "https://www.roblox.com/games/3901984129/Stargate-Horizons", // Example link
+              link: "https://www.roblox.com/games/3901984129/Stargate-Horizons",
               linkType: "roblox",
               tags: ["Ui Design", "3D art", "Scripting", "Roblox"],
-              thumbnail: "images/pS1.png" // Thumbnail for the grid
+              thumbnail: "images/pS1.png"
             },
             {
               title: "Project Franklin",
               images: [ "images/pR1.png", "images/pR2.png", "images/pR3.png", "images/pR4.png" ],
               description: "A personal project recreating Franklin's house from GTA V in Blender and importing it into Roblox Studio. This was a modeling and texturing exercise released for free to the community.",
-              link: "#", // No specific link provided
+              link: "#",
               linkType: "other",
               tags: ["Assets", "Modeling", "3D Design", "Blender", "Roblox Studio"],
               thumbnail: "images/pR1.png"
@@ -612,12 +657,11 @@
               title: "Project Space",
               images: [ "images/gsp1.png", "images/gsp2.jpeg", "images/gsp3.jpeg", "images/gsp4.png", "images/gsp5.png" ],
               description: "Project Space was a true passion project where I poured countless hours into development. As the creator of the Grant Space Program, I focused on building immersive environments, engaging mission systems, and a strong sense of community. This project helped me grow immensely as a developer—especially in environmental design and scripting.",
-              link: "#", // No specific link provided
+              link: "#",
               linkType: "other",
               tags: ["Ui Design", "Assets", "Modeling", "Scripting", "3D Design", "Blender", "Roblox Studio"],
               thumbnail: "images/gsp1.png"
             }
-            // Add more projects here following the same structure
           ];
           let currentProjectIndex = 0;
           let currentImageIndex = 0;
@@ -625,6 +669,7 @@
 
           // --- Populate Portfolio Grid ---
           function populateGrid() {
+            // ... (rest of populateGrid function remains the same) ...
             if (!portfolioGridContainer) { console.error("[Debug] Cannot populate grid, container not found."); return; }
             console.log("[Debug] Populating portfolio grid...");
             portfolioGridContainer.innerHTML = ''; // Clear existing items before populating
@@ -681,6 +726,7 @@
 
           // --- Display Project Details Logic ---
           function displayProjectDetails(index) {
+            // ... (rest of displayProjectDetails function remains the same until image display) ...
             console.log(`[Debug] Displaying project index: ${index}`);
             if (index < 0 || index >= projects.length || !projects[index]) {
               console.error(`[Debug] Invalid project index or missing project data: ${index}`);
@@ -750,6 +796,7 @@
                 showcaseLinkElement.classList.add('hidden');
             }
 
+            // Display the first image of the project
             if (typeof displayShowcaseImage === 'function') {
               console.log("[Debug] Calling displayShowcaseImage(0) for new project.");
               displayShowcaseImage(0);
@@ -757,6 +804,7 @@
               console.error("[Debug] displayShowcaseImage function is not defined when changing project.");
             }
 
+            // Update Active Thumbnail State
             if (portfolioGridContainer) {
               const gridItems = portfolioGridContainer.querySelectorAll('.portfolio-grid-item');
               gridItems.forEach((item, i) => {
@@ -770,6 +818,7 @@
 
           // --- Display Specific Showcase Image Logic ---
           function displayShowcaseImage(imgIndex) {
+            // ... (rest of displayShowcaseImage function remains mostly the same) ...
             console.log(`[Debug] Attempting display image index: ${imgIndex} for project index: ${currentProjectIndex}`);
             const project = projects[currentProjectIndex];
 
@@ -799,7 +848,6 @@
 
             setTimeout(() => {
                 showcaseImageElement.src = imageUrl;
-                // Fallback if original image fails to load
                 showcaseImageElement.onerror = () => {
                     console.error(`[Debug] Image failed to load: ${imageUrl}`);
                     showcaseImageElement.src = 'https://placehold.co/600x400/111827/9ca3af?text=Load+Error'; // Use placeholder on error
@@ -807,7 +855,7 @@
                 };
                 showcaseImageElement.onload = () => {
                     showcaseImageElement.style.opacity = '1';
-                    showcaseImageElement.onerror = null; // Reset onerror after successful load
+                    showcaseImageElement.onerror = null;
                 }
             }, 150);
 
@@ -830,6 +878,7 @@
 
           // --- Skill Bar Animation Trigger ---
           function triggerSkillAnimation(element) {
+            // ... (triggerSkillAnimation function remains the same) ...
             const bar = element?.querySelector('.skill-bar-inner');
             if (!bar) {
               console.warn("[Debug] Skill bar inner element not found for:", element);
@@ -847,6 +896,7 @@
           // --- Intersection Observer Setup for Scroll Animations ---
           console.log("[Debug] Setting up Intersection Observer...");
           let observer;
+          // ... (Intersection Observer setup remains the same) ...
           try {
             observer = new IntersectionObserver((entries, obs) => {
               entries.forEach(entry => {
@@ -893,7 +943,9 @@
           }
 
 
-          // --- Event Listeners for Showcase Carousel ---
+          // --- Event Listeners ---
+
+          // Showcase Carousel Buttons
           if (showcasePrevBtn) {
             showcasePrevBtn.addEventListener('click', () => {
               console.log("[Debug] Showcase Prev Arrow Clicked");
@@ -919,20 +971,86 @@
             console.log("[Debug] Attached listener to showcaseNextBtn");
           } else { console.warn("[Debug] showcaseNextBtn listener not attached (element missing)."); }
 
+          // ** NEW: Image Modal Listeners **
+          function openModal(imageUrl) {
+              if (!imageModal || !modalImage) return;
+              console.log(`[Debug] Opening modal for image: ${imageUrl}`);
+              modalImage.src = imageUrl;
+              modalImage.onerror = () => { // Handle potential error loading full image
+                  console.error(`[Debug] Modal Image failed to load: ${imageUrl}`);
+                  modalImage.src = 'https://placehold.co/800x600/111827/ef4444?text=Load+Error';
+              };
+              imageModal.classList.remove('hidden');
+              // Use setTimeout to allow the display change, then trigger opacity transition
+              setTimeout(() => {
+                  imageModal.classList.remove('opacity-0');
+                  document.body.classList.add('modal-open'); // Prevent background scroll
+              }, 10); // Small delay
+          }
 
-          // --- SMP Image Carousel Logic (Using original relative paths) ---
+          function closeModal() {
+              if (!imageModal) return;
+              console.log("[Debug] Closing modal.");
+              imageModal.classList.add('opacity-0');
+              // Wait for fade out transition before hiding and removing body class
+              setTimeout(() => {
+                  imageModal.classList.add('hidden');
+                  document.body.classList.remove('modal-open'); // Allow background scroll
+                  if (modalImage) modalImage.src = ""; // Clear src to free memory
+              }, 300); // Match CSS transition duration
+          }
+
+          // Listener for clicking the main showcase image
+          if (showcaseImageElement) {
+              showcaseImageElement.addEventListener('click', () => {
+                  if (showcaseImageElement.src && !showcaseImageElement.src.includes('placehold.co')) { // Don't open modal for placeholders/errors
+                      openModal(showcaseImageElement.src);
+                  } else {
+                      console.log("[Debug] Modal not opened for placeholder/error image.");
+                  }
+              });
+              console.log("[Debug] Attached modal open listener to showcaseImageElement");
+          } else { console.warn("[Debug] showcaseImageElement listener not attached (element missing)."); }
+
+          // Listener for the modal close button
+          if (modalCloseBtn) {
+              modalCloseBtn.addEventListener('click', closeModal);
+              console.log("[Debug] Attached listener to modalCloseBtn");
+          } else { console.warn("[Debug] modalCloseBtn listener not attached (element missing)."); }
+
+          // Listener for clicking the modal background (overlay)
+          if (imageModal) {
+              imageModal.addEventListener('click', (event) => {
+                  // Close only if the click is directly on the overlay (not the image/button inside)
+                  if (event.target === imageModal) {
+                      closeModal();
+                  }
+              });
+              console.log("[Debug] Attached overlay click listener to imageModal");
+          } else { console.warn("[Debug] imageModal overlay listener not attached (element missing)."); }
+
+          // Listener for the Escape key
+          document.addEventListener('keydown', (event) => {
+              if (event.key === 'Escape' && !imageModal.classList.contains('hidden')) {
+                  closeModal();
+              }
+          });
+          console.log("[Debug] Attached Escape key listener for modal");
+
+
+          // --- SMP Image Carousel Logic ---
           const smpImages = [ "images/smp1.png", "images/smp2.png", "images/smp3.png", "images/smp4.png" ];
           let currentSmpImageIndex = 0;
           let smpIntervalId = null;
 
           function changeSmpImage() {
+            // ... (changeSmpImage function remains the same) ...
             if (!smpImageElement) return;
             currentSmpImageIndex = (currentSmpImageIndex + 1) % smpImages.length;
             smpImageElement.style.opacity = 0;
             setTimeout(() => {
               smpImageElement.src = smpImages[currentSmpImageIndex]; // Use original path
               smpImageElement.alt = `Extreme Juicers SMP Screenshot ${currentSmpImageIndex + 1}`;
-              // Fallback if original SMP image fails
               smpImageElement.onerror = () => {
                   console.error(`[Debug] SMP Image failed to load: ${smpImages[currentSmpImageIndex]}`);
                   smpImageElement.src = 'https://placehold.co/1600x900/111827/9ca3af?text=Error'; // Use placeholder on error
@@ -946,6 +1064,7 @@
           }
 
           if (smpImageElement && smpImages.length > 1) {
+            // ... (SMP carousel interval setup remains the same) ...
             console.log("[Debug] Starting SMP image carousel.");
             smpIntervalId = setInterval(changeSmpImage, 5000);
             const smpSection = document.getElementById('smp-section');
@@ -981,6 +1100,7 @@
               }
             }, 50);
           } else {
+            // ... (Handling for no projects remains the same) ...
             console.log("[Debug] No projects found to display initially.");
              if(showcaseTitleElement) showcaseTitleElement.textContent = "No Projects Yet";
              if(showcaseDescElement) showcaseDescElement.textContent = "Check back later for project updates!";
