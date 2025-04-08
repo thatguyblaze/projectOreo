@@ -511,6 +511,8 @@
             }
             const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
+            console.log("--- Rendering Inventory ---"); // Added log start
+
             carsToRender.forEach(car => {
                 const daysInStorage = car.dateIn ? daysDifference(car.dateIn, today) : NaN;
                 let highlightClass = '';
@@ -518,6 +520,10 @@
                     if (daysInStorage >= 30) { highlightClass = 'highlight-red'; } // 30+ days
                     else if (daysInStorage >= 17) { highlightClass = 'highlight-yellow'; } // 17-29 days
                 }
+
+                // *** ADDED LOGGING HERE ***
+                console.log(`Car ID: ${car.id}, Plate: ${car.plateNumber}, Date In: ${car.dateIn}, Days: ${daysInStorage}, Highlight Class: '${highlightClass}'`);
+
                 const row = document.createElement('tr');
                 row.className = `${highlightClass} text-sm inventory-table-row`; // Add transition class
 
@@ -538,6 +544,7 @@
                 `;
                 inventoryTbody.appendChild(row);
             });
+             console.log("--- Finished Rendering Inventory ---"); // Added log end
         }
 
         function filterAndRenderInventory() {
