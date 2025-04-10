@@ -1106,15 +1106,12 @@
               // Add new car
               carData.id = `car_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`; // Simple unique ID
               inventory.unshift(carData); // Add to the beginning of the array
-              showDialog('Car added successfully!', null, 'btn-success');
           } else if (mode === 'edit' && editId) {
               // Update existing car
               const carIndex = inventory.findIndex(car => car.id === editId);
               if (carIndex !== -1) {
                   inventory[carIndex] = { ...inventory[carIndex], ...carData }; // Merge data, keeping original ID
-                  showDialog('Car updated successfully!', null, 'btn-success');
               } else {
-                  showDialog('Error: Could not find car to update.', null, 'btn-danger');
                   closeAddCarModal();
                   return; // Exit early
               }
@@ -1251,7 +1248,6 @@
             addTowDataForm.reset(); // Clear the form
             // Set date input back to today for convenience
             towDateInput.value = new Date().toISOString().split('T')[0];
-            showDialog('Tow data added/updated successfully!', null, 'btn-success');
       }
 
 
@@ -1267,7 +1263,6 @@
               saveTowData();
               renderTowDataTable();
               updateTowChartAndPrediction(); // Update chart and prediction
-              showDialog('Tow data entry deleted.', null, 'btn-success');
           }, 'btn-danger');
       }
 
