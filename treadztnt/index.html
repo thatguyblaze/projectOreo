@@ -3,382 +3,605 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treadz Pricing Calculator, Inventory & Prediction - Staff</title>
+    <title>Treadz - Towing & Inventory Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class', // Enable dark mode based on class
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'], // Set default font
-                    },
-                    colors: {
-                        // Define custom colors for light and dark modes
-                        'gray': { 700: '#374151', 800: '#1F2937', 900: '#111827' },
-                        'highlight-yellow-light': '#FEF9C3', // yellow-100
-                        'highlight-yellow-dark': '#78350F',  // amber-900
-                        'highlight-red-light': '#FEE2E2',   // red-100
-                        'highlight-red-dark': '#7F1D1D',   // red-900
-                        // Add colors for chart/prediction if needed
-                        'prediction-blue-light': '#EFF6FF', // blue-50
-                        'prediction-blue-dark': '#1E3A8A', // blue-900
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.css">
     <style>
         /* Base styles */
-        body { font-family: 'Inter', sans-serif; display: flex; flex-direction: column; min-height: 100vh;}
+        :root {
+            --primary-color-light: #4f46e5; /* indigo-600 */
+            --primary-color-dark: #818cf8;  /* indigo-400 */
+            --secondary-color-light: #f3f4f6; /* gray-100 */
+            --secondary-color-dark: #1f2937; /* gray-800 */
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #374151; /* gray-700 */
+            --text-light: #111827; /* gray-900 */
+            --text-dark: #f9fafb; /* gray-50 */
+            --text-muted-light: #6b7280; /* gray-500 */
+            --text-muted-dark: #9ca3af; /* gray-400 */
+            --border-light: #e5e7eb; /* gray-200 */
+            --border-dark: #4b5563; /* gray-600 */
+            --highlight-yellow-light: #fef9c3; /* yellow-100 */
+            --highlight-yellow-dark: #78350f;  /* amber-900 */
+            --highlight-red-light: #fee2e2;   /* red-100 */
+            --highlight-red-dark: #7f1d1d;   /* red-900 */
+            --prediction-bg-light: #eff6ff; /* blue-50 */
+            --prediction-bg-dark: #1e3a8a; /* blue-900 */
+            --prediction-text-light: #2563eb; /* blue-600 */
+            --prediction-text-dark: #93c5fd; /* blue-300 */
+            --success-light: #10b981; /* emerald-500 */
+            --success-dark: #34d399; /* emerald-400 */
+            --danger-light: #ef4444; /* red-500 */
+            --danger-dark: #f87171; /* red-400 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: var(--secondary-color-light);
+            color: var(--text-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark body {
+            background-color: var(--secondary-color-dark);
+            color: var(--text-dark);
+        }
         main { flex-grow: 1; }
-        /* Hide number input spinners */
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button { opacity: 0.8; }
-        /* Focus styles for accessibility */
-        .dark input:focus, .dark select:focus, .dark input[type=checkbox]:focus, .dark button:focus, .dark input[type=search]:focus, .dark input[type=date]:focus {
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.7); /* Indigo focus ring */
-            outline: none;
-        }
-        label { display: block; margin-bottom: 0.25rem; font-weight: 500; }
-        .input-group { margin-bottom: 1rem; }
-        .output-section { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #E5E7EB; } /* Light mode border */
-        .output-value { font-size: 1.5rem; font-weight: 700; display: block; }
-        .placeholder-note { font-size: 0.875rem; margin-top: 0.25rem; }
-        /* Dark mode specific styles */
-        .dark label { color: #D1D5DB; } /* gray-300 */
-        .dark .output-section { border-top-color: #4B5563; } /* Dark mode border (gray-600) */
-        .dark .placeholder-note { color: #9CA3AF; } /* gray-400 */
-        .dark #calculatedCost { color: #34D399; } /* emerald-400 */
-        .dark #calculatedFuelCost { color: #60A5FA; } /* blue-400 */
-        .dark #calculatedProfit { color: #FBBF24; } /* amber-400 */
-        .dark #calculatedTime { color: #A78BFA; } /* violet-400 */
-
-        /* --- Overtime Toggle Switch Style --- */
-        .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .dark .slider { background-color: #4B5563; } /* gray-600 */
-        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #4F46E5; } /* indigo-600 */
-        input:checked + .slider:before { transform: translateX(26px); }
-
-        /* --- Inventory Table Highlighting & Row Styles --- */
-        .inventory-table-row, .tow-data-table-row { transition: background-color 0.3s ease-in-out; } /* Smooth highlight transition */
-        .highlight-yellow { background-color: var(--highlight-yellow-light); }
-        .dark .highlight-yellow { background-color: var(--highlight-yellow-dark); color: #FEFCE8; } /* amber-50 */
-        .highlight-red { background-color: var(--highlight-red-light); }
-        .dark .highlight-red { background-color: var(--highlight-red-dark); color: #FEF2F2; } /* red-50 */
-        /* Subtle alternating row colors */
-         #inventoryTbody tr:nth-child(even), #towDataTbody tr:nth-child(even) { background-color: #f9fafb; } /* gray-50 */
-        .dark #inventoryTbody tr:nth-child(even), .dark #towDataTbody tr:nth-child(even) { background-color: rgba(31, 41, 55, 0.5); } /* gray-800 with opacity */
-        /* Ensure highlights override alternating colors */
-        #inventoryTbody .highlight-yellow, #inventoryTbody .highlight-red,
-        #towDataTbody .highlight-yellow, #towDataTbody .highlight-red { /* Use more specific selector */
-            /* Background colors defined above */
-        }
-         .dark #inventoryTbody .highlight-yellow, .dark #inventoryTbody .highlight-red,
-         .dark #towDataTbody .highlight-yellow, .dark #towDataTbody .highlight-red {
-            /* Background colors defined above */
-        }
-
-        /* Header and Footer styles */
-        header, footer { width: 100%; padding: 1rem; }
         footer { margin-top: auto; }
 
-        /* Modal Styles & Animations */
-        .modal {
+        /* Hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { appearance: none; margin: 0; }
+        input[type=number] { appearance: textfield; } /* Firefox */
+
+        /* Custom Card Styling */
+        .card {
+            background-color: var(--card-bg-light);
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem; /* p-6 */
+            transition: background-color 0.3s;
+        }
+        .dark .card {
+            background-color: var(--card-bg-dark);
+        }
+
+        /* Input/Select Styling */
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.625rem 0.75rem; /* py-2.5 px-3 */
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: var(--card-bg-light);
+            color: var(--text-light);
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .dark .form-input, .dark .form-select {
+            border-color: var(--border-dark);
+            background-color: var(--secondary-color-dark); /* gray-800 */
+            color: var(--text-dark);
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color-light);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3); /* Primary color focus ring */
+        }
+        .dark .form-input:focus, .dark .form-select:focus {
+            border-color: var(--primary-color-dark);
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.4); /* Primary dark focus ring */
+        }
+        label { display: block; margin-bottom: 0.375rem; font-weight: 500; font-size: 0.875rem; color: var(--text-muted-light); }
+        .dark label { color: var(--text-muted-dark); }
+
+        /* Button Styling */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1rem; /* py-2.5 px-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            font-size: 0.875rem; /* text-sm */
+            transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .btn:focus { outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4); }
+        .dark .btn:focus { box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.5); }
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background-color: var(--primary-color-light);
+            color: white;
+        }
+        .btn-primary:hover { background-color: #4338ca; } /* indigo-700 */
+        .dark .btn-primary { background-color: var(--primary-color-dark); color: var(--text-light); }
+        .dark .btn-primary:hover { background-color: #6366f1; } /* indigo-500 */
+
+        .btn-secondary {
+            background-color: var(--secondary-color-light);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+        }
+        .btn-secondary:hover { background-color: #e5e7eb; } /* gray-200 */
+        .dark .btn-secondary {
+            background-color: var(--card-bg-dark); /* gray-700 */
+            color: var(--text-dark);
+            border-color: var(--border-dark);
+        }
+        .dark .btn-secondary:hover { background-color: #4b5563; } /* gray-600 */
+
+        .btn-success { background-color: var(--success-light); color: white; }
+        .btn-success:hover { background-color: #059669; } /* emerald-600 */
+        .dark .btn-success { background-color: var(--success-dark); color: var(--text-light); }
+        .dark .btn-success:hover { background-color: #10b981; } /* emerald-500 */
+
+        .btn-danger { background-color: var(--danger-light); color: white; }
+        .btn-danger:hover { background-color: #dc2626; } /* red-600 */
+        .dark .btn-danger { background-color: var(--danger-dark); color: var(--text-light); }
+        .dark .btn-danger:hover { background-color: #ef4444; } /* red-500 */
+
+        .btn-icon { padding: 0.5rem; } /* Smaller padding for icon-only buttons */
+        .btn-icon i { font-size: 1.125rem; /* text-lg */ }
+
+        /* Toggle Switch */
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
+        .dark .slider { background-color: #4b5563; } /* gray-600 */
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color-light); }
+        .dark input:checked + .slider { background-color: var(--primary-color-dark); }
+        input:focus + .slider { box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3); }
+        .dark input:focus + .slider { box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.4); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Table Styling */
+        .table-wrapper { overflow-x: auto; }
+        .data-table { min-width: 100%; border-collapse: separate; border-spacing: 0; }
+        .data-table th, .data-table td {
+            padding: 0.75rem 1rem; /* py-3 px-4 */
+            text-align: left;
+            font-size: 0.875rem; /* text-sm */
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .dark .data-table th, .dark .data-table td { border-bottom-color: var(--border-dark); }
+        .data-table th {
+            font-weight: 600; /* font-semibold */
+            color: var(--text-muted-light);
+            background-color: var(--secondary-color-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .dark .data-table th {
+            background-color: var(--secondary-color-dark); /* gray-800 */
+            color: var(--text-muted-dark);
+        }
+        .data-table tbody tr { transition: background-color 0.2s ease-in-out; }
+        .data-table tbody tr:hover { background-color: rgba(0, 0, 0, 0.02); }
+        .dark .data-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+        /* Table Highlighting */
+        .highlight-yellow { background-color: var(--highlight-yellow-light) !important; }
+        .dark .highlight-yellow { background-color: var(--highlight-yellow-dark) !important; color: #fefce8 !important; } /* amber-50 */
+        .highlight-red { background-color: var(--highlight-red-light) !important; }
+        .dark .highlight-red { background-color: var(--highlight-red-dark) !important; color: #fef2f2 !important; } /* red-50 */
+
+        /* Modal Styles */
+        .modal-backdrop {
             position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
             overflow-y: auto; height: 100%; width: 100%;
             display: flex; align-items: center; justify-content: center;
-            /* Initial animation state (hidden) */
-            opacity: 0;
-            transition: opacity 0.3s ease-out;
-            z-index: 50; /* Ensure modal is on top */
+            opacity: 0; transition: opacity 0.3s ease-out; z-index: 50;
         }
         .modal-content {
-            transform: scale(0.95);
-            transition: transform 0.3s ease-out;
+            background-color: var(--card-bg-light);
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            width: 100%; max-width: 500px; /* Adjust as needed */
+            margin: 1rem;
+            transform: scale(0.95); transition: transform 0.3s ease-out;
+            padding: 1.5rem; /* p-6 */
         }
-        /* Active/Visible state */
-        .modal.active {
-            opacity: 1;
-        }
-         .modal.active .modal-content {
-            transform: scale(1);
-        }
+        .dark .modal-content { background-color: var(--card-bg-dark); }
+        .modal-backdrop.active { opacity: 1; }
+        .modal-backdrop.active .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .modal-title { font-size: 1.25rem; font-weight: 700; } /* text-xl font-bold */
+        .modal-body { margin-bottom: 1.5rem; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; /* space-x-3 */ }
 
-        /* Chart container */
+        /* Custom Dialog (for alert/confirm) */
+        #customDialog { display: none; } /* Initially hidden */
+        #customDialog .modal-content { max-width: 400px; }
+        #dialogMessage { margin-bottom: 1.5rem; text-align: center; font-size: 1rem; }
+        #dialogButtons { display: flex; justify-content: center; gap: 1rem; }
+
+        /* Chart Container */
         #towChartContainer {
             position: relative;
-            height: 300px; /* Adjust height as needed */
+            height: 350px; /* Increased height */
             width: 100%;
             margin-top: 1.5rem;
-        }
-
-        /* Prediction display */
-        .prediction-box {
-            background-color: #EFF6FF; /* prediction-blue-light */
-            border: 1px solid #DBEAFE; /* blue-200 */
             padding: 1rem;
-            border-radius: 0.5rem; /* rounded-lg */
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+        }
+        .dark #towChartContainer { border-color: var(--border-dark); }
+
+        /* Prediction Box */
+        .prediction-box {
+            background-color: var(--prediction-bg-light);
+            border: 1px solid #bfdbfe; /* blue-200 */
+            padding: 1.5rem;
+            border-radius: 0.75rem; /* rounded-xl */
             margin-top: 1.5rem;
             text-align: center;
         }
         .dark .prediction-box {
-            background-color: #1E3A8A; /* prediction-blue-dark */
-            border-color: #3B82F6; /* blue-500 */
-            color: #DBEAFE; /* blue-200 */
+            background-color: var(--prediction-bg-dark);
+            border-color: #3b82f6; /* blue-500 */
+            color: #dbeafe; /* blue-200 */
         }
         .prediction-value {
-            font-size: 1.875rem; /* text-3xl */
-            font-weight: 700; /* font-bold */
-            color: #2563EB; /* blue-600 */
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 800; /* font-extrabold */
+            color: var(--prediction-text-light);
+            display: block;
+            margin: 0.5rem 0;
         }
-        .dark .prediction-value {
-            color: #93C5FD; /* blue-300 */
+        .dark .prediction-value { color: var(--prediction-text-dark); }
+
+        /* Header & Footer */
+        header {
+            background-color: var(--card-bg-light);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            padding: 1rem 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 40; /* Below modal */
+            transition: background-color 0.3s;
+        }
+        .dark header { background-color: var(--card-bg-dark); }
+        footer {
+            background-color: var(--card-bg-light);
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-muted-light);
+            border-top: 1px solid var(--border-light);
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+        .dark footer {
+            background-color: var(--card-bg-dark);
+            color: var(--text-muted-dark);
+            border-top-color: var(--border-dark);
         }
 
+        /* Lucide Icons */
+        i.lucide { vertical-align: middle; }
+        .btn i.lucide { margin-right: 0.5rem; }
+        .btn-icon i.lucide { margin-right: 0; }
+
+        /* Responsive Adjustments */
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .lg-grid-cols-layout {
+                grid-template-columns: repeat(3, 1fr); /* Example: 3 columns */
+                gap: 1.5rem; /* gap-6 */
+            }
+            .lg-col-span-2 { grid-column: span 2 / span 2; }
+        }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300 text-gray-900 dark:text-gray-100">
+<body>
 
-    <header class="bg-white dark:bg-gray-800 shadow-md dark:shadow-lg">
-        <div class="container mx-auto flex justify-between items-center px-4">
-            <span class="text-xl font-bold">Treadz Tire & Towing</span>
-            <a href="tel:423-357-4551" class="text-lg text-indigo-600 dark:text-indigo-400 hover:underline">
-                423-357-4551
-            </a>
+    <header>
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                 <i class="lucide lucide-truck text-2xl text-indigo-600 dark:text-indigo-400"></i>
+                 <span class="text-xl font-bold">Treadz Dashboard</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="tel:423-357-4551" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+                    <i class="lucide lucide-phone text-base"></i>
+                    423-357-4551
+                </a>
+                <button id="darkModeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                    <i class="lucide lucide-sun dark:hidden"></i>
+                    <i class="lucide lucide-moon hidden dark:inline"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <main class="container mx-auto p-4 flex-grow">
+    <main class="container mx-auto p-4 md:p-6 lg:p-8 flex-grow">
 
-        <div class="calculator-container bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-4xl mx-auto mb-8">
-            <h1 class="text-2xl md:text-3xl font-bold text-center mb-6">
-                Tow Pricing Calculator
-            </h1>
-            <form id="towCalculatorForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <div class="input-group">
-                    <label for="towType">Tow Type:</label>
-                    <select id="towType" name="towType" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                        <option value="Easy" selected>Easy (+$0)</option>
-                        <option value="Medium">Medium (+$25)</option>
-                        <option value="Hard">Hard (+$50)</option>
-                    </select>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="card lg:col-span-1">
+                <h2 class="text-xl font-bold mb-5 flex items-center gap-2">
+                    <i class="lucide lucide-calculator text-lg text-indigo-500"></i>
+                    Tow Pricing Calculator
+                </h2>
+                <form id="towCalculatorForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="towType">Tow Difficulty:</label>
+                            <select id="towType" name="towType" class="form-select">
+                                <option value="Easy" selected>Easy (+$0)</option>
+                                <option value="Medium">Medium (+$25)</option>
+                                <option value="Hard">Hard (+$50)</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label for="distance">Distance (miles):</label>
+                            <input type="number" id="distance" name="distance" min="0" step="0.1" placeholder="e.g., 15" value="15" required class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <div>
+                            <label for="overtimeCheckbox" class="mb-1">Overtime Rate ($100):</label>
+                            <small class="text-xs text-gray-500 dark:text-gray-400 block">Base Rate: $85</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="overtimeCheckbox" name="overtimeCheckbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                     <div class="pt-2">
+                        <label for="calculatedTime">Estimated Time (min):</label>
+                        <output id="calculatedTime" name="calculatedTime" class="block text-lg font-semibold mt-1">0</output>
+                    </div>
+
+                    <div class="output-section border-t border-gray-200 dark:border-gray-600 pt-4 mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center sm:text-left">
+                        <div>
+                            <label class="block text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Est. Revenue:</label>
+                            <output id="calculatedRevenue" name="calculatedRevenue" class="block text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">$0.00</output>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Fuel Cost:</label>
+                            <output id="calculatedFuelCost" name="calculatedFuelCost" class="block text-xl font-bold text-blue-600 dark:text-blue-400 mt-1">$0.00</output>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">(Dist / 8) * $3.50</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Est. Profit:</label>
+                            <output id="calculatedProfit" name="calculatedProfit" class="block text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">$0.00</output>
+                             <p class="text-xs text-gray-400 dark:text-gray-500">(Revenue - Fuel)</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card lg:col-span-2">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                         <i class="lucide lucide-car text-lg text-indigo-500"></i>
+                         Lot Inventory
+                    </h2>
+                    <div class="flex items-center w-full sm:w-auto gap-3">
+                        <div class="relative flex-grow sm:flex-grow-0">
+                             <i class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                             <input type="search" id="searchInput" placeholder="Search inventory..." class="form-input pl-9 w-full sm:w-64">
+                        </div>
+                        <button id="addCarBtn" class="btn btn-primary flex-shrink-0">
+                            <i class="lucide lucide-plus-circle text-base"></i>
+                            <span>Add Car</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="input-group">
-                     <label for="overtimeCheckbox">Overtime Rate ($100):</label>
-                     <label class="toggle-switch mt-2">
-                         <input type="checkbox" id="overtimeCheckbox" name="overtimeCheckbox">
-                         <span class="slider"></span>
-                     </label>
-                     <small class="text-xs text-gray-500 dark:text-gray-400 block mt-1">Off = $85</small>
+                <div class="table-wrapper">
+                    <table id="inventoryTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date In</th>
+                                <th>Owner</th>
+                                <th>Make</th>
+                                <th>Model</th>
+                                <th>Plate</th>
+                                <th>Call Type</th>
+                                <th>Insurance</th>
+                                <th>Lot #</th>
+                                <th>Days</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTbody">
+                            <tr><td colspan="10" class="text-center py-6 text-gray-500 dark:text-gray-400">Loading inventory...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="input-group">
-                    <label for="distance">Distance (miles):</label>
-                    <input type="number" id="distance" name="distance" min="0" step="0.1" placeholder="e.g., 15" value="15" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                </div>
-                <div class="input-group">
-                    <label for="calculatedTime">Calculated Time (min):</label>
-                    <output id="calculatedTime" name="calculatedTime" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-gray-100 dark:bg-gray-700 block text-center font-medium">0</output>
-                    <small class="text-xs text-gray-500 dark:text-gray-400 block mt-1">Based on Distance</small>
-                </div>
-            </form>
-            <div class="output-section grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 items-start">
-                 <div>
-                     <label class="block text-sm font-medium">Estimated Cost:</label>
-                     <output id="calculatedCost" name="calculatedCost" class="output-value text-emerald-600">$0.00</output>
-                 </div>
-                 <div>
-                     <label class="block text-sm font-medium">Fuel Cost:</label>
-                     <output id="calculatedFuelCost" name="calculatedFuelCost" class="output-value text-blue-600">$0.00</output>
-                     <p class="placeholder-note">(Dist / 8) * $3.50</p>
-                 </div>
-                 <div>
-                     <label class="block text-sm font-medium">Profit:</label>
-                     <output id="calculatedProfit" name="calculatedProfit" class="output-value text-amber-600">$0.00</output>
-                      <p class="placeholder-note">(Dist + Fuel - Cost) (Min $0)</p>
-                 </div>
             </div>
         </div>
 
-        <div class="inventory-container bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-7xl mx-auto mb-8">
-             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                 <h2 class="text-2xl font-bold text-center sm:text-left">Lot Inventory</h2>
-                  <div class="flex items-center w-full sm:w-auto gap-2">
-                      <input type="search" id="searchInput" placeholder="Search Make, Model, Plate, Owner..." class="w-full sm:w-64 p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500 dark:focus:border-indigo-500">
-                     <button id="addCarBtn" class="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                         Add Car
-                     </button>
+        <div class="card">
+             <h2 class="text-xl font-bold mb-5 flex items-center gap-2">
+                <i class="lucide lucide-bar-chart-3 text-lg text-indigo-500"></i>
+                Tow Data & Prediction
+            </h2>
+
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div class="md:col-span-1 space-y-6">
+                     <div>
+                        <h3 class="text-lg font-semibold mb-3">Add Daily Tows</h3>
+                        <form id="addTowDataForm" class="space-y-3">
+                            <div>
+                                <label for="towDate">Date:</label>
+                                <input type="date" id="towDate" name="towDate" required class="form-input">
+                            </div>
+                            <div>
+                                <label for="towCount">Number of Tows:</label>
+                                <input type="number" id="towCount" name="towCount" min="0" step="1" placeholder="e.g., 5" required class="form-input">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-success w-full mt-1">
+                                    <i class="lucide lucide-save text-base"></i>
+                                    <span>Add Tow Data</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                     <div>
+                        <h3 class="text-lg font-semibold mb-3 mt-6">Recent Tow Data</h3>
+                        <div class="table-wrapper max-h-96 overflow-y-auto">
+                            <table id="towDataTable" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Tows</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="towDataTbody">
+                                    <tr><td colspan="3" class="text-center py-6 text-gray-500 dark:text-gray-400">Loading tow data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                  </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table id="inventoryTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date In</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Owner Name</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Make</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Model</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Plate</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Call Type</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Insurance</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Lot #</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Days</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTbody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr><td colspan="10" class="text-center py-4 text-gray-500 dark:text-gray-400">Loading inventory...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <div class="tow-data-container bg-white dark:bg-gray-800 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-7xl mx-auto mb-8">
-            <h2 class="text-2xl font-bold text-center mb-6">Tow Data & Prediction</h2>
+                 <div class="md:col-span-2 space-y-6">
+                     <div>
+                        <h3 class="text-lg font-semibold mb-3">Monthly Tow Totals</h3>
+                        <div id="towChartContainer">
+                            <canvas id="towChart"></canvas>
+                        </div>
+                    </div>
 
-            <form id="addTowDataForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-6 items-end">
-                <div class="input-group">
-                    <label for="towDate">Date:</label>
-                    <input type="date" id="towDate" name="towDate" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                </div>
-                <div class="input-group">
-                    <label for="towCount">Number of Tows:</label>
-                    <input type="number" id="towCount" name="towCount" min="0" step="1" placeholder="e.g., 5" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                </div>
-                <div class="input-group">
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-800">
-                        Add Tow Data
-                    </button>
-                </div>
-            </form>
-
-            <h3 class="text-xl font-semibold mb-3">Historical Tow Data</h3>
-            <div class="overflow-x-auto mb-6">
-                <table id="towDataTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tows</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="towDataTbody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr><td colspan="3" class="text-center py-4 text-gray-500 dark:text-gray-400">Loading tow data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <h3 class="text-xl font-semibold mb-3">Monthly Tow Totals</h3>
-            <div id="towChartContainer">
-                <canvas id="towChart"></canvas>
-            </div>
-
-            <div class="prediction-box">
-                <h3 class="text-lg font-medium mb-2">Predicted Tows for Next Month:</h3>
-                <output id="predictedTows" class="prediction-value">Calculating...</output>
-                <p class="text-xs mt-1">(Based on average of last 3 months)</p>
-            </div>
+                    <div class="prediction-box">
+                        <h3 class="text-md font-semibold mb-1 uppercase tracking-wider text-gray-600 dark:text-blue-200">Predicted Tows</h3>
+                        <p class="text-xs mb-2">(Next Month)</p>
+                        <output id="predictedTows" class="prediction-value">...</output>
+                        <p class="text-xs mt-1 text-gray-500 dark:text-blue-300">(Based on average of last 3 months)</p>
+                    </div>
+                 </div>
+             </div>
         </div>
 
     </main>
 
-    <footer class="bg-white dark:bg-gray-800 text-center py-4 mt-8">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-            © 2025 All Rights Reserved | Treadz Tire & Towing | 409 Main Street Mount Carmel, Tennessee | treadztnt@gmail.com
+    <footer>
+        <p>
+            © <span id="currentYear"></span> All Rights Reserved | Treadz Tire & Towing | 409 Main Street Mount Carmel, TN | treadztnt@gmail.com
         </p>
     </footer>
 
-    <div id="addCarModal" class="modal" style="display: none;">
-         <div class="modal-content relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white dark:bg-gray-800">
-             <div class="mt-3 text-center">
-                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Add New Car to Inventory</h3>
-                 <form id="addCarForm" class="space-y-3">
-                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div id="addCarModal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Car to Inventory</h3>
+                <button id="closeModalBtn" class="btn btn-icon text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
+                    <i class="lucide lucide-x"></i>
+                </button>
+            </div>
+            <form id="addCarForm">
+                <div class="modal-body space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="dateIn">Date In:</label>
+                            <input type="date" id="dateIn" name="dateIn" required class="form-input">
+                        </div>
+                        <div>
+                            <label for="ownerName">Owner Name:</label>
+                            <input type="text" id="ownerName" name="ownerName" required placeholder="e.g., John Doe" class="form-input">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="make">Make:</label>
+                            <input type="text" id="make" name="make" required placeholder="e.g., Toyota" class="form-input">
+                        </div>
+                        <div>
+                            <label for="model">Model:</label>
+                            <input type="text" id="model" name="model" required placeholder="e.g., Camry" class="form-input">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                          <div>
-                             <label for="dateIn" class="block text-sm font-medium text-left">Date In:</label>
-                             <input type="date" id="dateIn" name="dateIn" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                         </div>
-                          <div>
-                             <label for="ownerName" class="block text-sm font-medium text-left">Owner Name:</label>
-                             <input type="text" id="ownerName" name="ownerName" required placeholder="e.g., John Doe" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                         </div>
-                     </div>
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                             <label for="make" class="block text-sm font-medium text-left">Make:</label>
-                             <input type="text" id="make" name="make" required placeholder="e.g., Toyota" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                         </div>
-                         <div>
-                             <label for="model" class="block text-sm font-medium text-left">Model:</label>
-                             <input type="text" id="model" name="model" required placeholder="e.g., Camry" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                         </div>
-                     </div>
-                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         <div>
-                             <label for="plateNumber" class="block text-sm font-medium text-left">Plate Number:</label>
-                             <input type="text" id="plateNumber" name="plateNumber" required placeholder="e.g., ABC-123" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                         </div>
-                          <div>
-                             <label for="callType" class="block text-sm font-medium text-left">Call Type:</label>
-                             <select id="callType" name="callType" required class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                 <option value="CHP">CHP</option>
-                                 <option value="KPD">KPD</option>
-                                 <option value="THP">THP</option>
-                                 <option value="OWNER REQ">OWNER REQ</option>
-                             </select>
-                         </div>
-                     </div>
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                             <label class="block text-sm font-medium text-left mb-1">Insurance:</label>
-                             <div class="flex justify-start space-x-4 pt-2">
-                                <label class="flex items-center">
-                                   <input type="radio" name="insurance" value="Yes" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Yes
+                            <label for="plateNumber">Plate Number:</label>
+                            <input type="text" id="plateNumber" name="plateNumber" required placeholder="e.g., ABC-123" class="form-input">
+                        </div>
+                        <div>
+                            <label for="callType">Call Type:</label>
+                            <select id="callType" name="callType" required class="form-select">
+                                <option value="CHP">CHP</option>
+                                <option value="KPD">KPD</option>
+                                <option value="THP">THP</option>
+                                <option value="OWNER REQ">OWNER REQ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <label class="block mb-2">Insurance:</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="insurance" value="Yes" required class="form-radio h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Yes
                                 </label>
-                                <label class="flex items-center">
-                                   <input type="radio" name="insurance" value="No" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> No
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="insurance" value="No" required class="form-radio h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> No
                                 </label>
-                               </div>
-                         </div>
-                          <div>
-                             <label class="block text-sm font-medium text-left mb-1">Lot Number:</label>
-                              <div class="flex justify-start space-x-4 pt-2">
-                                 <label class="flex items-center">
-                                    <input type="radio" name="lotNumber" value="1" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 1
-                                 </label>
-                                 <label class="flex items-center">
-                                    <input type="radio" name="lotNumber" value="2" required class="mr-1 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 2
-                                 </label>
-                                </div>
-                         </div>
-                     </div>
-                     <div class="items-center px-4 py-3 border-t border-gray-200 dark:border-gray-700 mt-4">
-                         <button id="saveCarBtn" type="submit" class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                             Save Car
-                         </button>
-                         <button id="closeModalBtn" type="button" class="mt-2 px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-800">
-                             Cancel
-                         </button>
-                     </div>
-                 </form>
-             </div>
-         </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block mb-2">Lot Number:</label>
+                             <div class="flex space-x-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="lotNumber" value="1" required class="form-radio h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 1
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="lotNumber" value="2" required class="form-radio h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-indigo-500"> Lot 2
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-t border-gray-200 dark:border-gray-600 pt-4">
+                    <button id="cancelModalBtn" type="button" class="btn btn-secondary">Cancel</button>
+                    <button id="saveCarBtn" type="submit" class="btn btn-primary">
+                         <i class="lucide lucide-save text-base"></i>
+                         <span>Save Car</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <div id="customDialog" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p id="dialogMessage"></p>
+            </div>
+            <div id="dialogButtons" class="modal-footer">
+                </div>
+        </div>
+    </div>
+
 
     <script>
         // --- Global Variables & Constants ---
-        const INVENTORY_STORAGE_KEY = 'treadzInventory';
-        const TOW_DATA_STORAGE_KEY = 'treadzTowData';
+        const INVENTORY_STORAGE_KEY = 'treadzInventory_v2'; // Changed key for new version
+        const TOW_DATA_STORAGE_KEY = 'treadzTowData_v2'; // Changed key for new version
+        const FUEL_MPG = 8;
+        const FUEL_PRICE_PER_GALLON = 3.50;
+        const BASE_RATE = 85;
+        const OVERTIME_RATE = 100;
+        const AVG_SPEED_MPH = 41.25; // Including pickup/dropoff buffer
+
         let inventory = []; // Global inventory array
         let towData = []; // Global tow data array
         let towChartInstance = null; // To hold the Chart.js instance
+        let isDarkMode = document.documentElement.classList.contains('dark');
 
         // --- DOM Element References ---
         // Calculator
@@ -386,7 +609,7 @@
         const overtimeCheckbox = document.getElementById('overtimeCheckbox');
         const distanceInput = document.getElementById('distance');
         const calculatedTimeOutput = document.getElementById('calculatedTime');
-        const calculatedCostOutput = document.getElementById('calculatedCost');
+        const calculatedRevenueOutput = document.getElementById('calculatedRevenue'); // Renamed from Cost
         const calculatedFuelCostOutput = document.getElementById('calculatedFuelCost');
         const calculatedProfitOutput = document.getElementById('calculatedProfit');
         const calculatorForm = document.getElementById('towCalculatorForm');
@@ -395,6 +618,7 @@
         const addCarModal = document.getElementById('addCarModal');
         const addCarForm = document.getElementById('addCarForm');
         const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelModalBtn = document.getElementById('cancelModalBtn'); // Added cancel button
         const inventoryTbody = document.getElementById('inventoryTbody');
         const searchInput = document.getElementById('searchInput');
         // Tow Data & Prediction
@@ -404,41 +628,94 @@
         const towDataTbody = document.getElementById('towDataTbody');
         const towChartCanvas = document.getElementById('towChart');
         const predictedTowsOutput = document.getElementById('predictedTows');
+        // Other UI
+        const currentYearSpan = document.getElementById('currentYear');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        // Custom Dialog
+        const customDialog = document.getElementById('customDialog');
+        const dialogMessage = document.getElementById('dialogMessage');
+        const dialogButtons = document.getElementById('dialogButtons');
+
 
         // --- Utility Functions ---
+
+        /**
+         * Shows a custom dialog box.
+         * @param {string} message - The message to display.
+         * @param {Function} [confirmCallback] - Function to call if confirmed. If null, shows only an OK button.
+         */
+        function showDialog(message, confirmCallback = null) {
+            dialogMessage.textContent = message;
+            dialogButtons.innerHTML = ''; // Clear previous buttons
+
+            if (confirmCallback) {
+                // Confirmation dialog (Yes/No)
+                const noButton = document.createElement('button');
+                noButton.textContent = 'Cancel';
+                noButton.className = 'btn btn-secondary';
+                noButton.onclick = hideDialog;
+
+                const yesButton = document.createElement('button');
+                yesButton.textContent = 'Confirm';
+                yesButton.className = 'btn btn-danger'; // Or btn-primary depending on context
+                yesButton.onclick = () => {
+                    hideDialog();
+                    confirmCallback();
+                };
+
+                dialogButtons.appendChild(noButton);
+                dialogButtons.appendChild(yesButton);
+            } else {
+                // Alert dialog (OK)
+                const okButton = document.createElement('button');
+                okButton.textContent = 'OK';
+                okButton.className = 'btn btn-primary';
+                okButton.onclick = hideDialog;
+                dialogButtons.appendChild(okButton);
+            }
+
+            customDialog.style.display = 'flex';
+            setTimeout(() => customDialog.classList.add('active'), 10);
+        }
+
+        /** Hides the custom dialog box. */
+        function hideDialog() {
+            customDialog.classList.remove('active');
+            setTimeout(() => customDialog.style.display = 'none', 300); // Match animation duration
+        }
+
         /**
          * Formats a date string (YYYY-MM-DD) or Date object for display (e.g., MM/DD/YYYY).
          * Handles potential invalid dates gracefully.
          * @param {string|Date} dateInput - The date string or object.
-         * @returns {string} Formatted date or 'Invalid Date'.
+         * @returns {string} Formatted date or 'N/A'.
          */
         function formatDisplayDate(dateInput) {
             try {
-                const date = new Date(dateInput);
-                // Check if the date is valid and adjust for timezone offset
+                if (!dateInput) return 'N/A';
+                // Add time component to ensure correct date interpretation regardless of local timezone
+                const date = new Date(dateInput + 'T00:00:00');
                 if (!isNaN(date.getTime())) {
-                    // Add timezone offset to prevent date shifting
-                    const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-                    const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(adjustedDate.getDate()).padStart(2, '0');
-                    const year = adjustedDate.getFullYear();
+                    // Use UTC methods to avoid timezone shifts during formatting
+                    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                    const day = String(date.getUTCDate()).padStart(2, '0');
+                    const year = date.getUTCFullYear();
                     return `${month}/${day}/${year}`;
                 }
             } catch (e) {
-                console.error("Error formatting date:", e);
+                console.error("Error formatting date:", dateInput, e);
             }
-            return 'Invalid Date';
+            return 'N/A';
         }
 
         /**
          * Calculates the difference in days between two dates (YYYY-MM-DD format).
          * @param {string} dateStr1 - Start date string.
-         * @param {string} dateStr2 - End date string.
+         * @param {string} dateStr2 - End date string (usually today).
          * @returns {number|NaN} Difference in days or NaN if invalid.
          */
         function daysDifference(dateStr1, dateStr2) {
             try {
-                // Basic validation for YYYY-MM-DD format
                 if (!dateStr1 || !dateStr2 || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr1) || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr2)) { return NaN; }
                 // Use UTC to avoid timezone issues in calculation
                 const date1 = new Date(dateStr1 + 'T00:00:00Z');
@@ -452,15 +729,33 @@
             }
         }
 
+        // --- Dark Mode ---
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.documentElement.classList.toggle('dark', isDarkMode);
+            localStorage.setItem('treadzDarkMode', isDarkMode);
+            // Update chart if it exists
+            if (towChartInstance) {
+                updateChartAppearance();
+                towChartInstance.update();
+            }
+        }
+
+        function applyInitialDarkMode() {
+            const storedMode = localStorage.getItem('treadzDarkMode');
+            isDarkMode = storedMode === 'true';
+            document.documentElement.classList.toggle('dark', isDarkMode);
+        }
+
         // --- Calculator Logic ---
         function calculateAndDisplayPrice() {
             const towType = towTypeSelect.value;
             const distance = parseFloat(distanceInput.value) || 0;
             const isOvertimeChecked = overtimeCheckbox.checked;
-            const overtimeCharge = isOvertimeChecked ? 100 : 85;
-            // Calculate time based on distance (assuming average speed)
-            // Using 41.25 mph as an example average speed including pickup/dropoff time buffer
-            const calculatedTime = distance === 0 ? 0 : Math.round((distance / 41.25) * 60); // Time in minutes
+            const baseOrOvertimeRate = isOvertimeChecked ? OVERTIME_RATE : BASE_RATE;
+
+            // Calculate time based on distance
+            const calculatedTime = distance === 0 ? 0 : Math.round((distance / AVG_SPEED_MPH) * 60); // Time in minutes
             calculatedTimeOutput.textContent = calculatedTime;
 
             // Determine tow type surcharge
@@ -468,25 +763,22 @@
             if (towType === 'Medium') { towTypeCharge = 25; }
             else if (towType === 'Hard') { towTypeCharge = 50; }
 
-            // Example cost calculation (adjust factors as needed)
-            const timeCost = calculatedTime * 0.40; // Example: $0.40 per minute
-            const distanceCost = distance * 0.05; // Example: $0.05 per mile wear & tear
-            const totalCost = towTypeCharge + overtimeCharge + timeCost + distanceCost;
+            // Calculate Estimated Revenue (Price charged to customer)
+            // Simple model: Base/Overtime + Difficulty Surcharge + Per Mile Charge (example $4/mile)
+            const perMileCharge = 4.00;
+            const distanceCharge = distance * perMileCharge;
+            const estimatedRevenue = baseOrOvertimeRate + towTypeCharge + distanceCharge;
 
-            // Calculate fuel cost (Example: 8 MPG, $3.50/gallon)
-            const fuelCostRaw = distance === 0 ? 0 : (distance / 8) * 3.50;
-            const fuelCost = Math.round(fuelCostRaw * 100) / 100; // Round to 2 decimal places
+            // Calculate Fuel Cost
+            const fuelCost = distance === 0 ? 0 : (distance / FUEL_MPG) * FUEL_PRICE_PER_GALLON;
 
-            // Calculate profit (Example: Total Cost - Distance Charge (if applicable) + Fuel Cost)
-            // This profit formula seems unusual (Cost - Dist + Fuel). Let's assume profit is Revenue - Expenses
-            // For now, using the formula provided in the original HTML comments: (Cost - Distance + Fuel)
-            // It might be intended as: Revenue (implied) - Expenses (Fuel + Time + Wear/Tear)
-            // Let's stick to the comment's formula for now:
-            const profit = totalCost - distance + fuelCost; // Using the formula from comments
+            // Calculate Estimated Profit
+            // Profit = Revenue - Expenses (Simplifying expenses to just fuel cost for now)
+            const profit = estimatedRevenue - fuelCost;
             const displayProfit = Math.max(0, profit); // Ensure profit isn't negative
 
             // Display calculated values
-            calculatedCostOutput.textContent = `$${totalCost.toFixed(2)}`;
+            calculatedRevenueOutput.textContent = `$${estimatedRevenue.toFixed(2)}`;
             calculatedFuelCostOutput.textContent = `$${fuelCost.toFixed(2)}`;
             calculatedProfitOutput.textContent = `$${displayProfit.toFixed(2)}`;
         }
@@ -494,9 +786,15 @@
         // --- Inventory Logic ---
         function loadInventory() {
             const storedInventory = localStorage.getItem(INVENTORY_STORAGE_KEY);
-            inventory = storedInventory ? JSON.parse(storedInventory) : [];
+            try {
+                inventory = storedInventory ? JSON.parse(storedInventory) : [];
+                if (!Array.isArray(inventory)) inventory = []; // Ensure it's an array
+            } catch (e) {
+                console.error("Error parsing inventory from localStorage:", e);
+                inventory = [];
+            }
             // Sort by Date In (most recent first) on load
-            inventory.sort((a, b) => new Date(b.dateIn) - new Date(a.dateIn));
+            inventory.sort((a, b) => (b.dateIn || '').localeCompare(a.dateIn || ''));
         }
 
         function saveInventory() {
@@ -506,45 +804,44 @@
         function renderInventory(carsToRender = inventory) {
             inventoryTbody.innerHTML = ''; // Clear existing rows
             if (carsToRender.length === 0) {
-                inventoryTbody.innerHTML = `<tr><td colspan="10" class="text-center py-4 text-gray-500 dark:text-gray-400">No cars found matching criteria.</td></tr>`;
+                const message = searchInput.value ? "No cars found matching search." : "Inventory is empty. Add a car!";
+                inventoryTbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-gray-500 dark:text-gray-400">${message}</td></tr>`;
                 return;
             }
             const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
 
-            console.log("--- Rendering Inventory ---"); // Added log start
-
             carsToRender.forEach(car => {
                 const daysInStorage = car.dateIn ? daysDifference(car.dateIn, today) : NaN;
                 let highlightClass = '';
+                let daysText = isNaN(daysInStorage) ? 'N/A' : daysInStorage;
+                let daysClass = isNaN(daysInStorage) ? 'text-red-500' : '';
+
                 if (!isNaN(daysInStorage)) {
-                    if (daysInStorage >= 30) { highlightClass = 'highlight-red'; } // 30+ days
-                    else if (daysInStorage >= 17) { highlightClass = 'highlight-yellow'; } // 17-29 days
+                    if (daysInStorage >= 30) { highlightClass = 'highlight-red'; }
+                    else if (daysInStorage >= 17) { highlightClass = 'highlight-yellow'; }
                 }
 
-                // *** ADDED LOGGING HERE ***
-                console.log(`Car ID: ${car.id}, Plate: ${car.plateNumber}, Date In: ${car.dateIn}, Days: ${daysInStorage}, Highlight Class: '${highlightClass}'`);
-
                 const row = document.createElement('tr');
-                row.className = `${highlightClass} text-sm inventory-table-row`; // Add transition class
+                row.className = `${highlightClass}`; // Apply highlight class
 
-                // Populate row cells
                 row.innerHTML = `
-                    <td class="px-3 py-2 whitespace-nowrap">${formatDisplayDate(car.dateIn) || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${car.ownerName || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${car.make || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${car.model || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${car.plateNumber || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${car.callType || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${typeof car.insurance === 'boolean' ? (car.insurance ? 'Yes' : 'No') : 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${car.lotNumber || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap ${isNaN(daysInStorage) ? 'text-red-500' : ''}">${isNaN(daysInStorage) ? 'Error' : daysInStorage}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">
-                        <button data-id="${car.id}" class="remove-inventory-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs font-medium">Remove</button>
+                    <td>${formatDisplayDate(car.dateIn)}</td>
+                    <td>${car.ownerName || 'N/A'}</td>
+                    <td>${car.make || 'N/A'}</td>
+                    <td>${car.model || 'N/A'}</td>
+                    <td>${car.plateNumber || 'N/A'}</td>
+                    <td>${car.callType || 'N/A'}</td>
+                    <td>${typeof car.insurance === 'boolean' ? (car.insurance ? 'Yes' : 'No') : 'N/A'}</td>
+                    <td>${car.lotNumber || 'N/A'}</td>
+                    <td class="${daysClass}">${daysText}</td>
+                    <td>
+                        <button data-id="${car.id}" class="remove-inventory-btn btn btn-icon btn-danger p-1 text-xs" title="Remove Car">
+                            <i class="lucide lucide-trash-2 text-sm"></i>
+                        </button>
                     </td>
                 `;
                 inventoryTbody.appendChild(row);
             });
-             console.log("--- Finished Rendering Inventory ---"); // Added log end
         }
 
         function filterAndRenderInventory() {
@@ -553,7 +850,6 @@
                 renderInventory(inventory); // Render all if search is empty
                 return;
             }
-            // Filter based on make, model, plate, or owner name
             const filteredInventory = inventory.filter(car => {
                 return (car.make?.toLowerCase().includes(searchTerm) ||
                         car.model?.toLowerCase().includes(searchTerm) ||
@@ -568,52 +864,52 @@
             addCarForm.reset(); // Clear the form
             // Set default date to today
             document.getElementById('dateIn').valueAsDate = new Date();
-            addCarModal.style.display = 'flex'; // Make it flex for centering
-            // Timeout needed to allow display change before starting transition
-            setTimeout(() => {
-                addCarModal.classList.add('active'); // Add class to trigger opacity/scale transition
-            }, 10); // Small delay
+            addCarModal.style.display = 'flex';
+            setTimeout(() => addCarModal.classList.add('active'), 10);
         }
 
         function hideModal() {
-            addCarModal.classList.remove('active'); // Remove class to trigger fade out
-             // Wait for animation to finish before setting display none
-             setTimeout(() => {
-                 addCarModal.style.display = 'none';
-             }, 300); // Should match transition duration (0.3s)
+            addCarModal.classList.remove('active');
+            setTimeout(() => addCarModal.style.display = 'none', 300);
         }
 
         // --- Tow Data Logic ---
         function loadTowData() {
             const storedTowData = localStorage.getItem(TOW_DATA_STORAGE_KEY);
-            towData = storedTowData ? JSON.parse(storedTowData) : [];
+             try {
+                towData = storedTowData ? JSON.parse(storedTowData) : [];
+                 if (!Array.isArray(towData)) towData = []; // Ensure it's an array
+            } catch (e) {
+                console.error("Error parsing tow data from localStorage:", e);
+                towData = [];
+            }
             // Sort by date (oldest first) for chronological display/charting
-            towData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            towData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
         }
 
         function saveTowData() {
-            // Sort before saving to maintain order (optional, could sort on load)
-            towData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Sort before saving to maintain order
+            towData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
             localStorage.setItem(TOW_DATA_STORAGE_KEY, JSON.stringify(towData));
         }
 
         function renderTowDataTable() {
             towDataTbody.innerHTML = ''; // Clear existing rows
             if (towData.length === 0) {
-                towDataTbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-500 dark:text-gray-400">No tow data recorded yet.</td></tr>`;
+                towDataTbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-500 dark:text-gray-400">No tow data recorded yet.</td></tr>`;
                 return;
             }
 
             // Render in reverse chronological order (most recent first) for the table view
             [...towData].reverse().forEach(data => {
                 const row = document.createElement('tr');
-                row.className = 'text-sm tow-data-table-row'; // Add transition class if needed later
-
                 row.innerHTML = `
-                    <td class="px-3 py-2 whitespace-nowrap">${formatDisplayDate(data.date) || 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${data.tows ?? 'N/A'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">
-                        <button data-id="${data.id}" class="remove-tow-data-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-xs font-medium">Remove</button>
+                    <td>${formatDisplayDate(data.date)}</td>
+                    <td>${data.tows ?? 'N/A'}</td>
+                    <td>
+                        <button data-id="${data.id}" class="remove-tow-data-btn btn btn-icon btn-danger p-1 text-xs" title="Remove Data">
+                            <i class="lucide lucide-trash-2 text-sm"></i>
+                        </button>
                     </td>
                 `;
                 towDataTbody.appendChild(row);
@@ -622,17 +918,12 @@
 
         // --- Charting Logic ---
         function aggregateTowsByMonth(data) {
-            const monthlyTotals = {}; // Use object like { 'YYYY-MM': totalTows }
+            const monthlyTotals = {}; // { 'YYYY-MM': totalTows }
 
             data.forEach(item => {
                 try {
-                    const date = new Date(item.date + 'T00:00:00Z'); // Use UTC
-                    if (isNaN(date.getTime())) return; // Skip invalid dates
-
-                    const year = date.getUTCFullYear();
-                    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // 0-indexed month
-                    const yearMonth = `${year}-${month}`;
-
+                    if (!item.date || !/^\d{4}-\d{2}-\d{2}$/.test(item.date)) return; // Basic validation
+                    const yearMonth = item.date.substring(0, 7); // Extract 'YYYY-MM'
                     monthlyTotals[yearMonth] = (monthlyTotals[yearMonth] || 0) + (item.tows || 0);
                 } catch (e) {
                     console.error("Error processing date for aggregation:", item.date, e);
@@ -642,9 +933,8 @@
             // Convert to array and sort chronologically
             const sortedMonths = Object.keys(monthlyTotals).sort();
             const labels = sortedMonths.map(ym => {
-                // Format label as 'Mon YYYY' (e.g., 'Apr 2025')
                 const [year, month] = ym.split('-');
-                const date = new Date(Date.UTC(year, month - 1, 1)); // Month is 0-indexed for Date constructor
+                const date = new Date(Date.UTC(year, month - 1, 1));
                 return date.toLocaleString('default', { month: 'short', year: 'numeric', timeZone: 'UTC' });
             });
             const values = sortedMonths.map(ym => monthlyTotals[ym]);
@@ -652,10 +942,44 @@
             return { labels, values };
         }
 
+         function getChartColors() {
+            return {
+                backgroundColor: isDarkMode ? 'rgba(129, 140, 248, 0.6)' : 'rgba(79, 70, 229, 0.6)', // indigo-400 / indigo-600
+                borderColor: isDarkMode ? 'rgba(129, 140, 248, 1)' : 'rgba(79, 70, 229, 1)',
+                gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                ticksColor: isDarkMode ? '#9ca3af' : '#6b7280', // gray-400 / gray-500
+                tooltipBg: isDarkMode ? '#1f2937' : '#ffffff', // gray-800 / white
+                tooltipTitle: isDarkMode ? '#f3f4f6' : '#111827', // gray-100 / gray-900
+                tooltipBody: isDarkMode ? '#d1d5db' : '#374151' // gray-300 / gray-700
+            };
+        }
+
+        function updateChartAppearance() {
+            if (!towChartInstance) return;
+            const colors = getChartColors();
+
+            // Update dataset colors
+            towChartInstance.data.datasets[0].backgroundColor = colors.backgroundColor;
+            towChartInstance.data.datasets[0].borderColor = colors.borderColor;
+
+            // Update scale colors (ticks and grid lines)
+            towChartInstance.options.scales.y.grid.color = colors.gridColor;
+            towChartInstance.options.scales.y.ticks.color = colors.ticksColor;
+            towChartInstance.options.scales.x.grid.color = colors.gridColor; // Apply to x-axis grid too if needed
+            towChartInstance.options.scales.x.ticks.color = colors.ticksColor;
+
+            // Update tooltip colors
+            towChartInstance.options.plugins.tooltip.backgroundColor = colors.tooltipBg;
+            towChartInstance.options.plugins.tooltip.titleColor = colors.tooltipTitle;
+            towChartInstance.options.plugins.tooltip.bodyColor = colors.tooltipBody;
+        }
+
+
         function renderTowChart() {
-            if (!towChartCanvas) return; // Ensure canvas element exists
+            if (!towChartCanvas) return;
             const ctx = towChartCanvas.getContext('2d');
             const { labels, values } = aggregateTowsByMonth(towData);
+            const colors = getChartColors();
 
             // Destroy previous chart instance if it exists
             if (towChartInstance) {
@@ -664,48 +988,63 @@
 
             // Create new chart
             towChartInstance = new Chart(ctx, {
-                type: 'bar', // or 'line'
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Total Tows per Month',
+                        label: 'Total Tows',
                         data: values,
-                        backgroundColor: 'rgba(79, 70, 229, 0.6)', // Indigo-600 with opacity
-                        borderColor: 'rgba(79, 70, 229, 1)', // Indigo-600
+                        backgroundColor: colors.backgroundColor,
+                        borderColor: colors.borderColor,
                         borderWidth: 1,
-                        borderRadius: 4, // Rounded bars
+                        borderRadius: 5,
+                        borderSkipped: false, // Makes rounding consistent
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // Allow chart to fill container height
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                // Ensure only whole numbers are shown on y-axis
-                                stepSize: 1,
-                                precision: 0
+                                color: colors.ticksColor,
+                                precision: 0 // Ensure whole numbers
                             },
                             grid: {
-                                color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)' // Adjust grid color for dark/light mode
+                                color: colors.gridColor,
+                                drawBorder: false,
                             }
                         },
                         x: {
-                             grid: {
-                                display: false // Hide vertical grid lines
+                            ticks: { color: colors.ticksColor },
+                            grid: {
+                                display: false, // Hide vertical grid lines
+                                drawBorder: false,
                             }
                         }
                     },
                     plugins: {
-                        legend: {
-                            display: false // Hide legend if only one dataset
-                        },
+                        legend: { display: false },
                         tooltip: {
-                            backgroundColor: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF', // gray-800 or white
-                            titleColor: document.documentElement.classList.contains('dark') ? '#F3F4F6' : '#111827', // gray-100 or gray-900
-                            bodyColor: document.documentElement.classList.contains('dark') ? '#D1D5DB' : '#374151' // gray-300 or gray-700
+                            backgroundColor: colors.tooltipBg,
+                            titleColor: colors.tooltipTitle,
+                            bodyColor: colors.tooltipBody,
+                            borderColor: isDarkMode ? colors.borderColor : 'rgba(0,0,0,0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            cornerRadius: 6,
+                            displayColors: false, // Hide the color box in tooltip
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Tows: ${context.parsed.y}`;
+                                }
+                            }
                         }
+                    },
+                    animation: {
+                        duration: 500, // Add subtle animation
+                        easing: 'easeInOutQuad'
                     }
                 }
             });
@@ -717,15 +1056,14 @@
             const monthlyValues = monthlyData.values;
 
             if (monthlyValues.length < 1) {
-                return "N/A (No data)";
+                return "N/A";
             }
 
-            // Simple prediction: Average of the last 3 months (or fewer if less data)
-            const lastMonths = monthlyValues.slice(-3); // Get last 3 (or fewer) elements
+            const lastMonths = monthlyValues.slice(-3); // Average of last 3 months
             const sum = lastMonths.reduce((acc, val) => acc + val, 0);
             const average = sum / lastMonths.length;
 
-            return Math.round(average); // Return rounded average
+            return Math.round(average);
         }
 
         function displayPrediction() {
@@ -738,67 +1076,58 @@
         calculatorForm.addEventListener('input', calculateAndDisplayPrice);
         calculatorForm.addEventListener('change', calculateAndDisplayPrice);
 
-        // Add Car Modal Buttons
+        // Add Car Modal Buttons & Interaction
         addCarBtn.addEventListener('click', showModal);
         closeModalBtn.addEventListener('click', hideModal);
-        // Close modal if clicking outside the content
-        addCarModal.addEventListener('click', (event) => {
+        cancelModalBtn.addEventListener('click', hideModal); // Also hide on cancel
+        addCarModal.addEventListener('click', (event) => { // Close on backdrop click
             if (event.target === addCarModal) { hideModal(); }
         });
-        if (distanceInput) { // Check if the element exists
-            distanceInput.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Stop the default Enter key action (form submission)
-                }
-            });
-        }
+
+        // Prevent Enter key submission in distance input (optional, good UX)
+        distanceInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') { event.preventDefault(); }
+        });
+
         // Add Car Form Submission
         addCarForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            const dateInValue = document.getElementById('dateIn').value;
-            const ownerNameValue = document.getElementById('ownerName').value.trim();
-            const makeValue = document.getElementById('make').value.trim();
-            const modelValue = document.getElementById('model').value.trim();
-            const plateValue = document.getElementById('plateNumber').value.trim();
-            const insuranceChecked = document.querySelector('input[name="insurance"]:checked');
-            const lotNumberChecked = document.querySelector('input[name="lotNumber"]:checked');
-            const callTypeValue = document.getElementById('callType').value;
+            const formData = new FormData(addCarForm);
+            const newCar = {
+                id: Date.now(), // Simple unique ID
+                dateIn: formData.get('dateIn'),
+                ownerName: formData.get('ownerName').trim(),
+                make: formData.get('make').trim(),
+                model: formData.get('model').trim(),
+                plateNumber: formData.get('plateNumber').trim().toUpperCase(), // Standardize plate
+                callType: formData.get('callType'),
+                insurance: formData.get('insurance') === 'Yes', // Store as boolean
+                lotNumber: formData.get('lotNumber'),
+            };
 
-            // Basic validation
-            if (!dateInValue || !ownerNameValue || !makeValue || !modelValue || !plateValue || !insuranceChecked || !lotNumberChecked || !callTypeValue) {
-                // Replace alert with a more user-friendly notification if possible
-                alert("Please fill out all car details.");
+            // Basic validation (can be more robust)
+            if (!newCar.dateIn || !newCar.ownerName || !newCar.make || !newCar.model || !newCar.plateNumber || formData.get('insurance') === null || !newCar.lotNumber || !newCar.callType) {
+                 showDialog("Please fill out all car details."); // Use custom dialog
                 return;
             }
 
-            const newCar = {
-                id: Date.now(), // Simple unique ID
-                dateIn: dateInValue,
-                ownerName: ownerNameValue,
-                make: makeValue,
-                model: modelValue,
-                plateNumber: plateValue,
-                callType: callTypeValue,
-                insurance: insuranceChecked.value === 'Yes', // Store as boolean
-                lotNumber: lotNumberChecked.value,
-            };
-
             inventory.push(newCar);
-            saveInventory(); // Save updated inventory
+            inventory.sort((a, b) => (b.dateIn || '').localeCompare(a.dateIn || '')); // Re-sort
+            saveInventory();
             filterAndRenderInventory(); // Re-render the table (respecting search)
-            hideModal(); // Close the modal
+            hideModal();
         });
 
         // Inventory Table - Remove Button Click (Event Delegation)
         inventoryTbody.addEventListener('click', (event) => {
-            if (event.target.classList.contains('remove-inventory-btn')) {
-                const carId = parseInt(event.target.getAttribute('data-id'));
-                 // Confirmation dialog
-                if (confirm('Are you sure you want to remove this car from inventory?')) {
-                    inventory = inventory.filter(car => car.id !== carId); // Filter out the car
-                    saveInventory(); // Save the updated array
-                    filterAndRenderInventory(); // Re-render the table
-                }
+            const removeButton = event.target.closest('.remove-inventory-btn');
+            if (removeButton) {
+                const carId = parseInt(removeButton.getAttribute('data-id'));
+                showDialog('Are you sure you want to remove this car from inventory?', () => {
+                    inventory = inventory.filter(car => car.id !== carId);
+                    saveInventory();
+                    filterAndRenderInventory();
+                });
             }
         });
 
@@ -812,78 +1141,78 @@
             const countValue = parseInt(towCountInput.value, 10);
 
             if (!dateValue || isNaN(countValue) || countValue < 0) {
-                alert("Please enter a valid date and a non-negative number of tows.");
+                showDialog("Please enter a valid date and a non-negative number of tows.");
                 return;
             }
 
-            // Check if data for this date already exists (optional: update or prevent)
             const existingIndex = towData.findIndex(d => d.date === dateValue);
             if (existingIndex > -1) {
-                if (!confirm(`Data already exists for ${formatDisplayDate(dateValue)}. Overwrite with ${countValue} tows?`)) {
-                    return; // User cancelled overwrite
-                }
-                // Update existing entry
-                towData[existingIndex].tows = countValue;
+                 showDialog(`Data already exists for ${formatDisplayDate(dateValue)}. Overwrite with ${countValue} tows?`, () => {
+                    towData[existingIndex].tows = countValue; // Update existing
+                    saveTowData();
+                    renderTowDataTable();
+                    renderTowChart();
+                    displayPrediction();
+                    addTowDataForm.reset();
+                    towDateInput.valueAsDate = new Date(); // Reset date to today
+                });
             } else {
                 // Add new entry
-                 const newTowEntry = {
-                    id: Date.now(), // Simple unique ID
-                    date: dateValue,
-                    tows: countValue,
-                };
+                const newTowEntry = { id: Date.now(), date: dateValue, tows: countValue };
                 towData.push(newTowEntry);
+                saveTowData(); // Also sorts before saving
+                renderTowDataTable();
+                renderTowChart();
+                displayPrediction();
+                addTowDataForm.reset();
+                towDateInput.valueAsDate = new Date(); // Reset date to today
             }
-
-
-            saveTowData(); // Save updated data
-            // Re-render table, chart, and prediction
-            renderTowDataTable();
-            renderTowChart();
-            displayPrediction();
-
-            // Clear the form
-            addTowDataForm.reset();
-             // Set date input back to default (optional, could leave as last entered)
-             // towDateInput.valueAsDate = new Date();
         });
 
         // Tow Data Table - Remove Button Click (Event Delegation)
         towDataTbody.addEventListener('click', (event) => {
-            if (event.target.classList.contains('remove-tow-data-btn')) {
-                const dataId = parseInt(event.target.getAttribute('data-id'));
-                if (confirm('Are you sure you want to remove this tow data entry?')) {
+            const removeButton = event.target.closest('.remove-tow-data-btn');
+            if (removeButton) {
+                const dataId = parseInt(removeButton.getAttribute('data-id'));
+                showDialog('Are you sure you want to remove this tow data entry?', () => {
                     towData = towData.filter(data => data.id !== dataId);
                     saveTowData();
-                    // Re-render table, chart, and prediction
                     renderTowDataTable();
                     renderTowChart();
                     displayPrediction();
-                }
+                });
             }
         });
 
+        // Dark Mode Toggle Listener
+        darkModeToggle.addEventListener('click', toggleDarkMode);
 
         // --- Initial Page Load ---
         function initializePage() {
+            applyInitialDarkMode(); // Apply dark mode preference first
+            // Set current year in footer
+            if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+
             // Load data from localStorage
             loadInventory();
             loadTowData();
 
             // Initial renders
-            calculateAndDisplayPrice(); // Calculate initial price
-            filterAndRenderInventory(); // Render inventory (handles empty search)
-            renderTowDataTable(); // Render tow data table
-            renderTowChart(); // Render the tow chart
-            displayPrediction(); // Display initial prediction
+            calculateAndDisplayPrice();
+            filterAndRenderInventory();
+            renderTowDataTable();
+            renderTowChart();
+            displayPrediction();
 
-            // Ensure modal is hidden on initial load
-            if (addCarModal) {
-                addCarModal.style.display = 'none';
-                addCarModal.classList.remove('active');
-            }
+            // Ensure modals are hidden
+            addCarModal.style.display = 'none';
+            addCarModal.classList.remove('active');
+            customDialog.style.display = 'none';
+            customDialog.classList.remove('active');
 
-             // Set default date for tow input to today
-             towDateInput.valueAsDate = new Date();
+
+            // Set default date for tow input to today
+            towDateInput.valueAsDate = new Date();
         }
 
         // Run initialization when the DOM is fully loaded
