@@ -764,14 +764,14 @@
       // script contents
      // Wrap entire script in DOMContentLoaded to ensure HTML is ready
      document.addEventListener('DOMContentLoaded', () => {
-       console.log("[Debug] DOM fully loaded and parsed.");
+       // \("[Debug] DOM fully loaded and parsed.");
 
        // Get reference to the error message div early
        const styleErrorMessage = document.getElementById('style-error-message');
 
        try {
          // --- Get Static Elements ---
-         console.log("[Debug] Getting static elements...");
+         // \("[Debug] Getting static elements...");
          const portfolioGridContainer = document.querySelector('#portfolio .grid');
          const showcasePrevBtn = document.getElementById('showcase-prev');
          const showcaseNextBtn = document.getElementById('showcase-next');
@@ -843,12 +843,12 @@
          let currentImageIndex = 0;
          let modalImageSources = [];
          let currentModalImageIndex = 0;
-         console.log("[Debug] Projects data defined:", projects);
+         // \("[Debug] Projects data defined:", projects);
 
          // --- Populate Portfolio Grid ---
          function populateGrid() {
            if (!portfolioGridContainer) { console.error("[Debug] Cannot populate grid, container not found."); return; }
-           console.log("[Debug] Populating portfolio grid...");
+           // \("[Debug] Populating portfolio grid...");
            portfolioGridContainer.innerHTML = ''; // Clear existing items
 
            projects.forEach((project, index) => {
@@ -882,7 +882,7 @@
 
              // Add click listener to show details
              gridItem.addEventListener('click', () => {
-               console.log(`[Debug] Grid item ${index} clicked. Calling displayProjectDetails.`);
+               // \(`[Debug] Grid item ${index} clicked. Calling displayProjectDetails.`);
                if (typeof displayProjectDetails === 'function') {
                  displayProjectDetails(index);
                  // Scroll the showcase display into view smoothly
@@ -897,7 +897,7 @@
 
              portfolioGridContainer.appendChild(gridItem);
            });
-           console.log("[Debug] Portfolio grid populated.");
+           // \("[Debug] Portfolio grid populated.");
 
            // Make sure the newly added grid items are observed for animation
            portfolioGridContainer.querySelectorAll('.animate-on-scroll').forEach(el => {
@@ -912,7 +912,7 @@
 
          // --- Display Project Details Logic ---
          function displayProjectDetails(index) {
-           console.log(`[Debug] Displaying project index: ${index}`);
+           // \(`[Debug] Displaying project index: ${index}`);
            if (index < 0 || index >= projects.length || !projects[index]) {
              console.error(`[Debug] Invalid project index or missing project data: ${index}`);
              // Display error state in showcase
@@ -994,7 +994,7 @@
 
            // Display the first image of the selected project
            if (typeof displayShowcaseImage === 'function') {
-             console.log("[Debug] Calling displayShowcaseImage(0) for new project.");
+             // \("[Debug] Calling displayShowcaseImage(0) for new project.");
              displayShowcaseImage(0); // Display the first image (index 0)
            } else {
              console.error("[Debug] displayShowcaseImage function is not defined when changing project.");
@@ -1010,12 +1010,12 @@
            } else {
              console.warn("[Debug] Portfolio grid container not found for updating active state.");
            }
-           console.log(`[Debug] Finished displaying project index: ${index}`);
+           // \(`[Debug] Finished displaying project index: ${index}`);
          }
 
          // --- Display Specific Showcase Image Logic ---
          function displayShowcaseImage(imgIndex) {
-           console.log(`[Debug] Attempting display image index: ${imgIndex} for project index: ${currentProjectIndex}`);
+           // \(`[Debug] Attempting display image index: ${imgIndex} for project index: ${currentProjectIndex}`);
            const project = projects[currentProjectIndex];
 
            // Ensure elements exist
@@ -1041,7 +1041,7 @@
 
            currentImageIndex = imgIndex;
            const imageUrl = project.images[currentImageIndex]; // Use original image path
-           console.log(`[Debug] Setting showcase image src to: ${imageUrl}`);
+           // \(`[Debug] Setting showcase image src to: ${imageUrl}`);
 
            // Fade out current image
            showcaseImageElement.style.opacity = '0';
@@ -1089,7 +1089,7 @@
 
 
          // --- Intersection Observer Setup for Scroll Animations ---
-         console.log("[Debug] Setting up Intersection Observer...");
+         // \("[Debug] Setting up Intersection Observer...");
          let observer;
          try {
            observer = new IntersectionObserver((entries, obs) => {
@@ -1114,7 +1114,7 @@
                observer.observe(el);
              }
            });
-           console.log("[Debug] Intersection Observer setup complete.");
+           // \("[Debug] Intersection Observer setup complete.");
 
          } catch (e) {
            // Fallback if IntersectionObserver fails
@@ -1136,19 +1136,19 @@
          // Showcase Carousel Buttons
          if (showcasePrevBtn) {
            showcasePrevBtn.addEventListener('click', () => {
-             console.log("[Debug] Showcase Prev Arrow Clicked");
+             // \("[Debug] Showcase Prev Arrow Clicked");
              if (currentImageIndex > 0) { // Check if not the first image
                if(typeof displayShowcaseImage === 'function') {
                  displayShowcaseImage(currentImageIndex - 1); // Show previous image
                }
              }
            });
-           console.log("[Debug] Attached listener to showcasePrevBtn");
+           // \("[Debug] Attached listener to showcasePrevBtn");
          } else { console.warn("[Debug] showcasePrevBtn listener not attached (element missing)."); }
 
          if (showcaseNextBtn) {
            showcaseNextBtn.addEventListener('click', () => {
-             console.log("[Debug] Showcase Next Arrow Clicked");
+             // \("[Debug] Showcase Next Arrow Clicked");
              const project = projects[currentProjectIndex];
              // Check if project exists and not the last image
              if (project && currentImageIndex < project.images.length - 1) {
@@ -1157,7 +1157,7 @@
                }
              }
            });
-           console.log("[Debug] Attached listener to showcaseNextBtn");
+           // \("[Debug] Attached listener to showcaseNextBtn");
          } else { console.warn("[Debug] showcaseNextBtn listener not attached (element missing)."); }
          
          if (showcaseImageElement) {
@@ -1170,13 +1170,13 @@
                         // Pass the full image list for the *current project* and the *current showcase image index*
                         openModal(project.images, currentImageIndex);
                     } else {
-                        console.log("[Debug] Modal not opened for placeholder/error image shown in showcase.");
+                        // \("[Debug] Modal not opened for placeholder/error image shown in showcase.");
                     }
                 } else {
                      console.warn(`[Debug] Cannot open modal, no images found for project index ${currentProjectIndex}.`);
                 }
             });
-            console.log("[Debug] Attached modal open listener to showcaseImageElement");
+            // \("[Debug] Attached modal open listener to showcaseImageElement");
         } else { console.warn("[Debug] showcaseImageElement listener not attached (element missing)."); }
         
                 // Listener for the modal PREVIOUS button (NEW)
@@ -1186,7 +1186,7 @@
                     updateModalImageAndNav(currentModalImageIndex - 1);
                 }
             });
-            console.log("[Debug] Attached listener to modalPrevBtn");
+            // \("[Debug] Attached listener to modalPrevBtn");
         } else { console.warn("[Debug] modalPrevBtn listener not attached (element missing)."); }
 
         // Listener for the modal NEXT button (NEW)
@@ -1196,13 +1196,13 @@
                     updateModalImageAndNav(currentModalImageIndex + 1);
                  }
             });
-            console.log("[Debug] Attached listener to modalNextBtn");
+            // \("[Debug] Attached listener to modalNextBtn");
         } else { console.warn("[Debug] modalNextBtn listener not attached (element missing)."); }
 
         // Listener for the modal close button (Keep existing)
         if (modalCloseBtn) {
             modalCloseBtn.addEventListener('click', closeModal);
-            console.log("[Debug] Attached listener to modalCloseBtn");
+            // \("[Debug] Attached listener to modalCloseBtn");
         } else { console.warn("[Debug] modalCloseBtn listener not attached (element missing)."); }
 
         // Listener for clicking the modal background (overlay) to close (Keep existing)
@@ -1213,7 +1213,7 @@
                     closeModal();
                 }
             });
-            console.log("[Debug] Attached overlay click listener to imageModal");
+            // \("[Debug] Attached overlay click listener to imageModal");
         } else { console.warn("[Debug] imageModal overlay listener not attached (element missing)."); }
 
         // Listener for the Escape key to close modal (Keep existing)
@@ -1224,7 +1224,7 @@
             }
             // Note: Arrow key handling for the modal is now inside handleModalKeyboardNav
         });
-        console.log("[Debug] Attached global Escape key listener");
+        // \("[Debug] Attached global Escape key listener");
         
 
         // --- Image Modal Logic ---
@@ -1239,7 +1239,7 @@
                 console.error("[Debug] Cannot open modal - missing elements or image list.");
                 return;
             }
-            console.log(`[Debug] Opening modal with ${imageList.length} images, starting at index ${startIndex}.`);
+            // \(`[Debug] Opening modal with ${imageList.length} images, starting at index ${startIndex}.`);
 
             modalImageSources = imageList; // Store the list for navigation
             currentModalImageIndex = startIndex; // Set the starting index for the modal
@@ -1270,7 +1270,7 @@
 
             currentModalImageIndex = index; // Update the current modal index state
             const imageUrl = modalImageSources[currentModalImageIndex];
-            console.log(`[Debug] Updating modal image to index ${currentModalImageIndex}: ${imageUrl}`);
+            // \(`[Debug] Updating modal image to index ${currentModalImageIndex}: ${imageUrl}`);
 
             // --- Preload next/prev images (optional but good for UX) ---
             if (currentModalImageIndex < modalImageSources.length - 1) {
@@ -1319,7 +1319,7 @@
 
         function closeModal() {
             if (!imageModal) return;
-            console.log("[Debug] Closing modal.");
+            // \("[Debug] Closing modal.");
             imageModal.classList.add('opacity-0'); // Fade out modal
 
             // Remove keyboard listeners when modal closes
@@ -1358,7 +1358,7 @@
             }
         }
         
-         console.log("[Debug] Attached Escape key listener for modal");
+         // \("[Debug] Attached Escape key listener for modal");
 
 
          // --- SMP Image Carousel Logic ---
@@ -1396,7 +1396,7 @@
 
          // Start carousel only if element exists and there's more than one image
          if (smpImageElement && smpImages.length > 1) {
-           console.log("[Debug] Starting SMP image carousel.");
+           // \("[Debug] Starting SMP image carousel.");
            smpIntervalId = setInterval(changeSmpImage, 5000); // Change image every 5 seconds
 
            // Optional: Pause carousel on hover
@@ -1404,20 +1404,20 @@
            if (smpSection) {
                smpSection.addEventListener('mouseenter', () => {
                    if (smpIntervalId) clearInterval(smpIntervalId); // Clear interval on hover
-                   console.log("[Debug] SMP carousel paused on hover.");
+                   // \("[Debug] SMP carousel paused on hover.");
                });
                smpSection.addEventListener('mouseleave', () => {
                    // Restart interval when mouse leaves (reset timer)
                    smpIntervalId = setInterval(changeSmpImage, 5000);
-                   console.log("[Debug] SMP carousel resumed on mouse leave.");
+                   // \("[Debug] SMP carousel resumed on mouse leave.");
                });
            }
          } else {
-             console.log("[Debug] SMP image carousel not started (element missing or only one image).");
+             // \("[Debug] SMP image carousel not started (element missing or only one image).");
          }
 
          // --- Initial Page Setup ---
-         console.log("[Debug] Running initial page setup...");
+         // \("[Debug] Running initial page setup...");
          // Populate the portfolio grid first
          if (typeof populateGrid === 'function') {
            populateGrid();
@@ -1430,7 +1430,7 @@
          if (projects.length > 0) {
            setTimeout(() => {
              if (typeof displayProjectDetails === 'function') {
-               console.log("[Debug] Calling initial displayProjectDetails(0) via setTimeout.");
+               // \("[Debug] Calling initial displayProjectDetails(0) via setTimeout.");
                displayProjectDetails(0); // Display first project
              } else {
                console.error('[Debug] Initial displayProjectDetails function not defined');
@@ -1438,7 +1438,7 @@
            }, 50); // Small delay
          } else {
            // Handle case where there are no projects
-           console.log("[Debug] No projects found to display initially.");
+           // \("[Debug] No projects found to display initially.");
              if(showcaseTitleElement) showcaseTitleElement.textContent = "No Projects Yet";
              if(showcaseDescElement) showcaseDescElement.textContent = "Check back later for project updates!";
              if(showcaseImageElement) showcaseImageElement.src = 'https://placehold.co/600x400/111827/9ca3af?text=No+Projects';
@@ -1449,7 +1449,7 @@
              if(showcaseNextBtn) showcaseNextBtn.style.display = 'none';
          }
 
-         console.log("[Debug] Initial setup complete.");
+         // \("[Debug] Initial setup complete.");
 
        } catch (error) {
          // Catch any critical errors during initialization
