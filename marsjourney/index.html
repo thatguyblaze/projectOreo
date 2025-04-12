@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Trail - Embark on the Crimson Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.min.js"></script>
+
+    <style>
+        /* Custom styles (Consistent with game theme) */
+        :root {
+            --background-darker: #0f172a; /* Slate 950 */
+            --background-dark: #1e293b; /* Slate 800 */
+            --background-med: #334155; /* Slate 700 */
+            --background-light: #475569; /* Slate 600 */
+            --text-primary: #f1f5f9; /* Slate 100 */
+            --text-secondary: #94a3b8; /* Slate 400 */
+            --accent-color: #0ea5e9; /* Sky 500 - Futuristic Blue/Cyan */
+            --accent-darker: #0284c7; /* Sky 600 */
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Accent color application */
+        .text-accent { color: var(--accent-color); }
+        .bg-accent { background-color: var(--accent-color); }
+        .border-accent { border-color: var(--accent-color); }
+        .hover\:bg-accent-dark:hover { background-color: var(--accent-darker); }
+        .ring-accent:focus { --tw-ring-color: var(--accent-color); }
+
+        /* Hero Section Background */
+        .hero-bg {
+            background: linear-gradient(180deg, var(--background-dark) 0%, var(--background-darker) 100%);
+            overflow: hidden;
+        }
+
+        /* Feature Card styling */
+        .feature-card {
+            background-color: var(--background-dark);
+            border: 1px solid var(--background-med);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            display: flex; /* Use flexbox for alignment */
+            flex-direction: column; /* Stack icon, title, text vertically */
+            height: 100%; /* Make cards in a row equal height */
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-color);
+        }
+        .feature-card .card-content {
+             flex-grow: 1; /* Allow content to fill space */
+        }
+        .feature-card i[data-lucide] {
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+         .feature-card:hover i[data-lucide] {
+            transform: scale(1.1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--background-darker); }
+        ::-webkit-scrollbar-thumb { background: var(--background-light); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* Icon styling */
+        i[data-lucide] {
+            width: 1.1em; height: 1.1em;
+            margin-right: 0.4em;
+            vertical-align: -0.15em;
+            display: inline-block;
+        }
+
+        /* Button Styling */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 0.75rem 1.75rem;
+            border-radius: 0.5rem; font-weight: 600; text-align: center;
+            transition: all 0.2s ease; cursor: pointer;
+            border: 1px solid transparent; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn-accent { background-color: var(--accent-color); color: white; }
+        .btn-accent:hover { background-color: var(--accent-darker); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .btn-secondary { background-color: transparent; color: var(--text-primary); border: 1px solid var(--background-light); }
+        .btn-secondary:hover { background-color: var(--background-med); border-color: var(--text-secondary); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
+        /* Fade-in animation */
+        .fade-in {
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Icons in buttons */
+         .btn i[data-lucide] { margin-right: 0.5em; vertical-align: -0.1em; }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-background-dark/80 backdrop-blur-md sticky top-0 z-50 shadow-md border-b border-background-med">
+        <nav class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-lg font-bold text-accent flex items-center">
+                <i data-lucide="rocket" class="w-5 h-5 mr-2"></i> Mars Trail
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="#features" class="text-sm text-text-secondary hover:text-text-primary transition duration-300 hidden sm:inline">Gameplay</a>
+                <a href="https://blazinik.com/marsjourneygame" target="_blank" rel="noopener noreferrer" class="btn btn-accent text-sm px-4 py-1.5">
+                    Play Game
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-bg pt-24 pb-32 md:pt-32 md:pb-40 text-center relative">
+            <div class="container mx-auto px-4 sm:px-6 relative z-10">
+                <div class="absolute inset-0 flex items-center justify-center z-0 opacity-5" aria-hidden="true">
+                     <i data-lucide="planet" class="w-64 h-64 text-background-light transform rotate-12"></i>
+                 </div>
+
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-black text-text-primary mb-5 leading-tight drop-shadow-lg fade-in">
+                    The Crimson Journey Begins
+                </h1>
+                <p class="text-base sm:text-lg text-text-secondary mb-10 max-w-2xl mx-auto fade-in" style="transition-delay: 0.1s;">
+                    Take command of humanity's perilous first voyage to Mars in this strategic survival simulation. Make critical turn-based decisions, manage dwindling resources, respond to unexpected crises, and navigate the vast emptiness of space. Failure is not an option.
+                </p>
+                <div class="fade-in" style="transition-delay: 0.2s;">
+                    <a href="https://blazinik.com/marsjourneygame" target="_blank" rel="noopener noreferrer" class="btn btn-accent text-lg px-8 py-3">
+                       <i data-lucide="play-circle"></i> Launch Mission
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="py-16 md:py-24 bg-background-darker">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-accent mb-12 md:mb-16 fade-in">Gameplay: Survive the Void</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+
+                    <div class="feature-card rounded-lg p-6 text-center fade-in" style="transition-delay: 0.1s;">
+                        <div class="mb-4"><i data-lucide="database" class="w-12 h-12 mx-auto"></i></div>
+                        <div class="card-content">
+                            <h3 class="text-xl font-semibold text-text-primary mb-2">Strategic Resource Management</h3>
+                            <p class="text-sm text-text-secondary">Carefully monitor and allocate essential Fuel, Supplies, and Hull Integrity. Choose when to travel, conserve, or make vital repairs using limited resources.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card rounded-lg p-6 text-center fade-in" style="transition-delay: 0.2s;">
+                         <div class="mb-4"><i data-lucide="shield-alert" class="w-12 h-12 mx-auto"></i></div>
+                         <div class="card-content">
+                            <h3 class="text-xl font-semibold text-text-primary mb-2">Handle Unexpected Crises</h3>
+                            <p class="text-sm text-text-secondary">Respond to random events like damaging micrometeoroid showers, critical equipment malfunctions, solar flares, and potential resource discoveries. Adapt or perish.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-card rounded-lg p-6 text-center fade-in" style="transition-delay: 0.3s;">
+                         <div class="mb-4"><i data-lucide="flag" class="w-12 h-12 mx-auto"></i></div>
+                         <div class="card-content">
+                            <h3 class="text-xl font-semibold text-text-primary mb-2">Complete Your Mission</h3>
+                            <p class="text-sm text-text-secondary">Navigate the immense distance to Mars. Success requires careful planning, calculated risks, and a bit of luck to bring your crew safely to the Red Planet.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+         <section class="py-16 md:py-20 bg-background-dark">
+            <div class="container mx-auto px-4 sm:px-6 text-center">
+                <h2 class="text-2xl md:text-3xl font-bold text-text-primary mb-6 fade-in">Ready to Command Your Mission?</h2>
+                <p class="text-text-secondary mb-8 max-w-xl mx-auto fade-in" style="transition-delay: 0.1s;">
+                    Experience the challenge of interplanetary travel. The fate of the mission rests in your hands. Launch your journey to Mars today!
+                </p>
+                <div class="fade-in" style="transition-delay: 0.2s;">
+                    <a href="https://blazinik.com/marsjourneygame" target="_blank" rel="noopener noreferrer" class="btn btn-accent text-lg px-8 py-3">
+                        <i data-lucide="rocket"></i> Play Mars Trail Now
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-background-darker mt-12 pt-6 pb-6 border-t border-background-dark">
+        <div class="container mx-auto px-4 sm:px-6 text-center text-text-secondary text-xs">
+            <p>&copy; <span id="footer-year"></span> Mars Trail Landing Page Concept.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Wait for the DOM to be fully loaded before running scripts
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Lucide Icons
+            try {
+                lucide.createIcons();
+            } catch (e) {
+                console.error("Lucide icons initialization failed:", e);
+            }
+
+
+            // Update footer year
+            const yearSpan = document.getElementById('footer-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            } else {
+                 console.error("Footer year span not found");
+            }
+
+
+            // Simple Fade-in Animation on Scroll
+            try {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            // Optional: Unobserve after animation
+                            // observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 }); // Trigger when 10% is visible
+
+                const fadeInElements = document.querySelectorAll('.fade-in');
+                 if (fadeInElements.length === 0) {
+                    console.warn("No elements with class 'fade-in' found for IntersectionObserver.");
+                 }
+                fadeInElements.forEach(el => {
+                    observer.observe(el);
+                });
+            } catch (e) {
+                 console.error("IntersectionObserver setup failed:", e);
+                 // Fallback: Make elements visible immediately if observer fails
+                 document.querySelectorAll('.fade-in').forEach(el => {
+                    el.classList.add('visible');
+                 });
+            }
+        }); // End DOMContentLoaded
+
+    </script>
+
+</body>
+</html>
