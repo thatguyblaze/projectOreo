@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars Trail - The Crimson Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.min.js"></script>
+
+    <style>
+        /* Custom styles */
+        :root {
+            --background-darker: #0f172a; /* Slate 950 */
+            --background-dark: #1e293b; /* Slate 800 */
+            --background-med: #334155; /* Slate 700 */
+            --background-light: #475569; /* Slate 600 */
+            --text-primary: #f1f5f9; /* Slate 100 */
+            --text-secondary: #94a3b8; /* Slate 400 */
+            --accent-color: #0ea5e9; /* Sky 500 - Futuristic Blue/Cyan */
+            --accent-darker: #0284c7; /* Sky 600 */
+            --warning-color: #facc15; /* Yellow 400 */
+            --danger-color: #f87171; /* Red 400 */
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Accent color application */
+        .text-accent { color: var(--accent-color); }
+        .bg-accent { background-color: var(--accent-color); }
+        .border-accent { border-color: var(--accent-color); }
+        .hover\:bg-accent-dark:hover { background-color: var(--accent-darker); }
+        .ring-accent:focus { --tw-ring-color: var(--accent-color); }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--background-darker); }
+        ::-webkit-scrollbar-thumb { background: var(--background-light); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* Icon styling */
+        i[data-lucide] {
+            width: 1em; height: 1em;
+            margin-right: 0.4em;
+            vertical-align: -0.15em;
+            display: inline-block; /* Ensure proper alignment */
+        }
+
+        /* Button Styling */
+        .btn {
+            display: inline-flex; /* Use flex for icon alignment */
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.375rem; /* Tailwind default 'rounded-md' */
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-accent {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .btn-accent:not(:disabled):hover {
+            background-color: var(--accent-darker);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+        .btn-secondary {
+            background-color: var(--background-med);
+            color: var(--text-primary);
+            border-color: var(--background-light);
+        }
+        .btn-secondary:not(:disabled):hover {
+            background-color: var(--background-light);
+            border-color: var(--text-secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+
+        /* Game UI Specific Styles */
+        #event-log {
+            height: 200px; /* Fixed height */
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--background-med);
+            font-family: monospace;
+            font-size: 0.875rem;
+            padding: 0.75rem;
+            overflow-y: auto; /* Enable scrolling */
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+        }
+        #event-log p {
+            margin-bottom: 0.5em;
+            line-height: 1.4;
+        }
+        #event-log .event-warning { color: var(--warning-color); }
+        #event-log .event-danger { color: var(--danger-color); }
+        #event-log .event-info { color: var(--text-secondary); }
+        #event-log .event-success { color: #34d399; } /* Emerald 400 */
+
+        /* Progress Bar */
+        .progress-bar-container {
+            background-color: var(--background-light);
+            border-radius: 0.375rem;
+            overflow: hidden;
+            height: 1rem; /* Adjust height */
+            border: 1px solid var(--background-med);
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.5s ease-in-out;
+            text-align: center;
+            color: white;
+            font-size: 0.7rem;
+            line-height: 1rem; /* Match height */
+        }
+        .progress-bar.warning { background-color: var(--warning-color); }
+        .progress-bar.danger { background-color: var(--danger-color); }
+
+        /* Status Readout */
+        .status-item {
+            background-color: var(--background-dark);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--background-med);
+            text-align: center;
+        }
+        .status-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .status-value.warning { color: var(--warning-color); }
+        .status-value.danger { color: var(--danger-color); }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-background-dark/90 backdrop-blur-sm sticky top-0 z-50 shadow-md border-b border-background-med">
+        <nav class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <h1 class="text-lg font-bold text-accent flex items-center">
+                <i data-lucide="rocket" class="w-5 h-5 mr-2"></i> Mars Trail
+            </h1>
+            <button id="restart-button" class="btn btn-secondary text-sm px-3 py-1.5">
+                <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>Restart
+            </button>
+        </nav>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-8 md:py-12">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+
+            <div class="lg:col-span-1 space-y-6">
+                <h2 class="text-2xl font-bold text-text-primary mb-4 border-b border-background-med pb-2">Mission Status</h2>
+
+                <div class="status-item">
+                     <span class="status-label"><i data-lucide="map"></i>Journey Progress</span>
+                     <div class="progress-bar-container mt-1">
+                         <div id="progress-bar" class="progress-bar">0%</div>
+                     </div>
+                     <span id="progress-text" class="text-xs text-text-secondary mt-1 block">SOL 0 / 250 (Est.)</span>
+                </div>
+
+                 <div class="grid grid-cols-2 gap-4">
+                    <div class="status-item">
+                        <span class="status-label"><i data-lucide="fuel"></i>Fuel</span>
+                        <span id="fuel-status" class="status-value">100</span>
+                    </div>
+                     <div class="status-item">
+                        <span class="status-label"><i data-lucide="database"></i>Supplies</span>
+                        <span id="supplies-status" class="status-value">100</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label"><i data-lucide="shield-check"></i>Hull</span>
+                        <span id="hull-status" class="status-value">100</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label"><i data-lucide="users"></i>Crew</span>
+                        <span id="crew-status" class="status-value">OK</span>
+                    </div>
+                </div>
+
+                <div>
+                     <h3 class="text-lg font-semibold text-text-secondary mb-2">Ship Systems</h3>
+                     <ul class="text-sm space-y-1 text-text-primary">
+                         <li><i data-lucide="power" class="text-green-400"></i> Power Core: Nominal</li>
+                         <li><i data-lucide="wind" class="text-green-400"></i> Life Support: Stable</li>
+                         <li><i data-lucide="navigation" class="text-green-400"></i> Navigation: Online</li>
+                         <li><i data-lucide="shield" class="text-green-400"></i> Radiation Shielding: Active</li>
+                     </ul>
+                 </div>
+
+            </div>
+
+            <div class="lg:col-span-2">
+                 <h2 class="text-2xl font-bold text-text-primary mb-4 border-b border-background-med pb-2">Captain's Log</h2>
+
+                 <div id="event-log">
+                     </div>
+
+                 <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                     <button id="action-travel" class="btn btn-accent">
+                         <i data-lucide="move-right"></i>Travel
+                     </button>
+                     <button id="action-conserve" class="btn btn-secondary">
+                         <i data-lucide="battery-charging"></i>Conserve
+                     </button>
+                     <button id="action-repair" class="btn btn-secondary">
+                         <i data-lucide="wrench"></i>Repair
+                     </button>
+                     <button id="action-scan" class="btn btn-secondary">
+                         <i data-lucide="scan-line"></i>Scan
+                     </button>
+                 </div>
+
+                 <div id="game-over-message" class="mt-6 p-4 bg-background-dark border border-background-med rounded-md text-center hidden">
+                     <h3 id="game-over-title" class="text-xl font-bold mb-2">Game Over</h3>
+                     <p id="game-over-text" class="text-text-secondary"></p>
+                     <button id="restart-button-2" class="btn btn-accent mt-4">Restart Journey</button>
+                 </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="bg-background-darker mt-12 pt-6 pb-6 border-t border-background-dark">
+        <div class="container mx-auto px-4 sm:px-6 text-center text-text-secondary text-xs">
+            <p>&copy; <span id="footer-year"></span> Mars Trail - Concept Game. Inspired by classic survival journeys.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // --- DOM Elements ---
+        const fuelStatus = document.getElementById('fuel-status');
+        const suppliesStatus = document.getElementById('supplies-status');
+        const hullStatus = document.getElementById('hull-status');
+        const crewStatus = document.getElementById('crew-status');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const eventLog = document.getElementById('event-log');
+        const actionTravel = document.getElementById('action-travel');
+        const actionConserve = document.getElementById('action-conserve');
+        const actionRepair = document.getElementById('action-repair');
+        const actionScan = document.getElementById('action-scan');
+        const restartButton = document.getElementById('restart-button');
+        const restartButton2 = document.getElementById('restart-button-2');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const gameOverTitle = document.getElementById('game-over-title');
+        const gameOverText = document.getElementById('game-over-text');
+        const actionButtons = [actionTravel, actionConserve, actionRepair, actionScan];
+
+        // --- Game Constants ---
+        const TOTAL_DISTANCE = 250; // Represents distance units or SOLs to Mars
+        const FUEL_PER_TRAVEL = 5;
+        const SUPPLIES_PER_TRAVEL = 3;
+        const HULL_DAMAGE_CHANCE = 0.15; // 15% chance of hull damage per travel
+        const EVENT_CHANCE = 0.25; // 25% chance of a random event per travel
+
+        // --- Game State ---
+        let gameState = {};
+
+        // --- Game Functions ---
+
+        function initializeGame() {
+            gameState = {
+                fuel: 100,
+                supplies: 100,
+                hull: 100,
+                crewOk: true,
+                distance: 0,
+                sol: 0,
+                gameOver: false,
+                gameWon: false,
+            };
+            eventLog.innerHTML = ''; // Clear log
+            logEvent("Mission Control: You are cleared for Mars transit. Good luck, Commander.", "info");
+            logEvent(`Trajectory calculated: ${TOTAL_DISTANCE} Mkm / Approx ${TOTAL_DISTANCE} SOLs.`, "info");
+            updateUI();
+            gameOverMessage.classList.add('hidden');
+            actionButtons.forEach(btn => btn.disabled = false);
+        }
+
+        function logEvent(message, type = 'normal') {
+            const p = document.createElement('p');
+            p.textContent = `SOL ${gameState.sol}: ${message}`;
+            if (type) {
+                p.classList.add(`event-${type}`);
+            }
+            eventLog.appendChild(p);
+            // Auto-scroll to bottom
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        function updateUI() {
+            // Update Status Readouts
+            fuelStatus.textContent = gameState.fuel;
+            suppliesStatus.textContent = gameState.supplies;
+            hullStatus.textContent = gameState.hull;
+            crewStatus.textContent = gameState.crewOk ? 'OK' : 'Compromised';
+
+            // Update Progress Bar
+            const progressPercent = Math.min(100, Math.max(0, Math.round((gameState.distance / TOTAL_DISTANCE) * 100)));
+            progressBar.style.width = `${progressPercent}%`;
+            progressBar.textContent = `${progressPercent}%`;
+            progressText.textContent = `SOL ${gameState.sol} / ${TOTAL_DISTANCE} (Est.)`;
+
+            // Update Status Colors (Example for Hull)
+            updateStatusColor(hullStatus, gameState.hull, 30, 60); // Danger below 30, Warning below 60
+            updateStatusColor(fuelStatus, gameState.fuel, 15, 40);
+            updateStatusColor(suppliesStatus, gameState.supplies, 15, 40);
+
+            // Update Progress Bar Color
+            progressBar.classList.remove('warning', 'danger');
+            if (progressPercent < 30 && gameState.sol > TOTAL_DISTANCE * 0.5) { // Example warning condition
+                progressBar.classList.add('warning');
+            }
+
+             // Update Crew Status Color
+            crewStatus.classList.remove('warning', 'danger');
+            if (!gameState.crewOk) {
+                 crewStatus.classList.add('danger');
+            }
+        }
+
+        function updateStatusColor(element, value, dangerThreshold, warningThreshold) {
+            element.classList.remove('warning', 'danger');
+            if (value < dangerThreshold) {
+                element.classList.add('danger');
+            } else if (value < warningThreshold) {
+                element.classList.add('warning');
+            }
+        }
+
+        function checkGameOver() {
+            if (gameState.gameOver) return true; // Already over
+
+            if (gameState.fuel <= 0) {
+                setGameOver("Mission Failure: You ran out of fuel drifting in space.");
+            } else if (gameState.supplies <= 0) {
+                setGameOver("Mission Failure: Critical supplies depleted. Crew status critical.");
+                gameState.crewOk = false; // Update crew status
+            } else if (gameState.hull <= 0) {
+                setGameOver("Mission Failure: Hull breach! Catastrophic failure.");
+            } else if (!gameState.crewOk) {
+                 // Could add more specific crew loss conditions here
+                 setGameOver("Mission Failure: Crew status critical. Unable to continue mission.");
+            } else if (gameState.distance >= TOTAL_DISTANCE) {
+                setGameWon("Congratulations! You've successfully reached Mars orbit!");
+            }
+
+            if (gameState.gameOver) {
+                 actionButtons.forEach(btn => btn.disabled = true);
+                 gameOverMessage.classList.remove('hidden');
+                 return true;
+            }
+            return false;
+        }
+
+        function setGameOver(message) {
+            logEvent(message, "danger");
+            gameState.gameOver = true;
+            gameState.gameWon = false;
+            gameOverTitle.textContent = "Mission Failure";
+            gameOverText.textContent = message;
+        }
+         function setGameWon(message) {
+            logEvent(message, "success");
+            gameState.gameOver = true;
+            gameState.gameWon = true;
+            gameOverTitle.textContent = "Mission Success!";
+            gameOverText.textContent = message;
+        }
+
+
+        function handleRandomEvent() {
+            if (Math.random() < EVENT_CHANCE) {
+                const eventType = Math.random();
+                if (eventType < 0.3) { // Negative Event: Minor Damage
+                    const damage = Math.floor(Math.random() * 5) + 1;
+                    gameState.hull = Math.max(0, gameState.hull - damage);
+                    logEvent(`Micrometeoroid shower! Hull integrity decreased by ${damage}.`, "warning");
+                } else if (eventType < 0.5) { // Negative Event: Supply Spoilage
+                    const loss = Math.floor(Math.random() * 5) + 1;
+                    gameState.supplies = Math.max(0, gameState.supplies - loss);
+                    logEvent(`Supply container malfunction! Lost ${loss} units of supplies.`, "warning");
+                } else if (eventType < 0.7) { // Neutral Event
+                     logEvent("Detected unusual subspace fluctuations. No immediate danger.", "info");
+                } else { // Positive Event
+                    const fuelFound = Math.floor(Math.random() * 5) + 2;
+                    gameState.fuel = Math.min(100, gameState.fuel + fuelFound); // Cap at 100
+                    logEvent(`Navigated through a deuterium cloud! Gained ${fuelFound} fuel units.`, "success");
+                }
+            }
+        }
+
+        // --- Action Handlers ---
+
+        function travel() {
+            if (gameState.gameOver) return;
+            if (gameState.fuel < FUEL_PER_TRAVEL) {
+                logEvent("Cannot travel: Insufficient fuel.", "warning");
+                return;
+            }
+             if (gameState.supplies < SUPPLIES_PER_TRAVEL) {
+                logEvent("Cannot travel: Insufficient supplies.", "warning");
+                return;
+            }
+
+            // Consume resources
+            gameState.fuel -= FUEL_PER_TRAVEL;
+            gameState.supplies -= SUPPLIES_PER_TRAVEL;
+            gameState.sol++;
+
+            // Calculate distance gained (can add variability later)
+            const distanceGained = 1; // Simple: 1 unit per SOL/travel action
+            gameState.distance += distanceGained;
+            logEvent(`Traveled ${distanceGained} Mkm. Fuel used: ${FUEL_PER_TRAVEL}, Supplies used: ${SUPPLIES_PER_TRAVEL}.`);
+
+            // Chance of hull damage during travel
+            if (Math.random() < HULL_DAMAGE_CHANCE) {
+                 const damage = Math.floor(Math.random() * 3) + 1;
+                 gameState.hull = Math.max(0, gameState.hull - damage);
+                 logEvent(`Minor hull stress from transit. Integrity decreased by ${damage}.`, "warning");
+            }
+
+            // Handle random events
+            handleRandomEvent();
+
+            updateUI();
+            checkGameOver();
+        }
+
+        function conserve() {
+             if (gameState.gameOver) return;
+             gameState.sol++;
+             // Small chance to regain a tiny bit of something, or just skip resource use for a turn
+             const fuelRegen = Math.random() < 0.1 ? 1 : 0;
+             const supplyRegen = Math.random() < 0.1 ? 1 : 0;
+             gameState.fuel = Math.min(100, gameState.fuel + fuelRegen);
+             gameState.supplies = Math.min(100, gameState.supplies + supplyRegen);
+
+             logEvent(`Conserving resources. Minimal consumption. Fuel +${fuelRegen}, Supplies +${supplyRegen}.`, "info");
+             handleRandomEvent(); // Events can still happen
+             updateUI();
+             checkGameOver();
+        }
+
+        function repair() {
+             if (gameState.gameOver) return;
+             if (gameState.supplies < 5) { // Repair costs supplies
+                 logEvent("Cannot repair: Insufficient supplies.", "warning");
+                 return;
+             }
+             if (gameState.hull >= 100) {
+                 logEvent("Hull integrity already at maximum.", "info");
+                 return;
+             }
+
+             gameState.sol++;
+             gameState.supplies -= 5; // Cost of repair
+             const repairAmount = Math.floor(Math.random() * 10) + 5; // Repair 5-14 points
+             gameState.hull = Math.min(100, gameState.hull + repairAmount);
+             logEvent(`Repairs underway. Used 5 supplies. Hull integrity increased by ${repairAmount}.`, "success");
+             handleRandomEvent();
+             updateUI();
+             checkGameOver();
+        }
+
+        function scan() {
+             if (gameState.gameOver) return;
+             gameState.sol++;
+             // Doesn't use fuel/supplies unless we add that cost
+             logEvent("Scanning local space...", "info");
+             // Add logic here: chance to find resources, detect hazards, etc.
+             if (Math.random() < 0.3) {
+                 logEvent("Scan detected minor asteroid field ahead. Proceed with caution.", "warning");
+             } else if (Math.random() < 0.1) {
+                 const foundSupplies = Math.floor(Math.random() * 8) + 3;
+                 gameState.supplies = Math.min(100, gameState.supplies + foundSupplies);
+                 logEvent(`Scan detected a derelict probe with ${foundSupplies} supplies!`, "success");
+             } else {
+                  logEvent("Scan complete. Nothing out of the ordinary detected.", "info");
+             }
+             handleRandomEvent();
+             updateUI();
+             checkGameOver();
+        }
+
+
+        // --- Event Listeners ---
+        actionTravel.addEventListener('click', travel);
+        actionConserve.addEventListener('click', conserve);
+        actionRepair.addEventListener('click', repair);
+        actionScan.addEventListener('click', scan);
+        restartButton.addEventListener('click', initializeGame);
+        restartButton2.addEventListener('click', initializeGame);
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', initializeGame);
+        // Update footer year
+        document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+    </script>
+
+</body>
+</html>
