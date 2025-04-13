@@ -1907,7 +1907,7 @@
         // Calculate the target multiplier where the game will crash
         function calculateCrashTarget() {
             const r = Math.random();
-            const houseEdge = 0.03; // 3% house edge for instant crash
+            const houseEdge = 0.02; // 3% house edge for instant crash
 
             // Instant crash based on house edge
             if (r < houseEdge) {
@@ -1917,7 +1917,7 @@
             // Calculate multiplier using an exponential distribution adjusted for house edge
             // This formula creates more lower multipliers and fewer very high ones
             const effectiveRandom = (r - houseEdge) / (1 - houseEdge); // Adjust random number to exclude house edge range
-            const exponent = 2.5; // Controls the curve steepness (higher = more low multipliers)
+            const exponent = 1.85 ; // Controls the curve steepness (higher = more low multipliers)
             const multiplierBase = 1 / Math.pow(1 - effectiveRandom, 1 / exponent);
 
             // Ensure minimum multiplier is 1.01 and round to 2 decimal places
@@ -2213,7 +2213,7 @@
                 crashAutoCashoutToggle.textContent = 'Enable';
             }
             // Input should be editable ONLY when the toggle is enabled AND the game is NOT active
-            crashAutoCashoutInput.disabled = !(isAutoCashoutEnabled && !crashGameActive);
+            crashAutoCashoutInput.true = !(!crashGameActive);
         }
 
         // Toggle the crash auto-cashout feature
