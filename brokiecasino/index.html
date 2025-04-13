@@ -502,7 +502,6 @@
         }
         .horse {
             position: absolute; /* Position relative to the lane */
-            left: 10px; /* Starting position */
             font-size: 1.75rem; /* Adjust horse size */
             transition: left 0.1s linear; /* Smooth movement */
             padding: 0 5px;
@@ -512,7 +511,7 @@
         }
         #horserace-finish-line {
             position: absolute;
-            right: 20px; /* Position finish line */
+            left: 20px; /* Position finish line on the left */
             top: 0;
             bottom: 0;
             width: 5px;
@@ -1304,7 +1303,8 @@
                 horse.dataset.horseId = i;
                 horse.textContent = '🐎'; // Horse emoji
                 horse.style.color = HORSE_COLORS[i % HORSE_COLORS.length]; // Assign color
-                horse.style.left = '10px'; // Start position
+                // Start near the right edge (track width - approx horse width - padding)
+                horse.style.left = `calc(100% - 40px)`;
 
                 lane.appendChild(horse);
                 horseraceTrack.appendChild(lane);
@@ -1324,13 +1324,15 @@
             horseraceActive = false;
             horseraceBet = 0;
             selectedHorseIndex = -1; // Reset selection
-            horsePositions = new Array(NUM_HORSES).fill(10); // Reset positions to start (10px)
+            // Calculate starting position near right edge (needs track width)
+            const startPos = horseraceTrack.clientWidth ? horseraceTrack.clientWidth - 40 : 10; // Default if width not ready
+            horsePositions = new Array(NUM_HORSES).fill(startPos);
             raceFrameCounter = 0; // Reset trail counter
 
             // Reset horse elements visually
             horseElements.forEach((horse, index) => {
                 if (horse) {
-                    horse.style.left = `${horsePositions[index]}px`;
+                    horse.style.left = `${horsePositions[index]}px`; // Reset to calculated start position
                     horse.classList.remove('animate-pulse'); // Remove winner pulse if applied
                 }
             });
@@ -1367,17 +1369,23 @@
             horseraceSelectionContainer.querySelectorAll('.horse-select-btn').forEach(btn => btn.disabled = true);
             horseraceStatus.textContent = 'And they\'re off!';
             playSound('race_start');
-
-            horsePositions = new Array(NUM_HORSES).fill(10); // Reset positions
-            horseElements.forEach(horse => horse.classList.remove('animate-pulse')); // Clear previous winner pulse
+            const startPos = horseraceTrack.clientWidth ? horseraceTrack.clientWidth - 40 : 10; // Recalculate start pos
+            horsePositions = new Array(NUM_HORSES).fill(startPos);
+            horseElements.forEach((horse, i) => { // Set initial style correctly
+                if(horse) {
+                    horse.style.left = `${startPos}px`;
+                    horse.classList.remove('animate-pulse');
+                }
+            });
             // Clear old trails before starting
             horseraceTrack.querySelectorAll('.horse-trail').forEach(trail => trail.remove());
             raceFrameCounter = 0; // Reset frame counter for trails
 
             // Start the animation loop
             const trackWidth = horseraceTrack.clientWidth;
-            const finishLinePos = trackWidth - 30; // Position before the finish line element width + buffer
+            const finishLinePos = 20; // Target left position for finish line
             let startTime = null;
+            if (trackWidth <= 0) { /* ... error handling ... */ }
 
             function raceStep(timestamp) {
                 if (!startTime) startTime = timestamp;
@@ -1391,41 +1399,42 @@
                 horsePositions = horsePositions.map((pos, i) => {
                     if (pos >= finishLinePos) return pos; // Stop advancing if finished
 
-                    // Random advancement per frame
-                    const advancement = Math.random() * 2.5 + 0.5; // Base speed + random burst
-                    const newPos = pos + advancement;
-                    const displayPos = Math.min(newPos, finishLinePos + 5); // Clamp visual position
+                // Random advancement per frame
+                const advancement = Math.random() * 2.5 + 0.5; // Base speed + random burst
+                const newPos = pos - advancement; // DECREASE left position
+                const displayPos = Math.max(newPos, finishLinePos - 5); // Clamp visual position near left finish
 
-                    if(horseElements[i]) { // Check if element exists
-                       horseElements[i].style.left = `${displayPos}px`; // Move horse
+                if(horseElements[i]) { // Check if element exists
+                   horseElements[i].style.left = `${displayPos}px`; // Move horse
 
-                       // Create trail particle occasionally (e.g., every 4 frames)
-                       if (raceFrameCounter % 4 === 0) {
-                           const trail = document.createElement('div');
-                           trail.className = 'horse-trail';
-                           trail.style.backgroundColor = HORSE_COLORS[i % HORSE_COLORS.length];
-                           // Position trail slightly behind the horse's current visual position
-                           trail.style.left = `${displayPos - 5}px`;
-                           trail.style.top = '50%'; // Center vertically in lane
-                           trail.style.transform = 'translateY(-50%)'; // Adjust vertical centering
-                           // Append trail to the correct lane
-                           if(horseLaneElements[i]) {
-                               horseLaneElements[i].appendChild(trail);
-                           }
-                           // Remove trail after animation ends
-                           trail.addEventListener('animationend', () => {
-                               trail.remove();
-                           });
+                   // Create trail particle occasionally (e.g., every 4 frames)
+                   if (raceFrameCounter % 4 === 0) {
+                       const trail = document.createElement('div');
+                       trail.className = 'horse-trail';
+                       trail.style.backgroundColor = HORSE_COLORS[i % HORSE_COLORS.length];
+                       // Position trail slightly BEHIND (to the right of) the horse's current visual position
+                       trail.style.left = `${displayPos + 15}px`; // Adjust offset as needed
+                       trail.style.top = '50%'; // Center vertically in lane
+                       trail.style.transform = 'translateY(-50%)'; // Adjust vertical centering
+                       // Append trail to the correct lane
+                       if(horseLaneElements[i]) {
+                           horseLaneElements[i].appendChild(trail);
                        }
-                    }
+                       // Remove trail after animation ends
+                       trail.addEventListener('animationend', () => {
+                           trail.remove();
+                       });
+                   }
+                }
 
-                    if (newPos >= finishLinePos && winner === -1) { // Check if this horse is the first to cross
-                        winner = i;
-                    }
-                    return newPos; // Return the actual calculated position for logic
-                });
+                // Check if horse's calculated position has crossed the finish line on the left
+                if (newPos <= finishLinePos && winner === -1) {
+                    winner = i;
+                }
+                return newPos; // Return the actual calculated position for logic
+            });
 
-                if (winner !== -1) {
+            if (winner !== -1) {
                     finishRace(winner); // Finish the race
                 } else {
                     raceAnimationId = requestAnimationFrame(raceStep); // Continue animation
