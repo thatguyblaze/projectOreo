@@ -883,7 +883,7 @@
             <button class="atm-button" data-amount="500">500</button>
         </div>
     </div>
-<script>
+	<script>
     // --- Global State ---
     let currency = 500;
     let totalLoanAmount = 0;
@@ -974,14 +974,14 @@
     let raceFrameCounter = 0; // Counter for trail generation
 
     // --- Roulette Game ---
-    let rouletteActive = false; // Is the wheel spinning?
+    let rouletteActive = false; // Is the wheel spinning? (Corrected variable name)
     let rouletteBet = 0; // Current bet amount per spin
     let rouletteSelectedBet = null; // { type: 'number'/'red'/'black'/'odd'/'even'/'low'/'high', value: number | null }
-    let rouletteIsSpinning = false;
+    let rouletteIsSpinning = false; // Flag specifically for animation state
     const ROULETTE_NUMBERS = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]; // Standard European order
     const ROULETTE_NUMBER_COLORS = {}; // Will be populated in init
     const ROULETTE_SPIN_DURATION = 4000; // ms for wheel spin animation
-    let currentWheelAngle = 0; // Tracks the visual rotation
+    let currentWheelAngle = 0; // Tracks the visual rotation state
 
     // --- Sound ---
     let toneStarted = false;
@@ -1011,6 +1011,9 @@
         if (!toneStarted) return; // Don't play if Tone hasn't started
         const now = Tone.now();
         try {
+            // Added 'index' as a parameter for sounds needing it (like reel stop)
+            let index = typeof value === 'object' && value !== null && value.index !== undefined ? value.index : 0;
+
             switch (type) {
                 case 'win_small': polySynth.triggerAttackRelease(["C4", "E4", "G4"], "8n", now); break;
                 case 'win_medium': polySynth.triggerAttackRelease(["C5", "E5", "G5"], "4n", now); break;
@@ -1522,7 +1525,7 @@
             // Define transition end handler for this specific reel
             const transitionEndHandler = () => {
                 reelSymbolElement.removeEventListener('transitionend', transitionEndHandler); // Clean up listener
-                playSound('reel_stop', index); // Play stop sound
+                playSound('reel_stop', { index: index }); // Pass index to sound
                 activeReels--;
                 if (activeReels === 0) {
                     finalizeSpin(finalSymbols, betAmount); // Call finalize only when ALL reels stopped
@@ -1542,7 +1545,7 @@
                 if (activeReels > 0 && reelSymbolElement.style.transition !== 'none') { // Check if still active
                     console.warn(`Transition fallback for reel ${index + 1}`);
                     reelSymbolElement.removeEventListener('transitionend', transitionEndHandler); // Clean up listener
-                    playSound('reel_stop', index);
+                    playSound('reel_stop', { index: index }); // Pass index to sound
                     activeReels--;
                     if (activeReels === 0) {
                         finalizeSpin(finalSymbols, betAmount);
@@ -1713,8 +1716,8 @@
         crashSvg.setAttribute('viewBox', `0 0 ${INITIAL_VIEWBOX_WIDTH} ${INITIAL_VIEWBOX_HEIGHT}`);
         // Reset multiplier display
         crashMultiplierDisplay.textContent = `${crashMultiplier.toFixed(2)}x`;
-        crashMultiplierDisplay.className = 'text-gray-300'; // Reset classes
-        crashMultiplierDisplay.classList.add('text-gray-300'); // Ensure default color
+        crashMultiplierDisplay.className = ''; // Clear all classes first
+        crashMultiplierDisplay.classList.add('text-gray-300'); // Re-add default class
         crashMultiplierDisplay.style.fontSize = ''; // Reset font size
         // Reset graph line
         crashPolyline.setAttribute('points', `0,${INITIAL_VIEWBOX_HEIGHT}`); // Start at bottom-left
@@ -1852,10 +1855,12 @@
 
             // Apply visual effects based on multiplier
             const displaySpan = document.getElementById('potential-win-amount'); // Get span again for styling
+            // Clear previous multiplier styles first
             crashMultiplierDisplay.classList.remove('shake-subtle', 'shake-strong', 'mult-color-5x', 'mult-color-10x', 'mult-color-15x', 'mult-color-20x', 'mult-color-30x', 'mult-size-10x', 'mult-size-20x', 'mult-size-30x');
             crashMultiplierDisplay.style.fontSize = ''; // Reset font size
             if (displaySpan) displaySpan.className = 'font-bold text-gray-300'; // Reset potential win color
 
+            // Apply new styles based on current multiplier
             if (crashMultiplier >= 30) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-30x', 'mult-size-30x'); if (displaySpan) displaySpan.classList.add('mult-color-30x'); }
             else if (crashMultiplier >= 20) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-20x', 'mult-size-20x'); if (displaySpan) displaySpan.classList.add('mult-color-20x'); }
             else if (crashMultiplier >= 15) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-15x', 'mult-size-10x'); if (displaySpan) displaySpan.classList.add('mult-color-15x'); }
@@ -2754,7 +2759,8 @@
 
             horsePositions = horsePositions.map((pos, i) => {
                 // Calculate current position from the left edge for finish check
-                const currentLeftPos = trackWidth - pos - (horseElements[i]?.offsetWidth || 20); // Estimate width if needed
+                const horseWidth = horseElements[i]?.offsetWidth || 20; // Get actual or estimate width
+                const currentLeftPos = trackWidth - pos - horseWidth;
                 if (currentLeftPos <= finishLinePos) return pos; // Stop advancing if finished
 
                 // Random advancement per frame (move right position value)
@@ -2762,7 +2768,7 @@
                 const newPos = pos + advancement; // Increase distance from right edge
 
                 // Calculate visual position from left for clamping and finish check
-                const visualLeftPos = trackWidth - newPos - (horseElements[i]?.offsetWidth || 20);
+                const visualLeftPos = trackWidth - newPos - horseWidth;
 
                 if(horseElements[i]) {
                     horseElements[i].style.right = `${newPos}px`; // Update right style
@@ -2898,9 +2904,17 @@
         rouletteStatus.textContent = 'Place your bet!';
         rouletteResultDisplay.textContent = '?'; // Reset result display
         rouletteResultDisplay.className = ''; // Reset result color class
-        rouletteResultDisplay.classList.add('flex', 'items-center', 'justify-center', 'absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-16', 'h-16', 'bg-opacity-80', 'rounded-full', 'text-2xl', 'font-bold', 'text-white', 'z-10', 'border-4'); // Re-apply base classes
+        // Re-apply base classes for the result display
+        rouletteResultDisplay.classList.add('flex', 'items-center', 'justify-center', 'absolute', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2', 'w-16', 'h-16', 'bg-opacity-80', 'rounded-full', 'text-2xl', 'font-bold', 'text-white', 'z-10', 'border-4');
         rouletteResultDisplay.style.backgroundColor = 'rgba(20, 20, 20, 0.8)'; // Reset background
         rouletteResultDisplay.style.borderColor = '#4a4a4a'; // Reset border color
+
+        // Reset wheel rotation visually without transition for the next spin calculation
+        // rouletteWheel.style.transition = 'none'; // Temporarily disable transition
+        // rouletteWheel.style.transform = `rotate(${currentWheelAngle % 360}deg)`; // Set to remainder angle
+        // void rouletteWheel.offsetWidth; // Force reflow
+        // rouletteWheel.style.transition = ''; // Re-enable transition from CSS
+
         // Enable betting buttons
         rouletteInsideBetsContainer.querySelectorAll('.roulette-bet-btn').forEach(btn => btn.disabled = false);
         rouletteOutsideBetsContainer.querySelectorAll('.roulette-bet-btn').forEach(btn => btn.disabled = false);
@@ -2931,7 +2945,7 @@
         rouletteStatus.textContent = `Betting on ${betText}. Spin the wheel!`;
     }
 
-    // Spin the roulette wheel
+    // Spin the roulette wheel - REVISED
     function spinRouletteWheel() {
         if (rouletteIsSpinning) return; // Don't spin if already spinning
 
@@ -2966,27 +2980,36 @@
         const winningNumber = ROULETTE_NUMBERS[winningNumberIndex];
         const winningColor = ROULETTE_NUMBER_COLORS[winningNumber];
 
-        // Calculate target angle for the wheel visualization
+        // --- Calculate Target Angle ---
         const numberAngle = 360 / ROULETTE_NUMBERS.length;
-        const targetAngle = (360 * 5) + (360 - (winningNumberIndex * numberAngle + numberAngle / 2)); // Spin multiple times + land on number center
+        // Calculate the base angle for the winning number segment's center (0 degrees is top)
+        const winningSegmentCenterAngle = (winningNumberIndex * numberAngle) + (numberAngle / 2);
+        // Calculate the angle needed to rotate the wheel so the winning segment center aligns with the top pointer (0 degrees)
+        const angleToWinningNumber = 360 - winningSegmentCenterAngle;
 
-        // Apply the spin animation
+        // Add multiple full rotations for visual effect (e.g., 5-7 rotations)
+        const fullRotations = (5 + Math.floor(Math.random() * 3)) * 360;
+
+        // Calculate the final target angle based on the *current* visual angle plus rotations and offset
+        // This ensures the wheel spins forward from its current position.
+        const targetAngle = currentWheelAngle + fullRotations + angleToWinningNumber;
+
+        // Apply the spin animation using CSS transition
         rouletteWheel.style.transform = `rotate(${targetAngle}deg)`;
-        currentWheelAngle = targetAngle; // Store the final angle
 
         // Simulate ball bounce sounds during spin
-        let ballSoundTimeout;
-        function playBallSound() {
+        let ballSoundInterval = setInterval(() => {
              playSound('roulette_ball');
-             ballSoundTimeout = setTimeout(playBallSound, 100 + Math.random() * 200); // Random interval
-        }
-        playBallSound();
+        }, 150 + Math.random() * 150); // Random interval for ball sounds
 
 
         // --- Determine Result after Animation ---
         setTimeout(() => {
-            clearTimeout(ballSoundTimeout); // Stop ball sounds
-            rouletteIsSpinning = false;
+            clearInterval(ballSoundInterval); // Stop ball sounds
+            rouletteIsSpinning = false; // Mark spinning as complete
+
+            // Update the current angle state for the next spin calculation
+            currentWheelAngle = targetAngle;
 
             // Display winning number and color
             rouletteResultDisplay.textContent = winningNumber;
