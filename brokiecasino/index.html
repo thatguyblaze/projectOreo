@@ -502,16 +502,18 @@
         }
         .horse {
             position: absolute; /* Position relative to the lane */
+            left: 10px; /* Starting position */
             font-size: 1.75rem; /* Adjust horse size */
             transition: left 0.1s linear; /* Smooth movement */
             padding: 0 5px;
             line-height: 1; /* Ensure emoji vertical alignment */
             display: inline-block; /* Ensure the div takes space */
             z-index: 5; /* Horse above trail */
+            will-change: left; /* Optimize animation */
         }
         #horserace-finish-line {
             position: absolute;
-            left: 20px; /* Position finish line on the left */
+            right: 20px; /* Position finish line */
             top: 0;
             bottom: 0;
             width: 5px;
@@ -1187,7 +1189,67 @@
         function saveGameState() { /* ... */ try { localStorage.setItem('brokieCasinoState', JSON.stringify({ currency: currency, leaderboard: leaderboard, totalLoanAmount: totalLoanAmount, totalGain: totalGain, totalLoss: totalLoss, })); } catch (e) { console.error("Error saving game state:", e); showMessage("Could not save game progress.", 2000); } }
         function loadGameState() { /* ... */ const savedState = localStorage.getItem('brokieCasinoState'); if (savedState) { try { const state = JSON.parse(savedState); currency = state.currency !== undefined && !isNaN(state.currency) ? state.currency : 500; leaderboard = Array.isArray(state.leaderboard) ? state.leaderboard : []; totalLoanAmount = state.totalLoanAmount !== undefined && !isNaN(state.totalLoanAmount) ? state.totalLoanAmount : 0; totalGain = state.totalGain !== undefined && !isNaN(state.totalGain) ? state.totalGain : 0; totalLoss = state.totalLoss !== undefined && !isNaN(state.totalLoss) ? state.totalLoss : 0; } catch (e) { console.error("Error loading saved state:", e); currency = 500; leaderboard = []; totalLoanAmount = 0; totalGain = 0; totalLoss = 0; localStorage.removeItem('brokieCasinoState'); } } leaderboard = leaderboard.slice(0, MAX_LEADERBOARD_ENTRIES); updateCurrencyDisplay(); updateLeaderboardDisplay(); }
         function displayPayoutLegend() { /* ... */ payoutList.innerHTML = ''; const sortedPayouts = Object.entries(slotPayouts).sort(([,a],[,b]) => b-a); for (const [key, value] of sortedPayouts) { const li = document.createElement('li'); li.innerHTML = `<span>${key}</span><span>${value}x</span>`; payoutList.appendChild(li); } }
-        function setActiveTab(selectedTab) { /* ... */ if (isAutoSpinning && selectedTab !== tabSlots) { stopAutoSpin(); } if (isCrashAutoBetting && selectedTab !== tabCrash) { stopCrashAutoBet(); } if (coinFlipActive && selectedTab !== tabCoinflip) { resetCoinFlip(); } if (minefieldActive && selectedTab !== tabMinefield) { resetMinefield(); } if (memoryActive && selectedTab !== tabMemory) { resetMemoryGame(); } if (horseraceActive && selectedTab !== tabHorserace) { resetHorserace(); } allTabs.forEach(tab => { const gameAreaId = tab.id.replace('tab-', 'game-'); const gameArea = document.getElementById(gameAreaId); if (tab === selectedTab) { tab.setAttribute('aria-current', 'page'); if (gameArea) { gameArea.classList.remove('hidden', 'opacity-0'); gameArea.classList.add('opacity-100'); if (tab === tabCrash) { updateCrashAutoCashoutToggleVisuals(); } if (tab === tabHorserace && horseElements.length === 0) { createHorses(); resetHorserace(); } } } else { tab.removeAttribute('aria-current'); if (gameArea) { gameArea.classList.add('opacity-0'); setTimeout(() => { if (!tab.hasAttribute('aria-current')) { gameArea.classList.add('hidden'); } }, 300); } } }); if (selectedTab !== tabCrash && crashGameActive) { clearInterval(crashInterval); crashInterval = null; crashGameActive = false; crashBetButton.disabled = false; crashCashoutButton.disabled = true; crashBetInput.disabled = false; crashAutoBetToggle.disabled = false; crashAutoCashoutToggle.disabled = false; updateCrashAutoCashoutToggleVisuals(); crashStatus.textContent = "Game stopped by switching tabs."; crashPlayerBet = 0; resetCrashVisuals(); } if (selectedTab !== tabHorserace && horseraceActive) { resetHorserace(); horseraceStatus.textContent = "Race stopped by switching tabs."; } }
+        function setActiveTab(selectedTab) {
+            // Stop any active auto-play or ongoing games when switching tabs
+            if (isAutoSpinning && selectedTab !== tabSlots) { stopAutoSpin(); }
+            if (isCrashAutoBetting && selectedTab !== tabCrash) { stopCrashAutoBet(); }
+            if (coinFlipActive && selectedTab !== tabCoinflip) { resetCoinFlip(); }
+            if (minefieldActive && selectedTab !== tabMinefield) { resetMinefield(); }
+            if (memoryActive && selectedTab !== tabMemory) { resetMemoryGame(); }
+            if (horseraceActive && selectedTab !== tabHorserace) { resetHorserace(); } // Reset horserace game
+
+            // Handle tab switching visuals and game area visibility
+            allTabs.forEach(tab => {
+                const gameAreaId = tab.id.replace('tab-', 'game-');
+                const gameArea = document.getElementById(gameAreaId);
+                if (tab === selectedTab) {
+                    tab.setAttribute('aria-current', 'page');
+                    if (gameArea) {
+                        gameArea.classList.remove('hidden', 'opacity-0');
+                        gameArea.classList.add('opacity-100');
+                        // ** Explicitly update crash input state when switching TO crash tab **
+                        if (tab === tabCrash) {
+                            updateCrashAutoCashoutToggleVisuals();
+                        }
+                        // ** Create horses if switching TO horse race tab and they don't exist **
+                        if (tab === tabHorserace && horseElements.length === 0) {
+                            createHorses(); // Create the visual elements
+                            resetHorserace(); // Reset positions and UI state
+                        }
+                    }
+                } else {
+                    tab.removeAttribute('aria-current');
+                    if (gameArea) {
+                         // Start fade out
+                         gameArea.classList.add('opacity-0');
+                         // Hide after transition (300ms)
+                         setTimeout(() => {
+                             // Only hide if the tab is still not the selected one
+                             if (!tab.hasAttribute('aria-current')) {
+                                 gameArea.classList.add('hidden');
+                             }
+                         }, 300);
+                    }
+                }
+            });
+
+            // Special handling for Crash game interval if switching away
+            if (selectedTab !== tabCrash && crashGameActive) {
+                 clearInterval(crashInterval);
+                 crashInterval = null;
+                 crashGameActive = false;
+                 crashBetButton.disabled = false; crashCashoutButton.disabled = true; crashBetInput.disabled = false;
+                 crashAutoBetToggle.disabled = false; crashAutoCashoutToggle.disabled = false;
+                 updateCrashAutoCashoutToggleVisuals(); // Update input state based on toggle
+                 crashStatus.textContent = "Game stopped by switching tabs.";
+                 crashPlayerBet = 0; resetCrashVisuals();
+            }
+             // Special handling for Horse Race animation if switching away
+             if (selectedTab !== tabHorserace && horseraceActive) {
+                resetHorserace(); // Stops animation and resets state
+                horseraceStatus.textContent = "Race stopped by switching tabs.";
+            }
+        }
         function adjustBet(inputElement, amount, operation) { /* ... */ let currentBet = parseInt(inputElement.value); if (isNaN(currentBet)) currentBet = 1; let newBet = currentBet; const minBet = 1; const maxBet = Math.max(minBet, currency); switch (operation) { case 'add': newBet = currentBet + amount; break; case 'subtract': newBet = currentBet - amount; break; case 'multiply': newBet = Math.floor(currentBet * amount); break; case 'divide': newBet = Math.floor(currentBet / amount); break; case 'min': newBet = minBet; break; case 'max': newBet = maxBet; break; case 'set': newBet = amount; break; } newBet = Math.max(minBet, newBet); if (operation !== 'min') { newBet = Math.min(maxBet, newBet); } if (maxBet < minBet) { newBet = minBet; } inputElement.value = newBet; }
 
         // --- Slot Machine Logic (unchanged) ---
@@ -1284,12 +1346,9 @@
             horseLaneElements = []; // Clear the lane array
 
             // Check if track is actually visible and has height
-            if (horseraceTrack.clientHeight <= 0 && !document.hidden) {
-                console.warn("Track height not available yet, retrying horse creation...");
-                setTimeout(createHorses, 50); // Retry shortly
-                return;
-            } else if (horseraceTrack.clientHeight <= 0 && document.hidden) {
-                 console.warn("Tab hidden, delaying horse creation."); // Don't try if tab hidden
+            if (horseraceTrack.clientHeight <= 0) {
+                 console.warn("Track height not available for horse creation.");
+                 // Don't retry here, rely on setActiveTab to call it when visible
                  return;
             }
 
@@ -1303,8 +1362,7 @@
                 horse.dataset.horseId = i;
                 horse.textContent = '🐎'; // Horse emoji
                 horse.style.color = HORSE_COLORS[i % HORSE_COLORS.length]; // Assign color
-                // Start near the right edge (track width - approx horse width - padding)
-                horse.style.left = `calc(100% - 40px)`;
+                horse.style.left = '10px'; // Start position
 
                 lane.appendChild(horse);
                 horseraceTrack.appendChild(lane);
@@ -1324,15 +1382,13 @@
             horseraceActive = false;
             horseraceBet = 0;
             selectedHorseIndex = -1; // Reset selection
-            // Calculate starting position near right edge (needs track width)
-            const startPos = horseraceTrack.clientWidth ? horseraceTrack.clientWidth - 40 : 10; // Default if width not ready
-            horsePositions = new Array(NUM_HORSES).fill(startPos);
+            horsePositions = new Array(NUM_HORSES).fill(10); // Reset positions to start (10px)
             raceFrameCounter = 0; // Reset trail counter
 
             // Reset horse elements visually
             horseElements.forEach((horse, index) => {
                 if (horse) {
-                    horse.style.left = `${horsePositions[index]}px`; // Reset to calculated start position
+                    horse.style.left = `${horsePositions[index]}px`; // Set initial left style
                     horse.classList.remove('animate-pulse'); // Remove winner pulse if applied
                 }
             });
@@ -1356,6 +1412,11 @@
             if (betAmount > currency) { showMessage("Not enough currency!", 2000); return; }
             if (selectedHorseIndex < 0 || selectedHorseIndex >= NUM_HORSES) { showMessage("Please select a horse to bet on.", 2000); return; }
 
+            // Ensure horses are created if they weren't already (e.g., if tab wasn't visible on load)
+            if (horseElements.length === 0) {
+                createHorses();
+            }
+
             startTone();
             horseraceBet = betAmount;
             // selectedHorseIndex is already set by button click
@@ -1369,13 +1430,11 @@
             horseraceSelectionContainer.querySelectorAll('.horse-select-btn').forEach(btn => btn.disabled = true);
             horseraceStatus.textContent = 'And they\'re off!';
             playSound('race_start');
-            const startPos = horseraceTrack.clientWidth ? horseraceTrack.clientWidth - 40 : 10; // Recalculate start pos
-            horsePositions = new Array(NUM_HORSES).fill(startPos);
+
+            horsePositions = new Array(NUM_HORSES).fill(10); // Reset positions
             horseElements.forEach((horse, i) => { // Ensure visual reset before start
-                if(horse) {
-                    horse.style.left = `${startPos}px`;
-                    horse.classList.remove('animate-pulse');
-                }
+                if(horse) horse.style.left = `${horsePositions[i]}px`;
+                horse.classList.remove('animate-pulse');
             });
             // Clear old trails before starting
             horseraceTrack.querySelectorAll('.horse-trail').forEach(trail => trail.remove());
@@ -1383,9 +1442,15 @@
 
             // Start the animation loop
             const trackWidth = horseraceTrack.clientWidth;
-            const finishLinePos = 20; // Target left position for finish line
+            const finishLinePos = trackWidth - 30; // Position before the finish line element width + buffer
             let startTime = null;
-            if (trackWidth <= 0) { /* ... error handling ... */ }
+
+            if (trackWidth <= 0) {
+                console.error("Cannot start race: Track width is zero.");
+                horseraceStatus.textContent = "Error starting race (track size).";
+                resetHorserace(); // Reset to allow trying again
+                return;
+            }
 
             function raceStep(timestamp) {
                 if (!startTime) startTime = timestamp;
@@ -1399,42 +1464,41 @@
                 horsePositions = horsePositions.map((pos, i) => {
                     if (pos >= finishLinePos) return pos; // Stop advancing if finished
 
-                // Random advancement per frame
-                const advancement = Math.random() * 2.5 + 0.5; // Base speed + random burst
-                const newPos = pos - advancement; // DECREASE left position
-                const displayPos = Math.max(newPos, finishLinePos - 5); // Clamp visual position near left finish
+                    // Random advancement per frame
+                    const advancement = Math.random() * 2.5 + 0.5; // Base speed + random burst
+                    const newPos = pos + advancement;
+                    const displayPos = Math.min(newPos, finishLinePos + 5); // Clamp visual position
 
-                if(horseElements[i]) { // Check if element exists
-                   horseElements[i].style.left = `${displayPos}px`; // Move horse
+                    if(horseElements[i]) { // Check if element exists
+                       horseElements[i].style.left = `${displayPos}px`; // Move horse
 
-                   // Create trail particle occasionally (e.g., every 4 frames)
-                   if (raceFrameCounter % 4 === 0) {
-                       const trail = document.createElement('div');
-                       trail.className = 'horse-trail';
-                       trail.style.backgroundColor = HORSE_COLORS[i % HORSE_COLORS.length];
-                       // Position trail slightly BEHIND (to the right of) the horse's current visual position
-                       trail.style.left = `${displayPos + 15}px`; // Adjust offset as needed
-                       trail.style.top = '50%'; // Center vertically in lane
-                       trail.style.transform = 'translateY(-50%)'; // Adjust vertical centering
-                       // Append trail to the correct lane
-                       if(horseLaneElements[i]) {
-                           horseLaneElements[i].appendChild(trail);
+                       // Create trail particle occasionally (e.g., every 4 frames)
+                       if (raceFrameCounter % 4 === 0) {
+                           const trail = document.createElement('div');
+                           trail.className = 'horse-trail';
+                           trail.style.backgroundColor = HORSE_COLORS[i % HORSE_COLORS.length];
+                           // Position trail slightly behind the horse's current visual position
+                           trail.style.left = `${displayPos - 5}px`;
+                           trail.style.top = '50%'; // Center vertically in lane
+                           trail.style.transform = 'translateY(-50%)'; // Adjust vertical centering
+                           // Append trail to the correct lane
+                           if(horseLaneElements[i]) {
+                               horseLaneElements[i].appendChild(trail);
+                           }
+                           // Remove trail after animation ends
+                           trail.addEventListener('animationend', () => {
+                               trail.remove();
+                           });
                        }
-                       // Remove trail after animation ends
-                       trail.addEventListener('animationend', () => {
-                           trail.remove();
-                       });
-                   }
-                }
+                    }
 
-                // Check if horse's calculated position has crossed the finish line on the left
-                if (newPos <= finishLinePos && winner === -1) {
-                    winner = i;
-                }
-                return newPos; // Return the actual calculated position for logic
-            });
+                    if (newPos >= finishLinePos && winner === -1) { // Check if this horse is the first to cross
+                        winner = i;
+                    }
+                    return newPos; // Return the actual calculated position for logic
+                });
 
-            if (winner !== -1) {
+                if (winner !== -1) {
                     finishRace(winner); // Finish the race
                 } else {
                     raceAnimationId = requestAnimationFrame(raceStep); // Continue animation
@@ -1617,8 +1681,8 @@
             createMemoryGrid(); // Build the memory grid structure
             resetMemoryGame(); // Set initial memory game state
             createHorseSelectionUI(); // Create horse selection buttons
-            // createHorses(); // Delay horse creation until tab is visible
-            resetHorserace(); // Set initial horse race state (will call createHorses if needed)
+            // Horses are now created when tab becomes active via setActiveTab
+            resetHorserace(); // Set initial horse race state
 
             // Trigger entrance animations for cards
             const cards = document.querySelectorAll('.grid-col-1 > div, .grid-col-2 > div, .grid-col-about');
