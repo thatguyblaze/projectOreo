@@ -69,7 +69,7 @@ function playSound(type, value = 0) {
             case 'loan': synth.triggerAttackRelease("A4", "8n", now); break;
             case 'click': synth.triggerAttackRelease("C5", "16n", now + 0.01); break; // Subtle click for buttons/bets
 
-            // --- Game Specific Sounds (Keep these cases for potential future use if sounds are complex) ---
+            // --- Game Specific Sounds ---
             // Slots
             case 'spin_start': noiseSynth.triggerAttackRelease("8n", now); break;
             case 'reel_stop': synth.triggerAttackRelease("A3", "16n", now + index * 0.05); break;
@@ -111,6 +111,12 @@ function playSound(type, value = 0) {
             case 'blackjack_push': synth.triggerAttackRelease("E4", "8n", now); break;
             case 'blackjack_blackjack': polySynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "2n", now); break;
 
+            // Plinko (Add specific sounds)
+            case 'plinko_drop': synth.triggerAttackRelease("E5", "16n", now); break; // Placeholder
+            case 'plinko_peg_hit': synth.triggerAttackRelease("A5", "64n", now + Math.random()*0.02); break; // Placeholder - slightly random pitch/time
+            case 'plinko_win_low': polySynth.triggerAttackRelease(["C4", "E4"], "16n", now); break; // Placeholder for low multiplier win
+            case 'plinko_win_high': polySynth.triggerAttackRelease(["C5", "G5"], "8n", now); break; // Placeholder for high multiplier win
+
         }
     } catch (error) {
         console.error("Tone.js error playing sound:", error);
@@ -134,6 +140,7 @@ const tabMemory = document.getElementById('tab-memory');
 const tabHorserace = document.getElementById('tab-horserace');
 const tabRoulette = document.getElementById('tab-roulette');
 const tabBlackjack = document.getElementById('tab-blackjack');
+const tabPlinko = document.getElementById('tab-plinko'); // Added Plinko Tab
 const gameSlots = document.getElementById('game-slots');
 const gameCrash = document.getElementById('game-crash');
 const gameCoinflip = document.getElementById('game-coinflip');
@@ -142,8 +149,9 @@ const gameMemory = document.getElementById('game-memory');
 const gameHorserace = document.getElementById('game-horserace');
 const gameRoulette = document.getElementById('game-roulette');
 const gameBlackjack = document.getElementById('game-blackjack');
-const allTabs = [tabSlots, tabCrash, tabCoinflip, tabMinefield, tabMemory, tabHorserace, tabRoulette, tabBlackjack];
-const allGameAreas = [gameSlots, gameCrash, gameCoinflip, gameMinefield, gameMemory, gameHorserace, gameRoulette, gameBlackjack];
+const gamePlinko = document.getElementById('game-plinko'); // Added Plinko Game Area
+const allTabs = [tabSlots, tabCrash, tabCoinflip, tabMinefield, tabMemory, tabHorserace, tabRoulette, tabBlackjack, tabPlinko]; // Added Plinko Tab
+const allGameAreas = [gameSlots, gameCrash, gameCoinflip, gameMinefield, gameMemory, gameHorserace, gameRoulette, gameBlackjack, gamePlinko]; // Added Plinko Game Area
 // ATM Modal
 const atmModalOverlay = document.getElementById('atm-modal-overlay');
 const atmModal = document.getElementById('atm-modal');
@@ -160,6 +168,7 @@ const statsNetProfit = document.getElementById('stats-net-profit');
  * Updates the enabled/disabled state of the 'Pay Loan' button.
  */
 function updatePayLoanButtonState() {
+    if (!payLoanButton) return; // Check if element exists
     const canPay = currency >= totalLoanAmount && totalLoanAmount > 0;
     payLoanButton.disabled = !canPay;
 }
@@ -182,6 +191,7 @@ function flashElement(element) {
  * Updates the session statistics display in the UI.
  */
 function updateStatsDisplay() {
+    if (!statsTotalGain || !statsTotalLoss || !statsNetProfit) return; // Check elements
     const oldGain = parseFloat(statsTotalGain.textContent.replace(/,/g, '')) || 0;
     const oldLoss = parseFloat(statsTotalLoss.textContent.replace(/,/g, '')) || 0;
     const oldNet = parseFloat(statsNetProfit.textContent.replace(/,/g, '')) || 0;
@@ -210,6 +220,7 @@ function updateStatsDisplay() {
  * @param {'win' | 'loss'} type - The type of change.
  */
 function flashCurrency(type) {
+    if (!currencyDisplay) return; // Check element
     currencyDisplay.classList.remove('flash-win', 'flash-loss');
     void currencyDisplay.offsetWidth; // Trigger reflow to restart animation
     if (type === 'win') {
@@ -229,8 +240,8 @@ function flashCurrency(type) {
  * @param {'win' | 'loss' | null} [changeType=null] - Type of change for flashing effect.
  */
 function updateCurrencyDisplay(changeType = null) {
-    currencyDisplay.textContent = currency.toLocaleString();
-    loanBalanceDisplay.textContent = totalLoanAmount.toLocaleString();
+    if (currencyDisplay) currencyDisplay.textContent = currency.toLocaleString();
+    if (loanBalanceDisplay) loanBalanceDisplay.textContent = totalLoanAmount.toLocaleString();
     updatePayLoanButtonState();
     updateStatsDisplay(); // Update stats whenever currency changes
     if (changeType) {
@@ -244,6 +255,7 @@ function updateCurrencyDisplay(changeType = null) {
  * @param {number} [duration=3000] - How long to display the message in milliseconds.
  */
 function showMessage(text, duration = 3000) {
+    if (!messageBox) return; // Check element
     messageBox.textContent = text;
     messageBox.classList.add('show');
     // Hide the message after the duration
@@ -258,8 +270,14 @@ function showMessage(text, duration = 3000) {
  * @returns {string} The formatted number string.
  */
 function formatWin(amount) {
+    // Ensure amount is a number before formatting
+    if (typeof amount !== 'number' || isNaN(amount)) {
+        console.warn("Invalid amount passed to formatWin:", amount);
+        return '0'; // Or some other default/error string
+    }
     return amount.toLocaleString();
 }
+
 
 /**
  * Adds a win entry to the leaderboard state and updates the display.
@@ -281,6 +299,7 @@ function addWinToLeaderboard(type, winAmount) {
  * Updates the leaderboard list in the UI based on the current state.
  */
 function updateLeaderboardDisplay() {
+    if (!leaderboardList) return; // Check element
     const oldList = Array.from(leaderboardList.children).map(li => li.textContent); // Get text of old entries
     leaderboardList.innerHTML = ''; // Clear the list
     if (leaderboard.length === 0) {
@@ -362,79 +381,86 @@ function loadGameState() {
 function setActiveTab(selectedTab) {
     // --- Call reset/stop functions for the *previously* active game ---
     // Find the currently active tab before switching
-    const currentActiveTab = allTabs.find(tab => tab.getAttribute('aria-current') === 'page');
+    const currentActiveTab = allTabs.find(tab => tab && tab.getAttribute('aria-current') === 'page'); // Added null check for tab
     if (currentActiveTab && currentActiveTab !== selectedTab) {
-        // Example: Stop auto-spin if switching away from Slots
+        // Slots
         if (currentActiveTab === tabSlots && typeof stopAutoSpin === 'function') { stopAutoSpin(); }
-        // Example: Stop crash auto-bet and end game if switching away from Crash
+        // Crash
         if (currentActiveTab === tabCrash) {
             if (typeof stopCrashAutoBet === 'function') { stopCrashAutoBet(); }
-            if (typeof endCrashGame === 'function' && window.crashGameActive) { endCrashGame(true, 0, true); } // Force end crash game if active
+            // Check crashGameActive using window scope or ensure it's globally available
+            if (typeof endCrashGame === 'function' && typeof crashGameActive !== 'undefined' && crashGameActive) { endCrashGame(true, 0, true); }
         }
-        // Add similar checks and calls for other games as needed
-        if (currentActiveTab === tabCoinflip && typeof resetCoinFlip === 'function' && window.coinFlipActive) { resetCoinFlip(); }
-        if (currentActiveTab === tabMinefield && typeof resetMinefield === 'function' && window.minefieldActive) { resetMinefield(); }
-        if (currentActiveTab === tabMemory && typeof resetMemoryGame === 'function' && window.memoryActive) { resetMemoryGame(); }
-        if (currentActiveTab === tabHorserace && typeof resetHorserace === 'function' && window.horseraceActive) { resetHorserace(); }
-        if (currentActiveTab === tabRoulette && typeof resetRoulette === 'function' && window.rouletteIsSpinning) { resetRoulette(); }
-        if (currentActiveTab === tabBlackjack && typeof resetBlackjack === 'function' && window.blackjackActive) { resetBlackjack(true); } // Refund bet if switching away while active
+        // Coin Flip
+        if (currentActiveTab === tabCoinflip && typeof resetCoinFlip === 'function' && typeof coinFlipActive !== 'undefined' && coinFlipActive) { resetCoinFlip(); }
+        // Minefield
+        if (currentActiveTab === tabMinefield && typeof resetMinefield === 'function' && typeof minefieldActive !== 'undefined' && minefieldActive) { resetMinefield(); }
+        // Memory
+        if (currentActiveTab === tabMemory && typeof resetMemoryGame === 'function' && typeof memoryActive !== 'undefined' && memoryActive) { resetMemoryGame(); }
+        // Horse Race
+        if (currentActiveTab === tabHorserace && typeof resetHorserace === 'function' && typeof horseraceActive !== 'undefined' && horseraceActive) { resetHorserace(); }
+        // Roulette
+        if (currentActiveTab === tabRoulette && typeof resetRoulette === 'function' && typeof rouletteIsSpinning !== 'undefined' && rouletteIsSpinning) { resetRoulette(); }
+        // Blackjack
+        if (currentActiveTab === tabBlackjack && typeof resetBlackjack === 'function' && typeof blackjackActive !== 'undefined' && blackjackActive) { resetBlackjack(true); }
+        // Plinko
+        if (currentActiveTab === tabPlinko && typeof resetPlinko === 'function' && typeof plinkoActive !== 'undefined' && plinkoActive) { resetPlinko(); }
     }
 
 
     // --- Handle tab switching visuals and game area visibility ---
-    allTabs.forEach(tab => {
-        const gameAreaId = tab.id.replace('tab-', 'game-');
-        const gameArea = document.getElementById(gameAreaId);
+    allTabs.forEach((tab, index) => {
+        if (!tab) return; // Skip if tab element wasn't found
+        const gameArea = allGameAreas[index]; // Get corresponding game area
+        if (!gameArea) return; // Skip if game area element wasn't found
+
         if (tab === selectedTab) {
             tab.setAttribute('aria-current', 'page'); // Highlight active tab
-            if (gameArea) {
-                gameArea.classList.remove('hidden', 'opacity-0');
-                // Small delay to allow display: block before starting transition
-                requestAnimationFrame(() => {
-                    gameArea.classList.add('opacity-100'); // Make game area visible
-                });
+            gameArea.classList.remove('hidden');
+            // Delay opacity transition slightly to ensure 'hidden' is removed first
+            requestAnimationFrame(() => {
+                gameArea.classList.remove('opacity-0');
+                gameArea.classList.add('opacity-100'); // Make game area visible
+            });
 
-                // --- Call initialization functions for the *newly* active game (if needed) ---
-                // Example: Initialize crash graph visuals if switching TO Crash
-                if (tab === tabCrash && typeof resetCrashVisuals === 'function') {
-                    // Only reset visuals if the game isn't currently active (avoids resetting mid-game if clicking the same tab)
-                    if (!window.crashGameActive) {
-                        resetCrashVisuals();
-                    }
-                    if (typeof updateCrashAutoCashoutToggleVisuals === 'function') {
-                        updateCrashAutoCashoutToggleVisuals(); // Ensure input state is correct
-                    }
-                }
-                // Example: Create horse elements if switching TO Horse Race and they don't exist
-                if (tab === tabHorserace && typeof createHorses === 'function' && !document.querySelector('#horserace-track .horse')) {
-                    createHorses();
-                    if(typeof resetHorserace === 'function') resetHorserace(); // Reset positions/UI after creation
-                }
-                 // Example: Create roulette grid if switching TO Roulette and it doesn't exist
-                 if (tab === tabRoulette && typeof createRouletteBettingGrid === 'function' && !document.querySelector('#roulette-inside-bets button')) {
-                    createRouletteBettingGrid();
-                    if(typeof resetRoulette === 'function') resetRoulette(); // Reset state/UI after creation
-                }
-                // Add similar specific initializations for other games if required when switching TO them
-                 if (tab === tabBlackjack && typeof resetBlackjack === 'function' && !window.blackjackActive) {
-                     resetBlackjack(false); // Ensure clean state when switching to Blackjack if not active
-                 }
 
+            // --- Call initialization/reset functions for the *newly* active game (if needed) ---
+            // Crash: Reset visuals if game not active
+            if (tab === tabCrash && typeof resetCrashVisuals === 'function' && (typeof crashGameActive === 'undefined' || !crashGameActive)) {
+                resetCrashVisuals();
+                if (typeof updateCrashAutoCashoutToggleVisuals === 'function') updateCrashAutoCashoutToggleVisuals();
             }
+            // Horse Race: Create horses if needed
+            if (tab === tabHorserace && typeof createHorses === 'function' && !document.querySelector('#horserace-track .horse')) {
+                createHorses();
+                if (typeof resetHorserace === 'function') resetHorserace();
+            }
+            // Roulette: Create grid if needed
+            if (tab === tabRoulette && typeof createRouletteBettingGrid === 'function' && !document.querySelector('#roulette-inside-bets button')) {
+                createRouletteBettingGrid();
+                if (typeof resetRoulette === 'function') resetRoulette();
+            }
+            // Blackjack: Reset if not active
+            if (tab === tabBlackjack && typeof resetBlackjack === 'function' && (typeof blackjackActive === 'undefined' || !blackjackActive)) {
+                resetBlackjack(false);
+            }
+            // Plinko: Reset board if not active
+            if (tab === tabPlinko && typeof resetPlinko === 'function' && (typeof plinkoActive === 'undefined' || !plinkoActive)) {
+                resetPlinko(); // Redraws board without ball
+            }
+
         } else {
             tab.removeAttribute('aria-current'); // Unhighlight inactive tabs
-            if (gameArea) {
-                // Start fade out
-                gameArea.classList.remove('opacity-100');
-                gameArea.classList.add('opacity-0');
-                // Hide after transition (300ms matches CSS transition)
-                setTimeout(() => {
-                    // Only hide if the tab is still not the selected one
-                    if (tab.getAttribute('aria-current') !== 'page') {
-                        gameArea.classList.add('hidden');
-                    }
-                }, 300);
-            }
+            // Start fade out
+            gameArea.classList.remove('opacity-100');
+            gameArea.classList.add('opacity-0');
+            // Hide after transition (300ms matches CSS transition)
+            setTimeout(() => {
+                // Only hide if the tab is still not the selected one
+                if (tab.getAttribute('aria-current') !== 'page') {
+                    gameArea.classList.add('hidden');
+                }
+            }, 300);
         }
     });
 }
@@ -447,6 +473,7 @@ function setActiveTab(selectedTab) {
  * @param {'add'|'subtract'|'multiply'|'divide'|'min'|'max'|'set'} operation - The operation to perform.
  */
 function adjustBet(inputElement, amount, operation) {
+    if (!inputElement) return; // Check element exists
     let currentBet = parseInt(inputElement.value);
     if (isNaN(currentBet)) currentBet = 1; // Default to 1 if input is invalid
 
@@ -485,54 +512,69 @@ function adjustBet(inputElement, amount, operation) {
 }
 
 // --- ATM / Loan Logic ---
-function openAtmModal() { playSound('click'); atmModalOverlay.classList.remove('hidden'); atmModal.classList.remove('hidden'); }
-function closeAtmModal() { playSound('click'); atmModalOverlay.classList.add('hidden'); atmModal.classList.add('hidden'); }
+function openAtmModal() {
+    if (!atmModalOverlay || !atmModal) return;
+    playSound('click');
+    atmModalOverlay.classList.remove('hidden');
+    atmModal.classList.remove('hidden');
+}
+function closeAtmModal() {
+     if (!atmModalOverlay || !atmModal) return;
+    playSound('click');
+    atmModalOverlay.classList.add('hidden');
+    atmModal.classList.add('hidden');
+}
 
 
 // --- Event Listeners (Shared) ---
 
 // Loan/ATM Buttons
-loanButton.addEventListener('click', openAtmModal);
-atmCloseButton.addEventListener('click', closeAtmModal);
-atmModalOverlay.addEventListener('click', closeAtmModal); // Close on overlay click
-atmButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const amount = parseInt(button.dataset.amount);
-        if (isNaN(amount) || amount <= 0) return;
-        startTone(); // Ensure audio context
-        playSound('loan');
-        currency += amount;
-        totalLoanAmount += amount; // Increase loan balance
-        updateCurrencyDisplay('win'); // Flash green for getting money
-        saveGameState();
-        showMessage(`Withdrew ${amount}! Loan balance increased.`, 2000);
-        closeAtmModal();
+if (loanButton) loanButton.addEventListener('click', openAtmModal);
+if (atmCloseButton) atmCloseButton.addEventListener('click', closeAtmModal);
+if (atmModalOverlay) atmModalOverlay.addEventListener('click', closeAtmModal); // Close on overlay click
+if (atmButtons) {
+    atmButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const amount = parseInt(button.dataset.amount);
+            if (isNaN(amount) || amount <= 0) return;
+            startTone(); // Ensure audio context
+            playSound('loan');
+            currency += amount;
+            totalLoanAmount += amount; // Increase loan balance
+            updateCurrencyDisplay('win'); // Flash green for getting money
+            saveGameState();
+            showMessage(`Withdrew ${amount}! Loan balance increased.`, 2000);
+            closeAtmModal();
+        });
     });
-});
-payLoanButton.addEventListener('click', () => {
-    if (currency >= totalLoanAmount && totalLoanAmount > 0) {
-        startTone();
-        playSound('click'); // Or a specific pay sound
-        const paidAmount = totalLoanAmount;
-        currency -= totalLoanAmount;
-        totalLoanAmount = 0; // Clear loan
-        updateCurrencyDisplay('loss'); // Flash red for spending money
-        saveGameState();
-        showMessage(`Loan of ${paidAmount} paid off!`, 2000);
-    } else {
-        showMessage(`Not enough funds to pay off loan! Need ${totalLoanAmount}.`, 2000);
-    }
-});
+}
+if (payLoanButton) {
+    payLoanButton.addEventListener('click', () => {
+        if (currency >= totalLoanAmount && totalLoanAmount > 0) {
+            startTone();
+            playSound('click'); // Or a specific pay sound
+            const paidAmount = totalLoanAmount;
+            currency -= totalLoanAmount;
+            totalLoanAmount = 0; // Clear loan
+            updateCurrencyDisplay('loss'); // Flash red for spending money
+            saveGameState();
+            showMessage(`Loan of ${paidAmount} paid off!`, 2000);
+        } else {
+            showMessage(`Not enough funds to pay off loan! Need ${totalLoanAmount}.`, 2000);
+        }
+    });
+}
 
-// Tab Switching
-tabSlots.addEventListener('click', () => setActiveTab(tabSlots));
-tabCrash.addEventListener('click', () => setActiveTab(tabCrash));
-tabCoinflip.addEventListener('click', () => setActiveTab(tabCoinflip));
-tabMinefield.addEventListener('click', () => setActiveTab(tabMinefield));
-tabMemory.addEventListener('click', () => setActiveTab(tabMemory));
-tabHorserace.addEventListener('click', () => setActiveTab(tabHorserace));
-tabRoulette.addEventListener('click', () => setActiveTab(tabRoulette));
-tabBlackjack.addEventListener('click', () => setActiveTab(tabBlackjack));
+// Tab Switching (Add Plinko Tab Listener)
+if (tabSlots) tabSlots.addEventListener('click', () => setActiveTab(tabSlots));
+if (tabCrash) tabCrash.addEventListener('click', () => setActiveTab(tabCrash));
+if (tabCoinflip) tabCoinflip.addEventListener('click', () => setActiveTab(tabCoinflip));
+if (tabMinefield) tabMinefield.addEventListener('click', () => setActiveTab(tabMinefield));
+if (tabMemory) tabMemory.addEventListener('click', () => setActiveTab(tabMemory));
+if (tabHorserace) tabHorserace.addEventListener('click', () => setActiveTab(tabHorserace));
+if (tabRoulette) tabRoulette.addEventListener('click', () => setActiveTab(tabRoulette));
+if (tabBlackjack) tabBlackjack.addEventListener('click', () => setActiveTab(tabBlackjack));
+if (tabPlinko) tabPlinko.addEventListener('click', () => setActiveTab(tabPlinko)); // Added Plinko listener
 
 // Generic Bet Adjustment Listener Factory (to be called from game-specific files)
 function addBetAdjustmentListeners(gamePrefix, betInputElement) {
@@ -545,6 +587,7 @@ function addBetAdjustmentListeners(gamePrefix, betInputElement) {
     const doubleBtn = document.getElementById(`${gamePrefix}-bet-double`);
     const maxBtn = document.getElementById(`${gamePrefix}-bet-max`);
 
+    // Add listeners only if the buttons exist
     if (decrease10Btn) decrease10Btn.addEventListener('click', () => adjustBet(betInputElement, 10, 'subtract'));
     if (decrease1Btn) decrease1Btn.addEventListener('click', () => adjustBet(betInputElement, 1, 'subtract'));
     if (increase1Btn) increase1Btn.addEventListener('click', () => adjustBet(betInputElement, 1, 'add'));
@@ -563,8 +606,11 @@ function addBetAdjustmentListeners(gamePrefix, betInputElement) {
         });
          // Prevent non-numeric input
          betInputElement.addEventListener('input', () => {
+            // Allow only digits
             betInputElement.value = betInputElement.value.replace(/[^0-9]/g, '');
          });
+    } else {
+        console.warn(`Bet input not found for prefix: ${gamePrefix}`);
     }
 }
 
@@ -580,7 +626,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('keydown', startTone, { once: true }); // Also init on keydown
 
     // Set the initial active tab (e.g., Slots)
-    setActiveTab(tabSlots);
+    if (tabSlots) { // Check if default tab exists
+         setActiveTab(tabSlots);
+    } else {
+         console.error("Default tab (Slots) not found!");
+         // Optionally set another tab as default or handle error
+    }
 
     // --- Call Initialization functions from game-specific files ---
     // These functions should exist in their respective JS files (e.g., slots.js, crash.js)
@@ -593,6 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initHorserace === 'function') initHorserace(); else console.warn("initHorserace not found.");
     if (typeof initRoulette === 'function') initRoulette(); else console.warn("initRoulette not found.");
     if (typeof initBlackjack === 'function') initBlackjack(); else console.warn("initBlackjack not found.");
+    if (typeof initPlinko === 'function') initPlinko(); else console.warn("initPlinko not found."); // Added Plinko Init Call
     // --- End Game Initializations ---
 
     // Trigger entrance animations for cards (can be kept here)
