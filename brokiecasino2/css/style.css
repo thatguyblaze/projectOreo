@@ -1,0 +1,589 @@
+/* General Styles */
+body {
+    font-family: 'Inter', sans-serif; /* Applied via Tailwind class in HTML now */
+    /* background-color: #121212; */ /* Applied via Tailwind class in HTML now */
+    /* color: #e0e0e0; */ /* Applied via Tailwind class in HTML now */
+    /* display: flex; */ /* Applied via Tailwind class in HTML now */
+    /* flex-direction: column; */ /* Applied via Tailwind class in HTML now */
+    /* min-height: 100vh; */ /* Applied via Tailwind class in HTML now */
+    /* overflow-x: hidden; */ /* Applied via Tailwind class in HTML now */
+}
+.card-bg { background-color: #1e1e1e; } /* Dark Surface */
+.border-color { border-color: #3a3a3a; } /* Subtle Border */
+.border-color-light { border-color: #3a3a3a; } /* Consistent Border */
+.footer-bg { background-color: #1e1e1e; } /* Dark Surface */
+.footer-border { border-color: #3a3a3a; } /* Subtle Border */
+
+/* Buttons & Inputs */
+button {
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out, opacity 0.2s ease-in-out, filter 0.1s ease-in-out;
+}
+button:active:not(:disabled) {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+}
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+/* Hover scale for main action buttons */
+#loan-button:hover:not(:disabled),
+#pay-loan-button:hover:not(:disabled),
+#spin-button:hover:not(:disabled),
+#auto-spin-toggle:hover:not(:disabled),
+#crash-bet-button:hover:not(:disabled),
+#crash-cashout-button:hover:not(:disabled),
+.discord-btn:hover:not(:disabled), /* Assuming discord-btn class might be used */
+#atm-modal .atm-button:hover:not(:disabled),
+#coinflip-button:hover:not(:disabled),
+#coinflip-cashout-button:hover:not(:disabled),
+#minefield-start-button:hover:not(:disabled),
+#minefield-cashout-button:hover:not(:disabled),
+.coinflip-choice-btn:hover:not(:disabled),
+#memory-start-button:hover:not(:disabled),
+#horserace-start-button:hover:not(:disabled),
+.horse-select-btn:hover:not(:disabled),
+#roulette-spin-button:hover:not(:disabled),
+.roulette-bet-btn:hover:not(:disabled),
+#blackjack-deal-button:hover:not(:disabled), /* Added Blackjack */
+#blackjack-hit-button:hover:not(:disabled), /* Added Blackjack */
+#blackjack-stand-button:hover:not(:disabled) /* Added Blackjack */
+{
+    transform: scale(1.03);
+    filter: brightness(1.1); /* Add brightness on hover too */
+}
+input[type="number"], select {
+    background-color: #2a2a2a; /* Dark Gray Control BG */
+    border: 1px solid #3a3a3a; /* Subtle Border */
+    color: #e0e0e0; /* Light Gray Text */
+    border-radius: 0.375rem; /* rounded-md */
+    padding: 0.25rem 0.5rem; /* py-1 px-2 */
+    text-align: center;
+    -moz-appearance: textfield; /* For number input */
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+}
+input[type="number"]:focus, select:focus {
+    --tw-ring-color: #60a5fa; /* Accent Blue */
+    border-color: #60a5fa;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+     box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+}
+input[type="number"]:disabled, select:disabled { /* General disabled style */
+     background-color: #1e1e1e; opacity: 0.6; cursor: not-allowed;
+}
+select { text-align: left; padding-right: 2rem; } /* Add padding for dropdown arrow */
+
+/* Custom Focus Rings (Tailwind focus:ring might override, but good fallback) */
+button:focus-visible {
+     outline: 2px solid transparent; outline-offset: 2px;
+     --tw-ring-offset-width: 2px; --tw-ring-offset-color: #121212; /* Match body background */
+     --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+     --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+     box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+/* Specific focus ring colors (Define --tw-ring-color for each) */
+#loan-button:focus-visible { --tw-ring-color: #34d399; }
+#pay-loan-button:focus-visible { --tw-ring-color: #fb923c; }
+#spin-button:focus-visible { --tw-ring-color: #60a5fa; }
+#auto-spin-toggle:focus-visible { --tw-ring-color: #9ca3af; }
+#crash-bet-button:focus-visible { --tw-ring-color: #fcd34d; }
+#crash-cashout-button:focus-visible { --tw-ring-color: #f87171; }
+.discord-btn:focus-visible { --tw-ring-color: #a5b4fc; }
+.atm-button:focus-visible { --tw-ring-color: #9ca3af; }
+.bet-adjust-btn:focus-visible { --tw-ring-color: #9ca3af; }
+#crash-auto-bet-toggle:focus-visible { --tw-ring-color: #9ca3af; }
+#crash-auto-cashout-toggle:focus-visible { --tw-ring-color: #9ca3af; }
+#coinflip-button:focus-visible { --tw-ring-color: #60a5fa; }
+#coinflip-cashout-button:focus-visible { --tw-ring-color: #f87171; }
+#minefield-start-button:focus-visible { --tw-ring-color: #60a5fa; }
+#minefield-cashout-button:focus-visible { --tw-ring-color: #f87171; }
+.coinflip-choice-btn:focus-visible { --tw-ring-color: #9ca3af; }
+#memory-start-button:focus-visible { --tw-ring-color: #ec4899; }
+#horserace-start-button:focus-visible { --tw-ring-color: #84cc16; }
+.horse-select-btn:focus-visible { --tw-ring-color: #9ca3af; }
+.tab-button:focus-visible { --tw-ring-color: #60a5fa; } /* Focus for tab buttons */
+#roulette-spin-button:focus-visible { --tw-ring-color: #10b981; }
+.roulette-bet-btn:focus-visible { --tw-ring-color: #9ca3af; }
+#blackjack-deal-button:focus-visible { --tw-ring-color: #10b981; } /* Added Blackjack */
+#blackjack-hit-button:focus-visible { --tw-ring-color: #60a5fa; } /* Added Blackjack */
+#blackjack-stand-button:focus-visible { --tw-ring-color: #fb923c; } /* Added Blackjack */
+
+/* Bet Adjustment Buttons */
+.bet-adjust-btn {
+    background-color: #2a2a2a; /* Dark Gray Control BG */
+    color: #e0e0e0; padding: 0.25rem 0.5rem; border: 1px solid #3a3a3a; /* Subtle Border */
+    border-radius: 0.375rem; font-size: 0.75rem; line-height: 1; min-width: 30px;
+}
+.bet-adjust-btn:hover:not(:disabled) { background-color: #3a3a3a; } /* Hover effect */
+
+/* Toggle Button Base Style */
+.toggle-button {
+    padding: 0.5rem 1rem; border: 2px solid #3a3a3a; /* Subtle Border */
+    background-color: #2a2a2a; /* Dark Gray Control BG */
+    color: #e0e0e0; font-weight: 600; /* Semibold */
+    border-radius: 0.375rem; /* rounded-md */ font-size: 0.875rem; /* text-sm */
+}
+ .toggle-button:hover:not(:disabled) { background-color: #3a3a3a; } /* Hover effect */
+ .toggle-button.active {
+     background-color: #10b981; /* Emerald 500 */ border-color: #059669; /* Emerald 600 */
+     color: white; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+ }
+ /* Specific active state for Crash Auto Cashout */
+ #crash-auto-cashout-toggle.active {
+     background-color: #fb923c; /* orange-500 */ border-color: #f97316; /* orange-600 */
+ }
+
+/* Tabs */
+.tab-button { color: #9e9e9e; /* text-gray-400 */ }
+.tab-button:hover { border-color: #3a3a3a; color: #e0e0e0; }
+.tab-button[aria-current="page"] { border-color: #42a5f5; color: #64b5f6; /* Lighter blue variants */ }
+
+/* Game Area Transition */
+.game-area { transition: opacity 0.3s ease-in-out; }
+/* Add hidden state for initial load and tab switching */
+.game-area.hidden { opacity: 0; pointer-events: none; display: none; }
+
+/* Message Box */
+#message-box {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background-color: #2a2a2a; /* Dark Gray Control BG */
+    color: #e0e0e0; padding: 1rem 1.5rem; border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); z-index: 100;
+    opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+    font-weight: 500;
+}
+#message-box.show { opacity: 1; visibility: visible; }
+
+/* ATM Modal Styles & Transition */
+#atm-modal-overlay {
+    position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); z-index: 40;
+    transition: opacity 0.3s ease-out;
+}
+#atm-modal-overlay.hidden { opacity: 0; pointer-events: none; }
+#atm-modal {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(1); /* End state */
+    background-color: #1e1e1e; /* Dark Surface */
+    color: #e0e0e0; padding: 1.5rem 2rem; border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    z-index: 50; width: 90%; max-width: 400px; border: 1px solid #3a3a3a;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+ #atm-modal.hidden {
+     opacity: 0; transform: translate(-50%, -50%) scale(0.95); /* Start state */
+     pointer-events: none;
+ }
+#atm-modal h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+#atm-modal .atm-button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+#atm-modal .atm-button {
+    background-color: #2a2a2a; /* Dark Gray Control BG */
+    color: #e0e0e0; padding: 0.75rem 1rem; border-radius: 0.375rem;
+    text-align: center; font-weight: 500; border: 1px solid #3a3a3a;
+}
+#atm-modal .atm-button:hover:not(:disabled) { background-color: #3a3a3a; } /* Hover effect */
+#atm-modal .atm-close-button { position: absolute; top: 0.75rem; right: 0.75rem; background: none; border: none; color: #9e9e9e; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+#atm-modal .atm-close-button:hover { color: #e0e0e0; }
+
+/* Stats & Currency Flash */
+.stats-value { font-weight: 600; font-size: 1.125rem; transition: color 0.3s ease-out; } /* Add transition */
+.text-profit { color: #34d399; } /* Emerald 400 */
+.text-loss { color: #f87171; } /* Red 400 */
+@keyframes flash-green {
+    0%, 100% { color: #34d399; transform: scale(1.05); } /* Emerald 400 */
+    50% { color: #64b5f6; transform: scale(1); } /* Blue 400 (flash color) */
+}
+@keyframes flash-red {
+    0%, 100% { color: #f87171; transform: scale(1.05); } /* Red 400 */
+    50% { color: #64b5f6; transform: scale(1); } /* Blue 400 (flash color) */
+}
+.flash-win { animation: flash-green 0.6s ease-out; }
+.flash-loss { animation: flash-red 0.6s ease-out; }
+
+/* Leaderboard & Card Animations */
+@keyframes slideFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.leaderboard-entry-new { animation: slideFadeIn 0.5s ease-out; }
+
+@keyframes cardEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.animate-card-enter { opacity: 0; /* Start hidden */ animation: cardEnter 0.5s ease-out forwards; }
+
+/* Shake Animations */
+@keyframes shake-subtle {
+     0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1px); } 75% { transform: translateX(1px); }
+}
+@keyframes shake-strong {
+     0%, 100% { transform: translate(0, 0) rotate(0); }
+     25% { transform: translate(-2px, 1px) rotate(-0.5deg); }
+     50% { transform: translate(1px, -1px) rotate(0.5deg); }
+     75% { transform: translate(2px, 1px) rotate(-0.5deg); }
+}
+.shake-subtle { animation: shake-subtle 0.2s infinite linear; }
+.shake-strong { animation: shake-strong 0.15s infinite linear; }
+
+/* --- Slot Machine Specific --- */
+.reel {
+    border: 2px solid #3a3a3a; /* Subtle Border */ background-color: #1e1e1e; /* Dark Surface */
+    overflow: hidden; width: 80px; height: 100px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; font-size: 3rem; border-radius: 0.5rem;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); /* Slightly darker inset */
+    color: #e0e0e0; transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.reel.win-effect {
+     transform: scale(1.05); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(52, 211, 153, 0.6);
+     border-color: #34d399; /* Emerald 400 */
+}
+.reel-container { position: relative; height: 100px; overflow: hidden; width: 100%; }
+.reel-symbols { position: absolute; top: 0; left: 0; width: 100%; text-align: center; transition: top 0.5s ease-out; color: #e0e0e0; }
+#payout-legend { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #3a3a3a; font-size: 0.875rem; color: #9e9e9e; }
+ #payout-legend h4 { font-weight: 600; color: #e0e0e0; margin-bottom: 0.5rem; } /* Use font-weight instead of Tailwind class */
+ #payout-legend ul { list-style: none; padding: 0; }
+ #payout-legend li { display: flex; justify-content: space-between; padding: 0.25rem 0; }
+ #payout-legend li span:first-child { font-family: monospace; margin-right: 1rem; }
+ #payout-legend li span:last-child { font-weight: 500; color: #e0e0e0; }
+
+/* --- Crash Game Specific --- */
+#crash-graph {
+    height: 250px; background-color: #1e1e1e; /* Dark Surface */ border-radius: 0.5rem;
+    display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;
+    color: #9e9e9e; /* Slightly lighter gray text */ position: relative; overflow: hidden;
+    border: 1px solid #3a3a3a; /* Subtle Border */
+}
+#crash-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
+#crash-svg .grid-line { stroke: #3a3a3a; stroke-width: 0.5; vector-effect: non-scaling-stroke; }
+#crash-polyline {
+    fill: none; stroke: #34d399; /* Green line (Emerald 400) */ stroke-width: 2.5; stroke-linecap: round;
+    stroke-linejoin: round; transition: stroke 0.2s linear; vector-effect: non-scaling-stroke;
+    /* filter applied via attribute */
+}
+#crash-multiplier {
+    z-index: 10; background-color: rgba(30, 30, 30, 0.8); /* Dark Surface BG */
+    color: #e0e0e0; /* Default text color */ padding: 0.3rem 0.8rem; border-radius: 0.375rem;
+    transition: transform 0.1s ease, color 0.2s ease-out, font-size 0.2s ease-out; /* Faster transform */
+    font-size: 1.75rem; display: inline-block; /* Needed for transform */
+}
+ #crash-multiplier.win-effect { transform: scale(1.1); box-shadow: 0 0 15px rgba(52, 211, 153, 0.7); color: #34d399; }
+ /* Multiplier Color/Size Classes */
+ .mult-color-5x { color: #ffee58; } /* yellow-400 */
+ .mult-color-10x { color: #ffa726; } /* orange-400 */
+ .mult-color-15x { color: #ff7043; } /* deep-orange-400 */
+ .mult-color-20x { color: #ef5350; } /* red-400 */
+ .mult-color-30x { color: #ec407a; } /* pink-400 */
+ .mult-size-10x { font-size: 1.85rem; }
+ .mult-size-20x { font-size: 1.95rem; }
+ .mult-size-30x { font-size: 2.05rem; font-weight: 700; }
+
+/* --- Coin Flip Specific --- */
+.coin-container { /* Add perspective for 3D */
+     perspective: 600px; display: inline-block; vertical-align: middle; /* Align with text */
+}
+#coin {
+    font-size: 5rem; /* Larger coin */ cursor: default; transition: transform 0.6s;
+    transform-style: preserve-3d; display: inline-block;
+    /* backface-visibility: hidden; */ /* Keep visible for emoji */
+}
+#coin.flipping { animation: flip 0.6s ease-out; }
+@keyframes flip { /* 3D Flip */
+     0% { transform: rotateY(0) rotateX(5deg); }
+     50% { transform: rotateY(540deg) rotateX(20deg); }
+     100% { transform: rotateY(1080deg) rotateX(0deg); }
+}
+/* Style for selected coin choice */
+.coinflip-choice-btn.selected {
+    border-color: #fbbf24; /* amber-400 */ box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+}
+
+/* --- Minefield Specific --- */
+#minefield-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; /* gap-2 */
+    max-width: 240px; /* Limit width */ margin: 1rem auto; /* Center grid */
+}
+.minefield-tile {
+    aspect-ratio: 1 / 1; /* Square tiles */ background-color: #3a3a3a; /* Button background */
+    border: 1px solid #4b5563; /* Button border */ border-radius: 0.375rem; /* rounded-md */
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; /* text-2xl */
+    cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.minefield-tile:hover:not(.revealed):not(:disabled) { background-color: #4b5563; }
+ .minefield-tile:active:not(.revealed):not(:disabled) { transform: scale(0.95); }
+.minefield-tile.revealed.safe {
+    background-color: #10b981; /* Emerald 500 */ color: white; cursor: default;
+}
+ .minefield-tile.revealed.bomb {
+     background-color: #ef4444; /* Red 500 */ color: white; cursor: default;
+     animation: shake-strong 0.3s ease-in-out; /* Shake on bomb reveal */
+ }
+ .minefield-tile:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* --- Memory Game Specific --- */
+#memory-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); /* 4x4 Grid */ gap: 0.5rem; /* gap-2 */
+    max-width: 280px; /* Adjust width for 4x4 */ margin: 1rem auto; /* Center grid */
+    perspective: 1000px; /* For card flip animation */
+}
+.memory-card {
+    aspect-ratio: 1 / 1; /* Square cards */ background-color: transparent; border: none;
+    border-radius: 0.375rem; /* rounded-md */ display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem; /* Slightly larger emoji */ cursor: pointer; position: relative;
+    transform-style: preserve-3d; transition: transform 0.5s ease; /* Only transition transform */
+    transform: rotateY(0deg); /* Start face down */
+}
+.memory-card .card-face {
+     position: absolute; width: 100%; height: 100%; backface-visibility: hidden; /* Hide back */
+     display: flex; align-items: center; justify-content: center; border-radius: 0.375rem;
+     transition: background-color 0.2s ease, border-color 0.2s ease; /* Transition colors */
+     border: 1px solid #4b5563; /* Add border to faces */
+}
+.memory-card .card-front {
+     background-color: #3a3a3a; /* Darker front */ color: #e0e0e0; transform: rotateY(0deg); /* Front face */
+}
+.memory-card .card-back {
+     background-color: #2a2a2a; /* Even darker back */ color: #e0e0e0; transform: rotateY(180deg); /* Back face */
+}
+.memory-card.revealed { transform: rotateY(180deg); /* Flip card */ cursor: default; }
+.memory-card.matched { cursor: default; opacity: 0.8; }
+.memory-card.matched .card-back { background-color: #10b981; border-color: #059669; }
+.memory-card.mismatched .card-back {
+     background-color: #ef4444; border-color: #dc2626;
+     animation: shake-subtle 0.4s ease-in-out; /* Shake on mismatch */
+}
+.memory-card:disabled { cursor: not-allowed; opacity: 0.6; }
+
+/* --- Horse Race Specific (Right-to-Left) --- */
+#horserace-track {
+    position: relative; width: 100%; height: 200px; /* Adjusted height for 4 horses */
+    background-color: #2a2a2a; /* Dark track background */ border: 2px solid #3a3a3a;
+    border-radius: 0.5rem; overflow: hidden; /* Hide horses if they go past finish line */
+    margin-top: 1rem; padding: 0.5rem 0; /* Padding top/bottom for lanes */
+    display: flex; /* Use flexbox to arrange lanes */ flex-direction: column; /* Stack lanes vertically */
+}
+.horse-lane {
+    width: 100%; flex-grow: 1; /* Make lanes share height equally */
+    border-bottom: 1px dashed #4b5563; /* Dashed lane separators */
+    display: flex; /* Use flex to align horse vertically */ align-items: center; /* Center horse vertically */
+    position: relative; /* Needed for absolute positioning of horse */
+}
+.horse-lane:last-child { border-bottom: none; /* No border on last lane */ }
+.horse {
+    position: absolute; /* Position relative to the lane */
+    right: 10px; /* Starting position (RIGHT SIDE) */
+    font-size: 1.75rem; /* Adjust horse size */
+    transition: right 0.1s linear; /* Smooth movement (using RIGHT) */
+    padding: 0 5px; line-height: 1; /* Ensure emoji vertical alignment */
+    display: inline-block; /* Ensure the div takes space */
+    z-index: 5; /* Horse above trail */
+    will-change: right; /* Optimize animation (using RIGHT) */
+}
+#horserace-finish-line {
+    position: absolute;
+    left: 20px; /* Position finish line on the LEFT */
+    top: 0; bottom: 0; width: 5px;
+    background: repeating-linear-gradient( white, white 10px, black 10px, black 20px );
+    z-index: 10;
+}
+/* Horse Trail Styles */
+.horse-trail {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%; opacity: 0.7;
+    /* background-color handled by JS */
+    animation: fadeOutShrink 0.5s linear forwards;
+    pointer-events: none; /* Prevent trails interfering with clicks */ z-index: 1; /* Behind horse */
+}
+@keyframes fadeOutShrink {
+    from { opacity: 0.7; transform: scale(1) translateY(-50%); }
+    to { opacity: 0; transform: scale(0) translateY(-50%); }
+}
+/* Horse Selection Buttons */
+#horserace-selection {
+    display: flex; flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 0.5rem; /* space-x-2 equivalent */ justify-content: center; /* Center buttons */
+    margin-top: 0.5rem; /* Add some space above buttons */
+}
+.horse-select-btn {
+    padding: 0.5rem 1rem; /* py-2 px-4 */ border: 2px solid #4b5563; /* gray-600 */
+    border-radius: 0.375rem; /* rounded-md */ font-weight: 600; /* font-semibold */
+    font-size: 0.875rem; /* text-sm */ background-color: #3a3a3a; /* gray-700 */
+    color: #e0e0e0; /* gray-200 */ display: flex; align-items: center; gap: 0.5rem; /* space-x-2 */
+}
+.horse-select-btn .horse-color-indicator {
+    display: inline-block; width: 1rem; /* w-4 */ height: 1rem; /* h-4 */
+    border-radius: 9999px; /* rounded-full */ border: 1px solid rgba(255, 255, 255, 0.5); /* Add subtle border */
+}
+.horse-select-btn.selected {
+    border-color: #fbbf24; /* amber-400 */ box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+    background-color: #4b5563; /* gray-600 */
+}
+
+/* --- Roulette Specific --- */
+#roulette-wheel-container {
+    width: 250px; height: 250px; margin: 1rem auto;
+    border: 5px solid #4a4a4a; border-radius: 50%;
+    position: relative; overflow: hidden;
+    background-color: #1a1a1a;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+}
+#roulette-wheel {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    position: absolute; top: 0; left: 0;
+    transition: transform 4s cubic-bezier(0.3, 0.7, 0.4, 1); /* Spin animation */
+    background-image: conic-gradient( /* Simplified visual representation */
+        #10b981 0deg 9.7deg, /* Green 0 */
+        #ef4444 9.7deg 19.4deg, /* Red */
+        #1f2937 19.4deg 29.1deg, /* Black */
+        #ef4444 29.1deg 38.8deg, /* Red */
+        #1f2937 38.8deg 48.5deg, /* Black */
+        #ef4444 48.5deg 58.2deg, /* Red */
+        #1f2937 58.2deg 67.9deg, /* Black */
+        #ef4444 67.9deg 77.6deg, /* Red */
+        #1f2937 77.6deg 87.3deg, /* Black */
+        #ef4444 87.3deg 97deg,   /* Red */
+        #1f2937 97deg 106.7deg,  /* Black */
+        #ef4444 106.7deg 116.4deg, /* Red */
+        #1f2937 116.4deg 126.1deg, /* Black */
+        #ef4444 126.1deg 135.8deg, /* Red */
+        #1f2937 135.8deg 145.5deg, /* Black */
+        #ef4444 145.5deg 155.2deg, /* Red */
+        #1f2937 155.2deg 164.9deg, /* Black */
+        #ef4444 164.9deg 174.6deg, /* Red */
+        #1f2937 174.6deg 184.3deg, /* Black */
+        #10b981 184.3deg 194deg, /* Green 00 - simplified as second green */
+        #1f2937 194deg 203.7deg, /* Black */
+        #ef4444 203.7deg 213.4deg, /* Red */
+        #1f2937 213.4deg 223.1deg, /* Black */
+        #ef4444 223.1deg 232.8deg, /* Red */
+        #1f2937 232.8deg 242.5deg, /* Black */
+        #ef4444 242.5deg 252.2deg, /* Red */
+        #1f2937 252.2deg 261.9deg, /* Black */
+        #ef4444 261.9deg 271.6deg, /* Red */
+        #1f2937 271.6deg 281.3deg, /* Black */
+        #ef4444 281.3deg 291deg,   /* Red */
+        #1f2937 291deg 300.7deg,  /* Black */
+        #ef4444 300.7deg 310.4deg, /* Red */
+        #1f2937 310.4deg 320.1deg, /* Black */
+        #ef4444 320.1deg 329.8deg, /* Red */
+        #1f2937 329.8deg 339.5deg, /* Black */
+        #ef4444 339.5deg 349.2deg, /* Red */
+        #1f2937 349.2deg 360deg    /* Black */
+    );
+}
+#roulette-pointer {
+    position: absolute;
+    top: -10px; /* Position above the wheel */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 15px solid #facc15; /* Yellow pointer */
+    z-index: 10;
+}
+ #roulette-result {
+     position: absolute;
+     top: 50%; left: 50%;
+     transform: translate(-50%, -50%);
+     width: 60px; height: 60px;
+     background-color: rgba(20, 20, 20, 0.8);
+     border-radius: 50%;
+     display: flex; align-items: center; justify-content: center;
+     font-size: 1.5rem; font-weight: bold;
+     color: #fff; z-index: 5;
+     border: 3px solid #4a4a4a;
+ }
+#roulette-betting-area {
+    margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #3a3a3a;
+}
+.roulette-bet-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Basic grid for numbers */
+    gap: 0.5rem;
+    max-width: 300px; margin: 0 auto 1rem auto;
+}
+.roulette-bet-btn {
+    padding: 0.5rem; border: 1px solid #4b5563; border-radius: 0.25rem;
+    background-color: #3a3a3a; color: #e0e0e0; font-weight: 500;
+    text-align: center; font-size: 0.875rem;
+}
+.roulette-bet-btn.red { background-color: #ef4444; color: white; border-color: #dc2626;}
+.roulette-bet-btn.black { background-color: #1f2937; color: white; border-color: #111827;}
+.roulette-bet-btn.green { background-color: #10b981; color: white; border-color: #059669;}
+.roulette-bet-btn.outside { grid-column: span 1; padding: 0.75rem; } /* Style for outside bets */
+.roulette-bet-btn.selected {
+     box-shadow: 0 0 0 3px #60a5fa; /* Blue selection indicator */
+     filter: brightness(1.2);
+}
+.roulette-outside-bets {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+     max-width: 300px; margin: 0 auto;
+}
+
+/* --- Blackjack Specific --- */
+.blackjack-hand {
+    display: flex;
+    flex-wrap: wrap; /* Allow cards to wrap */
+    justify-content: center; /* Center cards horizontally */
+    gap: 0.5rem; /* Space between cards */
+    min-height: 90px; /* Ensure space for cards */
+    margin-bottom: 1rem; /* Space below hand */
+    padding: 0.5rem;
+    background-color: #2a2a2a; /* Slightly lighter background for hands */
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #3a3a3a;
+}
+.blackjack-card {
+    background-color: white;
+    color: black;
+    border: 1px solid #4b5563; /* gray-600 */
+    border-radius: 0.375rem; /* rounded-md */
+    width: 60px; /* Card width */
+    height: 85px; /* Card height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space rank and suit */
+    align-items: center;
+    padding: 0.25rem; /* py-1 */
+    font-weight: 600; /* font-semibold */
+    font-size: 1rem; /* text-base */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.blackjack-card.hidden {
+    background-color: #3a3a3a; /* Dark gray for hidden card */
+    background-image: repeating-linear-gradient(
+        45deg,
+        #4b5563,
+        #4b5563 5px,
+        #3a3a3a 5px,
+        #3a3a3a 10px
+    );
+    color: transparent; /* Hide text */
+    border-color: #4b5563;
+}
+.blackjack-card span:first-child { /* Rank */
+    font-size: 1.25rem; /* text-xl */
+    line-height: 1;
+}
+.blackjack-card span:last-child { /* Suit */
+    font-size: 1.5rem; /* text-2xl */
+    line-height: 1;
+}
+.blackjack-card.suit-red { color: #ef4444; /* red-500 */ }
+.blackjack-card.suit-black { color: #1f2937; /* gray-800 */ }
+.blackjack-score {
+    font-weight: 600;
+    font-size: 1.125rem; /* text-lg */
+    color: #a0aec0; /* gray-400 */
+}
+.blackjack-score-value {
+    font-weight: 700;
+    font-size: 1.25rem; /* text-xl */
+    color: #e0e0e0; /* gray-200 */
+    margin-left: 0.5rem;
+}
+/* Parent element of score needs these classes */
+.blackjack-score.busted .blackjack-score-value {
+    color: #f87171; /* Red for busted */
+}
+.blackjack-score.blackjack .blackjack-score-value {
+    color: #fbbf24; /* Amber for blackjack */
+}
