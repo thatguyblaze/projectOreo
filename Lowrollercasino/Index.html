@@ -3,185 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Modern Website</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Brokie Casino - Where Losing Feels Affordable?</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
+        /* Custom styles for a more unique feel */
         body {
             font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0; /* Light grey text for better contrast on dark bg */
+        }
+        /* Custom gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #4a90e2, #9013fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        /* Neon glow effect for buttons */
+        .neon-button {
+            box-shadow: 0 0 5px theme('colors.cyan.400'), 0 0 10px theme('colors.cyan.500'), 0 0 15px theme('colors.cyan.600');
+            transition: all 0.3s ease;
+        }
+        .neon-button:hover {
+            box-shadow: 0 0 10px theme('colors.cyan.400'), 0 0 20px theme('colors.cyan.500'), 0 0 30px theme('colors.cyan.600'), 0 0 40px theme('colors.cyan.700');
+        }
+         /* Active tab style */
+        .tab-active {
+            background-color: theme('colors.blue.700');
+            border-bottom: 3px solid theme('colors.cyan.400');
+            color: theme('colors.white');
+        }
+        /* Styling for scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a90e2;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9013fe;
+        }
+        /* Glassmorphism effect for containers */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem; /* Equivalent to rounded-xl */
+        }
+        /* Slot reel style */
+        .slot-reel {
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 2px solid theme('colors.cyan.500');
+            box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.3);
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900">
-    <header class="bg-white dark:bg-gray-800 shadow-md py-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <a href="#" class="text-xl font-semibold text-gray-800 dark:text-white">My Logo</a>
-            <nav class="hidden md:block">
-                <ul class="flex space-x-6">
-                    <li><a href="#home" class="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition duration-300">Home</a></li>
-                    <li><a href="#about" class="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition duration-300">About</a></li>
-                    <li><a href="#services" class="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition duration-300">Services</a></li>
-                    <li><a href="#contact" class="text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition duration-300">Contact</a></li>
-                </ul>
-            </nav>
-            <button id="hamburger-btn" class="md:hidden text-gray-600 dark:text-gray-300 focus:outline-none" aria-label="Toggle Navigation">
-                <svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-                <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
+<body class="min-h-screen flex flex-col">
+
+    <header class="py-4 px-6 text-center shadow-lg bg-black bg-opacity-30">
+        <h1 class="text-4xl font-black gradient-text tracking-tight">Brokie Casino</h1>
+        <p class="text-sm text-gray-400 mt-1">Where losing feels... affordable?</p>
     </header>
 
-    <div id="mobile-menu" class="hidden fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-90 z-50">
-        <div class="bg-gray-800 w-80 h-full absolute right-0 p-6">
-            <div class="flex justify-end mb-4">
-                <button id="mobile-menu-close-btn" class="text-gray-300 focus:outline-none" aria-label="Close Mobile Menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+    <div class="flex flex-1 flex-col md:flex-row p-4 gap-4">
+
+        <aside class="w-full md:w-1/4 lg:w-1/5 flex flex-col gap-4">
+            <div class="glass-container p-4 flex flex-col gap-3 text-center">
+                <h2 class="text-lg font-semibold text-gray-300 border-b border-gray-600 pb-2 mb-2">Your Balance</h2>
+                <p class="text-3xl font-bold text-green-400 tracking-wider">1,283,150</p>
+                <h3 class="text-md font-semibold text-gray-400 mt-2">Loan Balance</h3>
+                <p class="text-xl font-semibold text-orange-400">20,000</p>
+                <div class="flex gap-2 mt-3 justify-center">
+                    <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-sm flex-1">Get Loan</button>
+                    <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-sm flex-1">Pay Loan</button>
+                </div>
             </div>
-            <nav class="block">
-                <ul class="space-y-4">
-                    <li><a href="#home" class="block text-lg text-gray-200 hover:text-blue-400 transition duration-300">Home</a></li>
-                    <li><a href="#about" class="block text-lg text-gray-200 hover:text-blue-400 transition duration-300">About</a></li>
-                    <li><a href="#services" class="block text-lg text-gray-200 hover:text-blue-400 transition duration-300">Services</a></li>
-                    <li><a href="#contact" class="block text-lg text-gray-200 hover:text-blue-400 transition duration-300">Contact</a></li>
+
+            <div class="glass-container p-4 flex-grow flex flex-col">
+                <h2 class="text-lg font-semibold text-center text-gray-300 border-b border-gray-600 pb-2 mb-3">Biggest Wins</h2>
+                <ul class="space-y-2 text-sm overflow-y-auto flex-grow pr-2">
+                    <li class="flex justify-between items-center p-1 bg-black bg-opacity-20 rounded-md"><span>Mines</span> <span class="font-semibold text-yellow-400">17.7T</span></li>
+                    <li class="flex justify-between items-center p-1 bg-black bg-opacity-20 rounded-md"><span>Mines</span> <span class="font-semibold text-yellow-400">9.8T</span></li>
+                    <li class="flex justify-between items-center p-1 bg-black bg-opacity-20 rounded-md"><span>Blackjack</span> <span class="font-semibold text-yellow-400">3.9T</span></li>
+                    <li class="flex justify-between items-center p-1 bg-black bg-opacity-20 rounded-md"><span>Crash</span> <span class="font-semibold text-yellow-400">1.3T</span></li>
+                    <li class="flex justify-between items-center p-1 bg-black bg-opacity-20 rounded-md"><span>Crash</span> <span class="font-semibold text-yellow-400">1.1T</span></li>
+                    </ul>
+            </div>
+
+            <div class="glass-container p-4 text-sm">
+                <h2 class="text-lg font-semibold text-center text-gray-300 border-b border-gray-600 pb-2 mb-3">Session Stats</h2>
+                <div class="space-y-1">
+                    <p>Total Gain: <span class="font-semibold text-green-400 float-right">39.1T</span></p>
+                    <p>Total Loss: <span class="font-semibold text-red-400 float-right">39.1T</span></p>
+                    <p class="mt-2 pt-2 border-t border-gray-700">Net P/L: <span class="font-bold text-cyan-400 float-right">1,411,478</span></p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="w-full md:w-3/4 lg:w-4/5 flex flex-col gap-4">
+            <nav class="glass-container p-2 rounded-lg overflow-x-auto">
+                <ul class="flex space-x-2 whitespace-nowrap">
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 tab-active">Slot Machine</button></li>
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 text-gray-300">Crash Game</button></li>
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 text-gray-300">Coin Flip</button></li>
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 text-gray-300">Minefield</button></li>
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 text-gray-300">Memory</button></li>
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 text-gray-300">Horse Race</button></li>
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 text-gray-300">Roulette</button></li>
+                    <li><button class="px-4 py-2 rounded-md text-sm font-medium transition duration-200 hover:bg-blue-800 text-gray-300">Blackjack</button></li>
                 </ul>
             </nav>
-        </div>
+
+            <section class="glass-container flex-grow p-6 flex flex-col lg:flex-row gap-6 items-start">
+                <div class="w-full lg:w-1/3 flex flex-col gap-4 order-2 lg:order-1">
+                     <div class="text-center">
+                        <label for="bet-amount" class="block text-sm font-medium text-gray-300 mb-1">Bet Amount</label>
+                        <input type="text" id="bet-amount" value="10" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-center text-xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" readonly>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-2">
+                        <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2 rounded-lg transition duration-200">-10</button>
+                        <button class="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-2 rounded-lg transition duration-200">-</button>
+                        <span class="text-center font-bold text-xl flex items-center justify-center text-white">10</span>
+                        <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-2 rounded-lg transition duration-200">+</button>
+                        <button class="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-2 rounded-lg transition duration-200">+10</button>
+                    </div>
+
+                     <div class="grid grid-cols-4 gap-2">
+                        <button class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-2 rounded-lg transition duration-200 text-sm">Min</button>
+                        <button class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-2 rounded-lg transition duration-200 text-sm">/2</button>
+                        <button class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-2 rounded-lg transition duration-200 text-sm">x2</button>
+                        <button class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-2 rounded-lg transition duration-200 text-sm">Max</button>
+                    </div>
+
+                    <button class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-black text-2xl py-4 px-4 rounded-lg transition duration-200 neon-button mt-2">
+                        Spin to Win!
+                    </button>
+
+                    <button class="w-full bg-gray-700 hover:bg-gray-800 text-gray-300 font-semibold py-2 px-4 rounded-lg transition duration-200 text-sm mt-2">Auto Off</button>
+                </div>
+
+                <div class="w-full lg:w-2/3 flex flex-col items-center order-1 lg:order-2">
+                    <div class="flex justify-center gap-4 mb-6">
+                        <div class="slot-reel w-20 h-24 md:w-28 md:h-36 rounded-lg flex items-center justify-center text-5xl md:text-7xl font-bold text-yellow-400">❓</div>
+                        <div class="slot-reel w-20 h-24 md:w-28 md:h-36 rounded-lg flex items-center justify-center text-5xl md:text-7xl font-bold text-yellow-400">❓</div>
+                        <div class="slot-reel w-20 h-24 md:w-28 md:h-36 rounded-lg flex items-center justify-center text-5xl md:text-7xl font-bold text-yellow-400">❓</div>
+                    </div>
+
+                    <div class="w-full max-w-md bg-black bg-opacity-30 p-4 rounded-lg border border-gray-700">
+                        <h3 class="text-lg font-semibold text-center text-gray-300 mb-3">Payouts (Multiplier x Bet)</h3>
+                        <ul class="space-y-1 text-sm text-center">
+                            <li class="flex justify-between px-2"><span>7️⃣7️⃣7️⃣</span> <span class="font-semibold text-yellow-300">250x</span></li>
+                            <li class="flex justify-between px-2"><span>💰💰💰</span> <span class="font-semibold text-yellow-300">100x</span></li>
+                            <li class="flex justify-between px-2"><span>💎💎💎</span> <span class="font-semibold text-yellow-300">90x</span></li>
+                            <li class="flex justify-between px-2"><span>🔔🔔🔔</span> <span class="font-semibold text-yellow-300">60x</span></li>
+                            <li class="flex justify-between px-2"><span>🍉🍉🍉</span> <span class="font-semibold text-yellow-300">25x</span></li>
+                            <li class="flex justify-between px-2"><span>🍊🍊🍊</span> <span class="font-semibold text-yellow-300">20x</span></li>
+                            <li class="flex justify-between px-2"><span>🍋🍋🍋</span> <span class="font-semibold text-yellow-300">15x</span></li>
+                            <li class="flex justify-between px-2"><span>🍒🍒🍒</span> <span class="font-semibold text-yellow-300">10x</span></li>
+                            <li class="flex justify-between px-2 pt-1 mt-1 border-t border-gray-600"><span>7️⃣7️⃣</span> <span class="font-semibold text-yellow-300">10x</span></li>
+                            <li class="flex justify-between px-2"><span>💰💰</span> <span class="font-semibold text-yellow-300">7x</span></li>
+                            <li class="flex justify-between px-2"><span>💎💎</span> <span class="font-semibold text-yellow-300">5x</span></li>
+                            <li class="flex justify-between px-2"><span>🍒🍒</span> <span class="font-semibold text-yellow-300">2x</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
     </div>
 
-    <section id="home" class="bg-gray-100 dark:bg-gray-900 py-16 md:py-24">
-        <div class="container mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 dark:text-white mb-4">Welcome to My Website</h1>
-            <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">This is a modern and exciting website.</p>
-            <a href="#about" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full transition duration-300">Learn More</a>
-        </div>
-    </section>
-
-    <section id="about" class="bg-white dark:bg-gray-800 py-16 md:py-24">
-        <div class="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
-            <div class="md:order-2">
-                <h2 class="text-3xl md:text-4xl font-semibold text-gray-800 dark:text-white mb-4">About Us</h2>
-                <p class="text-lg text-gray-600 dark:text-gray-300">We are a passionate team dedicated to creating amazing web experiences.  We strive to deliver high-quality, innovative solutions that meet our clients' needs. Our mission is to make the web a more beautiful and user-friendly place.</p>
+    <footer class="mt-auto p-6 text-center text-gray-400 text-sm space-y-6 bg-black bg-opacity-30">
+        <div class="max-w-3xl mx-auto flex flex-col md:flex-row gap-6 items-start">
+            <div class="flex-1 text-left glass-container p-4">
+                <h3 class="text-lg font-semibold gradient-text mb-2">Why Brokie Casino?</h3>
+                <p class="text-xs leading-relaxed text-gray-300">
+                    Honestly just made this for fun. no real money, no stress, just a place to mess around and play some games when you’re bored. it’s got slots, crash, coin flip, mines, memory, horses, roulette, blackjack—all that good stuff.
+                    <br><br>
+                    Ran out of fake money? no worries, just hit the atm and you're good. nothing serious here, just something to kill time and maybe feel lucky for a bit. have fun with it
+                </p>
             </div>
-            <div class="md:order-1">
-                <img src="https://placehold.co/600x400" alt="About Us" class="rounded-lg shadow-lg">
-            </div>
-        </div>
-    </section>
-
-    <section id="services" class="bg-gray-100 dark:bg-gray-900 py-16 md:py-24">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl md:text-4xl font-semibold text-gray-800 dark:text-white mb-8">Our Services</h2>
-            <div class="grid md:grid-cols-3 gap-12">
-                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
-                    <h3 class="text-2xl font-semibold text-blue-500 dark:text-blue-400 mb-4">Web Design</h3>
-                    <p class="text-gray-600 dark:text-gray-300">We create stunning and responsive websites.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
-                    <h3 class="text-2xl font-semibold text-blue-500 dark:text-blue-400 mb-4">Web Development</h3>
-                    <p class="text-gray-600 dark:text-gray-300">We build powerful and scalable web applications.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
-                    <h3 class="text-2xl font-semibold text-blue-500 dark:text-blue-400 mb-4">Digital Marketing</h3>
-                    <p class="text-gray-600 dark:text-gray-300">We help you reach your target audience.</p>
-                </div>
+             <div class="flex-1 text-left glass-container p-4">
+                 <h3 class="text-lg font-semibold gradient-text mb-2">Join our Low Roller Lounge</h3>
+                 <p class="text-xs leading-relaxed text-gray-300">
+                     Connect with fellow brokies, share your (fake) big wins, and complain about your (fake) bad beats. Exclusive access to... well, nothing really, but it sounds cool!
+                 </p>
+                 <button class="mt-3 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 text-xs">Join Now (Maybe)</button>
             </div>
         </div>
-    </section>
-
-    <section id="contact" class="bg-white dark:bg-gray-800 py-16 md:py-24">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl md:text-4xl font-semibold text-gray-800 dark:text-white text-center mb-8">Contact Us</h2>
-            <div class="bg-gray-100 dark:bg-gray-900 rounded-lg shadow-md p-8">
-                <form>
-                    <div class="mb-6">
-                        <label for="name" class="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">Your Name</label>
-                        <input type="text" id="name" name="name" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline bg-white dark:bg-gray-800" placeholder="Your Name">
-                    </div>
-                    <div class="mb-6">
-                        <label for="email" class="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">Your Email</label>
-                        <input type="email" id="email" name="email" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline bg-white dark:bg-gray-800" placeholder="Your Email">
-                    </div>
-                    <div class="mb-6">
-                        <label for="message" class="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">Your Message</label>
-                        <textarea id="message" name="message" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 leading-tight focus:outline-none focus:shadow-outline bg-white dark:bg-gray-800 h-32 resize-y" placeholder="Your Message"></textarea>
-                    </div>
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full transition duration-300 focus:outline-none focus:shadow-outline">Send Message</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-gray-200 dark:bg-gray-800 py-4">
-        <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-            &copy; 2024 My Modern Website. All rights reserved.
-        </div>
+        <p class="mt-6 pt-4 border-t border-gray-700">Made with <span class="text-red-500">💖</span> by Blazinik</p>
     </footer>
 
-    <script>
-        const hamburgerBtn = document.getElementById("hamburger-btn");
-        const mobileMenu = document.getElementById("mobile-menu");
-        const mobileMenuCloseBtn = document.getElementById("mobile-menu-close-btn");
-        const hamburgerIcon = document.getElementById("hamburger-icon");
-        const closeIcon = document.getElementById("close-icon");
-        const mobileMenuLinks = mobileMenu.querySelectorAll("a");
-        const navLinks = document.querySelectorAll('.nav-links a');
-        const sections = document.querySelectorAll('section');
-
-        function toggleMobileMenu() {
-            mobileMenu.classList.toggle("hidden");
-            hamburgerIcon.classList.toggle("hidden");
-            closeIcon.classList.toggle("hidden");
-        }
-
-        hamburgerBtn.addEventListener("click", toggleMobileMenu);
-        mobileMenuCloseBtn.addEventListener("click", toggleMobileMenu);
-        mobileMenuLinks.forEach(link => {
-            link.addEventListener("click", toggleMobileMenu);
-        });
-
-        document.addEventListener('click', (event) => {
-            if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(event.target) && event.target !== hamburgerBtn) {
-                toggleMobileMenu();
-            }
-        });
-
-        function updateActiveNavLink() {
-            let currentSectionId = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (window.scrollY >= sectionTop - 100 && window.scrollY < sectionTop + sectionHeight - 100) {
-                    currentSectionId = section.getAttribute('id');
-                }
-            });
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href').slice(1) === currentSectionId) {
-                    link.classList.add('active');
-                }
-            });
-        }
-
-        window.addEventListener('scroll', updateActiveNavLink);
-
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
 </body>
 </html>
 
