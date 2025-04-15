@@ -316,9 +316,6 @@ function animatePlinko() {
                 return; // Stop animation
             }
         }
-        // If below bucket line but not in a bucket (e.g., hit divider perfectly), treat as loss?
-        // Or let it bounce? For simplicity, let's assume it falls into *a* bucket if y > bucketY.
-        // If it somehow misses all buckets (shouldn't happen with full width buckets), find closest.
         let closestBucket = plinkoBuckets[0];
         let minDist = Math.abs(plinkoBall.x - (closestBucket.x + closestBucket.width / 2));
         for(let i = 1; i < plinkoBuckets.length; i++) {

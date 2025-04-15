@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brokie Casino</title>
+    <title>Brokie Casino - Refined Gaming</title>
 
     <link rel="icon" type="image/png" href="brokieLogo.png">
 
-    <meta property="og:title" content="Brokie Casino">
-    <meta property="og:description" content="Where losing feels... affordable? Play Slots, Crash, Blackjack and more!">
-    <meta property="og:image" content="brokieLogo.png"> <meta property="og:url" content="YOUR_WEBSITE_URL"> <meta property="og:type" content="website">
+    <meta property="og:title" content="Brokie Casino - Refined Gaming">
+    <meta property="og:description" content="Clean layout, sleek design. Play Slots, Crash, Plinko & more!">
+    <meta property="og:image" content="brokieLogo.png">
+    <meta property="og:url" content="YOUR_WEBSITE_URL">
+    <meta property="og:type" content="website">
 
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/style.css">
 
@@ -30,438 +32,240 @@
     <script src="js/horserace.js" defer></script>
     <script src="js/roulette.js" defer></script>
     <script src="js/blackjack.js" defer></script>
-    <script src="js/plinko.js" defer></script>  </head>
-<body class="antialiased font-inter bg-[#121212] text-[#e0e0e0] flex flex-col min-h-screen overflow-x-hidden">
+    <script src="js/plinko.js" defer></script>
 
-    <header class="card-bg shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <h1 class="text-3xl font-bold text-white">Brokie Casino</h1>
-            <p class="text-gray-400">Where losing feels... affordable?</p>
-        </div>
-    </header>
+    <script>
+      // Tailwind config remains here for easy access to custom theme colors via JS if needed
+      // or can be removed if CSS handles all styling
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              // Fluent-Inspired Dark Palette
+              'fluent-bg': '#1c1c1c',
+              'fluent-surface': '#2a2a2a',
+              'fluent-card': '#252525',
+              'fluent-border': '#4a4a4a', // Adjusted border
+              'fluent-primary': '#0078d4',
+              'fluent-accent': '#107c10',
+              'fluent-text-primary': '#f5f5f5',
+              'fluent-text-secondary': '#b0b0b0',
+              'fluent-text-disabled': '#6a6a6a',
+              'fluent-danger': '#e81123',
+              'fluent-warning': '#ffb900',
+            }
+          }
+        }
+      }
+    </script>
+     <script>
+        // Accordion Toggle (Keep here or move to main.js)
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('.accordion-icon');
+            if (!content) return;
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
 
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 main-content-grid">
+            if (isOpen) {
+                content.style.maxHeight = '0px'; content.classList.remove('open');
+                if(icon) icon.style.transform = 'rotate(0deg)'; button.setAttribute('aria-expanded', 'false');
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px"; content.classList.add('open');
+                if(icon) icon.style.transform = 'rotate(90deg)'; button.setAttribute('aria-expanded', 'true');
+            }
+        }
+    </script>
 
-            <div class="md:col-span-1 space-y-6 grid-col-1">
-                <div class="card-bg p-6 rounded-lg shadow-lg animate-card-enter" style="animation-delay: 0s;">
-                    <h2 class="text-lg font-semibold mb-2 text-gray-300 pb-1 border-b-2 border-blue-500 inline-block">Your Balance</h2>
-                    <p class="text-4xl font-bold text-blue-400 mt-2" id="currency-display">500</p>
-                    <p class="text-sm text-gray-400 mt-1">Loan Balance: <span id="loan-balance-display" class="font-medium text-gray-300">0</span></p>
-                    <div class="flex space-x-2 mt-4">
-                        <button id="loan-button" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-green-500 focus:ring-opacity-75">
-                            Get Loan
-                        </button>
-                        <button id="pay-loan-button" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75" disabled>
-                            Pay Loan
-                        </button>
-                    </div>
-                </div>
-                <div class="card-bg p-6 rounded-lg shadow-lg animate-card-enter" style="animation-delay: 0.05s;">
-                    <h2 class="text-lg font-semibold mb-3 text-gray-300 pb-1 border-b-2 border-yellow-500 inline-block">Biggest Wins</h2>
-                    <ul id="leaderboard-list" class="space-y-2 text-gray-400 mt-3">
-                        <li>No wins yet!</li>
-                    </ul>
-                </div>
-                <div class="card-bg p-6 rounded-lg shadow-lg animate-card-enter" style="animation-delay: 0.1s;">
-                    <h2 class="text-lg font-semibold mb-3 text-gray-300 pb-1 border-b-2 border-indigo-500 inline-block">Session Stats</h2>
-                    <div class="space-y-2 text-gray-400 mt-3 text-sm">
-                        <p>Total Gain: <span id="stats-total-gain" class="stats-value text-profit">0</span></p>
-                        <p>Total Loss: <span id="stats-total-loss" class="stats-value text-loss">0</span></p>
-                        <p>Net Profit/Loss: <span id="stats-net-profit" class="stats-value">0</span></p>
-                    </div>
-                </div>
-            </div>
+</head>
+<body class="font-sans bg-fluent-bg text-fluent-text-primary flex flex-col min-h-screen antialiased selection:bg-fluent-primary selection:text-black">
 
-            <div class="md:col-span-2 space-y-8 grid-col-2">
-                <div class="mb-4 border-b border-color animate-card-enter" style="animation-delay: 0.15s;">
-                    <nav class="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
-                         <button id="tab-slots" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm" aria-current="page">
-                              Slot Machine
-                         </button>
-                         <button id="tab-crash" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                              Crash Game
-                         </button>
-                         <button id="tab-coinflip" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                              Coin Flip
-                         </button>
-                         <button id="tab-minefield" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                              Minefield
-                         </button>
-                         <button id="tab-memory" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                              Memory
-                         </button>
-                         <button id="tab-horserace" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                              Horse Race
-                         </button>
-                         <button id="tab-roulette" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                              Roulette
-                         </button>
-                         <button id="tab-blackjack" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                             Blackjack
-                         </button>
-                         <button id="tab-plinko" class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">
-                             Plinko </button>
-                    </nav>
-                </div>
-
-                <div id="game-slots" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 relative animate-card-enter" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-red-500 inline-block">Spin to Win!</h3>
-                    <div class="flex justify-center space-x-4 pt-4">
-                        <div class="reel"><div class="reel-container"><div class="reel-symbols" id="reel1">❓</div></div></div>
-                        <div class="reel"><div class="reel-container"><div class="reel-symbols" id="reel2">❓</div></div></div>
-                        <div class="reel"><div class="reel-container"><div class="reel-symbols" id="reel3">❓</div></div></div>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-4">
-                        <label for="slot-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                        <button class="bet-adjust-btn" id="slot-bet-decrease-10">-10</button>
-                        <button class="bet-adjust-btn" id="slot-bet-decrease-1">-</button>
-                        <input type="number" id="slot-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                        <button class="bet-adjust-btn" id="slot-bet-increase-1">+</button>
-                        <button class="bet-adjust-btn" id="slot-bet-increase-10">+10</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-2">
-                        <button class="bet-adjust-btn" id="slot-bet-min">Min</button>
-                        <button class="bet-adjust-btn" id="slot-bet-half">/2</button>
-                        <button class="bet-adjust-btn" id="slot-bet-double">x2</button>
-                        <button class="bet-adjust-btn" id="slot-bet-max">Max</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                        <button id="spin-button" class="w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
-                            Spin
-                        </button>
-                        <button id="auto-spin-toggle" class="toggle-button w-auto text-white font-bold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75">
-                            Auto Off
-                        </button>
-                    </div>
-                    <div id="payout-legend">
-                        <h4>Payouts (Multiplier x Bet)</h4>
-                        <ul id="payout-list">
-                            </ul>
-                    </div>
-                </div>
-
-                <div id="game-crash" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                     <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-green-500 inline-block">Cash Out Before the Crash!</h3>
-                     <div id="crash-graph" class="relative mt-4">
-                          <svg id="crash-svg" preserveAspectRatio="none">
-                              <defs>
-                                  <filter id="line-shadow" x="-50%" y="-50%" width="200%" height="200%">
-                                      <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#059669" flood-opacity="0.6"/>
-                                  </filter>
-                              </defs>
-                              <g id="crash-grid"></g>
-                              <polyline id="crash-polyline" filter="url(#line-shadow)" points="0,100"></polyline>
-                          </svg>
-                          <span id="crash-multiplier" class="text-gray-300">1.00x</span>
-                     </div>
-                     <div class="flex items-center justify-center space-x-2 mt-4">
-                          <label for="crash-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                          <button class="bet-adjust-btn" id="crash-bet-decrease-10">-10</button>
-                          <button class="bet-adjust-btn" id="crash-bet-decrease-1">-</button>
-                          <input type="number" id="crash-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400">
-                          <button class="bet-adjust-btn" id="crash-bet-increase-1">+</button>
-                          <button class="bet-adjust-btn" id="crash-bet-increase-10">+10</button>
-                     </div>
-                     <div class="flex items-center justify-center space-x-2 mt-2">
-                          <button class="bet-adjust-btn" id="crash-bet-min">Min</button>
-                          <button class="bet-adjust-btn" id="crash-bet-half">/2</button>
-                          <button class="bet-adjust-btn" id="crash-bet-double">x2</button>
-                          <button class="bet-adjust-btn" id="crash-bet-max">Max</button>
-                     </div>
-                     <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4">
-                          <button id="crash-bet-button" class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-amber-300 focus:ring-opacity-75">
-                              Place Bet
-                          </button>
-                          <button id="crash-cashout-button" class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 disabled:opacity-50" disabled>
-                               Cash Out
-                          </button>
-                     </div>
-                     <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 border-t border-color pt-4">
-                          <button id="crash-auto-bet-toggle" class="toggle-button w-full sm:w-auto">Auto Bet Off</button>
-                          <div class="flex items-center space-x-2">
-                              <label for="crash-auto-cashout-input" class="text-sm font-medium text-gray-400">Auto Cashout @</label>
-                              <input type="number" id="crash-auto-cashout-input" min="1.01" step="0.01" placeholder="1.50" class="w-20 text-sm auto-cashout-input">
-                              <button id="crash-auto-cashout-toggle" class="toggle-button text-sm !py-1 !px-3">Enable</button>
-                          </div>
-                     </div>
-                     <p id="crash-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-                <div id="game-coinflip" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-yellow-400 inline-block">Coin Flip: Double or Nothing!</h3>
-                    <div class="text-center my-6 coin-container">
-                         <span id="coin" class="text-6xl">🪙</span>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-4">
-                         <label for="coinflip-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                         <button class="bet-adjust-btn" id="coinflip-bet-decrease-10">-10</button>
-                         <button class="bet-adjust-btn" id="coinflip-bet-decrease-1">-</button>
-                         <input type="number" id="coinflip-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                         <button class="bet-adjust-btn" id="coinflip-bet-increase-1">+</button>
-                         <button class="bet-adjust-btn" id="coinflip-bet-increase-10">+10</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-2">
-                         <button class="bet-adjust-btn" id="coinflip-bet-min">Min</button>
-                         <button class="bet-adjust-btn" id="coinflip-bet-half">/2</button>
-                         <button class="bet-adjust-btn" id="coinflip-bet-double">x2</button>
-                         <button class="bet-adjust-btn" id="coinflip-bet-max">Max</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-4 mt-4">
-                         <button id="coinflip-choose-blue" class="coinflip-choice-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
-                             Choose Blue 🔵
-                         </button>
-                         <button id="coinflip-choose-yellow" class="coinflip-choice-btn flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-yellow-300 focus:ring-opacity-75">
-                             Choose Yellow 🟡
-                         </button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                         <button id="coinflip-button" class="w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75" disabled>
-                             Select Side & Flip
-                         </button>
-                         <button id="coinflip-cashout-button" class="w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 disabled:opacity-50" disabled>
-                             Cash Out <span id="coinflip-winnings">0</span>
-                         </button>
-                    </div>
-                    <p id="coinflip-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-                <div id="game-minefield" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-orange-500 inline-block">Minefield</h3>
-                    <div class="flex items-center justify-center space-x-2 mt-4">
-                         <label for="minefield-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                         <button class="bet-adjust-btn" id="minefield-bet-decrease-10">-10</button>
-                         <button class="bet-adjust-btn" id="minefield-bet-decrease-1">-</button>
-                         <input type="number" id="minefield-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                         <button class="bet-adjust-btn" id="minefield-bet-increase-1">+</button>
-                         <button class="bet-adjust-btn" id="minefield-bet-increase-10">+10</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-2">
-                         <button class="bet-adjust-btn" id="minefield-bet-min">Min</button>
-                         <button class="bet-adjust-btn" id="minefield-bet-half">/2</button>
-                         <button class="bet-adjust-btn" id="minefield-bet-double">x2</button>
-                         <button class="bet-adjust-btn" id="minefield-bet-max">Max</button>
-                    </div>
-                    <div id="minefield-grid">
-                        </div>
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                         <button id="minefield-start-button" class="w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
-                             Start Game
-                         </button>
-                         <button id="minefield-cashout-button" class="w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 disabled:opacity-50" disabled>
-                             Cash Out (<span id="minefield-current-multiplier">1.00</span>x)
-                         </button>
-                    </div>
-                    <p id="minefield-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-                <div id="game-memory" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                      <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-pink-500 inline-block">Memory Match</h3>
-                      <div class="flex items-center justify-center space-x-2 mt-4">
-                          <label for="memory-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                          <button class="bet-adjust-btn" id="memory-bet-decrease-10">-10</button>
-                          <button class="bet-adjust-btn" id="memory-bet-decrease-1">-</button>
-                          <input type="number" id="memory-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                          <button class="bet-adjust-btn" id="memory-bet-increase-1">+</button>
-                          <button class="bet-adjust-btn" id="memory-bet-increase-10">+10</button>
-                      </div>
-                      <div class="flex items-center justify-center space-x-2 mt-2">
-                           <button class="bet-adjust-btn" id="memory-bet-min">Min</button>
-                           <button class="bet-adjust-btn" id="memory-bet-half">/2</button>
-                           <button class="bet-adjust-btn" id="memory-bet-double">x2</button>
-                           <button class="bet-adjust-btn" id="memory-bet-max">Max</button>
-                      </div>
-                      <div id="memory-grid">
-                          </div>
-                      <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
-                           <button id="memory-start-button" class="w-auto bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75">
-                               Start Game
-                           </button>
-                           <div class="text-gray-300 text-sm">
-                               Tries Left: <span id="memory-tries-left" class="font-bold">--</span>
-                           </div>
-                      </div>
-                      <p id="memory-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-                <div id="game-horserace" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-lime-500 inline-block">Horse Racing</h3>
-                    <div class="flex flex-col space-y-4">
-                        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 flex-wrap">
-                             <label for="horserace-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                             <div class="flex items-center justify-center space-x-2">
-                                 <button class="bet-adjust-btn" id="horserace-bet-decrease-10">-10</button>
-                                 <button class="bet-adjust-btn" id="horserace-bet-decrease-1">-</button>
-                                 <input type="number" id="horserace-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                                 <button class="bet-adjust-btn" id="horserace-bet-increase-1">+</button>
-                                 <button class="bet-adjust-btn" id="horserace-bet-increase-10">+10</button>
-                             </div>
-                             <div class="flex items-center justify-center space-x-2">
-                                  <button class="bet-adjust-btn" id="horserace-bet-min">Min</button>
-                                  <button class="bet-adjust-btn" id="horserace-bet-half">/2</button>
-                                  <button class="bet-adjust-btn" id="horserace-bet-double">x2</button>
-                                  <button class="bet-adjust-btn" id="horserace-bet-max">Max</button>
-                             </div>
-                        </div>
-                        <div>
-                             <label class="block text-center font-medium text-gray-300 text-sm mb-2">Pick Your Horse:</label>
-                             <div id="horserace-selection" class="flex flex-wrap gap-2 justify-center">
-                                 </div>
-                        </div>
-                    </div>
-                    <div id="horserace-track">
-                         </div>
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                        <button id="horserace-start-button" class="w-auto bg-lime-600 hover:bg-lime-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-lime-400 focus:ring-opacity-75">
-                            Start Race
-                        </button>
-                    </div>
-                    <p id="horserace-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-                <div id="game-roulette" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-purple-500 inline-block">Roulette</h3>
-                    <div id="roulette-wheel-container">
-                        <div id="roulette-wheel"></div>
-                        <div id="roulette-pointer"></div>
-                        <div id="roulette-result">?</div>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-4">
-                        <label for="roulette-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                        <button class="bet-adjust-btn" id="roulette-bet-decrease-10">-10</button>
-                        <button class="bet-adjust-btn" id="roulette-bet-decrease-1">-</button>
-                        <input type="number" id="roulette-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                        <button class="bet-adjust-btn" id="roulette-bet-increase-1">+</button>
-                        <button class="bet-adjust-btn" id="roulette-bet-increase-10">+10</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-2">
-                        <button class="bet-adjust-btn" id="roulette-bet-min">Min</button>
-                        <button class="bet-adjust-btn" id="roulette-bet-half">/2</button>
-                        <button class="bet-adjust-btn" id="roulette-bet-double">x2</button>
-                        <button class="bet-adjust-btn" id="roulette-bet-max">Max</button>
-                    </div>
-                    <div id="roulette-betting-area">
-                        <p class="text-center text-gray-400 text-sm mb-2">Click to place bets (Current Bet: <span id="roulette-current-bet-type">None</span>)</p>
-                        <div class="roulette-bet-grid" id="roulette-inside-bets">
-                            </div>
-                        <div class="roulette-outside-bets mt-4" id="roulette-outside-bets">
-                            <button class="roulette-bet-btn outside red" data-bet-type="red">Red</button>
-                            <button class="roulette-bet-btn outside black" data-bet-type="black">Black</button>
-                            <button class="roulette-bet-btn outside" data-bet-type="odd">Odd</button>
-                            <button class="roulette-bet-btn outside" data-bet-type="even">Even</button>
-                            <button class="roulette-bet-btn outside" data-bet-type="low">1-18</button>
-                            <button class="roulette-bet-btn outside" data-bet-type="high">19-36</button>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                        <button id="roulette-spin-button" class="w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75">
-                            Spin Wheel
-                        </button>
-                    </div>
-                    <p id="roulette-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-                <div id="game-blackjack" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-gray-500 inline-block">Blackjack</h3>
-                    <div class="mb-4">
-                        <h4 class="text-lg font-medium text-gray-400 mb-2 text-center">Dealer's Hand (<span id="blackjack-dealer-score" class="blackjack-score-value">0</span>)</h4>
-                        <div id="blackjack-dealer-hand" class="blackjack-hand">
-                            </div>
-                    </div>
-                    <div class="mb-6">
-                        <h4 class="text-lg font-medium text-gray-400 mb-2 text-center">Your Hand (<span id="blackjack-player-score" class="blackjack-score-value">0</span>)</h4>
-                        <div id="blackjack-player-hand" class="blackjack-hand">
-                            </div>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-4">
-                        <label for="blackjack-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                        <button class="bet-adjust-btn" id="blackjack-bet-decrease-10">-10</button>
-                        <button class="bet-adjust-btn" id="blackjack-bet-decrease-1">-</button>
-                        <input type="number" id="blackjack-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                        <button class="bet-adjust-btn" id="blackjack-bet-increase-1">+</button>
-                        <button class="bet-adjust-btn" id="blackjack-bet-increase-10">+10</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-2">
-                        <button class="bet-adjust-btn" id="blackjack-bet-min">Min</button>
-                        <button class="bet-adjust-btn" id="blackjack-bet-half">/2</button>
-                        <button class="bet-adjust-btn" id="blackjack-bet-double">x2</button>
-                        <button class="bet-adjust-btn" id="blackjack-bet-max">Max</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                        <button id="blackjack-deal-button" class="w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75">
-                            Deal
-                        </button>
-                        <button id="blackjack-hit-button" class="w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75" disabled>
-                            Hit
-                        </button>
-                        <button id="blackjack-stand-button" class="w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75" disabled>
-                            Stand
-                        </button>
-                    </div>
-                    <p id="blackjack-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-                <div id="game-plinko" class="game-area card-bg p-6 rounded-lg shadow-lg space-y-6 hidden animate-card-enter" style="animation-delay: 0.2s;">
-                    <h3 class="text-xl font-semibold text-gray-100 pb-1 border-b-2 border-cyan-500 inline-block">Plinko Drop</h3>
-                    <div class="flex justify-center">
-                         <canvas id="plinko-canvas" width="350" height="450" class="bg-[#2a2a2a] rounded-md border border-[#3a3a3a]"></canvas>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-4">
-                        <label for="plinko-bet" class="font-medium text-gray-300 text-sm">Bet:</label>
-                        <button class="bet-adjust-btn" id="plinko-bet-decrease-10">-10</button>
-                        <button class="bet-adjust-btn" id="plinko-bet-decrease-1">-</button>
-                        <input type="number" id="plinko-bet" value="10" min="1" class="w-20 border-color-light rounded-md focus:ring-blue-400 focus:border-blue-400 appearance-none">
-                        <button class="bet-adjust-btn" id="plinko-bet-increase-1">+</button>
-                        <button class="bet-adjust-btn" id="plinko-bet-increase-10">+10</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-2 mt-2">
-                        <button class="bet-adjust-btn" id="plinko-bet-min">Min</button>
-                        <button class="bet-adjust-btn" id="plinko-bet-half">/2</button>
-                        <button class="bet-adjust-btn" id="plinko-bet-double">x2</button>
-                        <button class="bet-adjust-btn" id="plinko-bet-max">Max</button>
-                    </div>
-                    <div class="flex items-center justify-center space-x-4 mt-6">
-                        <button id="plinko-drop-button" class="w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-75">
-                            Drop Ball
-                        </button>
-                    </div>
-                    <p id="plinko-status" class="text-center text-gray-400 font-medium h-6"></p>
-                </div>
-
-
-            </div> </div> <div class="mt-12 card-bg p-6 rounded-lg shadow-lg grid-col-about animate-card-enter" style="animation-delay: 0.25s;">
-             <h2 class="text-2xl font-semibold mb-4 text-gray-100 pb-1 border-b-2 border-purple-500 inline-block">Why Brokie Casino?</h2>
-             <p class="text-gray-400 leading-relaxed mt-3">
-                 Honestly just made this for fun. no real money, no stress, just a place to mess around and play some games when you’re bored. it’s got slots, crash, coin flip, mines, memory, horses, roulette, blackjack—all that good stuff.
-             </p>
-             <p class="text-gray-300 leading-relaxed mt-3">
-                 Ran out of fake money? no worries, just hit the atm and you're good. nothing serious here, just something to kill time and maybe feel lucky for a bit. have fun with it
-             </p>
-             <a href="https://discord.gg/HUQrwA7wxm" target="_blank" rel="noopener noreferrer"
-             class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded-lg shadow-md mt-4 focus:outline-none focus:ring-offset-2 focus:ring-offset-black focus:ring-2 focus:ring-green-300 focus:ring-opacity-75">
-                 Join our Low Roller Lounge
+    <section id="hero" class="relative overflow-hidden border-b border-fluent-border/50 shadow-lg min-h-[35vh] sm:min-h-[45vh] flex items-center justify-center text-center px-4 py-12 sm:py-16">
+        <div class="z-10">
+            <img src="brokieLogo.png" alt="Brokie Casino Logo" class="h-16 w-16 sm:h-20 sm:w-20 rounded-full border-4 border-fluent-primary shadow-xl mx-auto mb-4" onerror="this.style.display='none'">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">
+                Brokie Casino
+            </h1>
+            <p class="text-md sm:text-lg text-fluent-text-secondary italic mb-6 max-w-xl mx-auto">
+                Where losing feels... affordable?
+            </p>
+            <a href="https://discord.gg/HUQrwA7wxm" target="_blank" rel="noopener noreferrer"
+                class="hero-button group inline-flex items-center">
+                 Join the Low Roller Lounge
+                 <svg class="w-5 h-5 ml-2 transition-transform duration-200 group-hover:translate-x-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" />
+                  </svg>
              </a>
         </div>
-    </main>
+        <div class="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
+    </section>
 
-    <footer class="footer-bg mt-auto border-t footer-border">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-gray-500 text-sm">
-            Made with 💖 by Blazinik
+    <div class="flex-grow max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+
+            <aside class="md:col-span-1 space-y-6">
+                 <div class="info-nav-card">
+                    <h3 class="info-nav-title border-fluent-primary">Balance & Loan</h3>
+                    <p class="balance-value" id="currency-display">500</p>
+                    <p class="loan-value mt-1">Loan Balance: <span id="loan-balance-display" class="font-medium text-fluent-text-primary">0</span></p>
+                    <div class="grid grid-cols-2 gap-2 mt-3">
+                        <button id="loan-button" class="loan-button get">Get Loan</button>
+                        <button id="pay-loan-button" class="loan-button pay" disabled>Pay Loan</button>
+                    </div>
+                </div>
+
+                <nav class="info-nav-card" aria-label="Games">
+                    <h3 class="info-nav-title border-fluent-accent">Games</h3>
+                    <div class="space-y-1 mt-2">
+                        <button id="tab-slots" class="tab-button group flex items-center w-full" aria-current="page">
+                             <span class="emoji mr-2">🎰</span> <span class="truncate">Slots</span>
+                        </button>
+                        <button id="tab-crash" class="tab-button group flex items-center w-full">
+                             <span class="emoji mr-2">🚀</span> <span class="truncate">Crash</span>
+                        </button>
+                         <button id="tab-coinflip" class="tab-button group flex items-center w-full">
+                            <span class="emoji mr-2">🪙</span> <span class="truncate">Coin Flip</span>
+                        </button>
+                        <button id="tab-minefield" class="tab-button group flex items-center w-full">
+                            <span class="emoji mr-2">💣</span> <span class="truncate">Mines</span>
+                        </button>
+                        <button id="tab-memory" class="tab-button group flex items-center w-full">
+                            <span class="emoji mr-2">🧠</span> <span class="truncate">Memory</span>
+                        </button>
+                        <button id="tab-horserace" class="tab-button group flex items-center w-full">
+                            <span class="emoji mr-2">🐎</span> <span class="truncate">Horses</span>
+                        </button>
+                        <button id="tab-roulette" class="tab-button group flex items-center w-full">
+                             <span class="emoji mr-2">🎲</span> <span class="truncate">Roulette</span>
+                        </button>
+                        <button id="tab-blackjack" class="tab-button group flex items-center w-full">
+                            <span class="emoji mr-2">🃏</span> <span class="truncate">Blackjack</span>
+                        </button>
+                        <button id="tab-plinko" class="tab-button group flex items-center w-full">
+                            <span class="emoji mr-2">⚪</span> <span class="truncate">Plinko</span>
+                        </button>
+                    </div>
+                </nav>
+
+                <div class="info-nav-card">
+                    <h3 class="info-nav-title border-fluent-warning">Biggest Wins</h3>
+                    <ul id="leaderboard-list" class="space-y-1.5 text-fluent-text-secondary mt-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                        <li class="italic text-sm">No wins yet!</li>
+                    </ul>
+                </div>
+                <div class="info-nav-card">
+                    <h3 class="info-nav-title border-fluent-secondary">Session Stats</h3>
+                    <div class="session-stats-list mt-2 text-sm">
+                        <p><span>Total Gain:</span> <span id="stats-total-gain" class="stats-value text-fluent-accent font-medium">0</span></p>
+                        <p><span>Total Loss:</span> <span id="stats-total-loss" class="stats-value text-fluent-danger font-medium">0</span></p>
+                        <p><span>Net Profit/Loss:</span> <span id="stats-net-profit" class="stats-value font-semibold text-fluent-text-primary">0</span></p>
+                    </div>
+                </div>
+
+            </aside>
+
+            <main class="md:col-span-2 space-y-6 lg:space-y-8">
+                <section id="game-container" class="game-container p-5 sm:p-6 min-h-[600px]">
+                     <div id="game-slots" class="game-area space-y-6">
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-red-500 inline-block">Spin to Win!</h3>
+                         <div class="flex justify-center space-x-4 pt-4">
+                            <div class="reel"><div class="reel-container"><div class="reel-symbols" id="reel1">❓</div></div></div>
+                            <div class="reel"><div class="reel-container"><div class="reel-symbols" id="reel2">❓</div></div></div>
+                            <div class="reel"><div class="reel-container"><div class="reel-symbols" id="reel3">❓</div></div></div>
+                        </div>
+                        <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
+                            <label for="slot-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
+                            <button class="bet-adjust-btn" id="slot-bet-decrease-10">-10</button>
+                            <button class="bet-adjust-btn" id="slot-bet-decrease-1">-</button>
+                            <input type="number" id="slot-bet" value="10" min="1" class="w-20 rounded-md appearance-none">
+                            <button class="bet-adjust-btn" id="slot-bet-increase-1">+</button>
+                            <button class="bet-adjust-btn" id="slot-bet-increase-10">+10</button>
+                        </div>
+                        <div class="flex items-center justify-center space-x-2 mt-2">
+                            <button class="bet-adjust-btn" id="slot-bet-min">Min</button>
+                            <button class="bet-adjust-btn" id="slot-bet-half">/2</button>
+                            <button class="bet-adjust-btn" id="slot-bet-double">x2</button>
+                            <button class="bet-adjust-btn" id="slot-bet-max">Max</button>
+                        </div>
+                        <div class="flex items-center justify-center space-x-4 mt-6">
+                            <button id="spin-button" class="game-button primary">Spin</button>
+                            <button id="auto-spin-toggle" class="toggle-button secondary">Auto Off</button>
+                        </div>
+                        <div id="payout-legend" class="pt-4 border-t border-fluent-border/50 mt-6">
+                            <h4 class="text-center font-semibold text-fluent-text-secondary mb-2">Payouts (Multiplier x Bet)</h4>
+                            <ul id="payout-list" class="text-xs text-center max-w-xs mx-auto"></ul>
+                        </div>
+                    </div>
+                    <div id="game-crash" class="game-area space-y-6 hidden">... (Copy Crash Content Here) ...</div>
+                    <div id="game-coinflip" class="game-area space-y-6 hidden">... (Copy Coinflip Content Here) ...</div>
+                    <div id="game-minefield" class="game-area space-y-6 hidden">... (Copy Minefield Content Here) ...</div>
+                    <div id="game-memory" class="game-area space-y-6 hidden">... (Copy Memory Content Here) ...</div>
+                    <div id="game-horserace" class="game-area space-y-4 hidden">... (Copy Horserace Content Here) ...</div>
+                    <div id="game-roulette" class="game-area space-y-6 hidden">... (Copy Roulette Content Here) ...</div>
+                    <div id="game-blackjack" class="game-area space-y-4 hidden">... (Copy Blackjack Content Here) ...</div>
+                    <div id="game-plinko" class="game-area space-y-6 hidden">... (Copy Plinko Content Here) ...</div>
+                </section>
+
+                <section id="info-accordion" class="space-y-3">
+                     <div class="accordion-item">
+                        <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
+                            <span>Responsible Gaming & Addiction</span>
+                            <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span> </button>
+                        <div class="accordion-content">
+                            <p>This site is for entertainment purposes only using fake currency. No real money is involved. Gambling can be addictive. If you or someone you know has a gambling problem, please seek help. Resources are available online and through various support organizations.</p>
+                            <p class="mt-2">Remember to play responsibly, set limits, and take breaks.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
+                            <span>Why I Made This Site</span>
+                            <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>Honestly just made this for fun. no real money, no stress, just a place to mess around and play some games when you’re bored. it’s got slots, crash, coin flip, mines, memory, horses, roulette, blackjack—all that good stuff. Ran out of fake money? no worries, just hit the atm and you're good. nothing serious here, just something to kill time and maybe feel lucky for a bit. have fun with it!</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item">
+                        <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
+                            <span>Who I Am</span>
+                             <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>Just a dev messing around and building stuff. Find me on Discord!</p>
+                             <a href="https://discord.gg/HUQrwA7wxm" target="_blank" rel="noopener noreferrer"
+                                class="inline-flex items-center text-fluent-primary hover:text-blue-400 font-medium mt-2">
+                                 Join Discord
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 16 16"><path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.01-.062c.018-.013.038-.028.061-.043a.052.052 0 0 1 .062.003c.145.099.391.296.667.518a.051.051 0 0 0 .051.007c2.668-1.575 2.668-1.575 0 0a.05.05 0 0 0 .051-.007c.276-.222.522-.42.667-.518a.052.052 0 0 1 .062-.003c.023.015.043.03.061.043a.05.05 0 0 1-.01.062 8.923 8.923 0 0 1-1.248.595.05.05 0 0 0-.01.059c.236.466.51.899.818 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.021-.018zM4.002 10a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm8 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+                             </a>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
         </div>
+    </div>
+
+    <footer class="bg-fluent-bg mt-auto border-t border-fluent-border/30 text-center py-5">
+        <p class="text-fluent-text-secondary text-sm">Made with <span class="text-red-500 animate-pulse">💖</span> by Blazinik</p>
     </footer>
 
-    <div id="message-box">This is a message!</div>
+    <div id="message-box" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-fluent-surface text-fluent-text-primary px-6 py-3 rounded-lg shadow-lg z-[100] opacity-0 transition-all duration-300 pointer-events-none border border-fluent-border/50">
+        This is a message!
+    </div>
 
-    <div id="atm-modal-overlay" class="hidden"></div>
-    <div id="atm-modal" class="hidden">
-        <button id="atm-close-button" class="atm-close-button">&times;</button>
-        <h3>Brokie ATM</h3>
-        <p class="text-sm text-gray-400 mb-4 text-center">Select withdrawal amount:</p>
-        <div class="atm-button-grid">
-            <button class="atm-button" data-amount="50">50</button>
-            <button class="atm-button" data-amount="100">100</button>
-            <button class="atm-button" data-amount="250">250</button>
-            <button class="atm-button" data-amount="500">500</button>
+    <div id="atm-modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+    <div id="atm-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-fluent-surface text-fluent-text-primary p-6 rounded-xl shadow-xl z-50 w-[90%] max-w-sm border border-fluent-border/50 hidden opacity-0 scale-95 transition-all duration-300">
+        <button id="atm-close-button" class="absolute top-2 right-3 text-fluent-text-secondary hover:text-white text-2xl font-bold">&times;</button>
+        <h3 class="text-xl font-semibold text-center mb-4 text-white">Brokie ATM</h3>
+        <p class="text-sm text-fluent-text-secondary mb-4 text-center">Select withdrawal amount:</p>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button class="atm-button modal-button" data-amount="50">50</button>
+            <button class="atm-button modal-button" data-amount="100">100</button>
+            <button class="atm-button modal-button" data-amount="250">250</button>
+            <button class="atm-button modal-button" data-amount="500">500</button>
         </div>
     </div>
 
