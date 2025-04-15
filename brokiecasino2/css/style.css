@@ -3,6 +3,8 @@
    - Uses direct hex color values instead of theme() for browser compatibility.
    - Includes fixes for card/background contrast and button colors.
    - Includes styles for roulette black buttons and number placeholders.
+   - Added z-index to roulette numbers.
+   - Added potential fixes for SVG text rendering.
    ========================================================================== */
 
 /* --- Base Styles & Background Animation --- */
@@ -42,7 +44,6 @@
 
 /* Hero section container */
 #hero {
-    /* Uses Tailwind classes for layout, padding, min-height etc. */
     border-bottom: 1px solid rgba(74, 74, 74, 0.5); /* fluent-border with opacity */
     box-shadow: 0 5px 25px rgba(0,0,0,0.4);
     position: relative;
@@ -457,7 +458,7 @@ input[type="number"]:disabled {
     transition: background-color 0.2s ease;
 }
 .accordion-button:hover {
-    background-color: #404040; /* Dark gray */
+    background-color: #4a4a4a; /* Use border color for hover */
 }
 .accordion-icon {
     font-size: 1rem;
@@ -570,21 +571,29 @@ input[type="number"]:disabled {
     display: flex; align-items: center; justify-content: center;
     font-size: 2rem; /* text-3xl */ font-weight: bold;
     color: #b0b0b0; /* fluent-text-secondary (Default text) */
-    position: relative; overflow: hidden;
+    position: relative; overflow: hidden; /* Keep overflow hidden */
     border: 1px solid #404040; /* Dark gray border */
 }
 #crash-svg {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;
+    /* ViewBox set in JS */
 }
 #crash-svg .grid-line {
     stroke: #404040; /* Dark gray border */
-    stroke-width: 0.5;
-    vector-effect: non-scaling-stroke; /* Keep lines thin on zoom */
+    stroke-width: 0.5; /* Thin lines */
+    vector-effect: non-scaling-stroke; /* Keep lines thin */
+}
+#crash-svg .grid-label { /* Style for Y-axis labels */
+    /* fill, font-size set in JS */
+    font-family: inherit; /* Use page font */
+    text-anchor: start; /* Align text start to the x coordinate */
+    dominant-baseline: middle; /* Better vertical alignment */
+    vector-effect: non-scaling-stroke; /* Prevent stroke scaling */
 }
 #crash-polyline {
     fill: none;
     stroke: #0078d4; /* fluent-primary */
-    stroke-width: 2.5;
+    stroke-width: 2.5; /* Slightly thicker line */
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: stroke 0.2s linear;
@@ -600,9 +609,12 @@ input[type="number"]:disabled {
     transition: transform 0.1s ease, color 0.2s ease-out, font-size 0.2s ease-out;
     font-size: 1.75rem; /* Between text-xl and text-2xl */
     display: inline-block; /* Needed for transform */
+    position: absolute; /* Position relative to #crash-graph */
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%); /* Center it */
 }
 #crash-multiplier.win-effect {
-    transform: scale(1.1);
+    transform: translate(-50%, -50%) scale(1.1); /* Adjust transform for centering */
     box-shadow: 0 0 15px rgba(0, 120, 212, 0.7); /* fluent-primary glow */
     color: #0078d4; /* fluent-primary */
 }
@@ -823,47 +835,46 @@ input[type="number"]:disabled {
     background-image: conic-gradient(
         #107c10 0deg 9.7deg, /* fluent-accent (Green 0) */
         #e81123 9.7deg 19.4deg, /* fluent-danger (Red) */
-        #111827 19.4deg 29.1deg, /* Dark Gray (Black) */
+        #111827 19.4deg 29.1deg, /* UPDATED Black */
         #e81123 29.1deg 38.8deg, /* Red */
-        #111827 38.8deg 48.5deg, /* Black */
+        #111827 38.8deg 48.5deg, /* UPDATED Black */
         #e81123 48.5deg 58.2deg, /* Red */
-        #111827 58.2deg 67.9deg, /* Black */
+        #111827 58.2deg 67.9deg, /* UPDATED Black */
         #e81123 67.9deg 77.6deg, /* Red */
-        #111827 77.6deg 87.3deg, /* Black */
+        #111827 77.6deg 87.3deg, /* UPDATED Black */
         #e81123 87.3deg 97deg,    /* Red */
-        #111827 97deg 106.7deg,  /* Black */
+        #111827 97deg 106.7deg,  /* UPDATED Black */
         #e81123 106.7deg 116.4deg, /* Red */
-        #111827 116.4deg 126.1deg, /* Black */
+        #111827 116.4deg 126.1deg, /* UPDATED Black */
         #e81123 126.1deg 135.8deg, /* Red */
-        #111827 135.8deg 145.5deg, /* Black */
+        #111827 135.8deg 145.5deg, /* UPDATED Black */
         #e81123 145.5deg 155.2deg, /* Red */
-        #111827 155.2deg 164.9deg, /* Black */
+        #111827 155.2deg 164.9deg, /* UPDATED Black */
         #e81123 164.9deg 174.6deg, /* Red */
-        #111827 174.6deg 184.3deg, /* Black */
+        #111827 174.6deg 184.3deg, /* UPDATED Black */
         #107c10 184.3deg 194deg, /* fluent-accent (Green 00) */
-        #111827 194deg 203.7deg, /* Black */
+        #111827 194deg 203.7deg, /* UPDATED Black */
         #e81123 203.7deg 213.4deg, /* Red */
-        #111827 213.4deg 223.1deg, /* Black */
+        #111827 213.4deg 223.1deg, /* UPDATED Black */
         #e81123 223.1deg 232.8deg, /* Red */
-        #111827 232.8deg 242.5deg, /* Black */
+        #111827 232.8deg 242.5deg, /* UPDATED Black */
         #e81123 242.5deg 252.2deg, /* Red */
-        #111827 252.2deg 261.9deg, /* Black */
+        #111827 252.2deg 261.9deg, /* UPDATED Black */
         #e81123 261.9deg 271.6deg, /* Red */
-        #111827 271.6deg 281.3deg, /* Black */
+        #111827 271.6deg 281.3deg, /* UPDATED Black */
         #e81123 281.3deg 291deg,    /* Red */
-        #111827 291deg 300.7deg,  /* Black */
+        #111827 291deg 300.7deg,  /* UPDATED Black */
         #e81123 300.7deg 310.4deg, /* Red */
-        #111827 310.4deg 320.1deg, /* Black */
+        #111827 310.4deg 320.1deg, /* UPDATED Black */
         #e81123 320.1deg 329.8deg, /* Red */
-        #111827 329.8deg 339.5deg, /* Black */
+        #111827 329.8deg 339.5deg, /* UPDATED Black */
         #e81123 339.5deg 349.2deg, /* Red */
-        #111827 349.2deg 360deg    /* Black */
+        #111827 349.2deg 360deg    /* UPDATED Black */
     );
 }
 /* Basic styles for numbers on the wheel (JS positions them) */
 #roulette-wheel .roulette-number {
     position: absolute;
-    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -875,6 +886,7 @@ input[type="number"]:disabled {
     text-shadow: 0 0 2px rgba(0,0,0,0.7); /* Improve readability */
     transform-origin: center center; /* Rotate around center */
     pointer-events: none; /* Prevent interaction */
+    z-index: 1; /* Ensure numbers are above the background gradient */
     /* top, left, transform: rotate() will be set by JS */
 }
 #roulette-pointer {
@@ -900,6 +912,11 @@ input[type="number"]:disabled {
     color: #fff; z-index: 5;
     border: 3px solid #4a4a4a; /* fluent-border */
 }
+/* Add styles for result display colors */
+#roulette-result.red { background-color: #e81123; color: white; }
+#roulette-result.black { background-color: #111827; color: white; }
+#roulette-result.green { background-color: #107c10; color: white; }
+
 #roulette-betting-area {
     margin-top: 1.5rem; padding-top: 1rem;
     border-top: 1px solid rgba(74, 74, 74, 0.5); /* fluent-border with opacity */
