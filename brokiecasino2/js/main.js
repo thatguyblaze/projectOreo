@@ -608,7 +608,6 @@ function setupMainEventListeners() {
     allTabs.forEach(tab => {
         if (tab) {
             tab.addEventListener('click', (e) => {
-                startTone(); // Ensure audio is ready on first tab click too
                 setActiveTab(e.currentTarget); // Pass the clicked button element
             });
         }

@@ -5,6 +5,7 @@
  * - Accepts BrokieAPI object during initialization.
  * - Uses passed API object for core functions (balance, sound, messages).
  * - Includes logic for placing numbers visually on the wheel.
+ * - Fixes handling of outside bet button clicks.
  * ==========================================================================
  */
 
@@ -35,7 +36,7 @@ const ANGLE_PER_NUMBER = 360 / TOTAL_NUMBERS;
 // --- Roulette State Variables ---
 let rouletteIsSpinning = false;
 let currentRouletteBetType = null; // e.g., 'single', 'red', 'odd', or a specific number
-let currentRouletteBetValue = null; // The specific number/value if bet type is 'single' or outside
+let currentRouletteBetValue = null; // The specific number/value (e.g., 5 for single, 'red' for red)
 let selectedBetButton = null; // The DOM element of the selected bet button
 
 // --- DOM Element References ---
@@ -121,8 +122,9 @@ function createBetButton(value, color, betType) {
     if (color) button.classList.add(color); // Add 'red', 'black', 'green' class
     button.textContent = value;
     button.dataset.betType = betType;
+    // Ensure data-bet-value is always set
     button.dataset.betValue = value; // Store the specific number/type
-    button.addEventListener('click', handleBetSelection);
+    // No need to add listener here, using delegation in setupRouletteEventListeners
     return button;
 }
 
@@ -134,11 +136,16 @@ function positionWheelNumbers() {
 
     const wheelDiameter = rouletteWheel.offsetWidth;
     if (wheelDiameter <= 0) {
-        console.warn("Roulette wheel has no width, cannot position numbers yet.");
+        console.warn("Roulette wheel has no width, attempting to position numbers again shortly.");
         // Attempt to reposition after a short delay, hoping layout is complete
-        setTimeout(positionWheelNumbers, 100);
+        // Clear any previous timeout to avoid multiple calls
+        if (window.positionWheelTimeout) clearTimeout(window.positionWheelTimeout);
+        window.positionWheelTimeout = setTimeout(positionWheelNumbers, 100);
         return;
     }
+    // Clear timeout if successful
+    if (window.positionWheelTimeout) clearTimeout(window.positionWheelTimeout);
+
 
     const wheelRadius = wheelDiameter / 2;
     // Position numbers slightly inside the outer edge
@@ -196,36 +203,47 @@ function setupRouletteEventListeners() {
 function handleBetSelection(event) {
     if (rouletteIsSpinning) return; // Don't allow betting while spinning
 
-    const target = event.target;
-    // Check if the clicked element IS a bet button
-    if (target.classList.contains('roulette-bet-btn')) {
-        // Remove highlight from previously selected button
-        if (selectedBetButton) {
-            selectedBetButton.classList.remove('selected');
-        }
+    // Use currentTarget to ensure we get the button the listener was attached to (for delegation)
+    const target = event.target.closest('.roulette-bet-btn'); // Find the button if click was on inner element
+    if (!target) return; // Exit if the click wasn't on a bet button
 
-        // Get bet details from data attributes
-        currentRouletteBetType = target.dataset.betType;
-        currentRouletteBetValue = target.dataset.betValue; // Store number or type string
-
-        // Highlight the newly selected button
-        target.classList.add('selected');
-        selectedBetButton = target;
-
-        // Update the display showing the current bet type
-        let betText = "None";
-        if (currentRouletteBetType === 'single') {
-            betText = `Number ${currentRouletteBetValue}`;
-        } else if (currentRouletteBetType) {
-             // Capitalize first letter for display (e.g., 'Red', 'Even')
-            betText = currentRouletteBetValue.charAt(0).toUpperCase() + currentRouletteBetValue.slice(1);
-        }
-        rouletteCurrentBetDisplay.textContent = betText;
-
-        rouletteSpinButton.disabled = false; // Enable spin button once a bet is selected
-        LocalBrokieAPI.playSound('click'); // Play click sound
+    // Remove highlight from previously selected button
+    if (selectedBetButton) {
+        selectedBetButton.classList.remove('selected');
     }
+
+    // Get bet details from data attributes
+    const betType = target.dataset.betType;
+    const betValue = target.dataset.betValue; // This might be undefined for outside bets if HTML isn't updated
+
+    // --- FIX START ---
+    // Set the bet type
+    currentRouletteBetType = betType;
+    // Set the bet value: parse if single, otherwise use the type string itself
+    // Use betType as the value for outside bets if betValue is missing
+    currentRouletteBetValue = (betType === 'single') ? parseInt(betValue, 10) : (betValue || betType);
+
+    // Update the display showing the current bet type
+    let betText = "None";
+    if (currentRouletteBetType === 'single') {
+        betText = `Number ${currentRouletteBetValue}`;
+    } else if (currentRouletteBetType) {
+        // Use the TYPE string for display text, capitalize it
+        betText = currentRouletteBetType.charAt(0).toUpperCase() + currentRouletteBetType.slice(1);
+        // Handle specific display text for low/high bets
+        if (currentRouletteBetType === 'low') betText = '1-18';
+        if (currentRouletteBetType === 'high') betText = '19-36';
+    }
+    rouletteCurrentBetDisplay.textContent = betText;
+    // --- FIX END ---
+
+    // Highlight the newly selected button
+    target.classList.add('selected');
+    selectedBetButton = target;
+
+    rouletteSpinButton.disabled = false; // Enable spin button once a bet is selected
 }
+
 
 /**
  * Resets the roulette game to its initial state.
@@ -263,6 +281,8 @@ function resetRoulette(resetWheelVisual = false) {
             // rouletteWheel.style.transition = 'transform 0.5s ease-out';
             // rouletteWheel.style.transform = `rotate(0deg)`;
          }
+         // Ensure numbers are visible (might be needed if wheel wasn't visible initially)
+         positionWheelNumbers();
     }
 
     // Ensure controls are re-enabled
@@ -347,6 +367,7 @@ function handleResult(winningNumber, betAmount) {
     let won = false;
 
     // Check win conditions based on stored bet type and value
+    // Use currentRouletteBetValue which now correctly holds number or type string
     if (currentRouletteBetType === 'single' && currentRouletteBetValue === winningNumber) {
         payoutMultiplier = ROULETTE_PAYOUTS.single;
         won = true;
