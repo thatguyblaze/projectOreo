@@ -128,7 +128,7 @@ function playSound(type, value = 0) {
 // IDs remain the same, just their position in the HTML changed
 const currencyDisplay = document.getElementById('currency-display');
 const loanBalanceDisplay = document.getElementById('loan-balance-display');
-const loanButton = document.getElementById('loan-button');
+const loanButton = document.getElementById('loan-button'); // This is now the ATM trigger button
 const payLoanButton = document.getElementById('pay-loan-button');
 const leaderboardList = document.getElementById('leaderboard-list');
 const messageBox = document.getElementById('message-box');
@@ -171,8 +171,8 @@ const statsNetProfit = document.getElementById('stats-net-profit');
  */
 function updatePayLoanButtonState() {
     if (!payLoanButton) return; // Check if element exists
-    const canPay = currency >= totalLoanAmount && totalLoanAmount > 0;
-    payLoanButton.disabled = !canPay;
+    // Enable "Pay Loan" if there's a loan balance and user has *any* currency to pay it
+    payLoanButton.disabled = !(totalLoanAmount > 0 && currency > 0);
 }
 
 /**
@@ -203,15 +203,13 @@ function updateStatsDisplay() {
     statsNetProfit.textContent = net.toLocaleString();
 
     // Apply color based on net profit/loss using CSS classes
-    statsNetProfit.className = 'stats-value font-semibold'; // Reset classes first
+    statsNetProfit.className = 'stats-value font-semibold text-fluent-text-primary'; // Reset classes first
     if (net > 0) {
         statsNetProfit.classList.add('text-fluent-accent'); // Use theme color
     } else if (net < 0) {
         statsNetProfit.classList.add('text-fluent-danger'); // Use theme color
-    } else {
-         statsNetProfit.classList.add('text-fluent-text-primary'); // Use theme color
     }
-
+    // else it remains text-fluent-text-primary (default/neutral)
 
     // Flash if values changed (Flash the parent <p> tag for better visibility)
     if (totalGain !== oldGain && statsTotalGain.parentElement) flashElement(statsTotalGain.parentElement);
@@ -247,8 +245,9 @@ function updateCurrencyDisplay(changeType = null) {
     if (currencyDisplay) currencyDisplay.textContent = currency.toLocaleString();
     if (loanBalanceDisplay) loanBalanceDisplay.textContent = totalLoanAmount.toLocaleString();
 
-    updatePayLoanButtonState();
-    updateStatsDisplay(); // Update stats whenever currency changes
+    updatePayLoanButtonState(); // Check if pay loan button should be enabled/disabled
+    // Note: updateStatsDisplay is called separately when gain/loss occurs
+
     if (changeType) {
         flashCurrency(changeType);
     }
@@ -279,6 +278,7 @@ function formatWin(amount) {
         console.warn("Invalid amount passed to formatWin:", amount);
         return '0';
     }
+    // Use toLocaleString for better number formatting
     return amount.toLocaleString();
 }
 
@@ -291,8 +291,8 @@ function formatWin(amount) {
 function addWinToLeaderboard(type, winAmount) {
     if (winAmount <= 0) return; // Only add actual wins
     leaderboard.push({ type: type, win: winAmount });
-    leaderboard.sort((a, b) => b.win - a.win);
-    leaderboard = leaderboard.slice(0, MAX_LEADERBOARD_ENTRIES);
+    leaderboard.sort((a, b) => b.win - a.win); // Sort descending
+    leaderboard = leaderboard.slice(0, MAX_LEADERBOARD_ENTRIES); // Keep top N
     saveGameState();
     updateLeaderboardDisplay(); // Update the UI
 }
@@ -302,25 +302,36 @@ function addWinToLeaderboard(type, winAmount) {
  */
 function updateLeaderboardDisplay() {
     if (!leaderboardList) return; // Check element
-    const oldList = Array.from(leaderboardList.children).map(li => li.textContent);
+
+    // Store existing entries text content to detect new ones for animation
+    const oldListContent = Array.from(leaderboardList.children).map(li => li.textContent);
+
     leaderboardList.innerHTML = ''; // Clear the list
+
     if (leaderboard.length === 0) {
         leaderboardList.innerHTML = '<li class="italic text-sm text-fluent-text-secondary">No wins yet!</li>'; // Use theme color
         return;
     }
+
     leaderboard.forEach((entry, index) => {
         const li = document.createElement('li');
-        const entryText = `${entry.type}: ${formatWin(entry.win)}`;
-        li.className = 'flex justify-between items-center'; // Tailwind classes for layout
-        if (!oldList.some(oldText => oldText.includes(entryText))) {
-            li.classList.add('leaderboard-entry-new'); // Add animation class for new entries
+        const entryText = `${entry.type}: ${formatWin(entry.win)}`; // Use formatted win amount for comparison
+        li.className = 'flex justify-between items-center text-sm py-1'; // Tailwind classes for layout
+
+        // Check if this entry is new compared to the old list content
+        if (!oldListContent.some(oldText => oldText.includes(entry.type) && oldText.includes(formatWin(entry.win)))) {
+            li.classList.add('leaderboard-entry-new'); // Add animation class
             li.style.animationDelay = `${index * 0.05}s`; // Stagger animation
         }
+
         li.innerHTML = `
-            <span class="font-medium text-fluent-text-secondary">${entry.type}</span> <span class="text-fluent-accent font-medium">${formatWin(entry.win)}</span> `;
+            <span class="font-medium text-fluent-text-secondary">${entry.type}</span>
+            <span class="text-fluent-accent font-medium">+${formatWin(entry.win)}</span>
+        `; // Use theme colors
         leaderboardList.appendChild(li);
     });
 }
+
 
 /**
  * Saves the current game state (currency, loan, leaderboard, stats) to localStorage.
@@ -348,38 +359,46 @@ function loadGameState() {
     if (savedState) {
         try {
             const state = JSON.parse(savedState);
-            currency = state.currency !== undefined && !isNaN(state.currency) ? state.currency : 500;
+            // Provide defaults and type checking
+            currency = typeof state.currency === 'number' && !isNaN(state.currency) ? state.currency : 500;
             leaderboard = Array.isArray(state.leaderboard) ? state.leaderboard : [];
-            totalLoanAmount = state.totalLoanAmount !== undefined && !isNaN(state.totalLoanAmount) ? state.totalLoanAmount : 0;
-            totalGain = state.totalGain !== undefined && !isNaN(state.totalGain) ? state.totalGain : 0;
-            totalLoss = state.totalLoss !== undefined && !isNaN(state.totalLoss) ? state.totalLoss : 0;
+            totalLoanAmount = typeof state.totalLoanAmount === 'number' && !isNaN(state.totalLoanAmount) ? state.totalLoanAmount : 0;
+            totalGain = typeof state.totalGain === 'number' && !isNaN(state.totalGain) ? state.totalGain : 0;
+            totalLoss = typeof state.totalLoss === 'number' && !isNaN(state.totalLoss) ? state.totalLoss : 0;
         } catch (e) {
             console.error("Error loading saved state:", e);
+            // Reset to defaults if loading fails
             currency = 500; leaderboard = []; totalLoanAmount = 0; totalGain = 0; totalLoss = 0;
-            localStorage.removeItem('brokieCasinoState');
+            localStorage.removeItem('brokieCasinoState'); // Clear corrupted state
         }
     }
+    // Ensure leaderboard doesn't exceed max entries after loading
     leaderboard = leaderboard.slice(0, MAX_LEADERBOARD_ENTRIES);
-    updateCurrencyDisplay();
+    updateCurrencyDisplay(); // Update UI with loaded values
     updateLeaderboardDisplay();
+    updateStatsDisplay(); // Update stats display
 }
 
 /**
  * Switches the active game tab and handles associated UI changes.
+ * Calls appropriate stop/reset/init functions for games.
  * @param {HTMLElement} selectedTab - The tab button element that was clicked.
  */
 function setActiveTab(selectedTab) {
+    if (!selectedTab) return;
+
     // --- Call reset/stop functions for the *previously* active game ---
     const currentActiveTab = allTabs.find(tab => tab && tab.getAttribute('aria-current') === 'page');
     if (currentActiveTab && currentActiveTab !== selectedTab) {
+        // Check if game-specific functions exist before calling
         if (currentActiveTab === tabSlots && typeof stopAutoSpin === 'function') { stopAutoSpin(); }
-        if (currentActiveTab === tabCrash && typeof endCrashGame === 'function' && typeof crashGameActive !== 'undefined' && crashGameActive) { endCrashGame(true, 0, true); }
+        if (currentActiveTab === tabCrash && typeof endCrashGame === 'function' && typeof crashGameActive !== 'undefined' && crashGameActive) { endCrashGame(true, 0, true); /* End immediately, no payout, silent */ }
         if (currentActiveTab === tabCoinflip && typeof resetCoinFlip === 'function' && typeof coinFlipActive !== 'undefined' && coinFlipActive) { resetCoinFlip(); }
         if (currentActiveTab === tabMinefield && typeof resetMinefield === 'function' && typeof minefieldActive !== 'undefined' && minefieldActive) { resetMinefield(); }
         if (currentActiveTab === tabMemory && typeof resetMemoryGame === 'function' && typeof memoryActive !== 'undefined' && memoryActive) { resetMemoryGame(); }
         if (currentActiveTab === tabHorserace && typeof resetHorserace === 'function' && typeof horseraceActive !== 'undefined' && horseraceActive) { resetHorserace(); }
         if (currentActiveTab === tabRoulette && typeof resetRoulette === 'function' && typeof rouletteIsSpinning !== 'undefined' && rouletteIsSpinning) { resetRoulette(); }
-        if (currentActiveTab === tabBlackjack && typeof resetBlackjack === 'function' && typeof blackjackActive !== 'undefined' && blackjackActive) { resetBlackjack(true); }
+        if (currentActiveTab === tabBlackjack && typeof resetBlackjack === 'function' && typeof blackjackActive !== 'undefined' && blackjackActive) { resetBlackjack(true); /* Silent reset */ }
         if (currentActiveTab === tabPlinko && typeof resetPlinko === 'function' && typeof plinkoActive !== 'undefined' && plinkoActive) { resetPlinko(); }
     }
 
@@ -392,38 +411,56 @@ function setActiveTab(selectedTab) {
         if (tab === selectedTab) {
             tab.setAttribute('aria-current', 'page');
             gameArea.classList.remove('hidden');
-            requestAnimationFrame(() => { gameArea.classList.remove('opacity-0'); gameArea.classList.add('opacity-100'); }); // Use opacity for transitions
+            // Use requestAnimationFrame to ensure 'hidden' is removed before adding opacity class for transition
+            requestAnimationFrame(() => {
+                gameArea.classList.remove('opacity-0');
+                gameArea.classList.add('opacity-100');
+            });
 
-            // --- Call initialization/reset functions for the *newly* active game ---
-            // These checks ensure game-specific reset/init functions are called correctly when switching TO a tab
+            // --- Call initialization/reset functions for the *newly* active game (if needed) ---
+            // These ensure the game is in a ready state when switched TO.
             if (tab === tabCrash && typeof resetCrashVisuals === 'function' && (typeof crashGameActive === 'undefined' || !crashGameActive)) { resetCrashVisuals(); }
             if (tab === tabHorserace && typeof createHorses === 'function' && !document.querySelector('#horserace-track .horse')) { createHorses(); if(typeof resetHorserace === 'function') resetHorserace(); }
             if (tab === tabRoulette && typeof createRouletteBettingGrid === 'function' && !document.querySelector('#roulette-inside-bets button')) { createRouletteBettingGrid(); if(typeof resetRoulette === 'function') resetRoulette(); }
-            if (tab === tabBlackjack && typeof resetBlackjack === 'function' && (typeof blackjackActive === 'undefined' || !blackjackActive)) { resetBlackjack(false); }
+            if (tab === tabBlackjack && typeof resetBlackjack === 'function' && (typeof blackjackActive === 'undefined' || !blackjackActive)) { resetBlackjack(false); /* Non-silent reset */ }
             if (tab === tabPlinko && typeof resetPlinko === 'function' && (typeof plinkoActive === 'undefined' || !plinkoActive)) { resetPlinko(); }
+             if (tab === tabSlots && typeof updateSlotsPayoutDisplay === 'function') { updateSlotsPayoutDisplay(); } // Update payouts on tab switch
 
         } else {
             tab.removeAttribute('aria-current');
             gameArea.classList.remove('opacity-100'); // Start fade out
             gameArea.classList.add('opacity-0');
-            setTimeout(() => { if (tab.getAttribute('aria-current') !== 'page') { gameArea.classList.add('hidden'); } }, 300); // Hide after transition
+            // Hide with delay to allow fade-out transition
+            setTimeout(() => {
+                // Check again in case the user quickly switched back
+                if (tab.getAttribute('aria-current') !== 'page') {
+                    gameArea.classList.add('hidden');
+                }
+            }, 300); // Match CSS transition duration
         }
     });
+    playSound('click'); // Play sound on tab switch
 }
+
 
 /**
  * Adjusts the value of a bet input field based on the operation.
+ * Ensures the bet stays within valid bounds (min 1, max current currency).
  * @param {HTMLInputElement} inputElement - The bet input field.
  * @param {number} amount - The amount to add/subtract/multiply/divide by, or the value to set.
  * @param {'add'|'subtract'|'multiply'|'divide'|'min'|'max'|'set'} operation - The operation to perform.
  */
 function adjustBet(inputElement, amount, operation) {
-    if (!inputElement) return;
+    if (!inputElement) {
+        console.error("adjustBet called with null inputElement");
+        return;
+    }
     let currentBet = parseInt(inputElement.value);
-    if (isNaN(currentBet)) currentBet = 1;
+    if (isNaN(currentBet)) currentBet = 1; // Default to 1 if input is invalid
 
     let newBet = currentBet;
     const minBet = 1;
+    // Max bet cannot exceed current currency, but should be at least minBet
     const maxBet = Math.max(minBet, currency);
 
     switch (operation) {
@@ -433,16 +470,29 @@ function adjustBet(inputElement, amount, operation) {
         case 'divide': newBet = Math.floor(currentBet / amount); break;
         case 'min': newBet = minBet; break;
         case 'max': newBet = maxBet; break;
-        case 'set': newBet = amount; break;
+        case 'set': newBet = amount; break; // Allow setting directly
     }
 
-    newBet = Math.max(minBet, newBet);
-    if (operation !== 'min' && currency > 0) { newBet = Math.min(maxBet, newBet); }
-    if (maxBet < minBet) { newBet = minBet; }
-    if(isNaN(newBet)) { newBet = minBet; }
+    // Clamp the new bet value
+    newBet = Math.max(minBet, newBet); // Ensure at least minBet
+    // Only clamp to maxBet if the operation wasn't 'min' and currency is positive
+    if (operation !== 'min' && currency > 0) {
+        newBet = Math.min(maxBet, newBet);
+    }
+    // If maxBet is less than minBet (i.e., currency is 0), force to minBet
+    if (maxBet < minBet) {
+        newBet = minBet;
+    }
+    // Final sanity check for NaN
+    if(isNaN(newBet)) {
+        newBet = minBet;
+    }
+
 
     inputElement.value = newBet;
-    playSound('click');
+    // Trigger change event manually if needed by other logic
+    // inputElement.dispatchEvent(new Event('change'));
+    playSound('click'); // Play sound for bet adjustment
 }
 
 // --- ATM / Loan Logic ---
@@ -451,7 +501,7 @@ function openAtmModal() {
     playSound('click');
     atmModalOverlay.classList.remove('hidden');
     atmModal.classList.remove('hidden');
-     requestAnimationFrame(() => { // For transition
+    requestAnimationFrame(() => { // For transition
         atmModalOverlay.classList.add('opacity-100');
         atmModal.classList.add('opacity-100', 'scale-100');
     });
@@ -469,51 +519,66 @@ function closeAtmModal() {
 
 
 // --- Event Listeners (Shared) ---
-if (loanButton) loanButton.addEventListener('click', openAtmModal);
-if (atmCloseButton) atmCloseButton.addEventListener('click', closeAtmModal);
-if (atmModalOverlay) atmModalOverlay.addEventListener('click', closeAtmModal);
-if (atmButtons) {
-    atmButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const amount = parseInt(button.dataset.amount);
-            if (isNaN(amount) || amount <= 0) return;
-            startTone();
-            playSound('loan');
-            currency += amount;
-            totalLoanAmount += amount;
-            updateCurrencyDisplay('win');
-            saveGameState();
-            showMessage(`Withdrew ${amount}! Loan balance increased.`, 2000);
-            closeAtmModal();
+function setupCoreEventListeners() {
+    // ATM / Loan Buttons
+    if (loanButton) loanButton.addEventListener('click', openAtmModal); // "Get Loan" opens ATM
+    if (atmCloseButton) atmCloseButton.addEventListener('click', closeAtmModal);
+    if (atmModalOverlay) atmModalOverlay.addEventListener('click', closeAtmModal); // Close on overlay click
+
+    if (atmButtons) {
+        atmButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const amount = parseInt(button.dataset.amount);
+                if (isNaN(amount) || amount <= 0) return;
+                startTone(); // Ensure Tone is started
+                playSound('loan');
+                currency += amount;
+                totalLoanAmount += amount; // ATM withdrawal adds to loan
+                updateCurrencyDisplay('win'); // Update display, flash green
+                saveGameState();
+                showMessage(`Withdrew ${formatWin(amount)}! Loan balance increased.`, 2000);
+                closeAtmModal();
+            });
         });
-    });
-}
-if (payLoanButton) {
-    payLoanButton.addEventListener('click', () => {
-        if (currency >= totalLoanAmount && totalLoanAmount > 0) {
-            startTone();
+    }
+
+    if (payLoanButton) {
+        payLoanButton.addEventListener('click', () => {
+            if (totalLoanAmount <= 0) {
+                showMessage("No loan to pay back.", 2000);
+                return;
+            }
+            const paymentAmount = Math.min(currency, totalLoanAmount); // Pay what you can
+            if (paymentAmount <= 0) {
+                showMessage(`Not enough funds to pay off loan! Need ${formatWin(totalLoanAmount)}.`, 2000);
+                return;
+            }
+
+            startTone(); // Ensure Tone is started
             playSound('click');
-            const paidAmount = totalLoanAmount;
-            currency -= totalLoanAmount;
-            totalLoanAmount = 0;
-            updateCurrencyDisplay('loss');
+            currency -= paymentAmount;
+            totalLoanAmount -= paymentAmount;
+            updateCurrencyDisplay('loss'); // Update display, flash red
             saveGameState();
-            showMessage(`Loan of ${paidAmount} paid off!`, 2000);
-        } else {
-            showMessage(`Not enough funds to pay off loan! Need ${totalLoanAmount}.`, 2000);
+            showMessage(`Paid back ${formatWin(paymentAmount)} of your loan.`, 2000);
+        });
+    }
+
+    // Tab Switching
+    allTabs.forEach(tab => {
+        if (tab) {
+            tab.addEventListener('click', () => setActiveTab(tab));
         }
     });
+
+    // Add listener to initialize Tone.js on first interaction
+    document.body.addEventListener('click', startTone, { once: true });
+    document.body.addEventListener('keydown', startTone, { once: true });
+
 }
 
-// Tab Switching
-allTabs.forEach(tab => {
-    if (tab) {
-        tab.addEventListener('click', () => setActiveTab(tab));
-    }
-});
-
-
 // Generic Bet Adjustment Listener Factory (to be called from game-specific files)
+// This function sets up listeners for a specific game's bet controls
 function addBetAdjustmentListeners(gamePrefix, betInputElement) {
     const decrease10Btn = document.getElementById(`${gamePrefix}-bet-decrease-10`);
     const decrease1Btn = document.getElementById(`${gamePrefix}-bet-decrease-1`);
@@ -524,6 +589,12 @@ function addBetAdjustmentListeners(gamePrefix, betInputElement) {
     const doubleBtn = document.getElementById(`${gamePrefix}-bet-double`);
     const maxBtn = document.getElementById(`${gamePrefix}-bet-max`);
 
+    if (!betInputElement) {
+        console.warn(`Bet input not found for prefix: ${gamePrefix}`);
+        return; // Exit if the core input element is missing
+    }
+
+    // Add listeners, checking if each button exists
     if (decrease10Btn) decrease10Btn.addEventListener('click', () => adjustBet(betInputElement, 10, 'subtract'));
     if (decrease1Btn) decrease1Btn.addEventListener('click', () => adjustBet(betInputElement, 1, 'subtract'));
     if (increase1Btn) increase1Btn.addEventListener('click', () => adjustBet(betInputElement, 1, 'add'));
@@ -533,32 +604,36 @@ function addBetAdjustmentListeners(gamePrefix, betInputElement) {
     if (doubleBtn) doubleBtn.addEventListener('click', () => adjustBet(betInputElement, 2, 'multiply'));
     if (maxBtn) maxBtn.addEventListener('click', () => adjustBet(betInputElement, currency, 'max'));
 
-    if (betInputElement) {
-        betInputElement.addEventListener('change', () => {
-            let value = parseInt(betInputElement.value);
-            if(isNaN(value)) value = 1;
-            adjustBet(betInputElement, value, 'set');
-        });
-         betInputElement.addEventListener('input', () => {
-            betInputElement.value = betInputElement.value.replace(/[^0-9]/g, '');
-         });
-    } else {
-        console.warn(`Bet input not found for prefix: ${gamePrefix}`);
-    }
+    // Add listeners to the input field itself for validation
+    betInputElement.addEventListener('change', () => { // Validate on change (e.g., focus lost)
+        let value = parseInt(betInputElement.value);
+        if(isNaN(value)) value = 1; // Default to min if invalid
+        adjustBet(betInputElement, value, 'set'); // Use 'set' to clamp the entered value
+    });
+    betInputElement.addEventListener('input', () => { // Prevent non-numeric input directly
+        betInputElement.value = betInputElement.value.replace(/[^0-9]/g, '');
+    });
 }
 
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Loaded. Initializing Brokie Casino...");
-    loadGameState();
+    loadGameState(); // Load saved state first
+    setupCoreEventListeners(); // Setup listeners for core elements
 
-    document.body.addEventListener('click', startTone, { once: true });
-    document.body.addEventListener('keydown', startTone, { once: true });
-
-    if (tabSlots) { setActiveTab(tabSlots); } else { console.error("Default tab (Slots) not found!"); }
+    // Set the initial active tab (e.g., Slots)
+    if (tabSlots) {
+        setActiveTab(tabSlots);
+    } else if (allTabs.length > 0 && allTabs[0]) {
+        setActiveTab(allTabs[0]); // Fallback to the first available tab
+        console.warn("Default 'Slots' tab not found, activating first available tab.");
+    } else {
+        console.error("No game tabs found to activate!");
+    }
 
     // --- Call Initialization functions from game-specific files ---
+    // Use optional chaining and check typeof just in case files don't load
     if (typeof initSlots === 'function') initSlots(); else console.warn("initSlots not found.");
     if (typeof initCrash === 'function') initCrash(); else console.warn("initCrash not found.");
     if (typeof initCoinflip === 'function') initCoinflip(); else console.warn("initCoinflip not found.");
@@ -571,3 +646,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log("Brokie Casino Initialized.");
 });
+
+// --- Global Access Object (for game files) ---
+// Expose necessary functions and state variables globally
+window.BrokieCore = {
+    // State Accessors
+    getBalance: () => currency,
+    getLoanBalance: () => totalLoanAmount,
+
+    // State Mutators (ensure updates go through main logic)
+    updateBalance: (amountChange) => {
+        const changeType = amountChange > 0 ? 'win' : 'loss';
+        currency += amountChange;
+        if (currency < 0) currency = 0; // Prevent negative balance
+
+        // Update stats
+        if (amountChange > 0) {
+            totalGain += amountChange;
+        } else {
+            totalLoss += Math.abs(amountChange);
+        }
+
+        updateCurrencyDisplay(changeType);
+        updateStatsDisplay();
+        saveGameState(); // Save state after balance change
+    },
+
+    // Utilities
+    showMessage,
+    playSound,
+    addWinToLeaderboard,
+    formatWin, // Expose formatting
+    addBetAdjustmentListeners // Expose the factory function
+};

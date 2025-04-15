@@ -1,155 +1,1064 @@
-/* Base Styles & Background Animation */
+/* ==========================================================================
+   Brokie Casino Stylesheet (Fluent Dark Theme)
+   ========================================================================== */
+
+/* --- Base Styles & Background Animation --- */
+
 @keyframes subtleGradientShift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
-body {
-    /* These colors should match tailwind.config.js */
-    background: linear-gradient(270deg, #1a1a1a, #1f1f1f, #1a1a1a); /* fluent-bg / fluent-surface gradient */
-    background-size: 400% 400%; /* Make gradient larger than view */
-    animation: subtleGradientShift 45s ease infinite; /* Slow animation */
-    color: #f5f5f5; /* fluent-text-primary */
-    font-family: 'Inter', sans-serif; /* Ensure font-family */
-}
-/* Custom Scrollbar (Optional) */
-.custom-scrollbar::-webkit-scrollbar { width: 8px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #252525; } /* fluent-card */
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 4px; } /* fluent-border */
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #5a5a5a; }
 
-/* Hero Section & Animation */
-@keyframes heroGradientFlow { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+/* Apply base styles to the body */
+body {
+    /* Use Tailwind classes defined in HTML's tailwind.config */
+    /* background: linear-gradient(270deg, #1a1a1a, #1f1f1f, #1a1a1a); /* fluent-bg / fluent-surface gradient */
+    /* background-size: 400% 400%; */
+    /* animation: subtleGradientShift 45s ease infinite; */
+    /* color: #f5f5f5; /* fluent-text-primary */
+    /* font-family: 'Inter', sans-serif; */
+    /* Base body styles are applied via Tailwind classes in the HTML body tag */
+}
+
+/* Custom Scrollbar (Optional, Webkit browsers) */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #252525; /* fluent-card */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #4a4a4a; /* fluent-border */
+    border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #5a5a5a; /* Slightly lighter border */
+}
+
+/* --- Hero Section --- */
+
+@keyframes heroGradientFlow {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Hero section container */
 #hero {
-    border-bottom: 1px solid #4a4a4a; box-shadow: 0 5px 25px rgba(0,0,0,0.4);
-    position: relative; overflow: hidden; background-color: #1f1f1f;
-    /* padding, min-height, display etc handled by Tailwind */
+    /* Uses Tailwind classes for layout, padding, min-height etc. */
+    border-bottom: 1px solid theme('colors.fluent-border / 50%'); /* Use configured border color with opacity */
+    box-shadow: 0 5px 25px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+    background-color: theme('colors.fluent-surface'); /* Use configured surface color */
 }
-#hero::before { /* Animated gradient overlay */
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(110deg, transparent 20%, rgba(0, 120, 212, 0.08) 45%, rgba(0, 120, 212, 0.08) 55%, transparent 80%);
-    background-size: 300% 100%; animation: heroGradientFlow 15s linear infinite; z-index: 0;
+
+/* Animated gradient overlay for Hero */
+#hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 20%, rgba(0, 120, 212, 0.08) 45%, rgba(0, 120, 212, 0.08) 55%, transparent 80%); /* Use fluent-primary with low opacity */
+    background-size: 300% 100%;
+    animation: heroGradientFlow 15s linear infinite;
+    z-index: 0;
 }
-#hero > div { z-index: 1; position: relative; } /* Ensure content is above pseudo-element */
+
+/* Ensure hero content is above the gradient overlay */
+#hero > div {
+    z-index: 1;
+    position: relative;
+}
+
+/* Hero section button style */
 .hero-button {
-    background-color: #0078d4; color: #ffffff; padding: 0.75rem 1.75rem;
-    border-radius: 0.375rem; font-weight: 600; box-shadow: 0 4px 10px rgba(0, 120, 212, 0.25);
+    background-color: theme('colors.fluent-primary');
+    color: #ffffff;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.375rem; /* rounded-md */
+    font-weight: 600; /* font-semibold */
+    box-shadow: 0 4px 10px rgba(0, 120, 212, 0.25); /* Shadow using primary color */
     transition: all 0.2s ease-in-out;
 }
-.hero-button:hover { background-color: #005a9e; box-shadow: 0 6px 15px rgba(0, 120, 212, 0.35); transform: translateY(-2px); }
+.hero-button:hover {
+    background-color: #005a9e; /* Darker shade of primary */
+    box-shadow: 0 6px 15px rgba(0, 120, 212, 0.35);
+    transform: translateY(-2px);
+}
 
-/* Left Column Components (Balance/Loan Card + Nav Card + Stats/Leaderboard) */
-.info-nav-card { /* Shared style for cards in left col */
-    background-color: #252525; /* fluent-card */
-    border: 1px solid #4a4a4a; /* fluent-border */
+/* Grid Pattern for Hero Background */
+.bg-grid-pattern {
+     background-image: linear-gradient(to right, theme('colors.fluent-border / 20%') 1px, transparent 1px), linear-gradient(to bottom, theme('colors.fluent-border / 20%') 1px, transparent 1px);
+     background-size: 20px 20px; /* Adjust grid size */
+}
+
+/* --- Left Sidebar Components --- */
+
+/* Shared style for cards in the left column */
+.info-nav-card {
+    background-color: theme('colors.fluent-card');
+    border: 1px solid theme('colors.fluent-border');
     border-radius: 0.75rem; /* rounded-xl */
     padding: 1rem; /* p-4 */
     box-shadow: 0 3px 10px rgba(0,0,0,0.25);
 }
-.info-nav-title { /* Title style used within sidebar cards */
-    font-size: 0.8rem; font-weight: 600; color: #d0d0d0; /* fluent-text-secondary */
-    text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 0.5rem;
-    margin-bottom: 0.75rem; border-bottom: 1px solid #4a4a4a; display: block; /* Ensure border spans width */
+
+/* Title style used within sidebar cards */
+.info-nav-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: theme('colors.fluent-text-secondary'); /* Adjusted for better contrast */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    border-bottom-width: 2px; /* Thicker border */
+    /* border-color applied via Tailwind class in HTML (e.g., border-fluent-primary) */
+    display: inline-block; /* Fit content width */
 }
-/* Balance/Loan Specific */
-.balance-value { font-size: 2rem; font-weight: 700; color: #0078d4; } /* fluent-primary */
-.loan-value { font-size: 0.8rem; color: #b0b0b0; }
-.loan-value span { font-weight: 500; color: #f5f5f5; }
-.loan-button { font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 0.25rem; font-weight: 500; text-align: center; transition: all 0.15s ease; border: 1px solid transparent; width: 100%; }
-.loan-button.get { background-color: #107c10; color: #ffffff; border-color: #107c10; }
-.loan-button.get:hover { background-color: #0d630d; }
-.loan-button.pay { background-color: #ffb900; color: #1c1c1c; border-color: #ffb900; }
-.loan-button.pay:hover:not(:disabled) { background-color: #e0a800; }
-.loan-button:disabled { opacity: 0.5; cursor: not-allowed; background-color: #404040 !important; border-color: #404040 !important; color: #707070 !important; }
 
-/* Navigation Tabs (Vertical) */
-.tab-button { color: #d0d0d0; transition: all 0.15s ease-in-out; text-align: left; border-left: 3px solid transparent; padding: 0.6rem calc(0.75rem - 3px); font-size: 0.9rem; border-radius: 0.375rem; }
-.tab-button:hover { background-color: rgba(74, 74, 74, 0.3); color: #ffffff; border-left-color: #4a4a4a; }
-.tab-button[aria-current="page"] { background-color: rgba(0, 120, 212, 0.1); color: #ffffff; font-weight: 600; border-left-color: #0078d4; }
-.tab-button .emoji { display: inline-block; width: 1.25rem; text-align: center; margin-right: 0.6rem; }
+/* Balance/Loan Card Specific Styles */
+.balance-value {
+    font-size: 2rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+    color: theme('colors.fluent-primary');
+}
+.loan-value {
+    font-size: 0.8rem; /* text-xs */
+    color: theme('colors.fluent-text-secondary');
+}
+.loan-value span {
+    font-weight: 500; /* font-medium */
+    color: theme('colors.fluent-text-primary');
+}
 
-/* Stats/Leaderboard Styles (Now inside cards) */
-#leaderboard-list { list-style: none; padding-left: 0; margin-top: 0; max-height: 10rem; overflow-y: auto; }
-#leaderboard-list li { font-size: 0.8rem; padding: 0.3rem 0; border-bottom: 1px dashed #4a4a4a; }
-#leaderboard-list li:last-child { border-bottom: none; }
-#leaderboard-list li span:first-child { color: #d0d0d0; }
-#leaderboard-list li span:last-child { color: #34d399; font-weight: 500; }
-.session-stats-list { list-style: none; padding-left: 0; margin-top: 0; font-size: 0.8rem; color: #b0b0b0; /* space-y handled by Tailwind */ }
-.session-stats-list p { display: flex; justify-content: space-between; }
-.stats-value { font-weight: 600; }
-/* Color for stats values handled by JS adding classes */
-.stats-value.text-fluent-accent { color: #107c10; }
-.stats-value.text-fluent-danger { color: #e81123; }
-.stats-value.text-fluent-text-primary { color: #f5f5f5; }
+/* Loan Get/Pay Buttons */
+.loan-button {
+    font-size: 0.75rem; /* text-xs */
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.375rem; /* rounded-md */
+    font-weight: 600; /* font-semibold */
+    text-align: center;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    width: 100%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.loan-button.get {
+    background-color: theme('colors.fluent-accent');
+    color: #ffffff;
+    border-color: theme('colors.fluent-accent');
+}
+.loan-button.get:hover:not(:disabled) {
+    background-color: #0d630d; /* Darker green */
+    filter: brightness(1.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.loan-button.pay {
+    background-color: theme('colors.fluent-warning');
+    color: theme('colors.fluent-bg'); /* Dark text on yellow */
+    border-color: theme('colors.fluent-warning');
+}
+.loan-button.pay:hover:not(:disabled) {
+    background-color: #e0a800; /* Darker yellow */
+    filter: brightness(1.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.loan-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #404040 !important; /* Use a specific gray */
+    border-color: #404040 !important;
+    color: theme('colors.fluent-text-disabled') !important;
+    box-shadow: none;
+}
+.loan-button:active:not(:disabled) {
+    transform: scale(0.98);
+    filter: brightness(0.95);
+}
+
+/* --- Game Navigation Tabs (Vertical) --- */
+.tab-button {
+    color: theme('colors.fluent-text-secondary');
+    transition: all 0.15s ease-in-out;
+    text-align: left;
+    border-left: 3px solid transparent;
+    padding: 0.6rem calc(0.75rem - 3px); /* Adjust padding for border */
+    font-size: 0.9rem;
+    border-radius: 0.375rem; /* rounded-md */
+}
+.tab-button:hover {
+    background-color: rgba(74, 74, 74, 0.3); /* fluent-border with alpha */
+    color: theme('colors.fluent-text-primary');
+    border-left-color: theme('colors.fluent-border');
+}
+/* Style for the currently active tab */
+.tab-button[aria-current="page"] {
+    background-color: theme('colors.fluent-primary / 10%'); /* Primary color with alpha */
+    color: theme('colors.fluent-text-primary');
+    font-weight: 600; /* font-semibold */
+    border-left-color: theme('colors.fluent-primary');
+}
+/* Emoji styling within tab buttons */
+.tab-button .emoji {
+    display: inline-block;
+    width: 1.25rem; /* w-5 */
+    text-align: center;
+    margin-right: 0.6rem; /* Adjusted margin */
+    font-size: 1rem; /* Ensure consistent emoji size */
+}
+
+/* --- Stats/Leaderboard Styles --- */
+#leaderboard-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0;
+    max-height: 10rem; /* Limit height */
+    overflow-y: auto; /* Add scroll if needed */
+}
+#leaderboard-list li {
+    font-size: 0.8rem; /* text-xs */
+    padding: 0.3rem 0;
+    border-bottom: 1px dashed theme('colors.fluent-border / 50%'); /* Dashed border */
+    color: theme('colors.fluent-text-secondary');
+}
+#leaderboard-list li:last-child {
+    border-bottom: none;
+}
+#leaderboard-list li span:first-child { /* Player name/placeholder */
+    color: theme('colors.fluent-text-primary');
+}
+#leaderboard-list li span:last-child { /* Win amount */
+    color: theme('colors.fluent-accent'); /* Green for win */
+    font-weight: 500; /* font-medium */
+}
+
+.session-stats-list {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0;
+    font-size: 0.8rem; /* text-xs */
+    color: theme('colors.fluent-text-secondary');
+    /* space-y handled by Tailwind */
+}
+.session-stats-list p {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.1rem 0;
+}
+.stats-value {
+    font-weight: 600; /* font-semibold */
+}
+/* Color classes for stats values (applied by JS) */
+.stats-value.text-fluent-accent { color: theme('colors.fluent-accent'); }
+.stats-value.text-fluent-danger { color: theme('colors.fluent-danger'); }
+.stats-value.text-fluent-text-primary { color: theme('colors.fluent-text-primary'); }
+
+/* --- Game Area --- */
+
+/* Main container for the active game */
+.game-container {
+    background-color: theme('colors.fluent-card');
+    border: 1px solid theme('colors.fluent-border');
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    /* Padding and min-height set by Tailwind */
+}
+
+/* Individual game area (for transitions) */
+.game-area {
+    transition: opacity 0.3s ease-in-out;
+    /* space-y handled by Tailwind */
+}
+
+/* --- General Button Styles (Used by Games) --- */
+
+/* Base style for most buttons within games */
+.game-button, .toggle-button, .modal-button, .coinflip-choice-btn, .horse-select-btn, .roulette-bet-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.375rem; /* rounded-md */
+    font-weight: 500; /* font-medium */
+    transition: all 0.15s ease-in-out;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    display: inline-flex; /* Allows alignment */
+    align-items: center;
+    justify-content: center;
+    line-height: 1.25; /* Adjust for text centering */
+}
+
+/* Disabled state for buttons */
+.game-button:disabled, .toggle-button:disabled, .modal-button:disabled, .coinflip-choice-btn:disabled, .horse-select-btn:disabled, .roulette-bet-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #404040 !important; /* Specific gray */
+    border-color: #404040 !important;
+    color: theme('colors.fluent-text-disabled') !important;
+    box-shadow: none !important;
+    transform: none !important;
+    filter: none !important;
+}
+
+/* Hover state for buttons */
+.game-button:hover:not(:disabled), .toggle-button:hover:not(:disabled), .modal-button:hover:not(:disabled), .coinflip-choice-btn:hover:not(:disabled), .horse-select-btn:hover:not(:disabled), .roulette-bet-btn:hover:not(:disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    transform: translateY(-1px); /* Subtle lift */
+}
+
+/* Active (pressed) state for buttons */
+.game-button:active:not(:disabled), .toggle-button:active:not(:disabled), .modal-button:active:not(:disabled), .coinflip-choice-btn:active:not(:disabled), .horse-select-btn:active:not(:disabled), .roulette-bet-btn:active:not(:disabled) {
+    transform: scale(0.98) translateY(0); /* Scale down slightly */
+    filter: brightness(0.95);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+
+/* Button Color Variants */
+.game-button.primary, .modal-button {
+    background-color: theme('colors.fluent-primary');
+    color: #ffffff;
+    border-color: theme('colors.fluent-primary');
+}
+.game-button.secondary, .toggle-button.secondary, .horse-select-btn {
+    background-color: #404040; /* Specific gray */
+    color: #ffffff;
+    border-color: #5a5a5a; /* Slightly lighter gray */
+}
+.game-button.success {
+    background-color: theme('colors.fluent-accent');
+    color: #ffffff;
+    border-color: theme('colors.fluent-accent');
+}
+.game-button.danger {
+    background-color: theme('colors.fluent-danger');
+    color: #ffffff;
+    border-color: theme('colors.fluent-danger');
+}
+.game-button.warning {
+    background-color: theme('colors.fluent-warning');
+    color: theme('colors.fluent-bg'); /* Dark text */
+    border-color: theme('colors.fluent-warning');
+}
+
+/* Toggle Button Specific States */
+.toggle-button.active {
+    background-color: theme('colors.fluent-primary');
+    color: #ffffff;
+    border-color: #005a9e; /* Darker primary */
+}
+/* Specific override for Crash auto cashout toggle */
+#crash-auto-cashout-toggle.active {
+    background-color: theme('colors.fluent-warning');
+    color: theme('colors.fluent-bg');
+    border-color: #e0a800; /* Darker warning */
+}
+
+/* Selection States for Specific Buttons */
+.coinflip-choice-btn.selected {
+    border-width: 2px;
+    border-color: theme('colors.fluent-warning');
+    box-shadow: 0 0 8px theme('colors.fluent-warning / 60%');
+}
+.horse-select-btn.selected {
+    border-width: 2px;
+    border-color: theme('colors.fluent-warning');
+    box-shadow: 0 0 8px theme('colors.fluent-warning / 60%');
+    background-color: #5a5a5a; /* Darker gray */
+}
+.roulette-bet-btn.selected {
+    box-shadow: 0 0 0 3px theme('colors.fluent-primary'); /* Blue ring */
+    filter: brightness(1.2);
+}
 
 
-/* Game Area Container */
-.game-container { background-color: #252525; border: 1px solid #4a4a4a; border-radius: 0.75rem; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+/* --- Bet Adjustment Buttons --- */
+.bet-adjust-btn {
+    background-color: #404040; /* Specific gray */
+    color: #ffffff;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid #5a5a5a; /* Slightly lighter gray */
+    border-radius: 0.25rem; /* rounded-sm */
+    font-size: 0.8rem;
+    line-height: 1;
+    min-width: 35px; /* Ensure minimum size */
+    transition: all 0.15s ease;
+}
+.bet-adjust-btn:hover:not(:disabled) {
+    background-color: #5a5a5a;
+    border-color: #6a6a6a;
+}
+.bet-adjust-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+.bet-adjust-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-/* General Button Styles */
-.game-button, .toggle-button, .modal-button { padding: 0.6rem 1.2rem; border-radius: 0.375rem; font-weight: 500; transition: all 0.15s ease-in-out; border: 1px solid transparent; cursor: pointer; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
-.game-button:disabled, .toggle-button:disabled, .modal-button:disabled { opacity: 0.5; cursor: not-allowed; background-color: #404040 !important; border-color: #404040 !important; color: #707070 !important; box-shadow: none !important; transform: none !important; }
-.game-button:hover:not(:disabled), .toggle-button:hover:not(:disabled), .modal-button:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-.game-button:active:not(:disabled), .toggle-button:active:not(:disabled), .modal-button:active:not(:disabled) { transform: scale(0.98); filter: brightness(0.95); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-.game-button.primary, .modal-button { background-color: #0078d4; color: #ffffff; border-color: #0078d4; }
-.game-button.secondary, .toggle-button.secondary { background-color: #404040; color: #ffffff; border-color: #5a5a5a; }
-.game-button.success { background-color: #107c10; color: #ffffff; border-color: #107c10; }
-.game-button.danger { background-color: #d13438; color: #ffffff; border-color: #d13438; }
-.toggle-button.active { background-color: #0078d4; color: #ffffff; border-color: #005a9e; }
-#crash-auto-cashout-toggle.active { background-color: #f7a31e; color: #1f1f1f; border-color: #d9901a; }
+/* --- Input Fields --- */
+input[type="number"] {
+    background-color: #2d2d2d; /* Darker surface */
+    border: 1px solid #404040; /* Dark gray border */
+    color: theme('colors.fluent-text-primary');
+    border-radius: 0.25rem; /* rounded-sm */
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+    -moz-appearance: textfield; /* Remove spinners Firefox */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+/* Remove spinners Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Focus state for number inputs */
+input[type="number"]:focus {
+    border-color: theme('colors.fluent-primary');
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px theme('colors.fluent-primary / 50%');
+}
+/* Disabled state for number inputs */
+input[type="number"]:disabled {
+    background-color: #1f1f1f; /* Darker bg */
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: #303030; /* Even darker border */
+}
+/* Specific input style for Crash auto cashout */
+.auto-cashout-input {
+    background-color: #2d2d2d;
+    border: 1px solid #404040;
+    color: theme('colors.fluent-text-primary');
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.3rem; /* Smaller padding */
+    text-align: center;
+}
 
-/* Bet Adjustment Buttons */
-.bet-adjust-btn { background-color: #404040; color: #ffffff; padding: 0.25rem 0.6rem; border: 1px solid #5a5a5a; border-radius: 0.25rem; font-size: 0.8rem; line-height: 1; min-width: 35px; transition: all 0.15s ease; }
-.bet-adjust-btn:hover:not(:disabled) { background-color: #5a5a5a; border-color: #6a6a6a; }
-.bet-adjust-btn:active:not(:disabled) { transform: scale(0.97); }
+/* --- Accordion Styles --- */
+.accordion-item {
+    background-color: theme('colors.fluent-card');
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid theme('colors.fluent-border');
+    overflow: hidden; /* Clip content */
+}
+.accordion-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-weight: 500; /* font-medium */
+    color: theme('colors.fluent-text-primary');
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.accordion-button:hover {
+    background-color: #404040; /* Dark gray */
+}
+.accordion-icon {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+    font-weight: bold;
+    color: theme('colors.fluent-primary');
+}
+.accordion-content {
+    max-height: 0; /* Initially hidden */
+    overflow: hidden;
+    padding: 0 1rem; /* Horizontal padding only when closed */
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
+    color: theme('colors.fluent-text-secondary');
+    font-size: 0.875rem; /* text-sm */
+    line-height: 1.6;
+    opacity: 0;
+}
+.accordion-content.open {
+    padding-top: 0.25rem; /* Add padding when open */
+    padding-bottom: 1rem;
+    opacity: 1;
+    /* max-height is set by JS */
+}
+.accordion-content p {
+    margin-bottom: 0.5rem;
+}
+.accordion-content p:last-child {
+    margin-bottom: 0;
+}
 
-/* Input Fields */
-input[type="number"] { background-color: #2d2d2d; border: 1px solid #404040; color: #ffffff; border-radius: 0.25rem; padding: 0.25rem 0.5rem; text-align: center; -moz-appearance: textfield; }
-input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type="number"]:focus { border-color: #0078d4; outline: 2px solid transparent; outline-offset: 2px; box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.5); }
-input[type="number"]:disabled { background-color: #1f1f1f; opacity: 0.6; cursor: not-allowed; border-color: #303030; }
+/* --- Modals (ATM) --- */
+#atm-modal-overlay {
+    background-color: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px); /* Blur background */
+    /* Position, z-index, transition handled by Tailwind */
+}
+#atm-modal {
+    background-color: #2c2c2c; /* Slightly lighter surface */
+    border: 1px solid #505050; /* Slightly lighter border */
+    /* Position, transform, padding, radius, shadow, z-index, width, transition handled by Tailwind */
+}
+/* ATM modal buttons use .modal-button class defined above */
 
-/* Accordion Styles */
-.accordion-item { background-color: #252525; border-radius: 0.375rem; border: 1px solid #404040; overflow: hidden; }
-.accordion-button { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0.75rem 1rem; font-weight: 500; color: #ffffff; background-color: transparent; border: none; cursor: pointer; transition: background-color 0.2s ease; }
-.accordion-button:hover { background-color: #404040; }
-.accordion-icon { font-size: 1rem; transition: transform 0.3s ease; font-weight: bold; color: #0078d4; }
-.accordion-content { max-height: 0; overflow: hidden; padding: 0 1rem; transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out; color: #d0d0d0; font-size: 0.875rem; line-height: 1.6; opacity: 0; }
-.accordion-content.open { padding-top: 0.25rem; padding-bottom: 1rem; opacity: 1; }
-.accordion-content p { margin-bottom: 0.5rem; }
+/* --- Game Specific Styles --- */
 
-/* Modals */
-.modal-overlay { background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
-.modal-content { background-color: #2c2c2c; border: 1px solid #505050; }
+/* Slots */
+.reel {
+    border: 2px solid #404040; /* Dark gray border */
+    background-color: #2d2d2d; /* Darker surface */
+    color: theme('colors.fluent-text-primary');
+    overflow: hidden;
+    width: 80px; height: 100px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 3rem; /* text-5xl */
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.reel.win-effect {
+    transform: scale(1.05);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px theme('colors.fluent-primary / 60%');
+    border-color: theme('colors.fluent-primary');
+}
+.reel-container {
+    position: relative; height: 100px; overflow: hidden; width: 100%;
+}
+.reel-symbols {
+    position: absolute; top: 0; left: 0; width: 100%;
+    text-align: center;
+    transition: top 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Smoother ease-out */
+    color: theme('colors.fluent-text-primary');
+}
+#payout-legend {
+    margin-top: 1.5rem; padding-top: 1rem;
+    border-top: 1px solid theme('colors.fluent-border / 50%');
+    font-size: 0.875rem; /* text-sm */
+    color: theme('colors.fluent-text-secondary');
+}
+#payout-legend h4 {
+    font-weight: 600; /* font-semibold */
+    color: theme('colors.fluent-text-primary');
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+#payout-legend ul {
+    list-style: none; padding: 0;
+    max-width: 250px; margin-left: auto; margin-right: auto;
+}
+#payout-legend li {
+    display: flex; justify-content: space-between;
+    padding: 0.25rem 0;
+    font-size: 0.75rem; /* text-xs */
+}
+#payout-legend li span:first-child { /* Emoji */
+    font-family: monospace; /* Consistent spacing for emojis */
+    margin-right: 1rem;
+    font-size: 1rem;
+}
+#payout-legend li span:last-child { /* Multiplier */
+    font-weight: 500; /* font-medium */
+    color: theme('colors.fluent-text-primary');
+}
 
-/* Game Specific Base Styles (Adapted Colors) */
-.reel { border: 2px solid #404040; background-color: #2d2d2d; color: #ffffff; }
-.reel.win-effect { box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(0, 120, 212, 0.6); border-color: #0078d4; }
-#crash-graph { background-color: #2d2d2d; border: 1px solid #404040; color: #d0d0d0; }
-#crash-svg .grid-line { stroke: #404040; }
-#crash-polyline { stroke: #0078d4; }
-#crash-multiplier { background-color: rgba(45, 45, 45, 0.8); color: #ffffff; }
-.blackjack-hand { background-color: #2d2d2d; border: 1px solid #404040; }
-.blackjack-card { border: 1px solid #505050; }
-.blackjack-card.hidden { background-color: #404040; }
-.blackjack-card.suit-red { color: #d13438; }
-.blackjack-card.suit-black { color: #252525; }
-.blackjack-score-value { color: #ffffff; }
-.blackjack-score.busted .blackjack-score-value { color: #d13438; }
-.blackjack-score.blackjack .blackjack-score-value { color: #f7a31e; }
-#plinko-canvas { background-color: #2d2d2d; border-color: #404040; }
-/* ... Add other adapted game styles if needed ... */
+/* Crash */
+#crash-graph {
+    height: 250px;
+    background-color: #2d2d2d; /* Darker surface */
+    border-radius: 0.5rem; /* rounded-lg */
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; /* text-3xl */ font-weight: bold;
+    color: theme('colors.fluent-text-secondary'); /* Default text */
+    position: relative; overflow: hidden;
+    border: 1px solid #404040; /* Dark gray border */
+}
+#crash-svg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;
+}
+#crash-svg .grid-line {
+    stroke: #404040; /* Dark gray border */
+    stroke-width: 0.5;
+    vector-effect: non-scaling-stroke; /* Keep lines thin on zoom */
+}
+#crash-polyline {
+    fill: none;
+    stroke: theme('colors.fluent-primary'); /* Blue line */
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.2s linear;
+    vector-effect: non-scaling-stroke;
+    /* filter applied via attribute in HTML */
+}
+#crash-multiplier {
+    z-index: 10; /* Above graph line */
+    background-color: theme('colors.fluent-surface / 80%'); /* Semi-transparent surface */
+    color: theme('colors.fluent-text-primary');
+    padding: 0.3rem 0.8rem;
+    border-radius: 0.375rem; /* rounded-md */
+    transition: transform 0.1s ease, color 0.2s ease-out, font-size 0.2s ease-out;
+    font-size: 1.75rem; /* Between text-xl and text-2xl */
+    display: inline-block; /* Needed for transform */
+}
+#crash-multiplier.win-effect {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px theme('colors.fluent-primary / 70%');
+    color: theme('colors.fluent-primary');
+}
+/* Multiplier Color/Size Classes (Keep from old style) */
+.mult-color-5x { color: #ffee58; }
+.mult-color-10x { color: #ffa726; }
+.mult-color-15x { color: #ff7043; }
+.mult-color-20x { color: #ef5350; }
+.mult-color-30x { color: #ec407a; }
+.mult-size-10x { font-size: 1.85rem; }
+.mult-size-20x { font-size: 1.95rem; }
+.mult-size-30x { font-size: 2.05rem; font-weight: 700; }
 
-/* Animations */
+/* Coin Flip */
+.coin-container {
+    perspective: 600px; /* For 3D effect */
+    display: inline-block; /* Keep size */
+    vertical-align: middle;
+}
+#coin {
+    font-size: 5rem; /* text-6xl */
+    cursor: default;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    display: inline-block;
+}
+#coin.flipping {
+    animation: flip 0.6s ease-out;
+}
+@keyframes flip { /* 3D Flip Animation */
+    0% { transform: rotateY(0) rotateX(5deg); }
+    50% { transform: rotateY(540deg) rotateX(20deg) scale(1.1); } /* Add slight scale */
+    100% { transform: rotateY(1080deg) rotateX(0deg); }
+}
+/* .coinflip-choice-btn uses base .game-button styles */
+/* .coinflip-choice-btn.selected defined in button section */
+
+/* Minefield */
+#minefield-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem; /* gap-2 */
+    max-width: 240px; /* Limit width */
+    margin: 1rem auto; /* Center grid */
+}
+.minefield-tile {
+    aspect-ratio: 1 / 1; /* Square tiles */
+    background-color: #404040; /* Use secondary button bg */
+    border: 1px solid #5a5a5a; /* Use secondary button border */
+    border-radius: 0.375rem; /* rounded-md */
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; /* text-2xl */
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+}
+.minefield-tile:hover:not(.revealed):not(:disabled) {
+    background-color: #5a5a5a; /* Lighter gray */
+}
+.minefield-tile:active:not(.revealed):not(:disabled) {
+    transform: scale(0.95);
+}
+.minefield-tile.revealed.safe {
+    background-color: theme('colors.fluent-accent');
+    color: white; cursor: default;
+    border-color: theme('colors.fluent-accent');
+}
+.minefield-tile.revealed.bomb {
+    background-color: theme('colors.fluent-danger');
+    color: white; cursor: default;
+    border-color: theme('colors.fluent-danger');
+    animation: shake-strong 0.3s ease-in-out; /* Shake on bomb reveal */
+}
+.minefield-tile:disabled {
+    opacity: 0.7; cursor: not-allowed;
+}
+
+/* Memory */
+#memory-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); /* 4x4 Grid */
+    gap: 0.5rem; /* gap-2 */
+    max-width: 280px; /* Adjust width for 4x4 */
+    margin: 1rem auto; /* Center grid */
+    perspective: 1000px; /* For card flip animation */
+}
+.memory-card {
+    aspect-ratio: 1 / 1; /* Square cards */
+    background-color: transparent; border: none;
+    border-radius: 0.375rem; /* rounded-md */
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem; /* Slightly larger emoji */
+    cursor: pointer; position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    transform: rotateY(0deg); /* Start face down */
+}
+.memory-card .card-face {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden; /* Hide back */
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    border: 1px solid theme('colors.fluent-border');
+}
+.memory-card .card-front { /* Visible when face down */
+    background-color: #404040; /* secondary button */
+    color: theme('colors.fluent-text-primary');
+    transform: rotateY(0deg);
+}
+.memory-card .card-back { /* Visible when face up (flipped) */
+    background-color: #2d2d2d; /* darker */
+    color: theme('colors.fluent-text-primary');
+    transform: rotateY(180deg);
+}
+.memory-card.revealed {
+    transform: rotateY(180deg); /* Flip card */
+    cursor: default;
+}
+.memory-card.matched {
+    cursor: default; opacity: 0.8;
+}
+.memory-card.matched .card-back { /* Style back face when matched */
+    background-color: theme('colors.fluent-accent');
+    border-color: #0d630d; /* Darker accent */
+}
+.memory-card.mismatched .card-back { /* Style back face when mismatched */
+    background-color: theme('colors.fluent-danger');
+    border-color: #d13438; /* Darker danger */
+    animation: shake-subtle 0.4s ease-in-out; /* Shake on mismatch */
+}
+.memory-card:disabled {
+    cursor: not-allowed; opacity: 0.6;
+}
+
+/* Horse Race */
+#horserace-track {
+    position: relative; width: 100%; height: 200px; /* Adjusted height */
+    background-color: #2d2d2d; /* Darker surface */
+    border: 2px solid #404040; /* Dark gray border */
+    border-radius: 0.5rem; /* rounded-lg */
+    overflow: hidden; /* Hide horses if they go past finish line */
+    margin-top: 1rem; padding: 0.5rem 0; /* Padding top/bottom for lanes */
+    display: flex; flex-direction: column; /* Stack lanes vertically */
+}
+.horse-lane {
+    width: 100%; flex-grow: 1; /* Make lanes share height equally */
+    border-bottom: 1px dashed theme('colors.fluent-border'); /* Dashed lane separators */
+    display: flex; align-items: center; /* Center horse vertically */
+    position: relative; /* Needed for absolute positioning of horse */
+}
+.horse-lane:last-child {
+    border-bottom: none; /* No border on last lane */
+}
+.horse {
+    position: absolute; /* Position relative to the lane */
+    right: 10px; /* Starting position (RIGHT SIDE) */
+    font-size: 1.75rem; /* Adjust horse size */
+    transition: right 0.1s linear; /* Smooth movement (using RIGHT) */
+    padding: 0 5px; line-height: 1; /* Ensure emoji vertical alignment */
+    display: inline-block; /* Ensure the div takes space */
+    z-index: 5; /* Horse above trail */
+    will-change: right; /* Optimize animation (using RIGHT) */
+}
+#horserace-finish-line {
+    position: absolute;
+    left: 20px; /* Position finish line on the LEFT */
+    top: 0; bottom: 0; width: 5px;
+    background: repeating-linear-gradient( white, white 10px, black 10px, black 20px );
+    z-index: 10;
+}
+/* Horse Trail Styles */
+.horse-trail {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%; opacity: 0.7;
+    /* background-color handled by JS */
+    animation: fadeOutShrink 0.5s linear forwards;
+    pointer-events: none; /* Prevent trails interfering with clicks */
+    z-index: 1; /* Behind horse */
+}
+@keyframes fadeOutShrink {
+    from { opacity: 0.7; transform: scale(1) translateY(-50%); }
+    to { opacity: 0; transform: scale(0) translateY(-50%); }
+}
+/* Horse Selection Buttons */
+#horserace-selection {
+    display: flex; flex-wrap: wrap;
+    gap: 0.5rem; /* gap-2 */
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+/* .horse-select-btn uses base .game-button.secondary styles */
+.horse-select-btn {
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border-width: 1px; /* Use base button style */
+    font-size: 0.875rem; /* text-sm */
+    gap: 0.5rem; /* space-x-2 */
+}
+.horse-select-btn .horse-color-indicator {
+    display: inline-block; width: 1rem; /* w-4 */ height: 1rem; /* h-4 */
+    border-radius: 9999px; /* rounded-full */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Add subtle border */
+}
+/* .horse-select-btn.selected defined in button section */
+
+/* Roulette */
+#roulette-wheel-container {
+    width: 250px; height: 250px; margin: 1rem auto;
+    border: 5px solid theme('colors.fluent-border');
+    border-radius: 50%;
+    position: relative; overflow: hidden;
+    background-color: #1a1a1a; /* Darker bg */
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+}
+#roulette-wheel {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    position: absolute; top: 0; left: 0;
+    transition: transform 4s cubic-bezier(0.3, 0.7, 0.4, 1); /* Spin animation */
+    /* Using new fluent colors */
+    background-image: conic-gradient(
+        theme('colors.fluent-accent') 0deg 9.7deg, /* Green 0 */
+        theme('colors.fluent-danger') 9.7deg 19.4deg, /* Red */
+        theme('colors.fluent-card') 19.4deg 29.1deg, /* Black */
+        theme('colors.fluent-danger') 29.1deg 38.8deg, /* Red */
+        theme('colors.fluent-card') 38.8deg 48.5deg, /* Black */
+        theme('colors.fluent-danger') 48.5deg 58.2deg, /* Red */
+        theme('colors.fluent-card') 58.2deg 67.9deg, /* Black */
+        theme('colors.fluent-danger') 67.9deg 77.6deg, /* Red */
+        theme('colors.fluent-card') 77.6deg 87.3deg, /* Black */
+        theme('colors.fluent-danger') 87.3deg 97deg,    /* Red */
+        theme('colors.fluent-card') 97deg 106.7deg,  /* Black */
+        theme('colors.fluent-danger') 106.7deg 116.4deg, /* Red */
+        theme('colors.fluent-card') 116.4deg 126.1deg, /* Black */
+        theme('colors.fluent-danger') 126.1deg 135.8deg, /* Red */
+        theme('colors.fluent-card') 135.8deg 145.5deg, /* Black */
+        theme('colors.fluent-danger') 145.5deg 155.2deg, /* Red */
+        theme('colors.fluent-card') 155.2deg 164.9deg, /* Black */
+        theme('colors.fluent-danger') 164.9deg 174.6deg, /* Red */
+        theme('colors.fluent-card') 174.6deg 184.3deg, /* Black */
+        theme('colors.fluent-accent') 184.3deg 194deg, /* Green 00 */
+        theme('colors.fluent-card') 194deg 203.7deg, /* Black */
+        theme('colors.fluent-danger') 203.7deg 213.4deg, /* Red */
+        theme('colors.fluent-card') 213.4deg 223.1deg, /* Black */
+        theme('colors.fluent-danger') 223.1deg 232.8deg, /* Red */
+        theme('colors.fluent-card') 232.8deg 242.5deg, /* Black */
+        theme('colors.fluent-danger') 242.5deg 252.2deg, /* Red */
+        theme('colors.fluent-card') 252.2deg 261.9deg, /* Black */
+        theme('colors.fluent-danger') 261.9deg 271.6deg, /* Red */
+        theme('colors.fluent-card') 271.6deg 281.3deg, /* Black */
+        theme('colors.fluent-danger') 281.3deg 291deg,    /* Red */
+        theme('colors.fluent-card') 291deg 300.7deg,  /* Black */
+        theme('colors.fluent-danger') 300.7deg 310.4deg, /* Red */
+        theme('colors.fluent-card') 310.4deg 320.1deg, /* Black */
+        theme('colors.fluent-danger') 320.1deg 329.8deg, /* Red */
+        theme('colors.fluent-card') 329.8deg 339.5deg, /* Black */
+        theme('colors.fluent-danger') 339.5deg 349.2deg, /* Red */
+        theme('colors.fluent-card') 349.2deg 360deg    /* Black */
+    );
+}
+#roulette-pointer {
+    position: absolute;
+    top: -10px; /* Position above the wheel */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 15px solid theme('colors.fluent-warning'); /* Yellow pointer */
+    z-index: 10;
+}
+#roulette-result {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px; height: 60px;
+    background-color: theme('colors.fluent-bg / 85%'); /* Semi-transparent bg */
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; /* text-2xl */ font-weight: bold;
+    color: #fff; z-index: 5;
+    border: 3px solid theme('colors.fluent-border');
+}
+#roulette-betting-area {
+    margin-top: 1.5rem; padding-top: 1rem;
+    border-top: 1px solid theme('colors.fluent-border / 50%');
+}
+.roulette-bet-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Basic grid for numbers */
+    gap: 0.5rem; /* gap-2 */
+    max-width: 300px; margin: 0 auto 1rem auto;
+}
+/* .roulette-bet-btn uses base button styles */
+.roulette-bet-btn {
+    padding: 0.5rem;
+    border-width: 1px;
+    border-radius: 0.25rem; /* rounded-sm */
+    font-size: 0.875rem; /* text-sm */
+}
+.roulette-bet-btn.red {
+    background-color: theme('colors.fluent-danger');
+    color: white; border-color: #d13438; /* Darker danger */
+}
+.roulette-bet-btn.black {
+    background-color: theme('colors.fluent-card');
+    color: white; border-color: #1a1a1a; /* Darker card */
+}
+.roulette-bet-btn.green {
+    background-color: theme('colors.fluent-accent');
+    color: white; border-color: #0d630d; /* Darker accent */
+}
+.roulette-bet-btn.outside {
+    grid-column: span 1; padding: 0.75rem;
+    background-color: #404040; /* Secondary button style */
+    border-color: #5a5a5a;
+    color: theme('colors.fluent-text-primary');
+}
+.roulette-outside-bets {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+    max-width: 300px; margin: 0 auto;
+}
+/* .roulette-bet-btn.selected defined in button section */
+
+/* Blackjack */
+.blackjack-hand {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.5rem; /* gap-2 */
+    min-height: 90px; /* Ensure space for cards */
+    margin-bottom: 1rem; padding: 0.5rem;
+    background-color: #2d2d2d; /* Darker surface */
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #404040; /* Dark gray border */
+}
+.blackjack-card {
+    background-color: white;
+    color: black;
+    border: 1px solid #505050; /* Lighter border than hand bg */
+    border-radius: 0.375rem; /* rounded-md */
+    width: 60px; /* Card width */
+    height: 85px; /* Card height */
+    display: flex; flex-direction: column;
+    justify-content: space-between; align-items: center;
+    padding: 0.25rem; /* py-1 */
+    font-weight: 600; /* font-semibold */
+    font-size: 1rem; /* text-base */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.blackjack-card.hidden {
+    background-color: #404040; /* Dark gray for hidden card */
+    background-image: repeating-linear-gradient(
+        45deg,
+        #5a5a5a, #5a5a5a 5px, /* Lighter gray */
+        #404040 5px, #404040 10px /* Dark gray */
+    );
+    color: transparent; /* Hide text */
+    border-color: #5a5a5a;
+}
+.blackjack-card span:first-child { /* Rank */
+    font-size: 1.25rem; /* text-xl */
+    line-height: 1;
+}
+.blackjack-card span:last-child { /* Suit */
+    font-size: 1.5rem; /* text-2xl */
+    line-height: 1;
+}
+.blackjack-card.suit-red { color: theme('colors.fluent-danger'); }
+.blackjack-card.suit-black { color: theme('colors.fluent-card'); } /* Use dark card color for black suits */
+
+.blackjack-score {
+    font-weight: 600; /* font-semibold */
+    font-size: 1.125rem; /* text-lg */
+    color: theme('colors.fluent-text-secondary');
+}
+.blackjack-score-value {
+    font-weight: 700; /* font-bold */
+    font-size: 1.25rem; /* text-xl */
+    color: theme('colors.fluent-text-primary');
+    margin-left: 0.5rem;
+}
+.blackjack-score.busted .blackjack-score-value {
+    color: theme('colors.fluent-danger'); /* Red for busted */
+}
+.blackjack-score.blackjack .blackjack-score-value {
+    color: theme('colors.fluent-warning'); /* Yellow for blackjack */
+}
+
+/* Plinko */
+#plinko-canvas {
+    background-color: #2d2d2d; /* Darker surface */
+    border: 1px solid #404040; /* Dark gray border */
+    border-radius: 0.5rem; /* rounded-lg */
+    display: block; /* Prevent extra space below canvas */
+    margin: 1rem auto; /* Center canvas */
+}
+
+/* --- Animations --- */
+
+/* Pulse animation for footer heart */
 @keyframes pulse { 50% { opacity: .5; } }
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-@keyframes flash-green { 0%, 100% { color: #107c10; transform: scale(1.05); } 50% { color: #0078d4; transform: scale(1); } }
-@keyframes flash-red { 0%, 100% { color: #d13438; transform: scale(1.05); } 50% { color: #0078d4; transform: scale(1); } }
+
+/* Flash animation for currency display */
+@keyframes flash-green {
+    0%, 100% { color: theme('colors.fluent-accent'); transform: scale(1.05); }
+    50% { color: theme('colors.fluent-primary'); transform: scale(1); } /* Flash to primary color */
+}
+@keyframes flash-red {
+    0%, 100% { color: theme('colors.fluent-danger'); transform: scale(1.05); }
+    50% { color: theme('colors.fluent-primary'); transform: scale(1); } /* Flash to primary color */
+}
 .flash-win { animation: flash-green 0.6s ease-out; }
 .flash-loss { animation: flash-red 0.6s ease-out; }
-@keyframes shake-subtle { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1px); } 75% { transform: translateX(1px); } }
-@keyframes shake-strong { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(-2px, 1px) rotate(-0.5deg); } 50% { transform: translate(1px, -1px) rotate(0.5deg); } 75% { transform: translate(2px, 1px) rotate(-0.5deg); } }
+
+/* Shake animations */
+@keyframes shake-subtle {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}
+@keyframes shake-strong {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    25% { transform: translate(-2px, 1px) rotate(-0.5deg); }
+    50% { transform: translate(1px, -1px) rotate(0.5deg); }
+    75% { transform: translate(2px, 1px) rotate(-0.5deg); }
+}
 .shake-subtle { animation: shake-subtle 0.2s infinite linear; }
 .shake-strong { animation: shake-strong 0.15s infinite linear; }
-@keyframes cardEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.animate-card-enter { opacity: 0; animation: cardEnter 0.5s ease-out forwards; }
+
+/* Card enter animation (used in old HTML, kept for reference if needed) */
+@keyframes cardEnter {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-card-enter {
+    opacity: 0; /* Start hidden */
+    animation: cardEnter 0.5s ease-out forwards;
+}
+
+/* --- Message Box --- */
+#message-box {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    background-color: theme('colors.fluent-surface');
+    color: theme('colors.fluent-text-primary');
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    border: 1px solid theme('colors.fluent-border');
+    font-weight: 500; /* font-medium */
+    transform: translate(-50%, 10px); /* Start slightly lower */
+    pointer-events: none; /* Allow clicks through when hidden */
+}
+#message-box.show {
+    opacity: 1; visibility: visible;
+    transform: translateX(-50%); /* Move to final position */
+}
