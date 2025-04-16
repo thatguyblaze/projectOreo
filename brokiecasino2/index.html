@@ -5,13 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brokie Casino</title>
 
-    <link rel="icon" type="image/png" href="brokieLogo.png">
-
-    <meta property="og:title" content="Brokie Casino - Refined Gaming">
+    <link rel="icon" type="image/png" href="brokieLogo.png"> <meta property="og:title" content="Brokie Casino - Refined Gaming">
     <meta property="og:description" content="Clean layout, sleek design. Play Slots, Crash, Plinko & more!">
-    <meta property="og:image" content="brokieLogo.png">
-    <meta property="og:url" content="YOUR_WEBSITE_URL">
-    <meta property="og:type" content="website">
+    <meta property="og:image" content="brokieLogo.png"> <meta property="og:type" content="website">
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -19,9 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/style.css">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="css/style.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
     <script src="js/main.js" defer></script>
     <script src="js/slots.js" defer></script>
@@ -44,7 +38,7 @@
             },
             colors: {
               // Fluent-Inspired Dark Palette (v2 Update)
-              'fluent-bg': '#1c1c1c',        // Main background (darkest)
+              'fluent-bg': '#1c1c1c',         // Main background (darkest)
               'fluent-surface': '#2a2a2a',   // Secondary background/surface
               'fluent-card': '#2d2d2d',      // Card background (Slightly lighter for contrast) - UPDATED
               'fluent-border': '#4a4a4a',    // Borders
@@ -53,7 +47,7 @@
               'fluent-text-primary': '#f5f5f5', // Main text
               'fluent-text-secondary': '#b0b0b0', // Secondary text
               'fluent-text-disabled': '#6a6a6a', // Disabled text
-              'fluent-danger': '#e81123',     // Red accent
+              'fluent-danger': '#e81123',    // Red accent
               'fluent-warning': '#ffb900',   // Yellow/Orange accent
               'fluent-secondary': '#6a6a6a',   // Grayish accent
             }
@@ -70,12 +64,15 @@
             const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
 
             if (isOpen) {
-                content.style.maxHeight = '0px'; content.classList.remove('open');
+                content.style.maxHeight = '0px';
+                content.classList.remove('open');
                 if(icon) icon.textContent = '+'; // Change icon
                 button.setAttribute('aria-expanded', 'false');
             } else {
-                content.style.maxHeight = content.scrollHeight + "px"; content.classList.add('open');
-                if(icon) icon.textContent = '−'; // Change icon
+                // Set max-height based on scrollHeight for smooth animation
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.classList.add('open');
+                if(icon) icon.textContent = '−'; // Change icon (using minus sign)
                 button.setAttribute('aria-expanded', 'true');
             }
         }
@@ -197,21 +194,21 @@
                          </div>
                          <div id="payout-legend" class="pt-4 border-t border-fluent-border/50 mt-6">
                              <h4 class="text-center font-semibold text-fluent-text-secondary mb-2">Payouts (Multiplier x Bet)</h4>
-                             <ul id="payout-list" class="text-xs text-center max-w-xs mx-auto"></ul>
+                             <ul id="payout-list" class="text-xs text-center max-w-xs mx-auto">
+                                </ul>
                          </div>
-                     </div>
+                      </div>
 
                     <div id="game-crash" class="game-area space-y-6 hidden">
                          <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-accent inline-block">Cash Out Before the Crash!</h3>
                          <div id="crash-graph" class="relative mt-4">
                              <svg id="crash-svg" preserveAspectRatio="none">
-                                 <defs>
-                                     <filter id="line-shadow" x="-50%" y="-50%" width="200%" height="200%">
-                                         <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#005a9e" flood-opacity="0.6"/>
-                                     </filter>
-                                 </defs>
-                                 <g id="crash-grid"></g>
-                                 <polyline id="crash-polyline" filter="url(#line-shadow)" points="0,100" clip-path="url(#graph-clip)"></polyline>
+                                  <defs>
+                                       <filter id="line-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                                           <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#005a9e" flood-opacity="0.6"/>
+                                       </filter>
+                                  </defs>
+                                  <g id="crash-grid"></g> <polyline id="crash-polyline" filter="url(#line-shadow)" points="0,100" clip-path="url(#graph-clip)"></polyline>
                              </svg>
                              <span id="crash-multiplier" class="text-fluent-text-primary">1.00x</span>
                          </div>
@@ -242,13 +239,12 @@
                              </div>
                          </div>
                          <p id="crash-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                     </div>
+                      </div>
 
                     <div id="game-coinflip" class="game-area space-y-6 hidden">
                          <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Coin Flip: Double or Nothing!</h3>
                          <div class="text-center my-6 coin-container">
-                             <span id="coin" class="text-6xl">🪙</span>
-                         </div>
+                             <span id="coin" class="text-6xl">🪙</span> </div>
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                              <label for="coinflip-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
                              <button class="bet-adjust-btn" id="coinflip-bet-decrease-10">-10</button>
@@ -272,7 +268,7 @@
                              <button id="coinflip-cashout-button" class="game-button danger" disabled>Cash Out <span id="coinflip-winnings">0</span></button>
                          </div>
                          <p id="coinflip-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                     </div>
+                      </div>
 
                     <div id="game-minefield" class="game-area space-y-6 hidden">
                          <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Minefield</h3>
@@ -290,14 +286,13 @@
                              <button class="bet-adjust-btn" id="minefield-bet-double">x2</button>
                              <button class="bet-adjust-btn" id="minefield-bet-max">Max</button>
                          </div>
-                         <div id="minefield-grid">
-                             </div>
+                         <div id="minefield-grid"></div>
                          <div class="flex items-center justify-center space-x-4 mt-6">
                              <button id="minefield-start-button" class="game-button primary">Start Game</button>
                              <button id="minefield-cashout-button" class="game-button success" disabled>Cash Out (<span id="minefield-current-multiplier">1.00</span>x)</button>
                          </div>
                          <p id="minefield-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                     </div>
+                      </div>
 
                     <div id="game-memory" class="game-area space-y-6 hidden">
                           <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-pink-500 inline-block">Memory Match</h3>
@@ -315,10 +310,10 @@
                               <button class="bet-adjust-btn" id="memory-bet-double">x2</button>
                               <button class="bet-adjust-btn" id="memory-bet-max">Max</button>
                           </div>
-                          <div id="memory-grid">
-                              </div>
+                          <div id="memory-grid"></div>
                           <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
-                               <button id="memory-start-button" class="game-button primary" style="background-color: #db2777; border-color: #db2777;">Start Game</button> <div class="text-fluent-text-secondary text-sm">
+                               <button id="memory-start-button" class="game-button primary" style="background-color: #db2777; border-color: #db2777;">Start Game</button>
+                               <div class="text-fluent-text-secondary text-sm">
                                    Tries Left: <span id="memory-tries-left" class="font-bold text-white">--</span>
                                </div>
                           </div>
@@ -346,23 +341,22 @@
                              </div>
                              <div>
                                  <label class="block text-center font-medium text-fluent-text-secondary text-sm mb-2">Pick Your Horse:</label>
-                                 <div id="horserace-selection" class="flex flex-wrap gap-2 justify-center">
-                                     </div>
+                                 <div id="horserace-selection" class="flex flex-wrap gap-2 justify-center"></div>
                              </div>
                          </div>
-                         <div id="horserace-track">
-                             </div>
+                         <div id="horserace-track"></div>
                          <div class="flex items-center justify-center space-x-4 mt-6">
                              <button id="horserace-start-button" class="game-button success">Start Race</button>
                          </div>
                          <p id="horserace-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                     </div>
+                      </div>
 
                     <div id="game-roulette" class="game-area space-y-6 hidden">
                          <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-purple-500 inline-block">Roulette</h3>
 
                          <div id="roulette-wheel-container">
-                             <div id="roulette-wheel"></div>
+                             <div id="roulette-wheel">
+                                 </div>
                              <div id="roulette-pointer"></div>
                              <div id="roulette-result">?</div>
                          </div>
@@ -387,20 +381,20 @@
                              <div class="roulette-bet-grid" id="roulette-inside-bets">
                                  </div>
                              <div class="roulette-outside-bets mt-4" id="roulette-outside-bets">
-                                 <button class="roulette-bet-btn outside red" data-bet-type="red">Red</button>
-                                 <button class="roulette-bet-btn outside black" data-bet-type="black">Black</button>
-                                 <button class="roulette-bet-btn outside" data-bet-type="odd">Odd</button>
-                                 <button class="roulette-bet-btn outside" data-bet-type="even">Even</button>
-                                 <button class="roulette-bet-btn outside" data-bet-type="low">1-18</button>
-                                 <button class="roulette-bet-btn outside" data-bet-type="high">19-36</button>
+                                 <button class="roulette-bet-btn outside red" data-bet-type="red" data-bet-value="red">Red</button>
+                                 <button class="roulette-bet-btn outside black" data-bet-type="black" data-bet-value="black">Black</button>
+                                 <button class="roulette-bet-btn outside" data-bet-type="odd" data-bet-value="odd">Odd</button>
+                                 <button class="roulette-bet-btn outside" data-bet-type="even" data-bet-value="even">Even</button>
+                                 <button class="roulette-bet-btn outside" data-bet-type="low" data-bet-value="low">1-18</button>
+                                 <button class="roulette-bet-btn outside" data-bet-type="high" data-bet-value="high">19-36</button>
                              </div>
                          </div>
 
                          <div class="flex items-center justify-center space-x-4 mt-6">
-                             <button id="roulette-spin-button" class="game-button success">Spin Wheel</button>
+                             <button id="roulette-spin-button" class="game-button success" disabled>Spin Wheel</button>
                          </div>
                          <p id="roulette-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                     </div>
+                      </div>
 
                     <div id="game-blackjack" class="game-area space-y-4 hidden">
                          <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-secondary inline-block">Blackjack</h3>
@@ -439,31 +433,30 @@
                          </div>
 
                          <p id="blackjack-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                     </div>
+                      </div>
 
                     <div id="game-plinko" class="game-area space-y-6 hidden">
                          <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-primary inline-block">Plinko</h3>
                          <canvas id="plinko-canvas" width="350" height="450"></canvas>
                           <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
-                             <label for="plinko-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
-                             <button class="bet-adjust-btn" id="plinko-bet-decrease-10">-10</button>
-                             <button class="bet-adjust-btn" id="plinko-bet-decrease-1">-</button>
-                             <input type="number" id="plinko-bet" value="10" min="1" class="w-20 rounded-md appearance-none">
-                             <button class="bet-adjust-btn" id="plinko-bet-increase-1">+</button>
-                             <button class="bet-adjust-btn" id="plinko-bet-increase-10">+10</button>
-                         </div>
-                         <div class="flex items-center justify-center space-x-2 mt-2">
-                             <button class="bet-adjust-btn" id="plinko-bet-min">Min</button>
-                             <button class="bet-adjust-btn" id="plinko-bet-half">/2</button>
-                             <button class="bet-adjust-btn" id="plinko-bet-double">x2</button>
-                             <button class="bet-adjust-btn" id="plinko-bet-max">Max</button>
-                         </div>
+                              <label for="plinko-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
+                              <button class="bet-adjust-btn" id="plinko-bet-decrease-10">-10</button>
+                              <button class="bet-adjust-btn" id="plinko-bet-decrease-1">-</button>
+                              <input type="number" id="plinko-bet" value="10" min="1" class="w-20 rounded-md appearance-none">
+                              <button class="bet-adjust-btn" id="plinko-bet-increase-1">+</button>
+                              <button class="bet-adjust-btn" id="plinko-bet-increase-10">+10</button>
+                          </div>
+                          <div class="flex items-center justify-center space-x-2 mt-2">
+                              <button class="bet-adjust-btn" id="plinko-bet-min">Min</button>
+                              <button class="bet-adjust-btn" id="plinko-bet-half">/2</button>
+                              <button class="bet-adjust-btn" id="plinko-bet-double">x2</button>
+                              <button class="bet-adjust-btn" id="plinko-bet-max">Max</button>
+                          </div>
                          <div class="flex items-center justify-center space-x-4 mt-6">
                               <button id="plinko-drop-button" class="game-button primary">Drop Ball</button>
                          </div>
                          <p id="plinko-status" class="text-center text-fluent-text-secondary font-medium h-6">Drop a ball to win!</p>
-                         <p class="text-center text-fluent-text-secondary text-xs">(Note: Plinko requires 'plinko.js' to be fully implemented)</p>
-                     </div>
+                         </div>
 
                 </section>
 
@@ -496,7 +489,7 @@
                              <p>Hey, I’m Chris. I mess around with code and build stuff like this when I’ve got free time. I’m not trying to be some big developer or run a business or anything like that. I just like making fun things that work. Brokie Casino started as a little side project and turned into something I actually enjoyed using, so I figured I’d share it. Hope you’re into it. And if not, all good. Maybe next time.</p>
                          </div>
                      </div>
-                 </section>
+                  </section>
             </main>
 
         </div>
@@ -516,10 +509,10 @@
         <h3 class="text-xl font-semibold text-center mb-4 text-white">Brokie ATM</h3>
         <p class="text-sm text-fluent-text-secondary mb-4 text-center">Select withdrawal amount:</p>
         <div class="grid grid-cols-2 gap-3 mb-4">
-            <button class="atm-button modal-button" data-amount="50">250</button>
-            <button class="atm-button modal-button" data-amount="100">500</button>
-            <button class="atm-button modal-button" data-amount="250">750</button>
-            <button class="atm-button modal-button" data-amount="500">1500</button>
+            <button class="atm-button modal-button" data-amount="250">250</button>
+            <button class="atm-button modal-button" data-amount="500">500</button>
+            <button class="atm-button modal-button" data-amount="750">750</button>
+            <button class="atm-button modal-button" data-amount="1500">1500</button>
         </div>
     </div>
 
