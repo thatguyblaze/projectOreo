@@ -1,15 +1,18 @@
 /**
- * Brokie Casino - Plinko Game Logic (plinko.js)
+ * ==========================================================================
+ * Brokie Casino - Plinko Game Logic (plinko.js) - v2 (Multiple Balls)
  *
- * Handles all functionality related to the Plinko game using HTML Canvas.
- * Depends on functions and variables defined in main.js.
+ * Handles Plinko game logic using HTML Canvas.
+ * - Allows multiple balls to be dropped concurrently.
+ * - Randomizes ball drop position.
+ * - Includes logic to reduce balls getting stuck.
+ * - Depends on functions and variables defined in main.js (BrokieAPI).
+ * ==========================================================================
  */
 
 // --- Plinko Specific State & Constants ---
-let plinkoActive = false; // Is a ball currently dropping?
-let plinkoBet = 0;
+let plinkoBalls = []; // Array to hold multiple ball objects
 let plinkoCanvas, plinkoCtx; // Canvas and context
-let plinkoBall = null; // Object to hold ball properties { x, y, vx, vy, radius }
 let plinkoPegs = []; // Array to hold peg positions [{ x, y, radius }]
 let plinkoBuckets = []; // Array to hold bucket properties [{ x, width, multiplier, color }]
 let plinkoAnimationId = null; // ID for requestAnimationFrame
@@ -17,25 +20,32 @@ let plinkoAnimationId = null; // ID for requestAnimationFrame
 const PLINKO_ROWS = 12; // Number of peg rows
 const PEG_RADIUS = 5;
 const BALL_RADIUS = 7;
-const PEG_COLOR = '#9ca3af'; // Gray-400
-const BALL_COLOR = '#facc15'; // Yellow-400
+const PEG_COLOR = '#9ca3af'; // Gray-400 (Tailwind gray-400)
+const BALL_COLOR = '#facc15'; // Yellow-400 (Tailwind yellow-400)
 const GRAVITY = 0.15;
 const BOUNCE_FACTOR = 0.6; // Energy retained on bounce (lower = less bouncy)
-const HORIZONTAL_DRIFT = 0.15; // Slight random horizontal push on collision
+const HORIZONTAL_DRIFT_FACTOR = 0.2; // Increased base horizontal push on collision
 
-// Bucket definitions (multipliers and colors) - Adjust as desired
+// Bucket definitions (multipliers and colors)
 const BUCKET_MULTIPLIERS = [10, 3, 0.5, 0.2, 0.5, 3, 10];
-const BUCKET_COLORS = ['#ef4444', '#fb923c', '#a3a3a3', '#6b7280', '#a3a3a3', '#fb923c', '#ef4444']; // Red, Orange, Neutral, Gray, Neutral, Orange, Red
+// Using Tailwind colors for consistency where possible
+const BUCKET_COLORS = ['#ef4444', '#fb923c', '#a3a3a3', '#6b7280', '#a3a3a3', '#fb923c', '#ef4444']; // red-500, orange-400, neutral-400, gray-500, neutral-400, orange-400, red-500
 
 // --- DOM Elements (Plinko Specific) ---
 let plinkoBetInput, plinkoDropButton, plinkoStatus;
 
+// --- API Reference ---
+let LocalBrokieAPI = null; // Will be set in initPlinko
+
 /**
  * Initializes the Plinko game elements, canvas, and event listeners.
  * Called by main.js on DOMContentLoaded.
+ * @param {object} API - The BrokieAPI object from main.js.
  */
-function initPlinko() {
+function initPlinko(API) {
     console.log("Initializing Plinko...");
+    LocalBrokieAPI = API; // Store the API reference
+
     // Get DOM elements
     plinkoBetInput = document.getElementById('plinko-bet');
     plinkoDropButton = document.getElementById('plinko-drop-button');
@@ -43,32 +53,32 @@ function initPlinko() {
     plinkoCanvas = document.getElementById('plinko-canvas');
 
     // Check if all essential elements were found
-    if (!plinkoBetInput || !plinkoDropButton || !plinkoStatus || !plinkoCanvas) {
-        console.error("Plinko initialization failed: Could not find all required DOM elements.");
+    if (!plinkoBetInput || !plinkoDropButton || !plinkoStatus || !plinkoCanvas || !LocalBrokieAPI) {
+        console.error("Plinko initialization failed: Could not find all required DOM elements or API.");
         const gameArea = document.getElementById('game-plinko');
-        if(gameArea) gameArea.innerHTML = '<p class="text-red-500 text-center">Error loading Plinko elements.</p>';
+        if (gameArea) gameArea.innerHTML = '<p class="text-fluent-danger text-center">Error loading Plinko elements.</p>';
         return; // Stop initialization
     }
 
     // Get canvas context
     plinkoCtx = plinkoCanvas.getContext('2d');
     if (!plinkoCtx) {
-         console.error("Plinko initialization failed: Could not get canvas context.");
-         plinkoCanvas.outerHTML = '<p class="text-red-500 text-center">Canvas not supported or context failed.</p>';
-         return;
+        console.error("Plinko initialization failed: Could not get canvas context.");
+        plinkoCanvas.outerHTML = '<p class="text-fluent-danger text-center">Canvas not supported or context failed.</p>';
+        return;
     }
 
-    // Setup board layout
+    // Setup board layout (pegs and buckets)
     setupPlinkoBoard();
 
-    // Initial draw
-    drawPlinkoBoard(); // Draw pegs and buckets initially
+    // Initial draw of the static board elements
+    drawPlinkoBoard();
 
     // Add Event Listeners
     plinkoDropButton.addEventListener('click', dropPlinkoBall);
 
     // Add bet adjustment listeners using the factory function from main.js
-    addBetAdjustmentListeners('plinko', plinkoBetInput); // uses main.js
+    LocalBrokieAPI.addBetAdjustmentListeners('plinko', plinkoBetInput);
 
     console.log("Plinko Initialized.");
 }
@@ -77,7 +87,7 @@ function initPlinko() {
  * Calculates and stores the positions of pegs and buckets based on canvas size.
  */
 function setupPlinkoBoard() {
-    if (!plinkoCanvas) return;
+    if (!plinkoCanvas || !plinkoCtx) return;
     const canvasWidth = plinkoCanvas.width;
     const canvasHeight = plinkoCanvas.height;
     plinkoPegs = [];
@@ -108,6 +118,8 @@ function setupPlinkoBoard() {
     for (let i = 0; i < BUCKET_MULTIPLIERS.length; i++) {
         plinkoBuckets.push({
             x: i * bucketWidth,
+            y: bucketY, // Store y position for clarity
+            height: bucketHeight,
             width: bucketWidth,
             multiplier: BUCKET_MULTIPLIERS[i],
             color: BUCKET_COLORS[i] || '#a3a3a3' // Default color
@@ -116,16 +128,13 @@ function setupPlinkoBoard() {
 }
 
 /**
- * Draws the Plinko board (pegs and buckets) on the canvas.
+ * Draws the static Plinko board elements (pegs and buckets) on the canvas.
  */
 function drawPlinkoBoard() {
     if (!plinkoCtx || !plinkoCanvas) return;
     const ctx = plinkoCtx;
     const canvasWidth = plinkoCanvas.width;
     const canvasHeight = plinkoCanvas.height;
-
-    // Clear canvas (redundant if called within animation loop, but good for initial draw)
-    // ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     // Draw Pegs
     ctx.fillStyle = PEG_COLOR;
@@ -136,25 +145,23 @@ function drawPlinkoBoard() {
     });
 
     // Draw Buckets
-    const bucketHeight = 30;
-    const bucketY = canvasHeight - bucketHeight;
     plinkoBuckets.forEach((bucket, index) => {
         ctx.fillStyle = bucket.color;
-        ctx.fillRect(bucket.x, bucketY, bucket.width, bucketHeight);
+        ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
 
         // Draw multiplier text
         ctx.fillStyle = '#FFFFFF'; // White text
         ctx.font = 'bold 12px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucketY + bucketHeight / 2);
+        ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
 
-        // Draw bucket dividers (optional)
+        // Draw bucket dividers
         if (index > 0) {
-            ctx.strokeStyle = '#121212'; // Dark divider
+            ctx.strokeStyle = '#1c1c1c'; // Use fluent-bg for divider
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(bucket.x, bucketY);
+            ctx.moveTo(bucket.x, bucket.y);
             ctx.lineTo(bucket.x, canvasHeight);
             ctx.stroke();
         }
@@ -162,87 +169,101 @@ function drawPlinkoBoard() {
 }
 
 /**
- * Draws the Plinko ball on the canvas.
+ * Draws all active Plinko balls on the canvas.
  */
-function drawPlinkoBall() {
-    if (!plinkoCtx || !plinkoBall) return;
+function drawPlinkoBalls() {
+    if (!plinkoCtx) return;
     const ctx = plinkoCtx;
     ctx.fillStyle = BALL_COLOR;
-    ctx.beginPath();
-    ctx.arc(plinkoBall.x, plinkoBall.y, plinkoBall.radius, 0, Math.PI * 2);
-    ctx.fill();
+    plinkoBalls.forEach(ball => {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fill();
+    });
 }
 
 /**
- * Resets the Plinko game state, clearing the ball and enabling the drop button.
+ * Resets the Plinko game state, clearing all balls and stopping the animation.
+ * Called on tab switch away from Plinko.
  */
 function resetPlinko() {
-    plinkoActive = false;
-    plinkoBall = null; // Remove the ball
+    plinkoBalls = []; // Clear all active balls
     if (plinkoAnimationId) {
         cancelAnimationFrame(plinkoAnimationId);
         plinkoAnimationId = null;
     }
+    // Re-enable drop button if it exists
     if (plinkoDropButton) plinkoDropButton.disabled = false;
-    // Clear status after a delay maybe? Or keep the last result?
-    // if (plinkoStatus) plinkoStatus.textContent = 'Drop the ball!';
 
-    // Redraw board without the ball
+    // Clear the canvas and redraw the static board
     if (plinkoCtx && plinkoCanvas) {
-         plinkoCtx.clearRect(0, 0, plinkoCanvas.width, plinkoCanvas.height);
-         drawPlinkoBoard();
+        plinkoCtx.clearRect(0, 0, plinkoCanvas.width, plinkoCanvas.height);
+        drawPlinkoBoard();
     }
+     console.log("Plinko reset.");
 }
 
 /**
- * Starts the Plinko game by dropping a ball from the top.
+ * Starts the Plinko game by creating and dropping a new ball.
+ * Allows multiple balls to be dropped concurrently.
  */
 function dropPlinkoBall() {
-    if (plinkoActive) return; // Don't drop if already active
-    if (!plinkoBetInput || !plinkoDropButton || !plinkoStatus || !plinkoCanvas) return; // Check elements
+    // Check elements and API exist
+    if (!plinkoBetInput || !plinkoDropButton || !plinkoStatus || !plinkoCanvas || !plinkoCtx || !LocalBrokieAPI) {
+        console.error("Cannot drop ball, Plinko not fully initialized.");
+        return;
+    }
 
     const betAmount = parseInt(plinkoBetInput.value);
     if (isNaN(betAmount) || betAmount <= 0) {
-        showMessage("Please enter a valid positive bet amount.", 2000); return; // uses main.js
+        LocalBrokieAPI.showMessage("Please enter a valid positive bet amount.", 2000); return;
     }
-    if (betAmount > currency) { // uses main.js
-        showMessage("Not enough currency!", 2000); return; // uses main.js
+    if (betAmount > LocalBrokieAPI.getBalance()) {
+        LocalBrokieAPI.showMessage("Not enough currency!", 2000); return;
     }
 
-    startTone(); // uses main.js
-    // Consider adding a specific 'plinko_drop' sound
-    playSound('click'); // uses main.js (using generic click for now)
+    LocalBrokieAPI.startTone();
+    LocalBrokieAPI.playSound('plinko_drop'); // Use specific sound
 
-    plinkoBet = betAmount;
-    currency -= betAmount; // uses main.js
-    updateCurrencyDisplay('loss'); // uses main.js
-    saveGameState(); // Save state immediately after bet deduction (uses main.js)
+    // Deduct bet for this specific ball
+    LocalBrokieAPI.updateBalance(-betAmount); // Update balance immediately
+    // No need to flash display here, let win/loss flash later
+    LocalBrokieAPI.saveGameState(); // Save state after bet deduction
 
-    plinkoActive = true;
-    plinkoDropButton.disabled = true;
-    plinkoStatus.textContent = 'Dropping...';
-
-    // Initial ball state
-    plinkoBall = {
-        x: plinkoCanvas.width / 2 + (Math.random() - 0.5) * 5, // Start slightly randomized horizontally
+    // Create the new ball object
+    const canvasWidth = plinkoCanvas.width;
+    // Random start position within the middle 60%
+    const randomX = canvasWidth * 0.2 + canvasWidth * 0.6 * Math.random();
+    const newBall = {
+        x: randomX,
         y: 20, // Start above the pegs
         vx: 0,
         vy: 0,
-        radius: BALL_RADIUS
+        radius: BALL_RADIUS,
+        betAmount: betAmount // Store the bet amount with the ball
     };
 
-    // Start animation loop
-    if (plinkoAnimationId) cancelAnimationFrame(plinkoAnimationId); // Clear previous animation if any
-    plinkoAnimationId = requestAnimationFrame(animatePlinko);
+    // Add the new ball to the array
+    plinkoBalls.push(newBall);
+
+    // Start the animation loop if it's not already running
+    if (!plinkoAnimationId) {
+        console.log("Starting Plinko animation loop.");
+        plinkoAnimationId = requestAnimationFrame(animatePlinko);
+    }
+
+    // Update status (optional, could get cluttered with many balls)
+    // plinkoStatus.textContent = 'Dropping...';
 }
 
 /**
- * The main animation loop for the Plinko ball.
+ * The main animation loop for updating and drawing Plinko balls.
  */
 function animatePlinko() {
-    if (!plinkoActive || !plinkoCtx || !plinkoCanvas || !plinkoBall) {
-        // Stop animation if game became inactive or elements are missing
-        if (plinkoAnimationId) cancelAnimationFrame(plinkoAnimationId);
+    // Check if context exists
+    if (!plinkoCtx || !plinkoCanvas) {
+        console.error("Canvas context lost, stopping animation.");
+        cancelAnimationFrame(plinkoAnimationId);
         plinkoAnimationId = null;
         return;
     }
@@ -250,172 +271,224 @@ function animatePlinko() {
     const canvasWidth = plinkoCanvas.width;
     const canvasHeight = plinkoCanvas.height;
 
-    // Clear canvas
+    // Clear canvas for redraw
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // --- Physics Update ---
-    // Apply gravity
-    plinkoBall.vy += GRAVITY;
+    // --- Update and Check Each Ball ---
+    // Iterate backwards for safe removal
+    for (let i = plinkoBalls.length - 1; i >= 0; i--) {
+        const ball = plinkoBalls[i];
 
-    // Update position
-    plinkoBall.x += plinkoBall.vx;
-    plinkoBall.y += plinkoBall.vy;
+        // --- Physics Update ---
+        ball.vy += GRAVITY;
+        ball.x += ball.vx;
+        ball.y += ball.vy;
 
-    // --- Collision Detection ---
-    let collisionOccurred = false;
+        // --- Collision Detection ---
+        let collisionOccurred = false; // Track collision for this ball this frame
 
-    // Peg Collisions
-    for (const peg of plinkoPegs) {
-        const dx = plinkoBall.x - peg.x;
-        const dy = plinkoBall.y - peg.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const minDist = plinkoBall.radius + peg.radius;
+        // Peg Collisions
+        for (const peg of plinkoPegs) {
+            const dx = ball.x - peg.x;
+            const dy = ball.y - peg.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDist = ball.radius + peg.radius;
 
-        if (distance < minDist) {
+            if (distance < minDist) {
+                collisionOccurred = true;
+
+                // Normalize collision vector
+                const nx = dx / distance;
+                const ny = dy / distance;
+
+                // Stronger overlap correction
+                const overlap = minDist - distance;
+                ball.x += nx * overlap;
+                ball.y += ny * overlap;
+
+                // Reflect velocity
+                // Calculate dot product of velocity and normal
+                const dotProduct = ball.vx * nx + ball.vy * ny;
+                // Reflect velocity vector
+                ball.vx -= 2 * dotProduct * nx;
+                ball.vy -= 2 * dotProduct * ny;
+
+                // Apply bounce factor (reduce energy)
+                ball.vx *= BOUNCE_FACTOR;
+                ball.vy *= BOUNCE_FACTOR;
+
+                // Add horizontal drift based on collision point
+                // Push away from the peg center horizontally, stronger effect
+                 ball.vx += nx * HORIZONTAL_DRIFT_FACTOR * (0.8 + Math.random() * 0.4);
+
+
+                // Anti-stuck: If vertical velocity is very low, give a nudge
+                if (Math.abs(ball.vy) < 0.1 && ball.y < canvasHeight - plinkoBuckets[0].height - 20) {
+                   ball.vy += 0.25; // Small downward nudge
+                   ball.vx += (Math.random() - 0.5) * 0.2; // Tiny horizontal nudge
+                }
+
+                // Play sound only once per collision check cycle for this ball
+                if (LocalBrokieAPI) LocalBrokieAPI.playSound('plinko_peg_hit');
+                break; // Handle only one peg collision per ball per frame
+            }
+        }
+
+        // Wall Collisions
+        if (ball.x - ball.radius < 0) { // Left wall
+            ball.x = ball.radius;
+            ball.vx *= -BOUNCE_FACTOR;
             collisionOccurred = true;
-            // Basic collision response:
-            // Normalize collision vector
-            const nx = dx / distance;
-            const ny = dy / distance;
-
-            // Reflect velocity (simplified) - primarily affect vertical bounce
-            plinkoBall.vy *= -BOUNCE_FACTOR;
-
-            // Add slight horizontal push based on collision angle and randomness
-            plinkoBall.vx += nx * HORIZONTAL_DRIFT * (Math.random() + 0.5);
-
-            // Prevent sticking: Move ball slightly away from peg
-            const overlap = minDist - distance;
-            plinkoBall.x += nx * overlap * 0.5; // Move slightly along collision normal
-            plinkoBall.y += ny * overlap * 0.5;
-
-            playSound('click'); // Play peg hit sound (using generic click for now)
-            break; // Handle only one peg collision per frame for simplicity
+        } else if (ball.x + ball.radius > canvasWidth) { // Right wall
+            ball.x = canvasWidth - ball.radius;
+            ball.vx *= -BOUNCE_FACTOR;
+            collisionOccurred = true;
         }
-    }
 
-    // Wall Collisions
-    if (plinkoBall.x - plinkoBall.radius < 0) { // Left wall
-        plinkoBall.x = plinkoBall.radius;
-        plinkoBall.vx *= -BOUNCE_FACTOR;
-        collisionOccurred = true;
-    } else if (plinkoBall.x + plinkoBall.radius > canvasWidth) { // Right wall
-        plinkoBall.x = canvasWidth - plinkoBall.radius;
-        plinkoBall.vx *= -BOUNCE_FACTOR;
-        collisionOccurred = true;
-    }
-
-    // --- Bucket Check ---
-    const bucketHeight = 30;
-    const bucketY = canvasHeight - bucketHeight;
-    if (plinkoBall.y + plinkoBall.radius > bucketY) {
-        for (const bucket of plinkoBuckets) {
-            if (plinkoBall.x >= bucket.x && plinkoBall.x < bucket.x + bucket.width) {
-                // Ball has landed in a bucket!
-                handlePlinkoWin(bucket);
-                return; // Stop animation
+        // --- Bucket Check ---
+        const bucketTopY = canvasHeight - plinkoBuckets[0].height;
+        if (ball.y + ball.radius > bucketTopY) {
+            let landedInBucket = false;
+            for (const bucket of plinkoBuckets) {
+                if (ball.x >= bucket.x && ball.x < bucket.x + bucket.width) {
+                    // Ball has landed in this bucket!
+                    handlePlinkoWin(bucket, ball.betAmount); // Pass bet amount
+                    plinkoBalls.splice(i, 1); // Remove this ball from the array
+                    landedInBucket = true;
+                    break; // Stop checking buckets for this ball
+                }
+            }
+            // If ball somehow missed buckets but is below top edge (e.g., lands on divider)
+            // Assign to nearest bucket or handle as loss? Let's assign to nearest for now.
+            if (!landedInBucket && ball.y > bucketTopY + 5) { // Give a little leeway
+                 console.warn("Ball landed outside defined buckets, assigning to closest.");
+                 let closestBucket = plinkoBuckets[0];
+                 let minDist = Math.abs(ball.x - (closestBucket.x + closestBucket.width / 2));
+                 for(let j = 1; j < plinkoBuckets.length; j++) {
+                     let dist = Math.abs(ball.x - (plinkoBuckets[j].x + plinkoBuckets[j].width / 2));
+                     if (dist < minDist) {
+                         minDist = dist;
+                         closestBucket = plinkoBuckets[j];
+                     }
+                 }
+                 handlePlinkoWin(closestBucket, ball.betAmount);
+                 plinkoBalls.splice(i, 1); // Remove this ball
             }
         }
-        let closestBucket = plinkoBuckets[0];
-        let minDist = Math.abs(plinkoBall.x - (closestBucket.x + closestBucket.width / 2));
-        for(let i = 1; i < plinkoBuckets.length; i++) {
-            let dist = Math.abs(plinkoBall.x - (plinkoBuckets[i].x + plinkoBuckets[i].width / 2));
-            if (dist < minDist) {
-                minDist = dist;
-                closestBucket = plinkoBuckets[i];
-            }
-        }
-        console.warn("Ball landed outside defined buckets, assigning to closest:", closestBucket);
-        handlePlinkoWin(closestBucket);
-        return;
-
-    }
+    } // End of loop through balls
 
     // --- Draw ---
-    drawPlinkoBoard(); // Redraw pegs and buckets
-    drawPlinkoBall(); // Draw the ball at its new position
+    drawPlinkoBoard(); // Redraw static elements (pegs, buckets)
+    drawPlinkoBalls(); // Draw all remaining balls
 
-    // Request next frame
-    plinkoAnimationId = requestAnimationFrame(animatePlinko);
+    // --- Continue or Stop Animation ---
+    if (plinkoBalls.length > 0) {
+        // If there are still balls falling, request the next frame
+        plinkoAnimationId = requestAnimationFrame(animatePlinko);
+    } else {
+        // If no balls are left, stop the animation loop
+        console.log("Stopping Plinko animation loop.");
+        cancelAnimationFrame(plinkoAnimationId);
+        plinkoAnimationId = null;
+        // Re-enable drop button now that all balls are finished
+        if (plinkoDropButton) plinkoDropButton.disabled = false;
+        if (plinkoStatus) plinkoStatus.textContent = 'Drop again!';
+    }
 }
 
 /**
- * Handles the win/loss calculation and UI update when the ball lands in a bucket.
+ * Handles the win/loss calculation and UI update when a ball lands in a bucket.
  * @param {object} bucket - The bucket object the ball landed in.
+ * @param {number} betAmount - The bet amount associated with the landed ball.
  */
-function handlePlinkoWin(bucket) {
-    if (!plinkoStatus) return; // Check element
-
-    plinkoActive = false; // Game round is over
-    cancelAnimationFrame(plinkoAnimationId); // Stop animation
-    plinkoAnimationId = null;
+function handlePlinkoWin(bucket, betAmount) {
+    if (!plinkoStatus || !LocalBrokieAPI) return; // Check elements & API
 
     const multiplier = bucket.multiplier;
-    const winAmount = Math.floor(plinkoBet * multiplier);
-    const profit = winAmount - plinkoBet;
+    const winAmount = Math.floor(betAmount * multiplier); // Use ball's specific bet amount
+    const profit = winAmount; // We already deducted the bet, so winAmount is the profit/loss relative to 0
 
     // Update currency and stats
-    currency += winAmount; // uses main.js
-    if (profit > 0) {
-        totalGain += profit; // uses main.js
-        addWinToLeaderboard('Plinko', profit); // uses main.js
-        plinkoStatus.textContent = `WIN! Landed in ${multiplier}x! Won ${formatWin(profit)}!`; // uses main.js
-        playSound('win_medium'); // uses main.js
-        updateCurrencyDisplay('win'); // uses main.js
-    } else if (profit < 0) {
-        totalLoss += Math.abs(profit); // uses main.js (or totalLoss += plinkoBet)
-        plinkoStatus.textContent = `Landed in ${multiplier}x. Lost ${formatWin(Math.abs(profit))}.`; // uses main.js
-        playSound('lose'); // uses main.js
-        updateCurrencyDisplay(); // uses main.js
-    } else { // 1x multiplier or similar where profit is 0
-        plinkoStatus.textContent = `Landed in ${multiplier}x. Bet returned.`;
-        playSound('click'); // Neutral sound for break-even (uses main.js)
-        updateCurrencyDisplay(); // uses main.js
+    LocalBrokieAPI.updateBalance(winAmount); // Add the calculated win amount
+
+    // Determine sound and status message based on multiplier
+    let winSound = 'click'; // Default neutral sound
+    let statusText = `Landed in ${multiplier}x. `;
+    if (multiplier > 1) {
+        winSound = 'plinko_win_high'; // High win sound
+        statusText += `Won ${LocalBrokieAPI.formatWin(winAmount)}!`;
+        LocalBrokieAPI.addWin('Plinko', winAmount); // Add win to leaderboard
+    } else if (multiplier < 1 && multiplier > 0) {
+         winSound = 'plinko_win_low'; // Low win sound
+         statusText += `Returned ${LocalBrokieAPI.formatWin(winAmount)}.`;
+    } else if (multiplier <= 0) { // Loss or very low return treated as loss sound-wise
+         winSound = 'lose';
+         statusText += `Returned ${LocalBrokieAPI.formatWin(winAmount)}.`; // Or "Lost bet." if multiplier is 0
+    } else { // multiplier == 1
+         statusText += `Bet returned.`;
     }
 
-    saveGameState(); // uses main.js
+    LocalBrokieAPI.playSound(winSound);
+    // Display status temporarily - might get overwritten quickly by other balls
+    // Consider a different way to show results for multiple balls (e.g., a scrolling log)
+    plinkoStatus.textContent = statusText;
 
-    // Highlight the winning bucket briefly (optional)
-    if (plinkoCtx && plinkoCanvas) {
-        const originalColor = bucket.color;
-        const highlightColor = '#FFFFFF'; // White highlight
-        const bucketY = plinkoCanvas.height - 30;
-        plinkoCtx.fillStyle = highlightColor;
-        plinkoCtx.fillRect(bucket.x, bucketY, bucket.width, 30);
-        // Redraw text
-        plinkoCtx.fillStyle = '#000000'; // Black text on highlight
-        plinkoCtx.font = 'bold 12px Inter, sans-serif';
-        plinkoCtx.textAlign = 'center';
-        plinkoCtx.textBaseline = 'middle';
-        plinkoCtx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucketY + 15);
-
-        // Revert after a delay
-        setTimeout(() => {
-            if (!plinkoActive && plinkoCtx) { // Check if another game hasn't started
-                 plinkoCtx.fillStyle = originalColor;
-                 plinkoCtx.fillRect(bucket.x, bucketY, bucket.width, 30);
-                 // Redraw text in white
-                 plinkoCtx.fillStyle = '#FFFFFF';
-                 plinkoCtx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucketY + 15);
-                 // Redraw dividers if needed
-            }
-        }, 800);
+    // Flash currency display based on profit (winAmount > betAmount, winAmount < betAmount, etc.)
+    // Since bet was already deducted, winAmount represents the return.
+    // Profit is winAmount. We flash green if winAmount > 0, red if winAmount = 0? Or based on multiplier?
+    // Let's flash green if multiplier > 1, red if multiplier < 1, neutral otherwise.
+    if (multiplier > 1) {
+        LocalBrokieAPI.updateCurrencyDisplay('win'); // Flash green
+    } else if (multiplier < 1) {
+         LocalBrokieAPI.updateCurrencyDisplay('loss'); // Flash red
+    } else {
+         LocalBrokieAPI.updateCurrencyDisplay(); // No flash
     }
 
 
-    // Re-enable drop button after a delay
-    setTimeout(() => {
-        if (!plinkoActive && plinkoDropButton) { // Ensure game hasn't restarted
-            plinkoDropButton.disabled = false;
-            if(plinkoStatus) plinkoStatus.textContent = 'Drop again!';
-        }
-    }, 1000);
+    // Highlight the winning bucket briefly
+    highlightBucket(bucket);
 
-    // Consider calling resetPlinko() here or let the board stay with the last result until next drop?
-    // For now, let's leave the board as is, reset happens on next drop or tab switch.
+    // No need to re-enable drop button here, handled when animation loop stops
+}
+
+/**
+ * Briefly highlights a specific bucket.
+ * @param {object} bucket - The bucket object to highlight.
+ */
+function highlightBucket(bucket) {
+     if (!plinkoCtx || !plinkoCanvas) return;
+     const ctx = plinkoCtx;
+     const originalColor = bucket.color;
+     const highlightColor = '#FFFFFF'; // White highlight
+
+     // Draw highlight
+     ctx.fillStyle = highlightColor;
+     ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
+     // Redraw text
+     ctx.fillStyle = '#000000'; // Black text on highlight
+     ctx.font = 'bold 12px Inter, sans-serif';
+     ctx.textAlign = 'center';
+     ctx.textBaseline = 'middle';
+     ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
+
+     // Revert after a delay
+     setTimeout(() => {
+         // Check context still exists and redraw original bucket color + text
+         if (plinkoCtx) {
+              ctx.fillStyle = originalColor;
+              ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
+              // Redraw text in white
+              ctx.fillStyle = '#FFFFFF';
+              ctx.font = 'bold 12px Inter, sans-serif'; // Ensure font is reset too
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
+              // Redraw divider if needed (might be simpler to just redraw whole board)
+         }
+     }, 500); // Highlight duration
 }
 
 
-// Note: The initPlinko() function will be called from main.js
-// Ensure main.js includes: if (typeof initPlinko === 'function') initPlinko();
-// within its DOMContentLoaded listener.
+// Make sure initPlinko is available globally if called directly by main.js
+// This is handled by the guard block at the top now.
