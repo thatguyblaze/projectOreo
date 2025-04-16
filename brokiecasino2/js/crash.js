@@ -1,11 +1,12 @@
 /**
  * ==========================================================================
- * Brokie Casino - Crash Game Logic (v4 - requestAnimationFrame)
+ * Brokie Casino - Crash Game Logic (v5 - Loop Start Fix)
  *
  * - Uses BrokieAPI object.
  * - Fixed auto-cashout logic.
- * - Fixed Y-axis scaling logic.
- * - Switched game loop from setInterval to requestAnimationFrame.
+ * - Fixed Y-axis scaling logic + uses clipPath.
+ * - Uses requestAnimationFrame loop.
+ * - Fixed order in placeBetAndStart to prevent immediate loop stop.
  * - Kept console logging for debugging.
  * ==========================================================================
  */
@@ -23,11 +24,10 @@ const SVG_VIEWBOX_HEIGHT = 100;
 
 // --- Crash Game State Variables ---
 let crashGameActive = false;
-let crashStartTime = null; // Will store high-resolution timestamp
+let crashStartTime = null;
 let currentMultiplier = 1.00;
 let crashTargetMultiplier = 1.00;
-// let crashInterval = null; // No longer needed
-let crashAnimationId = null; // ID for requestAnimationFrame
+let crashAnimationId = null;
 let crashPlayerBet = 0;
 let crashCashedOut = false;
 let crashRawPointsData = [];
@@ -35,6 +35,7 @@ let currentMaxYMultiplier = CRASH_STARTING_MAX_Y;
 let isCrashAutoBetting = false;
 let isAutoCashoutEnabled = false;
 let autoCashoutTarget = 1.50;
+// let lastFrameTimestamp = 0; // Not strictly needed for this RAF implementation
 
 // --- DOM Element References ---
 let crashGraph, crashMultiplierDisplay, crashSvg, crashGrid, crashPolyline;
@@ -52,12 +53,11 @@ function initCrash(API) {
     console.log("Initializing Crash Game...");
     LocalBrokieAPI = API;
 
-    // Get DOM elements (add checks within function)
-    if (!assignCrashDOMElements()) return; // Assign and check elements
+    if (!assignCrashDOMElements()) return;
 
     resetCrashVisuals();
     updateCrashAutoCashoutToggleVisuals();
-    setupCrashEventListeners(); // Setup listeners
+    setupCrashEventListeners();
 
     LocalBrokieAPI.addBetAdjustmentListeners('crash', crashBetInput);
     console.log("Crash Initialized");
@@ -146,17 +146,18 @@ function updateCrashGrid() {
 
 /**
  * Resets the crash game visuals to the starting state.
+ * IMPORTANT: Sets crashGameActive to false.
  */
 function resetCrashVisuals() {
     if (!crashMultiplierDisplay || !crashSvg || !crashPolyline || !crashStatusDisplay || !crashBetButton || !crashCashoutButton || !crashBetInput) return;
 
-    // Stop any existing game loop
     if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
     crashAnimationId = null;
 
-    // Reset state variables
-    crashGameActive = false; playerHasBet = false; crashCashedOut = false;
-    currentMultiplier = 1.00; // Reset currentMultiplier here
+    // Reset state variables *before* potentially setting active flag later
+    crashGameActive = false; // Crucial: Mark as inactive during reset
+    playerHasBet = false; crashCashedOut = false;
+    currentMultiplier = 1.00;
     crashRawPointsData = [[0, 1.00]];
     crashPointsString = `0,${SVG_VIEWBOX_HEIGHT}`;
     currentMaxYMultiplier = CRASH_STARTING_MAX_Y;
@@ -206,9 +207,12 @@ function placeBetAndStart() {
     crashPlayerBet = betAmount;
     LocalBrokieAPI.updateBalance(-betAmount);
 
-    crashGameActive = true; crashCashedOut = false;
+    // --- FIX: Reset visuals BEFORE setting game active ---
+    resetCrashVisuals();
+
+    crashGameActive = true; // NOW set game active
+    crashCashedOut = false;
     crashTargetMultiplier = calculateCrashTarget();
-    resetCrashVisuals(); // Reset graph BEFORE starting loop
     crashStatusDisplay.innerHTML = `Bet Placed! Value: <span id="potential-win-amount" class="font-bold text-white">${LocalBrokieAPI.formatWin(crashPlayerBet)}</span>`;
 
     // Disable controls
@@ -219,13 +223,13 @@ function placeBetAndStart() {
     if (isAutoCashoutEnabled) validateAndUpdateAutoCashoutTarget();
 
     // --- Start the Game Loop using requestAnimationFrame ---
-    crashStartTime = performance.now(); // Use high-resolution timer
-    crashRawPointsData = [[0, 1.00]]; // Start with initial point
-    crashPointsString = `0,${SVG_VIEWBOX_HEIGHT}`; // Reset visual points string
+    crashStartTime = performance.now();
+    crashRawPointsData = [[0, 1.00]]; // Start with initial point [time, multiplier]
+    crashPointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier); // Calculate initial points string
 
     console.log(`Crash round started. Target: ${crashTargetMultiplier.toFixed(2)}x`); // DEBUG
 
-    if (crashAnimationId) cancelAnimationFrame(crashAnimationId); // Cancel previous frame if any
+    if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
     crashAnimationId = requestAnimationFrame(crashGameLoop); // Start the loop
 }
 
@@ -234,13 +238,16 @@ function placeBetAndStart() {
  * @param {DOMHighResTimeStamp} timestamp - The timestamp provided by requestAnimationFrame.
  */
 function crashGameLoop(timestamp) {
+    // ***** START OF RAF CALLBACK *****
+    // console.log("RAF callback started"); // DEBUG: Keep minimal now
+
     if (!crashGameActive) {
-        console.log("Game loop stopped: crashGameActive is false."); // DEBUG
+        // console.log("RAF loop stopped: crashGameActive is false."); // DEBUG
         crashAnimationId = null;
-        return;
+        return; // Stop if game ended
     }
 
-    try { // Add try...catch
+    try {
         const elapsedTime = timestamp - crashStartTime;
 
         // Calculate multiplier
@@ -248,15 +255,10 @@ function crashGameLoop(timestamp) {
         currentMultiplier = 1 + 0.06 * Math.pow(timeFactor, 1.65);
         currentMultiplier = Math.max(1.00, currentMultiplier);
 
-        // --- DEBUG LOGGING ---
-        // console.log(`Loop Update - Time: ${elapsedTime.toFixed(0)}ms, Multiplier: ${currentMultiplier.toFixed(3)}, MaxY: ${currentMaxYMultiplier.toFixed(2)}`);
-
         // Check for Auto Cashout Trigger
         if (isAutoCashoutEnabled && !crashCashedOut && autoCashoutTarget >= 1.01 && currentMultiplier >= autoCashoutTarget) {
-            console.log(`Auto-cashing out at ${currentMultiplier.toFixed(2)}x`); // DEBUG
-            LocalBrokieAPI.showMessage(`Auto-cashed out at ${autoCashoutTarget.toFixed(2)}x!`, 2000);
             attemptCashOut(); // This will set crashGameActive = false, stopping loop on next frame
-            return; // Exit this frame
+            return; // Exit this frame's execution
         }
 
         // Check for Crash Condition
@@ -278,7 +280,7 @@ function crashGameLoop(timestamp) {
             }
 
             endCrashGame(true, crashPlayerBet); // Will set crashGameActive = false
-            return; // Exit this frame
+            return; // Exit this frame's execution
         }
 
         // --- Update display during active game ---
@@ -319,12 +321,15 @@ function crashGameLoop(timestamp) {
 
         LocalBrokieAPI.playSound('crash_tick', currentMultiplier);
 
-        // Request the next frame
-        crashAnimationId = requestAnimationFrame(crashGameLoop);
+        // Request the next frame ONLY if game is still active
+        if (crashGameActive) {
+            crashAnimationId = requestAnimationFrame(crashGameLoop);
+        } else {
+            crashAnimationId = null; // Ensure ID is cleared if game ended this frame
+        }
 
     } catch (error) {
         console.error("Error inside crash game loop:", error);
-        // Clean up on error
         if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
         crashAnimationId = null;
         crashGameActive = false;
@@ -335,6 +340,7 @@ function crashGameLoop(timestamp) {
 
 /**
  * Calculates the SVG points string from raw data based on the current Y scale.
+ * Uses clamped Y value to prevent negative coordinates in the string.
  * @param {Array<Array<number>>} dataPoints - Array of [elapsedTime, multiplier] points.
  * @param {number} maxYMultiplier - The current maximum multiplier for the Y axis scale.
  * @returns {string} The SVG points string (e.g., "x1,y1 x2,y2 ...").
@@ -346,15 +352,15 @@ function calculatePointsString(dataPoints, maxYMultiplier) {
         const multiplier = point[1];
         const x = Math.min(SVG_VIEWBOX_WIDTH, (elapsedTime / CRASH_MAX_TIME_MS) * SVG_VIEWBOX_WIDTH);
         const y = SVG_VIEWBOX_HEIGHT - ((multiplier - 1) / yMultiplierRange) * SVG_VIEWBOX_HEIGHT;
-        const clampedY = Math.max(0, Math.min(SVG_VIEWBOX_HEIGHT, y));
-        // console.log(`Mapping: T=${elapsedTime.toFixed(0)}, M=${multiplier.toFixed(3)} => X=${x.toFixed(2)}, Y=${y.toFixed(2)}, ClampedY=${clampedY.toFixed(2)}`); // DEBUG Y calculation
-        return `${x.toFixed(2)},${clampedY.toFixed(2)}`;
+        // REMOVED CLAMPING - RELY ON SVG CLIP PATH IN HTML
+        // const clampedY = Math.max(0, Math.min(SVG_VIEWBOX_HEIGHT, y));
+        // console.log(`Mapping: T=${elapsedTime.toFixed(0)}, M=${multiplier.toFixed(3)} => X=${x.toFixed(2)}, Y=${y.toFixed(2)}`); // DEBUG raw Y
+        return `${x.toFixed(2)},${y.toFixed(2)}`; // Use raw Y
     }).join(' ');
 }
 
 /** Applies visual styles (color, size, shake) to the multiplier display based on its value. */
 function applyMultiplierVisuals() {
-    // (Keep existing logic from previous version)
      if (!crashMultiplierDisplay) return;
      const displaySpan = document.getElementById('potential-win-amount');
      crashMultiplierDisplay.className = 'text-fluent-text-primary'; // Reset class
@@ -381,16 +387,11 @@ function applyMultiplierVisuals() {
  * @param {boolean} [stoppedByTabSwitch=false] - True if stopped because the user switched tabs.
  */
 function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
-    // Stop the animation loop FIRST
-    if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
-    crashAnimationId = null;
-    // Stop the interval just in case it was somehow still running (fallback)
-    if (crashInterval) { clearInterval(crashInterval); crashInterval = null; }
-
-    // Only proceed if the game was active or stopped by tab switch
+    if (crashAnimationId) cancelAnimationFrame(crashAnimationId); crashAnimationId = null;
+    if (crashInterval) { clearInterval(crashInterval); crashInterval = null; } // Clear interval just in case
     if (!crashGameActive && !stoppedByTabSwitch) return;
 
-    crashGameActive = false; // Mark game as inactive NOW
+    crashGameActive = false;
 
     // Re-enable controls
     if(crashBetButton) crashBetButton.disabled = false;
@@ -464,7 +465,7 @@ function attemptCashOut() {
         LocalBrokieAPI.showMessage(`Cashed out @ ${cashoutMultiplier.toFixed(2)}x. No profit.`, 3000);
         if(crashStatusDisplay) crashStatusDisplay.textContent = `Cashed Out @ ${cashoutMultiplier.toFixed(2)}x.`;
     }
-    // Game loop continues until actual crash, endCrashGame does final cleanup
+    // Game loop continues until actual crash
 }
 
 /**
@@ -555,3 +556,6 @@ function toggleCrashAutoCashout() {
     }
     updateCrashAutoCashoutToggleVisuals();
 }
+
+// Make init function available to main.js via the BrokieAPI object structure if preferred,
+// but main.js currently calls initCrash directly.
