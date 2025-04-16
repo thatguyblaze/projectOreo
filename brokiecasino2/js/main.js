@@ -570,8 +570,6 @@ function setupMainEventListeners() {
             button.addEventListener('click', () => {
                 const amount = parseInt(button.dataset.amount);
                 if (isNaN(amount) || amount <= 0) return;
-                startTone(); // Ensure audio is ready
-                playSound('loan'); // Play ATM/loan sound
                 currency += amount; // Increase currency
                 totalLoanAmount += amount; // Increase loan amount
                 updateCurrencyDisplay('win'); // Update UI, flash green
