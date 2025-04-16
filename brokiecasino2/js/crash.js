@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * Brokie Casino - Crash Game Logic (v6.3 - Increased Max Time)
+ * Brokie Casino - Crash Game Logic (v6.4 - End on Cashout)
  *
  * - Uses BrokieAPI object.
  * - Fixed auto-cashout logic.
@@ -12,12 +12,13 @@
  * - Fixed cashout issue by correcting playerHasBet state timing.
  * - Adjusted tick sound to start playing at >= 5x multiplier.
  * - Increased CRASH_MAX_TIME_MS to allow for higher potential multipliers.
+ * - Game loop now stops immediately when player cashes out.
  * - Kept console logging for debugging.
  * ==========================================================================
  */
 
 // --- Crash Game Constants ---
-const CRASH_MAX_TIME_MS = 60000; // Increased max time to 60 seconds
+const CRASH_MAX_TIME_MS = 60000; // Max time 60 seconds
 // const CRASH_UPDATE_INTERVAL_MS = 50; // Target interval (RAF controls actual timing)
 const CRASH_STARTING_MAX_Y = 2.0;
 const CRASH_Y_AXIS_PADDING_FACTOR = 1.15;
@@ -336,8 +337,11 @@ function placeBetAndStart() {
  */
 function crashGameLoop(timestamp) {
     // Stop immediately if the game is no longer marked as active
+    // This is important for the "End on Cashout" feature, as endCrashGame sets this to false.
     if (!crashGameActive) {
-        crashAnimationId = null; // Ensure ID is cleared if game stops unexpectedly
+        // console.log("RAF loop stopping: crashGameActive is false."); // DEBUG
+        if (crashAnimationId) cancelAnimationFrame(crashAnimationId); // Ensure frame is cancelled
+        crashAnimationId = null;
         return;
     }
 
@@ -347,85 +351,70 @@ function crashGameLoop(timestamp) {
         // Calculate elapsed time, ensuring it's non-negative
         const elapsedTime = Math.max(0, timestamp - crashStartTime);
 
-        // Calculate current multiplier based on elapsed time (adjust formula as needed for game feel)
+        // Calculate current multiplier based on elapsed time
         const timeFactor = elapsedTime / 1000; // Time in seconds
-        // Example formula: starts slow, accelerates over time
         currentMultiplier = 1 + 0.06 * Math.pow(timeFactor, 1.65);
         currentMultiplier = Math.max(1.00, currentMultiplier); // Ensure multiplier is always at least 1.00
 
         // --- Check for Auto Cashout Trigger ---
-        // Condition: Auto cashout enabled, player hasn't manually cashed out, target is valid, current multiplier meets target
         if (isAutoCashoutEnabled && !crashCashedOut && autoCashoutTarget >= 1.01 && currentMultiplier >= autoCashoutTarget) {
             console.log(`Auto-cashout triggered at ${currentMultiplier.toFixed(2)}x (Target: ${autoCashoutTarget.toFixed(2)}x)`); // DEBUG
-            attemptCashOut();
-            // Note: Loop continues after auto-cashout to show the graph reach its crash point.
+            attemptCashOut(); // This will now call endCrashGame and stop the loop
+            return; // Exit loop immediately after triggering cashout
         }
 
         // --- Check for Crash Condition ---
-        // Condition: Current multiplier reaches or exceeds the target, OR max game time is reached
         const hasCrashed = currentMultiplier >= crashTargetMultiplier || elapsedTime >= CRASH_MAX_TIME_MS;
 
         if (hasCrashed) {
-            // Determine if crash was due to time or multiplier target
             const crashedByTime = elapsedTime >= CRASH_MAX_TIME_MS && currentMultiplier < crashTargetMultiplier;
-            // Ensure the final displayed multiplier doesn't exceed the actual crash target
-            // If crashed by time, use the multiplier at that time. Otherwise, use the target.
             currentMultiplier = crashedByTime ? currentMultiplier : crashTargetMultiplier;
-            // Ensure multiplier is at least 1.00 even if calculation somehow results lower near start
-            currentMultiplier = Math.max(1.00, currentMultiplier);
+            currentMultiplier = Math.max(1.00, currentMultiplier); // Final safety check
 
             console.log(`Crashed at ${currentMultiplier.toFixed(2)}x` + (crashedByTime ? ' (Max Time Reached)' : '')); // DEBUG
 
             if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${currentMultiplier.toFixed(2)}x`;
-            // Add the final crash point to the data for accurate line drawing
             crashRawPointsData.push([elapsedTime, currentMultiplier]);
-            // Calculate the final points string including the crash point
             const finalPointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
             if(crashPolyline) {
                 crashPolyline.setAttribute('points', finalPointsString);
-                crashPolyline.style.stroke = '#e81123'; // Change line color to red for crash
+                crashPolyline.style.stroke = '#e81123'; // Red line
             }
-            endCrashGame(true, crashPlayerBet, false, crashedByTime); // Pass crashedByTime flag
-            return; // Stop the loop immediately after crash processing
+            endCrashGame(true, crashPlayerBet, false, crashedByTime); // End the game naturally
+            return; // Stop the loop
         }
 
         // --- Update display during active game (if not crashed yet) ---
         if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${currentMultiplier.toFixed(2)}x`;
 
-        // Update potential win amount display if the player hasn't cashed out yet and has bet
+        // Update potential win amount display
         if (!crashCashedOut && playerHasBet) {
              const currentCashoutValue = Math.floor(crashPlayerBet * currentMultiplier);
              const potentialWinSpan = document.getElementById('potential-win-amount');
              const formattedWin = (typeof LocalBrokieAPI.formatWin === 'function') ? LocalBrokieAPI.formatWin(currentCashoutValue) : currentCashoutValue;
              if (potentialWinSpan) {
-                 potentialWinSpan.textContent = formattedWin; // Update existing span
+                 potentialWinSpan.textContent = formattedWin;
              } else if (crashStatusDisplay) {
-                 // Fallback: Update status display if span is missing (less ideal)
                  crashStatusDisplay.innerHTML = `Value: <span id="potential-win-amount" class="font-bold text-white">${formattedWin}</span>`;
              }
         }
 
-        applyMultiplierVisuals(); // Apply color/shake effects based on multiplier
+        applyMultiplierVisuals(); // Apply color/shake effects
 
         // --- Update Graph Line & Scale ---
         let rescaleNeeded = false;
-        // Check if the current multiplier is approaching the top edge of the graph view
         while (currentMultiplier >= currentMaxYMultiplier * CRASH_RESCALE_THRESHOLD) {
-            currentMaxYMultiplier *= CRASH_Y_AXIS_PADDING_FACTOR; // Increase the max Y value for the scale
+            currentMaxYMultiplier *= CRASH_Y_AXIS_PADDING_FACTOR;
             rescaleNeeded = true;
         }
-        // If the scale changed, redraw the grid lines
         if (rescaleNeeded) {
             console.log("Rescaling Y axis to:", currentMaxYMultiplier.toFixed(2)); // DEBUG
             updateCrashGrid();
         }
 
-        // Add current raw data point [time, multiplier] to the array
         crashRawPointsData.push([elapsedTime, currentMultiplier]);
-        // Recalculate the entire points string based on the potentially updated scale
         const pointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
 
-        // Update the polyline if the element still exists
         if(crashPolyline) {
              crashPolyline.setAttribute('points', pointsString);
         } else {
@@ -435,26 +424,25 @@ function crashGameLoop(timestamp) {
         }
 
         // --- Play tick sound ---
-        // Play sound only if: not cashed out, API function exists, AND multiplier is >= threshold
         if (!crashCashedOut && currentMultiplier >= CRASH_TICK_SOUND_START_MULTIPLIER && typeof LocalBrokieAPI.playSound === 'function') {
             LocalBrokieAPI.playSound('crash_tick', currentMultiplier);
         }
 
         // --- Request the next frame ---
-        // Continue the loop only if the game is still marked as active
+        // Only request if the game is still active (it might have been stopped by cashout)
         if (crashGameActive) {
             crashAnimationId = requestAnimationFrame(crashGameLoop);
         } else {
-            crashAnimationId = null; // Ensure ID is cleared if game stopped by other means (e.g., cashout)
+             if (crashAnimationId) cancelAnimationFrame(crashAnimationId); // Explicitly cancel if stopped mid-frame
+             crashAnimationId = null;
         }
 
     } catch (error) {
         console.error("Error inside crash game loop:", error);
-        if (crashAnimationId) cancelAnimationFrame(crashAnimationId); // Stop loop on error
+        if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
         crashAnimationId = null;
-        crashGameActive = false; // Ensure game stops on error
+        crashGameActive = false;
         if(crashStatusDisplay) crashStatusDisplay.textContent = "Game error occurred!";
-        // Attempt to reset visuals to allow starting a new game
         resetCrashVisuals();
     }
 }
@@ -482,8 +470,6 @@ function calculatePointsString(dataPoints, maxYMultiplier) {
         const x = Math.min(SVG_VIEWBOX_WIDTH, (safeElapsedTime / CRASH_MAX_TIME_MS) * SVG_VIEWBOX_WIDTH);
 
         // Calculate Y coordinate: map multiplier (1 to max Y) to SVG height (height to 0)
-        // SVG Y=0 is at the top, Y=height is at the bottom.
-        // Formula: height - ((currentValue - minValue) / range) * height
         const y = SVG_VIEWBOX_HEIGHT - ((multiplier - 1) / yMultiplierRange) * SVG_VIEWBOX_HEIGHT;
 
         // Check for NaN values which can break SVG rendering
@@ -506,26 +492,21 @@ function applyMultiplierVisuals() {
      const displaySpan = document.getElementById('potential-win-amount');
 
      // --- Reset classes first for clean application ---
-     // Define all possible dynamic classes to remove them reliably
      const effectClasses = ['shake-subtle', 'shake-strong', 'mult-color-5x', 'mult-color-10x', 'mult-color-15x', 'mult-color-20x', 'mult-color-30x', 'win-effect'];
      const sizeClasses = ['mult-size-10x', 'mult-size-20x', 'mult-size-30x'];
 
-     // Remove all potential effect and size classes from the multiplier display
      crashMultiplierDisplay.classList.remove(...effectClasses, ...sizeClasses);
-     crashMultiplierDisplay.style.fontSize = ''; // Reset inline font size if previously set by effects
-     // Ensure base text color is reapplied if no specific color class is added below
+     crashMultiplierDisplay.style.fontSize = ''; // Reset inline font size
      crashMultiplierDisplay.classList.add('text-fluent-text-primary');
 
-     // Reset the potential win span as well
      if (displaySpan) {
-         displaySpan.classList.remove(...effectClasses); // Remove color classes from span too
-         displaySpan.className = 'font-bold text-white'; // Reset span class to default
+         displaySpan.classList.remove(...effectClasses);
+         displaySpan.className = 'font-bold text-white'; // Reset span class
      }
 
      // --- Apply new classes based on current multiplier ---
-     let appliedColorClass = null; // Track which color class is applied for the span
+     let appliedColorClass = null;
 
-     // Apply styles progressively based on multiplier thresholds
      if (currentMultiplier >= 30) {
          crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-30x', 'mult-size-30x');
          appliedColorClass = 'mult-color-30x';
@@ -542,16 +523,14 @@ function applyMultiplierVisuals() {
          crashMultiplierDisplay.classList.add('shake-subtle', 'mult-color-5x');
          appliedColorClass = 'mult-color-5x';
      } else if (currentMultiplier >= 3) {
-         crashMultiplierDisplay.classList.add('shake-subtle'); // Only shake, no color change
+         crashMultiplierDisplay.classList.add('shake-subtle');
      }
 
-     // Apply the determined color class to the potential win span, removing default white
      if (displaySpan && appliedColorClass) {
          displaySpan.classList.remove('text-white');
          displaySpan.classList.add(appliedColorClass);
      }
 
-     // If a specific color class was applied, remove the default primary text color from the main display
      if (appliedColorClass) {
          crashMultiplierDisplay.classList.remove('text-fluent-text-primary');
      }
@@ -566,22 +545,31 @@ function applyMultiplierVisuals() {
  * @param {boolean} [crashedByTime=false] - True if the crash was triggered by max time limit.
  */
 function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false, crashedByTime = false) {
-    // Stop the animation loop FIRST to prevent race conditions or further updates
+    // Stop the animation loop FIRST
+    // Important: Set crashGameActive false *before* cancelling frame to prevent race condition in loop check
+    crashGameActive = false;
     if (crashAnimationId) {
         cancelAnimationFrame(crashAnimationId);
         crashAnimationId = null;
     }
 
-    // Prevent multiple calls to endCrashGame for the same round if already inactive
-    if (!crashGameActive && !stoppedByTabSwitch) {
-        console.log("endCrashGame called but game already inactive."); // DEBUG
-        return;
-    }
-    crashGameActive = false; // Mark game as inactive
+    // Prevent multiple calls if already ended (e.g. cashout then crash condition met)
+    // Check if playerHasBet is true to ensure we only process end game for active bets
+    // Note: This check might need refinement depending on desired behavior after cashout + natural crash
+    // if (!playerHasBet && !stoppedByTabSwitch) {
+    //     console.log("endCrashGame called but no active bet or already ended."); // DEBUG
+    //     // Ensure controls are reset even if no bet was active
+    //      if(crashBetButton) crashBetButton.disabled = false;
+    //      if(crashCashoutButton) crashCashoutButton.disabled = true;
+    //      if(crashBetInput) crashBetInput.disabled = false;
+    //      updateCrashAutoCashoutToggleVisuals();
+    //     return;
+    // }
+
 
     // Re-enable betting controls and disable cashout button
     if(crashBetButton) crashBetButton.disabled = false;
-    if(crashCashoutButton) crashCashoutButton.disabled = true; // Disable cashout after round ends
+    if(crashCashoutButton) crashCashoutButton.disabled = true;
     if(crashBetInput) crashBetInput.disabled = false;
     if(crashAutoBetToggle) crashAutoBetToggle.disabled = false;
     if(crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
@@ -589,50 +577,56 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false, crashedByTi
 
     // --- Handle Game Outcome Display and Sounds ---
     const formattedBet = (typeof LocalBrokieAPI.formatWin === 'function') ? LocalBrokieAPI.formatWin(betAtEnd) : betAtEnd;
-    // Use the globally tracked currentMultiplier which was finalized in crashGameLoop before calling this
+    // Use the globally tracked currentMultiplier which was finalized before calling this
     const finalMultiplier = currentMultiplier;
 
-    if (crashed && !stoppedByTabSwitch) { // Game crashed normally (by multiplier or time)
-        if (!crashCashedOut && playerHasBet) { // Player bet and did not cash out in time = Loss
-            // Update displays for crash loss
+    // --- Logic based on how the game ended ---
+
+    if (stoppedByTabSwitch) { // Game stopped due to tab switch
+        if (!crashCashedOut && playerHasBet) { // Player lost their bet
+            if(crashStatusDisplay) crashStatusDisplay.textContent = "Game stopped (inactive tab). Bet lost.";
+        } else if (crashCashedOut) { // Player already cashed out
+             if(crashStatusDisplay) crashStatusDisplay.textContent += " (Game stopped)"; // Append to cashout message
+        } else { // No bet placed
+             if(crashStatusDisplay) crashStatusDisplay.textContent = "Game stopped (inactive tab).";
+        }
+    } else if (crashed) { // Game ended due to hitting target multiplier or max time
+        if (!crashCashedOut && playerHasBet) { // Player bet and did NOT cash out = Loss
             if(crashMultiplierDisplay) {
-                // Display the final multiplier achieved, whether it was the target or the one at max time
                 crashMultiplierDisplay.textContent = `CRASH! ${finalMultiplier.toFixed(2)}x`;
-                crashMultiplierDisplay.className = 'text-fluent-danger'; // Red text
+                crashMultiplierDisplay.className = 'text-fluent-danger';
             }
             if(crashPolyline) crashPolyline.style.stroke = '#e81123'; // Red line
             if(crashStatusDisplay) {
                 crashStatusDisplay.textContent = `Crashed${crashedByTime ? ' (Max Time)' : ''}! You lost ${formattedBet}.`;
             }
-            // Play crash sound
             if (typeof LocalBrokieAPI.playSound === 'function') LocalBrokieAPI.playSound('crash_explode');
-
-        } else if (crashCashedOut) { // Player cashed out before the crash = Win (handled in attemptCashOut)
+        } else if (crashCashedOut && playerHasBet) { // Player HAD cashed out before the natural crash
+             // Message already set by attemptCashOut, just append crash info
              if(crashStatusDisplay) {
-                // Append crash info to the existing cashout message for context
-                crashStatusDisplay.textContent += ` (Crashed @ ${finalMultiplier.toFixed(2)}x${crashedByTime ? ' by time' : ''})`;
+                crashStatusDisplay.textContent += ` (Round ended @ ${finalMultiplier.toFixed(2)}x${crashedByTime ? ' by time' : ''})`;
              }
-        } else { // Game crashed, but player didn't bet
+             // Optionally play a different sound here?
+        } else { // Game crashed, but player didn't bet (e.g., observer)
              if(crashStatusDisplay) {
                 crashStatusDisplay.textContent = `Round Crashed @ ${finalMultiplier.toFixed(2)}x${crashedByTime ? ' (Max Time)' : ''}`;
              }
         }
-    } else if (!crashed && crashCashedOut && !stoppedByTabSwitch) { // Should not happen if crash is always true when time runs out
-         console.warn("endCrashGame called with crashed=false despite possible max time condition."); // Should ideally not be reached
-         if(crashStatusDisplay) crashStatusDisplay.textContent += ` (Round ended)`;
-    } else if (stoppedByTabSwitch) { // Game stopped due to tab switch or similar interruption
-        if (!crashCashedOut && playerHasBet) { // Player lost their bet
-            if(crashStatusDisplay) crashStatusDisplay.textContent = "Game stopped (inactive tab). Bet lost.";
-        } else if (crashCashedOut) { // Player already cashed out
-             if(crashStatusDisplay) crashStatusDisplay.textContent += " (Game stopped)";
-        } else { // No bet placed
-             if(crashStatusDisplay) crashStatusDisplay.textContent = "Game stopped (inactive tab).";
+    } else if (crashCashedOut) { // Game ended specifically *because* of cashout (crashed == false)
+        // The main message is already set in attemptCashOut.
+        // We might add a generic "Round Ended" or leave as is.
+        if(crashStatusDisplay && crashStatusDisplay.textContent.includes("Cashed Out")) {
+             // Message already indicates cashout success. No extra text needed.
+        } else {
+            // Fallback if status wasn't updated correctly
+             if(crashStatusDisplay) crashStatusDisplay.textContent = `Round ended after cashout.`;
         }
-    } else { // Other end conditions
-        if(crashStatusDisplay && !crashStatusDisplay.textContent.includes("Cashed Out")) {
-             crashStatusDisplay.textContent = "Round finished.";
-        }
+    } else {
+         // Fallback for any other unexpected end condition
+         console.warn("endCrashGame reached unexpected state.");
+         if(crashStatusDisplay) crashStatusDisplay.textContent = "Round finished.";
     }
+
 
     // --- Save Game State (Optional) ---
     if (LocalBrokieAPI && typeof LocalBrokieAPI.saveGameState === 'function') {
@@ -642,47 +636,52 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false, crashedByTi
     }
 
     // Reset bet amount and status for the next round
+    const betBeforeReset = crashPlayerBet; // Store bet before resetting for auto-bet check
     crashPlayerBet = 0;
     playerHasBet = false; // Reset bet status
 
     // --- Handle Auto-Bet ---
-    if (isCrashAutoBetting && !stoppedByTabSwitch) {
+    // Start next round only if auto-bet is on AND the game wasn't stopped externally
+    if (isCrashAutoBetting && !stoppedByTabSwitch && betBeforeReset > 0) { // Also ensure a valid bet was made
         console.log("Auto-bet: Scheduling next bet."); // DEBUG
         setTimeout(placeBetAndStart, 1500); // Delay before starting next round
     } else {
-         console.log(`Auto-bet: Not starting next round. isCrashAutoBetting=${isCrashAutoBetting}, stoppedByTabSwitch=${stoppedByTabSwitch}`); // DEBUG
+         console.log(`Auto-bet: Not starting next round. isCrashAutoBetting=${isCrashAutoBetting}, stoppedByTabSwitch=${stoppedByTabSwitch}, betBeforeReset=${betBeforeReset}`); // DEBUG
          // If auto-betting was stopped/off, ensure controls are fully reset/enabled
-         if(!crashGameActive) {
-             resetCrashVisuals();
-         }
+         // Resetting visuals again here might be redundant if called correctly earlier
+         // but ensures clean state if endCrashGame is somehow called unexpectedly.
+         // if(!crashGameActive) { // Check again just in case
+         //     resetCrashVisuals();
+         // }
     }
 }
 
 /**
  * Attempts to cash out the current crash game bet at the current multiplier.
  * Called by button click or auto-cashout trigger.
+ * Ends the game immediately upon successful cashout.
  */
 function attemptCashOut() {
     // --- Pre-conditions for Cashout ---
     if (!crashGameActive || crashCashedOut || !crashCashoutButton || !playerHasBet) {
         console.warn(`Cashout attempt failed: gameActive=${crashGameActive}, cashedOut=${crashCashedOut}, playerHasBet=${playerHasBet}`);
-        return;
+        return; // Exit if conditions not met
     }
 
-    // --- Mark as Cashed Out ---
+    // --- Mark as Cashed Out & Disable Button ---
     crashCashedOut = true;
-    crashCashoutButton.disabled = true; // Disable button immediately
+    crashCashoutButton.disabled = true;
 
     // --- Calculate Winnings ---
-    const cashoutMultiplier = currentMultiplier; // Capture multiplier at the exact moment of cashout
-    const totalReturn = Math.floor(crashPlayerBet * cashoutMultiplier); // Calculate total amount returned
-    const profit = totalReturn - crashPlayerBet; // Calculate profit
+    const cashoutMultiplier = currentMultiplier; // Capture multiplier
+    const totalReturn = Math.floor(crashPlayerBet * cashoutMultiplier);
+    const profit = totalReturn - crashPlayerBet;
 
     // --- Update Balance & Play Sound ---
     if (typeof LocalBrokieAPI.updateBalance === 'function') {
-        LocalBrokieAPI.updateBalance(totalReturn); // Add the full return amount
+        LocalBrokieAPI.updateBalance(totalReturn);
     } else {
-        console.warn("LocalBrokieAPI.updateBalance is not a function. Balance not updated on cashout.");
+        console.warn("LocalBrokieAPI.updateBalance is not a function.");
     }
     if (typeof LocalBrokieAPI.playSound === 'function') {
         LocalBrokieAPI.playSound('crash_cashout');
@@ -692,27 +691,33 @@ function attemptCashOut() {
     const formattedProfit = (typeof LocalBrokieAPI.formatWin === 'function') ? LocalBrokieAPI.formatWin(profit) : profit;
     const formattedReturn = (typeof LocalBrokieAPI.formatWin === 'function') ? LocalBrokieAPI.formatWin(totalReturn) : totalReturn;
 
-    if (profit > 0) { // Player made a profit
+    if (profit > 0) {
         if (typeof LocalBrokieAPI.showMessage === 'function') {
             LocalBrokieAPI.showMessage(`Cashed out @ ${cashoutMultiplier.toFixed(2)}x! Won ${formattedProfit}!`, 3000);
         }
         if (typeof LocalBrokieAPI.addWin === 'function') {
             LocalBrokieAPI.addWin('Crash', profit);
         } else {
-             console.warn("LocalBrokieAPI.addWin is not a function. Win not recorded.");
+             console.warn("LocalBrokieAPI.addWin is not a function.");
         }
         if(crashStatusDisplay) crashStatusDisplay.textContent = `Cashed Out! Won ${formattedProfit}. Total: ${formattedReturn}`;
         if(crashMultiplierDisplay) {
              crashMultiplierDisplay.classList.add('win-effect');
-             setTimeout(() => { if(crashMultiplierDisplay) crashMultiplierDisplay.classList.remove('win-effect') }, 1000);
+             // Don't use timeout to remove, endCrashGame will reset visuals
+             // setTimeout(() => { if(crashMultiplierDisplay) crashMultiplierDisplay.classList.remove('win-effect') }, 1000);
         }
-    } else { // Player cashed out at 1.00x or very close, no profit
+    } else {
         if (typeof LocalBrokieAPI.showMessage === 'function') {
             LocalBrokieAPI.showMessage(`Cashed out @ ${cashoutMultiplier.toFixed(2)}x. No profit. Returned ${formattedReturn}`, 3000);
         }
         if(crashStatusDisplay) crashStatusDisplay.textContent = `Cashed Out @ ${cashoutMultiplier.toFixed(2)}x. Returned ${formattedReturn}.`;
     }
-    // Game loop continues visually until the actual crash.
+
+    // --- End the Game Immediately ---
+    // Call endCrashGame, indicating it did NOT crash naturally (crashed = false)
+    console.log(`Game ended by cashout at ${cashoutMultiplier.toFixed(2)}x`); // DEBUG
+    endCrashGame(false, crashPlayerBet); // Pass false for 'crashed' parameter
+
 }
 
 /**
