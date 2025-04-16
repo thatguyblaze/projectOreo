@@ -1,9 +1,11 @@
 /**
  * ==========================================================================
- * Brokie Casino - Plinko Game Logic (plinko.js) - v2.2 (Fix saveGameState Call)
+ * Brokie Casino - Plinko Game Logic (plinko.js) - v2.3 (Timer & Sound Fix)
  *
  * Handles Plinko game logic using HTML Canvas.
- * - Removed incorrect call to saveGameState (already handled by updateBalance).
+ * - Fixed error calling updateCurrencyDisplay directly via API.
+ * - Added 20-second despawn timer for balls.
+ * - Removed peg hit and bucket landing sounds.
  * - Added guard against multiple script executions/declarations.
  * - Allows multiple balls to be dropped concurrently.
  * - Randomizes ball drop position.
@@ -16,7 +18,7 @@
 if (typeof initPlinko === 'undefined') {
 
     // --- Plinko Specific State & Constants ---
-    let plinkoBalls = []; // Array to hold multiple ball objects
+    let plinkoBalls = []; // Array to hold multiple ball objects { x, y, vx, vy, radius, betAmount, startTime }
     let plinkoCanvas, plinkoCtx; // Canvas and context
     let plinkoPegs = []; // Array to hold peg positions [{ x, y, radius }]
     let plinkoBuckets = []; // Array to hold bucket properties [{ x, width, multiplier, color }]
@@ -30,6 +32,7 @@ if (typeof initPlinko === 'undefined') {
     const GRAVITY = 0.15;
     const BOUNCE_FACTOR = 0.6; // Energy retained on bounce (lower = less bouncy)
     const HORIZONTAL_DRIFT_FACTOR = 0.2; // Increased base horizontal push on collision
+    const BALL_LIFETIME_MS = 20000; // 20 seconds before despawn
 
     // Bucket definitions (multipliers and colors)
     const BUCKET_MULTIPLIERS = [10, 3, 0.5, 0.2, 0.5, 3, 10];
@@ -247,7 +250,6 @@ if (typeof initPlinko === 'undefined') {
 
         // Deduct bet for this specific ball
         LocalBrokieAPI.updateBalance(-betAmount); // Update balance immediately
-        // ** REMOVED LocalBrokieAPI.saveGameState(); - It's called within updateBalance **
 
         // Create the new ball object
         const canvasWidth = plinkoCanvas.width;
@@ -259,7 +261,8 @@ if (typeof initPlinko === 'undefined') {
             vx: 0,
             vy: 0,
             radius: BALL_RADIUS,
-            betAmount: betAmount // Store the bet amount with the ball
+            betAmount: betAmount, // Store the bet amount with the ball
+            startTime: Date.now() // Record the creation time
         };
 
         // Add the new ball to the array
@@ -286,14 +289,22 @@ if (typeof initPlinko === 'undefined') {
         const ctx = plinkoCtx;
         const canvasWidth = plinkoCanvas.width;
         const canvasHeight = plinkoCanvas.height;
+        const currentTime = Date.now(); // Get current time for timer check
 
         // Clear canvas for redraw
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         // --- Update and Check Each Ball ---
-        // Iterate backwards for safe removal when ball lands
+        // Iterate backwards for safe removal when ball lands or times out
         for (let i = plinkoBalls.length - 1; i >= 0; i--) {
             const ball = plinkoBalls[i];
+
+            // --- Check Timer ---
+            if (currentTime - ball.startTime > BALL_LIFETIME_MS) {
+                console.log("Ball timed out and removed.");
+                plinkoBalls.splice(i, 1); // Remove the timed-out ball
+                continue; // Skip physics and drawing for this ball
+            }
 
             // --- Physics Update ---
             ball.vy += GRAVITY;
@@ -340,8 +351,8 @@ if (typeof initPlinko === 'undefined') {
                        ball.vx += (Math.random() - 0.5) * 0.2; // Tiny horizontal nudge
                     }
 
-                    // Play sound only once per collision check cycle for this ball
-                    if (LocalBrokieAPI) LocalBrokieAPI.playSound('plinko_peg_hit');
+                    // ** SOUND REMOVED **
+                    // if (LocalBrokieAPI) LocalBrokieAPI.playSound('plinko_peg_hit');
                     break; // Handle only one peg collision per ball per frame for simplicity
                 }
             }
@@ -421,39 +432,29 @@ if (typeof initPlinko === 'undefined') {
         const winAmount = Math.floor(betAmount * multiplier); // Use ball's specific bet amount
 
         // Update currency (winAmount is the total return including original bet if multiplier >= 1)
-        LocalBrokieAPI.updateBalance(winAmount);
+        LocalBrokieAPI.updateBalance(winAmount); // This internally calls updateCurrencyDisplay and saveGameState
 
-        // Determine sound and status message based on multiplier
-        let winSound = 'click'; // Default neutral sound
+        // Determine status message based on multiplier
         let statusText = `Ball landed in ${multiplier}x. `;
         const profit = winAmount - betAmount; // Calculate net profit/loss
 
         if (profit > 0) {
-            winSound = multiplier >= 3 ? 'plinko_win_high' : 'plinko_win_low'; // Different sounds for high/low wins
             statusText += `Won ${LocalBrokieAPI.formatWin(profit)}!`;
             LocalBrokieAPI.addWin('Plinko', profit); // Add net win to leaderboard
         } else if (profit < 0) {
-             winSound = 'lose';
              statusText += `Lost ${LocalBrokieAPI.formatWin(Math.abs(profit))}.`;
         } else { // profit === 0
              statusText += `Bet returned.`;
         }
 
-        LocalBrokieAPI.playSound(winSound);
-        // Display status temporarily - Note: might be overwritten quickly by other balls
-        // plinkoStatus.textContent = statusText; // Maybe remove this for less clutter?
+        // ** SOUND REMOVED **
+        // LocalBrokieAPI.playSound(winSound);
+
         // Show message notification for each ball result - more reliable for multiple balls
         LocalBrokieAPI.showMessage(statusText, 2500);
 
-
-        // Flash currency display based on profit
-        if (profit > 0) {
-            LocalBrokieAPI.updateCurrencyDisplay('win'); // Flash green
-        } else if (profit < 0) {
-             LocalBrokieAPI.updateCurrencyDisplay('loss'); // Flash red
-        } else {
-             LocalBrokieAPI.updateCurrencyDisplay(); // No flash
-        }
+        // ** ERROR FIX: Removed incorrect calls to LocalBrokieAPI.updateCurrencyDisplay() **
+        // The balance display update (including flash) is handled internally by updateBalance now.
 
         // Highlight the winning bucket briefly
         highlightBucket(bucket);
@@ -482,8 +483,6 @@ if (typeof initPlinko === 'undefined') {
          // Revert after a delay
          setTimeout(() => {
              // Check context still exists and redraw original bucket color + text
-             // Important: Check if other balls haven't landed and re-highlighted in the meantime
-             // A simple redraw might be sufficient if timing isn't critical
              if (plinkoCtx) {
                   ctx.fillStyle = originalColor;
                   ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
@@ -493,7 +492,6 @@ if (typeof initPlinko === 'undefined') {
                   ctx.textAlign = 'center';
                   ctx.textBaseline = 'middle';
                   ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
-                  // Redraw divider if needed (might be simpler to just redraw whole board in main loop)
              }
          }, 500); // Highlight duration
     }
