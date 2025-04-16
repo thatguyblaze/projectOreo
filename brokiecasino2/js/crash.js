@@ -1,21 +1,21 @@
 /**
  * ==========================================================================
- * Brokie Casino - Crash Game Logic (v4 - Scaling/Log Fixes)
+ * Brokie Casino - Crash Game Logic (v4 - requestAnimationFrame)
  *
  * - Uses BrokieAPI object.
  * - Fixed auto-cashout logic.
- * - Adjusted Y-axis rescaling trigger point (0.90).
- * - Added more specific logging for Y coordinates and auto-bet.
- * - Ensures polyline recalculation uses clamped values.
+ * - Fixed Y-axis scaling logic.
+ * - Switched game loop from setInterval to requestAnimationFrame.
+ * - Kept console logging for debugging.
  * ==========================================================================
  */
 
 // --- Crash Game Constants ---
 const CRASH_MAX_TIME_MS = 15000;
-const CRASH_UPDATE_INTERVAL_MS = 50;
+// const CRASH_UPDATE_INTERVAL_MS = 50; // No longer needed for RAF
 const CRASH_STARTING_MAX_Y = 2.0;
-const CRASH_Y_AXIS_PADDING_FACTOR = 1.15; // Keep padding factor
-const CRASH_RESCALE_THRESHOLD = 0.90; // Rescale when multiplier hits 90% of max Y (Changed from 0.95)
+const CRASH_Y_AXIS_PADDING_FACTOR = 1.15;
+const CRASH_RESCALE_THRESHOLD = 0.90;
 const CRASH_GRID_LINES_X = 5;
 const CRASH_GRID_LINES_Y = 4;
 const SVG_VIEWBOX_WIDTH = 100;
@@ -23,13 +23,14 @@ const SVG_VIEWBOX_HEIGHT = 100;
 
 // --- Crash Game State Variables ---
 let crashGameActive = false;
-let crashStartTime = null;
+let crashStartTime = null; // Will store high-resolution timestamp
 let currentMultiplier = 1.00;
 let crashTargetMultiplier = 1.00;
-let crashInterval = null;
+// let crashInterval = null; // No longer needed
+let crashAnimationId = null; // ID for requestAnimationFrame
 let crashPlayerBet = 0;
 let crashCashedOut = false;
-let crashRawPointsData = []; // Store raw [elapsedTime, multiplier] pairs
+let crashRawPointsData = [];
 let currentMaxYMultiplier = CRASH_STARTING_MAX_Y;
 let isCrashAutoBetting = false;
 let isAutoCashoutEnabled = false;
@@ -51,6 +52,19 @@ function initCrash(API) {
     console.log("Initializing Crash Game...");
     LocalBrokieAPI = API;
 
+    // Get DOM elements (add checks within function)
+    if (!assignCrashDOMElements()) return; // Assign and check elements
+
+    resetCrashVisuals();
+    updateCrashAutoCashoutToggleVisuals();
+    setupCrashEventListeners(); // Setup listeners
+
+    LocalBrokieAPI.addBetAdjustmentListeners('crash', crashBetInput);
+    console.log("Crash Initialized");
+}
+
+/** Assigns and checks essential DOM elements for the Crash game. */
+function assignCrashDOMElements() {
     crashGraph = document.getElementById('crash-graph');
     crashMultiplierDisplay = document.getElementById('crash-multiplier');
     crashSvg = document.getElementById('crash-svg');
@@ -70,12 +84,13 @@ function initCrash(API) {
         console.error("Crash Game initialization failed: Could not find all required DOM elements or API.");
         const gameArea = document.getElementById('game-crash');
         if(gameArea) gameArea.innerHTML = '<p class="text-fluent-danger text-center">Error loading Crash Game elements.</p>';
-        return;
+        return false;
     }
+    return true;
+}
 
-    resetCrashVisuals();
-    updateCrashAutoCashoutToggleVisuals();
-
+/** Sets up event listeners for Crash game controls. */
+function setupCrashEventListeners() {
     crashBetButton.addEventListener('click', placeBetAndStart);
     crashCashoutButton.addEventListener('click', attemptCashOut);
     crashAutoBetToggle.addEventListener('click', toggleCrashAutoBet);
@@ -84,10 +99,8 @@ function initCrash(API) {
     crashAutoCashoutInput.addEventListener('input', () => {
         crashAutoCashoutInput.value = crashAutoCashoutInput.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
     });
-
-    LocalBrokieAPI.addBetAdjustmentListeners('crash', crashBetInput);
-    console.log("Crash Initialized");
 }
+
 
 /**
  * Updates the background grid lines in the SVG based on the current Y-axis scale.
@@ -111,11 +124,9 @@ function updateCrashGrid() {
 
     const numHorizontalLines = CRASH_GRID_LINES_Y;
     const yMultiplierRange = Math.max(0.01, currentMaxYMultiplier - 1);
-    // console.log(`Updating Grid: MaxY=${currentMaxYMultiplier.toFixed(2)}`); // DEBUG
     for (let i = 1; i <= numHorizontalLines; i++) {
         const multiplierValue = 1 + (i / (numHorizontalLines + 1)) * yMultiplierRange;
         const y = height - ((multiplierValue - 1) / yMultiplierRange) * height;
-        // console.log(`Grid Line ${i}: Mult=${multiplierValue.toFixed(2)}, Y=${y.toFixed(2)}`); // DEBUG
         if (y >= 0 && y <= height) {
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', '0'); line.setAttribute('y1', y.toFixed(2));
@@ -138,16 +149,20 @@ function updateCrashGrid() {
  */
 function resetCrashVisuals() {
     if (!crashMultiplierDisplay || !crashSvg || !crashPolyline || !crashStatusDisplay || !crashBetButton || !crashCashoutButton || !crashBetInput) return;
-    if (crashInterval) clearInterval(crashInterval); crashInterval = null;
 
+    // Stop any existing game loop
+    if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
+    crashAnimationId = null;
+
+    // Reset state variables
     crashGameActive = false; playerHasBet = false; crashCashedOut = false;
-    crashMultiplier = 1.00;
-    crashRawPointsData = [[0, 1.00]]; // Reset raw data points array with initial point
+    currentMultiplier = 1.00; // Reset currentMultiplier here
+    crashRawPointsData = [[0, 1.00]];
     crashPointsString = `0,${SVG_VIEWBOX_HEIGHT}`;
     currentMaxYMultiplier = CRASH_STARTING_MAX_Y;
 
     crashSvg.setAttribute('viewBox', `0 0 ${SVG_VIEWBOX_WIDTH} ${SVG_VIEWBOX_HEIGHT}`);
-    crashMultiplierDisplay.textContent = `${crashMultiplier.toFixed(2)}x`;
+    crashMultiplierDisplay.textContent = `${currentMultiplier.toFixed(2)}x`;
     crashMultiplierDisplay.className = 'text-fluent-text-primary';
     crashMultiplierDisplay.style.fontSize = '';
     crashPolyline.setAttribute('points', crashPointsString);
@@ -155,6 +170,7 @@ function resetCrashVisuals() {
     crashStatusDisplay.textContent = 'Place your bet for the next round!';
     updateCrashGrid();
 
+    // Reset button states
     crashBetButton.disabled = false;
     crashCashoutButton.disabled = true;
     crashBetInput.disabled = false;
@@ -174,25 +190,25 @@ function calculateCrashTarget() {
     return Math.max(1.01, Math.floor(crashPoint * 100) / 100);
 }
 
+
 /**
  * Validates the bet amount and starts a new round of the crash game.
  */
 function placeBetAndStart() {
-    // Basic validation and checks...
     if (!crashBetInput || !crashBetButton || !crashCashoutButton || !crashStatusDisplay || !LocalBrokieAPI) { console.error("Crash start failed: elements/API missing."); return; }
-    if (crashGameActive) { LocalBrokieAPI.showMessage("Round in progress.", 1500); return; }
+    if (crashGameActive) { LocalBrokieAPI.showMessage("Round already in progress.", 1500); return; }
     const betAmount = parseInt(crashBetInput.value);
     if (isNaN(betAmount) || betAmount < 1) { LocalBrokieAPI.showMessage("Invalid bet.", 2000); if (isCrashAutoBetting) stopCrashAutoBet(); return; }
     if (betAmount > LocalBrokieAPI.getBalance()) { LocalBrokieAPI.showMessage("Insufficient balance.", 2000); if (isCrashAutoBetting) stopCrashAutoBet(); return; }
 
-    // --- Start Game ---
+    // --- Bet is valid, proceed ---
     LocalBrokieAPI.startTone();
     crashPlayerBet = betAmount;
     LocalBrokieAPI.updateBalance(-betAmount);
 
     crashGameActive = true; crashCashedOut = false;
     crashTargetMultiplier = calculateCrashTarget();
-    resetCrashVisuals(); // Reset graph visual state
+    resetCrashVisuals(); // Reset graph BEFORE starting loop
     crashStatusDisplay.innerHTML = `Bet Placed! Value: <span id="potential-win-amount" class="font-bold text-white">${LocalBrokieAPI.formatWin(crashPlayerBet)}</span>`;
 
     // Disable controls
@@ -202,94 +218,120 @@ function placeBetAndStart() {
     if(crashAutoCashoutInput) crashAutoCashoutInput.disabled = true;
     if (isAutoCashoutEnabled) validateAndUpdateAutoCashoutTarget();
 
-    // --- Start Game Loop ---
-    crashStartTime = Date.now();
-    crashRawPointsData = [[0, 1.00]]; // Start with initial point for recalculation
+    // --- Start the Game Loop using requestAnimationFrame ---
+    crashStartTime = performance.now(); // Use high-resolution timer
+    crashRawPointsData = [[0, 1.00]]; // Start with initial point
     crashPointsString = `0,${SVG_VIEWBOX_HEIGHT}`; // Reset visual points string
 
-    console.log(`Crash round started. Target: ${crashTargetMultiplier.toFixed(2)}x`);
+    console.log(`Crash round started. Target: ${crashTargetMultiplier.toFixed(2)}x`); // DEBUG
 
-    if (crashInterval) clearInterval(crashInterval);
-    crashInterval = setInterval(() => {
-        try {
-            // console.log("Interval callback started"); // Keep this log minimal now
-            if (!crashGameActive) { clearInterval(crashInterval); crashInterval = null; return; }
-
-            const elapsedTime = Date.now() - crashStartTime;
-            const timeFactor = elapsedTime / 1000;
-            crashMultiplier = 1 + 0.06 * Math.pow(timeFactor, 1.65);
-            crashMultiplier = Math.max(1.00, crashMultiplier);
-
-            // Check for Auto Cashout
-            if (isAutoCashoutEnabled && !crashCashedOut && autoCashoutTarget >= 1.01 && crashMultiplier >= autoCashoutTarget) {
-                attemptCashOut(); return;
-            }
-
-            // Check for Crash
-            const hasCrashed = crashMultiplier >= crashTargetMultiplier || elapsedTime >= CRASH_MAX_TIME_MS;
-            if (hasCrashed) {
-                clearInterval(crashInterval); crashInterval = null;
-                crashMultiplier = Math.min(crashMultiplier, crashTargetMultiplier);
-                if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${crashMultiplier.toFixed(2)}x`;
-                // Add final point to raw data
-                crashRawPointsData.push([elapsedTime, crashMultiplier]);
-                // Recalculate final points string based on final scale
-                const finalPointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
-                if(crashPolyline) {
-                    crashPolyline.setAttribute('points', finalPointsString);
-                    crashPolyline.style.stroke = '#e81123'; // Red
-                }
-                setTimeout(() => endCrashGame(true, crashPlayerBet), 100);
-                return;
-            }
-
-            // --- Update display during active game ---
-            if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${crashMultiplier.toFixed(2)}x`;
-            const currentCashoutValue = Math.floor(crashPlayerBet * crashMultiplier);
-            const potentialWinSpan = document.getElementById('potential-win-amount');
-            if (potentialWinSpan) potentialWinSpan.textContent = LocalBrokieAPI.formatWin(currentCashoutValue);
-            else if (crashStatusDisplay) crashStatusDisplay.innerHTML = `Value: <span id="potential-win-amount" class="font-bold text-white">${LocalBrokieAPI.formatWin(currentCashoutValue)}</span>`;
-
-            applyMultiplierVisuals();
-
-            // --- Update Graph Line ---
-            let rescaleNeeded = false;
-            // Rescale check using the threshold constant
-            while (crashMultiplier >= currentMaxYMultiplier * CRASH_RESCALE_THRESHOLD) {
-                currentMaxYMultiplier *= CRASH_Y_AXIS_PADDING_FACTOR;
-                rescaleNeeded = true;
-            }
-            if (rescaleNeeded) {
-                console.log("Rescaling Y axis to:", currentMaxYMultiplier.toFixed(2)); // DEBUG
-                updateCrashGrid();
-            }
-
-            // Add current raw data point
-            crashRawPointsData.push([elapsedTime, crashMultiplier]);
-
-            // Recalculate the entire points string based on current scale
-            const pointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
-            const lastPointY = parseFloat(pointsString.slice(pointsString.lastIndexOf(',') + 1)); // Get Y of last point
-
-            console.log(`Loop Update: Time=${elapsedTime}ms, Mult=${crashMultiplier.toFixed(3)}, MaxY=${currentMaxYMultiplier.toFixed(2)}, LastY=${lastPointY.toFixed(2)}`); // Combined Log
-
-            if(crashPolyline) {
-                 crashPolyline.setAttribute('points', pointsString);
-            } else {
-                console.error("crashPolyline element lost during update!");
-                clearInterval(crashInterval); crashInterval = null;
-            }
-
-            LocalBrokieAPI.playSound('crash_tick', crashMultiplier);
-
-        } catch (error) {
-            console.error("Error inside crash game loop:", error);
-            clearInterval(crashInterval); crashInterval = null;
-            crashGameActive = false;
-            if(crashStatusDisplay) crashStatusDisplay.textContent = "Game error occurred!";
-        }
-    }, CRASH_UPDATE_INTERVAL_MS);
+    if (crashAnimationId) cancelAnimationFrame(crashAnimationId); // Cancel previous frame if any
+    crashAnimationId = requestAnimationFrame(crashGameLoop); // Start the loop
 }
+
+/**
+ * The main game loop, called by requestAnimationFrame.
+ * @param {DOMHighResTimeStamp} timestamp - The timestamp provided by requestAnimationFrame.
+ */
+function crashGameLoop(timestamp) {
+    if (!crashGameActive) {
+        console.log("Game loop stopped: crashGameActive is false."); // DEBUG
+        crashAnimationId = null;
+        return;
+    }
+
+    try { // Add try...catch
+        const elapsedTime = timestamp - crashStartTime;
+
+        // Calculate multiplier
+        const timeFactor = elapsedTime / 1000;
+        currentMultiplier = 1 + 0.06 * Math.pow(timeFactor, 1.65);
+        currentMultiplier = Math.max(1.00, currentMultiplier);
+
+        // --- DEBUG LOGGING ---
+        // console.log(`Loop Update - Time: ${elapsedTime.toFixed(0)}ms, Multiplier: ${currentMultiplier.toFixed(3)}, MaxY: ${currentMaxYMultiplier.toFixed(2)}`);
+
+        // Check for Auto Cashout Trigger
+        if (isAutoCashoutEnabled && !crashCashedOut && autoCashoutTarget >= 1.01 && currentMultiplier >= autoCashoutTarget) {
+            console.log(`Auto-cashing out at ${currentMultiplier.toFixed(2)}x`); // DEBUG
+            LocalBrokieAPI.showMessage(`Auto-cashed out at ${autoCashoutTarget.toFixed(2)}x!`, 2000);
+            attemptCashOut(); // This will set crashGameActive = false, stopping loop on next frame
+            return; // Exit this frame
+        }
+
+        // Check for Crash Condition
+        const hasCrashed = currentMultiplier >= crashTargetMultiplier || elapsedTime >= CRASH_MAX_TIME_MS;
+
+        if (hasCrashed) {
+            currentMultiplier = Math.min(currentMultiplier, crashTargetMultiplier);
+            console.log(`Crashed at ${currentMultiplier.toFixed(2)}x`); // DEBUG
+
+            if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${currentMultiplier.toFixed(2)}x`;
+
+            // Add final point to raw data
+            crashRawPointsData.push([elapsedTime, currentMultiplier]);
+            // Recalculate final points string based on final scale
+            const finalPointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
+            if(crashPolyline) {
+                crashPolyline.setAttribute('points', finalPointsString);
+                crashPolyline.style.stroke = '#e81123'; // Red
+            }
+
+            endCrashGame(true, crashPlayerBet); // Will set crashGameActive = false
+            return; // Exit this frame
+        }
+
+        // --- Update display during active game ---
+        if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${currentMultiplier.toFixed(2)}x`;
+        const currentCashoutValue = Math.floor(crashPlayerBet * currentMultiplier);
+        const potentialWinSpan = document.getElementById('potential-win-amount');
+        if (potentialWinSpan) potentialWinSpan.textContent = LocalBrokieAPI.formatWin(currentCashoutValue);
+        else if (crashStatusDisplay) crashStatusDisplay.innerHTML = `Value: <span id="potential-win-amount" class="font-bold text-white">${LocalBrokieAPI.formatWin(currentCashoutValue)}</span>`;
+
+        applyMultiplierVisuals();
+
+        // --- Update Graph Line ---
+        let rescaleNeeded = false;
+        while (currentMultiplier >= currentMaxYMultiplier * CRASH_RESCALE_THRESHOLD) {
+            currentMaxYMultiplier *= CRASH_Y_AXIS_PADDING_FACTOR;
+            rescaleNeeded = true;
+        }
+        if (rescaleNeeded) {
+            console.log("Rescaling Y axis to:", currentMaxYMultiplier.toFixed(2)); // DEBUG
+            updateCrashGrid();
+        }
+
+        // Add current raw data point
+        crashRawPointsData.push([elapsedTime, currentMultiplier]);
+
+        // Recalculate the entire points string based on current scale
+        const pointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
+        const lastPointY = parseFloat(pointsString.slice(pointsString.lastIndexOf(',') + 1)); // Get Y of last point
+
+        // console.log(`Loop Update: Time=${elapsedTime.toFixed(0)}ms, Mult=${currentMultiplier.toFixed(3)}, MaxY=${currentMaxYMultiplier.toFixed(2)}, LastY=${lastPointY.toFixed(2)}`); // Combined Log
+
+        if(crashPolyline) {
+             crashPolyline.setAttribute('points', pointsString);
+        } else {
+            console.error("crashPolyline element lost during update!");
+            crashGameActive = false; // Stop game if critical element lost
+        }
+
+        LocalBrokieAPI.playSound('crash_tick', currentMultiplier);
+
+        // Request the next frame
+        crashAnimationId = requestAnimationFrame(crashGameLoop);
+
+    } catch (error) {
+        console.error("Error inside crash game loop:", error);
+        // Clean up on error
+        if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
+        crashAnimationId = null;
+        crashGameActive = false;
+        if(crashStatusDisplay) crashStatusDisplay.textContent = "Game error occurred!";
+    }
+}
+
 
 /**
  * Calculates the SVG points string from raw data based on the current Y scale.
@@ -298,39 +340,39 @@ function placeBetAndStart() {
  * @returns {string} The SVG points string (e.g., "x1,y1 x2,y2 ...").
  */
 function calculatePointsString(dataPoints, maxYMultiplier) {
-    const yMultiplierRange = Math.max(0.01, maxYMultiplier - 1); // Denominator for scaling Y
+    const yMultiplierRange = Math.max(0.01, maxYMultiplier - 1);
     return dataPoints.map(point => {
         const elapsedTime = point[0];
         const multiplier = point[1];
-        // Map time to X coordinate (0-100)
         const x = Math.min(SVG_VIEWBOX_WIDTH, (elapsedTime / CRASH_MAX_TIME_MS) * SVG_VIEWBOX_WIDTH);
-        // Map multiplier (1 to maxYMultiplier) to Y coordinate (100 down to 0)
         const y = SVG_VIEWBOX_HEIGHT - ((multiplier - 1) / yMultiplierRange) * SVG_VIEWBOX_HEIGHT;
-        // Clamp Y coordinate to stay within the 0-100 viewbox height
         const clampedY = Math.max(0, Math.min(SVG_VIEWBOX_HEIGHT, y));
-        return `${x.toFixed(2)},${clampedY.toFixed(2)}`; // Use clamped Y
+        // console.log(`Mapping: T=${elapsedTime.toFixed(0)}, M=${multiplier.toFixed(3)} => X=${x.toFixed(2)}, Y=${y.toFixed(2)}, ClampedY=${clampedY.toFixed(2)}`); // DEBUG Y calculation
+        return `${x.toFixed(2)},${clampedY.toFixed(2)}`;
     }).join(' ');
 }
 
 /** Applies visual styles (color, size, shake) to the multiplier display based on its value. */
 function applyMultiplierVisuals() {
+    // (Keep existing logic from previous version)
      if (!crashMultiplierDisplay) return;
      const displaySpan = document.getElementById('potential-win-amount');
      crashMultiplierDisplay.className = 'text-fluent-text-primary'; // Reset class
      crashMultiplierDisplay.style.fontSize = '';
      if (displaySpan) displaySpan.className = 'font-bold text-white';
 
-     if (crashMultiplier >= 30) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-30x', 'mult-size-30x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-30x'; }
-     else if (crashMultiplier >= 20) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-20x', 'mult-size-20x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-20x'; }
-     else if (crashMultiplier >= 15) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-15x', 'mult-size-10x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-15x'; }
-     else if (crashMultiplier >= 10) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-10x', 'mult-size-10x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-10x'; }
-     else if (crashMultiplier >= 5) { crashMultiplierDisplay.classList.add('shake-subtle', 'mult-color-5x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-5x'; }
-     else if (crashMultiplier >= 3) { crashMultiplierDisplay.classList.add('shake-subtle'); }
+     if (currentMultiplier >= 30) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-30x', 'mult-size-30x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-30x'; }
+     else if (currentMultiplier >= 20) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-20x', 'mult-size-20x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-20x'; }
+     else if (currentMultiplier >= 15) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-15x', 'mult-size-10x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-15x'; }
+     else if (currentMultiplier >= 10) { crashMultiplierDisplay.classList.add('shake-strong', 'mult-color-10x', 'mult-size-10x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-10x'; }
+     else if (currentMultiplier >= 5) { crashMultiplierDisplay.classList.add('shake-subtle', 'mult-color-5x'); if (displaySpan) displaySpan.className = 'font-bold mult-color-5x'; }
+     else if (currentMultiplier >= 3) { crashMultiplierDisplay.classList.add('shake-subtle'); }
 
      if (!crashMultiplierDisplay.classList.contains('text-fluent-text-primary')) {
          crashMultiplierDisplay.classList.add('text-fluent-text-primary');
      }
 }
+
 
 /**
  * Ends the crash game round, updates UI, calculates win/loss, and handles auto-bet.
@@ -339,10 +381,16 @@ function applyMultiplierVisuals() {
  * @param {boolean} [stoppedByTabSwitch=false] - True if stopped because the user switched tabs.
  */
 function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
+    // Stop the animation loop FIRST
+    if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
+    crashAnimationId = null;
+    // Stop the interval just in case it was somehow still running (fallback)
     if (crashInterval) { clearInterval(crashInterval); crashInterval = null; }
+
+    // Only proceed if the game was active or stopped by tab switch
     if (!crashGameActive && !stoppedByTabSwitch) return;
 
-    crashGameActive = false;
+    crashGameActive = false; // Mark game as inactive NOW
 
     // Re-enable controls
     if(crashBetButton) crashBetButton.disabled = false;
@@ -397,7 +445,7 @@ function attemptCashOut() {
     crashCashedOut = true;
     crashCashoutButton.disabled = true;
 
-    const cashoutMultiplier = crashMultiplier;
+    const cashoutMultiplier = currentMultiplier;
     const totalReturn = Math.floor(crashPlayerBet * cashoutMultiplier);
     const profit = totalReturn - crashPlayerBet;
 
@@ -409,14 +457,14 @@ function attemptCashOut() {
         LocalBrokieAPI.addWin('Crash', profit);
         if(crashStatusDisplay) crashStatusDisplay.textContent = `Cashed Out! Won ${LocalBrokieAPI.formatWin(profit)}.`;
         if(crashMultiplierDisplay) {
-             crashMultiplierDisplay.classList.add('win-effect'); // Assumes win-effect class exists in CSS
+             crashMultiplierDisplay.classList.add('win-effect');
              setTimeout(() => { if(crashMultiplierDisplay) crashMultiplierDisplay.classList.remove('win-effect') }, 1000);
         }
     } else {
         LocalBrokieAPI.showMessage(`Cashed out @ ${cashoutMultiplier.toFixed(2)}x. No profit.`, 3000);
         if(crashStatusDisplay) crashStatusDisplay.textContent = `Cashed Out @ ${cashoutMultiplier.toFixed(2)}x.`;
     }
-    // Game loop continues until actual crash
+    // Game loop continues until actual crash, endCrashGame does final cleanup
 }
 
 /**
@@ -481,15 +529,13 @@ function validateAndUpdateAutoCashoutTarget() {
 
     if (isNaN(target) || target < 1.01) {
         LocalBrokieAPI.showMessage("Invalid auto-cashout target. Must be >= 1.01", 2500);
-        // Reset input to previous valid target or default if invalid
         crashAutoCashoutInput.value = autoCashoutTarget >= 1.01 ? autoCashoutTarget.toFixed(2) : '1.50';
-        // Update the internal target to match the reset value
         autoCashoutTarget = parseFloat(crashAutoCashoutInput.value);
-        return false; // Indicate validation failed
+        return false;
     } else {
         autoCashoutTarget = target;
-        crashAutoCashoutInput.value = target.toFixed(2); // Format input
-        return true; // Indicate validation passed
+        crashAutoCashoutInput.value = target.toFixed(2);
+        return true;
     }
 }
 
@@ -500,17 +546,12 @@ function validateAndUpdateAutoCashoutTarget() {
 function toggleCrashAutoCashout() {
     if (!crashAutoCashoutInput || !crashAutoCashoutToggle) return;
     LocalBrokieAPI.playSound('click');
-    isAutoCashoutEnabled = !isAutoCashoutEnabled; // Toggle the state
+    isAutoCashoutEnabled = !isAutoCashoutEnabled;
 
     if (isAutoCashoutEnabled) {
-        // When enabling, just update visuals. Validation happens on input change or game start.
         LocalBrokieAPI.showMessage("Auto-cashout enabled. Set target value.", 2000);
     } else {
-        // When disabling
         LocalBrokieAPI.showMessage("Auto-cashout disabled.", 2000);
     }
-    updateCrashAutoCashoutToggleVisuals(); // Update button text and input disabled state
+    updateCrashAutoCashoutToggleVisuals();
 }
-
-// Make init function available to main.js via the BrokieAPI object structure if preferred,
-// but main.js currently calls initCrash directly.
