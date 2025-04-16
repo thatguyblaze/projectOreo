@@ -1,8 +1,9 @@
 /**
  * ==========================================================================
- * Brokie Casino - Plinko Game Logic (plinko.js) - v2.1 (Guarded Init)
+ * Brokie Casino - Plinko Game Logic (plinko.js) - v2.2 (Fix saveGameState Call)
  *
  * Handles Plinko game logic using HTML Canvas.
+ * - Removed incorrect call to saveGameState (already handled by updateBalance).
  * - Added guard against multiple script executions/declarations.
  * - Allows multiple balls to be dropped concurrently.
  * - Randomizes ball drop position.
@@ -246,7 +247,7 @@ if (typeof initPlinko === 'undefined') {
 
         // Deduct bet for this specific ball
         LocalBrokieAPI.updateBalance(-betAmount); // Update balance immediately
-        LocalBrokieAPI.saveGameState(); // Save state after bet deduction
+        // ** REMOVED LocalBrokieAPI.saveGameState(); - It's called within updateBalance **
 
         // Create the new ball object
         const canvasWidth = plinkoCanvas.width;
@@ -440,8 +441,8 @@ if (typeof initPlinko === 'undefined') {
 
         LocalBrokieAPI.playSound(winSound);
         // Display status temporarily - Note: might be overwritten quickly by other balls
-        plinkoStatus.textContent = statusText;
-        // Show message notification for each ball result
+        // plinkoStatus.textContent = statusText; // Maybe remove this for less clutter?
+        // Show message notification for each ball result - more reliable for multiple balls
         LocalBrokieAPI.showMessage(statusText, 2500);
 
 
