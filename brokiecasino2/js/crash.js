@@ -1,19 +1,20 @@
 /**
  * ==========================================================================
- * Brokie Casino - Crash Game Logic (v5 - Loop Start Fix)
+ * Brokie Casino - Crash Game Logic (v6 - NaN & Interval Fix)
  *
  * - Uses BrokieAPI object.
  * - Fixed auto-cashout logic.
  * - Fixed Y-axis scaling logic + uses clipPath.
  * - Uses requestAnimationFrame loop.
- * - Fixed order in placeBetAndStart to prevent immediate loop stop.
+ * - Fixed NaN issue in polyline points calculation.
+ * - Removed obsolete crashInterval references.
  * - Kept console logging for debugging.
  * ==========================================================================
  */
 
 // --- Crash Game Constants ---
 const CRASH_MAX_TIME_MS = 15000;
-// const CRASH_UPDATE_INTERVAL_MS = 50; // No longer needed for RAF
+// const CRASH_UPDATE_INTERVAL_MS = 50; // Target interval (RAF controls actual timing)
 const CRASH_STARTING_MAX_Y = 2.0;
 const CRASH_Y_AXIS_PADDING_FACTOR = 1.15;
 const CRASH_RESCALE_THRESHOLD = 0.90;
@@ -27,7 +28,7 @@ let crashGameActive = false;
 let crashStartTime = null;
 let currentMultiplier = 1.00;
 let crashTargetMultiplier = 1.00;
-let crashAnimationId = null;
+let crashAnimationId = null; // ID for requestAnimationFrame
 let crashPlayerBet = 0;
 let crashCashedOut = false;
 let crashRawPointsData = [];
@@ -35,7 +36,6 @@ let currentMaxYMultiplier = CRASH_STARTING_MAX_Y;
 let isCrashAutoBetting = false;
 let isAutoCashoutEnabled = false;
 let autoCashoutTarget = 1.50;
-// let lastFrameTimestamp = 0; // Not strictly needed for this RAF implementation
 
 // --- DOM Element References ---
 let crashGraph, crashMultiplierDisplay, crashSvg, crashGrid, crashPolyline;
@@ -151,15 +151,16 @@ function updateCrashGrid() {
 function resetCrashVisuals() {
     if (!crashMultiplierDisplay || !crashSvg || !crashPolyline || !crashStatusDisplay || !crashBetButton || !crashCashoutButton || !crashBetInput) return;
 
-    if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
+    // Stop any existing game loop
+    if (crashAnimationId) cancelAnimationFrame(crashAnimationId); // Use cancelAnimationFrame
     crashAnimationId = null;
 
-    // Reset state variables *before* potentially setting active flag later
+    // Reset state variables
     crashGameActive = false; // Crucial: Mark as inactive during reset
     playerHasBet = false; crashCashedOut = false;
     currentMultiplier = 1.00;
-    crashRawPointsData = [[0, 1.00]];
-    crashPointsString = `0,${SVG_VIEWBOX_HEIGHT}`;
+    crashRawPointsData = [[0, 1.00]]; // Reset raw data points array
+    crashPointsString = `0,${SVG_VIEWBOX_HEIGHT}`; // Reset points string
     currentMaxYMultiplier = CRASH_STARTING_MAX_Y;
 
     crashSvg.setAttribute('viewBox', `0 0 ${SVG_VIEWBOX_WIDTH} ${SVG_VIEWBOX_HEIGHT}`);
@@ -238,9 +239,6 @@ function placeBetAndStart() {
  * @param {DOMHighResTimeStamp} timestamp - The timestamp provided by requestAnimationFrame.
  */
 function crashGameLoop(timestamp) {
-    // ***** START OF RAF CALLBACK *****
-    // console.log("RAF callback started"); // DEBUG: Keep minimal now
-
     if (!crashGameActive) {
         // console.log("RAF loop stopped: crashGameActive is false."); // DEBUG
         crashAnimationId = null;
@@ -248,7 +246,7 @@ function crashGameLoop(timestamp) {
     }
 
     try {
-        const elapsedTime = timestamp - crashStartTime;
+        const elapsedTime = Math.max(0, timestamp - crashStartTime); // Ensure elapsedTime is not negative
 
         // Calculate multiplier
         const timeFactor = elapsedTime / 1000;
@@ -257,8 +255,7 @@ function crashGameLoop(timestamp) {
 
         // Check for Auto Cashout Trigger
         if (isAutoCashoutEnabled && !crashCashedOut && autoCashoutTarget >= 1.01 && currentMultiplier >= autoCashoutTarget) {
-            attemptCashOut(); // This will set crashGameActive = false, stopping loop on next frame
-            return; // Exit this frame's execution
+            attemptCashOut(); return;
         }
 
         // Check for Crash Condition
@@ -266,21 +263,17 @@ function crashGameLoop(timestamp) {
 
         if (hasCrashed) {
             currentMultiplier = Math.min(currentMultiplier, crashTargetMultiplier);
-            console.log(`Crashed at ${currentMultiplier.toFixed(2)}x`); // DEBUG
+            console.log(`Crashed at ${currentMultiplier.toFixed(2)}x`);
 
             if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${currentMultiplier.toFixed(2)}x`;
-
-            // Add final point to raw data
             crashRawPointsData.push([elapsedTime, currentMultiplier]);
-            // Recalculate final points string based on final scale
             const finalPointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
             if(crashPolyline) {
                 crashPolyline.setAttribute('points', finalPointsString);
                 crashPolyline.style.stroke = '#e81123'; // Red
             }
-
             endCrashGame(true, crashPlayerBet); // Will set crashGameActive = false
-            return; // Exit this frame's execution
+            return;
         }
 
         // --- Update display during active game ---
@@ -305,12 +298,8 @@ function crashGameLoop(timestamp) {
 
         // Add current raw data point
         crashRawPointsData.push([elapsedTime, currentMultiplier]);
-
         // Recalculate the entire points string based on current scale
         const pointsString = calculatePointsString(crashRawPointsData, currentMaxYMultiplier);
-        const lastPointY = parseFloat(pointsString.slice(pointsString.lastIndexOf(',') + 1)); // Get Y of last point
-
-        // console.log(`Loop Update: Time=${elapsedTime.toFixed(0)}ms, Mult=${currentMultiplier.toFixed(3)}, MaxY=${currentMaxYMultiplier.toFixed(2)}, LastY=${lastPointY.toFixed(2)}`); // Combined Log
 
         if(crashPolyline) {
              crashPolyline.setAttribute('points', pointsString);
@@ -325,7 +314,7 @@ function crashGameLoop(timestamp) {
         if (crashGameActive) {
             crashAnimationId = requestAnimationFrame(crashGameLoop);
         } else {
-            crashAnimationId = null; // Ensure ID is cleared if game ended this frame
+            crashAnimationId = null;
         }
 
     } catch (error) {
@@ -340,23 +329,32 @@ function crashGameLoop(timestamp) {
 
 /**
  * Calculates the SVG points string from raw data based on the current Y scale.
- * Uses clamped Y value to prevent negative coordinates in the string.
+ * Uses raw Y value, relying on SVG clip-path for bounding.
  * @param {Array<Array<number>>} dataPoints - Array of [elapsedTime, multiplier] points.
  * @param {number} maxYMultiplier - The current maximum multiplier for the Y axis scale.
  * @returns {string} The SVG points string (e.g., "x1,y1 x2,y2 ...").
  */
 function calculatePointsString(dataPoints, maxYMultiplier) {
     const yMultiplierRange = Math.max(0.01, maxYMultiplier - 1);
-    return dataPoints.map(point => {
+    const points = dataPoints.map(point => {
         const elapsedTime = point[0];
         const multiplier = point[1];
-        const x = Math.min(SVG_VIEWBOX_WIDTH, (elapsedTime / CRASH_MAX_TIME_MS) * SVG_VIEWBOX_WIDTH);
+        // Ensure elapsedTime is non-negative for X calculation
+        const safeElapsedTime = Math.max(0, elapsedTime);
+        const x = Math.min(SVG_VIEWBOX_WIDTH, (safeElapsedTime / CRASH_MAX_TIME_MS) * SVG_VIEWBOX_WIDTH);
+        // Calculate Y, potentially going below 0 (above graph top)
         const y = SVG_VIEWBOX_HEIGHT - ((multiplier - 1) / yMultiplierRange) * SVG_VIEWBOX_HEIGHT;
-        // REMOVED CLAMPING - RELY ON SVG CLIP PATH IN HTML
-        // const clampedY = Math.max(0, Math.min(SVG_VIEWBOX_HEIGHT, y));
+
+        // Check for NaN before formatting (Fix for the polyline error)
+        if (isNaN(x) || isNaN(y)) {
+            console.warn(`NaN detected in point calculation: T=${elapsedTime}, M=${multiplier}, MaxY=${maxYMultiplier} => X=${x}, Y=${y}. Skipping point.`);
+            return null; // Indicate invalid point
+        }
         // console.log(`Mapping: T=${elapsedTime.toFixed(0)}, M=${multiplier.toFixed(3)} => X=${x.toFixed(2)}, Y=${y.toFixed(2)}`); // DEBUG raw Y
         return `${x.toFixed(2)},${y.toFixed(2)}`; // Use raw Y
-    }).join(' ');
+    });
+    // Filter out any null (invalid) points before joining
+    return points.filter(p => p !== null).join(' ');
 }
 
 /** Applies visual styles (color, size, shake) to the multiplier display based on its value. */
@@ -387,10 +385,13 @@ function applyMultiplierVisuals() {
  * @param {boolean} [stoppedByTabSwitch=false] - True if stopped because the user switched tabs.
  */
 function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
-    if (crashAnimationId) cancelAnimationFrame(crashAnimationId); crashAnimationId = null;
-    if (crashInterval) { clearInterval(crashInterval); crashInterval = null; } // Clear interval just in case
-    if (!crashGameActive && !stoppedByTabSwitch) return;
+    // Stop the animation loop FIRST
+    if (crashAnimationId) cancelAnimationFrame(crashAnimationId);
+    crashAnimationId = null;
+    // Remove obsolete interval clear
+    // if (crashInterval) { clearInterval(crashInterval); crashInterval = null; }
 
+    if (!crashGameActive && !stoppedByTabSwitch) return;
     crashGameActive = false;
 
     // Re-enable controls
