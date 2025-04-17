@@ -32,7 +32,7 @@ if (typeof initPlinko === 'undefined') {
     const GRAVITY = 0.15;
     const BOUNCE_FACTOR = 0.6; // Energy retained on bounce (lower = less bouncy)
     const HORIZONTAL_DRIFT_FACTOR = 0.2; // Increased base horizontal push on collision
-    const BALL_LIFETIME_MS = 20000; // 20 seconds before despawn
+    const BALL_LIFETIME_MS = 10000; // 20 seconds before despawn
 
     // Bucket definitions (multipliers and colors)
     const BUCKET_MULTIPLIERS = [8, 2.5, 0.4, 0.2, 0.4, 2.5, 8];
