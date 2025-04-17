@@ -8,7 +8,6 @@
     <link rel="icon" type="image/png" href="brokieLogo.png"> <meta property="og:title" content="Brokie Casino - Refined Gaming">
     <meta property="og:description" content="Clean layout, sleek design. Play Slots, Crash, Plinko & more!">
     <meta property="og:image" content="brokieLogo.png"> <meta property="og:type" content="website">
-
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,8 +26,7 @@
     <script src="js/roulette.js" defer></script>
     <script src="js/blackjack.js" defer></script>
     <script src="js/plinko.js" defer></script>
-
-    <script>
+    <script src="js/sabacc.js" defer></script> <script>
       tailwind.config = {
         darkMode: 'class', // Or 'media' if you prefer OS setting
         theme: {
@@ -144,6 +142,9 @@
                         <button id="tab-plinko" class="tab-button group flex items-center w-full">
                             <span class="emoji mr-2">⚪</span> <span class="truncate">Plinko</span>
                         </button>
+                        <button id="tab-sabacc" class="tab-button group flex items-center w-full">
+                            <span class="emoji mr-2">✨</span> <span class="truncate">Sabacc</span>
+                        </button>
                     </div>
                 </nav>
 
@@ -194,13 +195,12 @@
                          </div>
                          <div id="payout-legend" class="pt-4 border-t border-fluent-border/50 mt-6">
                              <h4 class="text-center font-semibold text-fluent-text-secondary mb-2">Payouts (Multiplier x Bet)</h4>
-                             <ul id="payout-list" class="text-xs text-center max-w-xs mx-auto">
-                                </ul>
+                             <ul id="payout-list" class="text-xs text-center max-w-xs mx-auto"></ul>
                          </div>
-                      </div>
+                    </div>
 
                     <div id="game-crash" class="game-area space-y-6 hidden">
-                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-accent inline-block">Cash Out Before the Crash!</h3>
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-accent inline-block">Cash Out Before the Crash!</h3>
                          <div id="crash-graph" class="relative mt-4">
                              <svg id="crash-svg" preserveAspectRatio="none">
                                   <defs>
@@ -239,10 +239,10 @@
                              </div>
                          </div>
                          <p id="crash-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                      </div>
+                    </div>
 
                     <div id="game-coinflip" class="game-area space-y-6 hidden">
-                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Coin Flip: Double or Nothing!</h3>
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Coin Flip: Double or Nothing!</h3>
                          <div class="text-center my-6 coin-container">
                              <span id="coin" class="text-6xl">🪙</span> </div>
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
@@ -268,10 +268,10 @@
                              <button id="coinflip-cashout-button" class="game-button danger" disabled>Cash Out <span id="coinflip-winnings">0</span></button>
                          </div>
                          <p id="coinflip-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                      </div>
+                    </div>
 
                     <div id="game-minefield" class="game-area space-y-6 hidden">
-                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Minefield</h3>
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Minefield</h3>
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                              <label for="minefield-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
                              <button class="bet-adjust-btn" id="minefield-bet-decrease-10">-10</button>
@@ -292,10 +292,10 @@
                              <button id="minefield-cashout-button" class="game-button success" disabled>Cash Out (<span id="minefield-current-multiplier">1.00</span>x)</button>
                          </div>
                          <p id="minefield-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                      </div>
+                    </div>
 
                     <div id="game-memory" class="game-area space-y-6 hidden">
-                          <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-pink-500 inline-block">Memory Match</h3>
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-pink-500 inline-block">Memory Match</h3>
                           <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                               <label for="memory-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
                               <button class="bet-adjust-btn" id="memory-bet-decrease-10">-10</button>
@@ -318,10 +318,10 @@
                                </div>
                           </div>
                           <p id="memory-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                      </div>
+                    </div>
 
                     <div id="game-horserace" class="game-area space-y-4 hidden">
-                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-lime-500 inline-block">Horse Racing</h3>
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-lime-500 inline-block">Horse Racing</h3>
                          <div class="flex flex-col space-y-4">
                              <div class="flex flex-col sm:flex-row items-center justify-center gap-2 flex-wrap">
                                  <label for="horserace-bet" class="font-medium text-fluent-text-secondary text-sm">Bet:</label>
@@ -349,18 +349,15 @@
                              <button id="horserace-start-button" class="game-button success">Start Race</button>
                          </div>
                          <p id="horserace-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                      </div>
+                    </div>
 
                     <div id="game-roulette" class="game-area space-y-6 hidden">
-                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-purple-500 inline-block">Roulette</h3>
-
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-purple-500 inline-block">Roulette</h3>
                          <div id="roulette-wheel-container">
-                             <div id="roulette-wheel">
-                                 </div>
+                             <div id="roulette-wheel"></div>
                              <div id="roulette-pointer"></div>
                              <div id="roulette-result">?</div>
                          </div>
-
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                              <label for="roulette-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
                              <button class="bet-adjust-btn" id="roulette-bet-decrease-10">-10</button>
@@ -375,11 +372,9 @@
                              <button class="bet-adjust-btn" id="roulette-bet-double">x2</button>
                              <button class="bet-adjust-btn" id="roulette-bet-max">Max</button>
                          </div>
-
                          <div id="roulette-betting-area">
                              <p class="text-center text-fluent-text-secondary text-sm mb-2">Click to place bets (Current Bet: <span id="roulette-current-bet-type" class="text-white">None</span>)</p>
-                             <div class="roulette-bet-grid" id="roulette-inside-bets">
-                                 </div>
+                             <div class="roulette-bet-grid" id="roulette-inside-bets"></div>
                              <div class="roulette-outside-bets mt-4" id="roulette-outside-bets">
                                  <button class="roulette-bet-btn outside red" data-bet-type="red" data-bet-value="red">Red</button>
                                  <button class="roulette-bet-btn outside black" data-bet-type="black" data-bet-value="black">Black</button>
@@ -389,28 +384,22 @@
                                  <button class="roulette-bet-btn outside" data-bet-type="high" data-bet-value="high">19-36</button>
                              </div>
                          </div>
-
                          <div class="flex items-center justify-center space-x-4 mt-6">
                              <button id="roulette-spin-button" class="game-button success" disabled>Spin Wheel</button>
                          </div>
                          <p id="roulette-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                      </div>
+                    </div>
 
                     <div id="game-blackjack" class="game-area space-y-4 hidden">
-                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-secondary inline-block">Blackjack</h3>
-
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-secondary inline-block">Blackjack</h3>
                          <div class="mb-4">
                              <h4 class="text-lg font-medium text-fluent-text-secondary mb-2 text-center">Dealer's Hand (<span id="blackjack-dealer-score" class="blackjack-score-value">0</span>)</h4>
-                             <div id="blackjack-dealer-hand" class="blackjack-hand">
-                                 </div>
+                             <div id="blackjack-dealer-hand" class="blackjack-hand"></div>
                          </div>
-
                          <div class="mb-6">
                              <h4 class="text-lg font-medium text-fluent-text-secondary mb-2 text-center">Your Hand (<span id="blackjack-player-score" class="blackjack-score-value">0</span>)</h4>
-                             <div id="blackjack-player-hand" class="blackjack-hand">
-                                 </div>
+                             <div id="blackjack-player-hand" class="blackjack-hand"></div>
                          </div>
-
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                              <label for="blackjack-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
                              <button class="bet-adjust-btn" id="blackjack-bet-decrease-10">-10</button>
@@ -425,18 +414,16 @@
                              <button class="bet-adjust-btn" id="blackjack-bet-double">x2</button>
                              <button class="bet-adjust-btn" id="blackjack-bet-max">Max</button>
                          </div>
-
                          <div class="flex items-center justify-center space-x-4 mt-6">
                              <button id="blackjack-deal-button" class="game-button success">Deal</button>
                              <button id="blackjack-hit-button" class="game-button primary" disabled>Hit</button>
                              <button id="blackjack-stand-button" class="game-button warning" disabled>Stand</button>
                          </div>
-
                          <p id="blackjack-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                      </div>
+                    </div>
 
                     <div id="game-plinko" class="game-area space-y-6 hidden">
-                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-primary inline-block">Plinko</h3>
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-primary inline-block">Plinko</h3>
                          <canvas id="plinko-canvas" width="350" height="450"></canvas>
                           <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                               <label for="plinko-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
@@ -456,9 +443,53 @@
                               <button id="plinko-drop-button" class="game-button primary">Drop Ball</button>
                          </div>
                          <p id="plinko-status" class="text-center text-fluent-text-secondary font-medium h-6">Drop a ball to win!</p>
-                         </div>
+                    </div>
 
-                </section>
+                    <div id="game-sabacc" class="game-area space-y-4 hidden">
+                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-yellow-500 inline-block">Sabacc</h3>
+
+                        <div class="mb-4">
+                            <h4 class="text-lg font-medium text-fluent-text-secondary mb-2 text-center">
+                                Dealer's Hand (<span id="sabacc-dealer-score" class="sabacc-score-value">?</span>)
+                            </h4>
+                            <div id="sabacc-dealer-hand" class="sabacc-hand">
+                                </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="text-lg font-medium text-fluent-text-secondary mb-2 text-center">
+                                Your Hand (<span id="sabacc-player-score" class="sabacc-score-value">0</span>)
+                            </h4>
+                            <div id="sabacc-player-hand" class="sabacc-hand">
+                                </div>
+                        </div>
+
+                        <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
+                            <label for="sabacc-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
+                            <button class="bet-adjust-btn" id="sabacc-bet-decrease-10">-10</button>
+                            <button class="bet-adjust-btn" id="sabacc-bet-decrease-1">-</button>
+                            <input type="number" id="sabacc-bet" value="10" min="1" class="w-20 rounded-md appearance-none">
+                            <button class="bet-adjust-btn" id="sabacc-bet-increase-1">+</button>
+                            <button class="bet-adjust-btn" id="sabacc-bet-increase-10">+10</button>
+                        </div>
+                        <div class="flex items-center justify-center space-x-2 mt-2">
+                            <button class="bet-adjust-btn" id="sabacc-bet-min">Min</button>
+                            <button class="bet-adjust-btn" id="sabacc-bet-half">/2</button>
+                            <button class="bet-adjust-btn" id="sabacc-bet-double">x2</button>
+                            <button class="bet-adjust-btn" id="sabacc-bet-max">Max</button>
+                        </div>
+
+                         <p class="text-center text-fluent-text-secondary font-medium">Pot: <span id="sabacc-pot-display" class="text-white">0</span></p>
+
+                        <div class="flex items-center justify-center space-x-4 mt-6">
+                            <button id="sabacc-deal-button" class="game-button success">Deal</button>
+                            <button id="sabacc-hit-button" class="game-button primary" disabled>Hit</button>
+                            <button id="sabacc-stand-button" class="game-button warning" disabled>Stand</button>
+                            </div>
+
+                        <p id="sabacc-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
+                    </div>
+                    </section>
 
                 <section id="info-accordion" class="space-y-3">
                      <div class="accordion-item">

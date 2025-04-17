@@ -1,5 +1,6 @@
 /* ==========================================================================
-   Brokie Casino Stylesheet (Fluent Dark Theme) v3.1
+   Brokie Casino Stylesheet (Fluent Dark Theme) v3.2
+   - Added Sabacc styles.
    - Corrected conic-gradient for European Roulette wheel (1 green slot).
    - Uses direct hex color values instead of theme() for browser compatibility.
    - Includes fixes for card/background contrast and button colors.
@@ -1036,6 +1037,94 @@ input[type="number"]:disabled {
     margin: 1rem auto; /* Center canvas */
 }
 
+/* Sabacc Styles */
+.sabacc-hand {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem; /* gap-2 */
+    min-height: 110px; /* Ensure space for taller cards */
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #2d2d2d; /* fluent-card */
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #404040; /* Dark gray border */
+}
+
+.sabacc-card {
+    background-color: #4a4a4a; /* fluent-border - Darker background for Sabacc */
+    color: #f5f5f5; /* fluent-text-primary */
+    border: 1px solid #5a5a5a; /* Slightly lighter border */
+    border-radius: 0.375rem; /* rounded-md */
+    width: 70px; /* Slightly wider cards */
+    height: 100px; /* Taller cards */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out name and value */
+    align-items: center;
+    padding: 0.3rem 0.2rem; /* Adjust padding */
+    font-weight: 600; /* font-semibold */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.sabacc-card.hidden {
+    background-color: #404040; /* Dark gray for hidden card */
+    background-image: repeating-linear-gradient(
+        45deg,
+        #5a5a5a, #5a5a5a 5px, /* Lighter gray */
+        #404040 5px, #404040 10px /* Dark gray */
+    );
+    color: transparent; /* Hide text */
+    border-color: #5a5a5a;
+}
+.sabacc-card.hidden span {
+    visibility: hidden; /* Hide spans too */
+}
+
+
+.sabacc-card .card-name {
+    font-size: 0.65rem; /* Smaller text for name */
+    line-height: 1.1;
+    font-weight: 400; /* Normal weight */
+    color: #b0b0b0; /* fluent-text-secondary */
+    /* Allow wrapping */
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-height: 3.3em; /* Limit height */
+    overflow: hidden;
+}
+
+.sabacc-card .card-value {
+    font-size: 1.5rem; /* Larger value display */
+    line-height: 1;
+    font-weight: 700; /* Bold */
+}
+
+/* Style cards based on value */
+.sabacc-card.positive .card-value {
+    color: #107c10; /* fluent-accent (Green for positive) */
+}
+.sabacc-card.negative .card-value {
+    color: #e81123; /* fluent-danger (Red for negative) */
+}
+.sabacc-card.zero .card-value {
+    color: #ffb900; /* fluent-warning (Yellow for zero/Idiot) */
+}
+
+/* Score display styling */
+.sabacc-score-value {
+    font-weight: 700; /* font-bold */
+    font-size: 1.1em; /* Slightly larger than surrounding text */
+    color: #f5f5f5; /* fluent-text-primary */
+    margin-left: 0.25rem;
+}
+.sabacc-score-value.busted {
+    color: #e81123; /* fluent-danger */
+    text-decoration: line-through;
+}
+
+
 /* --- Animations --- */
 
 /* Pulse animation for footer heart */
@@ -1099,4 +1188,3 @@ input[type="number"]:disabled {
     opacity: 1; visibility: visible;
     transform: translateX(-50%); /* Move to final position */
 }
-
