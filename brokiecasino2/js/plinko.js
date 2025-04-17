@@ -35,7 +35,7 @@ if (typeof initPlinko === 'undefined') {
     const BALL_LIFETIME_MS = 20000; // 20 seconds before despawn
 
     // Bucket definitions (multipliers and colors)
-    const BUCKET_MULTIPLIERS = [10, 3, 0.5, 0.2, 0.5, 3, 10];
+    const BUCKET_MULTIPLIERS = [8, 2.5, 0.4, 0.2, 0.4, 2.5, 8];
     // Using Tailwind colors for consistency where possible
     const BUCKET_COLORS = ['#ef4444', '#fb923c', '#a3a3a3', '#6b7280', '#a3a3a3', '#fb923c', '#ef4444']; // red-500, orange-400, neutral-400, gray-500, neutral-400, orange-400, red-500
 
