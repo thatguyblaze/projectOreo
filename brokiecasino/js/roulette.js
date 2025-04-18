@@ -3,9 +3,9 @@ if (typeof initRoulette === 'undefined') {
 
     /**
      * ==========================================================================
-     * Brokie Casino - Roulette Game Logic (v2.13 - Fine-tuning Number Radius AGAIN)
+     * Brokie Casino - Roulette Game Logic (v2.13 - Corrected Number Positioning Context)
      *
-     * - FIX: Further adjustment to numberRingRadius factor (0.89) in positionWheelNumbers.
+     * - FIX: positionWheelNumbers now calculates x/y relative to the wheel's center, not container's.
      * - Numbers spin with wheel (clock-face orientation).
      * - Wheel spins continuously via CSS.
      * - Ball animation landing synchronized.
@@ -13,17 +13,17 @@ if (typeof initRoulette === 'undefined') {
      */
 
     // --- Constants ---
-    const ROULETTE_NUMBERS = [ /* ... numbers ... */
+    const ROULETTE_NUMBERS = [ /* ... */
         0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
         5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
     ];
-    const ROULETTE_COLORS = { /* ... colors ... */
+    const ROULETTE_COLORS = { /* ... */
         0: 'green', 1: 'red', 2: 'black', 3: 'red', 4: 'black', 5: 'red', 6: 'black', 7: 'red', 8: 'black', 9: 'red', 10: 'black',
         11: 'black', 12: 'red', 13: 'black', 14: 'red', 15: 'black', 16: 'red', 17: 'black', 18: 'red', 19: 'red', 20: 'black',
         21: 'red', 22: 'black', 23: 'red', 24: 'black', 25: 'red', 26: 'black', 27: 'red', 28: 'black', 29: 'black', 30: 'red',
         31: 'black', 32: 'red', 33: 'black', 34: 'red', 35: 'black', 36: 'red'
     };
-    const ROULETTE_PAYOUTS = { /* ... payouts ... */
+    const ROULETTE_PAYOUTS = { /* ... */
         single: 35, red: 1, black: 1, odd: 1, even: 1, low: 1, high: 1
     };
     const TOTAL_NUMBERS = ROULETTE_NUMBERS.length;
@@ -32,9 +32,9 @@ if (typeof initRoulette === 'undefined') {
     const POST_RESULT_DELAY = 2500; // ms
 
     // --- Ball Animation Constants ---
-    const BALL_INITIAL_RADIUS_FACTOR = 0.9;
-    const BALL_FINAL_RADIUS_FACTOR = 0.75;
-    const BALL_INITIAL_SPEED = -800; // Degrees per second
+    const BALL_INITIAL_RADIUS_FACTOR = 0.9; // Relative to container radius
+    const BALL_FINAL_RADIUS_FACTOR = 0.75; // Relative to container radius
+    const BALL_INITIAL_SPEED = -800;
     const BALL_DECELERATION_START_TIME = BALL_ANIMATION_DURATION * 0.3;
     const BALL_DECELERATION_TIME = BALL_ANIMATION_DURATION * 0.7;
     const BALL_LANDING_SPIRAL_TIME = 1500;
@@ -51,7 +51,7 @@ if (typeof initRoulette === 'undefined') {
     let ballRadius = 0;
     let targetWinningNumberIndex = -1;
     let ballLanded = false;
-    let containerRadius = 0;
+    let containerRadius = 0; // Keep for ball animation calculations
     let lastBallTimestamp = 0;
 
     // --- DOM Element References ---
@@ -89,17 +89,23 @@ if (typeof initRoulette === 'undefined') {
         if (LocalBrokieAPI.addBetAdjustmentListeners) { LocalBrokieAPI.addBetAdjustmentListeners('roulette', rouletteBetInput); }
         // Initial Reset...
         resetRoulette(true);
-        console.log("Roulette Initialized (v2.11 - Tuned Radius)"); // Version bump
+        console.log("Roulette Initialized (v2.13 - Corrected Pos Context)");
     }
 
     // --- Helper Functions ---
     function findPlacedBet(type, value) { return placedBets.find(bet => bet.type === type && bet.value == value); }
     function updateButtonVisual(button, amount) { if (!button) return; const originalValue = button.dataset.originalValue || button.textContent; if (!button.dataset.originalValue) button.dataset.originalValue = originalValue; if (amount > 0) { button.textContent = `${originalValue} (${amount})`; button.dataset.betAmount = amount.toString(); button.classList.add('has-bet'); } else { button.textContent = originalValue; button.removeAttribute('data-bet-amount'); button.classList.remove('has-bet'); } }
     function updateTotalBetDisplay() { if (!rouletteCurrentBetDisplay) return; const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0); rouletteCurrentBetDisplay.textContent = totalBetAmount > 0 ? `Total Bet: ${totalBetAmount}` : 'No Bets Placed'; }
-    function showBall(winningIndex) { if (!rouletteBall || !rouletteWheelContainer) return; containerRadius = rouletteWheelContainer.offsetWidth / 2; if (containerRadius <= 0) { console.error("Cannot calculate container radius."); return; } targetWinningNumberIndex = winningIndex; ballLanded = false; ballStartTime = performance.now(); lastBallTimestamp = ballStartTime; ballStartAngle = Math.random() * 360; ballAngle = ballStartAngle; ballRadius = containerRadius * BALL_INITIAL_RADIUS_FACTOR; const initialRadians = ballStartAngle * (Math.PI / 180); const initialX = containerRadius + ballRadius * Math.cos(initialRadians); const initialY = containerRadius + ballRadius * Math.sin(initialRadians); rouletteBall.style.left = `${initialX}px`; rouletteBall.style.top = `${initialY}px`; rouletteBall.style.transform = 'translate(-50%, -50%)'; rouletteBall.classList.add('visible'); if (ballAnimationId) cancelAnimationFrame(ballAnimationId); ballAnimationId = requestAnimationFrame(animateBall); console.log("Ball animation started."); }
-    function hideBall() { if (ballAnimationId) { cancelAnimationFrame(ballAnimationId); ballAnimationId = null; } if (rouletteBall) { rouletteBall.classList.remove('visible'); } }
-    function startContinuousSpin() { if (!rouletteWheel) return; rouletteWheel.style.transition = 'none'; rouletteWheel.style.transform = ''; rouletteWheel.classList.add('continuous-spin'); }
-    function getCurrentWheelRotationAngle() { if (!rouletteWheel) return 0; try { const currentTransform = getComputedStyle(rouletteWheel).transform; if (currentTransform === 'none') return 0; const matrixValues = currentTransform.match(/matrix.*\((.+)\)/); if (matrixValues && matrixValues[1]) { const matrix = matrixValues[1].split(', '); const angleRad = Math.atan2(parseFloat(matrix[1]), parseFloat(matrix[0])); let angleDeg = angleRad * (180 / Math.PI); return (angleDeg < 0) ? angleDeg + 360 : angleDeg; } } catch (e) { console.error("Error getting wheel rotation:", e); } return 0; }
+    function showBall(winningIndex) { // Needs container radius correctly set first
+        if (!rouletteBall || !rouletteWheelContainer) return;
+        // Ensure containerRadius is up-to-date
+        containerRadius = rouletteWheelContainer.offsetWidth / 2;
+        if (containerRadius <= 0) { console.error("Cannot calculate container radius for ball."); return; }
+        targetWinningNumberIndex = winningIndex; ballLanded = false; ballStartTime = performance.now(); lastBallTimestamp = ballStartTime; ballStartAngle = Math.random() * 360; ballAngle = ballStartAngle; ballRadius = containerRadius * BALL_INITIAL_RADIUS_FACTOR; const initialRadians = ballStartAngle * (Math.PI / 180); const initialX = containerRadius + ballRadius * Math.cos(initialRadians); const initialY = containerRadius + ballRadius * Math.sin(initialRadians); rouletteBall.style.left = `${initialX}px`; rouletteBall.style.top = `${initialY}px`; rouletteBall.style.transform = 'translate(-50%, -50%)'; rouletteBall.classList.add('visible'); if (ballAnimationId) cancelAnimationFrame(ballAnimationId); ballAnimationId = requestAnimationFrame(animateBall); console.log("Ball animation started.");
+    }
+    function hideBall() { /* ... No changes ... */ if (ballAnimationId) { cancelAnimationFrame(ballAnimationId); ballAnimationId = null; } if (rouletteBall) { rouletteBall.classList.remove('visible'); } }
+    function startContinuousSpin() { /* ... No changes ... */ if (!rouletteWheel) return; rouletteWheel.style.transition = 'none'; rouletteWheel.style.transform = ''; rouletteWheel.classList.add('continuous-spin'); }
+    function getCurrentWheelRotationAngle() { /* ... No changes ... */ if (!rouletteWheel) return 0; try { const currentTransform = getComputedStyle(rouletteWheel).transform; if (currentTransform === 'none') return 0; const matrixValues = currentTransform.match(/matrix.*\((.+)\)/); if (matrixValues && matrixValues[1]) { const matrix = matrixValues[1].split(', '); const angleRad = Math.atan2(parseFloat(matrix[1]), parseFloat(matrix[0])); let angleDeg = angleRad * (180 / Math.PI); return (angleDeg < 0) ? angleDeg + 360 : angleDeg; } } catch (e) { console.error("Error getting wheel rotation:", e); } return 0; }
 
     /** The main ball animation loop. */
     function animateBall(timestamp) { // No changes needed here
@@ -122,24 +128,23 @@ if (typeof initRoulette === 'undefined') {
     /** Positions numbers ON the spinning wheel with clock-face orientation. */
     function positionWheelNumbers() {
         const wheel = document.getElementById('roulette-wheel');
-        const container = document.getElementById('roulette-wheel-container');
-        if (!wheel || !container) { console.error("Wheel or container missing"); return; }
+        // CHANGE: Use wheel dimensions for calculations now
+        if (!wheel) { console.error("Wheel element missing"); return; }
 
         requestAnimationFrame(() => {
-             const containerDiameter = container.offsetWidth;
-             if (containerDiameter <= 0) { setTimeout(positionWheelNumbers, 100); return; }
-             const containerRadius = containerDiameter / 2;
+             // CHANGE: Use wheel's dimensions, not container's
+             const wheelDiameter = wheel.offsetWidth;
+             if (wheelDiameter <= 0) { setTimeout(positionWheelNumbers, 100); return; }
+             const wheelRadius = wheelDiameter / 2; // Radius of the spinning element
 
-             // --- CHANGE: Adjust numberRingRadius factor ---
-             // Previous attempts: 0.85 (too far in), 0.92 (too far out)
-             // Try 0.88 or 0.89 - closer to outer edge than center
-             const numberRingRadius = containerRadius * 0.75; // << ADJUST THIS FACTOR
+             // --- Adjust numberRingRadius based on wheelRadius ---
+             // Keep the factor relative, adjust as needed
+             const numberRingRadiusFactor = 0.88; // Fine-tune this (0.75-0.9?)
+             const numberRingRadius = wheelRadius * numberRingRadiusFactor;
 
-             // --- ADDED: Logging ---
-             console.log(`Positioning Numbers - Container Radius: ${containerRadius.toFixed(2)}, Number Ring Radius: ${numberRingRadius.toFixed(2)} (Factor: 0.89)`);
+             console.log(`Positioning Numbers - Wheel Radius: ${wheelRadius.toFixed(2)}, Number Ring Radius: ${numberRingRadius.toFixed(2)} (Factor: ${numberRingRadiusFactor})`);
 
-
-             wheel.innerHTML = ''; // Clear previous numbers
+             wheel.innerHTML = ''; // Clear previous numbers from wheel
 
              ROULETTE_NUMBERS.forEach((num, index) => {
                  const angleDegrees = (ANGLE_PER_NUMBER * index) + (ANGLE_PER_NUMBER / 2); // 0=top, positive=CW
@@ -149,8 +154,9 @@ if (typeof initRoulette === 'undefined') {
                  numberSpan.textContent = num.toString();
                  numberSpan.classList.add('roulette-number', `num-${num}`);
 
-                 const x = containerRadius + numberRingRadius * Math.cos(calculationAngleRadians);
-                 const y = containerRadius + numberRingRadius * Math.sin(calculationAngleRadians);
+                 // --- CHANGE: Calculate position relative to wheel's center ---
+                 const x = wheelRadius + numberRingRadius * Math.cos(calculationAngleRadians);
+                 const y = wheelRadius + numberRingRadius * Math.sin(calculationAngleRadians);
 
                  numberSpan.style.position = 'absolute';
                  numberSpan.style.left = `${x}px`;
@@ -158,8 +164,9 @@ if (typeof initRoulette === 'undefined') {
                  // Apply rotation for "clock face" orientation
                  numberSpan.style.transform = `translate(-50%, -50%) rotate(${angleDegrees}deg)`;
 
-                 wheel.appendChild(numberSpan); // Append to wheel
+                 wheel.appendChild(numberSpan); // Append directly to wheel
              });
+             console.log("Positioned numbers relative to wheel center.");
         });
     }
 
