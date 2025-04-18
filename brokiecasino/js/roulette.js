@@ -133,7 +133,7 @@ if (typeof initRoulette === 'undefined') {
              // --- CHANGE: Adjust numberRingRadius factor ---
              // Previous attempts: 0.85 (too far in), 0.92 (too far out)
              // Try 0.88 or 0.89 - closer to outer edge than center
-             const numberRingRadius = containerRadius * 0.70; // << ADJUST THIS FACTOR
+             const numberRingRadius = containerRadius * 0.75; // << ADJUST THIS FACTOR
 
              // --- ADDED: Logging ---
              console.log(`Positioning Numbers - Container Radius: ${containerRadius.toFixed(2)}, Number Ring Radius: ${numberRingRadius.toFixed(2)} (Factor: 0.89)`);
