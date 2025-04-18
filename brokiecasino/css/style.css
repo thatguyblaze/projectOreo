@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Brokie Casino Stylesheet (Fluent Dark Theme) v3.3
+   Brokie Casino Stylesheet (Fluent Dark Theme) v3.4
    - Added Sabacc styles.
    - Corrected conic-gradient for European Roulette wheel (1 green slot).
    - Uses direct hex color values instead of theme() for browser compatibility.
@@ -7,8 +7,8 @@
    - Includes styles for roulette black buttons and number placeholders.
    - Added z-index to roulette numbers.
    - Added potential fixes for SVG text rendering.
-   * - NEW: Added .has-bet style for roulette buttons.
-   * - NEW: Added basic visual enhancements to roulette wheel elements.
+   - Added .has-bet style for roulette buttons.
+   * - NEW: Enhanced roulette wheel visual appearance based on reference image.
    ========================================================================== */
 
 /* --- Base Styles & Background Animation --- */
@@ -25,7 +25,6 @@
 /* Body text uses text-fluent-text-primary -> #f5f5f5 */
 
 /* Custom Scrollbar (Optional, Webkit browsers) */
-/* Note: This is a non-standard feature and may be flagged by some linters */
 .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
 }
@@ -47,7 +46,6 @@
     100% { background-position: 200% 0; }
 }
 
-/* Hero section container */
 #hero {
     border-bottom: 1px solid rgba(74, 74, 74, 0.5); /* fluent-border with opacity */
     box-shadow: 0 5px 25px rgba(0,0,0,0.4);
@@ -56,25 +54,21 @@
     background-color: #2a2a2a; /* fluent-surface */
 }
 
-/* Animated gradient overlay for Hero */
 #hero::before {
     content: '';
     position: absolute;
     inset: 0;
-    /* Use primary color with low opacity */
     background: linear-gradient(110deg, transparent 20%, rgba(0, 120, 212, 0.08) 45%, rgba(0, 120, 212, 0.08) 55%, transparent 80%);
     background-size: 300% 100%;
     animation: heroGradientFlow 15s linear infinite;
     z-index: 0;
 }
 
-/* Ensure hero content is above the gradient overlay */
 #hero > div {
     z-index: 1;
     position: relative;
 }
 
-/* Hero section button style */
 .hero-button {
     background-color: #0078d4; /* fluent-primary */
     color: #ffffff;
@@ -90,7 +84,6 @@
     transform: translateY(-2px);
 }
 
-/* Grid Pattern for Hero Background */
 .bg-grid-pattern {
      background-image: linear-gradient(to right, rgba(74, 74, 74, 0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(74, 74, 74, 0.2) 1px, transparent 1px); /* fluent-border with alpha */
      background-size: 20px 20px; /* Adjust grid size */
@@ -98,7 +91,6 @@
 
 /* --- Left Sidebar Components --- */
 
-/* Shared style for cards in the left column */
 .info-nav-card {
     background-color: #2d2d2d; /* fluent-card (updated) */
     border: 1px solid #4a4a4a; /* fluent-border */
@@ -107,7 +99,6 @@
     box-shadow: 0 3px 10px rgba(0,0,0,0.25);
 }
 
-/* Title style used within sidebar cards */
 .info-nav-title {
     font-size: 0.8rem;
     font-weight: 600;
@@ -117,11 +108,9 @@
     padding-bottom: 0.5rem;
     margin-bottom: 0.75rem;
     border-bottom-width: 2px; /* Thicker border */
-    /* border-color applied via Tailwind class in HTML */
     display: inline-block; /* Fit content width */
 }
 
-/* Balance/Loan Card Specific Styles */
 .balance-value {
     font-size: 2rem; /* text-3xl */
     font-weight: 700; /* font-bold */
@@ -136,7 +125,6 @@
     color: #f5f5f5; /* fluent-text-primary */
 }
 
-/* Loan Get/Pay Buttons */
 .loan-button {
     font-size: 0.75rem; /* text-xs */
     padding: 0.4rem 0.8rem;
@@ -168,7 +156,6 @@
     filter: brightness(1.1);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
-/* Note: Use of !important can sometimes be flagged by linters */
 .loan-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -197,14 +184,12 @@
     color: #f5f5f5; /* fluent-text-primary */
     border-left-color: #4a4a4a; /* fluent-border */
 }
-/* Style for the currently active tab */
 .tab-button[aria-current="page"] {
     background-color: rgba(0, 120, 212, 0.1); /* fluent-primary with alpha */
     color: #f5f5f5; /* fluent-text-primary */
     font-weight: 600; /* font-semibold */
     border-left-color: #0078d4; /* fluent-primary */
 }
-/* Emoji styling within tab buttons */
 .tab-button .emoji {
     display: inline-block;
     width: 1.25rem; /* w-5 */
@@ -244,7 +229,6 @@
     margin-top: 0;
     font-size: 0.8rem; /* text-xs */
     color: #b0b0b0; /* fluent-text-secondary */
-    /* space-y handled by Tailwind */
 }
 .session-stats-list p {
     display: flex;
@@ -254,31 +238,25 @@
 .stats-value {
     font-weight: 600; /* font-semibold */
 }
-/* Color classes for stats values (applied by JS) */
 .stats-value.text-fluent-accent { color: #107c10; /* fluent-accent */ }
 .stats-value.text-fluent-danger { color: #e81123; /* fluent-danger */ }
 .stats-value.text-fluent-text-primary { color: #f5f5f5; /* fluent-text-primary */ }
 
 /* --- Game Area --- */
 
-/* Main container for the active game */
 .game-container {
     background-color: #2d2d2d; /* fluent-card (updated) */
     border: 1px solid #4a4a4a; /* fluent-border */
     border-radius: 0.75rem; /* rounded-xl */
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    /* Padding and min-height set by Tailwind */
 }
 
-/* Individual game area (for transitions) */
 .game-area {
     transition: opacity 0.3s ease-in-out;
-    /* space-y handled by Tailwind */
 }
 
 /* --- General Button Styles (Used by Games) --- */
 
-/* Base style for most buttons within games */
 .game-button, .toggle-button, .modal-button, .coinflip-choice-btn, .horse-select-btn, .roulette-bet-btn {
     padding: 0.6rem 1.2rem;
     border-radius: 0.375rem; /* rounded-md */
@@ -295,8 +273,6 @@
     vertical-align: middle; /* Align better with inputs */
 }
 
-/* Disabled state for buttons */
-/* Note: Use of !important can sometimes be flagged by linters */
 .game-button:disabled, .toggle-button:disabled, .modal-button:disabled, .coinflip-choice-btn:disabled, .horse-select-btn:disabled, .roulette-bet-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -308,21 +284,18 @@
     filter: none !important;
 }
 
-/* Hover state for buttons */
 .game-button:hover:not(:disabled), .toggle-button:hover:not(:disabled), .modal-button:hover:not(:disabled), .coinflip-choice-btn:hover:not(:disabled), .horse-select-btn:hover:not(:disabled), .roulette-bet-btn:hover:not(:disabled) {
     filter: brightness(1.15);
     box-shadow: 0 2px 5px rgba(0,0,0,0.25);
     transform: translateY(-1px); /* Subtle lift */
 }
 
-/* Active (pressed) state for buttons */
 .game-button:active:not(:disabled), .toggle-button:active:not(:disabled), .modal-button:active:not(:disabled), .coinflip-choice-btn:active:not(:disabled), .horse-select-btn:active:not(:disabled), .roulette-bet-btn:active:not(:disabled) {
     transform: scale(0.98) translateY(0); /* Scale down slightly */
     filter: brightness(0.95);
     box-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
-/* Button Color Variants */
 .game-button.primary, .modal-button {
     background-color: #0078d4; /* fluent-primary */
     color: #ffffff;
@@ -349,20 +322,17 @@
     border-color: #ffb900; /* fluent-warning */
 }
 
-/* Toggle Button Specific States */
 .toggle-button.active {
     background-color: #0078d4; /* fluent-primary */
     color: #ffffff;
     border-color: #005a9e; /* Darker primary */
 }
-/* Specific override for Crash auto cashout toggle */
 #crash-auto-cashout-toggle.active {
     background-color: #ffb900; /* fluent-warning */
     color: #1c1c1c; /* fluent-bg */
     border-color: #e0a800; /* Darker warning */
 }
 
-/* Selection States for Specific Buttons */
 .coinflip-choice-btn.selected {
     border-width: 2px;
     border-color: #ffb900; /* fluent-warning */
@@ -374,12 +344,7 @@
     box-shadow: 0 0 8px rgba(255, 185, 0, 0.6); /* fluent-warning with alpha */
     background-color: #5a5a5a; /* Darker gray */
 }
-/* OLD .roulette-bet-btn.selected */
-/* .roulette-bet-btn.selected {
-   box-shadow: 0 0 0 3px #0078d4; /* fluent-primary ring * /
-   filter: brightness(1.2);
-} */
-/* NEW style for buttons with bets */
+
 .roulette-bet-btn.has-bet {
     border-color: #ffb900; /* fluent-warning border */
     box-shadow: 0 0 6px rgba(255, 185, 0, 0.4); /* fluent-warning glow */
@@ -427,27 +392,23 @@ input[type="number"] {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     vertical-align: middle; /* Align better with buttons */
 }
-/* Remove spinners Chrome, Safari, Edge, Opera */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-/* Focus state for number inputs */
 input[type="number"]:focus {
     border-color: #0078d4; /* fluent-primary */
     outline: 2px solid transparent;
     outline-offset: 2px;
     box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.5); /* fluent-primary with alpha */
 }
-/* Disabled state for number inputs */
 input[type="number"]:disabled {
     background-color: #1f1f1f; /* Darker bg */
     opacity: 0.6;
     cursor: not-allowed;
     border-color: #303030; /* Even darker border */
 }
-/* Specific input style for Crash auto cashout */
 .auto-cashout-input {
     background-color: #2d2d2d; /* fluent-card (updated) */
     border: 1px solid #404040;
@@ -500,7 +461,6 @@ input[type="number"]:disabled {
     padding-top: 0.25rem; /* Add padding when open */
     padding-bottom: 1rem;
     opacity: 1;
-    /* max-height is set by JS */
 }
 .accordion-content p {
     margin-bottom: 0.5rem;
@@ -513,14 +473,11 @@ input[type="number"]:disabled {
 #atm-modal-overlay {
     background-color: rgba(0,0,0,0.8);
     backdrop-filter: blur(5px); /* Blur background */
-    /* Position, z-index, transition handled by Tailwind */
 }
 #atm-modal {
     background-color: #2c2c2c; /* Slightly lighter surface */
     border: 1px solid #505050; /* Slightly lighter border */
-    /* Position, transform, padding, radius, shadow, z-index, width, transition handled by Tailwind */
 }
-/* ATM modal buttons use .modal-button class defined above */
 
 /* --- Game Specific Styles --- */
 
@@ -596,15 +553,13 @@ input[type="number"]:disabled {
 }
 #crash-svg {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;
-    /* ViewBox set in JS */
 }
 #crash-svg .grid-line {
     stroke: #404040; /* Dark gray border */
     stroke-width: 0.5; /* Thin lines */
     vector-effect: non-scaling-stroke; /* Keep lines thin */
 }
-#crash-svg .grid-label { /* Style for Y-axis labels */
-    /* fill, font-size set in JS */
+#crash-svg .grid-label {
     font-family: inherit; /* Use page font */
     text-anchor: start; /* Align text start to the x coordinate */
     dominant-baseline: middle; /* Better vertical alignment */
@@ -618,7 +573,6 @@ input[type="number"]:disabled {
     stroke-linejoin: round;
     transition: stroke 0.2s linear;
     vector-effect: non-scaling-stroke;
-    /* filter applied via attribute in HTML */
 }
 #crash-multiplier {
     z-index: 10; /* Above graph line */
@@ -638,7 +592,6 @@ input[type="number"]:disabled {
     box-shadow: 0 0 15px rgba(0, 120, 212, 0.7); /* fluent-primary glow */
     color: #0078d4; /* fluent-primary */
 }
-/* Multiplier Color/Size Classes (Keep from old style) */
 .mult-color-5x { color: #ffee58; }
 .mult-color-10x { color: #ffa726; }
 .mult-color-15x { color: #ff7043; }
@@ -669,8 +622,6 @@ input[type="number"]:disabled {
     50% { transform: rotateY(540deg) rotateX(20deg) scale(1.1); } /* Add slight scale */
     100% { transform: rotateY(1080deg) rotateX(0deg); }
 }
-/* .coinflip-choice-btn uses base .game-button styles */
-/* .coinflip-choice-btn.selected defined in button section */
 
 /* Minefield */
 #minefield-grid {
@@ -804,10 +755,8 @@ input[type="number"]:disabled {
     background: repeating-linear-gradient( white, white 10px, black 10px, black 20px );
     z-index: 10;
 }
-/* Horse Trail Styles */
 .horse-trail {
     position: absolute; width: 6px; height: 6px; border-radius: 50%; opacity: 0.7;
-    /* background-color handled by JS */
     animation: fadeOutShrink 0.5s linear forwards;
     pointer-events: none; /* Prevent trails interfering with clicks */
     z-index: 1; /* Behind horse */
@@ -816,14 +765,12 @@ input[type="number"]:disabled {
     from { opacity: 0.7; transform: scale(1) translateY(-50%); }
     to { opacity: 0; transform: scale(0) translateY(-50%); }
 }
-/* Horse Selection Buttons */
 #horserace-selection {
     display: flex; flex-wrap: wrap;
     gap: 0.5rem; /* gap-2 */
     justify-content: center;
     margin-top: 0.5rem;
 }
-/* .horse-select-btn uses base .game-button.secondary styles */
 .horse-select-btn {
     padding: 0.5rem 1rem; /* py-2 px-4 */
     border-width: 1px; /* Use base button style */
@@ -835,115 +782,114 @@ input[type="number"]:disabled {
     border-radius: 9999px; /* rounded-full */
     border: 1px solid rgba(255, 255, 255, 0.5); /* Add subtle border */
 }
-/* .horse-select-btn.selected defined in button section */
 
 /* Roulette */
 #roulette-wheel-container {
     width: 250px; height: 250px; margin: 1rem auto;
-    /* NEW: Add perspective */
-    perspective: 800px;
-    border: 5px solid #333; /* Darker border */
+    perspective: 800px; /* For potential 3D */
+    border: 8px solid #383838; /* Thicker, slightly lighter dark border */
     border-radius: 50%;
     position: relative; overflow: hidden;
     background-color: #1a1a1a; /* Darker bg */
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.4); /* Add outer shadow */
+    /* Enhanced shadow for depth */
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 6px 18px rgba(0,0,0,0.5);
 }
 #roulette-wheel {
     width: 100%; height: 100%;
     border-radius: 50%;
     position: absolute; top: 0; left: 0;
     transition: transform 4s cubic-bezier(0.3, 0.7, 0.4, 1); /* Spin animation */
-    /* NEW: Add inset shadow for depth */
-    box-shadow: inset 0 0 10px 5px rgba(0,0,0,0.5);
-    /* CORRECTED European Wheel Gradient (37 segments, 1 green) */
+    /* Stronger inset shadow */
+    box-shadow: inset 0 0 15px 8px rgba(0,0,0,0.6);
+    /* European Wheel Gradient with slightly darker red */
     background-image: conic-gradient(
         #107c10 0.000deg 9.730deg,   /* 0 Green */
-        #e81123 9.730deg 19.459deg,   /* 32 Red */
+        #d13438 9.730deg 19.459deg,   /* 32 Darker Red */
         #111827 19.459deg 29.189deg,  /* 15 Black */
-        #e81123 29.189deg 38.919deg,  /* 19 Red */
+        #d13438 29.189deg 38.919deg,  /* 19 Darker Red */
         #111827 38.919deg 48.649deg,  /* 4 Black */
-        #e81123 48.649deg 58.378deg,  /* 21 Red */
+        #d13438 48.649deg 58.378deg,  /* 21 Darker Red */
         #111827 58.378deg 68.108deg,  /* 2 Black */
-        #e81123 68.108deg 77.838deg,  /* 25 Red */
+        #d13438 68.108deg 77.838deg,  /* 25 Darker Red */
         #111827 77.838deg 87.568deg,  /* 17 Black */
-        #e81123 87.568deg 97.297deg,  /* 34 Red */
+        #d13438 87.568deg 97.297deg,  /* 34 Darker Red */
         #111827 97.297deg 107.027deg, /* 6 Black */
-        #e81123 107.027deg 116.757deg, /* 27 Red */
+        #d13438 107.027deg 116.757deg, /* 27 Darker Red */
         #111827 116.757deg 126.486deg, /* 13 Black */
-        #e81123 126.486deg 136.216deg, /* 36 Red */
+        #d13438 126.486deg 136.216deg, /* 36 Darker Red */
         #111827 136.216deg 145.946deg, /* 11 Black */
-        #e81123 145.946deg 155.676deg, /* 30 Red */
+        #d13438 145.946deg 155.676deg, /* 30 Darker Red */
         #111827 155.676deg 165.405deg, /* 8 Black */
-        #e81123 165.405deg 175.135deg, /* 23 Red */
+        #d13438 165.405deg 175.135deg, /* 23 Darker Red */
         #111827 175.135deg 184.865deg, /* 10 Black */
-        #e81123 184.865deg 194.595deg, /* 5 Red */
+        #d13438 184.865deg 194.595deg, /* 5 Darker Red */
         #111827 194.595deg 204.324deg, /* 24 Black */
-        #e81123 204.324deg 214.054deg, /* 16 Red */
+        #d13438 204.324deg 214.054deg, /* 16 Darker Red */
         #111827 214.054deg 223.784deg, /* 33 Black */
-        #e81123 223.784deg 233.514deg, /* 1 Red */
+        #d13438 223.784deg 233.514deg, /* 1 Darker Red */
         #111827 233.514deg 243.243deg, /* 20 Black */
-        #e81123 243.243deg 252.973deg, /* 14 Red */
+        #d13438 243.243deg 252.973deg, /* 14 Darker Red */
         #111827 252.973deg 262.703deg, /* 31 Black */
-        #e81123 262.703deg 272.432deg, /* 9 Red */
+        #d13438 262.703deg 272.432deg, /* 9 Darker Red */
         #111827 272.432deg 282.162deg, /* 22 Black */
-        #e81123 282.162deg 291.892deg, /* 18 Red */
+        #d13438 282.162deg 291.892deg, /* 18 Darker Red */
         #111827 291.892deg 301.622deg, /* 29 Black */
-        #e81123 301.622deg 311.351deg, /* 7 Red */
+        #d13438 301.622deg 311.351deg, /* 7 Darker Red */
         #111827 311.351deg 321.081deg, /* 28 Black */
-        #e81123 321.081deg 330.811deg, /* 12 Red */
-        #111827 330.811deg 340.541deg, /* 35 Black - Corrected */
-        #e81123 340.541deg 350.270deg, /* 3 Red */
+        #d13438 321.081deg 330.811deg, /* 12 Darker Red */
+        #111827 330.811deg 340.541deg, /* 35 Black */
+        #d13438 340.541deg 350.270deg, /* 3 Darker Red */
         #111827 350.270deg 360.000deg  /* 26 Black */
     );
 }
-/* Basic styles for numbers on the wheel (JS positions them) */
 #roulette-wheel .roulette-number {
     position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px; /* Adjust size as needed */
-    height: 20px;
-    font-size: 10px;
+    width: 22px; /* Slightly larger */
+    height: 22px;
+    font-size: 11px; /* Slightly larger font */
     font-weight: bold;
-    color: white;
-    text-shadow: 0 0 2px rgba(0,0,0,0.7); /* Improve readability */
-    transform-origin: center center; /* Rotate around center */
-    pointer-events: none; /* Prevent interaction */
-    z-index: 1; /* Ensure numbers are above the background gradient */
-    /* top, left, transform: rotate() will be set by JS */
+    color: white; /* Default color white */
+    /* Enhanced shadow for definition */
+    text-shadow: 0px 0px 3px rgba(0,0,0,0.8), 0px 0px 1px rgba(0,0,0,1);
+    transform-origin: center center;
+    pointer-events: none;
+    z-index: 1;
+    /* JS handles positioning and rotation */
 }
 #roulette-pointer {
     position: absolute;
-    top: -12px; /* Adjusted position */
+    top: -14px; /* Position adjusted for thicker border */
     left: 50%;
     transform: translateX(-50%);
-    width: 0; height: 0;
-    border-left: 8px solid transparent; /* Slightly smaller */
-    border-right: 8px solid transparent;
-    border-top: 14px solid #ffb900; /* fluent-warning */
+    width: 18px; /* Slightly wider base */
+    height: 16px; /* Slightly taller */
+    background-color: #ffb900; /* fluent-warning */
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle shape */
     z-index: 10;
-    /* NEW: Add a drop shadow */
-    filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));
+    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.6)); /* Stronger shadow */
+    border-bottom: 2px solid #e0a800; /* Add bottom edge highlight */
 }
 #roulette-result { /* Center Hub */
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 60px; height: 60px;
-    background-color: #2d2d2d; /* Slightly lighter than container bg */
+    width: 65px; height: 65px; /* Slightly larger hub */
+    background: radial-gradient(circle, #4a4a4a 0%, #2d2d2d 70%); /* Gradient background */
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; /* text-2xl */ font-weight: bold;
+    font-size: 1.6rem; /* Slightly larger text */
+    font-weight: bold;
     color: #fff; z-index: 5;
-    border: 4px solid #4a4a4a; /* fluent-border - thicker */
-    /* NEW: Add inner and outer shadows */
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.3);
+    border: 5px solid #5a5a5a; /* Thicker border */
+    /* More pronounced shadows */
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.4);
 }
-/* Add styles for result display colors */
-#roulette-result.red { background-color: #e81123; color: white; border-color: #d13438;}
-#roulette-result.black { background-color: #111827; color: white; border-color: #1f2937;}
-#roulette-result.green { background-color: #107c10; color: white; border-color: #0d630d;}
+#roulette-result.red { background: radial-gradient(circle, #ff6b6b 0%, #d13438 70%); color: white; border-color: #a71d2a;}
+#roulette-result.black { background: radial-gradient(circle, #555 0%, #111827 70%); color: white; border-color: #000;}
+#roulette-result.green { background: radial-gradient(circle, #50c878 0%, #107c10 70%); color: white; border-color: #0a5d0a;}
 
 #roulette-betting-area {
     margin-top: 1.5rem; padding-top: 1rem;
@@ -955,22 +901,19 @@ input[type="number"]:disabled {
     gap: 0.5rem; /* gap-2 */
     max-width: 300px; margin: 0 auto 1rem auto;
 }
-/* .roulette-bet-btn uses base button styles */
 .roulette-bet-btn {
     padding: 0.5rem;
     border-width: 1px;
     border-radius: 0.25rem; /* rounded-sm */
     font-size: 0.875rem; /* text-sm */
     min-height: 36px; /* Ensure consistent height */
-    /* Transition for has-bet effect */
     transition: all 0.15s ease-in-out, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 .roulette-bet-btn.red {
-    background-color: #e81123; /* fluent-danger */
-    color: white; border-color: #d13438; /* Darker danger */
+    background-color: #d13438; /* Darker red to match wheel */
+    color: white; border-color: #a71d2a;
 }
 .roulette-bet-btn.black {
-    /* UPDATED Black Button Color */
     background-color: #111827; /* Tailwind gray-900 */
     color: white;
     border-color: #1f2937; /* Tailwind gray-800 */
@@ -989,7 +932,6 @@ input[type="number"]:disabled {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
     max-width: 300px; margin: 0 auto;
 }
-/* .roulette-bet-btn.selected defined in button section (now .has-bet) */
 
 /* Blackjack */
 .blackjack-hand {
@@ -1114,7 +1056,6 @@ input[type="number"]:disabled {
     line-height: 1.1;
     font-weight: 400; /* Normal weight */
     color: #b0b0b0; /* fluent-text-secondary */
-    /* Allow wrapping */
     white-space: normal;
     overflow-wrap: break-word;
     max-height: 3.3em; /* Limit height */
@@ -1127,7 +1068,6 @@ input[type="number"]:disabled {
     font-weight: 700; /* Bold */
 }
 
-/* Style cards based on value */
 .sabacc-card.positive .card-value {
     color: #107c10; /* fluent-accent (Green for positive) */
 }
@@ -1138,7 +1078,6 @@ input[type="number"]:disabled {
     color: #ffb900; /* fluent-warning (Yellow for zero/Idiot) */
 }
 
-/* Score display styling */
 .sabacc-score-value {
     font-weight: 700; /* font-bold */
     font-size: 1.1em; /* Slightly larger than surrounding text */
@@ -1153,11 +1092,9 @@ input[type="number"]:disabled {
 
 /* --- Animations --- */
 
-/* Pulse animation for footer heart */
 @keyframes pulse { 50% { opacity: .5; } }
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
-/* Flash animation for currency display */
 @keyframes flash-green {
     0%, 100% { color: #107c10; transform: scale(1.05); } /* fluent-accent */
     50% { color: #0078d4; transform: scale(1); } /* fluent-primary */
@@ -1169,7 +1106,6 @@ input[type="number"]:disabled {
 .flash-win { animation: flash-green 0.6s ease-out; }
 .flash-loss { animation: flash-red 0.6s ease-out; }
 
-/* Shake animations */
 @keyframes shake-subtle {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-1px); }
@@ -1184,7 +1120,6 @@ input[type="number"]:disabled {
 .shake-subtle { animation: shake-subtle 0.2s infinite linear; }
 .shake-strong { animation: shake-strong 0.15s infinite linear; }
 
-/* Card enter animation (for leaderboard) */
 @keyframes slideFadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
