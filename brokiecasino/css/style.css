@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Brokie Casino Stylesheet (Fluent Dark Theme) v3.2
+   Brokie Casino Stylesheet (Fluent Dark Theme) v3.3
    - Added Sabacc styles.
    - Corrected conic-gradient for European Roulette wheel (1 green slot).
    - Uses direct hex color values instead of theme() for browser compatibility.
@@ -7,6 +7,8 @@
    - Includes styles for roulette black buttons and number placeholders.
    - Added z-index to roulette numbers.
    - Added potential fixes for SVG text rendering.
+   * - NEW: Added .has-bet style for roulette buttons.
+   * - NEW: Added basic visual enhancements to roulette wheel elements.
    ========================================================================== */
 
 /* --- Base Styles & Background Animation --- */
@@ -290,6 +292,7 @@
     align-items: center;
     justify-content: center;
     line-height: 1.25; /* Adjust for text centering */
+    vertical-align: middle; /* Align better with inputs */
 }
 
 /* Disabled state for buttons */
@@ -371,9 +374,20 @@
     box-shadow: 0 0 8px rgba(255, 185, 0, 0.6); /* fluent-warning with alpha */
     background-color: #5a5a5a; /* Darker gray */
 }
-.roulette-bet-btn.selected {
-    box-shadow: 0 0 0 3px #0078d4; /* fluent-primary ring */
-    filter: brightness(1.2);
+/* OLD .roulette-bet-btn.selected */
+/* .roulette-bet-btn.selected {
+   box-shadow: 0 0 0 3px #0078d4; /* fluent-primary ring * /
+   filter: brightness(1.2);
+} */
+/* NEW style for buttons with bets */
+.roulette-bet-btn.has-bet {
+    border-color: #ffb900; /* fluent-warning border */
+    box-shadow: 0 0 6px rgba(255, 185, 0, 0.4); /* fluent-warning glow */
+    transform: scale(1.03); /* Slightly larger */
+    font-weight: 600; /* Make text bolder */
+}
+.roulette-bet-btn.has-bet:hover:not(:disabled) {
+     transform: scale(1.03) translateY(-1px); /* Combine effects */
 }
 
 
@@ -411,6 +425,7 @@ input[type="number"] {
     text-align: center;
     -moz-appearance: textfield; /* Remove spinners Firefox */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    vertical-align: middle; /* Align better with buttons */
 }
 /* Remove spinners Chrome, Safari, Edge, Opera */
 input[type="number"]::-webkit-outer-spin-button,
@@ -825,17 +840,21 @@ input[type="number"]:disabled {
 /* Roulette */
 #roulette-wheel-container {
     width: 250px; height: 250px; margin: 1rem auto;
-    border: 5px solid #4a4a4a; /* fluent-border */
+    /* NEW: Add perspective */
+    perspective: 800px;
+    border: 5px solid #333; /* Darker border */
     border-radius: 50%;
     position: relative; overflow: hidden;
     background-color: #1a1a1a; /* Darker bg */
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.4); /* Add outer shadow */
 }
 #roulette-wheel {
     width: 100%; height: 100%;
     border-radius: 50%;
     position: absolute; top: 0; left: 0;
     transition: transform 4s cubic-bezier(0.3, 0.7, 0.4, 1); /* Spin animation */
+    /* NEW: Add inset shadow for depth */
+    box-shadow: inset 0 0 10px 5px rgba(0,0,0,0.5);
     /* CORRECTED European Wheel Gradient (37 segments, 1 green) */
     background-image: conic-gradient(
         #107c10 0.000deg 9.730deg,   /* 0 Green */
@@ -896,31 +915,35 @@ input[type="number"]:disabled {
 }
 #roulette-pointer {
     position: absolute;
-    top: -10px; /* Position above the wheel */
+    top: -12px; /* Adjusted position */
     left: 50%;
     transform: translateX(-50%);
     width: 0; height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 15px solid #ffb900; /* fluent-warning */
+    border-left: 8px solid transparent; /* Slightly smaller */
+    border-right: 8px solid transparent;
+    border-top: 14px solid #ffb900; /* fluent-warning */
     z-index: 10;
+    /* NEW: Add a drop shadow */
+    filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.5));
 }
-#roulette-result {
+#roulette-result { /* Center Hub */
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 60px; height: 60px;
-    background-color: rgba(28, 28, 28, 0.85); /* fluent-bg with alpha */
+    background-color: #2d2d2d; /* Slightly lighter than container bg */
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.5rem; /* text-2xl */ font-weight: bold;
     color: #fff; z-index: 5;
-    border: 3px solid #4a4a4a; /* fluent-border */
+    border: 4px solid #4a4a4a; /* fluent-border - thicker */
+    /* NEW: Add inner and outer shadows */
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.3);
 }
 /* Add styles for result display colors */
-#roulette-result.red { background-color: #e81123; color: white; }
-#roulette-result.black { background-color: #111827; color: white; }
-#roulette-result.green { background-color: #107c10; color: white; }
+#roulette-result.red { background-color: #e81123; color: white; border-color: #d13438;}
+#roulette-result.black { background-color: #111827; color: white; border-color: #1f2937;}
+#roulette-result.green { background-color: #107c10; color: white; border-color: #0d630d;}
 
 #roulette-betting-area {
     margin-top: 1.5rem; padding-top: 1rem;
@@ -938,6 +961,9 @@ input[type="number"]:disabled {
     border-width: 1px;
     border-radius: 0.25rem; /* rounded-sm */
     font-size: 0.875rem; /* text-sm */
+    min-height: 36px; /* Ensure consistent height */
+    /* Transition for has-bet effect */
+    transition: all 0.15s ease-in-out, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 .roulette-bet-btn.red {
     background-color: #e81123; /* fluent-danger */
@@ -963,7 +989,7 @@ input[type="number"]:disabled {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
     max-width: 300px; margin: 0 auto;
 }
-/* .roulette-bet-btn.selected defined in button section */
+/* .roulette-bet-btn.selected defined in button section (now .has-bet) */
 
 /* Blackjack */
 .blackjack-hand {

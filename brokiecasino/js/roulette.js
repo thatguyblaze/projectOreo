@@ -1,16 +1,18 @@
 // Check if the main function is already defined to prevent redeclaration errors
-// This acts as a guard against the script running multiple times.
 if (typeof initRoulette === 'undefined') {
 
     /**
      * ==========================================================================
-     * Brokie Casino - Roulette Game Logic (v2.1 - Guarded)
+     * Brokie Casino - Roulette Game Logic (v2.2 - Multiple Bets)
      *
+     * - Supports placing multiple bets simultaneously.
+     * - Uses a placedBets array to track bets {type, value, amount}.
+     * - Visualizes placed bet amount on buttons.
+     * - Calculates total bet and winnings based on all placed bets.
+     * - Added clearAllRouletteBets function (requires HTML button).
      * - Accepts BrokieAPI object during initialization.
      * - Uses passed API object for core functions (balance, sound, messages).
      * - Includes logic for placing numbers visually on the wheel.
-     * - Fixes handling of outside bet button clicks.
-     * - Added guard against multiple script executions.
      * ==========================================================================
      */
 
@@ -39,25 +41,23 @@ if (typeof initRoulette === 'undefined') {
     const ANGLE_PER_NUMBER = 360 / TOTAL_NUMBERS;
 
     // --- Roulette State Variables ---
-    // These are now scoped within the guard block
     let rouletteIsSpinning = false;
-    let currentRouletteBetType = null;
-    let currentRouletteBetValue = null;
-    let selectedBetButton = null;
+    // CHANGE: Store multiple bets in an array
+    let placedBets = []; // Array of bet objects: { type: string, value: string|number, amount: number, buttonElement: HTMLElement }
+    // let currentRouletteBetType = null; // Removed
+    // let currentRouletteBetValue = null; // Removed
+    // let selectedBetButton = null; // Removed (manage selection via placedBets)
 
     // --- DOM Element References ---
-    // Declare variables, will be assigned in initRoulette
     let rouletteWheel, roulettePointer, rouletteResultDisplay, rouletteBetInput,
         rouletteSpinButton, rouletteStatusDisplay, rouletteInsideBetsContainer, rouletteOutsideBetsContainer,
-        rouletteCurrentBetDisplay;
+        rouletteCurrentBetDisplay, clearBetsButton; // NEW: clearBetsButton
 
     // --- API Reference (Passed from main.js) ---
-    // This declaration is now safe inside the guard block
     let LocalBrokieAPI = null;
 
     /**
      * Initializes the Roulette game elements and event listeners.
-     * This function will now only be defined once globally.
      * @param {object} API - The BrokieAPI object passed from main.js.
      */
     function initRoulette(API) {
@@ -73,13 +73,15 @@ if (typeof initRoulette === 'undefined') {
         rouletteStatusDisplay = document.getElementById('roulette-status');
         rouletteInsideBetsContainer = document.getElementById('roulette-inside-bets');
         rouletteOutsideBetsContainer = document.getElementById('roulette-outside-bets');
-        rouletteCurrentBetDisplay = document.getElementById('roulette-current-bet-type');
+        rouletteCurrentBetDisplay = document.getElementById('roulette-current-bet-type'); // We might repurpose or remove this later
+        // NEW: Get clear bets button reference (assuming ID 'roulette-clear-bets-button')
+        clearBetsButton = document.getElementById('roulette-clear-bets-button');
 
-        // Check if elements exist before proceeding
+        // Basic element check (excluding clearBetsButton for now)
         if (!rouletteWheel || !roulettePointer || !rouletteResultDisplay || !rouletteBetInput ||
             !rouletteSpinButton || !rouletteStatusDisplay || !rouletteInsideBetsContainer ||
             !rouletteOutsideBetsContainer || !rouletteCurrentBetDisplay || !LocalBrokieAPI) {
-            console.error("Roulette initialization failed: Could not find all required elements or API.");
+            console.error("Roulette initialization failed: Could not find required elements or API.");
             const tab = document.getElementById('tab-roulette');
             if(tab) tab.style.display = 'none'; // Hide tab if setup fails
             return;
@@ -91,32 +93,61 @@ if (typeof initRoulette === 'undefined') {
         positionWheelNumbers();
         // Setup event listeners for betting and spinning
         setupRouletteEventListeners();
-        // Setup generic bet adjustment buttons using the factory from main.js
-        // Ensure BrokieAPI has the function before calling
+        // Setup generic bet adjustment buttons
         if (LocalBrokieAPI && typeof LocalBrokieAPI.addBetAdjustmentListeners === 'function') {
             LocalBrokieAPI.addBetAdjustmentListeners('roulette', rouletteBetInput);
         } else {
             console.error("BrokieAPI.addBetAdjustmentListeners not found in roulette.js");
         }
 
-
         // Initial reset
         resetRoulette(false);
-        console.log("Roulette Initialized (Guarded)"); // Updated log message
+        console.log("Roulette Initialized (v2.2 - Multiple Bets)");
     }
 
-    // --- All other functions (createRouletteBettingGrid, createBetButton, positionWheelNumbers, etc.) go here ---
-    // --- They are now defined only if initRoulette wasn't already defined ---
+    // --- Helper Functions ---
+
+    /**
+     * Finds a bet in the placedBets array.
+     * @param {string} type - Bet type (e.g., 'single', 'red').
+     * @param {string|number} value - Bet value (e.g., 5, 'red').
+     * @returns {object|null} The found bet object or null.
+     */
+    function findPlacedBet(type, value) {
+        return placedBets.find(bet => bet.type === type && bet.value == value); // Use == for potential type coercion (e.g., '5' vs 5)
+    }
+
+    /**
+    * Updates the visual display of a bet button (text content and data attribute).
+    * @param {HTMLElement} button - The button element to update.
+    * @param {number} amount - The total amount currently bet on this button (0 to reset).
+    */
+    function updateButtonVisual(button, amount) {
+        if (!button) return;
+        const originalValue = button.dataset.originalValue || button.textContent; // Store original text if not already stored
+        if (!button.dataset.originalValue) {
+            button.dataset.originalValue = originalValue;
+        }
+
+        if (amount > 0) {
+            button.textContent = `${originalValue} (${amount})`;
+            button.dataset.betAmount = amount.toString();
+            button.classList.add('has-bet'); // Add class for potential styling
+        } else {
+            button.textContent = originalValue;
+            button.removeAttribute('data-bet-amount');
+            button.classList.remove('has-bet'); // Remove class
+        }
+    }
+
+    // --- Core Functions ---
 
     /**
      * Creates the number buttons (0-36) for the inside betting grid.
      */
     function createRouletteBettingGrid() {
-        if (!rouletteInsideBetsContainer) {
-            console.error("Roulette inside bets container not found!");
-            return;
-        }
-        rouletteInsideBetsContainer.innerHTML = ''; // Clear previous grid if any
+        if (!rouletteInsideBetsContainer) return;
+        rouletteInsideBetsContainer.innerHTML = '';
         console.log("Creating Roulette inside bet buttons...");
 
         // Create button for 0
@@ -139,30 +170,30 @@ if (typeof initRoulette === 'undefined') {
     function createBetButton(value, color, betType) {
         const button = document.createElement('button');
         button.classList.add('roulette-bet-btn');
-        if (color) button.classList.add(color); // Add 'red', 'black', 'green' class
+        if (color) button.classList.add(color);
         button.textContent = value;
         button.dataset.betType = betType;
-        button.dataset.betValue = value; // Store the specific number/type
+        button.dataset.betValue = value;
+        button.dataset.originalValue = value; // NEW: Store original value for reset
         return button;
     }
 
     /**
      * Positions the number elements (0-36) absolutely around the roulette wheel graphic.
+     * (No changes needed here for multiple bets logic)
      */
     function positionWheelNumbers() {
+        // ... (Keep the existing positionWheelNumbers function as it was)
         if (!rouletteWheel) {
              console.error("Roulette wheel element not found for positioning numbers!");
              return;
         }
-
-        // Use requestAnimationFrame to ensure layout is calculated before accessing offsetWidth
         requestAnimationFrame(() => {
             const wheelDiameter = rouletteWheel.offsetWidth;
             if (wheelDiameter <= 0) {
                 console.warn("Roulette wheel still has no width after rAF, trying again shortly.");
-                // Fallback to setTimeout if rAF didn't work (e.g., element still hidden)
                 if (window.positionWheelTimeout) clearTimeout(window.positionWheelTimeout);
-                window.positionWheelTimeout = setTimeout(positionWheelNumbers, 150); // Slightly longer delay
+                window.positionWheelTimeout = setTimeout(positionWheelNumbers, 150);
                 return;
             }
             console.log("Positioning numbers on Roulette wheel (rAF)...");
@@ -171,30 +202,21 @@ if (typeof initRoulette === 'undefined') {
             const wheelRadius = wheelDiameter / 2;
             const numberRadius = wheelRadius * 0.85; // Radius for placing numbers
 
-            // Clear any existing numbers first
             const existingNumbers = rouletteWheel.querySelectorAll('.roulette-number');
             existingNumbers.forEach(num => num.remove());
 
             ROULETTE_NUMBERS.forEach((num, index) => {
-                // Calculate the angle for the center of the segment for this number
-                const angleDegrees = (ANGLE_PER_NUMBER * index) + (ANGLE_PER_NUMBER / 2) - 90; // Center in segment, adjust offset
+                const angleDegrees = (ANGLE_PER_NUMBER * index) + (ANGLE_PER_NUMBER / 2) - 90;
                 const angleRadians = angleDegrees * (Math.PI / 180);
-
                 const numberSpan = document.createElement('span');
                 numberSpan.textContent = num.toString();
-                numberSpan.classList.add('roulette-number', `num-${num}`); // Add class for styling
-
-                // Calculate position using trigonometry
+                numberSpan.classList.add('roulette-number', `num-${num}`);
                 const x = wheelRadius + numberRadius * Math.cos(angleRadians);
                 const y = wheelRadius + numberRadius * Math.sin(angleRadians);
-
-                // Apply styles for positioning and rotation
                 numberSpan.style.position = 'absolute';
                 numberSpan.style.left = `${x}px`;
                 numberSpan.style.top = `${y}px`;
-                // Rotate the number to be upright relative to the center
                 numberSpan.style.transform = `translate(-50%, -50%) rotate(${angleDegrees + 90}deg)`;
-
                 rouletteWheel.appendChild(numberSpan);
             });
             console.log("Finished positioning numbers on Roulette wheel.");
@@ -202,92 +224,137 @@ if (typeof initRoulette === 'undefined') {
     }
 
     /**
-     * Sets up event listeners for roulette betting buttons and the spin button.
+     * Sets up event listeners for roulette betting buttons, spin, and clear buttons.
      */
     function setupRouletteEventListeners() {
-        // Ensure containers exist before adding listeners
         if (rouletteInsideBetsContainer) {
-            rouletteInsideBetsContainer.addEventListener('click', handleBetSelection);
-        } else {
-            console.error("Roulette inside bets container not found for event listener.");
+            rouletteInsideBetsContainer.addEventListener('click', handleBetPlacement); // CHANGE: Renamed handler
         }
         if (rouletteOutsideBetsContainer) {
-            rouletteOutsideBetsContainer.addEventListener('click', handleBetSelection);
-        } else {
-             console.error("Roulette outside bets container not found for event listener.");
+            rouletteOutsideBetsContainer.addEventListener('click', handleBetPlacement); // CHANGE: Renamed handler
         }
         if (rouletteSpinButton) {
-             rouletteSpinButton.addEventListener('click', spinWheel);
+            rouletteSpinButton.addEventListener('click', spinWheel);
+        }
+        // NEW: Add listener for clear bets button (if it exists)
+        if (clearBetsButton) {
+            clearBetsButton.addEventListener('click', clearAllRouletteBets);
         } else {
-             console.error("Roulette spin button not found for event listener.");
+            console.warn("Roulette 'Clear Bets' button not found (ID: roulette-clear-bets-button). Functionality will be missing.");
         }
     }
 
     /**
-     * Handles clicks on any betting button (inside or outside).
+     * Handles clicks on any betting button to place or add to a bet.
+     * CHANGE: Major logic change for multiple bets.
      */
-    function handleBetSelection(event) {
-        if (rouletteIsSpinning) return; // Don't allow betting while spinning
+    function handleBetPlacement(event) {
+        if (rouletteIsSpinning) return;
 
-        // Find the actual button element that was clicked
-        const target = event.target.closest('.roulette-bet-btn');
-        if (!target) return; // Exit if the click wasn't on a bet button or its child
+        const targetButton = event.target.closest('.roulette-bet-btn');
+        if (!targetButton) return;
 
-        // Play sound only if API is available and function exists
-        if (LocalBrokieAPI && typeof LocalBrokieAPI.playSound === 'function') {
-            LocalBrokieAPI.playSound('click'); // Play click sound for bet selection
+        // Get amount from the main bet input
+        const amountToAdd = parseInt(rouletteBetInput.value);
+        if (isNaN(amountToAdd) || amountToAdd < 1) {
+            if (LocalBrokieAPI) LocalBrokieAPI.showMessage("Please enter a valid bet amount first.", 2000);
+            return;
+        }
+         // Check balance for this single addition - prevents adding if broke
+        if (LocalBrokieAPI && amountToAdd > LocalBrokieAPI.getBalance()) {
+            LocalBrokieAPI.showMessage("Not enough balance to add this amount.", 2000);
+            return;
         }
 
-        // Remove highlight from previously selected button
-        if (selectedBetButton) {
-            selectedBetButton.classList.remove('selected');
+        if (LocalBrokieAPI) LocalBrokieAPI.playSound('chip_place'); // NEW: Use a chip sound
+
+        const betType = targetButton.dataset.betType;
+        const betValue = targetButton.dataset.betValue; // Keep as string/number from dataset
+
+        // Find if this bet already exists
+        let existingBet = findPlacedBet(betType, betValue);
+
+        if (existingBet) {
+            // Add amount to existing bet
+            existingBet.amount += amountToAdd;
+        } else {
+            // Create new bet object and add to array
+            existingBet = {
+                type: betType,
+                value: (betType === 'single') ? parseInt(betValue, 10) : betValue, // Parse single number bets
+                amount: amountToAdd,
+                buttonElement: targetButton // Store reference to the button
+            };
+            placedBets.push(existingBet);
         }
 
-        // Get bet details from data attributes
-        const betType = target.dataset.betType;
-        const betValue = target.dataset.betValue;
+        // Update the button's visual display
+        updateButtonVisual(targetButton, existingBet.amount);
 
-        // Set the bet type
-        currentRouletteBetType = betType;
-        // Set the bet value: parse if single, otherwise use the type string itself
-        currentRouletteBetValue = (betType === 'single') ? parseInt(betValue, 10) : (betValue || betType);
+        // Update the total bet display (optional, could display sum of placedBets)
+        updateTotalBetDisplay();
 
-        // Update the display showing the current bet type
-        let betText = "None";
-        if (currentRouletteBetType === 'single') {
-            betText = `Number ${currentRouletteBetValue}`;
-        } else if (currentRouletteBetType) {
-            // Use the TYPE string for display text, capitalize it
-            betText = currentRouletteBetType.charAt(0).toUpperCase() + currentRouletteBetType.slice(1);
-            // Handle specific display text for low/high bets
-            if (currentRouletteBetType === 'low') betText = '1-18';
-            if (currentRouletteBetType === 'high') betText = '19-36';
+        // Enable spin button if any bets are placed
+        if (rouletteSpinButton && placedBets.length > 0) {
+            rouletteSpinButton.disabled = false;
         }
-        // Update display only if element exists
-        if (rouletteCurrentBetDisplay) rouletteCurrentBetDisplay.textContent = betText;
-
-        // Highlight the newly selected button
-        target.classList.add('selected');
-        selectedBetButton = target;
-
-        // Enable spin button only if it exists
-        if (rouletteSpinButton) rouletteSpinButton.disabled = false;
+        // NEW: Enable clear bets button if any bets are placed
+        if (clearBetsButton && placedBets.length > 0) {
+            clearBetsButton.disabled = false;
+        }
     }
+
+    /**
+     * NEW: Updates a display showing the total amount currently bet.
+     * (Replaces the old rouletteCurrentBetDisplay logic)
+     */
+    function updateTotalBetDisplay() {
+        if (!rouletteCurrentBetDisplay) return;
+        const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0);
+        if (totalBetAmount > 0) {
+            rouletteCurrentBetDisplay.textContent = `Total Bet: ${totalBetAmount}`;
+        } else {
+            rouletteCurrentBetDisplay.textContent = 'No Bets Placed';
+        }
+    }
+
+
+    /**
+     * NEW: Clears all currently placed bets without spinning.
+     */
+    function clearAllRouletteBets() {
+        if (rouletteIsSpinning) return; // Don't clear while spinning
+        if (LocalBrokieAPI) LocalBrokieAPI.playSound('clear_bets'); // NEW: Sound for clearing
+
+        // Reset visuals for all buttons that had bets
+        placedBets.forEach(bet => {
+            updateButtonVisual(bet.buttonElement, 0); // Reset visual to 0 amount
+        });
+
+        // Clear the bets array
+        placedBets = [];
+
+        // Update total bet display
+        updateTotalBetDisplay();
+
+        // Disable Spin and Clear buttons
+        if (rouletteSpinButton) rouletteSpinButton.disabled = true;
+        if (clearBetsButton) clearBetsButton.disabled = true;
+        if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = 'Bets cleared. Place new bets!';
+    }
+
 
     /**
      * Resets the roulette game to its initial state.
+     * CHANGE: Now clears the placedBets array and button visuals.
      */
     function resetRoulette(resetWheelVisual = false) {
         rouletteIsSpinning = false;
 
-        // Clear selected button highlight
-        if (selectedBetButton) {
-            selectedBetButton.classList.remove('selected');
-            selectedBetButton = null;
-        }
-        currentRouletteBetType = null;
-        currentRouletteBetValue = null;
-        if (rouletteCurrentBetDisplay) rouletteCurrentBetDisplay.textContent = 'None';
+        // Clear placed bets and button visuals
+        clearAllRouletteBets(); // Use the clear bets function to handle visuals and array
+
+        // Reset displays
         if (rouletteResultDisplay) {
             rouletteResultDisplay.textContent = '?';
             rouletteResultDisplay.className = 'roulette-result'; // Reset color classes
@@ -295,92 +362,98 @@ if (typeof initRoulette === 'undefined') {
             rouletteResultDisplay.style.color = '';
         }
         if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = 'Place your bet!';
+        updateTotalBetDisplay(); // Reset total bet display
 
-        // Reset wheel rotation and ensure numbers are positioned
-        if (rouletteWheel) {
-           positionWheelNumbers(); // Ensure numbers are positioned on reset
-           if (resetWheelVisual) {
-               rouletteWheel.style.transition = 'none'; // Disable transition temporarily
-               rouletteWheel.style.transform = `rotate(0deg)`;
-               // Force browser reflow to apply the 'transition: none' before re-enabling it
-               void rouletteWheel.offsetWidth;
-               rouletteWheel.style.transition = ''; // Re-enable transition (uses CSS definition)
-           }
+        // Reset wheel rotation
+        if (rouletteWheel && resetWheelVisual) {
+           // ... (Keep existing wheel visual reset logic)
+           positionWheelNumbers();
+           rouletteWheel.style.transition = 'none';
+           rouletteWheel.style.transform = `rotate(0deg)`;
+           void rouletteWheel.offsetWidth;
+           rouletteWheel.style.transition = '';
+        } else if (rouletteWheel) {
+             positionWheelNumbers(); // Ensure numbers are positioned on reset
         }
 
-        // Ensure controls are re-enabled
-        if (rouletteSpinButton) rouletteSpinButton.disabled = true; // Disable spin until bet placed
+        // Ensure controls are set correctly
+        if (rouletteSpinButton) rouletteSpinButton.disabled = true;
+        if (clearBetsButton) clearBetsButton.disabled = true; // Disable clear button initially
         if (rouletteBetInput) rouletteBetInput.disabled = false;
         // Re-enable betting buttons using pointer events
-        if(rouletteInsideBetsContainer) rouletteInsideBetsContainer.style.pointerEvents = 'auto';
-        if(rouletteOutsideBetsContainer) rouletteOutsideBetsContainer.style.pointerEvents = 'auto';
+        if (rouletteInsideBetsContainer) rouletteInsideBetsContainer.style.pointerEvents = 'auto';
+        if (rouletteOutsideBetsContainer) rouletteOutsideBetsContainer.style.pointerEvents = 'auto';
     }
 
     /**
      * Starts the roulette spin animation and determines the winner.
+     * CHANGE: Calculates total bet, deducts total, checks win for each bet.
      */
     function spinWheel() {
         if (rouletteIsSpinning) return;
-        if (!currentRouletteBetType) {
+        if (placedBets.length === 0) { // CHANGE: Check if any bets are placed
             if (LocalBrokieAPI) LocalBrokieAPI.showMessage("Please place a bet first!", 2000);
             return;
         }
 
-        // Get current bet amount from input
-        const currentBetAmount = parseInt(rouletteBetInput.value);
-        if (isNaN(currentBetAmount) || currentBetAmount < 1) {
-             if (LocalBrokieAPI) LocalBrokieAPI.showMessage("Invalid bet amount.", 2000);
+        // CHANGE: Calculate total bet amount from the array
+        const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0);
+
+        if (isNaN(totalBetAmount) || totalBetAmount < 1) {
+            // This case should ideally not happen if placedBets is managed correctly
+            if (LocalBrokieAPI) LocalBrokieAPI.showMessage("Invalid total bet amount.", 2000);
+            console.error("Invalid total bet amount calculated:", totalBetAmount, placedBets);
             return;
         }
-        // Check balance only if API is available
-        if (LocalBrokieAPI && currentBetAmount > LocalBrokieAPI.getBalance()) {
-            LocalBrokieAPI.showMessage("Not enough balance for this bet.", 2000);
+
+        // Check balance against total bet
+        if (LocalBrokieAPI && totalBetAmount > LocalBrokieAPI.getBalance()) {
+            LocalBrokieAPI.showMessage("Not enough balance for the total bet.", 2000);
             return;
         }
 
         // Start the spin
         rouletteIsSpinning = true;
         if (LocalBrokieAPI) {
-            LocalBrokieAPI.updateBalance(-currentBetAmount); // Deduct bet amount immediately
-            LocalBrokieAPI.playSound('roulette_spin'); // Play spin sound
+            LocalBrokieAPI.updateBalance(-totalBetAmount); // CHANGE: Deduct total bet amount
+            LocalBrokieAPI.playSound('roulette_spin');
         }
         if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = 'Spinning... No more bets!';
         if (rouletteSpinButton) rouletteSpinButton.disabled = true;
-        if (rouletteBetInput) rouletteBetInput.disabled = true;
+        if (clearBetsButton) clearBetsButton.disabled = true; // Disable clear during spin
+        if (rouletteBetInput) rouletteBetInput.disabled = true; // Disable main input
         // Disable betting buttons visually during spin
-        if(rouletteInsideBetsContainer) rouletteInsideBetsContainer.style.pointerEvents = 'none';
-        if(rouletteOutsideBetsContainer) rouletteOutsideBetsContainer.style.pointerEvents = 'none';
-        if (selectedBetButton) selectedBetButton.classList.remove('selected'); // Remove highlight
+        if (rouletteInsideBetsContainer) rouletteInsideBetsContainer.style.pointerEvents = 'none';
+        if (rouletteOutsideBetsContainer) rouletteOutsideBetsContainer.style.pointerEvents = 'none';
 
         // --- Calculate Winning Number and Spin Animation ---
+        // (No changes needed in the animation calculation itself)
         const winningNumberIndex = Math.floor(Math.random() * TOTAL_NUMBERS);
         const winningNumber = ROULETTE_NUMBERS[winningNumberIndex];
-
-        // Calculate target angle:
         const angleToSegmentStart = -(winningNumberIndex * ANGLE_PER_NUMBER);
-        const offsetWithinSegment = -(ANGLE_PER_NUMBER * (0.1 + Math.random() * 0.8)); // Random offset within the segment
+        const offsetWithinSegment = -(ANGLE_PER_NUMBER * (0.1 + Math.random() * 0.8));
         const finalAngleInRotation = angleToSegmentStart + offsetWithinSegment;
-        const fullRotations = (5 + Math.floor(Math.random() * 5)) * 360; // 5-9 full rotations
-        const targetRotation = finalAngleInRotation - fullRotations; // Subtract full rotations for clockwise spin effect
+        const fullRotations = (5 + Math.floor(Math.random() * 5)) * 360;
+        const targetRotation = finalAngleInRotation - fullRotations;
 
-        // Apply rotation using CSS transition
         if (rouletteWheel) {
-            rouletteWheel.style.transition = 'transform 4s cubic-bezier(0.2, 0.8, 0.4, 1)'; // Ensure transition is set
+            rouletteWheel.style.transition = 'transform 4s cubic-bezier(0.2, 0.8, 0.4, 1)';
             rouletteWheel.style.transform = `rotate(${targetRotation}deg)`;
         }
 
         // --- Handle Spin Completion ---
         setTimeout(() => {
-            handleResult(winningNumber, currentBetAmount); // Pass bet amount to result handler
+            handleResult(winningNumber); // CHANGE: Don't need to pass betAmount anymore
         }, 4100); // Match CSS transition duration + buffer
     }
 
     /**
      * Handles the result calculation and UI update after the spin finishes.
+     * CHANGE: Iterates through placedBets to calculate total win.
      */
-    function handleResult(winningNumber, betAmount) {
+    function handleResult(winningNumber) {
         rouletteIsSpinning = false; // Allow new spins/bets
-        if (LocalBrokieAPI) LocalBrokieAPI.playSound('roulette_ball'); // Sound for ball landing
+        if (LocalBrokieAPI) LocalBrokieAPI.playSound('roulette_ball');
 
         const winningColor = ROULETTE_COLORS[winningNumber];
 
@@ -391,59 +464,70 @@ if (typeof initRoulette === 'undefined') {
             rouletteResultDisplay.classList.add(winningColor); // Add color class
         }
 
-        // --- Determine Win/Loss ---
-        let payoutMultiplier = 0;
-        let won = false;
+        // --- Determine Win/Loss for EACH placed bet ---
+        let totalWinnings = 0; // Winnings only (excluding original bet amount)
+        let totalBetReturned = 0; // Sum of original bets for winning bets
 
-        // Check win conditions based on stored bet type and value
-        if (currentRouletteBetType === 'single' && currentRouletteBetValue === winningNumber) {
-            payoutMultiplier = ROULETTE_PAYOUTS.single; won = true;
-        } else if (currentRouletteBetType === 'red' && winningColor === 'red') {
-            payoutMultiplier = ROULETTE_PAYOUTS.red; won = true;
-        } else if (currentRouletteBetType === 'black' && winningColor === 'black') {
-            payoutMultiplier = ROULETTE_PAYOUTS.black; won = true;
-        } else if (currentRouletteBetType === 'odd' && winningNumber !== 0 && winningNumber % 2 !== 0) {
-            payoutMultiplier = ROULETTE_PAYOUTS.odd; won = true;
-        } else if (currentRouletteBetType === 'even' && winningNumber !== 0 && winningNumber % 2 === 0) {
-            payoutMultiplier = ROULETTE_PAYOUTS.even; won = true;
-        } else if (currentRouletteBetType === 'low' && winningNumber >= 1 && winningNumber <= 18) {
-            payoutMultiplier = ROULETTE_PAYOUTS.low; won = true;
-        } else if (currentRouletteBetType === 'high' && winningNumber >= 19 && winningNumber <= 36) {
-            payoutMultiplier = ROULETTE_PAYOUTS.high; won = true;
-        }
-        // Add checks for other bet types (split, street, etc.) here if implemented
+        placedBets.forEach(bet => {
+            let payoutMultiplier = 0;
+            let betWon = false;
 
-        // Calculate winnings and update balance/stats
+            // Check win conditions based on the current bet object
+            if (bet.type === 'single' && bet.value === winningNumber) {
+                payoutMultiplier = ROULETTE_PAYOUTS.single; betWon = true;
+            } else if (bet.type === 'red' && winningColor === 'red') {
+                payoutMultiplier = ROULETTE_PAYOUTS.red; betWon = true;
+            } else if (bet.type === 'black' && winningColor === 'black') {
+                payoutMultiplier = ROULETTE_PAYOUTS.black; betWon = true;
+            } else if (bet.type === 'odd' && winningNumber !== 0 && winningNumber % 2 !== 0) {
+                payoutMultiplier = ROULETTE_PAYOUTS.odd; betWon = true;
+            } else if (bet.type === 'even' && winningNumber !== 0 && winningNumber % 2 === 0) {
+                payoutMultiplier = ROULETTE_PAYOUTS.even; betWon = true;
+            } else if (bet.type === 'low' && winningNumber >= 1 && winningNumber <= 18) {
+                payoutMultiplier = ROULETTE_PAYOUTS.low; betWon = true;
+            } else if (bet.type === 'high' && winningNumber >= 19 && winningNumber <= 36) {
+                payoutMultiplier = ROULETTE_PAYOUTS.high; betWon = true;
+            }
+            // Add checks for other bet types here if implemented
+
+            if (betWon) {
+                const winningsForThisBet = bet.amount * payoutMultiplier;
+                totalWinnings += winningsForThisBet;
+                totalBetReturned += bet.amount; // Add original bet amount to return total
+            }
+        });
+
+        // Calculate total return and update balance/stats
+        const totalReturn = totalWinnings + totalBetReturned; // Winnings + original winning bets
         let statusMessage = '';
-        if (won && LocalBrokieAPI) {
-            const winnings = betAmount * payoutMultiplier;
-            const totalReturn = winnings + betAmount; // Original bet back + winnings
-            LocalBrokieAPI.updateBalance(totalReturn); // Add total amount back
-            const netWin = totalReturn - betAmount;
-            statusMessage = `Win! ${winningNumber} (${winningColor}). You won ${LocalBrokieAPI.formatWin(netWin)}!`;
-            LocalBrokieAPI.showMessage(`You won ${LocalBrokieAPI.formatWin(netWin)}!`, 3000);
-            LocalBrokieAPI.playSound('roulette_win');
-            LocalBrokieAPI.addWin('Roulette', netWin); // Add net win to leaderboard
-        } else if (LocalBrokieAPI) { // Only update status if loss and API exists
-            statusMessage = `Lose! Landed on ${winningNumber} (${winningColor}).`;
-            LocalBrokieAPI.showMessage(`Landed on ${winningNumber}. Better luck next time!`, 3000);
-            LocalBrokieAPI.playSound('lose');
-            // Balance was already deducted, no further action needed for loss
+
+        if (totalReturn > 0 && LocalBrokieAPI) {
+            LocalBrokieAPI.updateBalance(totalReturn); // Add winnings + original bets back
+            statusMessage = `Win! Landed on ${winningNumber} (${winningColor}). You won ${LocalBrokieAPI.formatWin(totalWinnings)}!`;
+            LocalBrokieAPI.showMessage(`You won ${LocalBrokieAPI.formatWin(totalWinnings)}!`, 3000);
+            LocalBrokieAPI.playSound('roulette_win'); // Could play tiered sounds based on win amount
+            LocalBrokieAPI.addWin('Roulette', totalWinnings); // Add net win to leaderboard
+        } else { // Loss (or API missing)
+             const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0); // Recalculate for message
+             statusMessage = `Lose! Landed on ${winningNumber} (${winningColor}). Lost ${totalBetAmount}.`;
+            if (LocalBrokieAPI) {
+                LocalBrokieAPI.showMessage(`Landed on ${winningNumber}. Better luck next time!`, 3000);
+                LocalBrokieAPI.playSound('lose');
+                 // Balance was already deducted, no further action needed for loss
+            }
         }
         if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = statusMessage;
 
         // Reset UI elements for the next round after a short delay
         setTimeout(() => {
-            // Check if roulette tab is still active before resetting UI elements
             const currentActiveTab = document.querySelector('.tab-button[aria-current="page"]');
             if (currentActiveTab && currentActiveTab.id === 'tab-roulette') {
-                resetRoulette(false); // Reset state but don't snap wheel visually
+                resetRoulette(false);
             }
-        }, 2000); // Delay before resetting UI for next bet
+        }, 2500); // Shortened delay a bit
     }
 
-// End of the guard block that checks if initRoulette is already defined
+// End of the guard block
 } else {
-    // Optional: Log a warning if the script tries to load again
     console.warn("Roulette script already loaded. Skipping re-initialization.");
 }
