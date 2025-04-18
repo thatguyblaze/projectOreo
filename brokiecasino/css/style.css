@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Brokie Casino Stylesheet (Fluent Dark Theme) v3.5
+   Brokie Casino Stylesheet (Fluent Dark Theme) v3.6
    - Added Sabacc styles.
    - Corrected conic-gradient for European Roulette wheel (1 green slot).
    - Uses direct hex color values instead of theme() for browser compatibility.
@@ -9,9 +9,12 @@
    - Added potential fixes for SVG text rendering.
    - Added .has-bet style for roulette buttons.
    - Enhanced roulette wheel visual appearance based on reference image.
-   * - NEW: Added inner overlay to wheel for shorter 'spots'.
-   * - NEW: Added continuous spin animation rule & applied by default.
-   * - NEW: Added basic styles for #roulette-ball and animation classes.
+   - Added inner overlay to wheel for shorter 'spots'.
+   - Added continuous spin animation rule & applied by default.
+   - Added basic styles for #roulette-ball and visibility class.
+   * - NEW: Added styles for stationary #roulette-number-ring.
+   * - NEW: Adjusted .roulette-number styles for stationary ring.
+   * - NEW: Removed unused .result-spin class.
    ========================================================================== */
 
 /* --- Base Styles & Background Animation --- */
@@ -545,6 +548,7 @@ input[type="number"]:disabled {
 }
 
 /* Crash */
+/* ... Crash styles ... */
 #crash-graph {
     height: 250px;
     background-color: #2d2d2d; /* fluent-card (updated) */
@@ -605,7 +609,9 @@ input[type="number"]:disabled {
 .mult-size-20x { font-size: 1.95rem; }
 .mult-size-30x { font-size: 2.05rem; font-weight: 700; }
 
+
 /* Coin Flip */
+/* ... Coinflip styles ... */
 .coin-container {
     perspective: 600px; /* For 3D effect */
     display: inline-block; /* Keep size */
@@ -628,6 +634,7 @@ input[type="number"]:disabled {
 }
 
 /* Minefield */
+/* ... Minefield styles ... */
 #minefield-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -667,6 +674,7 @@ input[type="number"]:disabled {
 }
 
 /* Memory */
+/* ... Memory styles ... */
 #memory-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); /* 4x4 Grid */
     gap: 0.5rem; /* gap-2 */
@@ -724,6 +732,7 @@ input[type="number"]:disabled {
 }
 
 /* Horse Race */
+/* ... Horserace styles ... */
 #horserace-track {
     position: relative; width: 100%; height: 200px; /* Adjusted height */
     background-color: #2d2d2d; /* fluent-card (updated) */
@@ -789,7 +798,7 @@ input[type="number"]:disabled {
 
 /* Roulette */
 
-/* NEW: Continuous spin animation */
+/* Continuous spin animation definition */
 @keyframes continuous-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -797,143 +806,123 @@ input[type="number"]:disabled {
 
 #roulette-wheel-container {
     width: 250px; height: 250px; margin: 1rem auto;
-    perspective: 800px; /* For potential 3D */
-    border: 8px solid #383838; /* Thicker, slightly lighter dark border */
+    perspective: 800px;
+    border: 8px solid #383838;
     border-radius: 50%;
     position: relative; overflow: hidden;
-    background-color: #1a1a1a; /* Darker bg */
-    /* Enhanced shadow for depth */
+    background-color: #1a1a1a;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 6px 18px rgba(0,0,0,0.5);
 }
 
+/* The spinning color segment part */
 #roulette-wheel {
     width: 100%; height: 100%;
     border-radius: 50%;
-    position: relative; /* Needed for pseudo-element */
-    /* Gradient colors */
-    background-image: conic-gradient(
-        #107c10 0.000deg 9.730deg,   /* 0 Green */
-        #d13438 9.730deg 19.459deg,   /* 32 Darker Red */
-        #111827 19.459deg 29.189deg,  /* 15 Black */
-        #d13438 29.189deg 38.919deg,  /* 19 Darker Red */
-        #111827 38.919deg 48.649deg,  /* 4 Black */
-        #d13438 48.649deg 58.378deg,  /* 21 Darker Red */
-        #111827 58.378deg 68.108deg,  /* 2 Black */
-        #d13438 68.108deg 77.838deg,  /* 25 Darker Red */
-        #111827 77.838deg 87.568deg,  /* 17 Black */
-        #d13438 87.568deg 97.297deg,  /* 34 Darker Red */
-        #111827 97.297deg 107.027deg, /* 6 Black */
-        #d13438 107.027deg 116.757deg, /* 27 Darker Red */
-        #111827 116.757deg 126.486deg, /* 13 Black */
-        #d13438 126.486deg 136.216deg, /* 36 Darker Red */
-        #111827 136.216deg 145.946deg, /* 11 Black */
-        #d13438 145.946deg 155.676deg, /* 30 Darker Red */
-        #111827 155.676deg 165.405deg, /* 8 Black */
-        #d13438 165.405deg 175.135deg, /* 23 Darker Red */
-        #111827 175.135deg 184.865deg, /* 10 Black */
-        #d13438 184.865deg 194.595deg, /* 5 Darker Red */
-        #111827 194.595deg 204.324deg, /* 24 Black */
-        #d13438 204.324deg 214.054deg, /* 16 Darker Red */
-        #111827 214.054deg 223.784deg, /* 33 Black */
-        #d13438 223.784deg 233.514deg, /* 1 Darker Red */
-        #111827 233.514deg 243.243deg, /* 20 Black */
-        #d13438 243.243deg 252.973deg, /* 14 Darker Red */
-        #111827 252.973deg 262.703deg, /* 31 Black */
-        #d13438 262.703deg 272.432deg, /* 9 Darker Red */
-        #111827 272.432deg 282.162deg, /* 22 Black */
-        #d13438 282.162deg 291.892deg, /* 18 Darker Red */
-        #111827 291.892deg 301.622deg, /* 29 Black */
-        #d13438 301.622deg 311.351deg, /* 7 Darker Red */
-        #111827 311.351deg 321.081deg, /* 28 Black */
-        #d13438 321.081deg 330.811deg, /* 12 Darker Red */
-        #111827 330.811deg 340.541deg, /* 35 Black */
-        #d13438 340.541deg 350.270deg, /* 3 Darker Red */
-        #111827 350.270deg 360.000deg  /* 26 Black */
+    position: absolute; /* Positioned within container */
+    top: 0; left: 0;
+    background-image: conic-gradient( /* Color segments */
+        #107c10 0.000deg 9.730deg, #d13438 9.730deg 19.459deg, #111827 19.459deg 29.189deg,
+        #d13438 29.189deg 38.919deg, #111827 38.919deg 48.649deg, #d13438 48.649deg 58.378deg,
+        #111827 58.378deg 68.108deg, #d13438 68.108deg 77.838deg, #111827 77.838deg 87.568deg,
+        #d13438 87.568deg 97.297deg, #111827 97.297deg 107.027deg, #d13438 107.027deg 116.757deg,
+        #111827 116.757deg 126.486deg, #d13438 126.486deg 136.216deg, #111827 136.216deg 145.946deg,
+        #d13438 145.946deg 155.676deg, #111827 155.676deg 165.405deg, #d13438 165.405deg 175.135deg,
+        #111827 175.135deg 184.865deg, #d13438 184.865deg 194.595deg, #111827 194.595deg 204.324deg,
+        #d13438 204.324deg 214.054deg, #111827 214.054deg 223.784deg, #d13438 223.784deg 233.514deg,
+        #111827 233.514deg 243.243deg, #d13438 243.243deg 252.973deg, #111827 252.973deg 262.703deg,
+        #d13438 262.703deg 272.432deg, #111827 272.432deg 282.162deg, #d13438 282.162deg 291.892deg,
+        #111827 291.892deg 301.622deg, #d13438 301.622deg 311.351deg, #111827 311.351deg 321.081deg,
+        #d13438 321.081deg 330.811deg, #111827 330.811deg 340.541deg, #d13438 340.541deg 350.270deg,
+        #111827 350.270deg 360.000deg
     );
+    will-change: transform; /* Optimize rotation */
 }
-/* Animation State Class: Applied by JS during continuous spin */
+/* Class applied by JS for continuous spin */
 #roulette-wheel.continuous-spin {
-    animation: continuous-spin 20s linear infinite; /* Use animation defined above */
-    transition: none; /* Ensure no transition interferes */
+    animation: continuous-spin 20s linear infinite;
+    transition: none; /* Make sure no transition interferes */
 }
-/* Animation State Class: Applied by JS during result spin */
-#roulette-wheel.result-spin {
-    transition: transform 4s cubic-bezier(0.2, 0.8, 0.4, 1); /* Define result spin transition */
-    animation: none; /* Ensure continuous animation is off */
-}
+/* NOTE: The .result-spin class is no longer needed as the wheel doesn't stop/transition */
 
-/* Inner overlay pseudo-element */
+/* Inner overlay pseudo-element on the wheel */
 #roulette-wheel::before {
     content: '';
     position: absolute;
-    /* Adjust % to control outer ring thickness (larger % = thinner ring) */
+    /* Adjust % to control outer ring thickness */
     top: 15%; left: 15%; right: 15%; bottom: 15%;
-    background: radial-gradient(circle, #2e2e2e 50%, #1a1a1a 100%); /* Inner area color/texture */
+    background: radial-gradient(circle, #2e2e2e 50%, #1a1a1a 100%); /* Inner area color */
     border-radius: 50%;
-    z-index: 0; /* Below numbers, above gradient */
-    box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.6); /* Inner shadow for effect */
+    z-index: 1; /* Above gradient, below numbers */
+    box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.6);
 }
 
-/* Numbers positioned on the wheel */
-#roulette-wheel .roulette-number {
+/* NEW: Stationary container for numbers */
+#roulette-number-ring {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0; /* Fill container */
+    border-radius: 50%;
+    pointer-events: none; /* Allow clicks through to wheel/bets if needed */
+    z-index: 2; /* Above the wheel's overlay */
+}
+
+/* Numbers positioned within the stationary ring */
+#roulette-number-ring .roulette-number {
     position: absolute;
     display: flex; align-items: center; justify-content: center;
     width: 22px; height: 22px;
     font-size: 11px; font-weight: bold; color: white;
     text-shadow: 0px 0px 3px rgba(0,0,0,0.8), 0px 0px 1px rgba(0,0,0,1);
-    transform-origin: center center; pointer-events: none;
-    z-index: 1; /* Above the ::before overlay */
-    /* JS handles positioning and rotation */
+    /* REMOVED transform-origin and rotation */
+    /* Apply only translation to center the number on its calculated x,y */
+    transform: translate(-50%, -50%);
+    pointer-events: none; /* Already on parent, but good practice */
+    /* JS handles top/left positioning */
 }
 
-/* The triangular pointer at the top */
+/* Pointer */
 #roulette-pointer {
     position: absolute;
-    top: -14px; /* Position adjusted for thicker border */
-    left: 50%;
+    top: -14px; left: 50%;
     transform: translateX(-50%);
     width: 18px; height: 16px;
-    background-color: #ffb900; /* fluent-warning */
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle shape */
-    z-index: 10; /* Above wheel numbers and ball */
-    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.6)); /* Stronger shadow */
-    border-bottom: 2px solid #e0a800; /* Add bottom edge highlight */
+    background-color: #ffb900;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    z-index: 10; /* Above everything */
+    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.6));
+    border-bottom: 2px solid #e0a800;
 }
 
-/* Center hub displaying the result */
+/* Center hub */
 #roulette-result {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 65px; height: 65px; /* Slightly larger hub */
-    background: radial-gradient(circle, #4a4a4a 0%, #2d2d2d 70%); /* Gradient background */
+    width: 65px; height: 65px;
+    background: radial-gradient(circle, #4a4a4a 0%, #2d2d2d 70%);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.6rem; font-weight: bold; color: #fff;
-    z-index: 5; /* Above overlay, below pointer/ball */
-    border: 5px solid #5a5a5a; /* Thicker border */
+    z-index: 5; /* Above wheel overlay, below ball/pointer */
+    border: 5px solid #5a5a5a;
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.4);
 }
 #roulette-result.red { background: radial-gradient(circle, #ff6b6b 0%, #d13438 70%); color: white; border-color: #a71d2a;}
 #roulette-result.black { background: radial-gradient(circle, #555 0%, #111827 70%); color: white; border-color: #000;}
 #roulette-result.green { background: radial-gradient(circle, #50c878 0%, #107c10 70%); color: white; border-color: #0a5d0a;}
 
-/* NEW: Roulette Ball Styling */
+/* Roulette Ball */
 #roulette-ball {
     position: absolute;
     width: 12px; height: 12px;
-    background-color: #f0f0f0; /* Off-white */
+    background-color: #f0f0f0;
     border-radius: 50%;
-    z-index: 8;  /* Above wheel numbers/overlay, below pointer */
-    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 5px white; /* 3D effect */
-    /* Start hidden */
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease; /* Fade in/out */
-    /* Initial position (set by JS in showBall) */
-    top: 10%; left: 50%;
+    z-index: 8;  /* Above number ring, below pointer */
+    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 5px white;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    top: 10%; left: 50%; /* Initial position set by JS showBall */
     transform: translate(-50%, -50%);
-    pointer-events: none; /* Don't interfere with clicks */
-    will-change: transform, top, left; /* Hint for animation */
+    pointer-events: none;
+    will-change: transform, top, left;
 }
 #roulette-ball.visible {
     opacity: 1;
@@ -943,40 +932,23 @@ input[type="number"]:disabled {
 /* Betting Area */
 #roulette-betting-area {
     margin-top: 1.5rem; padding-top: 1rem;
-    border-top: 1px solid rgba(74, 74, 74, 0.5); /* fluent-border with opacity */
+    border-top: 1px solid rgba(74, 74, 74, 0.5);
 }
 .roulette-bet-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Basic grid for numbers */
-    gap: 0.5rem; /* gap-2 */
-    max-width: 300px; margin: 0 auto 1rem auto;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem; max-width: 300px; margin: 0 auto 1rem auto;
 }
 .roulette-bet-btn {
-    padding: 0.5rem;
-    border-width: 1px;
-    border-radius: 0.25rem; /* rounded-sm */
-    font-size: 0.875rem; /* text-sm */
-    min-height: 36px; /* Ensure consistent height */
+    padding: 0.5rem; border-width: 1px; border-radius: 0.25rem;
+    font-size: 0.875rem; min-height: 36px;
     transition: all 0.15s ease-in-out, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-.roulette-bet-btn.red {
-    background-color: #d13438; /* Darker red to match wheel */
-    color: white; border-color: #a71d2a;
-}
-.roulette-bet-btn.black {
-    background-color: #111827; /* Tailwind gray-900 */
-    color: white;
-    border-color: #1f2937; /* Tailwind gray-800 */
-}
-.roulette-bet-btn.green {
-    background-color: #107c10; /* fluent-accent */
-    color: white; border-color: #0d630d; /* Darker accent */
-}
+.roulette-bet-btn.red { background-color: #d13438; color: white; border-color: #a71d2a; }
+.roulette-bet-btn.black { background-color: #111827; color: white; border-color: #1f2937; }
+.roulette-bet-btn.green { background-color: #107c10; color: white; border-color: #0d630d; }
 .roulette-bet-btn.outside {
-    grid-column: span 1; padding: 0.75rem;
-    background-color: #404040; /* Secondary button style */
-    border-color: #5a5a5a;
-    color: #f5f5f5; /* fluent-text-primary */
+    grid-column: span 1; padding: 0.75rem; background-color: #404040;
+    border-color: #5a5a5a; color: #f5f5f5;
 }
 .roulette-outside-bets {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
