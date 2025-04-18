@@ -3,10 +3,10 @@ if (typeof initRoulette === 'undefined') {
 
     /**
      * ==========================================================================
-     * Brokie Casino - Roulette Game Logic (v2.7 - Corrected Number Orientation)
+     * Brokie Casino - Roulette Game Logic (v2.7 - Corrected Number Orientation & Synced Ball)
      *
-     * - Corrected positionWheelNumbers: Numbers spin with wheel and stay upright relative to viewer.
-     * - Wheel (#roulette-wheel) spins continuously via CSS animation.
+     * - Corrected positionWheelNumbers: Numbers spin with wheel AND stay upright relative to viewer.
+     * - Wheel (#roulette-wheel) spins continuously via CSS animation. JS does not stop it.
      * - Ball animation landing synchronized with the wheel's current rotation.
      * - Retains ball animation loop (requestAnimationFrame).
      * - Retains multiple bet support.
@@ -14,7 +14,7 @@ if (typeof initRoulette === 'undefined') {
      */
 
     // --- Constants ---
-    const ROULETTE_NUMBERS = [ /* ... numbers ... */
+    const ROULETTE_NUMBERS = [
         0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
         5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
     ];
@@ -39,7 +39,7 @@ if (typeof initRoulette === 'undefined') {
     const BALL_DECELERATION_START_TIME = BALL_ANIMATION_DURATION * 0.3;
     const BALL_DECELERATION_TIME = BALL_ANIMATION_DURATION * 0.7;
     const BALL_LANDING_SPIRAL_TIME = 1500;
-    const BALL_LANDING_CONVERGE_TIME = 300; // Not currently used, but kept for potential refinement
+    const BALL_LANDING_CONVERGE_TIME = 300; // May use for angle smoothing later
 
     // --- State Variables ---
     let rouletteIsSpinning = false;
@@ -99,13 +99,8 @@ if (typeof initRoulette === 'undefined') {
 
     // --- Helper Functions ---
 
-    /** Finds a bet in the placedBets array. */
     function findPlacedBet(type, value) { return placedBets.find(bet => bet.type === type && bet.value == value); }
-
-    /** Updates the visual display of a bet button. */
     function updateButtonVisual(button, amount) { /* ... No changes ... */ if (!button) return; const originalValue = button.dataset.originalValue || button.textContent; if (!button.dataset.originalValue) button.dataset.originalValue = originalValue; if (amount > 0) { button.textContent = `${originalValue} (${amount})`; button.dataset.betAmount = amount.toString(); button.classList.add('has-bet'); } else { button.textContent = originalValue; button.removeAttribute('data-bet-amount'); button.classList.remove('has-bet'); } }
-
-    /** Updates the display showing the total amount currently bet. */
     function updateTotalBetDisplay() { /* ... No changes ... */ if (!rouletteCurrentBetDisplay) return; const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0); rouletteCurrentBetDisplay.textContent = totalBetAmount > 0 ? `Total Bet: ${totalBetAmount}` : 'No Bets Placed'; }
 
     /** Makes the roulette ball visible and starts its animation loop. */
@@ -146,7 +141,7 @@ if (typeof initRoulette === 'undefined') {
         rouletteWheel.classList.add('continuous-spin');
      }
 
-     /** Gets the current rotation angle of the wheel. */
+     /** Gets the current rotation angle of the wheel from its CSS transform. */
      function getCurrentWheelRotationAngle() {
          if (!rouletteWheel) return 0;
          try {
@@ -163,8 +158,7 @@ if (typeof initRoulette === 'undefined') {
          return 0;
      }
 
-
-    /** The main ball animation loop. */
+    /** The main ball animation loop using requestAnimationFrame. */
     function animateBall(timestamp) {
         if (ballLanded || !rouletteBall || containerRadius <= 0 || !ballStartTime) {
              if(ballAnimationId) cancelAnimationFrame(ballAnimationId); ballAnimationId = null; return;
@@ -181,7 +175,7 @@ if (typeof initRoulette === 'undefined') {
         if (elapsed > BALL_DECELERATION_START_TIME) {
             const decelerationElapsed = elapsed - BALL_DECELERATION_START_TIME;
             const decelerationFactor = Math.max(0, 1 - (decelerationElapsed / BALL_DECELERATION_TIME));
-            currentSpeed *= decelerationFactor * decelerationFactor;
+            currentSpeed *= decelerationFactor * decelerationFactor; // Ease-out
         }
 
         // Calculate Current Radius
@@ -190,7 +184,7 @@ if (typeof initRoulette === 'undefined') {
         if (elapsed > spiralStartTime) {
              const spiralElapsed = elapsed - spiralStartTime;
              const spiralProgress = Math.min(1, spiralElapsed / BALL_LANDING_SPIRAL_TIME);
-             const easedProgress = spiralProgress * spiralProgress * (3 - 2 * spiralProgress);
+             const easedProgress = spiralProgress * spiralProgress * (3 - 2 * spiralProgress); // Ease-in-out
              currentRadiusFactor = BALL_INITIAL_RADIUS_FACTOR + (BALL_FINAL_RADIUS_FACTOR - BALL_INITIAL_RADIUS_FACTOR) * easedProgress;
         }
         ballRadius = containerRadius * currentRadiusFactor;
@@ -205,14 +199,19 @@ if (typeof initRoulette === 'undefined') {
             ballLanded = true;
             // Sync with current wheel rotation
             const wheelCurrentAngle = getCurrentWheelRotationAngle();
-            const winningNumberBaseAngle = 360 - (targetWinningNumberIndex * ANGLE_PER_NUMBER + ANGLE_PER_NUMBER / 2); // 0=top, positive=CW
+            // Base angle of the winning number's center (0=top, positive=CW)
+            const winningNumberBaseAngle = (targetWinningNumberIndex * ANGLE_PER_NUMBER + ANGLE_PER_NUMBER / 2);
+            // The actual angle where the winning number center is NOW (relative to 0=top, positive=CW)
             const finalTargetAngle = (wheelCurrentAngle + winningNumberBaseAngle) % 360;
-            ballAngle = finalTargetAngle;
-            ballRadius = containerRadius * BALL_FINAL_RADIUS_FACTOR;
+
+            console.log(`Wheel Angle: ${wheelCurrentAngle.toFixed(2)}, Win Index: ${targetWinningNumberIndex}, Base Offset: ${winningNumberBaseAngle.toFixed(2)}, Final Ball Target: ${finalTargetAngle.toFixed(2)}`);
+
+            ballAngle = finalTargetAngle; // Snap angle
+            ballRadius = containerRadius * BALL_FINAL_RADIUS_FACTOR; // Snap radius
         }
 
-        // Calculate X, Y Coordinates
-        const currentRadians = (ballAngle - 90) * (Math.PI / 180); // Adjust for trig functions (0=right)
+        // Calculate X, Y Coordinates (adjusting angle for trig: 0=right, positive=CCW)
+        const currentRadians = (ballAngle - 90) * (Math.PI / 180);
         const x = containerRadius + ballRadius * Math.cos(currentRadians);
         const y = containerRadius + ballRadius * Math.sin(currentRadians);
 
@@ -229,20 +228,15 @@ if (typeof initRoulette === 'undefined') {
         }
     }
 
-
     // --- Core Functions ---
 
     /** Creates the betting grid buttons. */
-    function createRouletteBettingGrid() { /* ... No changes ... */
-        if (!rouletteInsideBetsContainer) { console.error("..."); return; } rouletteInsideBetsContainer.innerHTML = ''; const zeroButton = createBetButton(0, 'green', 'single'); zeroButton.classList.add('col-span-3'); rouletteInsideBetsContainer.appendChild(zeroButton); for (let i = 1; i <= 36; i++) { const color = ROULETTE_COLORS[i]; const button = createBetButton(i, color, 'single'); rouletteInsideBetsContainer.appendChild(button); }
-    }
+    function createRouletteBettingGrid() { /* ... No changes ... */ if (!rouletteInsideBetsContainer) { console.error("..."); return; } rouletteInsideBetsContainer.innerHTML = ''; const zeroButton = createBetButton(0, 'green', 'single'); zeroButton.classList.add('col-span-3'); rouletteInsideBetsContainer.appendChild(zeroButton); for (let i = 1; i <= 36; i++) { const color = ROULETTE_COLORS[i]; const button = createBetButton(i, color, 'single'); rouletteInsideBetsContainer.appendChild(button); } }
 
     /** Creates a single bet button element. */
-    function createBetButton(value, color, betType) { /* ... No changes ... */
-         const button = document.createElement('button'); button.classList.add('roulette-bet-btn'); if (color) button.classList.add(color); button.textContent = value.toString(); button.dataset.betType = betType; button.dataset.betValue = value.toString(); button.dataset.originalValue = value.toString(); return button;
-     }
+    function createBetButton(value, color, betType) { /* ... No changes ... */ const button = document.createElement('button'); button.classList.add('roulette-bet-btn'); if (color) button.classList.add(color); button.textContent = value.toString(); button.dataset.betType = betType; button.dataset.betValue = value.toString(); button.dataset.originalValue = value.toString(); return button; }
 
-    /** Positions numbers ON the spinning wheel, keeping text upright relative to viewer. */
+    /** Positions numbers ON the SPinning wheel, keeping text upright relative to viewer. */
     function positionWheelNumbers() {
         const wheel = document.getElementById('roulette-wheel');
         const container = document.getElementById('roulette-wheel-container');
@@ -255,12 +249,12 @@ if (typeof initRoulette === 'undefined') {
              const overlayInsetPercent = 0.15;
              const numberRingRadius = containerRadius * (1 - overlayInsetPercent - 0.04);
 
-             wheel.innerHTML = ''; // Clear previous numbers/content from wheel
+             wheel.innerHTML = ''; // Clear previous numbers
 
              ROULETTE_NUMBERS.forEach((num, index) => {
                  // Angle for positioning (0=top, positive=CW)
                  const angleDegrees = (ANGLE_PER_NUMBER * index) + (ANGLE_PER_NUMBER / 2);
-                 // Angle for trig calculations (0=right, positive=CCW)
+                 // Angle for trig (0=right, positive=CCW)
                  const calculationAngleRadians = (angleDegrees - 90) * (Math.PI / 180);
 
                  const numberSpan = document.createElement('span');
@@ -274,7 +268,7 @@ if (typeof initRoulette === 'undefined') {
                  numberSpan.style.position = 'absolute';
                  numberSpan.style.left = `${x}px`;
                  numberSpan.style.top = `${y}px`;
-                 // CHANGE: Apply only translate to center the span. Rotation comes from parent wheel.
+                 // CHANGE: Set only translate transform. Rotation comes from parent.
                  numberSpan.style.transform = `translate(-50%, -50%)`;
 
                  // Append to the wheel div so they rotate with it
@@ -284,20 +278,15 @@ if (typeof initRoulette === 'undefined') {
         });
     }
 
+
     /** Sets up event listeners. */
-    function setupRouletteEventListeners() { /* ... No changes ... */
-        if (rouletteInsideBetsContainer) rouletteInsideBetsContainer.addEventListener('click', handleBetPlacement); if (rouletteOutsideBetsContainer) rouletteOutsideBetsContainer.addEventListener('click', handleBetPlacement); if (rouletteSpinButton) rouletteSpinButton.addEventListener('click', spinWheel); if (clearBetsButton) clearBetsButton.addEventListener('click', clearAllRouletteBets);
-    }
+    function setupRouletteEventListeners() { /* ... No changes ... */ if (rouletteInsideBetsContainer) rouletteInsideBetsContainer.addEventListener('click', handleBetPlacement); if (rouletteOutsideBetsContainer) rouletteOutsideBetsContainer.addEventListener('click', handleBetPlacement); if (rouletteSpinButton) rouletteSpinButton.addEventListener('click', spinWheel); if (clearBetsButton) clearBetsButton.addEventListener('click', clearAllRouletteBets); }
 
     /** Handles placing bets. */
-    function handleBetPlacement(event) { /* ... No changes ... */
-         if (rouletteIsSpinning) return; const targetButton = event.target.closest('.roulette-bet-btn'); if (!targetButton) return; const amountToAdd = parseInt(rouletteBetInput.value); if (isNaN(amountToAdd) || amountToAdd < 1){/*..*/} if (LocalBrokieAPI && amountToAdd > LocalBrokieAPI.getBalance()){/*..*/} if (LocalBrokieAPI) LocalBrokieAPI.playSound('chip_place'); const betType = targetButton.dataset.betType; const betValue = targetButton.dataset.betValue; let existingBet = findPlacedBet(betType, betValue); if (existingBet) { existingBet.amount += amountToAdd; } else { existingBet = { type: betType, value: (betType === 'single') ? parseInt(betValue, 10) : betValue, amount: amountToAdd, buttonElement: targetButton }; placedBets.push(existingBet); } updateButtonVisual(targetButton, existingBet.amount); updateTotalBetDisplay(); if (rouletteSpinButton) rouletteSpinButton.disabled = false; if (clearBetsButton) clearBetsButton.disabled = false;
-     }
+    function handleBetPlacement(event) { /* ... No changes ... */ if (rouletteIsSpinning) return; const targetButton = event.target.closest('.roulette-bet-btn'); if (!targetButton) return; const amountToAdd = parseInt(rouletteBetInput.value); if (isNaN(amountToAdd) || amountToAdd < 1){/*..*/} if (LocalBrokieAPI && amountToAdd > LocalBrokieAPI.getBalance()){/*..*/} if (LocalBrokieAPI) LocalBrokieAPI.playSound('chip_place'); const betType = targetButton.dataset.betType; const betValue = targetButton.dataset.betValue; let existingBet = findPlacedBet(betType, betValue); if (existingBet) { existingBet.amount += amountToAdd; } else { existingBet = { type: betType, value: (betType === 'single') ? parseInt(betValue, 10) : betValue, amount: amountToAdd, buttonElement: targetButton }; placedBets.push(existingBet); } updateButtonVisual(targetButton, existingBet.amount); updateTotalBetDisplay(); if (rouletteSpinButton) rouletteSpinButton.disabled = false; if (clearBetsButton) clearBetsButton.disabled = false; }
 
     /** Clears all placed bets. */
-    function clearAllRouletteBets() { /* ... No changes ... */
-        if (rouletteIsSpinning) return; if (placedBets.length === 0) return; if (LocalBrokieAPI) LocalBrokieAPI.playSound('clear_bets'); placedBets.forEach(bet => { if (bet.buttonElement) updateButtonVisual(bet.buttonElement, 0); }); placedBets = []; updateTotalBetDisplay(); if (rouletteSpinButton) rouletteSpinButton.disabled = true; if (clearBetsButton) clearBetsButton.disabled = true; if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = 'Bets cleared. Place new bets!';
-    }
+    function clearAllRouletteBets() { /* ... No changes ... */ if (rouletteIsSpinning) return; if (placedBets.length === 0) return; if (LocalBrokieAPI) LocalBrokieAPI.playSound('clear_bets'); placedBets.forEach(bet => { if (bet.buttonElement) updateButtonVisual(bet.buttonElement, 0); }); placedBets = []; updateTotalBetDisplay(); if (rouletteSpinButton) rouletteSpinButton.disabled = true; if (clearBetsButton) clearBetsButton.disabled = true; if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = 'Bets cleared. Place new bets!'; }
 
 
     /** Resets the game state and UI. */
@@ -362,7 +351,6 @@ if (typeof initRoulette === 'undefined') {
         // --- Set timeout to handle result ---
         if (handleResultTimeoutId) clearTimeout(handleResultTimeoutId);
         handleResultTimeoutId = setTimeout(() => {
-            // Ball animation stops itself via ballLanded flag in animateBall
             console.log("Ball animation duration ended, handling result...");
             handleResult(winningNumber);
         }, BALL_ANIMATION_DURATION);
@@ -384,24 +372,24 @@ if (typeof initRoulette === 'undefined') {
         // Calculate Winnings
         let totalWinnings = 0; let totalBetReturned = 0;
         placedBets.forEach(bet => { /* ... Winnings calculation ... */
-            let payoutMultiplier = 0; let betWon = false;
-            if (bet.type === 'single' && bet.value === winningNumber) { payoutMultiplier = ROULETTE_PAYOUTS.single; betWon = true; }
-            else if (bet.type === 'red' && winningColor === 'red') { payoutMultiplier = ROULETTE_PAYOUTS.red; betWon = true; }
-            else if (bet.type === 'black' && winningColor === 'black') { payoutMultiplier = ROULETTE_PAYOUTS.black; betWon = true; }
-            else if (bet.type === 'odd' && winningNumber !== 0 && winningNumber % 2 !== 0) { payoutMultiplier = ROULETTE_PAYOUTS.odd; betWon = true; }
-            else if (bet.type === 'even' && winningNumber !== 0 && winningNumber % 2 === 0) { payoutMultiplier = ROULETTE_PAYOUTS.even; betWon = true; }
-            else if (bet.type === 'low' && winningNumber >= 1 && winningNumber <= 18) { payoutMultiplier = ROULETTE_PAYOUTS.low; betWon = true; }
-            else if (bet.type === 'high' && winningNumber >= 19 && winningNumber <= 36) { payoutMultiplier = ROULETTE_PAYOUTS.high; betWon = true; }
-            if (betWon) { const winningsForThisBet = bet.amount * payoutMultiplier; totalWinnings += winningsForThisBet; totalBetReturned += bet.amount;}
-        });
+             let payoutMultiplier = 0; let betWon = false;
+             if (bet.type === 'single' && bet.value === winningNumber) { payoutMultiplier = ROULETTE_PAYOUTS.single; betWon = true; }
+             else if (bet.type === 'red' && winningColor === 'red') { payoutMultiplier = ROULETTE_PAYOUTS.red; betWon = true; }
+             else if (bet.type === 'black' && winningColor === 'black') { payoutMultiplier = ROULETTE_PAYOUTS.black; betWon = true; }
+             else if (bet.type === 'odd' && winningNumber !== 0 && winningNumber % 2 !== 0) { payoutMultiplier = ROULETTE_PAYOUTS.odd; betWon = true; }
+             else if (bet.type === 'even' && winningNumber !== 0 && winningNumber % 2 === 0) { payoutMultiplier = ROULETTE_PAYOUTS.even; betWon = true; }
+             else if (bet.type === 'low' && winningNumber >= 1 && winningNumber <= 18) { payoutMultiplier = ROULETTE_PAYOUTS.low; betWon = true; }
+             else if (bet.type === 'high' && winningNumber >= 19 && winningNumber <= 36) { payoutMultiplier = ROULETTE_PAYOUTS.high; betWon = true; }
+             if (betWon) { const winningsForThisBet = bet.amount * payoutMultiplier; totalWinnings += winningsForThisBet; totalBetReturned += bet.amount;}
+         });
 
         // Update balance & status
         const totalReturn = totalWinnings + totalBetReturned;
         let statusMessage = '';
         if (totalReturn > 0 && LocalBrokieAPI) { /* ... Win message ... */
-            LocalBrokieAPI.updateBalance(totalReturn); statusMessage = `Win! Landed ${winningNumber} (${winningColor}). Won ${LocalBrokieAPI.formatWin(totalWinnings)}!`; LocalBrokieAPI.showMessage(`You won ${LocalBrokieAPI.formatWin(totalWinnings)}!`, 3000); LocalBrokieAPI.playSound('win_long'); if (totalWinnings > 0) LocalBrokieAPI.addWin('Roulette', totalWinnings);
+             LocalBrokieAPI.updateBalance(totalReturn); statusMessage = `Win! Landed ${winningNumber} (${winningColor}). Won ${LocalBrokieAPI.formatWin(totalWinnings)}!`; LocalBrokieAPI.showMessage(`You won ${LocalBrokieAPI.formatWin(totalWinnings)}!`, 3000); LocalBrokieAPI.playSound('win_long'); if (totalWinnings > 0) LocalBrokieAPI.addWin('Roulette', totalWinnings);
         } else { /* ... Lose message ... */
-            const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0); statusMessage = `Lose. Landed ${winningNumber} (${winningColor}). Lost ${totalBetAmount}.`; if (LocalBrokieAPI) { LocalBrokieAPI.showMessage(`Landed on ${winningNumber}. Better luck next time!`, 3000); LocalBrokieAPI.playSound('lose'); }
+             const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0); statusMessage = `Lose. Landed ${winningNumber} (${winningColor}). Lost ${totalBetAmount}.`; if (LocalBrokieAPI) { LocalBrokieAPI.showMessage(`Landed on ${winningNumber}. Better luck next time!`, 3000); LocalBrokieAPI.playSound('lose'); }
         }
         if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = statusMessage;
 
@@ -414,6 +402,7 @@ if (typeof initRoulette === 'undefined') {
     function endSpinCycle() {
         console.log("Ending spin cycle...");
         hideBall(); // Hide ball & stop its animation
+
         // Wheel continues spinning via CSS
 
         rouletteIsSpinning = false; // Allow next spin
