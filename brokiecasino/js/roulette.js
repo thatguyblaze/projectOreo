@@ -160,7 +160,7 @@ if (typeof initRoulette === 'undefined') {
              const containerRadius = containerDiameter / 2;
 
              // --- ADJUSTED: Calculate radius for centering ---
-             const numberRingRadius = containerRadius * 0.85; // Center in the visible band
+             const numberRingRadius = containerRadius * 0.78; // Center in the visible band
 
              wheel.innerHTML = ''; // Clear previous numbers
 
