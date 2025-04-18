@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Brokie Casino Stylesheet (Fluent Dark Theme) v3.4
+   Brokie Casino Stylesheet (Fluent Dark Theme) v3.5
    - Added Sabacc styles.
    - Corrected conic-gradient for European Roulette wheel (1 green slot).
    - Uses direct hex color values instead of theme() for browser compatibility.
@@ -8,7 +8,9 @@
    - Added z-index to roulette numbers.
    - Added potential fixes for SVG text rendering.
    - Added .has-bet style for roulette buttons.
-   * - NEW: Enhanced roulette wheel visual appearance based on reference image.
+   - Enhanced roulette wheel visual appearance based on reference image.
+   * - NEW: Added inner overlay to wheel for shorter 'spots'.
+   * - NEW: Added continuous spin animation rule & applied by default.
    ========================================================================== */
 
 /* --- Base Styles & Background Animation --- */
@@ -482,6 +484,7 @@ input[type="number"]:disabled {
 /* --- Game Specific Styles --- */
 
 /* Slots */
+/* ... (styles for other games remain unchanged) ... */
 .reel {
     border: 2px solid #404040; /* Dark gray border */
     background-color: #2d2d2d; /* fluent-card (updated) */
@@ -784,6 +787,13 @@ input[type="number"]:disabled {
 }
 
 /* Roulette */
+
+/* NEW: Continuous spin animation */
+@keyframes continuous-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 #roulette-wheel-container {
     width: 250px; height: 250px; margin: 1rem auto;
     perspective: 800px; /* For potential 3D */
@@ -794,13 +804,14 @@ input[type="number"]:disabled {
     /* Enhanced shadow for depth */
     box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 6px 18px rgba(0,0,0,0.5);
 }
+
 #roulette-wheel {
     width: 100%; height: 100%;
     border-radius: 50%;
-    position: absolute; top: 0; left: 0;
-    transition: transform 4s cubic-bezier(0.3, 0.7, 0.4, 1); /* Spin animation */
-    /* Stronger inset shadow */
-    box-shadow: inset 0 0 15px 8px rgba(0,0,0,0.6);
+    position: relative; /* Needed for pseudo-element */
+    /* REMOVED fixed transition, JS will handle result spin transition */
+    /* REMOVED absolute positioning, relative needed for ::before */
+    /* box-shadow: inset 0 0 15px 8px rgba(0,0,0,0.6); */ /* Moved shadow to ::before */
     /* European Wheel Gradient with slightly darker red */
     background-image: conic-gradient(
         #107c10 0.000deg 9.730deg,   /* 0 Green */
@@ -841,7 +852,26 @@ input[type="number"]:disabled {
         #d13438 340.541deg 350.270deg, /* 3 Darker Red */
         #111827 350.270deg 360.000deg  /* 26 Black */
     );
+    /* NEW: Apply continuous spin by default */
+    animation: continuous-spin 20s linear infinite; /* Adjust duration for desired speed */
+    /* Will need JS to pause/change animation */
 }
+/* NEW: Inner overlay pseudo-element */
+#roulette-wheel::before {
+    content: '';
+    position: absolute;
+    /* Adjust % to control outer ring thickness (larger % = thinner ring) */
+    top: 15%;
+    left: 15%;
+    right: 15%;
+    bottom: 15%;
+    background: radial-gradient(circle, #2e2e2e 50%, #1a1a1a 100%); /* Inner area color/texture */
+    border-radius: 50%;
+    z-index: 0; /* Below numbers, above gradient */
+    box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.6); /* Inner shadow for effect */
+}
+
+
 #roulette-wheel .roulette-number {
     position: absolute;
     display: flex;
@@ -852,13 +882,13 @@ input[type="number"]:disabled {
     font-size: 11px; /* Slightly larger font */
     font-weight: bold;
     color: white; /* Default color white */
-    /* Enhanced shadow for definition */
     text-shadow: 0px 0px 3px rgba(0,0,0,0.8), 0px 0px 1px rgba(0,0,0,1);
     transform-origin: center center;
     pointer-events: none;
-    z-index: 1;
+    z-index: 1; /* Above the ::before overlay */
     /* JS handles positioning and rotation */
 }
+
 #roulette-pointer {
     position: absolute;
     top: -14px; /* Position adjusted for thicker border */
@@ -868,7 +898,7 @@ input[type="number"]:disabled {
     height: 16px; /* Slightly taller */
     background-color: #ffb900; /* fluent-warning */
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle shape */
-    z-index: 10;
+    z-index: 10; /* Above wheel numbers and ball */
     filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.6)); /* Stronger shadow */
     border-bottom: 2px solid #e0a800; /* Add bottom edge highlight */
 }
@@ -882,9 +912,8 @@ input[type="number"]:disabled {
     display: flex; align-items: center; justify-content: center;
     font-size: 1.6rem; /* Slightly larger text */
     font-weight: bold;
-    color: #fff; z-index: 5;
+    color: #fff; z-index: 5; /* Above overlay, below pointer/ball */
     border: 5px solid #5a5a5a; /* Thicker border */
-    /* More pronounced shadows */
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.4);
 }
 #roulette-result.red { background: radial-gradient(circle, #ff6b6b 0%, #d13438 70%); color: white; border-color: #a71d2a;}
@@ -934,6 +963,7 @@ input[type="number"]:disabled {
 }
 
 /* Blackjack */
+/* ... (Styles for Blackjack, Plinko, Sabacc remain unchanged) ... */
 .blackjack-hand {
     display: flex; flex-wrap: wrap; justify-content: center;
     gap: 0.5rem; /* gap-2 */
@@ -1092,6 +1122,7 @@ input[type="number"]:disabled {
 
 /* --- Animations --- */
 
+/* ... (Other animations remain unchanged) ... */
 @keyframes pulse { 50% { opacity: .5; } }
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
