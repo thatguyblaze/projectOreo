@@ -11,6 +11,7 @@
    - Enhanced roulette wheel visual appearance based on reference image.
    * - NEW: Added inner overlay to wheel for shorter 'spots'.
    * - NEW: Added continuous spin animation rule & applied by default.
+   * - NEW: Added basic styles for #roulette-ball and animation classes.
    ========================================================================== */
 
 /* --- Base Styles & Background Animation --- */
@@ -809,10 +810,7 @@ input[type="number"]:disabled {
     width: 100%; height: 100%;
     border-radius: 50%;
     position: relative; /* Needed for pseudo-element */
-    /* REMOVED fixed transition, JS will handle result spin transition */
-    /* REMOVED absolute positioning, relative needed for ::before */
-    /* box-shadow: inset 0 0 15px 8px rgba(0,0,0,0.6); */ /* Moved shadow to ::before */
-    /* European Wheel Gradient with slightly darker red */
+    /* Gradient colors */
     background-image: conic-gradient(
         #107c10 0.000deg 9.730deg,   /* 0 Green */
         #d13438 9.730deg 19.459deg,   /* 32 Darker Red */
@@ -852,67 +850,66 @@ input[type="number"]:disabled {
         #d13438 340.541deg 350.270deg, /* 3 Darker Red */
         #111827 350.270deg 360.000deg  /* 26 Black */
     );
-    /* NEW: Apply continuous spin by default */
-    animation: continuous-spin 20s linear infinite; /* Adjust duration for desired speed */
-    /* Will need JS to pause/change animation */
 }
-/* NEW: Inner overlay pseudo-element */
+/* Animation State Class: Applied by JS during continuous spin */
+#roulette-wheel.continuous-spin {
+    animation: continuous-spin 20s linear infinite; /* Use animation defined above */
+    transition: none; /* Ensure no transition interferes */
+}
+/* Animation State Class: Applied by JS during result spin */
+#roulette-wheel.result-spin {
+    transition: transform 4s cubic-bezier(0.2, 0.8, 0.4, 1); /* Define result spin transition */
+    animation: none; /* Ensure continuous animation is off */
+}
+
+/* Inner overlay pseudo-element */
 #roulette-wheel::before {
     content: '';
     position: absolute;
     /* Adjust % to control outer ring thickness (larger % = thinner ring) */
-    top: 15%;
-    left: 15%;
-    right: 15%;
-    bottom: 15%;
+    top: 15%; left: 15%; right: 15%; bottom: 15%;
     background: radial-gradient(circle, #2e2e2e 50%, #1a1a1a 100%); /* Inner area color/texture */
     border-radius: 50%;
     z-index: 0; /* Below numbers, above gradient */
     box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.6); /* Inner shadow for effect */
 }
 
-
+/* Numbers positioned on the wheel */
 #roulette-wheel .roulette-number {
     position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px; /* Slightly larger */
-    height: 22px;
-    font-size: 11px; /* Slightly larger font */
-    font-weight: bold;
-    color: white; /* Default color white */
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+    font-size: 11px; font-weight: bold; color: white;
     text-shadow: 0px 0px 3px rgba(0,0,0,0.8), 0px 0px 1px rgba(0,0,0,1);
-    transform-origin: center center;
-    pointer-events: none;
+    transform-origin: center center; pointer-events: none;
     z-index: 1; /* Above the ::before overlay */
     /* JS handles positioning and rotation */
 }
 
+/* The triangular pointer at the top */
 #roulette-pointer {
     position: absolute;
     top: -14px; /* Position adjusted for thicker border */
     left: 50%;
     transform: translateX(-50%);
-    width: 18px; /* Slightly wider base */
-    height: 16px; /* Slightly taller */
+    width: 18px; height: 16px;
     background-color: #ffb900; /* fluent-warning */
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Triangle shape */
     z-index: 10; /* Above wheel numbers and ball */
     filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.6)); /* Stronger shadow */
     border-bottom: 2px solid #e0a800; /* Add bottom edge highlight */
 }
-#roulette-result { /* Center Hub */
-    position: absolute;
-    top: 50%; left: 50%;
+
+/* Center hub displaying the result */
+#roulette-result {
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     width: 65px; height: 65px; /* Slightly larger hub */
     background: radial-gradient(circle, #4a4a4a 0%, #2d2d2d 70%); /* Gradient background */
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; /* Slightly larger text */
-    font-weight: bold;
-    color: #fff; z-index: 5; /* Above overlay, below pointer/ball */
+    font-size: 1.6rem; font-weight: bold; color: #fff;
+    z-index: 5; /* Above overlay, below pointer/ball */
     border: 5px solid #5a5a5a; /* Thicker border */
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.4);
 }
@@ -920,6 +917,30 @@ input[type="number"]:disabled {
 #roulette-result.black { background: radial-gradient(circle, #555 0%, #111827 70%); color: white; border-color: #000;}
 #roulette-result.green { background: radial-gradient(circle, #50c878 0%, #107c10 70%); color: white; border-color: #0a5d0a;}
 
+/* NEW: Roulette Ball Styling */
+#roulette-ball {
+    position: absolute;
+    width: 12px; height: 12px;
+    background-color: #f0f0f0; /* Off-white */
+    border-radius: 50%;
+    z-index: 8;  /* Above wheel numbers/overlay, below pointer */
+    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 5px white; /* 3D effect */
+    /* Start hidden */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease; /* Fade in/out */
+    /* Initial position (set by JS in showBall) */
+    top: 10%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none; /* Don't interfere with clicks */
+    will-change: transform, top, left; /* Hint for animation */
+}
+#roulette-ball.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Betting Area */
 #roulette-betting-area {
     margin-top: 1.5rem; padding-top: 1rem;
     border-top: 1px solid rgba(74, 74, 74, 0.5); /* fluent-border with opacity */
