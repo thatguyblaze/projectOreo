@@ -3,12 +3,12 @@ if (typeof initRoulette === 'undefined') {
 
     /**
      * ==========================================================================
-     * Brokie Casino - Roulette Game Logic (v2.11 - Fine-tuning Number Radius)
+     * Brokie Casino - Roulette Game Logic (v2.12 - Added Logging & Reset Radius Factor)
      *
-     * - FIX: Fine-tuned numberRingRadius factor in positionWheelNumbers for better centering.
-     * - Numbers spin with wheel (clock-face orientation).
-     * - Wheel spins continuously via CSS.
-     * - Ball animation landing synchronized.
+     * - Added console logs in positionWheelNumbers to debug radius calculation.
+     * - Reset numberRingRadius factor to 0.85 (theoretical center).
+     * - Keeps clock-face number orientation.
+     * - Keeps continuous wheel spin and ball animation logic.
      * ==========================================================================
      */
 
@@ -89,7 +89,7 @@ if (typeof initRoulette === 'undefined') {
         if (LocalBrokieAPI.addBetAdjustmentListeners) { LocalBrokieAPI.addBetAdjustmentListeners('roulette', rouletteBetInput); }
         // Initial Reset...
         resetRoulette(true);
-        console.log("Roulette Initialized (v2.11 - Tuned Radius)");
+        console.log("Roulette Initialized (v2.12 - Debugging Radius)");
     }
 
     // --- Helper Functions ---
@@ -130,16 +130,17 @@ if (typeof initRoulette === 'undefined') {
              if (containerDiameter <= 0) { setTimeout(positionWheelNumbers, 100); return; }
              const containerRadius = containerDiameter / 2;
 
-             // --- CHANGE: Adjust numberRingRadius factor ---
-             // Previous: 0.85 (too far in), 0.92 (too far out)
-             // Try 0.88 - closer to outer edge than center
-             const numberRingRadius = containerRadius * 0.88; // << ADJUST THIS FACTOR
+             // --- CHANGE: Reset radius factor to theoretical center (0.85) ---
+             const numberRingRadius = containerRadius * 0.85;
+
+             // --- ADDED: Logging ---
+             console.log(`Positioning Numbers - Container Radius: ${containerRadius.toFixed(2)}, Number Ring Radius: ${numberRingRadius.toFixed(2)} (Factor: 0.85)`);
 
              wheel.innerHTML = ''; // Clear previous numbers
 
              ROULETTE_NUMBERS.forEach((num, index) => {
-                 const angleDegrees = (ANGLE_PER_NUMBER * index) + (ANGLE_PER_NUMBER / 2);
-                 const calculationAngleRadians = (angleDegrees - 90) * (Math.PI / 180);
+                 const angleDegrees = (ANGLE_PER_NUMBER * index) + (ANGLE_PER_NUMBER / 2); // 0=top, positive=CW
+                 const calculationAngleRadians = (angleDegrees - 90) * (Math.PI / 180); // For cos/sin
 
                  const numberSpan = document.createElement('span');
                  numberSpan.textContent = num.toString();
@@ -151,15 +152,14 @@ if (typeof initRoulette === 'undefined') {
                  numberSpan.style.position = 'absolute';
                  numberSpan.style.left = `${x}px`;
                  numberSpan.style.top = `${y}px`;
+
                  // Apply rotation for "clock face" orientation
                  numberSpan.style.transform = `translate(-50%, -50%) rotate(${angleDegrees}deg)`;
 
-                 wheel.appendChild(numberSpan);
+                 wheel.appendChild(numberSpan); // Append to wheel
              });
-             console.log("Positioned numbers on spinning wheel (Adjusted Radius).");
         });
     }
-
 
     function setupRouletteEventListeners() { /* ... No changes ... */ if (rouletteInsideBetsContainer) rouletteInsideBetsContainer.addEventListener('click', handleBetPlacement); if (rouletteOutsideBetsContainer) rouletteOutsideBetsContainer.addEventListener('click', handleBetPlacement); if (rouletteSpinButton) rouletteSpinButton.addEventListener('click', spinWheel); if (clearBetsButton) clearBetsButton.addEventListener('click', clearAllRouletteBets); }
     function handleBetPlacement(event) { /* ... No changes ... */ if (rouletteIsSpinning) return; const targetButton = event.target.closest('.roulette-bet-btn'); if (!targetButton) return; const amountToAdd = parseInt(rouletteBetInput.value); if (isNaN(amountToAdd) || amountToAdd < 1){/*..*/} if (LocalBrokieAPI && amountToAdd > LocalBrokieAPI.getBalance()){/*..*/} if (LocalBrokieAPI) LocalBrokieAPI.playSound('chip_place'); const betType = targetButton.dataset.betType; const betValue = targetButton.dataset.betValue; let existingBet = findPlacedBet(betType, betValue); if (existingBet) { existingBet.amount += amountToAdd; } else { existingBet = { type: betType, value: (betType === 'single') ? parseInt(betValue, 10) : betValue, amount: amountToAdd, buttonElement: targetButton }; placedBets.push(existingBet); } updateButtonVisual(targetButton, existingBet.amount); updateTotalBetDisplay(); if (rouletteSpinButton) rouletteSpinButton.disabled = false; if (clearBetsButton) clearBetsButton.disabled = false; }
