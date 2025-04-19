@@ -3,7 +3,7 @@
  *
  * Handles all functionality related to the Coin Flip game.
  * Depends on functions and variables defined in main.js.
- * v1.2 - Fixed animation not playing on subsequent flips.
+ * v1.3 - Reduced spins in animation to potentially improve reliability/fix visual mismatch.
  */
 
 // --- Coin Flip Specific State ---
@@ -17,6 +17,7 @@ let coinFlipChoice = null; // 'blue' or 'yellow'
 let coinElement; // Now references the div.coin element
 let coinflipBetInput, coinflipButton, coinflipCashoutButton;
 let coinflipWinningsSpan, coinflipStatus, coinflipChooseBlueBtn, coinflipChooseYellowBtn;
+let fallbackTimeoutId = null; // Stores the ID for the fallback timeout
 
 /**
  * Initializes the Coin Flip game elements and event listeners.
@@ -67,6 +68,7 @@ function resetCoinFlip() {
     coinFlipBet = 0;
     currentCoinFlipWinnings = 0;
     coinFlipChoice = null; // Reset choice
+    clearTimeout(fallbackTimeoutId); // Clear any pending fallback timeout
 
     if (coinElement) {
         // Reset coin rotation to show the front (Blue) side without animation
@@ -126,6 +128,41 @@ function setCoinFlipChoice(choice) {
     coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'Blue 🔵' : 'Yellow 🟡'}. Place your bet & Flip!`;
 }
 
+// --- Animation End Handler ---
+// Defined outside handleCoinFlip so it can be referenced by the listener and timeout
+const handleFlipEnd = (resultIsBlue, resultColor, resultEmoji) => {
+    // Check if the function was called prematurely or already handled
+    if (!isCoinFlipping) return;
+    clearTimeout(fallbackTimeoutId); // Clear timeout if transitionend fired
+
+    isCoinFlipping = false; // End flipping state - SET THIS FIRST
+
+    // Ensure elements still exist (user might switch tabs quickly)
+    if (!coinflipStatus || !coinflipButton || !coinflipCashoutButton || !coinflipWinningsSpan) {
+        console.warn("Coin flip elements missing after flip animation ended.");
+        resetCoinFlip(); // Attempt to reset to a safe state
+        return;
+    }
+
+    // Check win/loss
+    if (resultColor === coinFlipChoice) { // WIN
+        currentCoinFlipWinnings *= 2; // Double the winnings
+        coinflipStatus.textContent = `WIN! It was ${resultEmoji}. Current Winnings: ${formatWin(currentCoinFlipWinnings)}`; // uses main.js
+        coinflipButton.disabled = false; // Enable flip again
+        coinflipCashoutButton.disabled = false; // Enable cashout
+        coinflipWinningsSpan.textContent = formatWin(currentCoinFlipWinnings); // Update winnings display (uses main.js)
+        playSound('win_small'); // Play win sound (uses main.js)
+    } else { // LOSS
+        coinflipStatus.textContent = `LOSS! It was ${resultEmoji}. You lost ${formatWin(currentCoinFlipWinnings)}.`; // uses main.js
+        totalLoss += coinFlipBet; // Add original bet to total loss (uses main.js)
+        playSound('lose'); // uses main.js
+        resetCoinFlip(); // Reset the game state
+        updateCurrencyDisplay(); // Update currency (no change type) (uses main.js)
+    }
+    saveGameState(); // Save state after flip result (uses main.js)
+};
+
+
 /**
  * Handles the coin flip action. Manages the initial bet deduction
  * or subsequent flips using current winnings. Triggers animation and result check.
@@ -139,15 +176,11 @@ function handleCoinFlip() {
         return;
     }
 
-    // *** FIX: Reset rotation before starting the next flip animation ***
-    // This ensures the transition triggers correctly on subsequent flips.
-    // We snap it back to the front face (0deg) without animation first.
+    // Reset rotation before starting the next flip animation
     coinElement.style.transition = 'none'; // Disable animation for reset
     coinElement.style.transform = 'rotateY(0deg)'; // Snap to front face
-    coinElement.offsetHeight; // Force browser reflow to apply the change immediately
-    coinElement.style.transition = ''; // Re-enable CSS transition for the actual flip
-    // *** END FIX ***
-
+    coinElement.offsetHeight; // Force browser reflow
+    coinElement.style.transition = ''; // Re-enable CSS transition
 
     const betAmount = parseInt(coinflipBetInput.value);
 
@@ -164,93 +197,50 @@ function handleCoinFlip() {
         updateCurrencyDisplay('loss'); // uses main.js
         currentCoinFlipWinnings = betAmount; // Start winnings streak with the bet amount
         coinFlipActive = true; // Mark round as active
-        // Disable bet input and choice buttons for the duration of the round
+        // Disable bet input and choice buttons
         coinflipBetInput.disabled = true;
-        coinflipButton.textContent = 'Flip Again'; // Change button text
+        coinflipButton.textContent = 'Flip Again';
         coinflipChooseBlueBtn.disabled = true;
         coinflipChooseYellowBtn.disabled = true;
     }
-    // --- Subsequent Flips ---
-    // Bet amount is already deducted, player is risking currentCoinFlipWinnings
 
-    isCoinFlipping = true; // Start flipping animation state
+    isCoinFlipping = true;
     coinflipStatus.textContent = 'Flipping...';
-    coinflipButton.disabled = true; // Disable flip/cashout during animation
+    coinflipButton.disabled = true;
     coinflipCashoutButton.disabled = true;
 
-    playSound('coin_flip'); // uses main.js
+    playSound('coin_flip');
 
     // Determine result and target rotation
-    const resultIsBlue = Math.random() < 0.5; // 50/50 chance
+    const resultIsBlue = Math.random() < 0.5;
     const resultColor = resultIsBlue ? 'blue' : 'yellow';
-    const resultEmoji = resultIsBlue ? '🔵' : '🟡'; // Keep emoji for status message
+    const resultEmoji = resultIsBlue ? '🔵' : '🟡';
 
-    // Calculate target rotation: multiple flips + end on correct side
-    // rotateY(0) = Blue (Front), rotateY(180) = Yellow (Back)
-    // We add multiples of 360 degrees for more spins. Start from 0 due to reset above.
-    const numSpins = 3; // Number of full 360 spins
-    const finalRestingDegrees = resultIsBlue ? 0 : 180; // Target final state
-    const targetRotationDegrees = (numSpins * 360) + finalRestingDegrees;
+    // *** MODIFIED: Use fewer spins ***
+    const numSpins = 1; // Reduced from 3
+    const finalRestingDegrees = resultIsBlue ? 0 : 180;
+    const targetRotationDegrees = (numSpins * 360) + finalRestingDegrees; // e.g., 360 or 540
     const targetRotation = `rotateY(${targetRotationDegrees}deg)`;
 
-
-    // --- Animation End Handler ---
-    const handleFlipEnd = () => {
-        // Check if the function was called prematurely by the fallback timeout
-        // If isCoinFlipping is already false, it means the real transitionend fired first.
-        if (!isCoinFlipping) return;
-
-        isCoinFlipping = false; // End flipping state
-
-        // Check win/loss
-        if (resultColor === coinFlipChoice) { // WIN
-            currentCoinFlipWinnings *= 2; // Double the winnings
-            coinflipStatus.textContent = `WIN! It was ${resultEmoji}. Current Winnings: ${formatWin(currentCoinFlipWinnings)}`; // uses main.js
-            coinflipButton.disabled = false; // Enable flip again
-            coinflipCashoutButton.disabled = false; // Enable cashout
-            coinflipWinningsSpan.textContent = formatWin(currentCoinFlipWinnings); // Update winnings display (uses main.js)
-            playSound('win_small'); // Play win sound (uses main.js)
-        } else { // LOSS
-            coinflipStatus.textContent = `LOSS! It was ${resultEmoji}. You lost ${formatWin(currentCoinFlipWinnings)}.`; // uses main.js
-            totalLoss += coinFlipBet; // Add original bet to total loss (uses main.js)
-            playSound('lose'); // uses main.js
-            resetCoinFlip(); // Reset the game state
-            updateCurrencyDisplay(); // Update currency (no change type) (uses main.js)
-        }
-        saveGameState(); // Save state after flip result (uses main.js)
-    };
-
-    // Add a one-time listener for the end of the CSS transition
-    coinElement.addEventListener('transitionend', handleFlipEnd, { once: true });
-
-    // Start the animation by applying the target transform
-    coinElement.style.transform = targetRotation;
-
-    // Fallback timeout (if transitionend doesn't fire for some reason)
-    // Slightly longer than the CSS transition duration (0.8s)
-    const fallbackTimeout = setTimeout(() => {
-        // Check if the flip is still marked as active AND the transitionend listener hasn't already run
-        if (isCoinFlipping) {
-            console.warn("Coin flip transitionend event did not fire, using fallback timeout.");
-            // Manually remove the listener to prevent it running later if it was just delayed
-            coinElement.removeEventListener('transitionend', handleFlipEnd);
-            handleFlipEnd(); // Manually call the end handler
-        }
-    }, 900); // 0.9 seconds
-
-    // Ensure the fallback timeout is cleared if the transitionend event *does* fire correctly.
-    // We can modify the event listener slightly.
+    // Setup the listener for the end of the animation
     const transitionEndListener = (event) => {
-        // Ensure the event is for the transform property on the coin itself
+        // Make sure the event is for the transform property on the coin element
         if (event.target === coinElement && event.propertyName === 'transform') {
-            clearTimeout(fallbackTimeout); // Clear the fallback
-            handleFlipEnd(); // Handle the end of the flip
+            handleFlipEnd(resultIsBlue, resultColor, resultEmoji);
         }
     };
-    // Remove previous listener and add the new one that clears the timeout
-    coinElement.removeEventListener('transitionend', handleFlipEnd); // Remove the simple one if it was somehow added
     coinElement.addEventListener('transitionend', transitionEndListener, { once: true });
 
+    // Start the animation
+    coinElement.style.transform = targetRotation;
+
+    // Setup fallback timeout - Pass result info to the handler via anonymous function
+    fallbackTimeoutId = setTimeout(() => {
+        console.warn("Coin flip transitionend event did not fire, using fallback timeout.");
+        // Remove the listener since the timeout is firing
+        coinElement.removeEventListener('transitionend', transitionEndListener);
+        handleFlipEnd(resultIsBlue, resultColor, resultEmoji); // Manually call the handler
+    }, 900); // Animation is 0.8s, timeout slightly longer
 }
 
 
@@ -260,6 +250,7 @@ function handleCoinFlip() {
 function cashOutCoinFlip() {
     if (!coinFlipActive || isCoinFlipping) return; // Can't cash out if not active or flipping
     if (!coinflipWinningsSpan) return; // Check element
+    clearTimeout(fallbackTimeoutId); // Clear fallback timeout if cashing out mid-flip (although buttons should be disabled)
 
     const profit = currentCoinFlipWinnings - coinFlipBet; // Calculate profit
     currency += currentCoinFlipWinnings; // Add winnings back to currency (uses main.js)
