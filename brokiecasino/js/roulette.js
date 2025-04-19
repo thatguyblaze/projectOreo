@@ -2,6 +2,20 @@ function easeOutQuint(t) {
     return 1 - Math.pow(1 - t, 5);
   }
   
+  function calculateTargetScreenAngle(targetIndex, currentWheelAngle) {
+      const winningNumberBaseAngle = (targetIndex * ANGLE_PER_NUMBER + ANGLE_PER_NUMBER / 2);
+      let screenAngle = (currentWheelAngle + winningNumberBaseAngle) % 360;
+      return (screenAngle < 0) ? screenAngle + 360 : screenAngle;
+  }
+  
+  function interpolateAngles(startAngle, endAngle, factor) {
+      let difference = endAngle - startAngle;
+      while (difference < -180) difference += 360;
+      while (difference > 180) difference -= 360;
+      let interpolated = startAngle + difference * factor;
+      return (interpolated % 360 + 360) % 360;
+  }
+  
   if (typeof initRoulette === 'undefined') {
   
       const ROULETTE_NUMBERS = [
@@ -26,6 +40,8 @@ function easeOutQuint(t) {
       const BALL_FINAL_RADIUS_FACTOR = 0.75;
       const BALL_LANDING_SPIRAL_TIME = 1500;
       const MIN_ROTATIONS = 7;
+      const BALL_CORRECTION_DURATION = 400; // ms - Duration of final angle correction
+      const BALL_CORRECTION_START_TIME = BALL_ANIMATION_DURATION - BALL_CORRECTION_DURATION;
   
       let rouletteIsSpinning = false;
       let placedBets = [];
@@ -71,7 +87,7 @@ function easeOutQuint(t) {
           setupRouletteEventListeners();
           if (LocalBrokieAPI.addBetAdjustmentListeners) { LocalBrokieAPI.addBetAdjustmentListeners('roulette', rouletteBetInput); }
           resetRoulette(true);
-          console.log("Roulette Initialized (v2.22 - Deterministic Eased Spin)");
+          console.log("Roulette Initialized (v2.24 - Hybrid Easing + Correction)");
       }
   
       function findPlacedBet(type, value) { return placedBets.find(bet => bet.type === type && bet.value == value); }
@@ -137,7 +153,6 @@ function easeOutQuint(t) {
           containerRadius = currentContainerRadius;
   
           const elapsed = timestamp - ballStartTime;
-  
           const progress = Math.min(1.0, elapsed / BALL_ANIMATION_DURATION);
   
           let currentRadiusFactor = BALL_INITIAL_RADIUS_FACTOR;
@@ -151,8 +166,23 @@ function easeOutQuint(t) {
           ballRadius = containerRadius * currentRadiusFactor;
   
           const easedProgress = easeOutQuint(progress);
-          ballAngle = (ballStartAngle - (totalAngleToCover * easedProgress)) % 360;
-          ballAngle = (ballAngle + 360) % 360;
+          let calculatedAngle = (ballStartAngle - (totalAngleToCover * easedProgress)); // Angle based on easing
+  
+          if (elapsed >= BALL_CORRECTION_START_TIME && targetWinningNumberIndex !== -1) {
+              const correctionProgress = Math.min(1.0, (elapsed - BALL_CORRECTION_START_TIME) / BALL_CORRECTION_DURATION);
+               // Use easeInQuad for correction factor - start correction slowly, then faster
+              const correctionFactor = correctionProgress * correctionProgress;
+  
+              const currentWheelAngle = getCurrentWheelRotationAngle();
+              const targetScreenAngle = calculateTargetScreenAngle(targetWinningNumberIndex, currentWheelAngle);
+  
+              // Blend the calculated angle towards the real-time target angle
+              ballAngle = interpolateAngles(calculatedAngle, targetScreenAngle, correctionFactor);
+          } else {
+               ballAngle = calculatedAngle; // Use the eased angle before correction phase
+          }
+          ballAngle = (ballAngle % 360 + 360) % 360; // Normalize
+  
   
           if (progress >= 1.0) {
               ballLanded = true;
