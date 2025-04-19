@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Brokie Casino Stylesheet (Fluent Dark Theme) v3.7
+   Brokie Casino Stylesheet (Fluent Dark Theme) v3.6
    - Added Sabacc styles.
    - Corrected conic-gradient for European Roulette wheel (1 green slot).
    - Uses direct hex color values instead of theme() for browser compatibility.
@@ -12,7 +12,9 @@
    - Added inner overlay to wheel for shorter 'spots'.
    - Added continuous spin animation rule & applied by default.
    - Added basic styles for #roulette-ball and visibility class.
-   * - NEW: Replaced old #coin styles with 3D flip styles (.coin-container, .coin-face, animation).
+   * - NEW: Added styles for stationary #roulette-number-ring.
+   * - NEW: Adjusted .roulette-number styles for stationary ring.
+   * - NEW: Removed unused .result-spin class.
    ========================================================================== */
 
 /* --- Base Styles & Background Animation --- */
@@ -356,7 +358,7 @@
     font-weight: 600; /* Make text bolder */
 }
 .roulette-bet-btn.has-bet:hover:not(:disabled) {
-    transform: scale(1.03) translateY(-1px); /* Combine effects */
+     transform: scale(1.03) translateY(-1px); /* Combine effects */
 }
 
 
@@ -486,23 +488,24 @@ input[type="number"]:disabled {
 /* --- Game Specific Styles --- */
 
 /* Slots */
+/* ... (styles for other games remain unchanged) ... */
 .reel {
-    border: 2px solid #404040;
-    background-color: #2d2d2d;
-    color: #f5f5f5;
+    border: 2px solid #404040; /* Dark gray border */
+    background-color: #2d2d2d; /* fluent-card (updated) */
+    color: #f5f5f5; /* fluent-text-primary */
     overflow: hidden;
     width: 80px; height: 100px;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    font-size: 3rem;
-    border-radius: 0.5rem;
+    font-size: 3rem; /* text-5xl */
+    border-radius: 0.5rem; /* rounded-lg */
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .reel.win-effect {
     transform: scale(1.05);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(0, 120, 212, 0.6);
-    border-color: #0078d4;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 15px rgba(0, 120, 212, 0.6); /* fluent-primary glow */
+    border-color: #0078d4; /* fluent-primary */
 }
 .reel-container {
     position: relative; height: 100px; overflow: hidden; width: 100%;
@@ -510,18 +513,18 @@ input[type="number"]:disabled {
 .reel-symbols {
     position: absolute; top: 0; left: 0; width: 100%;
     text-align: center;
-    transition: top 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-    color: #f5f5f5;
+    transition: top 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Smoother ease-out */
+    color: #f5f5f5; /* fluent-text-primary */
 }
 #payout-legend {
     margin-top: 1.5rem; padding-top: 1rem;
-    border-top: 1px solid rgba(74, 74, 74, 0.5);
-    font-size: 0.875rem;
-    color: #b0b0b0;
+    border-top: 1px solid rgba(74, 74, 74, 0.5); /* fluent-border with opacity */
+    font-size: 0.875rem; /* text-sm */
+    color: #b0b0b0; /* fluent-text-secondary */
 }
 #payout-legend h4 {
-    font-weight: 600;
-    color: #f5f5f5;
+    font-weight: 600; /* font-semibold */
+    color: #f5f5f5; /* fluent-text-primary */
     margin-bottom: 0.5rem;
     text-align: center;
 }
@@ -532,69 +535,70 @@ input[type="number"]:disabled {
 #payout-legend li {
     display: flex; justify-content: space-between;
     padding: 0.25rem 0;
-    font-size: 0.75rem;
+    font-size: 0.75rem; /* text-xs */
 }
-#payout-legend li span:first-child {
-    font-family: monospace;
+#payout-legend li span:first-child { /* Emoji */
+    font-family: monospace; /* Consistent spacing for emojis */
     margin-right: 1rem;
     font-size: 1rem;
 }
-#payout-legend li span:last-child {
-    font-weight: 500;
-    color: #f5f5f5;
+#payout-legend li span:last-child { /* Multiplier */
+    font-weight: 500; /* font-medium */
+    color: #f5f5f5; /* fluent-text-primary */
 }
 
 /* Crash */
+/* ... Crash styles ... */
 #crash-graph {
     height: 250px;
-    background-color: #2d2d2d;
-    border-radius: 0.5rem;
+    background-color: #2d2d2d; /* fluent-card (updated) */
+    border-radius: 0.5rem; /* rounded-lg */
     display: flex; align-items: center; justify-content: center;
-    font-size: 2rem; font-weight: bold;
-    color: #b0b0b0;
-    position: relative; overflow: hidden;
-    border: 1px solid #404040;
+    font-size: 2rem; /* text-3xl */ font-weight: bold;
+    color: #b0b0b0; /* fluent-text-secondary (Default text) */
+    position: relative; overflow: hidden; /* Keep overflow hidden */
+    border: 1px solid #404040; /* Dark gray border */
 }
 #crash-svg {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;
 }
 #crash-svg .grid-line {
-    stroke: #404040;
-    stroke-width: 0.5;
-    vector-effect: non-scaling-stroke;
+    stroke: #404040; /* Dark gray border */
+    stroke-width: 0.5; /* Thin lines */
+    vector-effect: non-scaling-stroke; /* Keep lines thin */
 }
 #crash-svg .grid-label {
-    font-family: inherit;
-    text-anchor: start;
-    dominant-baseline: middle;
-    vector-effect: non-scaling-stroke;
+    font-family: inherit; /* Use page font */
+    text-anchor: start; /* Align text start to the x coordinate */
+    dominant-baseline: middle; /* Better vertical alignment */
+    vector-effect: non-scaling-stroke; /* Prevent stroke scaling */
 }
 #crash-polyline {
     fill: none;
-    stroke: #0078d4;
-    stroke-width: 2.5;
+    stroke: #0078d4; /* fluent-primary */
+    stroke-width: 2.5; /* Slightly thicker line */
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: stroke 0.2s linear;
     vector-effect: non-scaling-stroke;
 }
 #crash-multiplier {
-    z-index: 10;
-    background-color: rgba(42, 42, 42, 0.8);
-    color: #f5f5f5;
+    z-index: 10; /* Above graph line */
+    background-color: rgba(42, 42, 42, 0.8); /* fluent-surface with alpha */
+    color: #f5f5f5; /* fluent-text-primary */
     padding: 0.3rem 0.8rem;
-    border-radius: 0.375rem;
+    border-radius: 0.375rem; /* rounded-md */
     transition: transform 0.1s ease, color 0.2s ease-out, font-size 0.2s ease-out;
-    font-size: 1.75rem;
-    display: inline-block;
-    position: absolute;
+    font-size: 1.75rem; /* Between text-xl and text-2xl */
+    display: inline-block; /* Needed for transform */
+    position: absolute; /* Position relative to #crash-graph */
     top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); /* Center it */
 }
 #crash-multiplier.win-effect {
-    transform: translate(-50%, -50%) scale(1.1);
-    box-shadow: 0 0 15px rgba(0, 120, 212, 0.7);
-    color: #0078d4;
+    transform: translate(-50%, -50%) scale(1.1); /* Adjust transform for centering */
+    box-shadow: 0 0 15px rgba(0, 120, 212, 0.7); /* fluent-primary glow */
+    color: #0078d4; /* fluent-primary */
 }
 .mult-color-5x { color: #ffee58; }
 .mult-color-10x { color: #ffa726; }
@@ -606,192 +610,160 @@ input[type="number"]:disabled {
 .mult-size-30x { font-size: 2.05rem; font-weight: 700; }
 
 
-/* === START NEW Coin Flip 3D Styles === */
+/* Coin Flip */
+/* ... Coinflip styles ... */
 .coin-container {
-    width: 60px;  /* Adjust size as needed */
-    height: 60px; /* Adjust size as needed */
-    position: relative;
-    margin: 20px auto; /* Center it */
-    perspective: 1000px; /* How intense the 3D effect is */
+    perspective: 600px; /* For 3D effect */
+    display: inline-block; /* Keep size */
+    vertical-align: middle;
+}
+#coin {
+    font-size: 5rem; /* text-6xl */
     cursor: default;
-}
-
-.coin-face {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    backface-visibility: hidden; /* Hide the back */
+    transition: transform 0.6s;
     transform-style: preserve-3d;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 40px; /* Adjust emoji size */
-    border-radius: 50%;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.3);
+    display: inline-block;
 }
-
-.coin-front {
-    background: linear-gradient(135deg, #4a90e2, #357ABD); /* Example Blue Gradient */
-    color: white;
-    z-index: 2;
-    /* transform: rotateY(0deg); // Default */
+#coin.flipping {
+    animation: flip 0.6s ease-out;
 }
-
-.coin-back {
-    background: linear-gradient(135deg, #f8e71c, #f5a623); /* Example Yellow Gradient */
-    color: black;
-    transform: rotateY(180deg); /* Start hidden */
+@keyframes flip { /* 3D Flip Animation */
+    0% { transform: rotateY(0) rotateX(5deg); }
+    50% { transform: rotateY(540deg) rotateX(20deg) scale(1.1); } /* Add slight scale */
+    100% { transform: rotateY(1080deg) rotateX(0deg); }
 }
-
-/* Animation */
-/* Apply animation to the container */
-.coin-container.flipping {
-    animation: coin-flip-animation 0.6s linear; /* Match JS timeout */
-    /* Animation runs once per click via class add/remove */
-}
-
-@keyframes coin-flip-animation {
-    from {
-        transform: rotateY(0deg);
-    }
-    to {
-        /* Multiple rotations for effect (e.g., 5 * 360 = 1800) */
-        transform: rotateY(1800deg); /* Adjust degrees for more/less spin */
-    }
-}
-/* === END NEW Coin Flip 3D Styles === */
-
 
 /* Minefield */
+/* ... Minefield styles ... */
 #minefield-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
-    max-width: 240px;
-    margin: 1rem auto;
+    gap: 0.5rem; /* gap-2 */
+    max-width: 240px; /* Limit width */
+    margin: 1rem auto; /* Center grid */
 }
 .minefield-tile {
-    aspect-ratio: 1 / 1;
-    background-color: #404040;
-    border: 1px solid #5a5a5a;
-    border-radius: 0.375rem;
+    aspect-ratio: 1 / 1; /* Square tiles */
+    background-color: #404040; /* Use secondary button bg */
+    border: 1px solid #5a5a5a; /* Use secondary button border */
+    border-radius: 0.375rem; /* rounded-md */
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* text-2xl */
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
 }
 .minefield-tile:hover:not(.revealed):not(:disabled) {
-    background-color: #5a5a5a;
+    background-color: #5a5a5a; /* Lighter gray */
 }
 .minefield-tile:active:not(.revealed):not(:disabled) {
     transform: scale(0.95);
 }
 .minefield-tile.revealed.safe {
-    background-color: #107c10;
+    background-color: #107c10; /* fluent-accent */
     color: white; cursor: default;
-    border-color: #107c10;
+    border-color: #107c10; /* fluent-accent */
 }
 .minefield-tile.revealed.bomb {
-    background-color: #e81123;
+    background-color: #e81123; /* fluent-danger */
     color: white; cursor: default;
-    border-color: #e81123;
-    animation: shake-strong 0.3s ease-in-out;
+    border-color: #e81123; /* fluent-danger */
+    animation: shake-strong 0.3s ease-in-out; /* Shake on bomb reveal */
 }
 .minefield-tile:disabled {
     opacity: 0.7; cursor: not-allowed;
 }
 
 /* Memory */
+/* ... Memory styles ... */
 #memory-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
-    max-width: 280px;
-    margin: 1rem auto;
-    perspective: 1000px;
+    display: grid; grid-template-columns: repeat(4, 1fr); /* 4x4 Grid */
+    gap: 0.5rem; /* gap-2 */
+    max-width: 280px; /* Adjust width for 4x4 */
+    margin: 1rem auto; /* Center grid */
+    perspective: 1000px; /* For card flip animation */
 }
 .memory-card {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1; /* Square cards */
     background-color: transparent; border: none;
-    border-radius: 0.375rem;
+    border-radius: 0.375rem; /* rounded-md */
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.75rem;
+    font-size: 1.75rem; /* Slightly larger emoji */
     cursor: pointer; position: relative;
     transform-style: preserve-3d;
     transition: transform 0.5s ease;
-    transform: rotateY(0deg);
+    transform: rotateY(0deg); /* Start face down */
 }
 .memory-card .card-face {
     position: absolute; width: 100%; height: 100%;
-    backface-visibility: hidden;
+    backface-visibility: hidden; /* Hide back */
     display: flex; align-items: center; justify-content: center;
     border-radius: 0.375rem;
     transition: background-color 0.2s ease, border-color 0.2s ease;
-    border: 1px solid #4a4a4a;
+    border: 1px solid #4a4a4a; /* fluent-border */
 }
-.memory-card .card-front {
-    background-color: #404040;
-    color: #f5f5f5;
+.memory-card .card-front { /* Visible when face down */
+    background-color: #404040; /* secondary button */
+    color: #f5f5f5; /* fluent-text-primary */
     transform: rotateY(0deg);
 }
-.memory-card .card-back {
-    background-color: #2d2d2d;
-    color: #f5f5f5;
+.memory-card .card-back { /* Visible when face up (flipped) */
+    background-color: #2d2d2d; /* fluent-card (updated) */
+    color: #f5f5f5; /* fluent-text-primary */
     transform: rotateY(180deg);
 }
 .memory-card.revealed {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg); /* Flip card */
     cursor: default;
 }
 .memory-card.matched {
     cursor: default; opacity: 0.8;
 }
-.memory-card.matched .card-back {
-    background-color: #107c10;
-    border-color: #0d630d;
+.memory-card.matched .card-back { /* Style back face when matched */
+    background-color: #107c10; /* fluent-accent */
+    border-color: #0d630d; /* Darker accent */
 }
-.memory-card.mismatched .card-back {
-    background-color: #e81123;
-    border-color: #d13438;
-    animation: shake-subtle 0.4s ease-in-out;
+.memory-card.mismatched .card-back { /* Style back face when mismatched */
+    background-color: #e81123; /* fluent-danger */
+    border-color: #d13438; /* Darker danger */
+    animation: shake-subtle 0.4s ease-in-out; /* Shake on mismatch */
 }
 .memory-card:disabled {
     cursor: not-allowed; opacity: 0.6;
 }
 
 /* Horse Race */
+/* ... Horserace styles ... */
 #horserace-track {
-    position: relative; width: 100%; height: 200px;
-    background-color: #2d2d2d;
-    border: 2px solid #404040;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    margin-top: 1rem; padding: 0.5rem 0;
-    display: flex; flex-direction: column;
+    position: relative; width: 100%; height: 200px; /* Adjusted height */
+    background-color: #2d2d2d; /* fluent-card (updated) */
+    border: 2px solid #404040; /* Dark gray border */
+    border-radius: 0.5rem; /* rounded-lg */
+    overflow: hidden; /* Hide horses if they go past finish line */
+    margin-top: 1rem; padding: 0.5rem 0; /* Padding top/bottom for lanes */
+    display: flex; flex-direction: column; /* Stack lanes vertically */
 }
 .horse-lane {
-    width: 100%; flex-grow: 1;
-    border-bottom: 1px dashed #4a4a4a;
-    display: flex; align-items: center;
-    position: relative;
+    width: 100%; flex-grow: 1; /* Make lanes share height equally */
+    border-bottom: 1px dashed #4a4a4a; /* fluent-border */
+    display: flex; align-items: center; /* Center horse vertically */
+    position: relative; /* Needed for absolute positioning of horse */
 }
 .horse-lane:last-child {
-    border-bottom: none;
+    border-bottom: none; /* No border on last lane */
 }
 .horse {
-    position: absolute;
-    right: 10px;
-    font-size: 1.75rem;
-    transition: right 0.1s linear;
-    padding: 0 5px; line-height: 1;
-    display: inline-block;
-    z-index: 5;
-    will-change: right;
+    position: absolute; /* Position relative to the lane */
+    right: 10px; /* Starting position (RIGHT SIDE) */
+    font-size: 1.75rem; /* Adjust horse size */
+    transition: right 0.1s linear; /* Smooth movement (using RIGHT) */
+    padding: 0 5px; line-height: 1; /* Ensure emoji vertical alignment */
+    display: inline-block; /* Ensure the div takes space */
+    z-index: 5; /* Horse above trail */
+    will-change: right; /* Optimize animation (using RIGHT) */
 }
 #horserace-finish-line {
     position: absolute;
-    left: 20px;
+    left: 20px; /* Position finish line on the LEFT */
     top: 0; bottom: 0; width: 5px;
     background: repeating-linear-gradient( white, white 10px, black 10px, black 20px );
     z-index: 10;
@@ -799,8 +771,8 @@ input[type="number"]:disabled {
 .horse-trail {
     position: absolute; width: 6px; height: 6px; border-radius: 50%; opacity: 0.7;
     animation: fadeOutShrink 0.5s linear forwards;
-    pointer-events: none;
-    z-index: 1;
+    pointer-events: none; /* Prevent trails interfering with clicks */
+    z-index: 1; /* Behind horse */
 }
 @keyframes fadeOutShrink {
     from { opacity: 0.7; transform: scale(1) translateY(-50%); }
@@ -808,89 +780,396 @@ input[type="number"]:disabled {
 }
 #horserace-selection {
     display: flex; flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.5rem; /* gap-2 */
     justify-content: center;
     margin-top: 0.5rem;
 }
 .horse-select-btn {
-    padding: 0.5rem 1rem;
-    border-width: 1px;
-    font-size: 0.875rem;
-    gap: 0.5rem;
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border-width: 1px; /* Use base button style */
+    font-size: 0.875rem; /* text-sm */
+    gap: 0.5rem; /* space-x-2 */
 }
 .horse-select-btn .horse-color-indicator {
-    display: inline-block; width: 1rem; height: 1rem;
-    border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    display: inline-block; width: 1rem; /* w-4 */ height: 1rem; /* h-4 */
+    border-radius: 9999px; /* rounded-full */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Add subtle border */
 }
 
 /* Roulette */
-@keyframes continuous-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-#roulette-wheel-container { width: 250px; height: 250px; margin: 1rem auto; perspective: 800px; border: 8px solid #383838; border-radius: 50%; position: relative; overflow: hidden; background-color: #1a1a1a; box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 6px 18px rgba(0,0,0,0.5); }
-#roulette-wheel { width: 100%; height: 100%; border-radius: 50%; position: absolute; top: 0; left: 0; background-image: conic-gradient( #107c10 0.000deg 9.730deg, #d13438 9.730deg 19.459deg, #111827 19.459deg 29.189deg, #d13438 29.189deg 38.919deg, #111827 38.919deg 48.649deg, #d13438 48.649deg 58.378deg, #111827 58.378deg 68.108deg, #d13438 68.108deg 77.838deg, #111827 77.838deg 87.568deg, #d13438 87.568deg 97.297deg, #111827 97.297deg 107.027deg, #d13438 107.027deg 116.757deg, #111827 116.757deg 126.486deg, #d13438 126.486deg 136.216deg, #111827 136.216deg 145.946deg, #d13438 145.946deg 155.676deg, #111827 155.676deg 165.405deg, #d13438 165.405deg 175.135deg, #111827 175.135deg 184.865deg, #d13438 184.865deg 194.595deg, #111827 194.595deg 204.324deg, #d13438 204.324deg 214.054deg, #111827 214.054deg 223.784deg, #d13438 223.784deg 233.514deg, #111827 233.514deg 243.243deg, #d13438 243.243deg 252.973deg, #111827 252.973deg 262.703deg, #d13438 262.703deg 272.432deg, #111827 272.432deg 282.162deg, #d13438 282.162deg 291.892deg, #111827 291.892deg 301.622deg, #d13438 301.622deg 311.351deg, #111827 311.351deg 321.081deg, #d13438 321.081deg 330.811deg, #111827 330.811deg 340.541deg, #d13438 340.541deg 350.270deg, #111827 350.270deg 360.000deg ); will-change: transform; }
-#roulette-wheel.continuous-spin { animation: continuous-spin 20s linear infinite; transition: none; }
-#roulette-wheel::before { content: ''; position: absolute; top: 15%; left: 15%; right: 15%; bottom: 15%; background: radial-gradient(circle, #2e2e2e 50%, #1a1a1a 100%); border-radius: 50%; z-index: 1; box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.6); }
-.roulette-number { position: absolute; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; font-size: 10px; font-weight: bold; color: rgba(255, 255, 255, 0.9); text-shadow: 0px 0px 2px rgba(0,0,0,0.8), 0px 1px 1px rgba(0,0,0,1); transform: translate(-50%, -50%); pointer-events: none; z-index: 2; /* Ensure numbers are above overlay */ }
-#roulette-pointer { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent; border-top: 16px solid #ffbb00; /* Warning color */ z-index: 10; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.6)); }
-#roulette-result { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 65px; height: 65px; background: radial-gradient(circle, #4a4a4a 0%, #2d2d2d 70%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: bold; color: #fff; z-index: 5; border: 5px solid #5a5a5a; box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.4); }
+
+/* Continuous spin animation definition */
+@keyframes continuous-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+#roulette-wheel-container {
+    width: 250px; height: 250px; margin: 1rem auto;
+    perspective: 800px;
+    border: 8px solid #383838;
+    border-radius: 50%;
+    position: relative; overflow: hidden;
+    background-color: #1a1a1a;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 6px 18px rgba(0,0,0,0.5);
+}
+
+/* The spinning color segment part */
+#roulette-wheel {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    position: absolute; /* Positioned within container */
+    top: 0; left: 0;
+    background-image: conic-gradient( /* Color segments */
+        #107c10 0.000deg 9.730deg, #d13438 9.730deg 19.459deg, #111827 19.459deg 29.189deg,
+        #d13438 29.189deg 38.919deg, #111827 38.919deg 48.649deg, #d13438 48.649deg 58.378deg,
+        #111827 58.378deg 68.108deg, #d13438 68.108deg 77.838deg, #111827 77.838deg 87.568deg,
+        #d13438 87.568deg 97.297deg, #111827 97.297deg 107.027deg, #d13438 107.027deg 116.757deg,
+        #111827 116.757deg 126.486deg, #d13438 126.486deg 136.216deg, #111827 136.216deg 145.946deg,
+        #d13438 145.946deg 155.676deg, #111827 155.676deg 165.405deg, #d13438 165.405deg 175.135deg,
+        #111827 175.135deg 184.865deg, #d13438 184.865deg 194.595deg, #111827 194.595deg 204.324deg,
+        #d13438 204.324deg 214.054deg, #111827 214.054deg 223.784deg, #d13438 223.784deg 233.514deg,
+        #111827 233.514deg 243.243deg, #d13438 243.243deg 252.973deg, #111827 252.973deg 262.703deg,
+        #d13438 262.703deg 272.432deg, #111827 272.432deg 282.162deg, #d13438 282.162deg 291.892deg,
+        #111827 291.892deg 301.622deg, #d13438 301.622deg 311.351deg, #111827 311.351deg 321.081deg,
+        #d13438 321.081deg 330.811deg, #111827 330.811deg 340.541deg, #d13438 340.541deg 350.270deg,
+        #111827 350.270deg 360.000deg
+    );
+    will-change: transform; /* Optimize rotation */
+}
+/* Class applied by JS for continuous spin */
+#roulette-wheel.continuous-spin {
+    animation: continuous-spin 20s linear infinite;
+    transition: none; /* Make sure no transition interferes */
+}
+/* NOTE: The .result-spin class is no longer needed as the wheel doesn't stop/transition */
+
+/* Inner overlay pseudo-element on the wheel */
+#roulette-wheel::before {
+    content: '';
+    position: absolute;
+    /* Adjust % to control outer ring thickness */
+    top: 15%; left: 15%; right: 15%; bottom: 15%;
+    background: radial-gradient(circle, #2e2e2e 50%, #1a1a1a 100%); /* Inner area color */
+    border-radius: 50%;
+    z-index: 1; /* Above gradient, below numbers */
+    box-shadow: inset 0 0 15px 5px rgba(0,0,0,0.6);
+}
+
+/* NEW: Stationary container for numbers */
+#roulette-number-ring {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0; /* Fill container */
+    border-radius: 50%;
+    pointer-events: none; /* Allow clicks through to wheel/bets if needed */
+    z-index: 2; /* Above the wheel's overlay */
+}
+
+/* Numbers positioned within the stationary ring */
+#roulette-number-ring .roulette-number {
+    position: absolute;
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+    font-size: 2px; font-weight: bold; color: rgba(255, 255, 255, 0.247);
+    text-shadow: 0px 0px 1px rgba(0,0,0,0.8), 0px 0px 1px rgba(0,0,0,1);
+    /* REMOVED transform-origin and rotation */
+    /* Apply only translation to center the number on its calculated x,y */
+    transform: translate(-50%, -50%);
+    pointer-events: none; /* Already on parent, but good practice */
+    /* JS handles top/left positioning */
+}
+
+/* Pointer */
+#roulette-pointer {
+    position: absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%);
+    width: 18px; height: 16px;
+    background-color: #ffbb0000;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    z-index: 10; /* Above everything */
+    filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.6));
+    border-bottom: 2px solid #e0a80000;
+}
+
+/* Center hub */
+#roulette-result {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 65px; height: 65px;
+    background: radial-gradient(circle, #4a4a4a 0%, #2d2d2d 70%);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: bold; color: #fff;
+    z-index: 5; /* Above wheel overlay, below ball/pointer */
+    border: 5px solid #5a5a5a;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.4);
+}
 #roulette-result.red { background: radial-gradient(circle, #ff6b6b 0%, #d13438 70%); color: white; border-color: #a71d2a;}
 #roulette-result.black { background: radial-gradient(circle, #555 0%, #111827 70%); color: white; border-color: #000;}
 #roulette-result.green { background: radial-gradient(circle, #50c878 0%, #107c10 70%); color: white; border-color: #0a5d0a;}
-#roulette-ball { position: absolute; width: 12px; height: 12px; background-color: #f0f0f0; border-radius: 50%; z-index: 8; box-shadow: inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 5px white; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; top: 10%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; will-change: transform, top, left; }
-#roulette-ball.visible { opacity: 1; visibility: visible; }
-#roulette-betting-area { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(74, 74, 74, 0.5); }
-.roulette-bet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-width: 300px; margin: 0 auto 1rem auto; }
-.roulette-bet-btn { padding: 0.5rem; border-width: 1px; border-radius: 0.25rem; font-size: 0.875rem; min-height: 36px; transition: all 0.15s ease-in-out, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease; }
+
+/* Roulette Ball */
+#roulette-ball {
+    position: absolute;
+    width: 12px; height: 12px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    z-index: 8;  /* Above number ring, below pointer */
+    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.3), 0 0 5px white;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    top: 10%; left: 50%; /* Initial position set by JS showBall */
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    will-change: transform, top, left;
+}
+#roulette-ball.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Betting Area */
+#roulette-betting-area {
+    margin-top: 1.5rem; padding-top: 1rem;
+    border-top: 1px solid rgba(74, 74, 74, 0.5);
+}
+.roulette-bet-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem; max-width: 300px; margin: 0 auto 1rem auto;
+}
+.roulette-bet-btn {
+    padding: 0.5rem; border-width: 1px; border-radius: 0.25rem;
+    font-size: 0.875rem; min-height: 36px;
+    transition: all 0.15s ease-in-out, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
 .roulette-bet-btn.red { background-color: #d13438; color: white; border-color: #a71d2a; }
 .roulette-bet-btn.black { background-color: #111827; color: white; border-color: #1f2937; }
 .roulette-bet-btn.green { background-color: #107c10; color: white; border-color: #0d630d; }
-.roulette-bet-btn.outside { grid-column: span 1; padding: 0.75rem; background-color: #404040; border-color: #5a5a5a; color: #f5f5f5; }
-.roulette-outside-bets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-width: 300px; margin: 0 auto; }
+.roulette-bet-btn.outside {
+    grid-column: span 1; padding: 0.75rem; background-color: #404040;
+    border-color: #5a5a5a; color: #f5f5f5;
+}
+.roulette-outside-bets {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+    max-width: 300px; margin: 0 auto;
+}
 
 /* Blackjack */
-.blackjack-hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; min-height: 90px; margin-bottom: 1rem; padding: 0.5rem; background-color: #2d2d2d; border-radius: 0.375rem; border: 1px solid #404040; }
-.blackjack-card { background-color: white; color: black; border: 1px solid #505050; border-radius: 0.375rem; width: 60px; height: 85px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 0.25rem; font-weight: 600; font-size: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-.blackjack-card.hidden { background-color: #404040; background-image: repeating-linear-gradient( 45deg, #5a5a5a, #5a5a5a 5px, #404040 5px, #404040 10px ); color: transparent; border-color: #5a5a5a; }
-.blackjack-card span:first-child { font-size: 1.25rem; line-height: 1; }
-.blackjack-card span:last-child { font-size: 1.5rem; line-height: 1; }
-.blackjack-card.suit-red { color: #e81123; }
-.blackjack-card.suit-black { color: #111827; }
-.blackjack-score { font-weight: 600; font-size: 1.125rem; color: #b0b0b0; }
-.blackjack-score-value { font-weight: 700; font-size: 1.25rem; color: #f5f5f5; margin-left: 0.5rem; }
-.blackjack-score.busted .blackjack-score-value { color: #e81123; }
-.blackjack-score.blackjack .blackjack-score-value { color: #ffb900; }
+/* ... (Styles for Blackjack, Plinko, Sabacc remain unchanged) ... */
+.blackjack-hand {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 0.5rem; /* gap-2 */
+    min-height: 90px; /* Ensure space for cards */
+    margin-bottom: 1rem; padding: 0.5rem;
+    background-color: #2d2d2d; /* fluent-card (updated) */
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #404040; /* Dark gray border */
+}
+.blackjack-card {
+    background-color: white;
+    color: black;
+    border: 1px solid #505050; /* Lighter border than hand bg */
+    border-radius: 0.375rem; /* rounded-md */
+    width: 60px; /* Card width */
+    height: 85px; /* Card height */
+    display: flex; flex-direction: column;
+    justify-content: space-between; align-items: center;
+    padding: 0.25rem; /* py-1 */
+    font-weight: 600; /* font-semibold */
+    font-size: 1rem; /* text-base */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.blackjack-card.hidden {
+    background-color: #404040; /* Dark gray for hidden card */
+    background-image: repeating-linear-gradient(
+        45deg,
+        #5a5a5a, #5a5a5a 5px, /* Lighter gray */
+        #404040 5px, #404040 10px /* Dark gray */
+    );
+    color: transparent; /* Hide text */
+    border-color: #5a5a5a;
+}
+.blackjack-card span:first-child { /* Rank */
+    font-size: 1.25rem; /* text-xl */
+    line-height: 1;
+}
+.blackjack-card span:last-child { /* Suit */
+    font-size: 1.5rem; /* text-2xl */
+    line-height: 1;
+}
+.blackjack-card.suit-red { color: #e81123; /* fluent-danger */ }
+.blackjack-card.suit-black { color: #111827; } /* Use updated dark color for black suits */
+
+.blackjack-score {
+    font-weight: 600; /* font-semibold */
+    font-size: 1.125rem; /* text-lg */
+    color: #b0b0b0; /* fluent-text-secondary */
+}
+.blackjack-score-value {
+    font-weight: 700; /* font-bold */
+    font-size: 1.25rem; /* text-xl */
+    color: #f5f5f5; /* fluent-text-primary */
+    margin-left: 0.5rem;
+}
+.blackjack-score.busted .blackjack-score-value {
+    color: #e81123; /* fluent-danger */
+}
+.blackjack-score.blackjack .blackjack-score-value {
+    color: #ffb900; /* fluent-warning */
+}
 
 /* Plinko */
-#plinko-canvas { background-color: #2d2d2d; border: 1px solid #404040; border-radius: 0.5rem; display: block; margin: 1rem auto; }
+#plinko-canvas {
+    background-color: #2d2d2d; /* fluent-card (updated) */
+    border: 1px solid #404040; /* Dark gray border */
+    border-radius: 0.5rem; /* rounded-lg */
+    display: block; /* Prevent extra space below canvas */
+    margin: 1rem auto; /* Center canvas */
+}
 
 /* Sabacc Styles */
-.sabacc-hand { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; min-height: 110px; margin-bottom: 1rem; padding: 0.5rem; background-color: #2d2d2d; border-radius: 0.375rem; border: 1px solid #404040; }
-.sabacc-card { background-color: #4a4a4a; color: #f5f5f5; border: 1px solid #5a5a5a; border-radius: 0.375rem; width: 70px; height: 100px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 0.3rem 0.2rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.3); text-align: center; }
-.sabacc-card.hidden { background-color: #404040; background-image: repeating-linear-gradient( 45deg, #5a5a5a, #5a5a5a 5px, #404040 5px, #404040 10px ); color: transparent; border-color: #5a5a5a; }
-.sabacc-card.hidden span { visibility: hidden; }
-.sabacc-card .card-name { font-size: 0.65rem; line-height: 1.1; font-weight: 400; color: #b0b0b0; white-space: normal; overflow-wrap: break-word; max-height: 3.3em; overflow: hidden; }
-.sabacc-card .card-value { font-size: 1.5rem; line-height: 1; font-weight: 700; }
-.sabacc-card.positive .card-value { color: #107c10; }
-.sabacc-card.negative .card-value { color: #e81123; }
-.sabacc-card.zero .card-value { color: #ffb900; }
-.sabacc-score-value { font-weight: 700; font-size: 1.1em; color: #f5f5f5; margin-left: 0.25rem; }
-.sabacc-score-value.busted { color: #e81123; text-decoration: line-through; }
+.sabacc-hand {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem; /* gap-2 */
+    min-height: 110px; /* Ensure space for taller cards */
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #2d2d2d; /* fluent-card */
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #404040; /* Dark gray border */
+}
+
+.sabacc-card {
+    background-color: #4a4a4a; /* fluent-border - Darker background for Sabacc */
+    color: #f5f5f5; /* fluent-text-primary */
+    border: 1px solid #5a5a5a; /* Slightly lighter border */
+    border-radius: 0.375rem; /* rounded-md */
+    width: 70px; /* Slightly wider cards */
+    height: 100px; /* Taller cards */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out name and value */
+    align-items: center;
+    padding: 0.3rem 0.2rem; /* Adjust padding */
+    font-weight: 600; /* font-semibold */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.sabacc-card.hidden {
+    background-color: #404040; /* Dark gray for hidden card */
+    background-image: repeating-linear-gradient(
+        45deg,
+        #5a5a5a, #5a5a5a 5px, /* Lighter gray */
+        #404040 5px, #404040 10px /* Dark gray */
+    );
+    color: transparent; /* Hide text */
+    border-color: #5a5a5a;
+}
+.sabacc-card.hidden span {
+    visibility: hidden; /* Hide spans too */
+}
+
+
+.sabacc-card .card-name {
+    font-size: 0.65rem; /* Smaller text for name */
+    line-height: 1.1;
+    font-weight: 400; /* Normal weight */
+    color: #b0b0b0; /* fluent-text-secondary */
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-height: 3.3em; /* Limit height */
+    overflow: hidden;
+}
+
+.sabacc-card .card-value {
+    font-size: 1.5rem; /* Larger value display */
+    line-height: 1;
+    font-weight: 700; /* Bold */
+}
+
+.sabacc-card.positive .card-value {
+    color: #107c10; /* fluent-accent (Green for positive) */
+}
+.sabacc-card.negative .card-value {
+    color: #e81123; /* fluent-danger (Red for negative) */
+}
+.sabacc-card.zero .card-value {
+    color: #ffb900; /* fluent-warning (Yellow for zero/Idiot) */
+}
+
+.sabacc-score-value {
+    font-weight: 700; /* font-bold */
+    font-size: 1.1em; /* Slightly larger than surrounding text */
+    color: #f5f5f5; /* fluent-text-primary */
+    margin-left: 0.25rem;
+}
+.sabacc-score-value.busted {
+    color: #e81123; /* fluent-danger */
+    text-decoration: line-through;
+}
 
 
 /* --- Animations --- */
+
+/* ... (Other animations remain unchanged) ... */
 @keyframes pulse { 50% { opacity: .5; } }
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-@keyframes flash-green { 0%, 100% { color: #107c10; transform: scale(1.05); } 50% { color: #0078d4; transform: scale(1); } }
-@keyframes flash-red { 0%, 100% { color: #e81123; transform: scale(1.05); } 50% { color: #0078d4; transform: scale(1); } }
+
+@keyframes flash-green {
+    0%, 100% { color: #107c10; transform: scale(1.05); } /* fluent-accent */
+    50% { color: #0078d4; transform: scale(1); } /* fluent-primary */
+}
+@keyframes flash-red {
+    0%, 100% { color: #e81123; transform: scale(1.05); } /* fluent-danger */
+    50% { color: #0078d4; transform: scale(1); } /* fluent-primary */
+}
 .flash-win { animation: flash-green 0.6s ease-out; }
 .flash-loss { animation: flash-red 0.6s ease-out; }
-@keyframes shake-subtle { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-1px); } 75% { transform: translateX(1px); } }
-@keyframes shake-strong { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(-2px, 1px) rotate(-0.5deg); } 50% { transform: translate(1px, -1px) rotate(0.5deg); } 75% { transform: translate(2px, 1px) rotate(-0.5deg); } }
+
+@keyframes shake-subtle {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1px); }
+    75% { transform: translateX(1px); }
+}
+@keyframes shake-strong {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    25% { transform: translate(-2px, 1px) rotate(-0.5deg); }
+    50% { transform: translate(1px, -1px) rotate(0.5deg); }
+    75% { transform: translate(2px, 1px) rotate(-0.5deg); }
+}
 .shake-subtle { animation: shake-subtle 0.2s infinite linear; }
 .shake-strong { animation: shake-strong 0.15s infinite linear; }
-@keyframes slideFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-.leaderboard-entry-new { animation: slideFadeIn 0.5s ease-out forwards; }
+
+@keyframes slideFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.leaderboard-entry-new {
+    animation: slideFadeIn 0.5s ease-out forwards;
+}
 
 /* --- Message Box --- */
-#message-box { position: fixed; bottom: 20px; left: 50%; background-color: #2a2a2a; color: #f5f5f5; padding: 0.75rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease; border: 1px solid #4a4a4a; font-weight: 500; transform: translate(-50%, 10px); pointer-events: none; }
-#message-box.show { opacity: 1; visibility: visible; transform: translateX(-50%); }
+#message-box {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    background-color: #2a2a2a; /* fluent-surface */
+    color: #f5f5f5; /* fluent-text-primary */
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    border: 1px solid #4a4a4a; /* fluent-border */
+    font-weight: 500; /* font-medium */
+    transform: translate(-50%, 10px); /* Start slightly lower */
+    pointer-events: none; /* Allow clicks through when hidden */
+}
+#message-box.show {
+    opacity: 1; visibility: visible;
+    transform: translateX(-50%); /* Move to final position */
+}
