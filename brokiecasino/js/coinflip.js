@@ -1,114 +1,115 @@
-/**
- * Brokie Casino - Coin Flip Game Logic (coinflip.js)
- *
- * Handles all functionality related to the Coin Flip game.
- * Depends on functions and variables defined in main.js.
- */
+// v2.1 - 3D Flip - Guard Block Removed for Debugging ts(1128)
 
-// --- Coin Flip Specific State ---
-let coinFlipActive = false; // Is a round currently in progress (after first bet)?
-let coinFlipBet = 0; // The initial bet amount for the round
-let currentCoinFlipWinnings = 0; // The amount currently staked (doubles on win)
-let isCoinFlipping = false; // Is the coin animation currently playing?
-let coinFlipChoice = null; // 'blue' or 'yellow'
+console.log("[COINFLIP DEBUG] Script Loading (No Guard)...");
 
-// --- DOM Elements (Coin Flip Specific) ---
+let coinFlipActive = false;
+let coinFlipBet = 0;
+let currentCoinFlipWinnings = 0;
+let isCoinFlipping = false;
+let coinFlipChoice = null;
+
 let coinElement, coinflipBetInput, coinflipButton, coinflipCashoutButton;
 let coinflipWinningsSpan, coinflipStatus, coinflipChooseBlueBtn, coinflipChooseYellowBtn;
+let coinFrontFace, coinBackFace;
 
-/**
- * Initializes the Coin Flip game elements and event listeners.
- * Called by main.js on DOMContentLoaded.
- */
+// --- API Reference --- Attempt to get from global scope if not passed to init
+let LocalBrokieAPI = window.LocalBrokieAPI || null;
+
 function initCoinflip() {
-    console.log("Initializing Coin Flip...");
-    // Get DOM elements
-    coinElement = document.getElementById('coin');
-    coinflipBetInput = document.getElementById('coinflip-bet');
-    coinflipButton = document.getElementById('coinflip-button');
-    coinflipCashoutButton = document.getElementById('coinflip-cashout-button');
-    coinflipWinningsSpan = document.getElementById('coinflip-winnings');
-    coinflipStatus = document.getElementById('coinflip-status');
-    coinflipChooseBlueBtn = document.getElementById('coinflip-choose-blue');
-    coinflipChooseYellowBtn = document.getElementById('coinflip-choose-yellow');
+    console.log("Initializing Coin Flip (v2.1 - 3D / No Guard)...");
+    // If API is passed via main.js, uncomment this line:
+    // if (arguments.length > 0 && arguments[0]) LocalBrokieAPI = arguments[0];
+    const api = LocalBrokieAPI || window; // Use the API object or fallback to window
 
-    // Check if all essential elements were found
-    if (!coinElement || !coinflipBetInput || !coinflipButton || !coinflipCashoutButton ||
-        !coinflipWinningsSpan || !coinflipStatus || !coinflipChooseBlueBtn || !coinflipChooseYellowBtn) {
-        console.error("Coin Flip initialization failed: Could not find all required DOM elements.");
-        const gameArea = document.getElementById('game-coinflip');
-        if(gameArea) gameArea.innerHTML = '<p class="text-red-500 text-center">Error loading Coin Flip elements.</p>';
-        return; // Stop initialization
+    try {
+        coinElement = document.getElementById('coin');
+        coinflipBetInput = document.getElementById('coinflip-bet');
+        coinflipButton = document.getElementById('coinflip-button');
+        coinflipCashoutButton = document.getElementById('coinflip-cashout-button');
+        coinflipWinningsSpan = document.getElementById('coinflip-winnings');
+        coinflipStatus = document.getElementById('coinflip-status');
+        coinflipChooseBlueBtn = document.getElementById('coinflip-choose-blue');
+        coinflipChooseYellowBtn = document.getElementById('coinflip-choose-yellow');
+
+        // Strict check for essential elements
+        const elements = { coinElement, coinflipBetInput, coinflipButton, coinflipCashoutButton, coinflipWinningsSpan, coinflipStatus, coinflipChooseBlueBtn, coinflipChooseYellowBtn };
+        for (const key in elements) {
+            if (!elements[key]) {
+                console.error(`Coin Flip initialization failed: Element '${key}' not found. Check HTML IDs.`);
+                return;
+            }
+        }
+        console.log("All required elements found by ID.");
+
+        // Check coin face structure
+        if(coinElement) {
+            coinFrontFace = coinElement.querySelector('.coin-front');
+            coinBackFace = coinElement.querySelector('.coin-back');
+             console.log(`Coin faces query: front=${!!coinFrontFace}, back=${!!coinBackFace}`);
+             if (!coinFrontFace || !coinBackFace) {
+                 console.error("ERROR: Coin element found, but required .coin-front or .coin-back children are missing! Update HTML structure inside div#coin.");
+                 if(coinflipButton) coinflipButton.disabled = true;
+                 if(coinflipStatus) coinflipStatus.textContent = "HTML Error!";
+                 return;
+             }
+             console.log("Coin face structure (.coin-front, .coin-back) verified.");
+        } else { /* Should have failed above if !coinElement */ }
+
+
+        resetCoinFlip();
+
+        coinflipButton.addEventListener('click', handleCoinFlip);
+        coinflipCashoutButton.addEventListener('click', cashOutCoinFlip);
+        coinflipChooseBlueBtn.addEventListener('click', () => setCoinFlipChoice('blue'));
+        coinflipChooseYellowBtn.addEventListener('click', () => setCoinFlipChoice('yellow'));
+
+        if (typeof api.addBetAdjustmentListeners === 'function') {
+            api.addBetAdjustmentListeners('coinflip', coinflipBetInput);
+        } else {
+            console.warn('addBetAdjustmentListeners function not found.');
+        }
+
+        console.log("Coin Flip Initialized (No Guard).");
+
+    } catch (err) {
+        console.error("Error during Coin Flip initialization:", err);
     }
-
-    // Set initial state
-    resetCoinFlip();
-
-    // Add Event Listeners
-    coinflipButton.addEventListener('click', handleCoinFlip);
-    coinflipCashoutButton.addEventListener('click', cashOutCoinFlip);
-    coinflipChooseBlueBtn.addEventListener('click', () => setCoinFlipChoice('blue'));
-    coinflipChooseYellowBtn.addEventListener('click', () => setCoinFlipChoice('yellow'));
-
-    // Add bet adjustment listeners using the factory function from main.js
-    addBetAdjustmentListeners('coinflip', coinflipBetInput); // uses main.js
-
-    console.log("Coin Flip Initialized.");
 }
 
-/**
- * Resets the coin flip game to its initial state (UI and variables).
- */
 function resetCoinFlip() {
     coinFlipActive = false;
     isCoinFlipping = false;
     coinFlipBet = 0;
     currentCoinFlipWinnings = 0;
-    coinFlipChoice = null; // Reset choice
+    coinFlipChoice = null;
 
     if (coinElement) {
-        coinElement.classList.remove('flipping'); // Stop animation if active
-        coinElement.textContent = '🪙'; // Reset to default coin emoji
+        coinElement.classList.remove('flipping');
+        coinElement.style.transform = '';
+        coinElement.style.transition = '';
     }
+
     if (coinflipButton) {
         coinflipButton.textContent = 'Select Side & Flip';
-        coinflipButton.disabled = true; // Disabled until side is chosen
+        coinflipButton.disabled = true;
     }
-    if (coinflipCashoutButton) {
-        coinflipCashoutButton.disabled = true; // Disabled until a win occurs
-    }
-    if (coinflipWinningsSpan) {
-        coinflipWinningsSpan.textContent = '0'; // Reset winnings display
-    }
-    if (coinflipStatus) {
-        coinflipStatus.textContent = 'Choose Blue or Yellow!';
-    }
-    if (coinflipBetInput) {
-        coinflipBetInput.disabled = false; // Allow changing bet
-    }
-    // Reset button selections
-    if (coinflipChooseBlueBtn) {
-        coinflipChooseBlueBtn.classList.remove('selected');
-        coinflipChooseBlueBtn.disabled = false;
-    }
-    if (coinflipChooseYellowBtn) {
-        coinflipChooseYellowBtn.classList.remove('selected');
-        coinflipChooseYellowBtn.disabled = false;
-    }
+    if (coinflipCashoutButton) { coinflipCashoutButton.disabled = true; }
+    if (coinflipWinningsSpan) { coinflipWinningsSpan.textContent = '0'; }
+    if (coinflipStatus) { coinflipStatus.textContent = 'Choose Blue or Yellow!'; }
+    if (coinflipBetInput) { coinflipBetInput.disabled = false; }
+    if (coinflipChooseBlueBtn) { coinflipChooseBlueBtn.classList.remove('selected'); coinflipChooseBlueBtn.disabled = false; }
+    if (coinflipChooseYellowBtn) { coinflipChooseYellowBtn.classList.remove('selected'); coinflipChooseYellowBtn.disabled = false; }
 }
 
-/**
- * Sets the player's chosen side (blue or yellow) for the coin flip.
- * @param {'blue' | 'yellow'} choice - The chosen side.
- */
+
 function setCoinFlipChoice(choice) {
-    if (isCoinFlipping || coinFlipActive) return; // Don't allow changing choice mid-round
+    if (isCoinFlipping || coinFlipActive) return;
     if (!coinflipChooseBlueBtn || !coinflipChooseYellowBtn || !coinflipButton || !coinflipStatus) return;
 
-    playSound('click'); // uses main.js
+    const api = LocalBrokieAPI || window;
+    if (typeof api.playSound === 'function') api.playSound('click');
     coinFlipChoice = choice;
 
-    // Update button visuals
     if (choice === 'blue') {
         coinflipChooseBlueBtn.classList.add('selected');
         coinflipChooseYellowBtn.classList.remove('selected');
@@ -116,111 +117,181 @@ function setCoinFlipChoice(choice) {
         coinflipChooseYellowBtn.classList.add('selected');
         coinflipChooseBlueBtn.classList.remove('selected');
     }
-    coinflipButton.disabled = false; // Enable flip button now that side is chosen
+    coinflipButton.disabled = false;
     coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'Blue 🔵' : 'Yellow 🟡'}. Place your bet & Flip!`;
 }
 
-/**
- * Handles the coin flip action. Manages the initial bet deduction
- * or subsequent flips using current winnings. Triggers animation and result check.
- */
-function handleCoinFlip() {
-    if (isCoinFlipping) return; // Don't flip if already flipping
-    if (!coinElement || !coinflipBetInput || !coinflipButton || !coinflipCashoutButton || !coinflipStatus || !coinflipChooseBlueBtn || !coinflipChooseYellowBtn) return; // Check elements
 
-    if (!coinFlipChoice) { // Must choose a side first
-        showMessage("Please choose Blue or Yellow first!", 2000); // uses main.js
+function handleCoinFlip() {
+    if (isCoinFlipping) return;
+    if (!coinElement || !coinflipBetInput || !coinflipButton || !coinflipCashoutButton || !coinflipStatus || !coinflipChooseBlueBtn || !coinflipChooseYellowBtn) {
+         console.error("handleCoinFlip aborted: Missing required elements.");
+         return;
+     }
+
+    if (!coinFlipChoice) {
+        const api = LocalBrokieAPI || window;
+         if (typeof api.showMessage === 'function') api.showMessage("Please choose Blue or Yellow first!", 2000);
+         else alert("Please choose Blue or Yellow first!"); // Fallback alert
         return;
     }
 
     const betAmount = parseInt(coinflipBetInput.value);
+    const api = LocalBrokieAPI || window;
+    const currentBalance = typeof api.currency !== 'undefined' ? api.currency : (typeof window.currency !== 'undefined' ? window.currency : Infinity); // Assume infinite if not found
 
-    // --- Initial Bet ---
+
     if (!coinFlipActive) {
         if (isNaN(betAmount) || betAmount <= 0) {
-            showMessage("Please enter a valid positive bet amount.", 2000); return; // uses main.js
+             if (typeof api.showMessage === 'function') api.showMessage("Please enter a valid positive bet amount.", 2000);
+             else alert("Please enter a valid positive bet amount.");
+             return;
         }
-        if (betAmount > currency) { // uses currency from main.js
-            showMessage("Not enough currency!", 2000); return; // uses main.js
+        if (betAmount > currentBalance && currentBalance !== Infinity) { // Check balance if available
+             if (typeof api.showMessage === 'function') api.showMessage("Not enough currency!", 2000);
+             else alert("Not enough currency!");
+             return;
         }
-        coinFlipBet = betAmount; // Store the initial bet
-        currency -= betAmount; // Deduct bet (uses currency from main.js)
-        updateCurrencyDisplay('loss'); // uses main.js
-        currentCoinFlipWinnings = betAmount; // Start winnings streak with the bet amount
-        coinFlipActive = true; // Mark round as active
-        // Disable bet input and choice buttons for the duration of the round
+        coinFlipBet = betAmount;
+
+        if (typeof api.updateBalance === 'function') {
+             api.updateBalance(-coinFlipBet);
+        } else if (typeof window.updateBalance === 'function') {
+             window.updateBalance(-coinFlipBet);
+        } else {
+             if (typeof api.currency !== 'undefined') api.currency -= coinFlipBet;
+             else if (typeof window.currency !== 'undefined') window.currency -= coinFlipBet;
+             if (typeof api.updateCurrencyDisplay === 'function') api.updateCurrencyDisplay('loss');
+             else if (typeof window.updateCurrencyDisplay === 'function') window.updateCurrencyDisplay('loss');
+        }
+
+        currentCoinFlipWinnings = betAmount;
+        coinFlipActive = true;
         coinflipBetInput.disabled = true;
-        coinflipButton.textContent = 'Flip Again'; // Change button text
+        coinflipButton.textContent = 'Flip Again';
         coinflipChooseBlueBtn.disabled = true;
         coinflipChooseYellowBtn.disabled = true;
     }
-    // --- Subsequent Flips ---
-    // Bet amount is already deducted, player is risking currentCoinFlipWinnings
 
-    isCoinFlipping = true; // Start flipping animation state
+
+    isCoinFlipping = true;
     coinflipStatus.textContent = 'Flipping...';
-    coinflipButton.disabled = true; // Disable flip/cashout during animation
+    coinflipButton.disabled = true;
     coinflipCashoutButton.disabled = true;
-    coinElement.classList.add('flipping'); // Add animation class
-    playSound('coin_flip'); // uses main.js
 
-    // Simulate flip result after animation duration
+    coinElement.style.transform = '';
+    coinElement.classList.remove('flipping');
+    void coinElement.offsetWidth;
+    coinElement.classList.add('flipping');
+
+    if (typeof api.playSound === 'function') api.playSound('coin_flip');
+    else if (typeof window.playSound === 'function') window.playSound('coin_flip');
+
     setTimeout(() => {
         if (!coinElement || !coinflipButton || !coinflipCashoutButton || !coinflipWinningsSpan || !coinflipStatus) {
-             // Elements might have been removed if tab switched during timeout
-             console.warn("Coin flip elements not found after timeout.");
-             isCoinFlipping = false;
-             // Might need a more robust way to handle state if tab switching during animation is common
-             return;
+            console.warn("Coin flip elements not found after timeout.");
+            isCoinFlipping = false;
+            return;
         }
 
-        const resultIsBlue = Math.random() < 0.5; // 50/50 chance
+        const resultIsBlue = Math.random() < 0.5;
         const resultEmoji = resultIsBlue ? '🔵' : '🟡';
         const resultColor = resultIsBlue ? 'blue' : 'yellow';
 
-        coinElement.classList.remove('flipping'); // Remove animation class
-        coinElement.textContent = resultEmoji; // Show result
-        isCoinFlipping = false; // End flipping state
+        coinElement.classList.remove('flipping');
+        isCoinFlipping = false;
 
-        // Check win/loss
-        if (resultColor === coinFlipChoice) { // WIN
-            currentCoinFlipWinnings *= 2; // Double the winnings
-            coinflipStatus.textContent = `WIN! Current Winnings: ${formatWin(currentCoinFlipWinnings)}`; // uses main.js
-            coinflipButton.disabled = false; // Enable flip again
-            coinflipCashoutButton.disabled = false; // Enable cashout
-            coinflipWinningsSpan.textContent = formatWin(currentCoinFlipWinnings); // Update winnings display (uses main.js)
-            playSound('win_small'); // Play win sound (uses main.js)
-        } else { // LOSS
-            coinflipStatus.textContent = `LOSS! It was ${resultEmoji}. You lost ${formatWin(currentCoinFlipWinnings)}.`; // uses main.js
-            totalLoss += coinFlipBet; // Add original bet to total loss (uses main.js)
-            playSound('lose'); // uses main.js
-            resetCoinFlip(); // Reset the game state
-            updateCurrencyDisplay(); // Update currency (no change type) (uses main.js)
+        coinElement.style.transition = 'transform 0.15s ease-out';
+        if (resultIsBlue) {
+            coinElement.style.transform = 'rotateY(0deg)';
+        } else {
+            coinElement.style.transform = 'rotateY(180deg)';
         }
-        saveGameState(); // Save state after flip result (uses main.js)
-    }, 600); // Match animation duration in CSS
+        setTimeout(() => {
+            if (coinElement) coinElement.style.transition = '';
+        }, 160);
+
+
+        if (resultColor === coinFlipChoice) { // WIN
+            currentCoinFlipWinnings *= 2;
+            const displayWinnings = typeof api.formatWin === 'function' ? api.formatWin(currentCoinFlipWinnings) : (typeof window.formatWin === 'function' ? window.formatWin(currentCoinFlipWinnings) : currentCoinFlipWinnings);
+            coinflipStatus.textContent = `WIN! Current Winnings: ${displayWinnings}`;
+            coinflipButton.disabled = false;
+            coinflipCashoutButton.disabled = false;
+            coinflipWinningsSpan.textContent = displayWinnings;
+             if (typeof api.playSound === 'function') api.playSound('win_small');
+             else if (typeof window.playSound === 'function') window.playSound('win_small');
+        } else { // LOSS
+            const displayLoss = typeof api.formatWin === 'function' ? api.formatWin(currentCoinFlipWinnings) : (typeof window.formatWin === 'function' ? window.formatWin(currentCoinFlipWinnings) : currentCoinFlipWinnings);
+            coinflipStatus.textContent = `LOSS! It was ${resultEmoji}. You lost ${displayLoss}.`;
+             if (typeof api.totalLoss !== 'undefined') api.totalLoss += coinFlipBet;
+             else if (typeof window.totalLoss !== 'undefined') window.totalLoss += coinFlipBet;
+             if (typeof api.playSound === 'function') api.playSound('lose');
+             else if (typeof window.playSound === 'function') window.playSound('lose');
+            resetCoinFlip();
+             if (typeof api.updateCurrencyDisplay === 'function') api.updateCurrencyDisplay();
+             else if (typeof window.updateCurrencyDisplay === 'function') window.updateCurrencyDisplay();
+        }
+         if (typeof api.saveGameState === 'function') api.saveGameState();
+         else if (typeof window.saveGameState === 'function') window.saveGameState();
+    }, 600);
 }
 
-/**
- * Cashes out the current coin flip winnings, updates currency and stats, and resets the game.
- */
+
 function cashOutCoinFlip() {
-    if (!coinFlipActive || isCoinFlipping) return; // Can't cash out if not active or flipping
-    if (!coinflipWinningsSpan) return; // Check element
+    if (!coinFlipActive || isCoinFlipping) return;
+    if (!coinflipWinningsSpan) return;
 
-    const profit = currentCoinFlipWinnings - coinFlipBet; // Calculate profit
-    currency += currentCoinFlipWinnings; // Add winnings back to currency (uses main.js)
-    totalGain += Math.max(0, profit); // Add profit to total gain (uses main.js)
+    const profit = currentCoinFlipWinnings - coinFlipBet;
+    const api = LocalBrokieAPI || window;
 
-    showMessage(`Cashed out ${formatWin(currentCoinFlipWinnings)}! Profit: ${formatWin(profit)}`, 3000); // uses main.js
-    playSound('win_medium'); // Play cashout sound (uses main.js)
-    addWinToLeaderboard('Coin Flip', profit); // Add profit to leaderboard (uses main.js)
-    resetCoinFlip(); // Reset the game
-    updateCurrencyDisplay('win'); // Update currency (flash green) (uses main.js)
-    saveGameState(); // uses main.js
+     if (typeof api.updateBalance === 'function') {
+         api.updateBalance(currentCoinFlipWinnings);
+     } else if (typeof window.updateBalance === 'function') {
+         window.updateBalance(currentCoinFlipWinnings);
+     } else {
+         if (typeof api.currency !== 'undefined') api.currency += currentCoinFlipWinnings;
+         else if (typeof window.currency !== 'undefined') window.currency += currentCoinFlipWinnings;
+     }
+
+     if (typeof api.totalGain !== 'undefined') api.totalGain += Math.max(0, profit);
+     else if (typeof window.totalGain !== 'undefined') window.totalGain += Math.max(0, profit);
+
+
+    const displayWinnings = typeof api.formatWin === 'function' ? api.formatWin(currentCoinFlipWinnings) : (typeof window.formatWin === 'function' ? window.formatWin(currentCoinFlipWinnings) : currentCoinFlipWinnings);
+    const displayProfit = typeof api.formatWin === 'function' ? api.formatWin(profit) : (typeof window.formatWin === 'function' ? window.formatWin(profit) : profit);
+
+    if (typeof api.showMessage === 'function') api.showMessage(`Cashed out ${displayWinnings}! Profit: ${displayProfit}`, 3000);
+    else if (typeof window.showMessage === 'function') window.showMessage(`Cashed out ${displayWinnings}! Profit: ${displayProfit}`, 3000);
+    else alert(`Cashed out ${displayWinnings}! Profit: ${displayProfit}`); // Fallback alert
+
+    if (typeof api.playSound === 'function') api.playSound('win_medium');
+    else if (typeof window.playSound === 'function') window.playSound('win_medium');
+
+    if (typeof api.addWinToLeaderboard === 'function') api.addWinToLeaderboard('Coin Flip', profit);
+    else if (typeof window.addWinToLeaderboard === 'function') window.addWinToLeaderboard('Coin Flip', profit);
+
+    resetCoinFlip();
+
+    if (typeof api.updateCurrencyDisplay === 'function') api.updateCurrencyDisplay('win');
+    else if (typeof window.updateCurrencyDisplay === 'function') window.updateCurrencyDisplay('win');
+
+    if (typeof api.saveGameState === 'function') api.saveGameState();
+    else if (typeof window.saveGameState === 'function') window.saveGameState();
 }
 
+// --- Initialization Trigger ---
+// Make sure this init function is called after the DOM is loaded.
+/*
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Loaded, attempting to initialize Coinflip (No Guard)...");
+    if (typeof initCoinflip === 'function') {
+        initCoinflip(); // Assumes LocalBrokieAPI might be set globally or not needed
+    } else {
+        console.error("initCoinflip function is not defined!");
+    }
+});
+*/
+// If initCoinflip is already called from main.js, make sure it's called correctly.
 
-// Note: The initCoinflip() function will be called from main.js
-// Ensure main.js includes: if (typeof initCoinflip === 'function') initCoinflip();
-// within its DOMContentLoaded listener.
+// --- END OF SCRIPT ---

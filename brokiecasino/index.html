@@ -8,75 +8,12 @@
     <link rel="icon" type="image/png" href="brokieLogo.png"> <meta property="og:title" content="Brokie Casino - Refined Gaming">
     <meta property="og:description" content="Clean layout, sleek design. Play Slots, Crash, Plinko & more!">
     <meta property="og:image" content="brokieLogo.png"> <meta property="og:type" content="website">
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/style.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-
-    <script src="js/main.js" defer></script>
-    <script src="js/slots.js" defer></script>
-    <script src="js/crash.js" defer></script>
-    <script src="js/coinflip.js" defer></script>
-    <script src="js/minefield.js" defer></script>
-    <script src="js/memory.js" defer></script>
-    <script src="js/horserace.js" defer></script>
-    <script src="js/roulette.js" defer></script> <script src="js/blackjack.js" defer></script>
-    <script src="js/plinko.js" defer></script>
-    <script src="js/sabacc.js" defer></script> <script>
-      tailwind.config = {
-        darkMode: 'class', // Or 'media' if you prefer OS setting
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              // Fluent-Inspired Dark Palette (v2 Update)
-              'fluent-bg': '#1c1c1c',        // Main background (darkest)
-              'fluent-surface': '#2a2a2a',   // Secondary background/surface
-              'fluent-card': '#2d2d2d',      // Card background (Slightly lighter for contrast) - UPDATED
-              'fluent-border': '#4a4a4a',    // Borders
-              'fluent-primary': '#0078d4',   // Blue accent
-              'fluent-accent': '#107c10',    // Green accent
-              'fluent-text-primary': '#f5f5f5', // Main text
-              'fluent-text-secondary': '#b0b0b0', // Secondary text
-              'fluent-text-disabled': '#6a6a6a', // Disabled text
-              'fluent-danger': '#e81123',    // Red accent
-              'fluent-warning': '#ffb900',   // Yellow/Orange accent
-              'fluent-secondary': '#6a6a6a',   // Grayish accent
-            }
-          }
-        }
-      }
-    </script>
-
-    <script>
-        // Simple inline Accordion toggle logic
-        function toggleAccordion(button) {
-            const content = button.nextElementSibling;
-            const icon = button.querySelector('.accordion-icon');
-            if (!content) return;
-            const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
-
-            if (isOpen) {
-                content.style.maxHeight = '0px';
-                content.classList.remove('open');
-                if(icon) icon.textContent = '+'; // Change icon
-                button.setAttribute('aria-expanded', 'false');
-            } else {
-                // Set max-height based on scrollHeight for smooth animation
-                content.style.maxHeight = content.scrollHeight + "px";
-                content.classList.add('open');
-                if(icon) icon.textContent = '−'; // Change icon (using minus sign)
-                button.setAttribute('aria-expanded', 'true');
-            }
-        }
-    </script>
-
-</head>
+    <link rel="stylesheet" href="css/style.css">
+    </head>
 <body class="font-sans bg-fluent-bg text-fluent-text-primary flex flex-col min-h-screen antialiased selection:bg-fluent-primary selection:text-black">
 
     <section id="hero" class="relative overflow-hidden border-b border-fluent-border/50 shadow-lg min-h-[35vh] sm:min-h-[45vh] flex items-center justify-center text-center px-4 py-12 sm:py-16">
@@ -205,7 +142,7 @@
                              <svg id="crash-svg" preserveAspectRatio="none">
                                   <defs>
                                        <filter id="line-shadow" x="-50%" y="-50%" width="200%" height="200%">
-                                            <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#005a9e" flood-opacity="0.6"/>
+                                           <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#005a9e" flood-opacity="0.6"/>
                                        </filter>
                                   </defs>
                                   <g id="crash-grid"></g> <polyline id="crash-polyline" filter="url(#line-shadow)" points="0,100" clip-path="url(#graph-clip)"></polyline>
@@ -243,8 +180,12 @@
 
                     <div id="game-coinflip" class="game-area space-y-6 hidden">
                        <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Coin Flip: Double or Nothing!</h3>
-                         <div class="text-center my-6 coin-container">
-                             <span id="coin" class="text-6xl">🪙</span> </div>
+
+                       <div id="coin" class="coin-container">
+                           <div class="coin-face coin-front">🔵</div>
+                           <div class="coin-face coin-back">🟡</div>
+                       </div>
+
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                              <label for="coinflip-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
                              <button class="bet-adjust-btn" id="coinflip-bet-decrease-10">-10</button>
@@ -269,7 +210,6 @@
                          </div>
                          <p id="coinflip-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
                     </div>
-
                     <div id="game-minefield" class="game-area space-y-6 hidden">
                         <h3 class="text-xl font-semibold text-white pb-1 border-b-2 border-fluent-warning inline-block">Minefield</h3>
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
@@ -312,10 +252,10 @@
                           </div>
                           <div id="memory-grid"></div>
                           <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
-                               <button id="memory-start-button" class="game-button primary" style="background-color: #db2777; border-color: #db2777;">Start Game</button>
-                               <div class="text-fluent-text-secondary text-sm">
-                                   Tries Left: <span id="memory-tries-left" class="font-bold text-white">--</span>
-                               </div>
+                                <button id="memory-start-button" class="game-button primary" style="background-color: #db2777; border-color: #db2777;">Start Game</button>
+                                <div class="text-fluent-text-secondary text-sm">
+                                    Tries Left: <span id="memory-tries-left" class="font-bold text-white">--</span>
+                                </div>
                           </div>
                           <p id="memory-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
                     </div>
@@ -453,11 +393,11 @@
                          <div class="mb-4">
                             <h4 class="text-lg font-medium text-fluent-text-secondary mb-2 text-center"> Dealer's Hand (<span id="sabacc-dealer-score" class="sabacc-score-value">?</span>)</h4>
                             <div id="sabacc-dealer-hand" class="sabacc-hand"></div>
-                        </div>
+                         </div>
                          <div class="mb-6">
                             <h4 class="text-lg font-medium text-fluent-text-secondary mb-2 text-center"> Your Hand (<span id="sabacc-player-score" class="sabacc-score-value">0</span>)</h4>
                             <div id="sabacc-player-hand" class="sabacc-hand"></div>
-                        </div>
+                         </div>
                          <div class="flex items-center justify-center space-x-2 mt-4 flex-wrap gap-y-2">
                             <label for="sabacc-bet" class="font-medium text-fluent-text-secondary text-sm w-full text-center sm:w-auto">Bet:</label>
                             <button class="bet-adjust-btn" id="sabacc-bet-decrease-10">-10</button>
@@ -465,7 +405,7 @@
                             <input type="number" id="sabacc-bet" value="10" min="1" class="w-20 rounded-md appearance-none">
                             <button class="bet-adjust-btn" id="sabacc-bet-increase-1">+</button>
                             <button class="bet-adjust-btn" id="sabacc-bet-increase-10">+10</button>
-                        </div>
+                         </div>
                         <div class="flex items-center justify-center space-x-2 mt-2">
                             <button class="bet-adjust-btn" id="sabacc-bet-min">Min</button>
                             <button class="bet-adjust-btn" id="sabacc-bet-half">/2</button>
@@ -477,41 +417,46 @@
                             <button id="sabacc-deal-button" class="game-button success">Deal</button>
                             <button id="sabacc-hit-button" class="game-button primary" disabled>Hit</button>
                             <button id="sabacc-stand-button" class="game-button warning" disabled>Stand</button>
-                        </div>
+                         </div>
                          <p id="sabacc-status" class="text-center text-fluent-text-secondary font-medium h-6"></p>
-                    </div> </section> <section id="info-accordion" class="space-y-3">
-                     <div class="accordion-item">
-                         <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
-                             <span>Responsible Gaming & Addiction</span>
-                             <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
-                         </button>
-                         <div class="accordion-content">
-                             <p>So yeah, just to be clear, this site’s all fake money. You’re not betting real cash and you’re not gonna win any either. It’s all for fun. That said, even fake gambling can get a little too real if you’re not careful. If it stops being fun, step away for a bit. And if it ever feels like more than just a game, don’t ignore that. There are people out there who actually want to help. No pressure, just take care of yourself.</p>
-                             <p class="mt-2">Remember to play responsibly, set limits, and take breaks.</p>
-                         </div>
-                     </div>
-                     <div class="accordion-item">
-                         <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
-                             <span>Why I Made This Site</span>
-                             <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
-                         </button>
-                         <div class="accordion-content">
-                             <p>Honestly, I made this because I like these kinds of games, but I was tired of all the ads and pay-to-win junk. I just wanted something low-stress to mess around with when I’m bored, so I figured.. Why not just make it myself? No strings attached, no real stakes, just something that feels good to click around on when you’ve got a few minutes (or hours) to kill. If it makes your day a little better, that’s a win in my book. </p>
-                         </div>
-                     </div>
-                      <div class="accordion-item">
-                         <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
-                             <span>Who I Am</span>
-                              <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
-                         </button>
-                         <div class="accordion-content">
-                             <p>Hey, I’m Chris. I mess around with code and build stuff like this when I’ve got free time. I’m not trying to be some big developer or run a business or anything like that. I just like making fun things that work. Brokie Casino started as a little side project and turned into something I actually enjoyed using, so I figured I’d share it. Hope you’re into it. And if not, all good. Maybe next time.</p>
-                         </div>
-                     </div>
+                    </div>
                  </section>
+                 <section id="info-accordion" class="space-y-3">
+                         <div class="accordion-item">
+                             <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
+                                 <span>Responsible Gaming & Addiction</span>
+                                 <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
+                             </button>
+                             <div class="accordion-content">
+                                 <p>So yeah, just to be clear, this site’s all fake money. You’re not betting real cash and you’re not gonna win any either. It’s all for fun. That said, even fake gambling can get a little too real if you’re not careful. If it stops being fun, step away for a bit. And if it ever feels like more than just a game, don’t ignore that. There are people out there who actually want to help. No pressure, just take care of yourself.</p>
+                                 <p class="mt-2">Remember to play responsibly, set limits, and take breaks.</p>
+                             </div>
+                         </div>
+                         <div class="accordion-item">
+                             <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
+                                 <span>Why I Made This Site</span>
+                                 <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
+                             </button>
+                             <div class="accordion-content">
+                                 <p>Honestly, I made this because I like these kinds of games, but I was tired of all the ads and pay-to-win junk. I just wanted something low-stress to mess around with when I’m bored, so I figured.. Why not just make it myself? No strings attached, no real stakes, just something that feels good to click around on when you’ve got a few minutes (or hours) to kill. If it makes your day a little better, that’s a win in my book. </p>
+                             </div>
+                         </div>
+                          <div class="accordion-item">
+                             <button class="accordion-button" onclick="toggleAccordion(this)" aria-expanded="false">
+                                 <span>Who I Am</span>
+                                  <span class="accordion-icon transform transition-transform duration-300 ease-out">+</span>
+                             </button>
+                             <div class="accordion-content">
+                                 <p>Hey, I’m Chris. I mess around with code and build stuff like this when I’ve got free time. I’m not trying to be some big developer or run a business or anything like that. I just like making fun things that work. Brokie Casino started as a little side project and turned into something I actually enjoyed using, so I figured I’d share it. Hope you’re into it. And if not, all good. Maybe next time.</p>
+                             </div>
+                         </div>
+                      </section>
             </main>
 
-        </div> </div> <footer class="bg-fluent-bg mt-auto border-t border-fluent-border/30 text-center py-5">
+        </div>
+    </div>
+
+    <footer class="bg-fluent-bg mt-auto border-t border-fluent-border/30 text-center py-5">
         <p class="text-fluent-text-secondary text-sm">Made with <span class="text-fluent-danger animate-pulse">💖</span> by Blazinik</p>
     </footer>
 
