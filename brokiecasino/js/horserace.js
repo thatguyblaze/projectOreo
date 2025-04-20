@@ -15,7 +15,7 @@ let horseElements = []; // Array to store references to horse div elements
 let horseLaneElements = []; // Array to store references to lane div elements
 const NUM_HORSES = 6; // Number of horses in the race
 const HORSE_NAMES = ["Panda", "Quinton", "Blaze", "Matt", "Liqhtu", "Joker"]; // Names for the horses
-const HORSERACE_WIN_MULTIPLIER = 8; // Payout for winning horse (adjust as needed)
+const HORSERACE_WIN_MULTIPLIER = 12; // Payout for winning horse (adjust as needed)
 const HORSE_COLORS = ['#ef4444', '#f97316', '#3b82f6', '#a855f7', '#10b981', '#eab308']; // red, orange, blue, purple, green, yellow
 let raceFrameCounter = 0; // Counter for trail generation
 
