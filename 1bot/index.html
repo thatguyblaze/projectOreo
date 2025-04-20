@@ -9,313 +9,221 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* === True Black Theme Refinement v2 === */
         :root {
-            --hero-bg-color: #000000;
-            --feature-bg-color: #000000;
-            --footer-bg-color: #0a0a0a;
-            --text-primary: #f0f0f0;
-            --text-secondary: #a0a0a0;
-            --text-tertiary: #9ca3af;
-            --accent-start: #4f46e5; /* Indigo */
-            --accent-end: #06b6d4;   /* Cyan */
-            --button-bg: #2563eb;    /* Blue-600 */
-            --button-hover-bg: #1d4ed8; /* Blue-700 */
-            --icon-wrapper-bg: rgba(255, 255, 255, 0.05);
-            --feature-hover-bg: rgba(255, 255, 255, 0.05);
+            --bg-primary: #000000; /* True black */
+            --bg-secondary: #101010; /* Very dark gray */
+            --bg-tertiary: #1d1d1d; /* Slightly lighter dark gray */
+            --text-primary: #f5f5f5;
+            --text-secondary: #d4d4d4;
+            --text-tertiary: #a3a3a3;
+            --accent-start: #6366f1; /* Indigo-500 */
+            --accent-end: #22d3ee;   /* Cyan-400 */
+            --button-bg: #4f46e5;    /* Indigo-600 */
+            --button-hover-bg: #4338ca; /* Indigo-700 */
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover-color: rgba(255, 255, 255, 0.15);
+            --grid-line-color: rgba(255, 255, 255, 0.02);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--hero-bg-color);
+            background-color: var(--bg-primary);
             color: var(--text-primary);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             position: relative;
-            z-index: 1;
         }
 
-        /* Subtle Animated Background (Main Body) */
+        /* Layered Animated Background (Grid + Gradient) - MORE SUBTLE */
         body::before {
             content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; inset: 0; width: 100%; height: 100%;
             z-index: -1;
-            background:
-                radial-gradient(ellipse at 70% 30%, rgba(79, 70, 229, 0.08) 0%, transparent 50%), /* Even less intense */
-                radial-gradient(ellipse at 30% 70%, rgba(6, 182, 212, 0.08) 0%, transparent 50%); /* Even less intense */
-            background-size: 300% 300%;
-            opacity: 0.6; /* Slightly less opacity */
-            animation: subtle-background-shift 60s linear infinite alternate; /* Slower */
-            will-change: background-position;
+            background-image:
+                linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px),
+                radial-gradient(ellipse 100% 100% at 80% 20%, rgba(79, 70, 229, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 100% at 20% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+            background-size: 80px 80px, 80px 80px, 400% 400%, 400% 400%;
+            background-position: 0 0, 0 0, 50% 50%, 50% 50%;
+            opacity: 0.5;
+            animation:
+                body-grid-scroll 35s linear infinite,
+                body-gradient-shift 80s linear infinite alternate;
+            will-change: background-position, opacity;
+            background-blend-mode: screen;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        html { scroll-behavior: smooth; }
 
         /* === Animations & Transitions === */
-        @keyframes gradient-shift { /* For gradient text */
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes subtle-background-shift { /* For body::before */
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
-        }
-        @keyframes subtle-pulse { /* For CTA button */
-            0%, 100% { transform: scale(1); box-shadow: none; }
-            50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(37, 99, 235, 0.25); } /* Subtler glow */
-        }
-        @keyframes subtle-grid-scroll { /* For hero background pattern */
-             0% { background-position: 0 0; }
-             100% { background-position: 60px 60px; } /* Slower scroll */
-        }
+        @keyframes gradient-shift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes body-grid-scroll { 0% { background-position: 0 0, 0 0, 50% 50%, 50% 50%; } 100% { background-position: 160px 160px, 160px 160px, 50% 50%, 50% 50%; } }
+        @keyframes body-gradient-shift { 0% { background-position: 0 0, 0 0, 0% 0%, 100% 100%; } 100% { background-position: 0 0, 0 0, 100% 100%, 0% 0%; } }
+        @keyframes rotate-3d { from { transform: rotateY(0deg) rotateX(5deg) rotateZ(-5deg); } to { transform: rotateY(360deg) rotateX(5deg) rotateZ(-5deg); } }
 
-
-        /* Base class for entrance animations */
-        .animate-on-scroll {
-            opacity: 0;
-            transition: opacity 1s ease-out, transform 1s ease-out;
-        }
-        .fade-in-up { transform: translateY(50px); } /* Slightly less travel */
-        .scale-in { transform: scale(0.9); } /* Start less small */
-
-        .animate-on-scroll.visible {
-            opacity: 1;
-            transform: translate(0, 0) scale(1);
-        }
-
+        .animate-on-scroll { opacity: 0; transition: opacity 1s cubic-bezier(0.165, 0.84, 0.44, 1), transform 1s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        .fade-in { transform: translateY(20px); }
+        .scale-in { transform: scale(0.95); }
+        .animate-on-scroll.visible { opacity: 1; transform: translate(0, 0) scale(1); }
 
         /* === Elements === */
-        .gradient-text {
-            background: linear-gradient(90deg, var(--accent-start), var(--accent-end), var(--accent-start));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: gradient-shift 7s linear infinite; /* Slower gradient shift */
-        }
+        .gradient-text { background: linear-gradient(90deg, var(--accent-start), var(--accent-end), var(--accent-start)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-fill-color: transparent; background-size: 200% auto; animation: gradient-shift 8s linear infinite; }
+        .cta-button { background: linear-gradient(90deg, var(--accent-start), var(--accent-end)); color: #ffffff; border-radius: 9999px; padding: 14px 32px; font-weight: 600; font-size: 1.05rem; will-change: transform, box-shadow; transition: transform 0.2s ease, box-shadow 0.2s ease; display: inline-block; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); background-size: 200% auto; }
+        .cta-button:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3); }
+        .cta-button:focus { outline: 2px solid var(--accent-end); outline-offset: 3px; }
 
-        .cta-button {
-            background-color: var(--button-bg);
-            color: #ffffff;
-            border-radius: 9999px;
-            padding: 12px 30px;
-            font-weight: 600;
-            font-size: 1.05rem;
-            will-change: transform, background-color, box-shadow;
-            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            display: inline-block;
-            box-shadow: none;
-            animation: subtle-pulse 3.5s infinite ease-in-out 1.8s; /* Slower pulse, later start */
-        }
-        .cta-button:hover {
-            background-color: var(--button-hover-bg);
-            transform: scale(1.05);
-            animation-play-state: paused; box-shadow: none;
-        }
-         .cta-button:focus {
-             outline: 2px solid #60a5fa; outline-offset: 2px;
-             animation-play-state: paused;
-        }
-        .footer-cta { padding: 10px 24px; font-size: 1rem; }
+        /* Feature Blocks */
+        .feature-block { background-color: transparent; border: 1px solid var(--border-color); border-radius: 18px; padding: 2rem; text-align: center; will-change: transform, box-shadow, border-color, background-color; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease; position: relative; overflow: hidden; }
+        .feature-block:hover { transform: translateY(-8px); border-color: var(--border-hover-color); background-color: var(--bg-secondary); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25); }
+        .feature-icon-wrapper { margin-bottom: 1.25rem; display: inline-flex; padding: 16px; background-color: var(--bg-secondary); /* Darker */ border-radius: 16px; transition: background-color 0.3s ease, transform 0.3s ease; }
+        .feature-block:hover .feature-icon-wrapper { background-color: var(--accent-start); transform: scale(1.1); }
+        .feature-icon { width: 36px; height: 36px; stroke-width: 1.5; transition: color 0.3s ease; }
+        .feature-block:hover .feature-icon { color: #ffffff; }
 
+        /* ToS Accordion - Darker Background */
+        details { background-color: var(--bg-primary); /* Use primary (black) */ border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 1rem; transition: background-color 0.2s ease; }
+        details[open] { background-color: var(--bg-secondary); /* Use secondary (v dark gray) */ border-color: var(--border-hover-color); }
+        summary { padding: 1rem 1.5rem; font-weight: 600; cursor: pointer; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center; transition: color 0.2s ease; }
+        summary:hover { color: var(--text-primary); }
+        summary::-webkit-details-marker { display: none; } summary::marker { display: none; }
+        summary::after { content: '+'; font-size: 1.5em; font-weight: 400; color: var(--text-secondary); transition: transform 0.3s ease, color 0.2s ease; }
+        details[open] summary::after { content: '−'; transform: rotate(180deg); }
+        summary:hover::after { color: var(--text-primary); }
+        .tos-content { padding: 0.5rem 1.5rem 1.5rem 1.5rem; border-top: 1px solid var(--border-color); margin-top: 0.5rem; }
+        .tos-content p { margin-bottom: 1em; color: var(--text-secondary); line-height: 1.6; }
+        .tos-content a { color: var(--accent-start); text-decoration: underline; transition: color 0.2s ease; }
+        .tos-content a:hover { color: var(--accent-end); }
+        .tos-content strong { color: var(--text-primary); font-weight: 600; }
 
-        /* Feature Section Enhancements */
-        .feature-item {
-            padding: 2rem;
-            text-align: center;
-            border-radius: 18px;
-            will-change: transform, background-color, box-shadow;
-            transition: transform 0.4s ease, background-color 0.4s ease, box-shadow 0.4s ease;
-            position: relative;
-            overflow: hidden;
-            background-color: transparent;
-            border: 1px solid transparent;
-        }
-        .feature-item:hover {
-             background-color: var(--feature-hover-bg);
-             transform: translateY(-8px) scale(1.02); /* Less lift */
-             border-color: rgba(255, 255, 255, 0.1);
-             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Subtler shadow */
-        }
-        .feature-icon-wrapper {
-            margin-bottom: 1.5rem;
-            display: inline-block;
-            padding: 18px;
-            background-color: var(--icon-wrapper-bg);
-            border-radius: 50%;
-            will-change: transform;
-            transition: transform 0.4s ease, background-color 0.4s ease;
-        }
-        .feature-item:hover .feature-icon-wrapper {
-             transform: scale(1.1);
-             background-color: rgba(255, 255, 255, 0.1);
-        }
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            stroke-width: 1.5;
-        }
+        /* Stats Section */
+        .stat-item { background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 12px; text-align: center; border: 1px solid var(--border-color); }
+        .stat-icon { margin-bottom: 0.75rem; color: var(--accent-end); } /* Use accent color */
+        .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--text-primary); line-height: 1.1; margin-bottom: 0.25rem; }
+        .stat-label { font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+
 
         /* Reduced motion preference */
         @media (prefers-reduced-motion: reduce) {
-          body::before, .hero-background-pattern { animation: none; }
-          .animate-on-scroll, .cta-button, .cta-button:hover, .feature-item:hover, .feature-item:hover .feature-icon-wrapper {
-            transition: none; transform: none !important; scale: none; animation: none;
-          }
+          body::before { animation: none !important; }
+          .hero-visual-shape { animation: none !important; }
+          .animate-on-scroll, .cta-button:hover, .feature-block:hover, .feature-block:hover .feature-icon-wrapper { transition: none; transform: none !important; scale: none; animation: none; }
           .gradient-text { animation: none; background-size: auto; background-position: default; }
           html { scroll-behavior: auto; }
+          details summary::after { transition: none; transform: none !important; }
         }
 
-        /* Footer adjustments */
-        footer {
-            background-color: var(--footer-bg-color);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        /* Footer - Darker Background */
+        footer { background-color: var(--bg-primary); /* Use primary (black) */ border-top: 1px solid var(--border-color); }
 
         /* === Typography Hierarchy === */
-        .hero-title { /* REDUCED title size */
-             /* Min 4rem, scales 10vw, Max 10rem */
-             font-size: clamp(4rem, 10vw, 10rem); /* Reduced max and vw */
-             line-height: 1; /* Adjusted line height */
-             font-weight: 800;
-             letter-spacing: -0.03em; /* Adjusted spacing */
-             color: #ffffff;
-        }
-
-        .hero-subtitle { /* Adjusted size */
-            font-size: 1.5rem; /* Slightly smaller base */
-            line-height: 1.45;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-         @media (min-width: 768px) { .hero-subtitle { font-size: 1.9rem; } } /* Adjusted */
-
-         .hero-description { /* Adjusted size */
-             font-size: 1.1rem; /* Slightly smaller base */
-             line-height: 1.7;
-             color: var(--text-secondary);
-             max-width: 60ch;
-        }
-         @media (min-width: 768px) { .hero-description { font-size: 1.2rem; } } /* Adjusted */
-
-
-         .section-title {
-             font-size: 2.5rem; line-height: 1.2; margin-bottom: 5rem;
-             font-weight: 700; color: var(--text-primary);
-         }
-          @media (min-width: 768px) { .section-title { font-size: 3.25rem; } }
-          @media (min-width: 1024px) { .section-title { font-size: 3.75rem; } }
-
-        h3 { /* Feature Titles */
-            font-size: 1.4rem;
-            font-weight: 600; color: var(--text-primary);
-            margin-bottom: 0.8rem;
-        }
-
+        .hero-title { font-size: clamp(4rem, 10vw, 9rem); line-height: 1.05; font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary); }
+        .hero-subtitle { font-size: clamp(1.3rem, 3vw, 1.6rem); line-height: 1.5; font-weight: 500; color: var(--text-secondary); max-width: 50ch; margin-left: auto; margin-right: auto; }
+        .hero-description { font-size: clamp(1rem, 2.2vw, 1.15rem); line-height: 1.7; color: var(--text-secondary); max-width: 55ch; margin-left: auto; margin-right: auto; }
+        .section-title { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.2; margin-bottom: 4.5rem; font-weight: 700; color: var(--text-primary); }
+        h3 { font-size: 1.3rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem; }
         p { color: var(--text-secondary); line-height: 1.7; }
-        .feature-description { font-size: 1rem; color: var(--text-tertiary); }
-
-        footer p, footer a { color: var(--text-tertiary); font-size: 0.9rem; }
+        .feature-description { font-size: 0.95rem; color: var(--text-tertiary); }
+        footer p, footer a { color: var(--text-tertiary); font-size: 0.875rem; }
         footer a:hover { color: var(--text-primary); }
-        .footer-heading {
-             font-size: 1.1rem; font-weight: 600;
-             color: var(--text-primary); margin-bottom: 1.5rem;
-         }
+        .footer-heading { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1.5rem; }
 
-         /* Hero Background Pattern */
-         .hero-background-pattern {
-             position: absolute;
-             top: 0; left: 0; right: 0; bottom: 0;
-             width: 100%; height: 100%;
-             overflow: hidden;
-             z-index: -1;
-             background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), /* Fainter grid */
-                               linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px); /* Fainter grid */
-             background-size: 60px 60px; /* Larger grid squares */
-             opacity: 0.4; /* Less opacity */
-             animation: subtle-grid-scroll 15s linear infinite; /* Slower scroll */
-             will-change: background-position;
-         }
+         /* Hero Visual - Rotating Number 1 Outline */
+         .hero-visual-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; perspective: 1200px; z-index: -1; overflow: hidden; }
+         .hero-visual-shape { width: clamp(200px, 35vw, 350px); height: auto; position: relative; transform-style: preserve-3d; animation: rotate-3d 40s linear infinite; opacity: 0.2; }
+         .hero-visual-shape svg { width: 100%; height: 100%; display: block; }
+         .svg-outline-1 { fill: none; stroke: var(--accent-end); stroke-width: 8; /* Slightly thicker */ stroke-linecap: round; stroke-linejoin: round; }
 
     </style>
 </head>
 <body class="relative">
 
-    <section id="home" class="relative py-40 md:py-60 lg:py-64 text-center overflow-hidden"> <div class="hero-background-pattern"></div>
+    <section id="home" class="relative min-h-screen flex items-center justify-center text-center overflow-hidden py-20">
+        <div class="hero-visual-container animate-on-scroll scale-in" style="transition-delay: 0.5s;">
+            <div class="hero-visual-shape">
+                <svg viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg" class="svg-outline-1">
+                    <path d="M25 15 L15 25 L15 90 H35 L35 15 L25 15 Z" />
+                </svg>
+            </div>
+        </div>
 
         <div class="container mx-auto px-6 relative z-10">
-            <h1 class="hero-title mb-5 animate-on-scroll scale-in" style="transition-delay: 0.1s;">
-                Meet <span class="gradient-text">1Bot</span>.
-            </h1>
-             <h2 class="hero-subtitle mb-10 animate-on-scroll fade-in-up" style="transition-delay: 0.4s;">
-                One bot, several uses.
-            </h2>
-            <p class="hero-description mx-auto mb-12 animate-on-scroll fade-in-up" style="transition-delay: 0.7s;">
-                1Bot is a fully free multipurpose Discord bot that lets you get things done without leaving Discord.
-            </p>
-            <a href="#" class="cta-button text-lg animate-on-scroll fade-in-up" style="transition-delay: 1s;">
-                Add 1Bot
-            </a>
-        </div>
-    </section>
-
-    <section id="features" class="py-28 md:py-40 bg-feature-bg-color">
-        <div class="container mx-auto px-6">
-            <h2 class="section-title text-center animate-on-scroll fade-in-up">What makes <span class="gradient-text">1Bot</span> special?</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20 max-w-5xl mx-auto">
-                 <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.2s;">
-                    <div class="feature-icon-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-unlock feature-icon text-sky-400"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
-                    </div>
-                    <h3>Freedom</h3>
-                    <p class="feature-description">Completely free to use for everyone. No paywalls or restrictions. Not only free of charge, but also free as in freedom - it's <a href="#" class="text-blue-400 hover:text-blue-300 underline">open source!</a></p>
-                </div>
-
-                <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.4s;">
-                     <div class="feature-icon-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-layout-grid feature-icon text-purple-400"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-                    </div>
-                    <h3>Multipurpose</h3>
-                    <p class="feature-description">Wide variety of features. Whether it is poking fun at friends, managing permissions, or getting lyrics - 1Bot is here to help.</p>
-                </div>
-
-                <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.6s;">
-                     <div class="feature-icon-wrapper">
-                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-zap feature-icon text-green-400"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    </div>
-                    <h3>Easy to use</h3>
-                    <p class="feature-description">Uses Discord's latest Application Command features, including Slash Commands and Context Menus. No more memorising commands.</p>
-                </div>
-
-                 <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.8s;">
-                     <div class="feature-icon-wrapper">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-globe feature-icon text-pink-400"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                    </div>
-                    <h3>Use Anywhere</h3>
-                    <p class="feature-description">Supports user installation - add it to your account and use it anywhere, including DMs and group chats. (Moderator commands excluded).</p>
+             <div class="max-w-3xl mx-auto">
+                <div class="animate-on-scroll fade-in" style="transition-delay: 0.1s;">
+                    <h1 class="hero-title mb-5"> Meet <span class="gradient-text">1Bot</span>. </h1>
+                    <h2 class="hero-subtitle mb-6"> One bot, several uses. </h2>
+                    <p class="hero-description mb-12"> 1Bot is a fully free multipurpose Discord bot that lets you get things done without leaving Discord. </p>
+                    <a href="#" class="cta-button"> Add 1Bot </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="py-20 bg-footer-bg-color">
-        <div class="container mx-auto px-6 text-center">
-             <p class="footer-heading animate-on-scroll fade-in-up" style="transition-delay: 0.2s;">1Bot - One bot, several uses.</p>
-             <div class="mb-10 animate-on-scroll fade-in-up" style="transition-delay: 0.4s;">
-                <a href="#" class="cta-button footer-cta">
-                    Add 1Bot Now
-                </a>
+    <section id="features" class="py-24 md:py-32 bg-bg-primary relative z-10">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-center animate-on-scroll fade-in">What makes <span class="gradient-text">1Bot</span> special?</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
+                 <div class="feature-block animate-on-scroll fade-in" style="transition-delay: 0.1s;"> <div class="feature-icon-wrapper"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-unlock feature-icon text-sky-400"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg> </div> <h3>Freedom</h3> <p class="feature-description">Completely free & <a href="#" class="text-blue-400 hover:text-blue-300 underline">open source!</a> No paywalls or restrictions.</p> </div>
+                <div class="feature-block animate-on-scroll fade-in" style="transition-delay: 0.2s;"> <div class="feature-icon-wrapper"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-layout-grid feature-icon text-purple-400"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg> </div> <h3>Multipurpose</h3> <p class="feature-description">Wide variety of features, from server management to fun commands and utilities.</p> </div>
+                <div class="feature-block animate-on-scroll fade-in" style="transition-delay: 0.3s;"> <div class="feature-icon-wrapper"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-zap feature-icon text-green-400"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> </div> <h3>Easy to use</h3> <p class="feature-description">Utilizes modern Slash Commands & Context Menus. No need to memorize commands.</p> </div>
+                <div class="feature-block animate-on-scroll fade-in" style="transition-delay: 0.4s;"> <div class="feature-icon-wrapper"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-globe feature-icon text-pink-400"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> </div> <h3>Use Anywhere</h3> <p class="feature-description">Supports user installation for use in DMs & group chats (mod commands excluded).</p> </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="stats" class="py-20 md:py-28 bg-bg-secondary relative z-10">
+        <div class="container mx-auto px-6">
+             <h2 class="section-title text-center mb-12 animate-on-scroll fade-in">Trusted by Communities</h2>
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                 <div class="stat-item animate-on-scroll fade-in" style="transition-delay: 0.1s;">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-server stat-icon mx-auto"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+                     <div class="stat-number">10+</div>
+                     <div class="stat-label">Servers Active</div>
+                 </div>
+                 <div class="stat-item animate-on-scroll fade-in" style="transition-delay: 0.2s;">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users stat-icon mx-auto"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                     <div class="stat-number">15K+</div>
+                     <div class="stat-label">Users Reached</div>
+                 </div>
+                 <div class="stat-item animate-on-scroll fade-in" style="transition-delay: 0.3s;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check stat-icon mx-auto"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                     <div class="stat-number">99.9%</div>
+                     <div class="stat-label">Uptime</div>
+                 </div>
              </div>
-             <div class="mb-8 space-x-6 animate-on-scroll fade-in-up" style="transition-delay: 0.6s;">
-                <a href="#" class="transition duration-200">Terms of Service</a>
+        </div>
+    </section>
+
+    <section id="tos" class="py-20 md:py-28 bg-bg-primary relative z-10"> <div class="container mx-auto px-6 max-w-3xl">
+              <h2 class="section-title text-center mb-10 animate-on-scroll fade-in">Terms of Service</h2>
+              <details class="animate-on-scroll fade-in" style="transition-delay: 0.1s;">
+                  <summary>Read the 1Bot Terms of Service</summary>
+                  <div class="tos-content">
+                      <p><strong>1Bot is an independently run Discord bot which is not affiliated with Discord or any other company.</strong></p>
+                      <p>By using 1Bot, i.e., by using any of its features within Direct Messages or any Discord server, you agree to be bound by these Terms of Service. This applies to all users of 1Bot.</p>
+                      <p><strong>These Terms are an extension of 1Bot's License</strong><br> 1Bot is licensed under the <a href="#" target="_blank" rel="noopener noreferrer">GNU AGPL v3 License</a>. Please read the license to understand your rights and obligations when using 1Bot and its source code.</p>
+                      <p><strong>We may use your feedback and inputs to improve 1Bot</strong><br> If you choose to provide us with feedback about 1Bot in any form (including but not limited to sending a suggestion via Discord, opening pull requests or issues on GitHub), you grant us permission to use your input to improve 1Bot without any payment to you.</p>
+                      <p><strong>We make use of open-source software to develop 1Bot</strong><br> 1Bot itself is <a href="#" target="_blank" rel="noopener noreferrer">open-source on GitHub</a> and is licensed under the GNU AGPL v3 License. We retain all intellectual property rights in 1Bot. To build the bot, we incorporate and make use of third-party software and services.</p>
+                      <p><strong>We are not responsible for content that comes from or is created by third parties</strong><br> 1Bot provides content from various third-party sources. We have no control over said sources and cannot guarantee that the content is accurate, up-to-date, complete, unharmful or appropriate. The list of third-party sources is <a href="#" target="_blank" rel="noopener noreferrer">here</a>.</p>
+                      <p><strong>We have limited liability</strong><br> Please refer to <a href="#" target="_blank" rel="noopener noreferrer">Section 16 of the License</a> for the details on the limitation of liability.</p>
+                      <p><strong>Governing law</strong><br> These Terms shall be governed and construed in accordance with the laws of the Republic of India and the State of Karnataka, without regard to its conflict of law provisions.</p>
+                      <p><strong>These Terms are subject to change</strong><br> We reserve the right to change these Terms without notice.</p>
+                  </div>
+              </details>
+         </div>
+    </section>
+
+    <footer class="py-16 footer-bg-color relative z-10">
+        <div class="container mx-auto px-6 text-center">
+             <p class="footer-heading animate-on-scroll fade-in" style="transition-delay: 0.1s;">1Bot - One bot, several uses.</p>
+             <div class="mb-6 space-x-6 animate-on-scroll fade-in" style="transition-delay: 0.2s;">
+                <a href="#tos" class="transition duration-200">Terms of Service</a>
                 <a href="#" class="transition duration-200">Privacy Policy</a>
                 <a href="#" class="transition duration-200">Source (GitHub)</a>
             </div>
-             <p class="animate-on-scroll fade-in-up" style="transition-delay: 0.8s;">&copy; 2024-present thatjar. Not affiliated with Discord, Inc.</p>
+             <p class="animate-on-scroll fade-in" style="transition-delay: 0.3s;">&copy; 2024-present thatjar. Not affiliated with Discord, Inc.</p>
         </div>
     </footer>
 
@@ -326,36 +234,29 @@
 
         // Function to safely disable animations via CSSOM
         function disableAnimation(selector, animationName) {
-            // ... (disableAnimation function remains the same)
-             try {
+            try {
                 const styleSheets = document.styleSheets;
                 for (let i = 0; i < styleSheets.length; i++) {
-                    // Add check for stylesheet access
                     if (!styleSheets[i].cssRules && !styleSheets[i].rules) continue;
                     const rules = styleSheets[i].cssRules || styleSheets[i].rules;
                     for (let j = 0; j < rules.length; j++) {
-                         // Check if it's a style rule and has the selector/animation name
-                        if (rules[j].type === CSSRule.STYLE_RULE && rules[j].selectorText === selector && rules[j].style.animationName === animationName) {
-                            rules[j].style.animation = 'none';
-                            return; // Stop searching once found and disabled
+                        if (rules[j].type === CSSRule.STYLE_RULE) {
+                           if (rules[j].selectorText === selector && rules[j].style.animationName && rules[j].style.animationName.includes(animationName)) {
+                                rules[j].style.animation = 'none'; return;
+                            }
                         }
                     }
                 }
-            } catch (e) {
-                console.warn("Could not access stylesheet rules, possibly due to CORS or browser restrictions.", e);
-            }
+            } catch (e) { console.warn("Could not access stylesheet rules.", e); }
         }
 
-
-        // Stop pulse animation immediately if motion is reduced
+        // Stop animations if motion is reduced
         if (prefersReducedMotion) {
-            const ctaButtons = document.querySelectorAll('.cta-button');
-            ctaButtons.forEach(button => { button.style.animation = 'none'; });
-            disableAnimation('body::before', 'subtle-background-shift');
-            disableAnimation('.gradient-text', 'gradient-shift');
-            disableAnimation('.hero-background-pattern', 'subtle-grid-scroll'); // Disable grid scroll
+             disableAnimation('body::before', 'body-grid-scroll');
+             disableAnimation('body::before', 'body-gradient-shift');
+             disableAnimation('.hero-visual-shape', 'rotate-3d');
+             disableAnimation('.gradient-text', 'gradient-shift');
         }
-
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -366,12 +267,10 @@
                         entry.target.style.opacity = 1;
                         entry.target.style.transform = 'translate(0, 0) scale(1)';
                     }
-                     observer.unobserve(entry.target); // Unobserve after first intersection
+                     observer.unobserve(entry.target);
                 }
             });
-        }, {
-            threshold: 0.1 // Trigger when 10% is visible
-        });
+        }, { threshold: 0.1 });
 
         animatedElements.forEach(el => {
             if (prefersReducedMotion) {
