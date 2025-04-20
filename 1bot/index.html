@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1Bot - One Bot, Several Uses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* === Apple-Inspired Dark Theme w/ Enhanced Flow & Appeal === */
+        :root {
+            --hero-bg-color: #000000;
+            --feature-bg-color: #000000;
+            --footer-bg-color: #0a0a0a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #9ca3af;
+            --accent-start: #4f46e5; /* Indigo */
+            --accent-end: #06b6d4;   /* Cyan */
+            --button-bg: #2563eb;    /* Blue-600 */
+            --button-hover-bg: #1d4ed8; /* Blue-700 */
+            --icon-wrapper-bg: rgba(255, 255, 255, 0.05);
+            --feature-hover-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--hero-bg-color);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Subtle Animated Background (Main Body) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 70% 30%, rgba(79, 70, 229, 0.1) 0%, transparent 50%), /* Less intense */
+                radial-gradient(ellipse at 30% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 50%); /* Less intense */
+            background-size: 300% 300%; /* Larger size for slower perceived movement */
+            opacity: 0.7;
+            animation: subtle-background-shift 50s linear infinite alternate; /* Slower */
+            will-change: background-position;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* === Animations & Transitions === */
+        @keyframes gradient-shift { /* For gradient text */
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes subtle-background-shift { /* For body::before */
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+        @keyframes subtle-pulse { /* For CTA button */
+            0%, 100% { transform: scale(1); box-shadow: none; }
+            50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(37, 99, 235, 0.3); } /* Adjusted glow */
+        }
+        @keyframes subtle-grid-scroll { /* For hero background pattern */
+             0% { background-position: 0 0; }
+             100% { background-position: 50px 50px; } /* Adjust distance for speed */
+        }
+
+
+        /* Base class for entrance animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transition: opacity 1s ease-out, transform 1s ease-out; /* Smoother duration */
+        }
+        .fade-in-up { transform: translateY(60px); } /* More pronounced */
+        .scale-in { transform: scale(0.8); } /* Start smaller */
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translate(0, 0) scale(1);
+        }
+
+
+        /* === Elements === */
+        .gradient-text {
+            background: linear-gradient(90deg, var(--accent-start), var(--accent-end), var(--accent-start));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: gradient-shift 6s linear infinite;
+        }
+
+        .cta-button {
+            background-color: var(--button-bg);
+            color: #ffffff;
+            border-radius: 9999px;
+            padding: 12px 30px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            will-change: transform, background-color, box-shadow;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-block;
+            box-shadow: none;
+            animation: subtle-pulse 3s infinite ease-in-out 1.5s;
+        }
+        .cta-button:hover {
+            background-color: var(--button-hover-bg);
+            transform: scale(1.05);
+            animation-play-state: paused; box-shadow: none;
+        }
+         .cta-button:focus {
+             outline: 2px solid #60a5fa; outline-offset: 2px;
+             animation-play-state: paused;
+        }
+        .footer-cta { padding: 10px 24px; font-size: 1rem; }
+
+
+        /* Feature Section Enhancements */
+        .feature-item {
+            padding: 2rem; /* More padding */
+            text-align: center;
+            border-radius: 18px; /* Smoother radius */
+            will-change: transform, background-color, box-shadow;
+            transition: transform 0.4s ease, background-color 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            overflow: hidden; /* Needed for potential pseudo-element effects */
+            background-color: transparent; /* Start transparent */
+            border: 1px solid transparent; /* Placeholder for hover border */
+        }
+         /* Adding a subtle glow/border effect on hover */
+        .feature-item:hover {
+             background-color: var(--feature-hover-bg);
+             transform: translateY(-10px) scale(1.02); /* More lift */
+             border-color: rgba(255, 255, 255, 0.1); /* Subtle border */
+             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Soft shadow */
+        }
+        .feature-icon-wrapper {
+            margin-bottom: 1.5rem; /* Increased space */
+            display: inline-block;
+            padding: 18px; /* Larger padding */
+            background-color: var(--icon-wrapper-bg);
+            border-radius: 50%;
+            will-change: transform;
+            transition: transform 0.4s ease, background-color 0.4s ease;
+        }
+        .feature-item:hover .feature-icon-wrapper {
+             transform: scale(1.1); /* Keep scale subtle */
+             background-color: rgba(255, 255, 255, 0.1); /* Slightly brighter */
+        }
+        .feature-icon {
+            width: 40px; /* Larger icon */
+            height: 40px;
+            stroke-width: 1.5;
+        }
+
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+          body::before, .hero-background-pattern { animation: none; }
+          .animate-on-scroll, .cta-button, .cta-button:hover, .feature-item:hover, .feature-item:hover .feature-icon-wrapper {
+            transition: none; transform: none !important; scale: none; animation: none;
+          }
+          .gradient-text { animation: none; background-size: auto; background-position: default; }
+          html { scroll-behavior: auto; }
+        }
+
+        /* Footer adjustments */
+        footer {
+            background-color: var(--footer-bg-color);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* === Typography Hierarchy === */
+        .hero-title { /* Reverted to clamp(), tuned slightly */
+             /* Min 6rem, scales 15vw, Max 16rem */
+             font-size: clamp(6rem, 15vw, 16rem);
+             line-height: 0.9;
+             font-weight: 800;
+             letter-spacing: -0.04em;
+             color: #ffffff;
+        }
+
+        .hero-subtitle { /* Slightly increased size */
+            font-size: 1.6rem;
+            line-height: 1.45;
+            font-weight: 500; /* Medium weight */
+            color: var(--text-secondary); /* Use secondary text color */
+        }
+         @media (min-width: 768px) { .hero-subtitle { font-size: 2rem; } }
+
+         .hero-description { /* Slightly increased size */
+             font-size: 1.15rem;
+             line-height: 1.7;
+             color: var(--text-secondary);
+             max-width: 60ch; /* Slightly narrower */
+        }
+         @media (min-width: 768px) { .hero-description { font-size: 1.3rem; } }
+
+
+         .section-title {
+             font-size: 2.5rem; line-height: 1.2; margin-bottom: 5rem;
+             font-weight: 700; color: var(--text-primary);
+         }
+          @media (min-width: 768px) { .section-title { font-size: 3.25rem; } }
+          @media (min-width: 1024px) { .section-title { font-size: 3.75rem; } }
+
+        h3 { /* Feature Titles */
+            font-size: 1.4rem; /* Larger */
+            font-weight: 600; color: var(--text-primary);
+            margin-bottom: 0.8rem;
+        }
+
+        p { color: var(--text-secondary); line-height: 1.7; }
+        .feature-description { font-size: 1rem; color: var(--text-tertiary); }
+
+        footer p, footer a { color: var(--text-tertiary); font-size: 0.9rem; }
+        footer a:hover { color: var(--text-primary); }
+        .footer-heading {
+             font-size: 1.1rem; font-weight: 600;
+             color: var(--text-primary); margin-bottom: 1.5rem;
+         }
+
+         /* Hero Background Pattern */
+         .hero-background-pattern {
+             position: absolute;
+             top: 0; left: 0; right: 0; bottom: 0;
+             width: 100%; height: 100%;
+             overflow: hidden;
+             z-index: -1; /* Behind hero text, above body::before */
+             /* Subtle grid pattern */
+             background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                               linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+             background-size: 50px 50px; /* Size of grid squares */
+             opacity: 0.5;
+             animation: subtle-grid-scroll 10s linear infinite;
+             will-change: background-position;
+         }
+
+    </style>
+</head>
+<body class="relative">
+
+    <section id="home" class="relative py-40 md:py-60 lg:py-72 text-center overflow-hidden"> <div class="hero-background-pattern"></div>
+
+        <div class="container mx-auto px-6 relative z-10">
+            <h1 class="hero-title mb-5 animate-on-scroll scale-in" style="transition-delay: 0.1s;">
+                Meet <span class="gradient-text">1Bot</span>.
+            </h1>
+             <h2 class="hero-subtitle mb-10 animate-on-scroll fade-in-up" style="transition-delay: 0.4s;">
+                One bot, several uses.
+            </h2>
+            <p class="hero-description mx-auto mb-12 animate-on-scroll fade-in-up" style="transition-delay: 0.7s;">
+                1Bot is a fully free multipurpose Discord bot that lets you get things done without leaving Discord.
+            </p>
+            <a href="#" class="cta-button text-lg animate-on-scroll fade-in-up" style="transition-delay: 1s;">
+                Add 1Bot
+            </a>
+        </div>
+    </section>
+
+    <section id="features" class="py-28 md:py-40 bg-feature-bg-color"> <div class="container mx-auto px-6">
+            <h2 class="section-title text-center animate-on-scroll fade-in-up">What makes <span class="gradient-text">1Bot</span> special?</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20 max-w-5xl mx-auto"> <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.2s;">
+                    <div class="feature-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-unlock feature-icon text-sky-400"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                    </div>
+                    <h3>Freedom</h3>
+                    <p class="feature-description">Completely free to use for everyone. No paywalls or restrictions. Not only free of charge, but also free as in freedom - it's <a href="#" class="text-blue-400 hover:text-blue-300 underline">open source!</a></p>
+                </div>
+
+                <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.4s;">
+                     <div class="feature-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-layout-grid feature-icon text-purple-400"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                    </div>
+                    <h3>Multipurpose</h3>
+                    <p class="feature-description">Wide variety of features. Whether it is poking fun at friends, managing permissions, or getting lyrics - 1Bot is here to help.</p>
+                </div>
+
+                <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.6s;">
+                     <div class="feature-icon-wrapper">
+                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-zap feature-icon text-green-400"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    </div>
+                    <h3>Easy to use</h3>
+                    <p class="feature-description">Uses Discord's latest Application Command features, including Slash Commands and Context Menus. No more memorising commands.</p>
+                </div>
+
+                 <div class="feature-item animate-on-scroll fade-in-up" style="transition-delay: 0.8s;">
+                     <div class="feature-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="lucide lucide-globe feature-icon text-pink-400"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    </div>
+                    <h3>Use Anywhere</h3>
+                    <p class="feature-description">Supports user installation - add it to your account and use it anywhere, including DMs and group chats. (Moderator commands excluded).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 bg-footer-bg-color"> <div class="container mx-auto px-6 text-center">
+             <p class="footer-heading animate-on-scroll fade-in-up" style="transition-delay: 0.2s;">1Bot - One bot, several uses.</p>
+             <div class="mb-10 animate-on-scroll fade-in-up" style="transition-delay: 0.4s;">
+                <a href="#" class="cta-button footer-cta">
+                    Add 1Bot Now
+                </a>
+             </div>
+             <div class="mb-8 space-x-6 animate-on-scroll fade-in-up" style="transition-delay: 0.6s;">
+                <a href="#" class="transition duration-200">Terms of Service</a>
+                <a href="#" class="transition duration-200">Privacy Policy</a>
+                <a href="#" class="transition duration-200">Source (GitHub)</a>
+            </div>
+             <p class="animate-on-scroll fade-in-up" style="transition-delay: 0.8s;">&copy; 2024-present thatjar. Not affiliated with Discord, Inc.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for animations
+        const animatedElements = document.querySelectorAll('.animate-on-scroll');
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Function to safely disable animations via CSSOM
+        function disableAnimation(selector, animationName) {
+            // ... (disableAnimation function remains the same)
+             try {
+                const styleSheets = document.styleSheets;
+                for (let i = 0; i < styleSheets.length; i++) {
+                    // Add check for stylesheet access
+                    if (!styleSheets[i].cssRules && !styleSheets[i].rules) continue;
+                    const rules = styleSheets[i].cssRules || styleSheets[i].rules;
+                    for (let j = 0; j < rules.length; j++) {
+                         // Check if it's a style rule and has the selector/animation name
+                        if (rules[j].type === CSSRule.STYLE_RULE && rules[j].selectorText === selector && rules[j].style.animationName === animationName) {
+                            rules[j].style.animation = 'none';
+                            return; // Stop searching once found and disabled
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not access stylesheet rules, possibly due to CORS or browser restrictions.", e);
+            }
+        }
+
+
+        // Stop pulse animation immediately if motion is reduced
+        if (prefersReducedMotion) {
+            const ctaButtons = document.querySelectorAll('.cta-button');
+            ctaButtons.forEach(button => { button.style.animation = 'none'; });
+            disableAnimation('body::before', 'subtle-background-shift');
+            disableAnimation('.gradient-text', 'gradient-shift');
+            disableAnimation('.hero-background-pattern', 'subtle-grid-scroll'); // Disable grid scroll
+        }
+
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (!prefersReducedMotion) {
+                        entry.target.classList.add('visible');
+                    } else {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translate(0, 0) scale(1)';
+                    }
+                     observer.unobserve(entry.target); // Unobserve after first intersection
+                }
+            });
+        }, {
+            threshold: 0.1 // Trigger when 10% is visible
+        });
+
+        animatedElements.forEach(el => {
+            if (prefersReducedMotion) {
+                el.style.opacity = 1;
+                el.style.transform = 'translate(0, 0) scale(1)';
+            } else {
+                observer.observe(el);
+            }
+        });
+
+    </script>
+</body>
+</html>
