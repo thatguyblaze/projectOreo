@@ -20,7 +20,7 @@ let totalLoanAmount = 0;
 let leaderboard = []; // Array to store { type: 'GameName', win: 150 }
 let totalGain = 0;
 let totalLoss = 0;
-const MAX_LEADERBOARD_ENTRIES = 5;
+const MAX_LEADERBOARD_ENTRIES = 25;
 let animationFrameId = null; // For potential shared animations
 
 // --- Sound State & Management ---
