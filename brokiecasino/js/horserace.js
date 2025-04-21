@@ -17,8 +17,10 @@ let horseLaneElements = []; // Array to store references to lane div elements
 const NUM_HORSES = 6;
 const HORSERACE_WIN_MULTIPLIER = 10; // Adjusted payout multiplier
 const BASE_SPEED_FACTOR = 1.8; // Base speed multiplier for advancement calculation
-const STAMINA_DRAIN_FACTOR = 0.3; // How much stamina affects speed loss over the race
-const CONSISTENCY_FACTOR = 2.0; // How much consistency reduces randomness (higher = less random)
+// --- Balancing Adjustments ---
+const STAMINA_DRAIN_FACTOR = 0.6; // How much stamina affects speed loss over the race
+const CONSISTENCY_FACTOR = 3.0; // How much consistency reduces randomness (higher = less random)
+// --- End Adjustments ---
 
 // --- Horse Data with Attributes ---
 // Attributes:
@@ -45,7 +47,7 @@ const finishLinePos = 25; // Target position (pixels from left edge of track) fo
  * Called by main.js on DOMContentLoaded.
  */
 function initHorserace() {
-    console.log("Initializing Horse Race (Balanced)...");
+    console.log("Initializing Horse Race (Balanced v3 - Stamina Tweak)..."); // Log version
     // Get DOM elements
     horseraceBetInput = document.getElementById('horserace-bet');
     horseraceSelectionContainer = document.getElementById('horserace-selection');
@@ -282,17 +284,22 @@ function startHorserace() {
             let baseAdvancement = horseData.attributes.speed * BASE_SPEED_FACTOR;
 
             // 2. Randomness based on consistency (less consistent = more random range)
-            // Random factor between -1 and 1, scaled by (1 - consistency)
             let randomFactor = (Math.random() - 0.5) * CONSISTENCY_FACTOR * (1 - horseData.attributes.consistency);
             let variedAdvancement = baseAdvancement * (1 + randomFactor);
 
-            // 3. Stamina effect (slows down over race distance)
-            // Calculate race progress (0 to 1)
-            // Use 'pos' (distance from right) relative to trackWidth
-            let raceProgress = Math.max(0, (pos - 10)) / (trackWidth - finishLinePos - 10); // Approximate progress
-            // Stamina reduces the drain effect. Higher stamina means staminaEffect closer to 1.
-            let staminaEffect = 1.0 - (raceProgress * STAMINA_DRAIN_FACTOR * (1.1 - horseData.attributes.stamina)); // Ensure stamina > 0
-            staminaEffect = Math.max(0.5, staminaEffect); // Prevent horse from stopping completely
+            // 3. Stamina effect (slows down over race distance) - NON-LINEAR
+            let raceProgress = Math.max(0, (pos - 10)) / (trackWidth - finishLinePos - 10); // Approximate progress 0 to 1
+
+            // Calculate drain: Use Math.pow on progress for non-linear effect.
+            // Amplify effect based on (1.5 - stamina) - lower stamina = higher multiplier for drain.
+            let staminaAttributeFactor = Math.max(0.1, 1.5 - horseData.attributes.stamina); // Ensure positive factor
+            // Use progress^1.5 - effect accelerates later in the race
+            let drain = Math.pow(raceProgress, 1.5) * STAMINA_DRAIN_FACTOR * staminaAttributeFactor;
+
+            let staminaEffect = 1.0 - drain;
+
+            // Set a floor for the effect to prevent horses stopping completely, but allow significant slowdown.
+            staminaEffect = Math.max(0.35, staminaEffect); // Adjusted floor
 
             // 4. Final advancement for this frame
             const finalAdvancement = Math.max(0.1, variedAdvancement * staminaEffect); // Ensure minimum movement
@@ -307,12 +314,9 @@ function startHorserace() {
                 const trail = document.createElement('div');
                 trail.className = 'horse-trail'; // Class defined in style.css
                 trail.style.backgroundColor = horseData.color;
-                // Position trail slightly behind the horse (adjust based on 'right' style)
-                trail.style.right = `${newPos - 5}px`; // Position relative to lane
-                trail.style.top = '50%'; // Center vertically in lane
-                // Apply animation directly (defined in style.css)
+                trail.style.right = `${newPos - 5}px`;
+                trail.style.top = '50%';
                 horseLaneElements[i].appendChild(trail);
-                // Remove trail after animation ends (matches CSS animation duration)
                 setTimeout(() => trail.remove(), 500);
             }
             // Play step sound less frequently
@@ -322,9 +326,8 @@ function startHorserace() {
             const newLeftPos = trackWidth - newPos - horseWidth;
             if (newLeftPos <= finishLinePos && winner === -1) {
                 winner = i;
-                // Ensure the winning horse is exactly at the finish line visually
                 horseElem.style.right = `${trackWidth - finishLinePos - horseWidth}px`;
-                return trackWidth - finishLinePos - horseWidth; // Return exact finish position
+                return trackWidth - finishLinePos - horseWidth;
             }
 
             return newPos; // Return updated right position
