@@ -3,437 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receipt Builder</title>
+    <title>Your Lodge Name - Freemasons</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Apply monospace font to the receipt preview */
-        .receipt-preview-container {
-            font-family: 'Courier New', Courier, monospace; /* Classic mono font */
-            border: 1px dashed #ccc; /* Dashed border like perforated paper */
-            background-color: #fff;
-            padding: 20px;
-            width: 100%; /* Take full width of its column */
-            max-width: 320px; /* Approx 80mm width for preview */
-            margin: 0 auto; /* Center preview within its column */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        /* Specific print styles */
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-                background-color: #fff;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            /* Hide the builder form and print button container */
-            .builder-form-container, .print-button-container {
-                display: none !important;
-            }
-            /* Ensure only the receipt preview is visible and centered */
-            .receipt-preview-area {
-                width: 100%;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                justify-content: center;
-            }
-            .receipt-preview-container {
-                width: 80mm; /* Standard thermal receipt paper width */
-                margin: 0 auto; /* Center receipt on page */
-                padding: 5mm;
-                box-shadow: none;
-                border: none;
-                max-width: none; /* Remove max-width for print */
-                color: #000 !important; /* Ensure black text */
-            }
-             .receipt-preview-container * {
-                 color: #000 !important;
-             }
-            .receipt-logo img {
-                max-width: 100%;
-                height: auto;
-            }
-             hr {
-                border-top: 1px dashed #000 !important; /* Ensure separators print */
-             }
-        }
-
-        /* General Styles */
+        /* Apply Inter font globally */
         body {
-            background-color: #f3f4f6; /* Light gray background */
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dark background */
+            color: #d1d5db; /* Light text */
         }
-        input, textarea, select {
-            border: 1px solid #d1d5db; /* Gray border */
-            border-radius: 0.375rem; /* Rounded corners */
-            padding: 0.5rem 0.75rem;
+        /* Subtle background pattern (optional) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin-top: 0.25rem;
-            font-size: 0.875rem;
+            height: 100%;
+            background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 60%);
+            opacity: 0.5;
+            z-index: -1;
+            pointer-events: none;
         }
-        label {
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: #374151; /* Dark gray */
+        /* Custom scrollbar for a sleeker look (optional) */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        button {
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            font-weight: 500;
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* Slightly lighter dark */
         }
-        .add-item-btn {
-            background-color: #10b981; /* Emerald green */
-            color: white;
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* Gray */
+            border-radius: 4px;
         }
-        .add-item-btn:hover {
-            background-color: #059669;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* Lighter gray on hover */
         }
-        .remove-item-btn {
-            background-color: #ef4444; /* Red */
-            color: white;
-            padding: 0.25rem 0.5rem; /* Smaller padding */
-            font-size: 0.75rem; /* Smaller font */
-            margin-left: 0.5rem;
+        /* Section heading style */
+        .section-heading {
+            @apply text-3xl font-semibold text-gray-100 mb-6 border-l-4 border-yellow-500 pl-4;
         }
-        .remove-item-btn:hover {
-            background-color: #dc2626;
+        /* Button style */
+        .btn {
+            @apply inline-block bg-yellow-600 text-gray-900 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out;
         }
-        .print-button {
-            background-color: #3b82f6; /* Blue */
-            color: white;
+        /* Navigation link style */
+        .nav-link {
+            @apply text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200;
         }
-        .print-button:hover {
-            background-color: #2563eb;
-        }
-        hr {
-            border-top: 1px dashed #9ca3af; /* Dashed line separator in preview */
-            margin-top: 8px;
-            margin-bottom: 8px;
-        }
-        .item-row {
-            display: grid;
-            grid-template-columns: 3fr 1fr 1fr auto; /* Name, Qty, Price, Remove Btn */
-            gap: 0.5rem;
-            align-items: flex-end; /* Align items to bottom */
-            margin-bottom: 0.5rem;
-        }
-         .item-row label {
-             margin-bottom: 0.1rem; /* Small space below label */
-             display: block; /* Make label block */
-         }
-         .item-row input {
-             margin-top: 0; /* Reset margin for inputs in grid */
-         }
-         /* Ensure preview text sizes match the original */
-        .receipt-preview-container .text-xs { font-size: 0.75rem; line-height: 1rem; }
-        .receipt-preview-container .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-        .receipt-preview-container .font-semibold { font-weight: 600; }
-        .receipt-preview-container .text-center { text-align: center; }
-        .receipt-preview-container .text-right { text-align: right; }
-        .receipt-preview-container .mt-1 { margin-top: 0.25rem; }
-        .receipt-preview-container .mt-2 { margin-top: 0.5rem; }
-        .receipt-preview-container .mt-4 { margin-top: 1rem; }
-        .receipt-preview-container .mb-1 { margin-bottom: 0.25rem; }
-        .receipt-preview-container .mb-2 { margin-bottom: 0.5rem; }
-        .receipt-preview-container .mb-4 { margin-bottom: 1rem; }
-        .receipt-preview-container .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-        .receipt-preview-container .flex { display: flex; }
-        .receipt-preview-container .justify-between { justify-content: space-between; }
-        .receipt-preview-container .items-center { align-items: center; }
-        .receipt-preview-container .receipt-logo img {
-           max-width: 100px; /* Limit logo size on screen */
-           height: auto;
-           margin: 0 auto; /* Center logo */
-           display: block;
+        .nav-link-active {
+            @apply bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium;
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="antialiased">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="builder-form-container bg-white p-6 rounded-lg shadow-md space-y-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Receipt Builder</h2>
-
-            <div class="space-y-3 border p-4 rounded-md">
-                <h3 class="text-lg font-medium text-gray-600">Store Information</h3>
-                <div>
-                    <label for="logo-url">Logo URL:</label>
-                    <input type="url" id="logo-url" placeholder="https://your-logo.com/image.png">
+    <header class="bg-gray-800/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#home" class="flex items-center space-x-2">
+                        <img class="h-10 w-10 rounded-full"
+                             src="https://placehold.co/100x100/111827/FFF?text=L"
+                             alt="Lodge Logo Placeholder"
+                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/111827/FFF?text=Error';">
+                        <span class="text-white font-bold text-xl">Lodge Name</span>
+                    </a>
                 </div>
-                <div>
-                    <label for="company-name">Company Name:</label>
-                    <input type="text" id="company-name" value="Your Company Name">
-                </div>
-                <div>
-                    <label for="address-line1">Address Line 1:</label>
-                    <input type="text" id="address-line1" value="123 Main Street">
-                </div>
-                <div>
-                    <label for="address-line2">Address Line 2 (City, ST ZIP):</label>
-                    <input type="text" id="address-line2" value="Anytown, ST 12345">
-                </div>
-                <div>
-                    <label for="phone">Phone:</label>
-                    <input type="tel" id="phone" value="(123) 456-7890">
-                </div>
-                <div>
-                    <label for="website">Website:</label>
-                    <input type="url" id="website" value="www.yourwebsite.com">
-                </div>
-            </div>
-
-            <div class="space-y-3 border p-4 rounded-md">
-                <h3 class="text-lg font-medium text-gray-600">Transaction Details</h3>
-                 <div>
-                    <label for="receipt-number">Receipt #:</label>
-                    <input type="text" id="receipt-number" value="123456789">
-                </div>
-                 <div>
-                    <label for="cashier">Cashier:</label>
-                    <input type="text" id="cashier" value="Jane D.">
-                </div>
-                 <div>
-                    <label for="terminal">Terminal:</label>
-                    <input type="text" id="terminal" value="01">
-                </div>
-                 <div>
-                    <label for="transaction-date">Date:</label>
-                    <input type="date" id="transaction-date">
-                </div>
-                 <div>
-                    <label for="transaction-time">Time:</label>
-                    <input type="time" id="transaction-time">
-                </div>
-            </div>
-
-            <div class="space-y-3 border p-4 rounded-md">
-                <h3 class="text-lg font-medium text-gray-600">Items</h3>
-                <div id="item-list-input" class="space-y-4">
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link-active">Home</a>
+                        <a href="#about" class="nav-link">About Us</a>
+                        <a href="#history" class="nav-link">History</a>
+                        <a href="#membership" class="nav-link">Membership</a>
+                        <a href="#events" class="nav-link">Events</a>
+                        <a href="#contact" class="nav-link">Contact</a>
                     </div>
-                <button type="button" class="add-item-btn" onclick="addItemInputRow()">+ Add Item</button>
-            </div>
-
-            <div class="space-y-3 border p-4 rounded-md">
-                 <h3 class="text-lg font-medium text-gray-600">Totals & Payment</h3>
-                 <div>
-                     <label for="tax-rate">Tax Rate (%):</label>
-                     <input type="number" id="tax-rate" value="8" step="0.01" min="0">
-                 </div>
-                 <div>
-                     <label for="payment-method">Payment Method:</label>
-                     <input type="text" id="payment-method" value="VISA">
-                 </div>
-                 <div>
-                     <label for="card-number">Card Number (Last 4 Digits):</label>
-                     <input type="text" id="card-number" value="1234" maxlength="4">
-                 </div>
-                  <div>
-                     <label for="amount-paid">Amount Paid:</label>
-                     <input type="number" id="amount-paid" value="0.00" step="0.01" min="0">
-                 </div>
-            </div>
-
-             <div class="space-y-3 border p-4 rounded-md">
-                <h3 class="text-lg font-medium text-gray-600">Footer Message</h3>
-                <div>
-                    <label for="footer-line1">Line 1:</label>
-                    <textarea id="footer-line1" rows="1">Thank you for your business!</textarea>
                 </div>
-                <div>
-                    <label for="footer-line2">Line 2:</label>
-                    <textarea id="footer-line2" rows="1">Returns accepted within 30 days with receipt.</textarea>
-                </div>
-                 <div>
-                    <label for="footer-line3">Line 3:</label>
-                    <textarea id="footer-line3" rows="1">* Have a great day! *</textarea>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobile-menu-button" class="bg-gray-700 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             </div>
+        </nav>
 
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#about" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">About Us</a>
+                <a href="#history" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">History</a>
+                <a href="#membership" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Membership</a>
+                <a href="#events" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Events</a>
+                <a href="#contact" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Contact</a>
+            </div>
         </div>
+    </header>
 
-        <div class="receipt-preview-area sticky top-8 self-start">
-            <div class="receipt-preview-container text-xs">
-                <div class="receipt-logo mb-4">
-                    <img id="preview-logo" src="https://placehold.co/100x50/e2e8f0/333?text=LOGO" alt="Company Logo"
-                         onerror="this.onerror=null; this.src='https://placehold.co/100x50/e2e8f0/333?text=Logo+Error';">
-                </div>
+    <main>
+        <section id="home" class="relative py-24 md:py-32 min-h-[60vh] flex items-center justify-center text-center overflow-hidden">
+             <div class="absolute inset-0 bg-gradient-to-b from-gray-900/50 to-gray-900 z-10"></div>
+             <div class="relative z-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
+                    Welcome to <span class="text-yellow-400">[Your Lodge Name]</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-8">
+                    Building better men through fellowship, truth, and charity.
+                </p>
+                <a href="#about" class="btn">Learn More About Us</a>
+            </div>
+        </section>
 
-                <div class="text-center mb-4">
-                    <p class="font-semibold text-sm" id="preview-company-name">Your Company Name</p>
-                    <p id="preview-address-line1">123 Main Street</p>
-                    <p id="preview-address-line2">Anytown, ST 12345</p>
-                    <p id="preview-phone">Phone: (123) 456-7890</p>
-                    <p id="preview-website">www.yourwebsite.com</p>
-                </div>
-
-                <hr>
-
-                <div class="mb-2">
-                    <p>Date: <span id="preview-date"></span></p>
-                    <p>Time: <span id="preview-time"></span></p>
-                    <p>Receipt #: <span id="preview-receipt-number">123456789</span></p>
-                    <p>Cashier: <span id="preview-cashier">Jane D.</span></p>
-                    <p>Terminal: <span id="preview-terminal">01</span></p>
-                </div>
-
-                <hr>
-
-                <div class="mb-2">
-                    <div class="flex justify-between font-semibold">
-                        <span>Item</span>
-                        <span>Price</span>
+        <section id="about" class="py-16 md:py-24 bg-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-heading text-center md:text-left">About Our Lodge</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <p class="text-lg mb-4">
+                            [Your Lodge Name], chartered in [Year], is a cornerstone of the community located in [City, State]. We are a fraternity of men dedicated to the principles of Brotherly Love, Relief, and Truth.
+                        </p>
+                        <p class="mb-4">
+                            Our members come from diverse backgrounds, united by a shared commitment to self-improvement, supporting one another, and contributing positively to society. We strive to uphold the timeless values and traditions of Freemasonry in a modern world.
+                        </p>
+                        <p>
+                            Explore our website to learn more about our history, activities, and how Freemasonry continues to make a difference in the lives of its members and the community.
+                        </p>
                     </div>
-                    <div id="preview-item-list">
+                    <div class="flex justify-center">
+                         <img class="rounded-lg shadow-xl max-w-md w-full h-auto object-cover"
+                             src="https://placehold.co/600x400/374151/FFF?text=Lodge+Photo"
+                             alt="Placeholder image of the lodge or members"
+                             onerror="this.onerror=null; this.src='https://placehold.co/600x400/374151/FFF?text=Error';">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history" class="py-16 md:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-heading text-center md:text-left">Our Rich History</h2>
+                <p class="text-lg mb-8 max-w-3xl">
+                    Since our founding in [Year], [Your Lodge Name] has played a significant role in [mention local history or contributions]. Discover the milestones and traditions that have shaped our lodge over the decades.
+                </p>
+                <div class="space-y-6">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-yellow-400 mb-2">[Year] - Charter Granted</h3>
+                        <p>Our lodge was officially chartered by the Grand Lodge of [State/Jurisdiction].</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-yellow-400 mb-2">[Significant Year] - Milestone Event</h3>
+                        <p>Description of a key event, building dedication, or achievement.</p>
+                    </div>
+                     <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-yellow-400 mb-2">Present Day</h3>
+                        <p>Continuing our legacy of fraternity and community service.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="membership" class="py-16 md:py-24 bg-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="section-heading justify-center">Becoming a Freemason</h2>
+                 <p class="text-lg mb-8 max-w-3xl mx-auto">
+                    Freemasonry welcomes men of good character who seek self-improvement and wish to be part of a worldwide brotherhood. Membership is open to men aged [Minimum Age, e.g., 18 or 21] who meet the qualifications and standards.
+                </p>
+                <p class="mb-8 max-w-3xl mx-auto">
+                    The path typically begins by expressing interest and getting to know members of the lodge. If you're interested in learning more about joining [Your Lodge Name], we encourage you to reach out.
+                </p>
+                <a href="#contact" class="btn">Inquire About Membership</a>
+            </div>
+        </section>
+
+        <section id="events" class="py-16 md:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="section-heading text-center md:text-left">Upcoming Lodge Events</h2>
+                <p class="text-lg mb-8 max-w-3xl">
+                    Stay informed about our meetings, social gatherings, and community service activities. (Note: Some events may be for members only).
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                        <div class="p-6">
+                            <p class="text-sm text-yellow-400 font-semibold mb-1">[Date, e.g., May 15, 2025]</p>
+                            <h3 class="text-xl font-semibold text-white mb-2">Stated Meeting</h3>
+                            <p class="text-gray-400 text-sm mb-3">Members Only | 7:00 PM</p>
+                            <p class="text-gray-300">Regular lodge business and fellowship.</p>
                         </div>
-                </div>
-
-                <hr>
-
-                <div class="mb-2">
-                    <div class="flex justify-between">
-                        <span>Subtotal:</span>
-                        <span id="preview-subtotal">$0.00</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Tax (<span id="preview-tax-rate">8</span>%):</span>
-                        <span id="preview-tax-amount">$0.00</span>
+                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                        <div class="p-6">
+                            <p class="text-sm text-yellow-400 font-semibold mb-1">[Date, e.g., June 5, 2025]</p>
+                            <h3 class="text-xl font-semibold text-white mb-2">Community Pancake Breakfast</h3>
+                            <p class="text-gray-400 text-sm mb-3">Open to Public | 8:00 AM - 11:00 AM</p>
+                            <p class="text-gray-300">Join us for a delicious breakfast supporting [Charity Name].</p>
+                        </div>
                     </div>
-                    <hr class="my-1">
-                    <div class="flex justify-between font-semibold text-sm">
-                        <span>TOTAL:</span>
-                        <span id="preview-total">$0.00</span>
+                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+                        <div class="p-6">
+                            <p class="text-sm text-yellow-400 font-semibold mb-1">[Date, e.g., June 20, 2025]</p>
+                            <h3 class="text-xl font-semibold text-white mb-2">Guest Speaker Night</h3>
+                             <p class="text-gray-400 text-sm mb-3">Open to Guests | 7:30 PM</p>
+                            <p class="text-gray-300">An informative talk on [Topic]. RSVP required.</p>
+                        </div>
                     </div>
-                </div>
-
-                <hr>
-
-                <div class="mb-4">
-                     <div class="flex justify-between">
-                        <span>Payment Method:</span>
-                        <span id="preview-payment-method">VISA</span>
-                    </div>
-                     <div class="flex justify-between">
-                        <span>Card Number:</span>
-                        <span id="preview-card-number">**** **** **** 1234</span>
-                    </div>
-                     <div class="flex justify-between">
-                        <span>Amount Paid:</span>
-                        <span id="preview-amount-paid">$0.00</span>
-                    </div>
-                     <div class="flex justify-between">
-                        <span>Change Due:</span>
-                        <span id="preview-change-due">$0.00</span>
-                    </div>
-                </div>
-
-                <hr>
-
-                <div class="text-center mt-4">
-                    <p id="preview-footer-line1">Thank you for your business!</p>
-                    <p id="preview-footer-line2">Returns accepted within 30 days with receipt.</p>
-                    <p class="mt-2" id="preview-footer-line3">* Have a great day! *</p>
                 </div>
             </div>
-             <div class="print-button-container text-center mt-6">
-                <button class="print-button" onclick="window.print()">Print Receipt</button>
+        </section>
+
+        <section id="contact" class="py-16 md:py-24 bg-gray-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                 <h2 class="section-heading text-center">Get In Touch</h2>
+                 <div class="max-w-lg mx-auto">
+                     <p class="text-center text-lg mb-8">
+                         Have questions or wish to inquire about membership? Please use the form below or contact our Lodge Secretary.
+                     </p>
+                     <form action="#" method="POST" class="space-y-6">
+                         <div>
+                             <label for="name" class="block text-sm font-medium text-gray-300">Full Name</label>
+                             <input type="text" name="name" id="name" required class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm text-white">
+                         </div>
+                         <div>
+                             <label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
+                             <input type="email" name="email" id="email" required class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm text-white">
+                         </div>
+                         <div>
+                             <label for="message" class="block text-sm font-medium text-gray-300">Message</label>
+                             <textarea id="message" name="message" rows="4" required class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm text-white"></textarea>
+                         </div>
+                         <div class="text-center">
+                             <button type="submit" class="btn">Send Message</button>
+                         </div>
+                     </form>
+                     <div class="mt-10 text-center text-gray-400">
+                         <p>Or contact the Lodge Secretary directly:</p>
+                         <p>[Secretary Name]</p>
+                         <p><a href="mailto:[secretary_email@example.com]" class="text-yellow-400 hover:text-yellow-300">[secretary_email@example.com]</a></p>
+                         <p>[Phone Number (Optional)]</p>
+                     </div>
+                 </div>
             </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 border-t border-gray-700">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-gray-400">
+            <p>&copy; <span id="current-year"></span> [Your Lodge Name] No. [Lodge Number]. All Rights Reserved.</p>
+            <p class="text-sm mt-2">Meeting Location: [Your Lodge Address]</p>
+            <p class="text-sm mt-2">
+                Proudly part of the <a href="[Grand Lodge URL]" target="_blank" rel="noopener noreferrer" class="text-yellow-500 hover:text-yellow-400">Grand Lodge of [State/Jurisdiction]</a>
+            </p>
         </div>
-    </div>
+    </footer>
 
     <script>
-        // --- DOM Element References ---
-        const elements = {
-            // Inputs
-            logoUrl: document.getElementById('logo-url'),
-            companyName: document.getElementById('company-name'),
-            addressLine1: document.getElementById('address-line1'),
-            addressLine2: document.getElementById('address-line2'),
-            phone: document.getElementById('phone'),
-            website: document.getElementById('website'),
-            receiptNumber: document.getElementById('receipt-number'),
-            cashier: document.getElementById('cashier'),
-            terminal: document.getElementById('terminal'),
-            transactionDate: document.getElementById('transaction-date'),
-            transactionTime: document.getElementById('transaction-time'),
-            itemListInput: document.getElementById('item-list-input'),
-            taxRate: document.getElementById('tax-rate'),
-            paymentMethod: document.getElementById('payment-method'),
-            cardNumber: document.getElementById('card-number'),
-            amountPaid: document.getElementById('amount-paid'),
-            footerLine1: document.getElementById('footer-line1'),
-            footerLine2: document.getElementById('footer-line2'),
-            footerLine3: document.getElementById('footer-line3'),
+        // Mobile Menu Toggle
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = menuButton.querySelector('svg:first-child');
+        const closeIcon = menuButton.querySelector('svg:last-child');
 
-            // Preview Outputs
-            previewLogo: document.getElementById('preview-logo'),
-            previewCompanyName: document.getElementById('preview-company-name'),
-            previewAddress1: document.getElementById('preview-address-line1'),
-            previewAddress2: document.getElementById('preview-address-line2'),
-            previewPhone: document.getElementById('preview-phone'),
-            previewWebsite: document.getElementById('preview-website'),
-            previewDate: document.getElementById('preview-date'),
-            previewTime: document.getElementById('preview-time'),
-            previewReceiptNumber: document.getElementById('preview-receipt-number'),
-            previewCashier: document.getElementById('preview-cashier'),
-            previewTerminal: document.getElementById('preview-terminal'),
-            previewItemList: document.getElementById('preview-item-list'),
-            previewTaxRate: document.getElementById('preview-tax-rate'),
-            previewSubtotal: document.getElementById('preview-subtotal'),
-            previewTaxAmount: document.getElementById('preview-tax-amount'),
-            previewTotal: document.getElementById('preview-total'),
-            previewPaymentMethod: document.getElementById('preview-payment-method'),
-            previewCardNumber: document.getElementById('preview-card-number'),
-            previewAmountPaid: document.getElementById('preview-amount-paid'),
-            previewChangeDue: document.getElementById('preview-change-due'),
-            previewFooter1: document.getElementById('preview-footer-line1'),
-            previewFooter2: document.getElementById('preview-footer-line2'),
-            previewFooter3: document.getElementById('preview-footer-line3'),
-        };
+        menuButton.addEventListener('click', () => {
+            const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+            menuButton.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.classList.toggle('hidden');
+            hamburgerIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
 
-        // --- Utility Functions ---
-        const formatCurrency = (amount) => {
-            return `$${amount.toFixed(2)}`;
-        };
+        // Close mobile menu when a link is clicked
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                menuButton.setAttribute('aria-expanded', 'false');
+                mobileMenu.classList.add('hidden');
+                hamburgerIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            });
+        });
 
-        const formatDate = (dateString) => {
-            if (!dateString) return '';
-            const date = new Date(dateString + 'T00:00:00'); // Ensure correct date parsing
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        };
+        // Smooth Scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // Calculate offset for fixed header
+                    const headerOffset = document.querySelector('header').offsetHeight;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
-         const formatTime = (timeString) => {
-             if (!timeString) return '';
-             // Create a dummy date to parse the time
-             const [hours, minutes] = timeString.split(':');
-             const date = new Date();
-             date.setHours(hours, minutes, 0, 0);
-             return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-         };
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
 
-        // --- Update Functions ---
+        // Update Footer Year
+        document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // Updates the preview based on input values
-        function updatePreview() {
-            // Store Info
-            elements.previewLogo.src = elements.logoUrl.value || 'https://placehold.co/100x50/e2e8f0/333?text=LOGO';
-            elements.previewCompanyName.textContent = elements.companyName.value;
-            elements.previewAddress1.textContent = elements.addressLine1.value;
-            elements.previewAddress2.textContent = elements.addressLine2.value;
-            elements.previewPhone.textContent = `Phone: ${elements.phone.value}`;
-            elements.previewWebsite.textContent = elements.website.value;
+        // Simple Active Nav Link Highlighting on Scroll (Basic)
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('header nav a');
+        const mobileNavLinks = document.querySelectorAll('#mobile-menu a');
 
-            // Transaction Meta
-            elements.previewDate.textContent = formatDate(elements.transactionDate.value);
-            elements.previewTime.textContent = formatTime(elements.transactionTime.value);
-            elements.previewReceiptNumber.textContent = elements.receiptNumber.value;
-            elements.previewCashier.textContent = elements.cashier.value;
-            elements.previewTerminal.textContent = elements.terminal.value;
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const headerHeight = document.querySelector('header').offsetHeight;
 
-            // Payment Info
-            elements.previewPaymentMethod.textContent = elements.paymentMethod.value;
-            const cardNum = elements.cardNumber.value;
-            elements.previewCardNumber.textContent = cardNum ? `**** **** **** ${cardNum}` : '**** **** **** ****';
-            elements.previewTaxRate.textContent = elements.taxRate.
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - headerHeight - 50; // Adjust offset as needed
+                if (pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            // Update desktop nav
+            navLinks.forEach(link => {
+                link.classList.remove('nav-link-active');
+                link.classList.add('nav-link');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('nav-link-active');
+                    link.classList.remove('nav-link');
+     
