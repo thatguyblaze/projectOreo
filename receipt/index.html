@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Apply monospace font to the receipt preview */
+        .receipt-preview-container {
+            font-family: 'Courier New', Courier, monospace; /* Classic mono font */
+            border: 1px dashed #ccc; /* Dashed border like perforated paper */
+            background-color: #fff;
+            padding: 20px;
+            width: 100%; /* Take full width of its column */
+            max-width: 320px; /* Approx 80mm width for preview */
+            margin: 0 auto; /* Center preview within its column */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Specific print styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* Hide the builder form and print button container */
+            .builder-form-container, .print-button-container {
+                display: none !important;
+            }
+            /* Ensure only the receipt preview is visible and centered */
+            .receipt-preview-area {
+                width: 100%;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+            }
+            .receipt-preview-container {
+                width: 80mm; /* Standard thermal receipt paper width */
+                margin: 0 auto; /* Center receipt on page */
+                padding: 5mm;
+                box-shadow: none;
+                border: none;
+                max-width: none; /* Remove max-width for print */
+                color: #000 !important; /* Ensure black text */
+            }
+             .receipt-preview-container * {
+                 color: #000 !important;
+             }
+            .receipt-logo img {
+                max-width: 100%;
+                height: auto;
+            }
+             hr {
+                border-top: 1px dashed #000 !important; /* Ensure separators print */
+             }
+        }
+
+        /* General Styles */
+        body {
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        input, textarea, select {
+            border: 1px solid #d1d5db; /* Gray border */
+            border-radius: 0.375rem; /* Rounded corners */
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+        }
+        label {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #374151; /* Dark gray */
+        }
+        button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 500;
+        }
+        .add-item-btn {
+            background-color: #10b981; /* Emerald green */
+            color: white;
+        }
+        .add-item-btn:hover {
+            background-color: #059669;
+        }
+        .remove-item-btn {
+            background-color: #ef4444; /* Red */
+            color: white;
+            padding: 0.25rem 0.5rem; /* Smaller padding */
+            font-size: 0.75rem; /* Smaller font */
+            margin-left: 0.5rem;
+        }
+        .remove-item-btn:hover {
+            background-color: #dc2626;
+        }
+        .print-button {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+        }
+        .print-button:hover {
+            background-color: #2563eb;
+        }
+        hr {
+            border-top: 1px dashed #9ca3af; /* Dashed line separator in preview */
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .item-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr auto; /* Name, Qty, Price, Remove Btn */
+            gap: 0.5rem;
+            align-items: flex-end; /* Align items to bottom */
+            margin-bottom: 0.5rem;
+        }
+         .item-row label {
+             margin-bottom: 0.1rem; /* Small space below label */
+             display: block; /* Make label block */
+         }
+         .item-row input {
+             margin-top: 0; /* Reset margin for inputs in grid */
+         }
+         /* Ensure preview text sizes match the original */
+        .receipt-preview-container .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .receipt-preview-container .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .receipt-preview-container .font-semibold { font-weight: 600; }
+        .receipt-preview-container .text-center { text-align: center; }
+        .receipt-preview-container .text-right { text-align: right; }
+        .receipt-preview-container .mt-1 { margin-top: 0.25rem; }
+        .receipt-preview-container .mt-2 { margin-top: 0.5rem; }
+        .receipt-preview-container .mt-4 { margin-top: 1rem; }
+        .receipt-preview-container .mb-1 { margin-bottom: 0.25rem; }
+        .receipt-preview-container .mb-2 { margin-bottom: 0.5rem; }
+        .receipt-preview-container .mb-4 { margin-bottom: 1rem; }
+        .receipt-preview-container .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .receipt-preview-container .flex { display: flex; }
+        .receipt-preview-container .justify-between { justify-content: space-between; }
+        .receipt-preview-container .items-center { align-items: center; }
+        .receipt-preview-container .receipt-logo img {
+           max-width: 100px; /* Limit logo size on screen */
+           height: auto;
+           margin: 0 auto; /* Center logo */
+           display: block;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="builder-form-container bg-white p-6 rounded-lg shadow-md space-y-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Receipt Builder</h2>
+
+            <div class="space-y-3 border p-4 rounded-md">
+                <h3 class="text-lg font-medium text-gray-600">Store Information</h3>
+                <div>
+                    <label for="logo-url">Logo URL:</label>
+                    <input type="url" id="logo-url" placeholder="https://your-logo.com/image.png">
+                </div>
+                <div>
+                    <label for="company-name">Company Name:</label>
+                    <input type="text" id="company-name" value="Your Company Name">
+                </div>
+                <div>
+                    <label for="address-line1">Address Line 1:</label>
+                    <input type="text" id="address-line1" value="123 Main Street">
+                </div>
+                <div>
+                    <label for="address-line2">Address Line 2 (City, ST ZIP):</label>
+                    <input type="text" id="address-line2" value="Anytown, ST 12345">
+                </div>
+                <div>
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" value="(123) 456-7890">
+                </div>
+                <div>
+                    <label for="website">Website:</label>
+                    <input type="url" id="website" value="www.yourwebsite.com">
+                </div>
+            </div>
+
+            <div class="space-y-3 border p-4 rounded-md">
+                <h3 class="text-lg font-medium text-gray-600">Transaction Details</h3>
+                 <div>
+                    <label for="receipt-number">Receipt #:</label>
+                    <input type="text" id="receipt-number" value="123456789">
+                </div>
+                 <div>
+                    <label for="cashier">Cashier:</label>
+                    <input type="text" id="cashier" value="Jane D.">
+                </div>
+                 <div>
+                    <label for="terminal">Terminal:</label>
+                    <input type="text" id="terminal" value="01">
+                </div>
+                 <div>
+                    <label for="transaction-date">Date:</label>
+                    <input type="date" id="transaction-date">
+                </div>
+                 <div>
+                    <label for="transaction-time">Time:</label>
+                    <input type="time" id="transaction-time">
+                </div>
+            </div>
+
+            <div class="space-y-3 border p-4 rounded-md">
+                <h3 class="text-lg font-medium text-gray-600">Items</h3>
+                <div id="item-list-input" class="space-y-4">
+                    </div>
+                <button type="button" class="add-item-btn" onclick="addItemInputRow()">+ Add Item</button>
+            </div>
+
+            <div class="space-y-3 border p-4 rounded-md">
+                 <h3 class="text-lg font-medium text-gray-600">Totals & Payment</h3>
+                 <div>
+                     <label for="tax-rate">Tax Rate (%):</label>
+                     <input type="number" id="tax-rate" value="8" step="0.01" min="0">
+                 </div>
+                 <div>
+                     <label for="payment-method">Payment Method:</label>
+                     <input type="text" id="payment-method" value="VISA">
+                 </div>
+                 <div>
+                     <label for="card-number">Card Number (Last 4 Digits):</label>
+                     <input type="text" id="card-number" value="1234" maxlength="4">
+                 </div>
+                  <div>
+                     <label for="amount-paid">Amount Paid:</label>
+                     <input type="number" id="amount-paid" value="0.00" step="0.01" min="0">
+                 </div>
+            </div>
+
+             <div class="space-y-3 border p-4 rounded-md">
+                <h3 class="text-lg font-medium text-gray-600">Footer Message</h3>
+                <div>
+                    <label for="footer-line1">Line 1:</label>
+                    <textarea id="footer-line1" rows="1">Thank you for your business!</textarea>
+                </div>
+                <div>
+                    <label for="footer-line2">Line 2:</label>
+                    <textarea id="footer-line2" rows="1">Returns accepted within 30 days with receipt.</textarea>
+                </div>
+                 <div>
+                    <label for="footer-line3">Line 3:</label>
+                    <textarea id="footer-line3" rows="1">* Have a great day! *</textarea>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="receipt-preview-area sticky top-8 self-start">
+            <div class="receipt-preview-container text-xs">
+                <div class="receipt-logo mb-4">
+                    <img id="preview-logo" src="https://placehold.co/100x50/e2e8f0/333?text=LOGO" alt="Company Logo"
+                         onerror="this.onerror=null; this.src='https://placehold.co/100x50/e2e8f0/333?text=Logo+Error';">
+                </div>
+
+                <div class="text-center mb-4">
+                    <p class="font-semibold text-sm" id="preview-company-name">Your Company Name</p>
+                    <p id="preview-address-line1">123 Main Street</p>
+                    <p id="preview-address-line2">Anytown, ST 12345</p>
+                    <p id="preview-phone">Phone: (123) 456-7890</p>
+                    <p id="preview-website">www.yourwebsite.com</p>
+                </div>
+
+                <hr>
+
+                <div class="mb-2">
+                    <p>Date: <span id="preview-date"></span></p>
+                    <p>Time: <span id="preview-time"></span></p>
+                    <p>Receipt #: <span id="preview-receipt-number">123456789</span></p>
+                    <p>Cashier: <span id="preview-cashier">Jane D.</span></p>
+                    <p>Terminal: <span id="preview-terminal">01</span></p>
+                </div>
+
+                <hr>
+
+                <div class="mb-2">
+                    <div class="flex justify-between font-semibold">
+                        <span>Item</span>
+                        <span>Price</span>
+                    </div>
+                    <div id="preview-item-list">
+                        </div>
+                </div>
+
+                <hr>
+
+                <div class="mb-2">
+                    <div class="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span id="preview-subtotal">$0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Tax (<span id="preview-tax-rate">8</span>%):</span>
+                        <span id="preview-tax-amount">$0.00</span>
+                    </div>
+                    <hr class="my-1">
+                    <div class="flex justify-between font-semibold text-sm">
+                        <span>TOTAL:</span>
+                        <span id="preview-total">$0.00</span>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="mb-4">
+                     <div class="flex justify-between">
+                        <span>Payment Method:</span>
+                        <span id="preview-payment-method">VISA</span>
+                    </div>
+                     <div class="flex justify-between">
+                        <span>Card Number:</span>
+                        <span id="preview-card-number">**** **** **** 1234</span>
+                    </div>
+                     <div class="flex justify-between">
+                        <span>Amount Paid:</span>
+                        <span id="preview-amount-paid">$0.00</span>
+                    </div>
+                     <div class="flex justify-between">
+                        <span>Change Due:</span>
+                        <span id="preview-change-due">$0.00</span>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="text-center mt-4">
+                    <p id="preview-footer-line1">Thank you for your business!</p>
+                    <p id="preview-footer-line2">Returns accepted within 30 days with receipt.</p>
+                    <p class="mt-2" id="preview-footer-line3">* Have a great day! *</p>
+                </div>
+            </div>
+             <div class="print-button-container text-center mt-6">
+                <button class="print-button" onclick="window.print()">Print Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element References ---
+        const elements = {
+            // Inputs
+            logoUrl: document.getElementById('logo-url'),
+            companyName: document.getElementById('company-name'),
+            addressLine1: document.getElementById('address-line1'),
+            addressLine2: document.getElementById('address-line2'),
+            phone: document.getElementById('phone'),
+            website: document.getElementById('website'),
+            receiptNumber: document.getElementById('receipt-number'),
+            cashier: document.getElementById('cashier'),
+            terminal: document.getElementById('terminal'),
+            transactionDate: document.getElementById('transaction-date'),
+            transactionTime: document.getElementById('transaction-time'),
+            itemListInput: document.getElementById('item-list-input'),
+            taxRate: document.getElementById('tax-rate'),
+            paymentMethod: document.getElementById('payment-method'),
+            cardNumber: document.getElementById('card-number'),
+            amountPaid: document.getElementById('amount-paid'),
+            footerLine1: document.getElementById('footer-line1'),
+            footerLine2: document.getElementById('footer-line2'),
+            footerLine3: document.getElementById('footer-line3'),
+
+            // Preview Outputs
+            previewLogo: document.getElementById('preview-logo'),
+            previewCompanyName: document.getElementById('preview-company-name'),
+            previewAddress1: document.getElementById('preview-address-line1'),
+            previewAddress2: document.getElementById('preview-address-line2'),
+            previewPhone: document.getElementById('preview-phone'),
+            previewWebsite: document.getElementById('preview-website'),
+            previewDate: document.getElementById('preview-date'),
+            previewTime: document.getElementById('preview-time'),
+            previewReceiptNumber: document.getElementById('preview-receipt-number'),
+            previewCashier: document.getElementById('preview-cashier'),
+            previewTerminal: document.getElementById('preview-terminal'),
+            previewItemList: document.getElementById('preview-item-list'),
+            previewTaxRate: document.getElementById('preview-tax-rate'),
+            previewSubtotal: document.getElementById('preview-subtotal'),
+            previewTaxAmount: document.getElementById('preview-tax-amount'),
+            previewTotal: document.getElementById('preview-total'),
+            previewPaymentMethod: document.getElementById('preview-payment-method'),
+            previewCardNumber: document.getElementById('preview-card-number'),
+            previewAmountPaid: document.getElementById('preview-amount-paid'),
+            previewChangeDue: document.getElementById('preview-change-due'),
+            previewFooter1: document.getElementById('preview-footer-line1'),
+            previewFooter2: document.getElementById('preview-footer-line2'),
+            previewFooter3: document.getElementById('preview-footer-line3'),
+        };
+
+        // --- Utility Functions ---
+        const formatCurrency = (amount) => {
+            return `$${amount.toFixed(2)}`;
+        };
+
+        const formatDate = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString + 'T00:00:00'); // Ensure correct date parsing
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        };
+
+         const formatTime = (timeString) => {
+             if (!timeString) return '';
+             // Create a dummy date to parse the time
+             const [hours, minutes] = timeString.split(':');
+             const date = new Date();
+             date.setHours(hours, minutes, 0, 0);
+             return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+         };
+
+        // --- Update Functions ---
+
+        // Updates the preview based on input values
+        function updatePreview() {
+            // Store Info
+            elements.previewLogo.src = elements.logoUrl.value || 'https://placehold.co/100x50/e2e8f0/333?text=LOGO';
+            elements.previewCompanyName.textContent = elements.companyName.value;
+            elements.previewAddress1.textContent = elements.addressLine1.value;
+            elements.previewAddress2.textContent = elements.addressLine2.value;
+            elements.previewPhone.textContent = `Phone: ${elements.phone.value}`;
+            elements.previewWebsite.textContent = elements.website.value;
+
+            // Transaction Meta
+            elements.previewDate.textContent = formatDate(elements.transactionDate.value);
+            elements.previewTime.textContent = formatTime(elements.transactionTime.value);
+            elements.previewReceiptNumber.textContent = elements.receiptNumber.value;
+            elements.previewCashier.textContent = elements.cashier.value;
+            elements.previewTerminal.textContent = elements.terminal.value;
+
+            // Payment Info
+            elements.previewPaymentMethod.textContent = elements.paymentMethod.value;
+            const cardNum = elements.cardNumber.value;
+            elements.previewCardNumber.textContent = cardNum ? `**** **** **** ${cardNum}` : '**** **** **** ****';
+            elements.previewTaxRate.textContent = elements.taxRate.
