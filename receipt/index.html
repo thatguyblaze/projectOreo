@@ -3,272 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Echelon - [Evolve // Construct]</title>
+    <title>The Echelon // Signal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Base styles */
+        :root {
+            --bg-primary: #0D1117; /* GitHub dark dim */
+            --bg-secondary: #161B22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-color: #39d353; /* Vibrant Green */
+            --accent-hover: #46f865;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #050505; /* Even darker base */
-            color: #b0b0b0; /* Slightly brighter muted text */
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
             overflow-x: hidden;
         }
 
-        /* Enhanced Glow Effects */
-        .glow-blue {
-            text-shadow: 0 0 5px rgba(0, 191, 255, 0.4), /* Sky Blue */
-                         0 0 10px rgba(0, 191, 255, 0.3),
-                         0 0 15px rgba(0, 191, 255, 0.2);
-        }
-        .glow-magenta {
-             text-shadow: 0 0 5px rgba(255, 0, 255, 0.4), /* Magenta */
-                          0 0 10px rgba(255, 0, 255, 0.3),
-                          0 0 15px rgba(255, 0, 255, 0.2);
-        }
-        .subtle-glow-blue {
-             text-shadow: 0 0 6px rgba(0, 191, 255, 0.3);
-        }
-         .subtle-glow-magenta {
-             text-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+        /* Monospace font for specific elements */
+        .font-mono {
+            font-family: 'Source Code Pro', monospace;
         }
 
-        /* More Vibrant Animated Gradient Border */
-        .gradient-border-animated {
-            position: relative;
+        /* Accent color application */
+        .text-accent { color: var(--accent-color); }
+        .bg-accent { background-color: var(--accent-color); }
+        .border-accent { border-color: var(--accent-color); }
+        .hover\:text-accent:hover { color: var(--accent-hover); }
+        .hover\:bg-accent:hover { background-color: var(--accent-hover); }
+
+        /* Custom scrollbar (optional, for aesthetics) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        /* Glassmorphism effect for cards/sections */
+        .glass-pane {
+            background: rgba(22, 27, 34, 0.6); /* --bg-secondary with transparency */
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
             border-radius: 0.75rem; /* rounded-xl */
-            padding: 2px; /* Slightly thicker border */
-            background: linear-gradient(90deg, #00BFFF, #FF00FF, #00BFFF); /* Blue to Magenta loop */
-            background-size: 300% 100%;
-            animation: gradient-flow 4s linear infinite;
-            box-shadow: 0 0 15px rgba(0, 191, 255, 0.2), 0 0 15px rgba(255, 0, 255, 0.2); /* Add outer glow */
-        }
-        .gradient-border-animated > * {
-            background-color: #111827; /* Inner background (gray-900) */
-            border-radius: calc(0.75rem - 2px); /* Adjust inner radius */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
-        @keyframes gradient-flow {
-            0% { background-position: 150% 0; }
-            100% { background-position: -150% 0; }
+        /* Subtle background pattern */
+        .pattern-bg {
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(to right, var(--border-color) 1px, var(--bg-primary) 1px);
+            background-size: 20px 20px;
+            background-position: center center;
         }
 
-        /* Text Reveal Animation (Unchanged) */
-        .reveal-text {
-            opacity: 0;
-            animation: fadeIn 1.5s ease-out forwards;
+        /* Section title styling */
+        .section-title {
+            @apply font-mono text-2xl font-semibold mb-6 text-accent uppercase tracking-widest;
         }
-        @keyframes fadeIn { to { opacity: 1; } }
-        .reveal-text-delayed { animation-delay: 0.5s; }
-        .reveal-text-more-delayed { animation-delay: 1s; }
 
-        /* Section Header Styling */
-        .section-header {
-            font-weight: 800; /* Slightly bolder */
-            font-size: 2rem; /* text-3xl */
-            letter-spacing: 0.15em; /* Wider spacing */
-            text-transform: uppercase;
-            color: #f0f0f0; /* Brighter text */
-            margin-bottom: 1.5rem; /* mb-6 */
-            text-align: center;
-            /* Alternating glow effect */
-        }
-        #about .section-header { @apply subtle-glow-blue; }
-        #join .section-header { @apply subtle-glow-magenta; }
-        #projects .section-header { @apply subtle-glow-blue; }
-
-
-        /* Enhanced Button Styles */
+        /* Button Styling */
         .btn {
-             @apply inline-block px-8 py-3 font-bold rounded-lg shadow-lg transition duration-300 ease-in-out transform focus:outline-none focus:ring-4;
+            @apply inline-block px-6 py-2 rounded-md font-semibold transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary;
         }
-        .btn-primary {
-             @apply btn bg-gradient-to-r from-sky-500 via-sky-600 to-cyan-500 text-white hover:from-sky-600 hover:to-cyan-600 hover:shadow-cyan-400/40 hover:-translate-y-1 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-gray-900;
+        .btn-accent {
+            @apply btn bg-accent text-bg-primary hover:bg-accent hover:brightness-110 focus:ring-accent;
         }
-        .btn-secondary {
-             @apply btn bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 text-gray-300 hover:from-gray-600 hover:to-gray-600 hover:shadow-gray-500/30 hover:-translate-y-1 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900;
-        }
-         .btn-accent { /* New button style using magenta */
-             @apply btn bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 hover:shadow-fuchsia-500/40 hover:-translate-y-1 focus:ring-fuchsia-400 focus:ring-offset-2 focus:ring-offset-gray-900;
+        .btn-outline {
+            @apply btn border-2 border-accent text-accent hover:bg-accent hover:text-bg-primary focus:ring-accent;
         }
 
-        /* Hero Section Background Animation */
-        .hero-bg {
-            position: relative;
-            background: linear-gradient(160deg, #0a0a0a 0%, #111827 50%, #050505 100%);
-            overflow: hidden; /* Contain the pseudo-element */
+        /* Link styling */
+        a {
+            @apply text-accent hover:underline transition duration-150;
         }
-        .hero-bg::before { /* Subtle animated grid lines */
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%; height: 100%;
-            background-image:
-                linear-gradient(to right, rgba(0, 191, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 191, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            opacity: 0.5;
-            animation: bg-pan 20s linear infinite;
-            z-index: 0; /* Behind content */
+        nav a {
+             @apply text-text-secondary hover:text-text-primary font-medium transition duration-150 no-underline px-3 py-2 rounded-md;
         }
-         @keyframes bg-pan {
-            0% { background-position: 0 0; }
-            100% { background-position: 80px 80px; } /* Pan diagonally */
-        }
-        .hero-content {
-            position: relative; /* Ensure content is above the background */
-            z-index: 1;
+        nav a.active {
+            @apply text-text-primary bg-gray-700/50; /* Subtle active state */
         }
 
-        /* Header Styling */
-         header {
-            background-color: rgba(5, 5, 5, 0.6); /* Darker, slightly less transparent */
-            backdrop-filter: blur(12px); /* Stronger blur */
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Fainter border */
-         }
-         header h1 { @apply subtle-glow-blue; }
-         header nav a { @apply text-gray-400 hover:text-fuchsia-400 transition duration-300 px-3 py-2 rounded-md text-sm font-medium; } /* Added hover color */
-         header nav a:hover { @apply subtle-glow-magenta; }
-
-
-        /* Project Card Hover Effect */
-        .project-card {
-            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+        /* Animation */
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
         }
-        .project-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        .pulse-element {
+            animation: subtle-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        .project-card h4 { @apply subtle-glow-blue; } /* Add glow to project titles */
 
-        /* Footer */
-        footer {
-             border-top: 1px solid rgba(255, 255, 255, 0.1);
-             background-color: #050505;
+        /* Header styling */
+        header {
+            background-color: rgba(13, 17, 23, 0.8); /* --bg-primary with transparency */
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border-color);
         }
 
     </style>
 </head>
-<body class="antialiased">
+<body class="pattern-bg">
 
-    <header class="fixed top-0 left-0 right-0 z-50 p-4">
+    <header class="sticky top-0 z-50 w-full py-3">
         <div class="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
-            <h1 class="text-2xl font-bold text-gray-100">// ECHELON</h1>
-            <nav class="hidden md:flex space-x-2">
-                <a href="#about">Ethos</a>
-                <a href="#join">Engage</a>
-                <a href="#projects">Blueprints</a>
+            <div class="text-xl font-bold font-mono text-accent pulse-element">// ECHELON</div>
+            <nav class="hidden md:flex items-center space-x-2">
+                <a href="#philosophy" class="active">Philosophy</a>
+                <a href="#nexus">Nexus</a>
+                <a href="#connect">Connect</a>
             </nav>
-             <button class="md:hidden text-gray-300 hover:text-white focus:outline-none">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            <button class="md:hidden text-text-secondary hover:text-text-primary focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
         </div>
     </header>
 
-    <section class="min-h-screen flex items-center justify-center text-center hero-bg px-4 pt-20">
-        <div class="hero-content max-w-4xl mx-auto">
-            <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-fuchsia-500 to-sky-400 mb-6 glow-blue reveal-text" style="animation: gradient-flow 6s linear infinite; background-size: 200% auto;">
-                BUILD BEYOND LIMITS.
-            </h2>
-            <p class="text-xl sm:text-2xl text-gray-300 mb-10 reveal-text reveal-text-delayed">A collective for dedicated developers focused on growth, collaboration, and crafting ambitious games.</p>
-            <div class="reveal-text reveal-text-more-delayed space-x-4">
-                <a href="#about" class="btn-primary">Understand Our Ethos</a>
-                 <a href="#join" class="btn-secondary">Explore Engagement</a>
-            </div>
-        </div>
-    </section>
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 
-    <section id="about" class="py-24 md:py-36 bg-gray-900 px-4">
-        <div class="container mx-auto max-w-4xl">
-            <h3 class="section-header">Our Ethos</h3>
-            <div class="gradient-border-animated">
-                 <div class="p-10 md:p-14 rounded-[calc(0.75rem-2px)] text-gray-300 space-y-6 text-lg md:text-xl leading-relaxed">
-                    <p>Potential unrefined is potential wasted. The Echelon is where capable developers converge to sharpen their skills and build something significant, together.</p>
-                    <p>We're driven by two core principles: continuous personal improvement in our craft and the collaborative creation of large-scale games. We share knowledge, challenge assumptions, and push each other to elevate our work.</p>
-                    <p>This isn't a casual forum. We seek individuals ready to contribute, learn, and commit to building impressive projects and a stronger collective.</p>
+        <section class="text-center mb-24 md:mb-32">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">Where <span class="text-accent">Proven Talent</span> Converges.</h1>
+            <p class="text-xl text-text-secondary max-w-3xl mx-auto mb-8">
+                The Echelon is a curated network for accomplished developers. A space for peer-to-peer exchange, ideation, and the genesis of new collaborations.
+            </p>
+            <a href="#philosophy" class="btn-accent text-lg">Explore the Core</a>
+        </section>
+
+        <section id="philosophy" class="mb-20 md:mb-28 scroll-mt-20">
+             <div class="glass-pane p-8 md:p-12">
+                <h2 class="section-title">Philosophy</h2>
+                <div class="grid md:grid-cols-2 gap-8 text-lg text-text-primary">
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Beyond the Basics</h3>
+                        <p class="text-text-secondary">We operate on the assumption of competence. This is a space for those who have already demonstrated skill and are looking for higher-level interaction and challenges.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Mutual Elevation</h3>
+                        <p class="text-text-secondary">Share insights, critique ideas constructively, and discover collaborators who match your drive. Growth here is driven by the collective experience.</p>
+                    </div>
+                     <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Independent Ventures</h3>
+                        <p class="text-text-secondary">The focus isn't one monolithic project, but fostering an environment where members can spark and pursue their own ambitious ventures, potentially finding co-founders or key team members within the network.</p>
+                    </div>
+                     <div>
+                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Curated Community</h3>
+                        <p class="text-text-secondary">Membership is selective to maintain a high signal-to-noise ratio. Contribution and mutual respect are fundamental pillars.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="join" class="py-24 md:py-36 bg-black px-4">
-         <div class="container mx-auto max-w-4xl text-center">
-             <h3 class="section-header">Engage</h3>
-             <p class="text-gray-300 mb-10 max-w-2xl mx-auto text-xl">Joining means commitment. Show us your skills, your drive, and your understanding of collaborative growth.</p>
-             <div class="bg-gray-900 p-10 rounded-xl shadow-2xl border border-gray-700 inline-block max-w-2xl text-left space-y-5 relative overflow-hidden">
-                 <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-fuchsia-500/50 rounded-tl-lg"></div>
-                 <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-fuchsia-500/50 rounded-br-lg"></div>
+        <section id="nexus" class="mb-20 md:mb-28 scroll-mt-20">
+            <h2 class="section-title text-center">The Nexus</h2>
+            <p class="text-center text-text-secondary text-lg mb-12 max-w-2xl mx-auto">A dynamic hub for ideas, discussions, and potential partnerships.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <div class="glass-pane p-6 flex flex-col items-center text-center hover:border-accent transition duration-200">
+                     <svg class="w-12 h-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                    <h3 class="font-semibold text-xl mb-2 text-gray-200">Idea Exchange</h3>
+                    <p class="text-text-secondary text-sm">Dedicated channels for discussing emerging tech, architectural patterns, and project concepts.</p>
+                </div>
+                <div class="glass-pane p-6 flex flex-col items-center text-center hover:border-accent transition duration-200">
+                    <svg class="w-12 h-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                    <h3 class="font-semibold text-xl mb-2 text-gray-200">Project Signals</h3>
+                    <p class="text-text-secondary text-sm">A space to broadcast personal projects seeking feedback or collaborators among peers.</p>
+                </div>
+                <div class="glass-pane p-6 flex flex-col items-center text-center hover:border-accent transition duration-200">
+                     <svg class="w-12 h-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    <h3 class="font-semibold text-xl mb-2 text-gray-200">Curated Resources</h3>
+                    <p class="text-text-secondary text-sm">Access to shared insights, tool recommendations, and best practices distilled by the group.</p>
+                </div>
+            </div>
+        </section>
 
-                <h4 class="text-2xl font-semibold text-gray-100 mb-4 subtle-glow-magenta">Collective Investment:</h4>
-                <p class="text-gray-400 text-lg">The Echelon requires member dues. Transparency is key: these funds are directly reinvested into the group.</p>
-                <p class="text-gray-400 text-lg">Your contribution fuels our collective engine. It pays for shared software licenses, development tools, server costs for our projects, and potentially unique member benefits like custom 'uniform' apparel or resources for our game builds.</p>
-                <p class="text-gray-400 text-lg">This shared investment ensures everyone has skin in the game and benefits from the resources needed to tackle ambitious projects.</p>
-                <p class="text-gray-200 font-semibold mt-6 text-lg">Think you align with our goals?</p>
-                <a href="#" class="btn-accent mt-5 block text-center text-lg">Signal Your Interest</a>
+        <section id="connect" class="text-center scroll-mt-20">
+            <h2 class="section-title">Connect</h2>
+            <p class="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">Entry into The Echelon is based on demonstrated experience and alignment with our collaborative ethos. This ensures a community of peers capable of meaningful contribution.</p>
+             <div class="glass-pane inline-block p-8 text-left max-w-lg">
+                 <h3 class="font-semibold text-xl mb-3 text-gray-200">Express Interest:</h3>
+                 <p class="text-text-secondary mb-5">If you believe your background and goals align with The Echelon, initiate contact. Be prepared to discuss your work and how you envision contributing to the network.</p>
+                 <a href="#" class="btn-outline w-full text-center">Initiate Contact Protocol</a>
+                 <p class="text-xs text-text-secondary mt-4 italic">Note: A nominal membership fee may apply upon acceptance to maintain shared resources and infrastructure.</p>
              </div>
-         </div>
-    </section>
+        </section>
 
-     <section id="projects" class="py-24 md:py-36 bg-gray-900 px-4">
-        <div class="container mx-auto max-w-5xl"> <h3 class="section-header">Blueprints</h3>
-            <p class="text-gray-300 text-center mb-16 text-xl">Current vectors of our collective effort. Primarily focused on challenging game development initiatives.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div class="gradient-border-animated project-card">
-                    <div class="p-8 rounded-[calc(0.75rem-2px)]">
-                        <h4 class="text-2xl font-semibold text-gray-100 mb-3">[Project Chimera]</h4>
-                        <p class="text-fuchsia-400 font-medium mb-3">// COMPLEX SYSTEMS DESIGN //</p>
-                        <p class="text-gray-400 text-lg">Developing a simulation emphasizing emergent AI behavior and intricate world logic. A test of architectural skill.</p>
-                    </div>
-                </div>
-                <div class="gradient-border-animated project-card">
-                     <div class="p-8 rounded-[calc(0.75rem-2px)]">
-                        <h4 class="text-2xl font-semibold text-gray-100 mb-3">[Project Leviathan]</h4>
-                        <p class="text-fuchsia-400 font-medium mb-3">// SCALABLE WORLD INFRASTRUCTURE //</p>
-                        <p class="text-gray-400 text-lg">Building the foundational tech for a persistent online experience. Prioritizing performance and network efficiency.</p>
-                    </div>
-                </div>
-                 </div>
-        </div>
-    </section>
+    </main>
 
-    <footer class="py-10 bg-black border-t border-gray-800 px-4">
-        <div class="container mx-auto text-center text-gray-500">
-            <p class="mb-2 text-sm">&copy; 2025 The Echelon. Commitment Required.</p>
-            <p class="text-xs">// System Offline //</p>
+    <footer class="mt-24 md:mt-32 py-8 border-t border-border-color">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-text-secondary text-sm">
+            <p>&copy; 2025 The Echelon. Signal integrity maintained.</p>
+            <p class="font-mono text-xs mt-1">// END TRANSMISSION //</p>
         </div>
     </footer>
 
     <script>
-        // Basic smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        // Smooth scroll for navigation links
+        document.querySelectorAll('header nav a').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
-                if(targetElement) {
-                    const headerOffset = document.querySelector('header').offsetHeight || 70;
+                if (targetElement) {
+                    // Calculate offset for sticky header
+                    const headerOffset = document.querySelector('header').offsetHeight || 60; // Adjust as needed
                     const elementPosition = targetElement.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                    window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+
+                    // Update active state (simple version)
+                    document.querySelectorAll('header nav a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
                 }
             });
         });
 
-        // Scroll reveal effect
-        const revealElements = document.querySelectorAll('.reveal-text');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationPlayState = 'running';
+         // Update active nav link on scroll (optional, more robust implementation needed for accuracy)
+         // Basic idea:
+         const sections = document.querySelectorAll('section[id]');
+         window.addEventListener('scroll', () => {
+            let current = '';
+            const headerOffset = document.querySelector('header').offsetHeight + 20;
+            sections.forEach( section => {
+                const sectionTop = section.offsetTop - headerOffset;
+                if (pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
                 }
             });
-        }, { threshold: 0.1 });
-        revealElements.forEach(el => {
-             el.style.animationPlayState = 'paused';
-            observer.observe(el);
-        });
+             document.querySelectorAll('header nav a').forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('href') === `#${current}`) {
+                    a.classList.add('active');
+                }
+             });
+             // Default to first link if near top
+             if (pageYOffset < headerOffset * 2 && !current) {
+                 const firstLink = document.querySelector('header nav a');
+                 if(firstLink) firstLink.classList.add('active');
+             }
+         });
+
     </script>
 
 </body>
