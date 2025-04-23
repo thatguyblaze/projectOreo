@@ -3,243 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Everlasting Flame of Blazinik</title>
+    <title>Sector 7-G Reactor Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* bg-gray-900 */
-            color: #f3f4f6; /* text-gray-100 */
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #1a1a1a; /* Dark background */
+            color: #0f0; /* Default glowing green text */
+            overflow: hidden; /* Prevent scrollbars */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        /* Simple fade-in animation */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .control-panel-bg {
+            background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+            border: 2px solid #444;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 0 10px rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 20px;
+            width: 95%;
+            max-width: 1400px; /* Max width for large screens */
+            height: 90vh; /* Limit height */
+            display: flex;
+            flex-direction: column;
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+        .screen {
+            background-color: #0a0f0a; /* Darker screen background */
+            border: 2px solid #3a5a3a;
+            box-shadow: inset 0 0 10px #00ff0030;
+            padding: 10px;
+            overflow-y: auto; /* Scrollable content */
+            border-radius: 5px;
+            color: #0f0; /* Green text */
+            height: 100%; /* Fill available space */
+            font-size: 0.85rem;
+            line-height: 1.3;
+            white-space: pre-wrap; /* Preserve whitespace */
+            word-wrap: break-word;
         }
-        /* Neon glow effect for accents */
-        .neon-glow-teal {
-            text-shadow: 0 0 5px #14b8a6, 0 0 10px #14b8a6, 0 0 15px #14b8a6;
+        .screen::-webkit-scrollbar {
+            width: 8px;
         }
-         .neon-glow-purple {
-            text-shadow: 0 0 5px #9333ea, 0 0 10px #9333ea, 0 0 15px #9333ea;
+        .screen::-webkit-scrollbar-track {
+            background: #1a1a1a;
         }
-        /* Button hover effect */
-        .btn-hover-effect {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        .screen::-webkit-scrollbar-thumb {
+            background-color: #0f0;
+            border-radius: 4px;
+            border: 2px solid #1a1a1a;
         }
-        .btn-hover-effect:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        .flicker {
+            animation: flicker 0.15s infinite alternate;
         }
-        /* Style for the message box */
-        #messageBox {
-            position: fixed;
-            bottom: 20px;
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+        .scanlines::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 3px, 6px 100%;
+            z-index: 2;
+            pointer-events: none;
+            animation: scanline-anim 10s linear infinite;
+        }
+        @keyframes scanline-anim {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100vh; } /* Adjust based on expected height */
+        }
+
+        /* Buttons & Switches */
+        .control-button {
+            background: linear-gradient(145deg, #555, #333);
+            border: 1px solid #777;
+            color: #eee;
+            padding: 8px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+        }
+        .control-button:hover {
+            background: linear-gradient(145deg, #666, #444);
+        }
+        .control-button:active {
+            background: linear-gradient(145deg, #444, #222);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            transform: translateY(1px);
+        }
+        .button-glow-green {
+            box-shadow: 0 0 5px #0f0, 0 0 10px #0f0, inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+        .button-glow-red {
+            background: linear-gradient(145deg, #a00, #600);
+            border-color: #c00;
+            color: #fee;
+            box-shadow: 0 0 8px #f00, 0 0 15px #f00, inset 0 1px 1px rgba(255,255,255,0.2);
+            text-shadow: 0 1px 1px rgba(0,0,0,0.7);
+        }
+        .button-glow-red:hover {
+             background: linear-gradient(145deg, #b00, #700);
+        }
+         .button-glow-red:active {
+             background: linear-gradient(145deg, #800, #500);
+             box-shadow: inset 0 2px 4px rgba(0,0,0,0.7);
+         }
+
+        .switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background-color: #333;
+            border-radius: 15px;
+            border: 1px solid #555;
+            cursor: pointer;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .switch-handle {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(145deg, #aaa, #777);
+            border-radius: 50%;
+            top: 1px;
+            left: 2px;
+            transition: left 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        .switch.on {
+            background-color: #28a745; /* Green when on */
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 8px #28a745;
+        }
+        .switch.on .switch-handle {
+            left: 31px; /* Position for 'on' state */
+            background: linear-gradient(145deg, #eee, #aaa);
+        }
+
+        /* Gauges */
+        .gauge {
+            width: 100px;
+            height: 50px; /* Half circle */
+            border-radius: 50px 50px 0 0;
+            background-color: #ddd;
+            border: 3px solid #555;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.3);
+        }
+        .gauge-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, #ff0000, #ffff00, #00ff00); /* Red to Yellow to Green */
+            transform-origin: bottom center;
+        }
+        .gauge-needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            height: 48px;
+            background-color: #333;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(-90deg); /* Start at left */
+            transition: transform 0.5s ease-out;
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+        .gauge-center {
+            position: absolute;
+            bottom: -3px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 12px 20px;
-            border-radius: 8px;
-            background-color: #4f46e5; /* bg-indigo-600 */
+            width: 8px;
+            height: 8px;
+            background-color: #333;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        /* Blinking Light */
+        .blinking-light {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #ffc107; /* Warning yellow */
+            box-shadow: 0 0 5px #ffc107;
+            animation: blink 1s infinite step-end;
+        }
+        .blinking-light.red {
+             background-color: #dc3545; /* Error red */
+             box-shadow: 0 0 8px #dc3545;
+             animation: blink-fast 0.5s infinite step-end;
+        }
+         .blinking-light.green {
+             background-color: #28a745; /* OK green */
+             box-shadow: 0 0 5px #28a745;
+             animation: none; /* Solid green */
+         }
+        @keyframes blink {
+            50% { background-color: #555; box-shadow: none; }
+        }
+         @keyframes blink-fast {
+            50% { background-color: #555; box-shadow: none; }
+        }
+
+        /* Layout specific */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr; /* Left, Center, Right */
+            grid-template-rows: auto 1fr auto; /* Header, Content, Footer */
+            gap: 15px;
+            height: calc(100% - 60px); /* Adjust based on header/footer */
+            flex-grow: 1;
+        }
+        .header-bar {
+            grid-column: 1 / -1; /* Span all columns */
+            grid-row: 1 / 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #444;
+            margin-bottom: 10px;
+        }
+        .footer-bar {
+            grid-column: 1 / -1; /* Span all columns */
+            grid-row: 3 / 4;
+            padding-top: 10px;
+            border-top: 2px solid #444;
+            margin-top: 10px;
+        }
+        .left-panel { grid-column: 1 / 2; grid-row: 2 / 3; display: flex; flex-direction: column; gap: 15px; }
+        .center-panel { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; flex-direction: column; gap: 15px; }
+        .right-panel { grid-column: 3 / 4; grid-row: 2 / 3; display: flex; flex-direction: column; gap: 15px; }
+
+        /* Utility */
+        .text-glow { text-shadow: 0 0 5px currentColor; }
+        .text-red-glow { color: #f87171; text-shadow: 0 0 8px #f87171; }
+        .text-yellow-glow { color: #facc15; text-shadow: 0 0 8px #facc15; }
+        .text-blue-glow { color: #60a5fa; text-shadow: 0 0 8px #60a5fa; }
+
+        /* Alert Box */
+        #alert-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(220, 53, 69, 0.9); /* Red background */
             color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            padding: 15px 25px;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            max-width: 90%;
+            display: none; /* Hidden by default */
+            font-size: 1.1rem;
             text-align: center;
+            animation: fadeInOut 5s ease-in-out forwards;
         }
-        #messageBox.show {
-            opacity: 1;
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; top: 0px; }
+            10% { opacity: 1; top: 20px; }
+            90% { opacity: 1; top: 20px; }
+            100% { opacity: 0; top: 0px; display: none;}
         }
+
+         /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr; /* Stack columns */
+                grid-template-rows: auto auto auto auto auto; /* Header, Left, Center, Right, Footer */
+                height: auto; /* Allow content to determine height */
+                overflow-y: auto; /* Enable scrolling for the whole grid if needed */
+            }
+            .left-panel { grid-column: 1 / -1; grid-row: 2 / 3; }
+            .center-panel { grid-column: 1 / -1; grid-row: 3 / 4; }
+            .right-panel { grid-column: 1 / -1; grid-row: 4 / 5; }
+            .footer-bar { grid-column: 1 / -1; grid-row: 5 / 6; }
+            .control-panel-bg { height: auto; max-height: 95vh; overflow-y: auto; } /* Allow scrolling on smaller screens */
+             .screen { min-height: 200px; } /* Ensure screens have minimum height */
+        }
+         @media (max-width: 768px) {
+            body { font-size: 0.9rem; }
+            .control-panel-bg { padding: 15px; }
+            .gauge { width: 80px; height: 40px; }
+            .gauge-needle { height: 38px; }
+            .control-button { padding: 6px 12px; font-size: 0.8rem; }
+            .switch { width: 50px; height: 25px; }
+            .switch-handle { width: 21px; height: 21px; }
+            .switch.on .switch-handle { left: 27px; }
+            .blinking-light { width: 12px; height: 12px; }
+            .header-bar h1 { font-size: 1.2rem; }
+        }
+
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 leading-relaxed">
+<body class="flex items-center justify-center min-h-screen">
 
-    <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-teal-400 neon-glow-teal">Temple of Blazinik</h1>
-            <div class="space-x-4">
-                <a href="#lore" class="text-gray-300 hover:text-teal-300 transition duration-300">Lore</a>
-                <a href="#commandments" class="text-gray-300 hover:text-teal-300 transition duration-300">Commandments</a>
-                <a href="#rituals" class="text-gray-300 hover:text-teal-300 transition duration-300">Rituals</a>
-                <a href="#testimonials" class="text-gray-300 hover:text-teal-300 transition duration-300">Testimonials</a>
+    <div id="control-panel" class="control-panel-bg">
+        <div class="header-bar">
+            <h1 class="text-xl lg:text-2xl font-bold text-glow">SECTOR 7-G : REACTOR CONTROL INTERFACE</h1>
+            <div class="flex items-center space-x-4">
+                <span id="system-time" class="text-sm text-blue-400 text-glow">--:--:--</span>
+                <div id="master-warning-light" class="blinking-light green" title="System Status"></div>
+                <button id="audio-toggle" class="control-button text-xs">Enable Audio</button>
             </div>
-        </nav>
-    </header>
-
-    <section class="text-center py-20 px-6 bg-gradient-to-b from-gray-900 to-gray-800">
-        <h2 class="text-5xl font-bold mb-4 text-purple-400 neon-glow-purple">Behold Blazinik!</h2>
-        <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">The Slightly Singed, Ever-Ambivalent Deity of Questionable Miracles and Mild Inconveniences.</p>
-        <div class="space-x-4">
-            <button id="worshipButton" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-md btn-hover-effect">
-                Worship Blazinik
-            </button>
-            <button id="tributeButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md btn-hover-effect">
-                Offer Tribute (Digitally)
-            </button>
         </div>
-    </section>
 
-    <main class="container mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-12">
-
-        <section id="lore" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in">
-            <h3 class="text-3xl font-bold mb-6 text-teal-400 border-b-2 border-teal-500 pb-2">The Divine Lore</h3>
-            <p class="mb-4">In the beginning, there was... well, something. Probably. And then, possibly due to a cosmic clerical error or a particularly potent spicy burrito, Blazinik manifested. Neither benevolent nor malevolent, Blazinik primarily concerns Themself with the proper organization of sock drawers and the precise moment toast becomes *too* brown.</p>
-            <p class="mb-4">Legend speaks of the Great Sneaker Scuffing, where Blazinik mildly smudged the footwear of an unbeliever, and the Murmured Suggestion, where a follower was divinely inspired to switch to decaf. These are the pillars upon which our faith is built (and occasionally leans against).</p>
-            <p>Blazinik's symbol is the Eternal Loading Icon, representing the constant anticipation of something... eventually happening.</p>
-        </section>
-
-        <section id="commandments" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in" style="animation-delay: 0.1s;">
-            <h3 class="text-3xl font-bold mb-6 text-teal-400 border-b-2 border-teal-500 pb-2">The Sacred Commandments</h3>
-            <ul class="list-disc list-inside space-y-3 text-gray-300">
-                <li>Thou shalt not leave one single sock behind in the dryer. It displeases Blazinik (and is just annoying).</li>
-                <li>Thou shalt always pretend to read the Terms and Conditions.</li>
-                <li>Thou shalt acknowledge the awkward silence when someone waves back, but wasn't waving at you.</li>
-                <li>Thou shalt not reheat fish in the office microwave. (This one's actually serious).</li>
-                <li>Thou shalt buffer thy streaming video only at dramatically inconvenient moments.</li>
-                <li>Thou shalt question the necessity of *every* meeting that could have been an email.</li>
-                <li>Thou shalt maintain a healthy suspicion of anyone who *enjoys* assembling flat-pack furniture.</li>
-            </ul>
-        </section>
-
-        <section id="rituals" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in md:col-span-2" style="animation-delay: 0.2s;">
-             <h3 class="text-3xl font-bold mb-6 text-purple-400 border-b-2 border-purple-500 pb-2">Strange Rituals & Practices</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="border border-gray-700 p-4 rounded">
-                    <h4 class="font-semibold text-lg mb-2 text-purple-300">The Ritual of the Unplugged USB</h4>
-                    <p class="text-sm text-gray-400">Before any important task, attempt to plug in a USB device three times. It must be flipped incorrectly the first two times. This honors Blazinik's appreciation for minor technological frustrations.</p>
+        <div class="main-grid">
+            <div class="left-panel">
+                <div class="bg-gray-700 p-3 rounded border border-gray-600 shadow-inner">
+                    <h2 class="text-lg mb-2 text-yellow-400 text-glow border-b border-gray-600 pb-1">SYSTEM STATUS</h2>
+                    <div class="space-y-2 text-sm">
+                        <p>Coolant Flow: <span id="coolant-status" class="text-green-400">NOMINAL</span></p>
+                        <p>Containment Field: <span id="containment-status" class="text-green-400">STABLE</span></p>
+                        <p>Turbine Speed: <span id="turbine-speed" class="text-green-400">7500 RPM</span></p>
+                        <p>Aux Power: <span id="aux-power-status" class="text-red-500">OFFLINE</span></p>
+                    </div>
                 </div>
-                <div class="border border-gray-700 p-4 rounded">
-                    <h4 class="font-semibold text-lg mb-2 text-purple-300">The Chant of the Forgotten Password</h4>
-                     <p class="text-sm text-gray-400">When accessing sacred texts (or your email), loudly recite variations of your pet's name combined with significant dates until access is granted or you are locked out. Both outcomes are acceptable.</p>
-                </div>
-                <div class="border border-gray-700 p-4 rounded">
-                    <h4 class="font-semibold text-lg mb-2 text-purple-300">The Synchronized Screen Refresh</h4>
-                    <p class="text-sm text-gray-400">At precisely 3:33 PM local time, all followers must simultaneously refresh their web browser. The purpose is unknown, but the tradition persists. It might appease Blazinik, or just clear the cache.</p>
+                <div class="bg-gray-700 p-3 rounded border border-gray-600 shadow-inner flex-grow">
+                    <h2 class="text-lg mb-3 text-yellow-400 text-glow border-b border-gray-600 pb-1">CONTROLS</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label for="coolant-switch">Primary Coolant Pump</label>
+                            <div id="coolant-switch" class="switch" data-control="coolant">
+                                <div class="switch-handle"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label for="aux-power-switch">Auxiliary Power</label>
+                            <div id="aux-power-switch" class="switch" data-control="aux-power">
+                                <div class="switch-handle"></div>
+                            </div>
+                        </div>
+                         <div class="flex items-center justify-between">
+                            <label for="venting-switch">Emergency Venting</label>
+                            <div id="venting-switch" class="switch" data-control="venting">
+                                <div class="switch-handle"></div>
+                            </div>
+                        </div>
+                        <button id="reset-alerts-btn" class="control-button w-full mt-4">Reset Alerts</button>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <section id="testimonials" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in md:col-span-2" style="animation-delay: 0.3s;">
-            <h3 class="text-3xl font-bold mb-6 text-teal-400 border-b-2 border-teal-500 pb-2">Words from the Faithful (Probably)</h3>
-            <div class="space-y-6">
-                <blockquote class="border-l-4 border-teal-500 pl-4 italic text-gray-300">
-                    <p>"I offered Blazinik half a slightly stale donut, and the next day, I found a parking spot that was only moderately inconvenient. Coincidence? I think NOT."</p>
-                    <cite class="block text-right not-italic text-sm text-gray-500 mt-2">- Barry B., Devotee</cite>
-                </blockquote>
-                <blockquote class="border-l-4 border-teal-500 pl-4 italic text-gray-300">
-                    <p>"Since worshipping Blazinik, my Wi-Fi drops slightly *less* often during important video calls. It's still annoying, but... progress?"</p>
-                    <cite class="block text-right not-italic text-sm text-gray-500 mt-2">- Brenda P., Hopeful Follower</cite>
-                </blockquote>
-                 <blockquote class="border-l-4 border-teal-500 pl-4 italic text-gray-300">
-                    <p>"I performed the Ritual of the Unplugged USB, and my computer immediately needed to restart for updates. Blazinik works in mysterious, time-consuming ways."</p>
-                    <cite class="block text-right not-italic text-sm text-gray-500 mt-2">- Chad G., Slightly Confused Acolyte</cite>
-                </blockquote>
+            <div class="center-panel">
+                 <div class="bg-gray-800 p-3 rounded border border-gray-600 shadow-inner flex-grow flex flex-col">
+                    <h2 class="text-lg mb-2 text-blue-400 text-glow border-b border-gray-600 pb-1">SYSTEM LOG / COMMAND INPUT</h2>
+                    <div id="log-screen" class="screen scanlines flex-grow mb-3 relative">
+                        </div>
+                     <input type="text" id="command-input" class="w-full p-1 bg-black border border-green-700 text-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500 placeholder-gray-600" placeholder="Enter command... (try 'help')">
+                 </div>
+                 <div class="bg-gray-700 p-3 rounded border border-gray-600 shadow-inner text-center">
+                     <h2 class="text-lg mb-3 text-red-500 text-glow border-b border-gray-600 pb-1">REACTOR CORE</h2>
+                     <button id="initiate-reactor-btn" class="control-button button-glow-red text-lg px-8 py-3">INITIATE REACTOR STARTUP</button>
+                     <p id="reactor-status-msg" class="mt-2 text-yellow-400 text-sm">STATUS: OFFLINE</p>
+                 </div>
             </div>
-        </section>
 
-    </main>
+            <div class="right-panel">
+                <div class="bg-gray-700 p-3 rounded border border-gray-600 shadow-inner">
+                    <h2 class="text-lg mb-3 text-yellow-400 text-glow border-b border-gray-600 pb-1">CORE MONITOR</h2>
+                    <div class="flex justify-around items-center space-x-2">
+                        <div class="text-center">
+                            <div class="gauge mx-auto">
+                                <div class="gauge-fill"></div>
+                                <div id="temp-gauge-needle" class="gauge-needle"></div>
+                                <div class="gauge-center"></div>
+                            </div>
+                            <span class="text-xs mt-1 block">Temperature</span>
+                            <span id="temp-readout" class="text-sm block">25°C</span>
+                        </div>
+                        <div class="text-center">
+                            <div class="gauge mx-auto">
+                                <div class="gauge-fill"></div>
+                                <div id="pressure-gauge-needle" class="gauge-needle"></div>
+                                <div class="gauge-center"></div>
+                            </div>
+                            <span class="text-xs mt-1 block">Pressure</span>
+                             <span id="pressure-readout" class="text-sm block">1 ATM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-3 rounded border border-gray-600 shadow-inner flex-grow flex flex-col">
+                     <h2 class="text-lg mb-2 text-blue-400 text-glow border-b border-gray-600 pb-1">SECURITY FEED</h2>
+                     <div id="camera-feed" class="screen flicker flex-grow relative scanlines bg-black flex items-center justify-center">
+                         <span class="text-gray-500 text-center">FEED OFFLINE<br/>Attempting reconnect...</span>
+                         <img id="feed-image" src="https://placehold.co/300x200/000000/333333?text=STATIC" alt="Security Feed Placeholder" class="absolute inset-0 w-full h-full object-cover opacity-30 hidden" onerror="this.style.display='none'">
+                     </div>
+                </div>
+                 <div class="bg-gray-700 p-3 rounded border border-gray-600 shadow-inner">
+                    <h2 class="text-lg mb-2 text-yellow-400 text-glow border-b border-gray-600 pb-1">WARNING INDICATORS</h2>
+                     <div class="flex justify-around items-center h-10">
+                         <div id="warning-temp" class="blinking-light green" title="Temperature Alert"></div>
+                         <div id="warning-pressure" class="blinking-light green" title="Pressure Alert"></div>
+                         <div id="warning-containment" class="blinking-light green" title="Containment Alert"></div>
+                     </div>
+                 </div>
+            </div>
+        </div>
 
-    <footer class="bg-gray-800 text-center py-6 mt-12 border-t border-gray-700">
-        <p class="text-gray-500">&copy; Eternally Now-ish. All rights reserved (or mildly disregarded) by the Temple of Blazinik.</p>
-        <p class="text-xs text-gray-600 mt-1">This is a satirical website. No actual deities were inconvenienced in its creation.</p>
-    </footer>
+        <div class="footer-bar text-center text-xs text-gray-500">
+            Property of Weyland-Yutani Corp - Unauthorized Access Prohibited - System Build v3.14
+        </div>
+    </div>
 
-    <div id="messageBox"></div>
+    <div id="alert-box">SYSTEM ALERT!</div>
 
     <script>
-        // Get button elements
-        const worshipButton = document.getElementById('worshipButton');
-        const tributeButton = document.getElementById('tributeButton');
-        const messageBox = document.getElementById('messageBox');
-        let messageTimeout; // To handle message display timing
-
-        // Function to show messages
-        function showMessage(text, duration = 3000) {
-            // Clear any existing timeout
-            clearTimeout(messageTimeout);
-
-            messageBox.textContent = text;
-            messageBox.classList.add('show');
-
-            // Set timeout to hide the message
-            messageTimeout = setTimeout(() => {
-                messageBox.classList.remove('show');
-            }, duration);
-        }
-
-        // Add event listener for the Worship button
-        worshipButton.addEventListener('click', () => {
-            const messages = [
-                "Blazinik acknowledges your existence... probably.",
-                "A faint warmth spreads. Or maybe that's just indigestion. Thanks!",
-                "Your devotion has been noted. And filed. Somewhere.",
-                "Blazinik nods, slightly distracted by a passing cloud.",
-                "Worship accepted. Please allow 3-5 business eons for processing."
-            ];
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            showMessage(randomMessage);
-             // Optional: Add a subtle visual effect like a quick button glow
-            worshipButton.classList.add('animate-pulse');
-            setTimeout(() => worshipButton.classList.remove('animate-pulse'), 500);
-        });
-
-        // Add event listener for the Tribute button
-        tributeButton.addEventListener('click', () => {
-             const tributes = [
-                "Blazinik accepts your digital tribute. It will be used for... things.",
-                "Your offering is adequate. The cosmic balance remains... balanced-ish.",
-                "Tribute received! Blazinik might spare your favorite mug today.",
-                "Generous! Blazinik briefly considers performing a minor miracle but decides against it.",
-                "Thank you. Your tribute has been converted to BlazinikCoin (exchange rate may vary wildly)."
-            ];
-            const randomTribute = tributes[Math.floor(Math.random() * tributes.length)];
-            showMessage(randomTribute);
-             // Optional: Add a subtle visual effect
-            tributeButton.classList.add('animate-pulse');
-            setTimeout(() => tributeButton.classList.remove('animate-pulse'), 500);
-        });
-
-        // Smooth scrolling for nav links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                try {
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                } catch (error) {
-                    console.warn("Smooth scroll target not found:", this.getAttribute('href'));
-                }
-            });
-        });
-
-        // Add fade-in effect to sections on scroll (optional enhancement)
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in-visible'); // Use a different class to prevent re-triggering
-                     entry.target.style.opacity = 1;
-                     entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, { threshold: 0.1 }); // Trigger when 10% of the element is visible
-
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = 0; // Start hidden
-            el.style.transform = 'translateY(20px)'; // Start slightly lower
-            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out'; // Smooth transition
-            observer.observe(el);
-        });
-
-    </script>
-
-</body>
-</html>
-
+        // --- DOM Elements ---
+        const logScreen = document.getElementById('log-screen');
+        const commandInput = document.getElementById('command-input');
+        const systemTime = document.getElementById('system-time');
+        const coolantStatus = document.getElementById('coolant-status');
+        const containmentStatus = document.getElementById('containment-status');
+        const turbineSpeed = document.getElementById('turbine-speed');
+        const auxPowerStatus = document.getElementById('aux-power-status');
+        const tempGaugeNeedle = document.getElementById('temp-gauge-needle');
+        const pressureGaugeNeedle = document.getElementById('pressure-gauge-needle');
+        const tempReadout = document.getElementById('temp-readout');
+        const pressureReado
