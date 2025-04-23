@@ -3,381 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECH//ON :: Interface</title>
+    <title>The Everlasting Flame of Blazinik</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-deep: #05080D;      /* Very dark blue */
-            --bg-card: #10141C;      /* Slightly lighter dark blue */
-            --text-primary: #E1E1E6; /* Off-white */
-            --text-secondary: #A8A8B3;/* Light gray */
-            --accent-cyan: #00DFD8;    /* Bright Cyan/Teal */
-            --accent-cyan-dark: #00A8A3;
-            --border-color: rgba(0, 223, 216, 0.15); /* Cyan transparent border */
-            --shadow-color: rgba(0, 223, 216, 0.1);  /* Cyan transparent shadow */
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-deep);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            line-height: 1.6;
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-100 */
         }
-
-        /* Header */
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background-color: rgba(5, 8, 13, 0.8); /* --bg-deep transparent */
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
+        /* Simple fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .header-logo {
-            font-weight: 800;
-            font-size: 1.5rem;
-            letter-spacing: 0.15em;
-            color: var(--text-primary);
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
         }
-        .header-logo span {
-            color: var(--text-secondary);
-            opacity: 0.6;
-            font-weight: 400;
+        /* Neon glow effect for accents */
+        .neon-glow-teal {
+            text-shadow: 0 0 5px #14b8a6, 0 0 10px #14b8a6, 0 0 15px #14b8a6;
         }
-        /* Optional: Simple Nav */
-        .main-nav a {
-            @apply text-text-secondary hover:text-accent-cyan px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+         .neon-glow-purple {
+            text-shadow: 0 0 5px #9333ea, 0 0 10px #9333ea, 0 0 15px #9333ea;
         }
-        .main-nav a.active { /* Example active state */
-            @apply text-accent-cyan;
+        /* Button hover effect */
+        .btn-hover-effect {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
-
-
-        /* Container */
-        .container-main {
-            max-width: 1100px;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 0 1.5rem;
-        }
-
-        /* Section Styling */
-        .content-section {
-            padding: 6rem 0; /* Vertical padding */
-        }
-        .section-heading {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-        .section-title {
-             /* Using clamp for responsive font size */
-            font-size: clamp(1.8rem, 5vw, 2.75rem);
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-        .section-title .highlight {
-            color: var(--accent-cyan);
-        }
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            max-width: 650px;
-            margin: 0 auto;
-            line-height: 1.7;
-        }
-
-        /* Card Styling */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.75rem; /* Gap between cards */
-        }
-        .info-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 2rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            overflow: hidden; /* Ensure pseudo elements don't overflow */
-            position: relative;
-        }
-        /* Subtle animated border highlight on hover */
-        .info-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.5s ease;
-        }
-        .info-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(0, 223, 216, 0.4);
-            box-shadow: 0 10px 25px var(--shadow-color);
-        }
-        .info-card:hover::before {
-            transform: translateX(100%);
-        }
-
-        .card-icon {
-            width: 2.5rem; /* 40px */
-            height: 2.5rem; /* 40px */
-            margin-bottom: 1rem;
-            color: var(--accent-cyan);
-            stroke-width: 1.5; /* Adjust stroke width for line icons */
-        }
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-        .card-text {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* Button */
-        .btn {
-            display: inline-block;
-            font-weight: 500;
-            padding: 0.75rem 1.75rem;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            border: 1px solid transparent;
-        }
-        .btn-accent {
-            background-color: var(--accent-cyan);
-            color: var(--bg-deep);
-            border-color: var(--accent-cyan);
-        }
-        .btn-accent:hover {
-            background-color: var(--accent-cyan-dark);
-            border-color: var(--accent-cyan-dark);
+        .btn-hover-effect:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px var(--shadow-color);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
-        .btn-outline {
-            border-color: var(--border-color);
-            color: var(--accent-cyan);
-        }
-        .btn-outline:hover {
-             background-color: rgba(0, 223, 216, 0.1); /* Subtle cyan background */
-             border-color: var(--accent-cyan);
-             color: var(--accent-cyan);
-             transform: translateY(-2px);
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 4rem; /* Space before footer */
-            padding: 2.5rem 0;
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-        .footer span { /* For the logo slashes */
-             opacity: 0.5;
-        }
-
-        /* Scroll Animations */
-        .fade-in-up {
+        /* Style for the message box */
+        #messageBox {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            transition: opacity 0.5s ease-in-out;
+            max-width: 90%;
+            text-align: center;
         }
-        .fade-in-up.visible {
+        #messageBox.show {
             opacity: 1;
-            transform: translateY(0);
         }
-
-
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 leading-relaxed">
 
-    <header class="header">
-        <div class="container-main flex justify-between items-center">
-            <a href="#" class="header-logo">ECH<span>//</span>ON</a>
-             <nav class="main-nav hidden md:flex space-x-1">
-                <a href="#ethos" class="active">Ethos</a>
-                <a href="#value">Value</a>
-                <a href="#access">Access</a>
-            </nav>
-        </div>
+    <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-teal-400 neon-glow-teal">Temple of Blazinik</h1>
+            <div class="space-x-4">
+                <a href="#lore" class="text-gray-300 hover:text-teal-300 transition duration-300">Lore</a>
+                <a href="#commandments" class="text-gray-300 hover:text-teal-300 transition duration-300">Commandments</a>
+                <a href="#rituals" class="text-gray-300 hover:text-teal-300 transition duration-300">Rituals</a>
+                <a href="#testimonials" class="text-gray-300 hover:text-teal-300 transition duration-300">Testimonials</a>
+            </div>
+        </nav>
     </header>
 
-    <main>
-        <section class="content-section min-h-[70vh] flex items-center text-center">
-            <div class="container-main fade-in-up">
-                <h1 class="text-4xl md:text-6xl font-black mb-4 leading-tight">
-                    Interface <span class="highlight">Activated.</span><br> Network <span class="highlight">Synchronized.</span>
-                </h1>
-                <p class="text-lg md:text-xl text-text-secondary max-w-3xl mx-auto mb-8">
-                    Echelon is the nexus for high-caliber developers seeking to transcend limitations through collaboration and shared intelligence.
-                </p>
-                <a href="#ethos" class="btn btn-accent">Explore Protocol</a>
-            </div>
+    <section class="text-center py-20 px-6 bg-gradient-to-b from-gray-900 to-gray-800">
+        <h2 class="text-5xl font-bold mb-4 text-purple-400 neon-glow-purple">Behold Blazinik!</h2>
+        <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">The Slightly Singed, Ever-Ambivalent Deity of Questionable Miracles and Mild Inconveniences.</p>
+        <div class="space-x-4">
+            <button id="worshipButton" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-md btn-hover-effect">
+                Worship Blazinik
+            </button>
+            <button id="tributeButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-md btn-hover-effect">
+                Offer Tribute (Digitally)
+            </button>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-12">
+
+        <section id="lore" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in">
+            <h3 class="text-3xl font-bold mb-6 text-teal-400 border-b-2 border-teal-500 pb-2">The Divine Lore</h3>
+            <p class="mb-4">In the beginning, there was... well, something. Probably. And then, possibly due to a cosmic clerical error or a particularly potent spicy burrito, Blazinik manifested. Neither benevolent nor malevolent, Blazinik primarily concerns Themself with the proper organization of sock drawers and the precise moment toast becomes *too* brown.</p>
+            <p class="mb-4">Legend speaks of the Great Sneaker Scuffing, where Blazinik mildly smudged the footwear of an unbeliever, and the Murmured Suggestion, where a follower was divinely inspired to switch to decaf. These are the pillars upon which our faith is built (and occasionally leans against).</p>
+            <p>Blazinik's symbol is the Eternal Loading Icon, representing the constant anticipation of something... eventually happening.</p>
         </section>
 
-        <section class="content-section bg-bg-card" id="ethos">
-            <div class="container-main">
-                <div class="section-heading fade-in-up">
-                    <h2 class="section-title">Core <span class="highlight">Ethos</span></h2>
-                    <p class="section-subtitle">
-                        Built on principles of expertise, contribution, and mutual elevation. We operate at a higher frequency.
-                    </p>
-                </div>
-                <div class="card-grid">
-                    <div class="info-card fade-in-up" style="transition-delay: 0.1s;">
-                        <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
-                        </svg>
-                        <h3 class="card-title">Validated Expertise</h3>
-                        <p class="card-text">Membership is reserved for developers with demonstrated skill and experience. We value depth and proven ability.</p>
-                    </div>
-                    <div class="info-card fade-in-up" style="transition-delay: 0.2s;">
-                        <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
-                        </svg>
-                        <h3 class="card-title">Synergistic Connection</h3>
-                        <p class="card-text">Foster meaningful collaborations. Find co-founders, advisors, or key contributors for ambitious projects within a trusted circle.</p>
-                    </div>
-                    <div class="info-card fade-in-up" style="transition-delay: 0.3s;">
-                        <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
-                        </svg>
-                        <h3 class="card-title">Continuous Elevation</h3>
-                        <p class="card-text">Engage in high-level discourse beyond routine tasks. Sharpen your strategic thinking and technical prowess through peer interaction.</p>
-                    </div>
-                </div>
-            </div>
+        <section id="commandments" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in" style="animation-delay: 0.1s;">
+            <h3 class="text-3xl font-bold mb-6 text-teal-400 border-b-2 border-teal-500 pb-2">The Sacred Commandments</h3>
+            <ul class="list-disc list-inside space-y-3 text-gray-300">
+                <li>Thou shalt not leave one single sock behind in the dryer. It displeases Blazinik (and is just annoying).</li>
+                <li>Thou shalt always pretend to read the Terms and Conditions.</li>
+                <li>Thou shalt acknowledge the awkward silence when someone waves back, but wasn't waving at you.</li>
+                <li>Thou shalt not reheat fish in the office microwave. (This one's actually serious).</li>
+                <li>Thou shalt buffer thy streaming video only at dramatically inconvenient moments.</li>
+                <li>Thou shalt question the necessity of *every* meeting that could have been an email.</li>
+                <li>Thou shalt maintain a healthy suspicion of anyone who *enjoys* assembling flat-pack furniture.</li>
+            </ul>
         </section>
 
-        <section class="content-section" id="value">
-             <div class="container-main">
-                <div class="section-heading fade-in-up">
-                    <h2 class="section-title">Network <span class="highlight">Value</span></h2>
-                    <p class="section-subtitle">
-                        Unlock benefits accessible only within a curated collective of high-performing developers.
-                    </p>
+        <section id="rituals" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in md:col-span-2" style="animation-delay: 0.2s;">
+             <h3 class="text-3xl font-bold mb-6 text-purple-400 border-b-2 border-purple-500 pb-2">Strange Rituals & Practices</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="border border-gray-700 p-4 rounded">
+                    <h4 class="font-semibold text-lg mb-2 text-purple-300">The Ritual of the Unplugged USB</h4>
+                    <p class="text-sm text-gray-400">Before any important task, attempt to plug in a USB device three times. It must be flipped incorrectly the first two times. This honors Blazinik's appreciation for minor technological frustrations.</p>
                 </div>
-                 <div class="card-grid">
-                    <div class="info-card fade-in-up" style="transition-delay: 0.1s;">
-                         <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                         </svg>
-                        <h3 class="card-title">Accelerated Learning</h3>
-                        <p class="card-text">Gain insights from diverse experts. Access distilled knowledge and practical wisdom that cuts through the noise.</p>
-                    </div>
-                     <div class="info-card fade-in-up" style="transition-delay: 0.2s;">
-                        <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 13.508c-.09.027-.183.041-.277.054-.26.033-.528.051-.8.054a3.75 3.75 0 1 1 3.75-3.75c0 .272-.018.54-.051.8-.013.094-.027.187-.054.277l.277.054ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 0A12.03 12.03 0 0 1 7.5 21a12.01 12.01 0 0 1-4.418-1.013M12 18.75A12.03 12.03 0 0 0 16.5 21a12.01 12.01 0 0 0 4.418-1.013M12 18.75V21m0-9.75A12.03 12.03 0 0 1 7.5 3a12.01 12.01 0 0 1-4.418 1.013M12 9A12.03 12.03 0 0 0 16.5 3a12.01 12.01 0 0 0 4.418 1.013M12 9V3" />
-                        </svg>
-                        <h3 class="card-title">Exclusive Opportunities</h3>
-                        <p class="card-text">Access potential collaborations, project partnerships, or unique ventures surfaced within the private network.</p>
-                    </div>
-                    <div class="info-card fade-in-up" style="transition-delay: 0.3s;">
-                         <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527c.48-.342 1.12-.329 1.58.031l.755.577c.46.354.516 1.04.114 1.52l-.609.719c-.36.423-.403.994-.108 1.43l.149.894c.09.542.56.94 1.11.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527c.48-.342 1.12-.329 1.58.031l.755.577c.46.354.516 1.04.114 1.52l-.609.719c-.36.423-.403.994-.108 1.43l.149.894c.09.542.56.94 1.11.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527c.48-.342 1.12-.329 1.58.031l.755.577c.46.354.516 1.04.114 1.52l-.609.719c-.36.423-.403.994-.108 1.43l-.149.894c-.09.542-.56.94-1.11.94h-1.093c-.55 0-1.02-.398-1.11-.94l-.149-.894c-.07-.424-.384-.764-.78-.93-.398-.164-.855-.142-1.205.108l-.737.527c-.48.342-1.12.329-1.58-.031l-.755-.577c-.46-.354-.516-1.04-.114-1.52l.609-.719c.36-.423.403-.994.108-1.43l-.149-.894c-.09-.542-.56-.94-1.11-.94h-1.093c-.55 0-1.02-.398-1.11-.94l-.149-.894c-.07-.424-.384-.764-.78-.93-.398-.164-.855-.142-1.205.108l-.737.527c-.48.342-1.12.329-1.58-.031l-.755-.577c-.46-.354-.516-1.04-.114-1.52l.609-.719c.36-.423.403-.994.108-1.43l.149-.894c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527c.48-.342 1.12-.329 1.58.031l.755.577c.46.354.516 1.04.114 1.52l-.609.719c-.36.423-.403.994-.108 1.43l.149-.894c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94Z" />
-                         </svg>
-                        <h3 class="card-title">Reduced Noise</h3>
-                        <p class="card-text">Cut through the clutter of open platforms. Engage in focused discussions with peers who understand the complexities.</p>
-                    </div>
+                <div class="border border-gray-700 p-4 rounded">
+                    <h4 class="font-semibold text-lg mb-2 text-purple-300">The Chant of the Forgotten Password</h4>
+                     <p class="text-sm text-gray-400">When accessing sacred texts (or your email), loudly recite variations of your pet's name combined with significant dates until access is granted or you are locked out. Both outcomes are acceptable.</p>
+                </div>
+                <div class="border border-gray-700 p-4 rounded">
+                    <h4 class="font-semibold text-lg mb-2 text-purple-300">The Synchronized Screen Refresh</h4>
+                    <p class="text-sm text-gray-400">At precisely 3:33 PM local time, all followers must simultaneously refresh their web browser. The purpose is unknown, but the tradition persists. It might appease Blazinik, or just clear the cache.</p>
                 </div>
             </div>
         </section>
 
-        <section class="content-section bg-bg-card" id="access">
-            <div class="container-main">
-                <div class="section-heading fade-in-up">
-                    <h2 class="section-title">Access <span class="highlight">Protocol</span></h2>
-                    <p class="section-subtitle">
-                        Entry is selective, ensuring network integrity and a high standard of interaction. Contribution is expected.
-                    </p>
-                </div>
-                <div class="max-w-2xl mx-auto text-center bg-bg-deep p-8 rounded-lg border border-border-color fade-in-up" style="transition-delay: 0.1s;">
-                    <h3 class="text-2xl font-semibold mb-4">Initiate Contact</h3>
-                    <p class="text-text-secondary mb-6">
-                        If you are an experienced developer seeking a network that values depth, collaboration, and continuous growth, express your interest. Prepare to discuss your background and potential contributions.
-                    </p>
-                    <a href="#" class="btn btn-outline">Request Network Access</a>
-                     <p class="text-xs text-text-secondary mt-6 italic opacity-70">Note: Accepted members contribute nominal dues to sustain shared infrastructure and resources.</p>
-                </div>
+        <section id="testimonials" class="bg-gray-800 p-8 rounded-lg shadow-xl fade-in md:col-span-2" style="animation-delay: 0.3s;">
+            <h3 class="text-3xl font-bold mb-6 text-teal-400 border-b-2 border-teal-500 pb-2">Words from the Faithful (Probably)</h3>
+            <div class="space-y-6">
+                <blockquote class="border-l-4 border-teal-500 pl-4 italic text-gray-300">
+                    <p>"I offered Blazinik half a slightly stale donut, and the next day, I found a parking spot that was only moderately inconvenient. Coincidence? I think NOT."</p>
+                    <cite class="block text-right not-italic text-sm text-gray-500 mt-2">- Barry B., Devotee</cite>
+                </blockquote>
+                <blockquote class="border-l-4 border-teal-500 pl-4 italic text-gray-300">
+                    <p>"Since worshipping Blazinik, my Wi-Fi drops slightly *less* often during important video calls. It's still annoying, but... progress?"</p>
+                    <cite class="block text-right not-italic text-sm text-gray-500 mt-2">- Brenda P., Hopeful Follower</cite>
+                </blockquote>
+                 <blockquote class="border-l-4 border-teal-500 pl-4 italic text-gray-300">
+                    <p>"I performed the Ritual of the Unplugged USB, and my computer immediately needed to restart for updates. Blazinik works in mysterious, time-consuming ways."</p>
+                    <cite class="block text-right not-italic text-sm text-gray-500 mt-2">- Chad G., Slightly Confused Acolyte</cite>
+                </blockquote>
             </div>
         </section>
+
     </main>
 
-    <footer class="footer">
-        <div class="container-main">
-            &copy; 2025 ECH<span>//</span>ON Network :: Signal Integrity Maintained
-        </div>
+    <footer class="bg-gray-800 text-center py-6 mt-12 border-t border-gray-700">
+        <p class="text-gray-500">&copy; Eternally Now-ish. All rights reserved (or mildly disregarded) by the Temple of Blazinik.</p>
+        <p class="text-xs text-gray-600 mt-1">This is a satirical website. No actual deities were inconvenienced in its creation.</p>
     </footer>
 
+    <div id="messageBox"></div>
+
     <script>
-        // Simple Scroll Fade-In Animation Trigger
+        // Get button elements
+        const worshipButton = document.getElementById('worshipButton');
+        const tributeButton = document.getElementById('tributeButton');
+        const messageBox = document.getElementById('messageBox');
+        let messageTimeout; // To handle message display timing
+
+        // Function to show messages
+        function showMessage(text, duration = 3000) {
+            // Clear any existing timeout
+            clearTimeout(messageTimeout);
+
+            messageBox.textContent = text;
+            messageBox.classList.add('show');
+
+            // Set timeout to hide the message
+            messageTimeout = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, duration);
+        }
+
+        // Add event listener for the Worship button
+        worshipButton.addEventListener('click', () => {
+            const messages = [
+                "Blazinik acknowledges your existence... probably.",
+                "A faint warmth spreads. Or maybe that's just indigestion. Thanks!",
+                "Your devotion has been noted. And filed. Somewhere.",
+                "Blazinik nods, slightly distracted by a passing cloud.",
+                "Worship accepted. Please allow 3-5 business eons for processing."
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            showMessage(randomMessage);
+             // Optional: Add a subtle visual effect like a quick button glow
+            worshipButton.classList.add('animate-pulse');
+            setTimeout(() => worshipButton.classList.remove('animate-pulse'), 500);
+        });
+
+        // Add event listener for the Tribute button
+        tributeButton.addEventListener('click', () => {
+             const tributes = [
+                "Blazinik accepts your digital tribute. It will be used for... things.",
+                "Your offering is adequate. The cosmic balance remains... balanced-ish.",
+                "Tribute received! Blazinik might spare your favorite mug today.",
+                "Generous! Blazinik briefly considers performing a minor miracle but decides against it.",
+                "Thank you. Your tribute has been converted to BlazinikCoin (exchange rate may vary wildly)."
+            ];
+            const randomTribute = tributes[Math.floor(Math.random() * tributes.length)];
+            showMessage(randomTribute);
+             // Optional: Add a subtle visual effect
+            tributeButton.classList.add('animate-pulse');
+            setTimeout(() => tributeButton.classList.remove('animate-pulse'), 500);
+        });
+
+        // Smooth scrolling for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                try {
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                } catch (error) {
+                    console.warn("Smooth scroll target not found:", this.getAttribute('href'));
+                }
+            });
+        });
+
+        // Add fade-in effect to sections on scroll (optional enhancement)
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
+                    entry.target.classList.add('fade-in-visible'); // Use a different class to prevent re-triggering
+                     entry.target.style.opacity = 1;
+                     entry.target.style.transform = 'translateY(0)';
                 }
-                // Optional: Remove class if you want it to fade out when scrolling away
-                // else {
-                //     entry.target.classList.remove('visible');
-                // }
             });
-        }, {
-            threshold: 0.1 // Trigger when 10% of the element is visible
-        });
+        }, { threshold: 0.1 }); // Trigger when 10% of the element is visible
 
-        document.querySelectorAll('.fade-in-up').forEach((el) => {
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = 0; // Start hidden
+            el.style.transform = 'translateY(20px)'; // Start slightly lower
+            el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out'; // Smooth transition
             observer.observe(el);
-        });
-
-        // Optional: Active Nav Link Highlighting on Scroll
-        const navLinks = document.querySelectorAll('.main-nav a');
-        const sections = document.querySelectorAll('section[id]');
-
-        window.addEventListener('scroll', () => {
-            let currentSection = '';
-            const scrollY = window.pageYOffset;
-
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop - 100; // Adjust offset as needed
-                const sectionHeight = section.offsetHeight;
-                if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
-                    currentSection = section.getAttribute('id');
-                }
-            });
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${currentSection}`) {
-                    link.classList.add('active');
-                }
-            });
-             // Handle case where no section is active (e.g., at the top)
-            if (!currentSection && navLinks.length > 0) {
-                 navLinks[0].classList.add('active'); // Default to first link
-            }
         });
 
     </script>
