@@ -3,197 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grant Space Program (Simplified)</title>
+    <title>Grant Space Program | Modernized</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <style>
-        /* Basic Dark Mode & Font */
+        /* Base Styles & Font */
+        html {
+             scroll-behavior: smooth;
+             font-size: 16px;
+        }
         body {
-            font-family: sans-serif; /* Use basic system font first */
-            background-color: #1a1a2e; /* Dark blue-ish background */
-            color: #e0e0e0; /* Light text color */
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 - Dark Base */
+            color: #cbd5e1; /* Slate 300 - Default Text */
+            overflow-x: hidden;
             line-height: 1.6;
         }
-        /* Basic container */
-        .container {
-            max-width: 1024px;
-            margin-left: auto;
-            margin-right: auto;
-            padding-left: 1rem;
-            padding-right: 1rem;
+
+        /* Custom Properties (Refined Palette) */
+        :root {
+            --color-primary: #3b82f6; /* Blue 500 */
+            --color-primary-hover: #2563eb; /* Blue 600 */
+            --color-secondary: #14b8a6; /* Teal 500 */
+            --color-background: #0f172a; /* Slate 900 */
+            --color-card: #1e293b; /* Slate 800 */
+            --color-card-border: #334155; /* Slate 700 */
+            --color-text: #cbd5e1; /* Slate 300 */
+            --color-text-muted: #94a3b8; /* Slate 400 */
+            --color-heading: #f1f5f9; /* Slate 100 */
         }
-        /* Simple card */
-        .simple-card {
-            background-color: #2a2a3e; /* Slightly lighter card */
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 0.375rem;
-            border: 1px solid #4a4a5e;
-        }
+
         /* Headings */
-        h1, h2, h3 {
-            color: #ffffff; /* White headings */
-            margin-bottom: 0.75rem;
-            font-weight: 600;
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--color-heading);
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
-        h1 { font-size: 2rem; margin-bottom: 1rem; }
-        h2 { font-size: 1.5rem; margin-top: 2rem; border-bottom: 1px solid #4a4a5e; padding-bottom: 0.5rem;}
-        h3 { font-size: 1.2rem; }
-        p { margin-bottom: 1rem; }
-        a { color: #7aa2f7; text-decoration: underline; } /* Basic link styling */
-        ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem;}
-        li { margin-bottom: 0.5rem; }
-        /* Basic Button */
+        h1 { font-size: 2.8rem; line-height: 1.1; }
+        h2 { font-size: 2rem; line-height: 1.2; }
+        h3 { font-size: 1.25rem; line-height: 1.3; } /* Slightly smaller H3 */
+        @media (min-width: 768px) {
+            h1 { font-size: 3.5rem; }
+            h2 { font-size: 2.5rem; }
+            h3 { font-size: 1.5rem; }
+        }
+
+        /* Section Padding & Spacing */
+        .section-padding {
+            padding: 5rem 1rem; /* py-20 px-4 */
+        }
+        @media (min-width: 1024px) {
+             .section-padding { padding: 6rem 1.5rem; } /* py-24 px-6 */
+        }
+
+        /* Section Heading Style */
+        .section-heading {
+            text-align: center;
+            margin-bottom: 3.5rem; /* mb-14 */
+        }
+        .section-heading h2 { margin-bottom: 0.5rem; }
+        .section-heading p.subtitle {
+            margin-top: 0.5rem; font-size: 1.1rem; color: var(--color-text-muted);
+            max-width: 65ch; margin-left: auto; margin-right: auto; line-height: 1.5;
+        }
+        .section-heading span { color: var(--color-primary); }
+
+        /* Card Styling */
+        .info-card {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-card-border);
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 1.75rem; /* p-7 */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-color: var(--color-primary);
+        }
+
+        /* Button Styling */
         .btn {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background-color: #3b82f6; /* Blue */
-            color: white;
-            border-radius: 0.25rem;
-            text-decoration: none;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem; /* Spacing for stacked buttons */
-            border: none;
-            cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 0.7rem 1.5rem; /* Adjusted padding */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; text-align: center;
+            transition: all 0.2s ease-in-out; cursor: pointer;
+            border: 1px solid transparent; font-size: 0.95rem;
+        }
+        .btn i { margin-right: 0.5rem; }
+
+        .btn-primary {
+            background-color: var(--color-primary); color: #ffffff; border-color: var(--color-primary);
+        }
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover); border-color: var(--color-primary-hover);
+            transform: translateY(-2px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
         }
         .btn-secondary {
-             background-color: #4a4a5e;
+            background-color: var(--color-card-border); /* Darker secondary */
+            color: var(--color-text); border-color: var(--color-card-border);
         }
-        /* Basic Nav */
-        nav {
-            background-color: #161625;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid #4a4a5e;
-            margin-bottom: 2rem;
+        .btn-secondary:hover {
+            border-color: var(--color-primary); color: var(--color-primary);
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
         }
-        nav a {
-            color: #c0c0c0;
-            margin-right: 1rem;
-            text-decoration: none;
+
+        /* Navbar Styling */
+        #navbar {
+            background-color: rgba(15, 23, 42, 0.85); /* Slate 900 base with transparency */
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 50;
+            border-bottom: 1px solid #1e293b; /* Slate 800 */
+            transition: background-color 0.3s ease;
         }
-        nav a:hover { color: #ffffff; }
+        .nav-link {
+            color: #9ca3af; /* Gray 400 */ font-weight: 500;
+            padding: 0.5rem 0.75rem; border-radius: 0.375rem;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        .nav-link:hover { color: #f1f5f9; background-color: rgba(255, 255, 255, 0.05); }
+        .nav-logo {
+            font-weight: 800; font-size: 1.5rem; color: var(--color-heading); letter-spacing: -0.05em;
+        }
+        .nav-logo span { color: var(--color-primary); }
+
+        /* Mobile Menu Styling */
+        #mobile-menu {
+            background-color: var(--color-card); border-top: 1px solid var(--color-card-border);
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0; overflow: hidden; opacity: 0; position: absolute; width: 100%; left: 0; top: 100%;
+        }
+        #mobile-menu.open { max-height: 500px; opacity: 1; }
+        #mobile-menu a {
+            display: block; padding: 0.8rem 1.5rem; color: var(--color-text);
+            border-bottom: 1px solid var(--color-card-border);
+        }
+        #mobile-menu a:last-child { border-bottom: none; }
+        #mobile-menu a:hover { background-color: rgba(59, 130, 246, 0.1); color: var(--color-heading); }
+
+        /* List styling with icons */
+        .icon-list li { display: flex; align-items: start; margin-bottom: 0.8rem; }
+        .icon-list i {
+            margin-right: 0.8rem; margin-top: 0.2rem; color: var(--color-primary);
+            flex-shrink: 0; width: 1.2em; text-align: center;
+        }
+
+        /* Division Card Icon Styling */
+        .division-icon-wrapper {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             width: 2.75rem; /* w-11 */
+             height: 2.75rem; /* h-11 */
+             border-radius: 50%; /* rounded-full */
+             background-color: rgba(59, 130, 246, 0.15); /* bg-blue-600/15 */
+             color: #60a5fa; /* text-blue-400 */
+             margin-right: 0.75rem; /* mr-3 */
+             flex-shrink: 0;
+             font-size: 1.25rem; /* text-xl */
+        }
+
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <nav>
-        <div class="container">
-            <a href="#home" class="font-bold text-white text-lg">GSP</a>
-            <a href="#about">About</a>
-            <a href="#game">Game</a>
-            <a href="#divisions">Divisions</a>
-            <a href="#join">Join</a>
+    <nav id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 relative">
+                <a href="#" class="nav-logo">G<span>S</span>P</a>
+
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#game" class="nav-link">The Game</a>
+                    <a href="#divisions" class="nav-link">Divisions</a>
+                    <a href="#join" class="nav-link">Join</a>
+                    <a href="#" class="ml-3 btn btn-primary !py-1.5 !px-4 !text-sm">Get Started</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" aria-label="Toggle Menu" class="text-gray-400 hover:text-white focus:outline-none p-2">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+
+                <div id="mobile-menu" class="md:hidden">
+                    <a href="#about" class="block">About GSP</a>
+                    <a href="#game" class="block">The Game</a>
+                    <a href="#divisions" class="block">Divisions</a>
+                    <a href="#join" class="block">Join Us</a>
+                    <a href="#" class="block font-semibold text-white bg-blue-600/30">Get Started</a>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
+    <header class="relative bg-gradient-to-b from-slate-950 via-slate-950 to-background pt-24 pb-32 md:pt-32 md:pb-40 text-center overflow-hidden">
+         <div class="absolute inset-0 opacity-[0.02] z-0" style="background-image: linear-gradient(45deg, #334155 25%, transparent 25%), linear-gradient(-45deg, #334155 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #334155 75%), linear-gradient(-45deg, transparent 75%, #334155 75%); background-size: 20px 20px;"></div>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-4 text-white leading-tight" data-aos="fade-up">
+                Grant Space Program
+            </h1>
+            <p class="text-xl sm:text-2xl lg:text-3xl font-semibold mb-6 text-blue-400" data-aos="fade-up" data-aos-delay="100">
+                "Partnering Space Innovation"
+            </p>
+            <p class="text-base md:text-lg text-gray-300 max-w-prose mx-auto mb-10" data-aos="fade-up" data-aos-delay="200">
+                Welcome to GSP, Roblox's dedicated hub for immersive Ro-Space simulation. Master intricate launch procedures, coordinate critical ground operations, and experience the thrill of collaborative space missions.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4" data-aos="fade-up" data-aos-delay="300">
+                 <a href="#game" class="btn btn-primary text-base"><i class="fas fa-rocket"></i> Explore the Simulation</a>
+                 <a href="#join" class="btn btn-secondary text-base"><i class="fas fa-users"></i> Join the Crew</a>
+            </div>
+        </div>
+    </header>
 
-        <section id="home" class="text-center py-8">
-            <h1>Grant Space Program</h1>
-            <p class="text-lg text-blue-300 mb-4">"Partnering Space Innovation"</p>
-            <p>Welcome to Roblox's premier Ro-Space simulation group, focusing on detailed launch operations and teamwork.</p>
-            <div>
-                <a href="#game" class="btn btn-primary"><i class="fas fa-gamepad"></i> Learn About the Game</a>
-                <a href="#join" class="btn btn-secondary"><i class="fas fa-user-plus"></i> Join Us</a>
+    <main>
+
+        <section id="about" class="section-padding">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="section-heading" data-aos="fade-up">
+                    <h2>About <span>Grant Space Program</span></h2>
+                    <p class="subtitle">Founded 1/22/24 - Committed to realistic simulation and community collaboration.</p>
+                </div>
+
+                <div class="info-card max-w-4xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="text-xl font-semibold mb-4 text-center">Our Core Mission</h3>
+                    <p class="mb-4 text-gray-300">
+                        The Grant Space Program (GSP) focuses on creating Roblox's most detailed and engaging Ro-Space launch simulation. We delve into the complexities of ground support, mission control coordination, and the precise procedures essential for successful space missions, emphasizing teamwork and technical detail.
+                    </p>
+                    <p class="text-gray-400">
+                        Our goal is to foster a community where players learn, collaborate, and experience the challenges of space exploration. We value precision, communication, and a shared passion for pushing Ro-Space boundaries.
+                    </p>
+                    <blockquote class="mt-6 border-l-4 border-blue-700 pl-4 text-sm italic text-gray-400">
+                        "We strive to provide our community with an exciting experience for everyone to enjoy such as rocket missions and space exploration."
+                    </blockquote>
+                </div>
             </div>
         </section>
 
-        <section id="about">
-            <h2>About Grant Space Program</h2>
-            <div class="simple-card">
-                <h3>Our Mission (Founded: 1/22/24)</h3>
-                <p>The Grant Space Program (GSP) aims to be the most dedicated and user-involved Ro-Space group on Roblox. We strive to provide our community with an exciting, immersive experience focusing on realistic rocket missions, ground control simulation, and collaborative space exploration challenges.</p>
-                <p>We emphasize the technical details, teamwork, and communication required for successful spaceflight operations, creating a learning environment alongside engaging gameplay.</p>
-                <blockquote>
-                    "We hope to see you around!"
-                </blockquote>
-            </div>
-        </section>
+        <section id="game" class="section-padding bg-slate-900/40">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="section-heading" data-aos="fade-up">
+                    <h2>The GSP Experience: <span>Command the Launch</span></h2>
+                    <p class="subtitle">Master ground operations and mission control in our core simulation.</p>
+                </div>
 
-        <section id="game">
-            <h2>The GSP Experience: Command the Launch</h2>
-            <div class="simple-card">
-                <h3>Core Gameplay Focus</h3>
-                <p>Our main simulation centers on the critical phases of launching rockets into space and managing their initial flight or landing. This involves detailed ground operations and coordinated mission control gameplay.</p>
-
-                <h3>Key Features:</h3>
-                <ul>
-                    <li><strong>Detailed Ground Operations:</strong> Manage power systems (generators, solar panels), fuel loading, system checks, and launchpad readiness.</li>
-                    <li><strong>Realistic Mission Control:</strong> Monitor telemetry, manage flight stages, track trajectory, handle anomalies, and issue commands.</li>
-                    <li><strong>Role-Based Teamwork:</strong> Players take specific roles (Flight Director, Engineer, Pad Tech, etc.) requiring collaboration for success.</li>
-                </ul>
-
-                <h3>Mission Phases Example:</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <h4>1. Pre-Launch Prep</h4>
-                        <ul>
-                            <li>System checklists</li>
-                            <li>Power activation</li>
-                            <li>Propellant loading</li>
-                            <li>Comms check</li>
-                            <li>Weather check</li>
-                        </ul>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div class="info-card h-full" data-aos="fade-up" data-aos-delay="100">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-cogs text-2xl text-blue-400 mr-3"></i>
+                            <h4 class="font-semibold text-lg">Ground Operations</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">Manage power grids, fuel flow, cryogenics, comms links, structural checks, and more. Master the launchpad systems.</p>
                     </div>
-                    <div>
-                        <h4>2. Launch & Ascent/Landing</h4>
-                        <ul>
-                            <li>Terminal count management</li>
-                            <li>Liftoff monitoring</li>
-                            <li>Trajectory analysis</li>
-                            <li>Anomaly response</li>
-                            <li>Command execution (staging/landing)</li>
-                        </ul>
+                     <div class="info-card h-full" data-aos="fade-up" data-aos-delay="150">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-headset text-2xl text-blue-400 mr-3"></i>
+                            <h4 class="font-semibold text-lg">Mission Control</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">Monitor telemetry, manage flight stages, track trajectory, troubleshoot anomalies, and communicate critical commands.</p>
+                    </div>
+                     <div class="info-card h-full" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-users-cog text-2xl text-blue-400 mr-3"></i>
+                            <h4 class="font-semibold text-lg">Collaborative Roles</h4>
+                        </div>
+                        <p class="text-sm text-gray-400">Success hinges on teamwork. Fill specialized roles (Flight Director, Systems Engineer, etc.) each vital for launch.</p>
                     </div>
                 </div>
-                 <p>This simulation requires multiple users working together to complete tasks and ensure a successful mission.</p>
-            </div>
-        </section>
 
-        <section id="divisions">
-            <h2>Operational Divisions</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="simple-card">
-                    <h3><i class="fas fa-fire-extinguisher mr-2 text-red-400"></i>GSPFD</h3>
-                    <p class="text-sm">Fire Department: Ensures launch site safety, manages hazards, and provides emergency response.</p>
-                </div>
-                 <div class="simple-card">
-                    <h3><i class="fas fa-shield-alt mr-2 text-blue-400"></i>GSPS</h3>
-                    <p class="text-sm">Security: Protects facilities, technology, and personnel; enforces access control.</p>
-                </div>
-                 <div class="simple-card">
-                    <h3><i class="fas fa-user-astronaut mr-2 text-gray-400"></i>GAPAC</h3>
-                    <p class="text-sm">Astronaut Corps: Defines mission profiles and influences simulation parameters.</p>
-                </div>
-                 <div class="simple-card">
-                    <h3><i class="fas fa-bullhorn mr-2 text-yellow-400"></i>Public Affairs</h3>
-                    <p class="text-sm">Handles communications, community engagement, event organization, and recruitment.</p>
-                </div>
-                 <div class="simple-card">
-                    <h3><i class="fas fa-flask-vial mr-2 text-green-400"></i>GSP PRL</h3>
-                    <p class="text-sm">Propulsion & Research Lab: Focuses on the science/tech behind the simulation; proposes improvements.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="join">
-            <h2>Join the GSP Crew</h2>
-            <div class="simple-card text-center">
-                <h3>Become an Official Member</h3>
-                <p>Join the group for an exclusive Employee role! Gain access to participate in missions and operations.</p>
-                <p>If you're interested in more information, be sure to join our communications server! We welcome all who share our passion for exploring space.</p>
-                <div>
-                    <a href="#" class="btn btn-primary"><i class="fab fa-roblox"></i> Join Roblox Group</a>
-                    <a href="#" class="btn btn-secondary"><i class="fas fa-comments"></i> Join Comms Server</a>
+                <div class="info-card" data-aos="fade-up" data-aos-delay="250">
+                     <h3 class="text-xl font-semibold mb-5 text-center">Mission Phases: The Flow of Operations</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                         <div>
+                            <h4 class="text-lg font-semibold mb-3 text-blue-300">1. Pre-Launch</h4>
+                            <ul class="icon-list text-sm space-y-1.5 text-gray-400">
+                                <li><i class="fas fa-clipboard-check"></i> Execute system checklists</li>
+                                <li><i class="fas fa-bolt"></i> Verify power systems</li>
+                                <li><i class="fas fa-gas-pump"></i> Supervise propellant loading</li>
+                                <li><i class="fas fa-satellite-dish"></i> Confirm comms links</li>
+                                <li><i class="fas fa-wind"></i> Receive weather/range clearance</li>
+                            </ul>
+                         </div>
+                         <div>
+                             <h4 class="text-lg font-semibold mb-3 text-teal-300">2. Launch & Ascent/Landing</h4>
+                             <ul class="icon-list text-sm space-y-1.5 text-gray-400">
+                                <li><i class="fas fa-stopwatch"></i> Manage terminal count</li>
+                                <li><i class="fas fa-tachometer-alt"></i> Monitor liftoff & performance</li>
+                                <li><i class="fas fa-chart-line"></i> Track trajectory data</li>
+                                <li><i class="fas fa-exclamation-triangle"></i> Respond to system alerts</li>
+                                <li><i class="fas fa-route"></i> Execute staging/landing commands</li>
+                            </ul>
+                         </div>
+                     </div>
+                     <p class="text-center text-sm text-gray-500 mt-6 italic">Requires multiple users coordinating tasks for mission success.</p>
                 </div>
             </div>
         </section>
 
-        <footer class="text-center text-xs text-gray-500 py-6 mt-8 border-t border-gray-700">
-            <p>&copy; <script>document.write(new Date().getFullYear())</script> Grant Space Program. All Rights Reserved.</p>
-            <p>Founded: January 22, 2024</p>
-        </footer>
+        <section id="divisions" class="section-padding">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="section-heading" data-aos="fade-up">
+                    <h2>Operational <span>Divisions</span></h2>
+                    <p class="subtitle">The specialized teams powering the Grant Space Program.</p>
+                </div>
 
-    </div> </body>
-</html>
-
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="info-card flex flex-col h-full" data-aos="fade-up" data-aos-delay="100">
+                        <div class="flex items-center mb-3">
+                             <span class="division-icon-wrapper">
+                                 <i class="fas fa-fire-extinguisher"></i>
+                             </span>
+                             <h3 class="text-lg font-semibold">GSPFD</h3>
+                        </div>
+                        <p class="text-sm text-gray-400 flex-grow">Fire Department: Manages site safety, hazardous materials handling, and emergency response during operations.</p>
+                    </div>
+                    <div class="info-card flex flex-col h-full" data-aos="fade-up" data-aos-delay="150">
+                        <div class="flex items-center mb-3">
+                             <span class="division-icon-wrapper">
+                                 <i class="fas fa-shield-alt"></i>
+                             </span>
+                             <h3 class="text-lg font-semibold">GSPS</h3>
+                        </div>
+                        <p class="text-sm text-gray-400 flex-grow">Security: Protects facilities, technology, and personnel; ensures operational integrity and access control.</p>
+                    </div>
+                     <div class="info-card flex flex-col h-full" data-aos="fade-up" data-aos-delay="200">
+                        <div class="flex items-center mb-3">
+                             <span class="division-icon-wrapper">
+                                 <i class="fas fa-user-astronaut"></i>
+                             </span>
+                             <h3 class="text-lg font-semibold">GAPAC</h3>
+                        </div>
+                        <p class="text-sm text-gray-400 flex-grow">Astronaut Corps: Defines mission objectives and payload requirements, influencing simulation parameters.</p>
+                    </div>
+                     <div class="info-card flex flex-col h-full" data-aos="fade-up" data-aos-delay="250">
+                        <div class="flex items-center mb-3">
+                             <span class="division-icon-wrapper">
+                                 <i class="fas fa-bullhorn"></i>
+                             </span>
+                             <h3 class="text-lg font-semibold">Public Affairs</h3>
+                        </div>
+                        <p class="text-sm text-gray-400 flex-grow">Handles group communications, community engagement, event planning, and recruitment efforts.</p>
+                    </div>
+                     <div class="info-card flex flex-col h-full" data-aos="fade-up" data-aos-delay="300">
+                        <div class="flex items-center mb-3">
+                             <span class="division-icon-wrapper">
+                     
