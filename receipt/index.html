@@ -3,253 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Echelon // Signal</title>
+    <title>ECHELON // Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0D1117; /* GitHub dark dim */
-            --bg-secondary: #161B22;
-            --border-color: #30363d;
-            --text-primary: #c9d1d9;
-            --text-secondary: #8b949e;
-            --accent-color: #39d353; /* Vibrant Green */
-            --accent-hover: #46f865;
+            --bg-color: #000005; /* Near black */
+            --text-color: #e0e0e0;
+            --text-muted: #7a7a7a;
+            --accent-color: #0077ff; /* Electric Blue */
+            --accent-light: #66b3ff;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             overflow-x: hidden;
+            min-height: 100vh;
+            position: relative; /* Needed for absolute positioned elements */
         }
 
-        /* Monospace font for specific elements */
-        .font-mono {
-            font-family: 'Source Code Pro', monospace;
+        /* Abstract background shapes */
+        .shape {
+            position: absolute;
+            background: linear-gradient(45deg, var(--accent-color), #3300ff); /* Blue to deeper purple */
+            border-radius: 50%;
+            filter: blur(100px); /* Heavy blur for soft effect */
+            opacity: 0.15;
+            animation: float 20s ease-in-out infinite alternate;
+            z-index: 0; /* Behind content */
         }
 
-        /* Accent color application */
-        .text-accent { color: var(--accent-color); }
-        .bg-accent { background-color: var(--accent-color); }
-        .border-accent { border-color: var(--accent-color); }
-        .hover\:text-accent:hover { color: var(--accent-hover); }
-        .hover\:bg-accent:hover { background-color: var(--accent-hover); }
+        .shape-1 { top: -20%; left: -10%; width: 50vw; height: 50vw; animation-duration: 25s; }
+        .shape-2 { bottom: -15%; right: -15%; width: 60vw; height: 60vw; animation-duration: 30s; animation-delay: -5s; }
+        .shape-3 { top: 30%; right: 5%; width: 30vw; height: 30vw; animation-duration: 18s; animation-delay: -10s; background: linear-gradient(45deg, #ff0077, var(--accent-color)); } /* Add pinkish hue */
 
-        /* Custom scrollbar (optional, for aesthetics) */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
 
-        /* Glassmorphism effect for cards/sections */
-        .glass-pane {
-            background: rgba(22, 27, 34, 0.6); /* --bg-secondary with transparency */
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        @keyframes float {
+            from { transform: translateY(0px) translateX(0px) rotate(0deg); }
+            to { transform: translateY(40px) translateX(-30px) rotate(15deg); }
         }
 
-        /* Subtle background pattern */
-        .pattern-bg {
-            background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(to right, var(--border-color) 1px, var(--bg-primary) 1px);
-            background-size: 20px 20px;
-            background-position: center center;
+        /* Main content container */
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 1rem; /* More padding */
         }
 
-        /* Section title styling */
-        .section-title {
-            @apply font-mono text-2xl font-semibold mb-6 text-accent uppercase tracking-widest;
+        /* Header/Logo */
+        .header-logo {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: 0.2em;
+            color: var(--text-color);
+            z-index: 10;
+            opacity: 0.8;
+        }
+        .header-logo span {
+            color: var(--accent-color);
+            opacity: 0.6;
         }
 
-        /* Button Styling */
-        .btn {
-            @apply inline-block px-6 py-2 rounded-md font-semibold transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary;
-        }
-        .btn-accent {
-            @apply btn bg-accent text-bg-primary hover:bg-accent hover:brightness-110 focus:ring-accent;
-        }
-        .btn-outline {
-            @apply btn border-2 border-accent text-accent hover:bg-accent hover:text-bg-primary focus:ring-accent;
+        /* Core message styling */
+        .core-message {
+            max-width: 800px;
+            text-align: center;
+            margin-bottom: 4rem;
         }
 
-        /* Link styling */
-        a {
-            @apply text-accent hover:underline transition duration-150;
-        }
-        nav a {
-             @apply text-text-secondary hover:text-text-primary font-medium transition duration-150 no-underline px-3 py-2 rounded-md;
-        }
-        nav a.active {
-            @apply text-text-primary bg-gray-700/50; /* Subtle active state */
-        }
-
-        /* Animation */
-        @keyframes subtle-pulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
-        }
-        .pulse-element {
-            animation: subtle-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .core-message h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem); /* Responsive font size */
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            /* Subtle text gradient */
+            background: linear-gradient(90deg, var(--text-color), #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInDown 1s ease-out;
         }
 
-        /* Header styling */
-        header {
-            background-color: rgba(13, 17, 23, 0.8); /* --bg-primary with transparency */
-            backdrop-filter: blur(8px);
-            border-bottom: 1px solid var(--border-color);
+        .core-message p {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+            animation: fadeInUp 1s ease-out 0.3s;
+            animation-fill-mode: backwards; /* Start invisible */
+        }
+
+        /* Abstract sections / Info blocks */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .info-block {
+            background-color: rgba(10, 10, 15, 0.5); /* Dark transparent */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            animation: popIn 0.6s ease-out forwards;
+            opacity: 0; /* Start hidden for animation */
+        }
+
+        .info-block:nth-child(1) { animation-delay: 0.5s; }
+        .info-block:nth-child(2) { animation-delay: 0.7s; }
+        .info-block:nth-child(3) { animation-delay: 0.9s; }
+
+
+        .info-block:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 119, 255, 0.3); /* Accent border on hover */
+        }
+
+        .info-block h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--accent-light);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .info-block p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Call to Action / Connect Button */
+        .connect-trigger {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px; /* Pill shape */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0, 119, 255, 0.3);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .connect-trigger:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 119, 255, 0.5);
+            animation-play-state: paused; /* Pause pulse on hover */
+        }
+
+        /* Simple Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+         @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 119, 255, 0.3); }
+            50% { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0, 119, 255, 0.4); }
+            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 119, 255, 0.3); }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .header-logo { font-size: 1.2rem; left: 1rem; top: 1rem;}
+            .connect-trigger { right: 1rem; bottom: 1rem; padding: 0.6rem 1.2rem; font-size: 0.9rem;}
+            .content-wrapper { padding: 6rem 1rem 4rem 1rem; } /* Adjust padding for smaller screens */
+            .info-grid { gap: 1rem; }
+            .info-block { padding: 1.2rem 1.5rem; }
         }
 
     </style>
 </head>
-<body class="pattern-bg">
+<body>
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
 
-    <header class="sticky top-0 z-50 w-full py-3">
-        <div class="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
-            <div class="text-xl font-bold font-mono text-accent pulse-element">// ECHELON</div>
-            <nav class="hidden md:flex items-center space-x-2">
-                <a href="#philosophy" class="active">Philosophy</a>
-                <a href="#nexus">Nexus</a>
-                <a href="#connect">Connect</a>
-            </nav>
-            <button class="md:hidden text-text-secondary hover:text-text-primary focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-            </button>
+    <div class="header-logo">ECH<span>//</span>ON</div>
+
+    <div class="content-wrapper">
+        <div class="core-message">
+            <h1>Synthesize. Innovate. Ascend.</h1>
+            <p>A curated frequency for developers operating at a higher wavelength. Share signals, forge connections, build the future.</p>
         </div>
-    </header>
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-
-        <section class="text-center mb-24 md:mb-32">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4">Where <span class="text-accent">Proven Talent</span> Converges.</h1>
-            <p class="text-xl text-text-secondary max-w-3xl mx-auto mb-8">
-                The Echelon is a curated network for accomplished developers. A space for peer-to-peer exchange, ideation, and the genesis of new collaborations.
-            </p>
-            <a href="#philosophy" class="btn-accent text-lg">Explore the Core</a>
-        </section>
-
-        <section id="philosophy" class="mb-20 md:mb-28 scroll-mt-20">
-             <div class="glass-pane p-8 md:p-12">
-                <h2 class="section-title">Philosophy</h2>
-                <div class="grid md:grid-cols-2 gap-8 text-lg text-text-primary">
-                    <div>
-                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Beyond the Basics</h3>
-                        <p class="text-text-secondary">We operate on the assumption of competence. This is a space for those who have already demonstrated skill and are looking for higher-level interaction and challenges.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Mutual Elevation</h3>
-                        <p class="text-text-secondary">Share insights, critique ideas constructively, and discover collaborators who match your drive. Growth here is driven by the collective experience.</p>
-                    </div>
-                     <div>
-                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Independent Ventures</h3>
-                        <p class="text-text-secondary">The focus isn't one monolithic project, but fostering an environment where members can spark and pursue their own ambitious ventures, potentially finding co-founders or key team members within the network.</p>
-                    </div>
-                     <div>
-                        <h3 class="font-semibold text-xl mb-2 text-gray-200">Curated Community</h3>
-                        <p class="text-text-secondary">Membership is selective to maintain a high signal-to-noise ratio. Contribution and mutual respect are fundamental pillars.</p>
-                    </div>
-                </div>
+        <div class="info-grid">
+            <div class="info-block">
+                <h3>Core Concept</h3>
+                <p>Echelon is not a company, it's a nexus. A decentralized collective of skilled developers sharing insights and exploring collaborative potential across diverse projects.</p>
             </div>
-        </section>
-
-        <section id="nexus" class="mb-20 md:mb-28 scroll-mt-20">
-            <h2 class="section-title text-center">The Nexus</h2>
-            <p class="text-center text-text-secondary text-lg mb-12 max-w-2xl mx-auto">A dynamic hub for ideas, discussions, and potential partnerships.</p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                <div class="glass-pane p-6 flex flex-col items-center text-center hover:border-accent transition duration-200">
-                     <svg class="w-12 h-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
-                    <h3 class="font-semibold text-xl mb-2 text-gray-200">Idea Exchange</h3>
-                    <p class="text-text-secondary text-sm">Dedicated channels for discussing emerging tech, architectural patterns, and project concepts.</p>
-                </div>
-                <div class="glass-pane p-6 flex flex-col items-center text-center hover:border-accent transition duration-200">
-                    <svg class="w-12 h-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                    <h3 class="font-semibold text-xl mb-2 text-gray-200">Project Signals</h3>
-                    <p class="text-text-secondary text-sm">A space to broadcast personal projects seeking feedback or collaborators among peers.</p>
-                </div>
-                <div class="glass-pane p-6 flex flex-col items-center text-center hover:border-accent transition duration-200">
-                     <svg class="w-12 h-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                    <h3 class="font-semibold text-xl mb-2 text-gray-200">Curated Resources</h3>
-                    <p class="text-text-secondary text-sm">Access to shared insights, tool recommendations, and best practices distilled by the group.</p>
-                </div>
+            <div class="info-block">
+                <h3>Ideation Hub</h3>
+                <p>Engage in high-bandwidth discussions. Explore emerging technologies, critique architectures, and spark new ventures within a network of peers.</p>
             </div>
-        </section>
-
-        <section id="connect" class="text-center scroll-mt-20">
-            <h2 class="section-title">Connect</h2>
-            <p class="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">Entry into The Echelon is based on demonstrated experience and alignment with our collaborative ethos. This ensures a community of peers capable of meaningful contribution.</p>
-             <div class="glass-pane inline-block p-8 text-left max-w-lg">
-                 <h3 class="font-semibold text-xl mb-3 text-gray-200">Express Interest:</h3>
-                 <p class="text-text-secondary mb-5">If you believe your background and goals align with The Echelon, initiate contact. Be prepared to discuss your work and how you envision contributing to the network.</p>
-                 <a href="#" class="btn-outline w-full text-center">Initiate Contact Protocol</a>
-                 <p class="text-xs text-text-secondary mt-4 italic">Note: A nominal membership fee may apply upon acceptance to maintain shared resources and infrastructure.</p>
-             </div>
-        </section>
-
-    </main>
-
-    <footer class="mt-24 md:mt-32 py-8 border-t border-border-color">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-text-secondary text-sm">
-            <p>&copy; 2025 The Echelon. Signal integrity maintained.</p>
-            <p class="font-mono text-xs mt-1">// END TRANSMISSION //</p>
+            <div class="info-block">
+                <h3>Selective Network</h3>
+                <p>Access is curated based on demonstrated expertise and a collaborative mindset. We value signal over noise. Contribution fuels the collective.</p>
+            </div>
         </div>
-    </footer>
+    </div>
 
-    <script>
-        // Smooth scroll for navigation links
-        document.querySelectorAll('header nav a').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    // Calculate offset for sticky header
-                    const headerOffset = document.querySelector('header').offsetHeight || 60; // Adjust as needed
-                    const elementPosition = targetElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    <a href="#" class="connect-trigger">Initiate Sync</a>
 
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: "smooth"
-                    });
-
-                    // Update active state (simple version)
-                    document.querySelectorAll('header nav a').forEach(a => a.classList.remove('active'));
-                    this.classList.add('active');
-                }
-            });
-        });
-
-         // Update active nav link on scroll (optional, more robust implementation needed for accuracy)
-         // Basic idea:
-         const sections = document.querySelectorAll('section[id]');
-         window.addEventListener('scroll', () => {
-            let current = '';
-            const headerOffset = document.querySelector('header').offsetHeight + 20;
-            sections.forEach( section => {
-                const sectionTop = section.offsetTop - headerOffset;
-                if (pageYOffset >= sectionTop) {
-                    current = section.getAttribute('id');
-                }
-            });
-             document.querySelectorAll('header nav a').forEach(a => {
-                a.classList.remove('active');
-                if (a.getAttribute('href') === `#${current}`) {
-                    a.classList.add('active');
-                }
-             });
-             // Default to first link if near top
-             if (pageYOffset < headerOffset * 2 && !current) {
-                 const firstLink = document.querySelector('header nav a');
-                 if(firstLink) firstLink.classList.add('active');
-             }
-         });
-
-    </script>
-
-</body>
+    </body>
 </html>
 
