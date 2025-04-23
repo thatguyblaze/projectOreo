@@ -3,228 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECHELON // Developer Network</title>
+    <title>ECHELON // Network Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #000005; /* Near black */
-            --text-color: #e0e0e0;
-            --text-muted: #9a9a9a; /* Slightly brighter muted text */
-            --accent-color: #0077ff; /* Electric Blue */
-            --accent-light: #66b3ff;
+            --bg-primary: #0F0F1A; /* Very dark blue/purple */
+            --bg-secondary: #1A1A2E; /* Slightly lighter dark blue/purple */
+            --text-primary: #E0E0E0;
+            --text-secondary: #A0A0B0;
+            --accent-primary: #9333ea; /* Purple */
+            --accent-secondary: #c084fc; /* Lighter Purple */
+            --border-color: rgba(192, 132, 252, 0.2); /* Light purple transparent */
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             overflow-x: hidden;
-            min-height: 100vh;
-            position: relative; /* Needed for absolute positioned elements */
+            position: relative;
         }
 
-        /* Abstract background shapes (Unchanged) */
-        .shape {
-            position: absolute;
-            background: linear-gradient(45deg, var(--accent-color), #3300ff); /* Blue to deeper purple */
-            border-radius: 50%;
-            filter: blur(100px); /* Heavy blur for soft effect */
-            opacity: 0.15;
-            animation: float 20s ease-in-out infinite alternate;
-            z-index: 0; /* Behind content */
-        }
-        .shape-1 { top: -20%; left: -10%; width: 50vw; height: 50vw; animation-duration: 25s; }
-        .shape-2 { bottom: -15%; right: -15%; width: 60vw; height: 60vw; animation-duration: 30s; animation-delay: -5s; }
-        .shape-3 { top: 30%; right: 5%; width: 30vw; height: 30vw; animation-duration: 18s; animation-delay: -10s; background: linear-gradient(45deg, #ff0077, var(--accent-color)); } /* Add pinkish hue */
-
-        @keyframes float {
-            from { transform: translateY(0px) translateX(0px) rotate(0deg); }
-            to { transform: translateY(40px) translateX(-30px) rotate(15deg); }
+        /* Animated Geometric Background */
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1; /* Make it very subtle */
         }
 
-        /* Main content container (Unchanged) */
-        .content-wrapper {
+        /* Content Sections */
+        .content-section {
             position: relative;
             z-index: 1;
-            min-height: 100vh;
+            padding: 6rem 1rem; /* Increased padding */
+            min-height: 80vh;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            padding: 4rem 1rem;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .content-section:nth-child(odd) {
+            background-color: var(--bg-secondary);
+        }
+        .content-section:last-child {
+            border-bottom: none;
         }
 
-        /* Header/Logo (Unchanged) */
+        /* Header/Logo Styling */
         .header-logo {
-            position: absolute;
-            top: 2rem;
-            left: 2rem;
             font-weight: 900;
-            font-size: 1.5rem;
+            font-size: 1.8rem; /* Slightly larger */
             letter-spacing: 0.2em;
-            color: var(--text-color);
-            z-index: 10;
-            opacity: 0.8;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
         .header-logo span {
-            color: var(--accent-color);
-            opacity: 0.6;
+            color: var(--accent-secondary);
+            opacity: 0.7;
+            transition: color 0.3s ease, opacity 0.3s ease;
         }
-
-        /* Core message styling - Text Updated */
-        .core-message {
-            max-width: 800px;
-            text-align: center;
-            margin-bottom: 4rem;
+        .header-logo:hover {
+             color: var(--accent-secondary);
         }
+         .header-logo:hover span {
+            color: var(--text-primary);
+            opacity: 1;
+         }
 
-        .core-message h1 {
-            font-size: clamp(2.5rem, 7vw, 4.5rem); /* Slightly adjusted size */
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            letter-spacing: -0.02em;
-            background: linear-gradient(90deg, var(--text-color), #b0b0b0); /* Brighter gradient */
+        /* Section Title */
+        .section-title {
+             @apply text-3xl md:text-4xl font-bold mb-4 text-center;
+             background: linear-gradient(90deg, var(--accent-secondary), var(--text-primary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: fadeInDown 1s ease-out;
+        }
+        .section-subtitle {
+            @apply text-lg md:text-xl text-text-secondary text-center max-w-3xl mx-auto mb-12;
         }
 
-        /* Updated core message paragraph for clarity */
-        .core-message p {
-            font-size: clamp(1rem, 3vw, 1.25rem);
-            color: var(--text-muted);
-            max-width: 650px; /* Slightly wider */
-            margin: 0 auto;
-            line-height: 1.7;
-            animation: fadeInUp 1s ease-out 0.3s;
-            animation-fill-mode: backwards;
+        /* Card Styling */
+        .info-card {
+            background-color: rgba(26, 26, 46, 0.6); /* --bg-secondary transparent */
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 2rem;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.15); /* Purple shadow */
+            border-color: var(--accent-secondary);
+        }
+        .card-title {
+            @apply text-xl font-semibold mb-3 text-accent-secondary;
+        }
+        .card-text {
+            @apply text-text-secondary leading-relaxed;
+        }
+        .card-icon {
+             @apply w-10 h-10 mb-4 text-accent-primary;
         }
 
-        /* Abstract sections / Info blocks - Text Updated */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1000px;
-            width: 100%;
+        /* Button Styling */
+        .btn {
+            @apply inline-block px-8 py-3 rounded-lg font-semibold transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary;
+        }
+        .btn-primary {
+            @apply btn bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-md hover:from-purple-700 hover:to-violet-700 hover:shadow-lg hover:shadow-purple-500/30 focus:ring-violet-500 transform hover:-translate-y-1;
+        }
+        .btn-outline {
+             @apply btn border-2 border-accent-primary text-accent-secondary hover:bg-accent-primary hover:text-white focus:ring-accent-primary;
         }
 
-        .info-block {
-            background-color: rgba(10, 10, 15, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 1.5rem 2rem;
-            border-radius: 12px;
-            backdrop-filter: blur(5px);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-            animation: popIn 0.6s ease-out forwards;
-            opacity: 0; /* Start hidden for animation */
+        /* Scroll Animation Placeholders */
+        .scroll-fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
         }
-
-        .info-block:nth-child(1) { animation-delay: 0.5s; }
-        .info-block:nth-child(2) { animation-delay: 0.7s; }
-        .info-block:nth-child(3) { animation-delay: 0.9s; }
-
-        .info-block:hover {
-            transform: translateY(-5px);
-            border-color: rgba(0, 119, 255, 0.3);
-        }
-
-        /* Updated info block titles for clarity */
-        .info-block h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: var(--accent-light);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        /* Updated info block paragraphs for clarity */
-        .info-block p {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        /* Call to Action / Connect Button - Text Updated */
-        .connect-trigger {
-            position: absolute;
-            bottom: 2rem;
-            right: 2rem;
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px; /* Pill shape */
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10;
-            box-shadow: 0 5px 15px rgba(0, 119, 255, 0.3);
-            animation: pulse 2s infinite ease-in-out;
-            text-decoration: none; /* Ensure link style doesn't interfere */
-        }
-
-        .connect-trigger:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(0, 119, 255, 0.5);
-            animation-play-state: paused;
-        }
-
-        /* Simple Animations (Unchanged) */
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 119, 255, 0.3); }
-            50% { transform: scale(1.03); box-shadow: 0 8px 25px rgba(0, 119, 255, 0.4); }
-            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 119, 255, 0.3); }
-        }
-
-        /* Responsive Adjustments (Unchanged) */
-        @media (max-width: 768px) {
-            .header-logo { font-size: 1.2rem; left: 1rem; top: 1rem;}
-            .connect-trigger { right: 1rem; bottom: 1rem; padding: 0.6rem 1.2rem; font-size: 0.9rem;}
-            .content-wrapper { padding: 6rem 1rem 4rem 1rem; }
-            .info-grid { gap: 1rem; }
-            .info-block { padding: 1.2rem 1.5rem; }
+        .scroll-fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
     </style>
 </head>
-<body>
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
+<body class="relative">
 
-    <div class="header-logo">ECH<span>//</span>ON</div>
+    <canvas id="background-canvas"></canvas>
 
-    <div class="content-wrapper">
-        <div class="core-message">
-            <h1>Connect. Collaborate. Create.</h1>
-            <p>The Echelon is an exclusive network for skilled developers seeking to share knowledge, find collaborators, and push the boundaries of their craft.</p>
+    <header class="fixed top-0 left-0 w-full p-4 z-50 mix-blend-difference">
+         <div class="container mx-auto">
+             <a href="#" class="header-logo">ECH<span>//</span>ON</a>
+             </div>
+    </header>
+
+    <section class="content-section min-h-screen flex flex-col justify-center text-center" id="hero">
+        <div class="max-w-4xl mx-auto scroll-fade-in">
+            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
+                Where <span class="text-purple-400">Talent</span> Amplifies <span class="text-violet-400">Impact</span>.
+            </h1>
+            <p class="text-xl md:text-2xl text-text-secondary mb-10">
+                Echelon is a private network for proven developers dedicated to collaborative growth, knowledge sharing, and building what's next.
+            </p>
+            <a href="#about" class="btn-primary text-lg">Discover Echelon</a>
         </div>
+    </section>
 
-        <div class="info-grid">
-            <div class="info-block">
-                <h3>Peer Network</h3>
-                <p>Join a curated community of experienced developers. Exchange high-level ideas, get valuable feedback, and learn from others operating at your level.</p>
-            </div>
-            <div class="info-block">
-                <h3>Collaboration Hub</h3>
-                <p>Discover potential partners for your next big project or lend your expertise to others. Echelon fosters an environment where ambitious ideas find talented teams.</p>
-            </div>
-            <div class="info-block">
-                <h3>Growth Focused</h3>
-                <p>Membership is selective, ensuring a high-quality environment focused on mutual improvement and meaningful contribution. Elevate your skills and impact.</p>
+    <section class="content-section" id="about">
+        <div class="container mx-auto text-center max-w-5xl scroll-fade-in">
+            <h2 class="section-title">A Curated Collective</h2>
+            <p class="section-subtitle">
+                We are more than just a group; we are a high-signal environment built on mutual respect, shared expertise, and a drive for excellence. We filter for skill and commitment, ensuring every interaction is meaningful.
+            </p>
+            <div class="grid md:grid-cols-3 gap-8 text-left">
+                <div class="info-card">
+                     <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
+                    <h3 class="card-title">Peer-Driven Insight</h3>
+                    <p class="card-text">Engage with experienced developers across diverse domains. Share challenges, gain fresh perspectives, and accelerate your learning curve.</p>
+                </div>
+                 <div class="info-card">
+                     <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" /></svg>
+                    <h3 class="card-title">Selective Membership</h3>
+                    <p class="card-text">Our curated approach ensures a high concentration of talent and a focus on meaningful contribution, fostering genuine connections.</p>
+                </div>
+                 <div class="info-card">
+                     <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.63 2.25a14.98 14.98 0 0 0-5.84 7.38m6.16 12.12a14.98 14.98 0 0 1 6.16-12.12m-6.16 12.12v-4.8m0 4.8a14.98 14.98 0 0 1-6.16-12.12A14.98 14.98 0 0 1 9.63 2.25m-5.84 7.38a14.98 14.98 0 0 1-6.16-12.12m6.16 12.12v-4.8" /></svg>
+                    <h3 class="card-title">Beyond Code</h3>
+                    <p class="card-text">Discuss architecture, strategy, team dynamics, and the future of technology. Grow not just as a coder, but as a builder and leader.</p>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <a href="#" class="connect-trigger">Request Access</a>
+     <section class="content-section" id="process">
+        <div class="container mx-auto max-w-5xl scroll-fade-in">
+            <h2 class="section-title">The Echelon Flow</h2>
+            <p class="section-subtitle">
+                Our network facilitates connection and collaboration through structured channels and organic interaction. Find your collaborators, share your breakthroughs.
+            </p>
+             <div class="grid md:grid-cols-2 gap-8 items-center">
+                 <div class="text-center p-8 border border-dashed border-border-color rounded-lg">
+                     <svg class="w-24 h-24 mx-auto text-text-secondary opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" /></svg>
+                     <p class="mt-4 text-text-secondary italic">Abstract representation of network connections</p>
+                 </div>
+                 <div class="space-y-6 text-left">
+                    <div class="flex items-start space-x-4">
+                         <span class="text-accent-primary font-bold text-2xl mt-1">&rarr;</span>
+                         <div>
+                             <h4 class="font-semibold text-lg mb-1">Knowledge Streams</h4>
+                             <p class="text-text-secondary">Dedicated spaces for deep dives into specific technologies, design patterns, and industry trends.</p>
+                         </div>
+                     </div>
+                     <div class="flex items-start space-x-4">
+                         <span class="text-accent-primary font-bold text-2xl mt-1">&rarr;</span>
+                         <div>
+                             <h4 class="font-semibold text-lg mb-1">Project Signals</h4>
+                             <p class="text-text-secondary">Showcase your personal projects, seek feedback, or find skilled collaborators within the trusted network.</p>
+                         </div>
+                     </div>
+                     <div class="flex items-start space-x-4">
+                         <span class="text-accent-primary font-bold text-2xl mt-1">&rarr;</span>
+                         <div>
+                             <h4 class="font-semibold text-lg mb-1">Direct Connection</h4>
+                             <p class="text-text-secondary">Facilitated introductions and direct messaging allow for focused conversations and potential partnerships.</p>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="connect">
+        <div class="container mx-auto text-center max-w-3xl scroll-fade-in">
+            <h2 class="section-title">Join the Network</h2>
+            <p class="section-subtitle">
+                Echelon membership is for established developers who are passionate about their craft and eager to contribute to a community of peers. If this resonates with you, express your interest.
+            </p>
+            <div class="info-card max-w-xl mx-auto text-left p-8">
+                 <h3 class="card-title text-center mb-4">Application Process</h3>
+                 <p class="card-text mb-6 text-center">Our process involves reviewing your background and experience to ensure alignment with the group's ethos. Be ready to share your work and discuss your motivations.</p>
+                 <a href="#" class="btn-outline w-full text-center block">Request Access Inquiry</a>
+                 <p class="text-xs text-text-secondary mt-4 text-center italic">A modest membership fee supports shared resources and platform costs upon acceptance.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 text-center text-text-secondary text-sm relative z-10 bg-bg-primary">
+        <p>&copy; 2025 ECHELON // All rights reserved.</p>
+        <p class="mt-1 opacity-70">Network Integrity Protocol Active</p>
+    </footer>
+
+    <script>
+        // Background Animation (Simple Example - Replace with more complex if needed)
+        const canvas = document.getElementById('background-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let canvasWidth, canvasHeight;
+
+        function resizeCanvas() {
+            canvasWidth = canvas.width = window.innerWidth;
+            canvasHeight = canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvasWidth;
+                this.y = Math.random() * canvasHeight;
+                this.size = Math.random() * 1 + 0.5; // Smaller particles
+                this.speedX = Math.random() * 0.4 - 0.2; // Slower speed
+                this.speedY = Math.random() * 0.4 - 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvasWidth) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvasHeight) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(192, 132, 252, 0.5)'; // Lighter Purple particles
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            let numberOfParticles = (canvasWidth * canvasHeight) / 15000; // Adjust density
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function connectParticles() {
+            let opacityValue = 1;
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a + 1; b < particles.length; b++) { // Start b from a + 1
+                    let distance = Math.sqrt(
+                        Math.pow(particles[a].x - particles[b].x, 2) +
+                        Math.pow(particles[a].y - particles[b].y, 2)
+                    );
+                    if (distance < 100) { // Connection distance threshold
+                        opacityValue = 1 - (distance / 100);
+                        ctx.strokeStyle = `rgba(192, 132, 252, ${opacityValue * 0.3})`; // Adjust line opacity
+                        ctx.lineWidth = 0.5; // Thinner lines
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+
+        function animate() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+
+        // Scroll Fade-In Animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Optional: Stop observing once visible
+                    // observer.unobserve(entry.target);
+                }
+                // Optional: Fade out when scrolling out of view
+                // else {
+                //     entry.target.classList.remove('visible');
+                // }
+            });
+        }, {
+            threshold: 0.1 // Trigger when 10% of the element is visible
+        });
+
+        document.querySelectorAll('.scroll-fade-in').forEach((el) => {
+            observer.observe(el);
+        });
+
+    </script>
 
 </body>
 </html>
