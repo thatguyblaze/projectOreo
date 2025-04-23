@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Power Plant Control Simulator</title>
+    <title>Power Plant Control Simulator v2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles */
+        /* Base styles */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Dark background */
-            color: #e2e8f0; /* Light text */
+            background-color: #1f2937; /* Darker blue-grey */
+            color: #f3f4f6; /* Lighter grey text */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -19,333 +19,262 @@
             padding: 1rem;
             overflow: hidden; /* Prevent scrollbars during explosion */
         }
+        /* Control Panel */
         .control-panel {
-            background-color: #2d3748; /* Slightly lighter dark */
-            border-radius: 0.75rem; /* Rounded corners */
-            padding: 2rem;
-            border: 2px solid #4a5568;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+            background-color: #374151; /* Medium grey */
+            border-radius: 0.75rem;
+            padding: 1.5rem 2rem; /* Slightly adjusted padding */
+            border: 3px solid #4b5563; /* Thicker border */
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 800px; /* Max width for the panel */
+            max-width: 900px; /* Wider panel */
         }
+        /* Screens (Digital Displays) */
         .screen {
-            background-color: #000;
-            color: #0f0; /* Green digital text */
-            font-family: 'Orbitron', sans-serif; /* Digital-style font */
+            background-color: #111827; /* Very dark blue-grey */
+            color: #2dd4bf; /* Teal digital text */
+            font-family: 'Orbitron', sans-serif;
             padding: 0.75rem 1rem;
-            border-radius: 0.375rem; /* Slightly rounded */
-            border: 1px solid #38a169; /* Green border */
+            border-radius: 0.375rem;
+            border: 2px solid #14b8a6; /* Teal border */
             text-align: right;
-            font-size: 1.5rem; /* Larger font size */
-            box-shadow: inset 0 2px 4px 0 rgba(0, 255, 0, 0.1);
+            font-size: 1.5rem;
+            box-shadow: inset 0 2px 4px 0 rgba(45, 212, 191, 0.1), 0 0 8px rgba(45, 212, 191, 0.3); /* Inner and outer glow */
             margin-bottom: 1rem;
-            min-height: 50px; /* Ensure consistent height */
+            min-height: 50px;
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            transition: color 0.3s, border-color 0.3s;
         }
-         .status-screen {
-            font-size: 1.25rem; /* Slightly smaller for status */
+        .status-screen {
+            font-size: 1.1rem; /* Smaller for status */
             text-align: center;
             justify-content: center;
             min-height: 40px;
-            margin-top: 1rem;
-         }
-        .status-stable { color: #68d391; border-color: #68d391; box-shadow: inset 0 2px 4px 0 rgba(104, 211, 145, 0.1); }
-        .status-warning { color: #f6e05e; border-color: #f6e05e; animation: pulse-warning 1.5s infinite; box-shadow: inset 0 2px 4px 0 rgba(246, 224, 94, 0.1); }
-        .status-danger { color: #fc8181; border-color: #fc8181; animation: pulse-danger 1s infinite; box-shadow: inset 0 2px 4px 0 rgba(252, 129, 129, 0.1); }
-        .status-meltdown { color: #fff; background-color: #c53030; border-color: #c53030; animation: blink-danger 0.5s infinite; box-shadow: none; }
+            margin-top: 0.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        /* Status Colors & Animations */
+        .status-offline { color: #6b7280; border-color: #4b5563; box-shadow: inset 0 2px 4px 0 rgba(107, 114, 128, 0.1); }
+        .status-starting { color: #facc15; border-color: #facc15; animation: pulse-starting 1.8s infinite; box-shadow: inset 0 2px 4px 0 rgba(250, 204, 21, 0.1), 0 0 8px rgba(250, 204, 21, 0.3); }
+        .status-stable { color: #2dd4bf; border-color: #14b8a6; box-shadow: inset 0 2px 4px 0 rgba(45, 212, 191, 0.1), 0 0 8px rgba(45, 212, 191, 0.3); }
+        .status-warning { color: #fb923c; border-color: #fb923c; animation: pulse-warning 1.5s infinite; box-shadow: inset 0 2px 4px 0 rgba(251, 146, 60, 0.1), 0 0 10px rgba(251, 146, 60, 0.4); }
+        .status-danger { color: #f87171; border-color: #f87171; animation: pulse-danger 1s infinite; box-shadow: inset 0 2px 4px 0 rgba(248, 113, 113, 0.1), 0 0 12px rgba(248, 113, 113, 0.5); }
+        .status-meltdown { color: #fff; background-color: #dc2626; border-color: #b91c1c; animation: blink-danger 0.5s infinite; box-shadow: none; }
+        .status-grid-connected { color: #a3e635; border-color: #84cc16; box-shadow: inset 0 2px 4px 0 rgba(163, 230, 53, 0.1), 0 0 10px rgba(163, 230, 53, 0.4); }
 
-        @keyframes pulse-warning {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        @keyframes pulse-danger {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-         @keyframes blink-danger {
-            0%, 100% { background-color: #c53030; color: #fff; }
-            50% { background-color: #e53e3e; color: #eee; }
-        }
+        @keyframes pulse-starting { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes pulse-warning { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes pulse-danger { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes blink-danger { 0%, 100% { background-color: #dc2626; color: #fff; } 50% { background-color: #ef4444; color: #eee; } }
 
         /* Custom Switch Style */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #4a5568; /* Darker grey */
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: #a0aec0; /* Lighter grey */
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #48bb78; /* Green when on */
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-            background-color: white;
-        }
+        .switch-container { display: flex; flex-direction: column; align-items: center; }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; margin-top: 5px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #4b5563; transition: .4s; border-radius: 34px; border: 1px solid #6b7280; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 3px; background-color: #9ca3af; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #10b981; border-color: #059669; } /* Emerald green */
+        input:checked + .slider:before { transform: translateX(26px); background-color: white; }
+        input:disabled + .slider { cursor: not-allowed; background-color: #374151; border-color: #4b5563; }
+        input:disabled + .slider:before { background-color: #6b7280; }
 
         /* Custom Dial Style */
+        .dial-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
         input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 15px;
-            background: linear-gradient(to right, #f6e05e, #e53e3e); /* Yellow to Red gradient */
-            border-radius: 5px;
-            outline: none;
-            opacity: 0.9;
-            transition: opacity .2s;
-            cursor: pointer;
-            margin-top: 0.5rem;
+            -webkit-appearance: none; appearance: none; width: 80%; height: 18px;
+            background: linear-gradient(to right, #34d399, #facc15, #f87171); /* Green -> Yellow -> Red */
+            border-radius: 8px; outline: none; opacity: 0.8; transition: opacity .2s; cursor: pointer; margin-top: 8px; border: 1px solid #4b5563;
         }
-        input[type="range"]:hover {
-            opacity: 1;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 25px;
-            height: 25px;
-            background: #cbd5e0; /* Light grey handle */
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid #4a5568;
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 25px;
-            height: 25px;
-            background: #cbd5e0;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid #4a5568;
-        }
+        input[type="range"]:hover { opacity: 1; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; background: #e5e7eb; border-radius: 50%; cursor: pointer; border: 3px solid #4b5563; }
+        input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; background: #e5e7eb; border-radius: 50%; cursor: pointer; border: 3px solid #4b5563; }
+        input[type="range"]:disabled { cursor: not-allowed; opacity: 0.5; background: #4b5563; }
+        input[type="range"]:disabled::-webkit-slider-thumb { background: #9ca3af; border-color: #6b7280; }
+        input[type="range"]:disabled::-moz-range-thumb { background: #9ca3af; border-color: #6b7280; }
+        .dial-value { font-size: 0.9rem; color: #9ca3af; margin-top: 4px; font-family: 'Orbitron', sans-serif; }
 
         /* Button Style */
         .control-button {
-            background-color: #4a5568;
-            border: 2px solid #718096;
-            color: #e2e8f0;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            background-color: #4b5563; border: none; color: #f3f4f6;
+            padding: 0.8rem 1.5rem; border-radius: 0.375rem; font-weight: 500;
+            transition: all 0.2s ease-in-out; cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.12);
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem; /* For icons */
+            width: 100%; /* Make buttons fill container */
+            margin-top: 5px;
         }
-        .control-button:hover {
-            background-color: #718096;
-            border-color: #a0aec0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        .control-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        .control-button:disabled {
-             background-color: #2d3748;
-             border-color: #4a5568;
-             color: #718096;
-             cursor: not-allowed;
-             opacity: 0.6;
-         }
+        .control-button:hover:not(:disabled) { background-color: #6b7280; box-shadow: 0 6px 8px -1px rgba(0,0,0,0.25), 0 4px 6px -1px rgba(0,0,0,0.15); }
+        .control-button:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 2px 3px -1px rgba(0,0,0,0.2), 0 1px 2px -1px rgba(0,0,0,0.1); }
+        .control-button:disabled { background-color: #374151; color: #6b7280; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
+        .button-indicator { width: 10px; height: 10px; border-radius: 50%; background-color: #6b7280; transition: background-color 0.3s; }
+        .button-indicator.on { background-color: #34d399; box-shadow: 0 0 5px #34d399; }
+        .button-indicator.warn { background-color: #facc15; box-shadow: 0 0 5px #facc15; }
+        .button-indicator.danger { background-color: #f87171; box-shadow: 0 0 5px #f87171; }
 
         /* Explosion Overlay */
         #explosion-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,100,0,0.8) 0%, rgba(200,0,0,0.95) 70%, rgba(50,0,0,1) 100%);
-            display: flex;
-            flex-direction: column; /* Stack message and button */
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-            backdrop-filter: blur(5px); /* Optional blur effect */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(255,100,0,0.85) 0%, rgba(200,0,0,0.95) 70%, rgba(50,0,0,1) 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            backdrop-filter: blur(5px);
         }
-        #explosion-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        #explosion-message {
-            font-size: 4rem;
-            color: white;
-            text-shadow: 2px 2px 5px black;
-            font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
-            margin-bottom: 2rem; /* Space before button */
-            text-align: center;
-        }
+        #explosion-overlay.active { opacity: 1; visibility: visible; }
+        #explosion-message { font-size: 4rem; color: white; text-shadow: 3px 3px 6px black; font-weight: bold; font-family: 'Orbitron', sans-serif; margin-bottom: 2rem; text-align: center; }
         #reset-button {
-             background-color: #e2e8f0;
-             color: #1a202c;
-             padding: 1rem 2rem;
-             border-radius: 0.5rem;
-             font-size: 1.25rem;
-             font-weight: bold;
-             cursor: pointer;
-             border: none;
-             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-             transition: background-color 0.2s;
+             background-color: #f3f4f6; color: #1f2937; padding: 1rem 2.5rem; border-radius: 0.5rem;
+             font-size: 1.25rem; font-weight: bold; cursor: pointer; border: none;
+             box-shadow: 0 5px 10px rgba(0,0,0,0.3); transition: background-color 0.2s;
         }
-        #reset-button:hover {
-            background-color: #cbd5e0;
-        }
+        #reset-button:hover { background-color: #d1d5db; }
 
-        /* Control Labels */
-        .control-label {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #a0aec0; /* Lighter grey for labels */
-            display: block; /* Ensure label is above control */
-            text-align: center; /* Center labels */
-        }
-
-        /* Layout */
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid */
-            gap: 2rem; /* Gap between controls */
-            align-items: start; /* Align items to the top */
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Center items within the group */
-        }
+        /* Control Labels & Grouping */
+        .control-label { font-weight: 500; margin-bottom: 0.5rem; color: #9ca3af; display: block; text-align: center; font-size: 0.9rem; }
+        .control-group { display: flex; flex-direction: column; align-items: center; background-color: #4b5563; padding: 1rem; border-radius: 0.5rem; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; align-items: start; }
+        .section-title { text-align: center; font-size: 1.25rem; font-weight: 600; color: #d1d5db; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #6b7280; }
     </style>
 </head>
 <body>
     <div class="control-panel">
-        <h1 class="text-3xl font-bold text-center mb-6 text-yellow-400">Power Plant Control</h1>
+        <h1 class="text-3xl font-bold text-center mb-4 text-teal-400 tracking-wider">Reactor Control Console v2</h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-                <label class="block text-sm font-medium text-gray-400 mb-1">Power Output (kW)</label>
+                <label class="block text-xs font-medium text-gray-400 mb-1 text-center">Power Output (kW)</label>
                 <div id="power-output" class="screen">0</div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-400 mb-1">Core Temperature (°C)</label>
+                <label class="block text-xs font-medium text-gray-400 mb-1 text-center">Core Temp (°C)</label>
                 <div id="temperature" class="screen">20</div>
             </div>
+             <div>
+                <label class="block text-xs font-medium text-gray-400 mb-1 text-center">Grid Status</label>
+                <div id="grid-status" class="screen status-screen status-offline">OFFLINE</div>
+            </div>
         </div>
-
-        <div>
+         <div class="mb-6">
              <label class="block text-sm font-medium text-gray-400 mb-1 text-center">System Status</label>
-             <div id="system-status" class="screen status-screen status-stable">OFFLINE</div>
+             <div id="system-status" class="screen status-screen status-offline">OFFLINE</div>
          </div>
 
-        <div class="mt-8 pt-6 border-t border-gray-600">
-            <h2 class="text-xl font-semibold text-center mb-6 text-gray-300">Controls</h2>
+
+        <div class="mt-6 pt-4 border-t border-gray-600">
             <div class="controls-grid">
-                <div class="control-group">
-                    <label for="main-power" class="control-label">Main Power</label>
-                    <label class="switch">
-                        <input type="checkbox" id="main-power">
-                        <span class="slider"></span>
-                    </label>
+
+                <div class="control-group col-span-full md:col-span-1">
+                    <label class="control-label section-title mb-2">Startup Sequence</label>
+                    <button id="aux-power-btn" class="control-button mb-2">
+                        <span id="aux-power-indicator" class="button-indicator"></span>Auxiliary Power
+                    </button>
+                    <button id="coolant-startup-btn" class="control-button mb-2" disabled>
+                         <span id="coolant-startup-indicator" class="button-indicator"></span>Engage Coolant
+                    </button>
+                    <button id="main-breaker-btn" class="control-button mb-2" disabled>
+                         <span id="main-breaker-indicator" class="button-indicator"></span>Main Breaker
+                    </button>
+                    <button id="reactor-ignition-btn" class="control-button" disabled>
+                        <span id="reactor-ignition-indicator" class="button-indicator"></span>Ignite Reactor
+                    </button>
                 </div>
 
-                <div class="control-group">
-                    <label for="coolant-pump" class="control-label">Coolant Pump</label>
-                    <label class="switch">
-                        <input type="checkbox" id="coolant-pump" disabled> <span class="slider"></span>
-                    </label>
+                <div class="control-group col-span-full md:col-span-1">
+                     <label class="control-label section-title mb-2">Reactor Control</label>
+                    <div class="dial-container">
+                        <label for="reactor-level" class="control-label">Control Rods (%)</label>
+                        <input type="range" id="reactor-level" min="0" max="100" value="0" disabled>
+                        <span id="reactor-level-value" class="dial-value">0%</span>
+                    </div>
                 </div>
 
-                <div class="control-group">
-                    <label for="reactor-level" class="control-label">Reactor Level (%)</label>
-                    <input type="range" id="reactor-level" min="0" max="100" value="0" disabled> <span id="reactor-level-value" class="text-sm text-gray-400 mt-1">0%</span>
-                </div>
+                <div class="control-group col-span-full md:col-span-1">
+                    <label class="control-label section-title mb-2">Operations</label>
+                     <button id="connect-grid-btn" class="control-button mb-2" disabled>
+                        <span id="connect-grid-indicator" class="button-indicator"></span>Connect to Grid
+                    </button>
+                    <button id="emergency-vent-btn" class="control-button" disabled>
+                        <span id="emergency-vent-indicator" class="button-indicator"></span>Emergency Vent
+                    </button>
+                     <span id="vent-status" class="text-xs text-gray-400 mt-2 h-4"></span> </div>
 
-                 <div class="control-group">
-                    <label for="emergency-vent" class="control-label">Emergency Vent</label>
-                    <button id="emergency-vent" class="control-button" disabled>VENT</button>
-                </div>
             </div>
         </div>
     </div>
 
     <div id="explosion-overlay">
-        <div id="explosion-message">MELTDOWN!</div>
+        <div id="explosion-message">REACTOR MELTDOWN!</div>
         <button id="reset-button">Restart Simulation</button>
     </div>
 
     <script>
         // --- DOM Elements ---
-        const mainPowerSwitch = document.getElementById('main-power');
-        const coolantPumpSwitch = document.getElementById('coolant-pump');
-        const reactorLevelDial = document.getElementById('reactor-level');
-        const reactorLevelValue = document.getElementById('reactor-level-value');
-        const emergencyVentButton = document.getElementById('emergency-vent');
-
         const powerOutputDisplay = document.getElementById('power-output');
         const temperatureDisplay = document.getElementById('temperature');
         const systemStatusDisplay = document.getElementById('system-status');
+        const gridStatusDisplay = document.getElementById('grid-status');
+
+        // Startup Buttons & Indicators
+        const auxPowerBtn = document.getElementById('aux-power-btn');
+        const auxPowerIndicator = document.getElementById('aux-power-indicator');
+        const coolantStartupBtn = document.getElementById('coolant-startup-btn');
+        const coolantStartupIndicator = document.getElementById('coolant-startup-indicator');
+        const mainBreakerBtn = document.getElementById('main-breaker-btn');
+        const mainBreakerIndicator = document.getElementById('main-breaker-indicator');
+        const reactorIgnitionBtn = document.getElementById('reactor-ignition-btn');
+        const reactorIgnitionIndicator = document.getElementById('reactor-ignition-indicator');
+
+        // Reactor Control
+        const reactorLevelDial = document.getElementById('reactor-level');
+        const reactorLevelValue = document.getElementById('reactor-level-value');
+
+        // Operations Buttons & Indicators
+        const connectGridBtn = document.getElementById('connect-grid-btn');
+        const connectGridIndicator = document.getElementById('connect-grid-indicator');
+        const emergencyVentBtn = document.getElementById('emergency-vent-btn');
+        const emergencyVentIndicator = document.getElementById('emergency-vent-indicator');
+        const ventStatus = document.getElementById('vent-status');
+
 
         const explosionOverlay = document.getElementById('explosion-overlay');
         const resetButton = document.getElementById('reset-button');
 
         // --- Game State Variables ---
-        let gameState = {
-            mainPower: false,
-            coolantPump: false,
-            reactorLevel: 0, // percentage
-            powerOutput: 0, // kW
-            temperature: 20, // degrees C
-            status: 'OFFLINE', // OFFLINE, STABLE, WARNING, DANGER, MELTDOWN
-            ventCooldown: 0, // Seconds remaining for vent cooldown
-            isMeltdown: false
-        };
+        let gameState = {}; // Will be initialized by resetSimulation
 
         // --- Game Constants ---
-        const TEMP_BASE_INCREASE = 0.1; // Base temp increase per tick when reactor is off but power is on
-        const TEMP_REACTOR_MULTIPLIER = 0.15; // Temp increase per % of reactor level
-        const TEMP_COOLANT_REDUCTION = 0.5; // Factor by which coolant reduces temp increase
-        const TEMP_VENT_REDUCTION = 50; // Instant temp reduction from vent
-        const POWER_REACTOR_MULTIPLIER = 15; // Power generated per % of reactor level
-        const WARNING_TEMP = 400;
-        const DANGER_TEMP = 700;
-        const MELTDOWN_TEMP = 900;
-        const VENT_COOLDOWN_TIME = 10; // seconds
-        const GAME_TICK_INTERVAL = 200; // milliseconds (5 times per second)
+        const TEMP_AMBIENT = 20;
+        const TEMP_AUX_POWER_INCREASE = 0.05; // Slight temp increase from aux systems
+        const TEMP_REACTOR_MULTIPLIER = 0.18; // Temp increase per % of reactor level (slightly higher)
+        const TEMP_COOLANT_EFFECTIVENESS = 0.6; // Coolant reduces temp increase by 60%
+        const TEMP_VENT_REDUCTION = 75; // Instant temp reduction from vent (increased)
+        const POWER_REACTOR_MULTIPLIER = 20; // Power generated per % of reactor level (increased)
+        const POWER_LOSS_HIGH_TEMP = 0.001; // Efficiency loss per degree over warning temp
+        const WARNING_TEMP = 450; // Adjusted thresholds
+        const DANGER_TEMP = 750;
+        const MELTDOWN_TEMP = 950;
+        const GRID_CONNECT_MIN_POWER = 100; // Min power needed to connect to grid
+        const GRID_CONNECT_MAX_TEMP = WARNING_TEMP - 50; // Must be below warning temp to connect
+        const VENT_COOLDOWN_TIME = 15; // seconds (increased)
+        const GAME_TICK_INTERVAL = 250; // milliseconds (4 times per second)
+
+        // Startup Sequence Enum (using strings for clarity)
+        const StartupPhase = {
+            OFFLINE: 'OFFLINE',
+            AUX_POWER_ON: 'AUX_POWER_ON',
+            COOLANT_ENGAGED: 'COOLANT_ENGAGED',
+            MAIN_BREAKER_ON: 'MAIN_BREAKER_ON',
+            REACTOR_IGNITED: 'REACTOR_IGNITED', // Plant is running, ready for grid
+            GRID_CONNECTED: 'GRID_CONNECTED' // Fully operational
+        };
 
         // --- Game Loop ---
         let gameInterval = null;
 
         function startGameLoop() {
-            if (gameInterval) clearInterval(gameInterval); // Clear existing loop if any
+            if (gameInterval) clearInterval(gameInterval);
             gameInterval = setInterval(updateGame, GAME_TICK_INTERVAL);
             console.log("Game loop started");
         }
@@ -358,143 +287,59 @@
 
         // --- Update Function (Called every tick) ---
         function updateGame() {
-            if (gameState.isMeltdown) return; // Stop updates if meltdown occurred
+            if (gameState.isMeltdown) return;
 
             let tempIncrease = 0;
+            let currentPower = 0;
 
-            // --- Calculate Temperature Change ---
-            if (gameState.mainPower) {
-                // Base temperature increase just by being online
-                tempIncrease += TEMP_BASE_INCREASE;
-
-                // Temperature increase from reactor
-                tempIncrease += gameState.reactorLevel * TEMP_REACTOR_MULTIPLIER;
-
-                // Coolant reduces temperature increase
-                if (gameState.coolantPump) {
-                    tempIncrease *= (1 - TEMP_COOLANT_REDUCTION);
-                }
-
-                gameState.temperature += tempIncrease;
-
-            } else {
-                // Gradual cooldown when offline
-                if (gameState.temperature > 20) {
-                    gameState.temperature -= 0.5;
-                } else {
-                    gameState.temperature = 20;
-                }
+            // --- Temperature Calculation ---
+            if (gameState.startupPhase >= StartupPhase.AUX_POWER_ON) {
+                tempIncrease += TEMP_AUX_POWER_INCREASE; // Base heat from systems
             }
 
-             // Clamp temperature minimum
-             if (gameState.temperature < 20) {
-                 gameState.temperature = 20;
+            if (gameState.startupPhase >= StartupPhase.REACTOR_IGNITED && gameState.reactorLevel > 0) {
+                 let reactorHeat = gameState.reactorLevel * TEMP_REACTOR_MULTIPLIER;
+                 if (gameState.startupPhase >= StartupPhase.COOLANT_ENGAGED) {
+                     reactorHeat *= (1 - TEMP_COOLANT_EFFECTIVENESS); // Coolant reduces reactor heat
+                 }
+                 tempIncrease += reactorHeat;
+            }
+
+            // Apply temperature change
+            gameState.temperature += tempIncrease;
+
+            // Natural cooldown towards ambient if heat generation is low
+            if (tempIncrease < 0.1 && gameState.temperature > TEMP_AMBIENT) {
+                 gameState.temperature -= 0.2; // Slow cooldown
+            }
+
+            // Clamp temperature minimum
+             if (gameState.temperature < TEMP_AMBIENT) {
+                 gameState.temperature = TEMP_AMBIENT;
              }
 
-
-            // --- Calculate Power Output ---
-            if (gameState.mainPower && gameState.reactorLevel > 0) {
-                // Power generation depends on reactor level, but also slightly affected by high temp (less efficient)
-                let efficiency = 1;
-                if (gameState.temperature > DANGER_TEMP) {
-                    efficiency = 0.8; // Reduced efficiency in danger zone
-                } else if (gameState.temperature > WARNING_TEMP) {
-                    efficiency = 0.95; // Slightly reduced efficiency in warning zone
+            // --- Power Output Calculation ---
+            if (gameState.startupPhase >= StartupPhase.REACTOR_IGNITED && gameState.reactorLevel > 0) {
+                let basePower = gameState.reactorLevel * POWER_REACTOR_MULTIPLIER;
+                // Efficiency loss at high temperatures
+                let efficiency = 1.0;
+                if (gameState.temperature > WARNING_TEMP) {
+                    efficiency -= (gameState.temperature - WARNING_TEMP) * POWER_LOSS_HIGH_TEMP;
+                    efficiency = Math.max(0.5, efficiency); // Cap efficiency loss
                 }
-                gameState.powerOutput = Math.round(gameState.reactorLevel * POWER_REACTOR_MULTIPLIER * efficiency);
-            } else {
-                gameState.powerOutput = 0;
+                 currentPower = Math.round(basePower * efficiency);
             }
+            gameState.powerOutput = currentPower;
 
-            // --- Update Status ---
-            if (!gameState.mainPower) {
-                gameState.status = 'OFFLINE';
-            } else if (gameState.temperature >= MELTDOWN_TEMP) {
+
+            // --- Update Status & Check for Meltdown ---
+            if (gameState.temperature >= MELTDOWN_TEMP) {
                 gameState.status = 'MELTDOWN';
                 triggerMeltdown();
             } else if (gameState.temperature >= DANGER_TEMP) {
                 gameState.status = 'DANGER';
             } else if (gameState.temperature >= WARNING_TEMP) {
                 gameState.status = 'WARNING';
-            } else {
-                gameState.status = 'STABLE';
-            }
-
-            // --- Update Vent Cooldown ---
-            if (gameState.ventCooldown > 0) {
-                gameState.ventCooldown -= GAME_TICK_INTERVAL / 1000; // Decrease cooldown timer
-                if (gameState.ventCooldown <= 0) {
-                    gameState.ventCooldown = 0;
-                    emergencyVentButton.disabled = !gameState.mainPower; // Re-enable if power is on
-                    emergencyVentButton.textContent = "VENT";
-                } else {
-                     emergencyVentButton.textContent = `VENT (${Math.ceil(gameState.ventCooldown)}s)`;
-                }
-            }
-
-            // --- Update UI ---
-            updateUI();
-        }
-
-        // --- UI Update Function ---
-        function updateUI() {
-            powerOutputDisplay.textContent = gameState.powerOutput;
-            temperatureDisplay.textContent = Math.round(gameState.temperature);
-            reactorLevelValue.textContent = `${gameState.reactorLevel}%`;
-
-            // Update Status Display Class
-            systemStatusDisplay.textContent = gameState.status;
-            systemStatusDisplay.className = 'screen status-screen'; // Reset classes
-            switch (gameState.status) {
-                case 'STABLE':
-                    systemStatusDisplay.classList.add('status-stable');
-                    break;
-                case 'WARNING':
-                    systemStatusDisplay.classList.add('status-warning');
-                    break;
-                case 'DANGER':
-                    systemStatusDisplay.classList.add('status-danger');
-                    break;
-                case 'MELTDOWN':
-                    systemStatusDisplay.classList.add('status-meltdown');
-                    break;
-                case 'OFFLINE':
-                default:
-                     systemStatusDisplay.classList.add('status-stable'); // Use stable style for offline
-                     systemStatusDisplay.textContent = 'OFFLINE'; // Ensure text is OFFLINE
-                     break;
-            }
-
-            // Update control enabled states based on main power
-            coolantPumpSwitch.disabled = !gameState.mainPower || gameState.isMeltdown;
-            reactorLevelDial.disabled = !gameState.mainPower || gameState.isMeltdown;
-            // Vent button is disabled during cooldown OR if power is off OR during meltdown
-            emergencyVentButton.disabled = gameState.ventCooldown > 0 || !gameState.mainPower || gameState.isMeltdown;
-             if (gameState.ventCooldown > 0 && !gameState.isMeltdown) {
-                 emergencyVentButton.textContent = `VENT (${Math.ceil(gameState.ventCooldown)}s)`;
-             } else if (!gameState.isMeltdown) {
-                 emergencyVentButton.textContent = "VENT";
-             }
-
-             // Ensure controls reflect state (important for reset)
-             mainPowerSwitch.checked = gameState.mainPower;
-             coolantPumpSwitch.checked = gameState.coolantPump;
-             reactorLevelDial.value = gameState.reactorLevel;
-        }
-
-        // --- Event Listeners ---
-        mainPowerSwitch.addEventListener('change', (event) => {
-            gameState.mainPower = event.target.checked;
-            console.log("Main Power:", gameState.mainPower);
-            if (gameState.mainPower) {
-                // If turning on, start the game loop
-                startGameLoop();
-                gameState.status = 'STABLE'; // Initial status when turned on
-            } else {
-                // If turning off, reset relevant states
-                gameState.coolantPump = false;
-                gameState.reactorLevel = 0;
-                gameState.powerOutput = 0;
-                // Don't stop the loop immediately, let it cool down
-                // stopGameLoop(); // Optionally stop loop instantly
-              
+            } else if (gameState.startupPhase === StartupPhase.GRID_CONNECTED) {
+                 gameState.status = 'STABLE (GRID)';
+            } else if (gameState.startupPhase 
