@@ -3,302 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Lodge Name - Freemasons</title>
+    <title>The Echelon - [ACCESS GRANTED]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Apply Inter font globally */
+        /* Custom styles for the cryptic feel */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark background */
-            color: #d1d5db; /* Light text */
+            background-color: #0a0a0a; /* Very dark background */
+            color: #a0a0a0; /* Muted text color */
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
-        /* Subtle background pattern (optional) */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 60%);
-            opacity: 0.5;
-            z-index: -1;
-            pointer-events: none;
+        /* Subtle glow effect for key elements */
+        .glow {
+            text-shadow: 0 0 8px rgba(0, 191, 255, 0.3), 0 0 12px rgba(0, 191, 255, 0.2); /* Deep sky blue glow */
         }
-        /* Custom scrollbar for a sleeker look (optional) */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .subtle-glow {
+             text-shadow: 0 0 5px rgba(0, 191, 255, 0.2);
         }
-        ::-webkit-scrollbar-track {
-            background: #1f2937; /* Slightly lighter dark */
+        /* Animated gradient border effect */
+        .gradient-border {
+            position: relative;
+            border-radius: 0.5rem; /* Corresponds to rounded-lg */
+            padding: 1px; /* Border thickness */
+            background: linear-gradient(90deg, #1f2937, #0a0a0a, #1f2937); /* Dark gradient */
+            background-size: 200% 100%;
+            animation: gradient-animation 5s linear infinite;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #4b5563; /* Gray */
-            border-radius: 4px;
+        .gradient-border > * {
+            background-color: #111827; /* Inner background (gray-900) */
+            border-radius: calc(0.5rem - 1px); /* Adjust inner radius */
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* Lighter gray on hover */
+
+        @keyframes gradient-animation {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
-        /* Section heading style */
-        .section-heading {
-            @apply text-3xl font-semibold text-gray-100 mb-6 border-l-4 border-yellow-500 pl-4;
+
+        /* Simple text reveal animation */
+        .reveal-text {
+            opacity: 0;
+            animation: fadeIn 1.5s ease-out forwards;
         }
-        /* Button style */
-        .btn {
-            @apply inline-block bg-yellow-600 text-gray-900 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300 ease-in-out;
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
-        /* Navigation link style */
-        .nav-link {
-            @apply text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200;
+        .reveal-text-delayed { animation-delay: 0.5s; }
+        .reveal-text-more-delayed { animation-delay: 1s; }
+
+        /* Style for section headers */
+        .section-header {
+            font-weight: 700;
+            font-size: 1.875rem; /* text-3xl */
+            letter-spacing: 0.1em; /* Wider spacing */
+            text-transform: uppercase;
+            color: #e5e7eb; /* gray-200 */
+            margin-bottom: 1rem; /* mb-4 */
+            text-align: center;
         }
-        .nav-link-active {
-            @apply bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium;
+
+        /* Custom button style */
+        .btn-primary {
+             @apply inline-block px-6 py-3 bg-gradient-to-r from-sky-700 to-cyan-600 text-white font-semibold rounded-lg shadow-md hover:from-sky-600 hover:to-cyan-500 transition duration-300 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500;
         }
+        .btn-secondary {
+             @apply inline-block px-6 py-3 bg-gray-700 text-gray-300 font-semibold rounded-lg shadow-md hover:bg-gray-600 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-gray-500;
+        }
+
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="bg-gray-800/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0">
-                    <a href="#home" class="flex items-center space-x-2">
-                        <img class="h-10 w-10 rounded-full"
-                             src="https://placehold.co/100x100/111827/FFF?text=L"
-                             alt="Lodge Logo Placeholder"
-                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/111827/FFF?text=Error';">
-                        <span class="text-white font-bold text-xl">Lodge Name</span>
-                    </a>
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" class="nav-link-active">Home</a>
-                        <a href="#about" class="nav-link">About Us</a>
-                        <a href="#history" class="nav-link">History</a>
-                        <a href="#membership" class="nav-link">Membership</a>
-                        <a href="#events" class="nav-link">Events</a>
-                        <a href="#contact" class="nav-link">Contact</a>
-                    </div>
-                </div>
-                <div class="-mr-2 flex md:hidden">
-                    <button type="button" id="mobile-menu-button" class="bg-gray-700 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Open main menu</span>
-                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                        </svg>
-                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#home" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Home</a>
-                <a href="#about" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">About Us</a>
-                <a href="#history" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">History</a>
-                <a href="#membership" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Membership</a>
-                <a href="#events" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Events</a>
-                <a href="#contact" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Contact</a>
-            </div>
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-50 backdrop-blur-md p-4 border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
+            <h1 class="text-xl font-bold text-gray-200 subtle-glow">// ECHELON</h1>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#about" class="text-gray-400 hover:text-sky-400 transition duration-300">Manifesto</a>
+                <a href="#join" class="text-gray-400 hover:text-sky-400 transition duration-300">Initiation</a>
+                <a href="#projects" class="text-gray-400 hover:text-sky-400 transition duration-300">Constructs</a>
+            </nav>
+             <button class="md:hidden text-gray-400 hover:text-white focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
         </div>
     </header>
 
-    <main>
-        <section id="home" class="relative py-24 md:py-32 min-h-[60vh] flex items-center justify-center text-center overflow-hidden">
-             <div class="absolute inset-0 bg-gradient-to-b from-gray-900/50 to-gray-900 z-10"></div>
-             <div class="relative z-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
-                    Welcome to <span class="text-yellow-400">[Your Lodge Name]</span>
-                </h1>
-                <p class="text-lg md:text-xl text-gray-300 mb-8">
-                    Building better men through fellowship, truth, and charity.
-                </p>
-                <a href="#about" class="btn">Learn More About Us</a>
+    <section class="min-h-screen flex items-center justify-center text-center bg-gradient-to-b from-black via-gray-900 to-black px-4 pt-20">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-100 mb-4 glow reveal-text">TRANSCEND THE MUNDANE.</h2>
+            <p class="text-lg sm:text-xl text-gray-400 mb-8 reveal-text reveal-text-delayed">We are the architects of the next level. A collective bound by code, driven by evolution.</p>
+            <div class="reveal-text reveal-text-more-delayed">
+                <a href="#about" class="btn-primary mr-2 mb-2">Discover More</a>
+                 <a href="#join" class="btn-secondary mb-2">Seek Initiation</a>
             </div>
-        </section>
+            </div>
+    </section>
 
-        <section id="about" class="py-16 md:py-24 bg-gray-800">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="section-heading text-center md:text-left">About Our Lodge</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <p class="text-lg mb-4">
-                            [Your Lodge Name], chartered in [Year], is a cornerstone of the community located in [City, State]. We are a fraternity of men dedicated to the principles of Brotherly Love, Relief, and Truth.
-                        </p>
-                        <p class="mb-4">
-                            Our members come from diverse backgrounds, united by a shared commitment to self-improvement, supporting one another, and contributing positively to society. We strive to uphold the timeless values and traditions of Freemasonry in a modern world.
-                        </p>
-                        <p>
-                            Explore our website to learn more about our history, activities, and how Freemasonry continues to make a difference in the lives of its members and the community.
-                        </p>
-                    </div>
-                    <div class="flex justify-center">
-                         <img class="rounded-lg shadow-xl max-w-md w-full h-auto object-cover"
-                             src="https://placehold.co/600x400/374151/FFF?text=Lodge+Photo"
-                             alt="Placeholder image of the lodge or members"
-                             onerror="this.onerror=null; this.src='https://placehold.co/600x400/374151/FFF?text=Error';">
-                    </div>
+    <section id="about" class="py-20 md:py-32 bg-gray-900 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <h3 class="section-header subtle-glow">Our Mandate</h3>
+            <div class="gradient-border">
+                 <div class="p-8 md:p-12 rounded-lg text-gray-300 space-y-6 text-base md:text-lg leading-relaxed">
+                    <p>Mediocrity is the default state. We reject it. The Echelon is not merely a group; it's a crucible for talent. We are developers, thinkers, and creators committed to mutual elevation.</p>
+                    <p>Our focus is twofold: relentless self-improvement and the collaborative construction of ambitious digital worlds. We don't just write code; we forge experiences, pushing the boundaries of what's possible in game development and beyond.</p>
+                    <p>Entry is selective. Purpose is paramount. We seek those who understand that true growth requires challenge and contribution.</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="history" class="py-16 md:py-24">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="section-heading text-center md:text-left">Our Rich History</h2>
-                <p class="text-lg mb-8 max-w-3xl">
-                    Since our founding in [Year], [Your Lodge Name] has played a significant role in [mention local history or contributions]. Discover the milestones and traditions that have shaped our lodge over the decades.
-                </p>
-                <div class="space-y-6">
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold text-yellow-400 mb-2">[Year] - Charter Granted</h3>
-                        <p>Our lodge was officially chartered by the Grand Lodge of [State/Jurisdiction].</p>
-                    </div>
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold text-yellow-400 mb-2">[Significant Year] - Milestone Event</h3>
-                        <p>Description of a key event, building dedication, or achievement.</p>
-                    </div>
-                     <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-semibold text-yellow-400 mb-2">Present Day</h3>
-                        <p>Continuing our legacy of fraternity and community service.</p>
+    <section id="join" class="py-20 md:py-32 bg-black px-4">
+         <div class="container mx-auto max-w-4xl text-center">
+             <h3 class="section-header subtle-glow">The Path</h3>
+             <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-lg">Membership is earned, not given. Prove your aptitude. Demonstrate your drive. Understand the commitment.</p>
+             <div class="bg-gray-900 p-8 rounded-lg shadow-xl border border-gray-700 inline-block max-w-xl text-left space-y-4">
+                <h4 class="text-xl font-semibold text-gray-200 mb-3">The Commitment:</h4>
+                <p class="text-gray-400">The Echelon operates on collective investment. Membership dues are required.</p>
+                <p class="text-gray-400">These contributions are not profit; they are fuel. They fund shared resources, exclusive member apparel <span class="italic">(uniforms)</span>, infrastructure for our projects, and the very tools we use to build.</p>
+                <p class="text-gray-400">This ensures every member is invested in our shared ascent and the tangible creation of large-scale games and initiatives.</p>
+                <p class="text-gray-300 font-semibold mt-4">Ready to prove your worth?</p>
+                <a href="#" class="btn-primary mt-4 block text-center">Begin Assessment</a>
+             </div>
+         </div>
+    </section>
+
+     <section id="projects" class="py-20 md:py-32 bg-gray-900 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <h3 class="section-header subtle-glow">Constructs</h3>
+            <p class="text-gray-400 text-center mb-12 text-lg">Witness the blueprints of our ambition. Current directives focus on large-scale game development.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="gradient-border">
+                    <div class="p-6 rounded-lg">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-2">[Project Chimera]</h4>
+                        <p class="text-gray-400">Status: // SPECIFICATION PHASE //</p>
+                        <p class="text-gray-400 mt-2">A multi-layered simulation exploring emergent systems. Requires advanced logic and architectural foresight.</p>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <section id="membership" class="py-16 md:py-24 bg-gray-800">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="section-heading justify-center">Becoming a Freemason</h2>
-                 <p class="text-lg mb-8 max-w-3xl mx-auto">
-                    Freemasonry welcomes men of good character who seek self-improvement and wish to be part of a worldwide brotherhood. Membership is open to men aged [Minimum Age, e.g., 18 or 21] who meet the qualifications and standards.
-                </p>
-                <p class="mb-8 max-w-3xl mx-auto">
-                    The path typically begins by expressing interest and getting to know members of the lodge. If you're interested in learning more about joining [Your Lodge Name], we encourage you to reach out.
-                </p>
-                <a href="#contact" class="btn">Inquire About Membership</a>
-            </div>
-        </section>
-
-        <section id="events" class="py-16 md:py-24">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="section-heading text-center md:text-left">Upcoming Lodge Events</h2>
-                <p class="text-lg mb-8 max-w-3xl">
-                    Stay informed about our meetings, social gatherings, and community service activities. (Note: Some events may be for members only).
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                        <div class="p-6">
-                            <p class="text-sm text-yellow-400 font-semibold mb-1">[Date, e.g., May 15, 2025]</p>
-                            <h3 class="text-xl font-semibold text-white mb-2">Stated Meeting</h3>
-                            <p class="text-gray-400 text-sm mb-3">Members Only | 7:00 PM</p>
-                            <p class="text-gray-300">Regular lodge business and fellowship.</p>
-                        </div>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                        <div class="p-6">
-                            <p class="text-sm text-yellow-400 font-semibold mb-1">[Date, e.g., June 5, 2025]</p>
-                            <h3 class="text-xl font-semibold text-white mb-2">Community Pancake Breakfast</h3>
-                            <p class="text-gray-400 text-sm mb-3">Open to Public | 8:00 AM - 11:00 AM</p>
-                            <p class="text-gray-300">Join us for a delicious breakfast supporting [Charity Name].</p>
-                        </div>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                        <div class="p-6">
-                            <p class="text-sm text-yellow-400 font-semibold mb-1">[Date, e.g., June 20, 2025]</p>
-                            <h3 class="text-xl font-semibold text-white mb-2">Guest Speaker Night</h3>
-                             <p class="text-gray-400 text-sm mb-3">Open to Guests | 7:30 PM</p>
-                            <p class="text-gray-300">An informative talk on [Topic]. RSVP required.</p>
-                        </div>
+                <div class="gradient-border">
+                     <div class="p-6 rounded-lg">
+                        <h4 class="text-xl font-semibold text-gray-200 mb-2">[Project Leviathan]</h4>
+                        <p class="text-gray-400">Status: // CORE ENGINE DEV //</p>
+                        <p class="text-gray-400 mt-2">Foundation for a persistent world experience. Focus on scalability and network optimization.</p>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <section id="contact" class="py-16 md:py-24 bg-gray-800">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                 <h2 class="section-heading text-center">Get In Touch</h2>
-                 <div class="max-w-lg mx-auto">
-                     <p class="text-center text-lg mb-8">
-                         Have questions or wish to inquire about membership? Please use the form below or contact our Lodge Secretary.
-                     </p>
-                     <form action="#" method="POST" class="space-y-6">
-                         <div>
-                             <label for="name" class="block text-sm font-medium text-gray-300">Full Name</label>
-                             <input type="text" name="name" id="name" required class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm text-white">
-                         </div>
-                         <div>
-                             <label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
-                             <input type="email" name="email" id="email" required class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm text-white">
-                         </div>
-                         <div>
-                             <label for="message" class="block text-sm font-medium text-gray-300">Message</label>
-                             <textarea id="message" name="message" rows="4" required class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm text-white"></textarea>
-                         </div>
-                         <div class="text-center">
-                             <button type="submit" class="btn">Send Message</button>
-                         </div>
-                     </form>
-                     <div class="mt-10 text-center text-gray-400">
-                         <p>Or contact the Lodge Secretary directly:</p>
-                         <p>[Secretary Name]</p>
-                         <p><a href="mailto:[secretary_email@example.com]" class="text-yellow-400 hover:text-yellow-300">[secretary_email@example.com]</a></p>
-                         <p>[Phone Number (Optional)]</p>
-                     </div>
                  </div>
-            </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <footer class="bg-gray-900 border-t border-gray-700">
-        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-gray-400">
-            <p>&copy; <span id="current-year"></span> [Your Lodge Name] No. [Lodge Number]. All Rights Reserved.</p>
-            <p class="text-sm mt-2">Meeting Location: [Your Lodge Address]</p>
-            <p class="text-sm mt-2">
-                Proudly part of the <a href="[Grand Lodge URL]" target="_blank" rel="noopener noreferrer" class="text-yellow-500 hover:text-yellow-400">Grand Lodge of [State/Jurisdiction]</a>
-            </p>
+    <footer class="py-8 bg-black border-t border-gray-800 px-4">
+        <div class="container mx-auto text-center text-gray-500 text-sm">
+            <p>&copy; 2025 The Echelon. Access Restricted. // Transmission Ends //</p>
         </div>
     </footer>
 
     <script>
-        // Mobile Menu Toggle
-        const menuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = menuButton.querySelector('svg:first-child');
-        const closeIcon = menuButton.querySelector('svg:last-child');
-
-        menuButton.addEventListener('click', () => {
-            const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-            menuButton.setAttribute('aria-expanded', !isExpanded);
-            mobileMenu.classList.toggle('hidden');
-            hamburgerIcon.classList.toggle('hidden');
-            closeIcon.classList.toggle('hidden');
-        });
-
-        // Close mobile menu when a link is clicked
-        const mobileLinks = mobileMenu.querySelectorAll('a');
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                menuButton.setAttribute('aria-expanded', 'false');
-                mobileMenu.classList.add('hidden');
-                hamburgerIcon.classList.remove('hidden');
-                closeIcon.classList.add('hidden');
-            });
-        });
-
-        // Smooth Scrolling for internal links
+        // Basic smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
-                if (targetElement) {
+                if(targetElement) {
                     // Calculate offset for fixed header
-                    const headerOffset = document.querySelector('header').offsetHeight;
+                    const headerOffset = document.querySelector('header').offsetHeight || 70; // Adjust if header height changes
                     const elementPosition = targetElement.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -310,30 +179,26 @@
             });
         });
 
-        // Update Footer Year
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-
-        // Simple Active Nav Link Highlighting on Scroll (Basic)
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('header nav a');
-        const mobileNavLinks = document.querySelectorAll('#mobile-menu a');
-
-        window.addEventListener('scroll', () => {
-            let current = '';
-            const headerHeight = document.querySelector('header').offsetHeight;
-
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop - headerHeight - 50; // Adjust offset as needed
-                if (pageYOffset >= sectionTop) {
-                    current = section.getAttribute('id');
+        // Add simple scroll reveal effect (optional)
+        const revealElements = document.querySelectorAll('.reveal-text');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                    // Optional: Stop observing after revealed
+                    // observer.unobserve(entry.target);
                 }
             });
+        }, { threshold: 0.1 }); // Trigger when 10% visible
 
-            // Update desktop nav
-            navLinks.forEach(link => {
-                link.classList.remove('nav-link-active');
-                link.classList.add('nav-link');
-                if (link.getAttribute('href') === `#${current}`) {
-                    link.classList.add('nav-link-active');
-                    link.classList.remove('nav-link');
-     
+        revealElements.forEach(el => {
+            // Ensure animation doesn't play immediately on load for elements already in view
+             el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+
+    </script>
+
+</body>
+</html>
+
