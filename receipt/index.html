@@ -3,343 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Power Plant Control Simulator v2</title>
+    <title>Grant Space Program</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Base styles */
+        /* Apply Inter font globally */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1f2937; /* Darker blue-grey */
-            color: #f3f4f6; /* Lighter grey text */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
-            overflow: hidden; /* Prevent scrollbars during explosion */
+            background-color: #111827; /* Dark background */
+            color: #e5e7eb; /* Light text */
         }
-        /* Control Panel */
-        .control-panel {
-            background-color: #374151; /* Medium grey */
-            border-radius: 0.75rem;
-            padding: 1.5rem 2rem; /* Slightly adjusted padding */
-            border: 3px solid #4b5563; /* Thicker border */
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 900px; /* Wider panel */
+        /* Custom gradient for header/hero */
+        .gradient-bg {
+            background: linear-gradient(90deg, #1f2937, #374151);
         }
-        /* Screens (Digital Displays) */
-        .screen {
-            background-color: #111827; /* Very dark blue-grey */
-            color: #2dd4bf; /* Teal digital text */
-            font-family: 'Orbitron', sans-serif;
-            padding: 0.75rem 1rem;
-            border-radius: 0.375rem;
-            border: 2px solid #14b8a6; /* Teal border */
-            text-align: right;
-            font-size: 1.5rem;
-            box-shadow: inset 0 2px 4px 0 rgba(45, 212, 191, 0.1), 0 0 8px rgba(45, 212, 191, 0.3); /* Inner and outer glow */
-            margin-bottom: 1rem;
-            min-height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            transition: color 0.3s, border-color 0.3s;
+        /* Style for division cards */
+        .division-card {
+            background-color: #1f2937; /* Slightly lighter dark */
+            border: 1px solid #374151; /* Subtle border */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .status-screen {
-            font-size: 1.1rem; /* Smaller for status */
+        .division-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+        /* Button styling */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; /* Rounded corners */
+            font-weight: 600;
             text-align: center;
-            justify-content: center;
-            min-height: 40px;
-            margin-top: 0.5rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
         }
-        /* Status Colors & Animations */
-        .status-offline { color: #6b7280; border-color: #4b5563; box-shadow: inset 0 2px 4px 0 rgba(107, 114, 128, 0.1); }
-        .status-starting { color: #facc15; border-color: #facc15; animation: pulse-starting 1.8s infinite; box-shadow: inset 0 2px 4px 0 rgba(250, 204, 21, 0.1), 0 0 8px rgba(250, 204, 21, 0.3); }
-        .status-stable { color: #2dd4bf; border-color: #14b8a6; box-shadow: inset 0 2px 4px 0 rgba(45, 212, 191, 0.1), 0 0 8px rgba(45, 212, 191, 0.3); }
-        .status-warning { color: #fb923c; border-color: #fb923c; animation: pulse-warning 1.5s infinite; box-shadow: inset 0 2px 4px 0 rgba(251, 146, 60, 0.1), 0 0 10px rgba(251, 146, 60, 0.4); }
-        .status-danger { color: #f87171; border-color: #f87171; animation: pulse-danger 1s infinite; box-shadow: inset 0 2px 4px 0 rgba(248, 113, 113, 0.1), 0 0 12px rgba(248, 113, 113, 0.5); }
-        .status-meltdown { color: #fff; background-color: #dc2626; border-color: #b91c1c; animation: blink-danger 0.5s infinite; box-shadow: none; }
-        .status-grid-connected { color: #a3e635; border-color: #84cc16; box-shadow: inset 0 2px 4px 0 rgba(163, 230, 53, 0.1), 0 0 10px rgba(163, 230, 53, 0.4); }
-
-        @keyframes pulse-starting { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        @keyframes pulse-warning { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        @keyframes pulse-danger { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes blink-danger { 0%, 100% { background-color: #dc2626; color: #fff; } 50% { background-color: #ef4444; color: #eee; } }
-
-        /* Custom Switch Style */
-        .switch-container { display: flex; flex-direction: column; align-items: center; }
-        .switch { position: relative; display: inline-block; width: 60px; height: 34px; margin-top: 5px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #4b5563; transition: .4s; border-radius: 34px; border: 1px solid #6b7280; }
-        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 3px; background-color: #9ca3af; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #10b981; border-color: #059669; } /* Emerald green */
-        input:checked + .slider:before { transform: translateX(26px); background-color: white; }
-        input:disabled + .slider { cursor: not-allowed; background-color: #374151; border-color: #4b5563; }
-        input:disabled + .slider:before { background-color: #6b7280; }
-
-        /* Custom Dial Style */
-        .dial-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        input[type="range"] {
-            -webkit-appearance: none; appearance: none; width: 80%; height: 18px;
-            background: linear-gradient(to right, #34d399, #facc15, #f87171); /* Green -> Yellow -> Red */
-            border-radius: 8px; outline: none; opacity: 0.8; transition: opacity .2s; cursor: pointer; margin-top: 8px; border: 1px solid #4b5563;
+        .btn-primary {
+            background-color: #4f46e5; /* Indigo */
+            color: white;
         }
-        input[type="range"]:hover { opacity: 1; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; background: #e5e7eb; border-radius: 50%; cursor: pointer; border: 3px solid #4b5563; }
-        input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; background: #e5e7eb; border-radius: 50%; cursor: pointer; border: 3px solid #4b5563; }
-        input[type="range"]:disabled { cursor: not-allowed; opacity: 0.5; background: #4b5563; }
-        input[type="range"]:disabled::-webkit-slider-thumb { background: #9ca3af; border-color: #6b7280; }
-        input[type="range"]:disabled::-moz-range-thumb { background: #9ca3af; border-color: #6b7280; }
-        .dial-value { font-size: 0.9rem; color: #9ca3af; margin-top: 4px; font-family: 'Orbitron', sans-serif; }
-
-        /* Button Style */
-        .control-button {
-            background-color: #4b5563; border: none; color: #f3f4f6;
-            padding: 0.8rem 1.5rem; border-radius: 0.375rem; font-weight: 500;
-            transition: all 0.2s ease-in-out; cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2), 0 2px 4px -1px rgba(0,0,0,0.12);
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem; /* For icons */
-            width: 100%; /* Make buttons fill container */
-            margin-top: 5px;
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: scale(1.05);
         }
-        .control-button:hover:not(:disabled) { background-color: #6b7280; box-shadow: 0 6px 8px -1px rgba(0,0,0,0.25), 0 4px 6px -1px rgba(0,0,0,0.15); }
-        .control-button:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 2px 3px -1px rgba(0,0,0,0.2), 0 1px 2px -1px rgba(0,0,0,0.1); }
-        .control-button:disabled { background-color: #374151; color: #6b7280; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
-        .button-indicator { width: 10px; height: 10px; border-radius: 50%; background-color: #6b7280; transition: background-color 0.3s; }
-        .button-indicator.on { background-color: #34d399; box-shadow: 0 0 5px #34d399; }
-        .button-indicator.warn { background-color: #facc15; box-shadow: 0 0 5px #facc15; }
-        .button-indicator.danger { background-color: #f87171; box-shadow: 0 0 5px #f87171; }
-
-        /* Explosion Overlay */
-        #explosion-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(255,100,0,0.85) 0%, rgba(200,0,0,0.95) 70%, rgba(50,0,0,1) 100%);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-            backdrop-filter: blur(5px);
+        .btn-secondary {
+            background-color: #374151; /* Gray */
+            color: #e5e7eb;
+            border: 1px solid #4b5563;
         }
-        #explosion-overlay.active { opacity: 1; visibility: visible; }
-        #explosion-message { font-size: 4rem; color: white; text-shadow: 3px 3px 6px black; font-weight: bold; font-family: 'Orbitron', sans-serif; margin-bottom: 2rem; text-align: center; }
-        #reset-button {
-             background-color: #f3f4f6; color: #1f2937; padding: 1rem 2.5rem; border-radius: 0.5rem;
-             font-size: 1.25rem; font-weight: bold; cursor: pointer; border: none;
-             box-shadow: 0 5px 10px rgba(0,0,0,0.3); transition: background-color 0.2s;
+        .btn-secondary:hover {
+            background-color: #4b5563;
+            transform: scale(1.05);
         }
-        #reset-button:hover { background-color: #d1d5db; }
-
-        /* Control Labels & Grouping */
-        .control-label { font-weight: 500; margin-bottom: 0.5rem; color: #9ca3af; display: block; text-align: center; font-size: 0.9rem; }
-        .control-group { display: flex; flex-direction: column; align-items: center; background-color: #4b5563; padding: 1rem; border-radius: 0.5rem; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
-        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; align-items: start; }
-        .section-title { text-align: center; font-size: 1.25rem; font-weight: 600; color: #d1d5db; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #6b7280; }
+        /* Ensure images/icons don't cause layout shifts */
+        img, svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
     </style>
 </head>
-<body>
-    <div class="control-panel">
-        <h1 class="text-3xl font-bold text-center mb-4 text-teal-400 tracking-wider">Reactor Control Console v2</h1>
+<body class="antialiased">
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1 text-center">Power Output (kW)</label>
-                <div id="power-output" class="screen">0</div>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1 text-center">Core Temp (°C)</label>
-                <div id="temperature" class="screen">20</div>
-            </div>
-             <div>
-                <label class="block text-xs font-medium text-gray-400 mb-1 text-center">Grid Status</label>
-                <div id="grid-status" class="screen status-screen status-offline">OFFLINE</div>
-            </div>
+    <header class="gradient-bg shadow-lg py-12 sm:py-16">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-2">
+                Grant Space Program
+            </h1>
+            <p class="text-xl sm:text-2xl text-indigo-300 font-semibold">
+                "Partnering Space Innovation"
+            </p>
         </div>
-         <div class="mb-6">
-             <label class="block text-sm font-medium text-gray-400 mb-1 text-center">System Status</label>
-             <div id="system-status" class="screen status-screen status-offline">OFFLINE</div>
-         </div>
+    </header>
 
+    <main class="container mx-auto px-6 py-12">
 
-        <div class="mt-6 pt-4 border-t border-gray-600">
-            <div class="controls-grid">
-
-                <div class="control-group col-span-full md:col-span-1">
-                    <label class="control-label section-title mb-2">Startup Sequence</label>
-                    <button id="aux-power-btn" class="control-button mb-2">
-                        <span id="aux-power-indicator" class="button-indicator"></span>Auxiliary Power
-                    </button>
-                    <button id="coolant-startup-btn" class="control-button mb-2" disabled>
-                         <span id="coolant-startup-indicator" class="button-indicator"></span>Engage Coolant
-                    </button>
-                    <button id="main-breaker-btn" class="control-button mb-2" disabled>
-                         <span id="main-breaker-indicator" class="button-indicator"></span>Main Breaker
-                    </button>
-                    <button id="reactor-ignition-btn" class="control-button" disabled>
-                        <span id="reactor-ignition-indicator" class="button-indicator"></span>Ignite Reactor
-                    </button>
-                </div>
-
-                <div class="control-group col-span-full md:col-span-1">
-                     <label class="control-label section-title mb-2">Reactor Control</label>
-                    <div class="dial-container">
-                        <label for="reactor-level" class="control-label">Control Rods (%)</label>
-                        <input type="range" id="reactor-level" min="0" max="100" value="0" disabled>
-                        <span id="reactor-level-value" class="dial-value">0%</span>
-                    </div>
-                </div>
-
-                <div class="control-group col-span-full md:col-span-1">
-                    <label class="control-label section-title mb-2">Operations</label>
-                     <button id="connect-grid-btn" class="control-button mb-2" disabled>
-                        <span id="connect-grid-indicator" class="button-indicator"></span>Connect to Grid
-                    </button>
-                    <button id="emergency-vent-btn" class="control-button" disabled>
-                        <span id="emergency-vent-indicator" class="button-indicator"></span>Emergency Vent
-                    </button>
-                     <span id="vent-status" class="text-xs text-gray-400 mt-2 h-4"></span> </div>
-
+        <section id="about" class="mb-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-indigo-400">About Us</h2>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-md max-w-3xl mx-auto">
+                <p class="text-lg leading-relaxed mb-4">
+                    The Grant Space Program is the most dedicated and user involved Ro-Space group on Roblox. We strive to provide our community with an exciting experience for everyone to enjoy such as rocket missions and space exploration.
+                </p>
+                <p class="text-lg leading-relaxed">
+                    We hope to see you around! Founded: 1/22/24.
+                </p>
             </div>
+        </section>
+
+        <section id="divisions" class="mb-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-indigo-400">Our Divisions</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="division-card p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold mb-2 text-white">GSPFD</h3>
+                    <p class="text-gray-400">Grant Space Program Fire Department</p>
+                </div>
+                <div class="division-card p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold mb-2 text-white">GSPS</h3>
+                    <p class="text-gray-400">Grant Space Program Security</p>
+                </div>
+                <div class="division-card p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold mb-2 text-white">GAPAC</h3>
+                    <p class="text-gray-400">Grant Astronaut Program and Astronaut Corps</p>
+                </div>
+                <div class="division-card p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold mb-2 text-white">Public Affairs</h3>
+                    <p class="text-gray-400">Community Engagement and Information</p>
+                </div>
+                <div class="division-card p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold mb-2 text-white">GSP PRL</h3>
+                    <p class="text-gray-400">GSP Propulsion and Research Laboratory</p>
+                </div>
+                 </div>
+        </section>
+
+        <section id="join" class="mb-16 scroll-mt-16 text-center">
+            <h2 class="text-3xl font-bold mb-8 text-indigo-400">Get Involved</h2>
+            <div class="bg-gray-800 p-8 rounded-lg shadow-md max-w-3xl mx-auto">
+                <p class="text-xl font-semibold mb-4">
+                    Join the group for an exclusive Employee role!
+                </p>
+                <p class="text-lg leading-relaxed mb-6">
+                    If you're interested in more information, be sure to join our communications server! We welcome all who share our passion for exploring space.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                     <a href="#" class="btn btn-primary">Join Roblox Group (Link)</a>
+                     <a href="#" class="btn btn-secondary">Join Comms Server (Link)</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 py-6 mt-16">
+        <div class="container mx-auto px-6 text-center text-sm">
+            <p>&copy; <script>document.write(new Date().getFullYear())</script> Grant Space Program. All Rights Reserved.</p>
+            <p>Founded: January 22, 2024</p>
         </div>
-    </div>
+    </footer>
 
-    <div id="explosion-overlay">
-        <div id="explosion-message">REACTOR MELTDOWN!</div>
-        <button id="reset-button">Restart Simulation</button>
-    </div>
+</body>
+</html>
 
-    <script>
-        // --- DOM Elements ---
-        const powerOutputDisplay = document.getElementById('power-output');
-        const temperatureDisplay = document.getElementById('temperature');
-        const systemStatusDisplay = document.getElementById('system-status');
-        const gridStatusDisplay = document.getElementById('grid-status');
-
-        // Startup Buttons & Indicators
-        const auxPowerBtn = document.getElementById('aux-power-btn');
-        const auxPowerIndicator = document.getElementById('aux-power-indicator');
-        const coolantStartupBtn = document.getElementById('coolant-startup-btn');
-        const coolantStartupIndicator = document.getElementById('coolant-startup-indicator');
-        const mainBreakerBtn = document.getElementById('main-breaker-btn');
-        const mainBreakerIndicator = document.getElementById('main-breaker-indicator');
-        const reactorIgnitionBtn = document.getElementById('reactor-ignition-btn');
-        const reactorIgnitionIndicator = document.getElementById('reactor-ignition-indicator');
-
-        // Reactor Control
-        const reactorLevelDial = document.getElementById('reactor-level');
-        const reactorLevelValue = document.getElementById('reactor-level-value');
-
-        // Operations Buttons & Indicators
-        const connectGridBtn = document.getElementById('connect-grid-btn');
-        const connectGridIndicator = document.getElementById('connect-grid-indicator');
-        const emergencyVentBtn = document.getElementById('emergency-vent-btn');
-        const emergencyVentIndicator = document.getElementById('emergency-vent-indicator');
-        const ventStatus = document.getElementById('vent-status');
-
-
-        const explosionOverlay = document.getElementById('explosion-overlay');
-        const resetButton = document.getElementById('reset-button');
-
-        // --- Game State Variables ---
-        let gameState = {}; // Will be initialized by resetSimulation
-
-        // --- Game Constants ---
-        const TEMP_AMBIENT = 20;
-        const TEMP_AUX_POWER_INCREASE = 0.05; // Slight temp increase from aux systems
-        const TEMP_REACTOR_MULTIPLIER = 0.18; // Temp increase per % of reactor level (slightly higher)
-        const TEMP_COOLANT_EFFECTIVENESS = 0.6; // Coolant reduces temp increase by 60%
-        const TEMP_VENT_REDUCTION = 75; // Instant temp reduction from vent (increased)
-        const POWER_REACTOR_MULTIPLIER = 20; // Power generated per % of reactor level (increased)
-        const POWER_LOSS_HIGH_TEMP = 0.001; // Efficiency loss per degree over warning temp
-        const WARNING_TEMP = 450; // Adjusted thresholds
-        const DANGER_TEMP = 750;
-        const MELTDOWN_TEMP = 950;
-        const GRID_CONNECT_MIN_POWER = 100; // Min power needed to connect to grid
-        const GRID_CONNECT_MAX_TEMP = WARNING_TEMP - 50; // Must be below warning temp to connect
-        const VENT_COOLDOWN_TIME = 15; // seconds (increased)
-        const GAME_TICK_INTERVAL = 250; // milliseconds (4 times per second)
-
-        // Startup Sequence Enum (using strings for clarity)
-        const StartupPhase = {
-            OFFLINE: 'OFFLINE',
-            AUX_POWER_ON: 'AUX_POWER_ON',
-            COOLANT_ENGAGED: 'COOLANT_ENGAGED',
-            MAIN_BREAKER_ON: 'MAIN_BREAKER_ON',
-            REACTOR_IGNITED: 'REACTOR_IGNITED', // Plant is running, ready for grid
-            GRID_CONNECTED: 'GRID_CONNECTED' // Fully operational
-        };
-
-        // --- Game Loop ---
-        let gameInterval = null;
-
-        function startGameLoop() {
-            if (gameInterval) clearInterval(gameInterval);
-            gameInterval = setInterval(updateGame, GAME_TICK_INTERVAL);
-            console.log("Game loop started");
-        }
-
-        function stopGameLoop() {
-            clearInterval(gameInterval);
-            gameInterval = null;
-            console.log("Game loop stopped");
-        }
-
-        // --- Update Function (Called every tick) ---
-        function updateGame() {
-            if (gameState.isMeltdown) return;
-
-            let tempIncrease = 0;
-            let currentPower = 0;
-
-            // --- Temperature Calculation ---
-            if (gameState.startupPhase >= StartupPhase.AUX_POWER_ON) {
-                tempIncrease += TEMP_AUX_POWER_INCREASE; // Base heat from systems
-            }
-
-            if (gameState.startupPhase >= StartupPhase.REACTOR_IGNITED && gameState.reactorLevel > 0) {
-                 let reactorHeat = gameState.reactorLevel * TEMP_REACTOR_MULTIPLIER;
-                 if (gameState.startupPhase >= StartupPhase.COOLANT_ENGAGED) {
-                     reactorHeat *= (1 - TEMP_COOLANT_EFFECTIVENESS); // Coolant reduces reactor heat
-                 }
-                 tempIncrease += reactorHeat;
-            }
-
-            // Apply temperature change
-            gameState.temperature += tempIncrease;
-
-            // Natural cooldown towards ambient if heat generation is low
-            if (tempIncrease < 0.1 && gameState.temperature > TEMP_AMBIENT) {
-                 gameState.temperature -= 0.2; // Slow cooldown
-            }
-
-            // Clamp temperature minimum
-             if (gameState.temperature < TEMP_AMBIENT) {
-                 gameState.temperature = TEMP_AMBIENT;
-             }
-
-            // --- Power Output Calculation ---
-            if (gameState.startupPhase >= StartupPhase.REACTOR_IGNITED && gameState.reactorLevel > 0) {
-                let basePower = gameState.reactorLevel * POWER_REACTOR_MULTIPLIER;
-                // Efficiency loss at high temperatures
-                let efficiency = 1.0;
-                if (gameState.temperature > WARNING_TEMP) {
-                    efficiency -= (gameState.temperature - WARNING_TEMP) * POWER_LOSS_HIGH_TEMP;
-                    efficiency = Math.max(0.5, efficiency); // Cap efficiency loss
-                }
-                 currentPower = Math.round(basePower * efficiency);
-            }
-            gameState.powerOutput = currentPower;
-
-
-            // --- Update Status & Check for Meltdown ---
-            if (gameState.temperature >= MELTDOWN_TEMP) {
-                gameState.status = 'MELTDOWN';
-                triggerMeltdown();
-            } else if (gameState.temperature >= DANGER_TEMP) {
-                gameState.status = 'DANGER';
-            } else if (gameState.temperature >= WARNING_TEMP) {
-                gameState.status = 'WARNING';
-            } else if (gameState.startupPhase === StartupPhase.GRID_CONNECTED) {
-                 gameState.status = 'STABLE (GRID)';
-            } else if (gameState.startupPhase 
