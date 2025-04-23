@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sector 9-X Control Interface</title>
+    <title>Sector 9-X Control Interface - Mk III</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -13,6 +13,7 @@
             --glow-color-blue: #60a5fa;
             --glow-color-yellow: #facc15;
             --glow-color-red: #f87171;
+            --glow-color-cyan: #22d3ee;
             --bg-dark: #111827; /* Tailwind gray-900 */
             --bg-medium: #1f2937; /* Tailwind gray-800 */
             --bg-light: #374151; /* Tailwind gray-700 */
@@ -28,7 +29,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem; /* Add padding for smaller screens */
+            padding: 1rem;
         }
 
         .control-panel-bg {
@@ -37,7 +38,7 @@
             box-shadow: inset 0 0 20px rgba(0,0,0,0.7), 0 0 15px rgba(0,0,0,0.5);
             border-radius: 12px;
             padding: 20px;
-            width: 100%; /* Take full width within padding */
+            width: 100%;
             max-width: 1500px;
             height: 95vh;
             display: flex;
@@ -45,8 +46,8 @@
         }
 
         .screen {
-            background-color: #050a05; /* Very dark green */
-            border: 1px solid #00ff0040; /* Subtle green border */
+            background-color: #050a05;
+            border: 1px solid #00ff0040;
             box-shadow: inset 0 0 15px #00ff0020;
             padding: 12px;
             overflow-y: auto;
@@ -87,175 +88,111 @@
         .control-button {
             background: linear-gradient(145deg, var(--bg-light), var(--bg-medium));
             border: 1px solid var(--border-color);
-            color: #e5e7eb; /* Tailwind gray-200 */
-            padding: 10px 18px;
-            border-radius: 6px;
+            color: #e5e7eb; padding: 10px 18px; border-radius: 6px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.4);
-            font-weight: bold;
+            cursor: pointer; transition: all 0.15s ease;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.4); font-weight: bold;
         }
-        .control-button:hover {
-            background: linear-gradient(145deg, #4b5563, #2a3341); /* Lighter gray-600 / darker gray-700 */
-            border-color: #6b7280; /* gray-500 */
-            color: white;
-        }
-        .control-button:active {
-            background: linear-gradient(145deg, #2a3341, #1f2937); /* Darker */
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-            transform: translateY(1px);
-        }
-        .control-button:disabled {
-            background: var(--bg-medium);
-            color: #6b7280; /* gray-500 */
-            cursor: not-allowed;
-            opacity: 0.6;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
-        }
+        .control-button:hover { background: linear-gradient(145deg, #4b5563, #2a3341); border-color: #6b7280; color: white; }
+        .control-button:active { background: linear-gradient(145deg, #2a3341, #1f2937); box-shadow: inset 0 2px 4px rgba(0,0,0,0.4); transform: translateY(1px); }
+        .control-button:disabled { background: var(--bg-medium); color: #6b7280; cursor: not-allowed; opacity: 0.6; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
 
         .button-glow-green { box-shadow: 0 0 8px var(--glow-color-green), 0 0 15px var(--glow-color-green), inset 0 1px 1px rgba(255,255,255,0.1); }
-        .button-glow-red {
-            background: linear-gradient(145deg, #b91c1c, #7f1d1d); /* Tailwind red-700 / red-900 */
-            border-color: #dc2626; /* red-600 */
-            color: #fef2f2; /* red-50 */
-            box-shadow: 0 0 10px var(--glow-color-red), 0 0 20px var(--glow-color-red), inset 0 1px 1px rgba(255,255,255,0.1);
-        }
-        .button-glow-red:hover { background: linear-gradient(145deg, #dc2626, #991b1b); border-color: #ef4444; } /* red-600 / red-800 */
-        .button-glow-red:active { background: linear-gradient(145deg, #991b1b, #7f1d1d); box-shadow: inset 0 2px 4px rgba(0,0,0,0.6); } /* red-800 / red-900 */
+        .button-glow-red { background: linear-gradient(145deg, #b91c1c, #7f1d1d); border-color: #dc2626; color: #fef2f2; box-shadow: 0 0 10px var(--glow-color-red), 0 0 20px var(--glow-color-red), inset 0 1px 1px rgba(255,255,255,0.1); }
+        .button-glow-red:hover { background: linear-gradient(145deg, #dc2626, #991b1b); border-color: #ef4444; }
+        .button-glow-red:active { background: linear-gradient(145deg, #991b1b, #7f1d1d); box-shadow: inset 0 2px 4px rgba(0,0,0,0.6); }
 
-        .switch {
-            position: relative; width: 60px; height: 30px;
-            background-color: var(--bg-dark);
-            border-radius: 15px; border: 1px solid var(--border-color);
-            cursor: pointer; box-shadow: inset 0 2px 5px rgba(0,0,0,0.6);
-            transition: background-color 0.3s ease;
-        }
-        .switch-handle {
-            position: absolute; width: 24px; height: 24px;
-            background: linear-gradient(145deg, #9ca3af, #6b7280); /* gray-400 / gray-500 */
-            border-radius: 50%; top: 2px; left: 3px;
-            transition: left 0.3s ease; box-shadow: 0 2px 3px rgba(0,0,0,0.4);
-        }
-        .switch.on { background-color: #16a34a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 10px #16a34a; } /* green-600 */
-        .switch.on .switch-handle { left: 32px; background: linear-gradient(145deg, #e5e7eb, #b2bbc8); } /* gray-200 / lighter */
+        .switch { position: relative; width: 60px; height: 30px; background-color: var(--bg-dark); border-radius: 15px; border: 1px solid var(--border-color); cursor: pointer; box-shadow: inset 0 2px 5px rgba(0,0,0,0.6); transition: background-color 0.3s ease; }
+        .switch-handle { position: absolute; width: 24px; height: 24px; background: linear-gradient(145deg, #9ca3af, #6b7280); border-radius: 50%; top: 2px; left: 3px; transition: left 0.3s ease; box-shadow: 0 2px 3px rgba(0,0,0,0.4); }
+        .switch.on { background-color: #16a34a; box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), 0 0 10px #16a34a; }
+        .switch.on .switch-handle { left: 32px; background: linear-gradient(145deg, #e5e7eb, #b2bbc8); }
 
-        /* Modern Dial */
+        /* Dial */
         .dial-container { text-align: center; }
-        .dial {
-            position: relative; width: 100px; height: 100px;
-            border-radius: 50%;
-            background: radial-gradient(circle at center, var(--bg-light) 60%, var(--bg-medium) 100%);
-            border: 2px solid var(--border-color);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 0 10px rgba(0,0,0,0.5);
-            margin: 0 auto 5px auto;
-            cursor: grab; user-select: none; /* Prevent text selection */
-        }
+        .dial { position: relative; width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle at center, var(--bg-light) 60%, var(--bg-medium) 100%); border: 2px solid var(--border-color); box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 0 10px rgba(0,0,0,0.5); margin: 0 auto 5px auto; cursor: grab; user-select: none; }
         .dial:active { cursor: grabbing; }
-        .dial-indicator {
-            position: absolute; top: 5px; left: 50%;
-            transform: translateX(-50%);
-            width: 4px; height: 15px;
-            background-color: var(--glow-color-yellow);
-            border-radius: 2px;
-            box-shadow: 0 0 5px var(--glow-color-yellow);
-        }
+        .dial-indicator { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); width: 4px; height: 15px; background-color: var(--glow-color-yellow); border-radius: 2px; box-shadow: 0 0 5px var(--glow-color-yellow); }
         .dial-value { font-size: 0.9em; color: var(--glow-color-yellow); }
 
         /* Blinking Light */
-        .blinking-light {
-            width: 18px; height: 18px; border-radius: 50%;
-            background-color: var(--glow-color-yellow);
-            box-shadow: 0 0 8px var(--glow-color-yellow), 0 0 15px var(--glow-color-yellow);
-            transition: background-color 0.3s, box-shadow 0.3s;
-        }
+        .blinking-light { width: 18px; height: 18px; border-radius: 50%; background-color: var(--glow-color-yellow); box-shadow: 0 0 8px var(--glow-color-yellow), 0 0 15px var(--glow-color-yellow); transition: background-color 0.3s, box-shadow 0.3s; }
         .blinking-light.red { background-color: var(--glow-color-red); box-shadow: 0 0 10px var(--glow-color-red), 0 0 20px var(--glow-color-red); animation: blink-fast 0.5s infinite step-end; }
         .blinking-light.yellow { background-color: var(--glow-color-yellow); box-shadow: 0 0 8px var(--glow-color-yellow), 0 0 15px var(--glow-color-yellow); animation: blink 1s infinite step-end; }
         .blinking-light.green { background-color: var(--glow-color-green); box-shadow: 0 0 8px var(--glow-color-green); animation: none; }
-        .blinking-light.off { background-color: #4b5563; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); animation: none; } /* Off state */
-
+        .blinking-light.off { background-color: #4b5563; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); animation: none; }
         @keyframes blink { 50% { background-color: var(--bg-light); box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); } }
         @keyframes blink-fast { 50% { background-color: var(--bg-light); box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); } }
 
-        /* Layout */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 2.5fr 1fr; /* Adjust column ratios */
-            grid-template-rows: auto 1fr auto;
-            gap: 20px;
-            height: calc(100% - 70px); /* Adjust based on header/footer */
-            flex-grow: 1;
-        }
-        .panel {
-            background-color: var(--bg-medium);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            gap: 15px; /* Gap between elements inside a panel */
-        }
-        .panel-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid var(--border-color);
-            text-shadow: 0 0 5px currentColor;
-        }
+        /* Layout & Panels */
+        .main-grid { display: grid; grid-template-columns: 1fr 2.5fr 1.5fr; /* Adjusted right panel width */ grid-template-rows: auto 1fr auto; gap: 20px; height: calc(100% - 70px); flex-grow: 1; }
+        .panel { background-color: var(--bg-medium); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 15px; }
+        .panel-title { font-size: 1.1em; font-weight: bold; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); text-shadow: 0 0 5px currentColor; }
         .header-bar { grid-column: 1 / -1; grid-row: 1 / 2; display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
         .footer-bar { grid-column: 1 / -1; grid-row: 3 / 4; padding-top: 15px; border-top: 1px solid var(--border-color); margin-top: 15px; }
         .left-panel { grid-column: 1 / 2; grid-row: 2 / 3; display: flex; flex-direction: column; gap: 20px; }
         .center-panel { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; flex-direction: column; gap: 20px; }
-        .right-panel { grid-column: 3 / 4; grid-row: 2 / 3; display: flex; flex-direction: column; gap: 20px; }
+        .right-panel { grid-column: 3 / 4; grid-row: 2 / 3; display: flex; flex-direction: column; gap: 20px; } /* Keep right panel separate */
 
         /* Utility */
         .text-glow { text-shadow: 0 0 7px currentColor; }
         .text-red-glow { color: var(--glow-color-red); text-shadow: 0 0 8px var(--glow-color-red); }
         .text-yellow-glow { color: var(--glow-color-yellow); text-shadow: 0 0 8px var(--glow-color-yellow); }
         .text-blue-glow { color: var(--glow-color-blue); text-shadow: 0 0 8px var(--glow-color-blue); }
+        .text-cyan-glow { color: var(--glow-color-cyan); text-shadow: 0 0 8px var(--glow-color-cyan); }
 
         /* Alert Box */
-        #alert-box {
-            position: fixed; top: -100px; /* Start off screen */ left: 50%; transform: translateX(-50%);
-            background-color: rgba(185, 28, 28, 0.95); /* Tailwind red-800 */
-            color: white; padding: 15px 30px; border-radius: 6px;
-            border: 1px solid #fca5a5; /* red-300 */
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6); z-index: 1000;
-            display: block; /* Always block, control with position/opacity */
-            opacity: 0; font-size: 1.2rem; text-align: center;
-            transition: top 0.5s ease-out, opacity 0.5s ease-out;
-        }
+        #alert-box { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(185, 28, 28, 0.95); color: white; padding: 15px 30px; border-radius: 6px; border: 1px solid #fca5a5; box-shadow: 0 8px 20px rgba(0,0,0,0.6); z-index: 1000; display: block; opacity: 0; font-size: 1.2rem; text-align: center; transition: top 0.5s ease-out, opacity 0.5s ease-out; }
         #alert-box.show { top: 20px; opacity: 1; }
+
+        /* New Visualizations */
+        .gauge-container { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
+        .gauge { width: 100px; height: 50px; border-radius: 50px 50px 0 0; background-color: #ddd; border: 3px solid #555; position: relative; overflow: hidden; box-shadow: inset 0 3px 5px rgba(0,0,0,0.3); }
+        .gauge-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, #ff0000, #ffff00, #00ff00); transform-origin: bottom center; }
+        .gauge-needle { position: absolute; bottom: 0; left: 50%; width: 2px; height: 48px; background-color: #333; transform-origin: bottom center; transform: translateX(-50%) rotate(-90deg); transition: transform 0.5s ease-out; box-shadow: 0 0 2px rgba(0,0,0,0.5); }
+        .gauge-center { position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; background-color: #333; border-radius: 50%; z-index: 1; }
+        .gauge-label { text-align: center; font-size: 0.8em; margin-top: 2px; }
+
+        .level-indicator { width: 80%; height: 150px; background-color: var(--bg-dark); border: 2px solid var(--border-color); border-radius: 4px; margin: 10px auto; position: relative; overflow: hidden; }
+        .level-fill { position: absolute; bottom: 0; left: 0; width: 100%; background-color: var(--glow-color-blue); /* Coolant color */ transition: height 0.5s ease-out; box-shadow: inset 0 0 10px rgba(96, 165, 250, 0.5); } /* blue-400 */
+        .level-fill.steam { background-color: #cbd5e1; /* Tailwind slate-300 for steam */ box-shadow: inset 0 0 10px rgba(203, 213, 225, 0.5); }
+
+        .turbine-viz { text-align: center; padding: 15px 0; }
+        .turbine-icon { display: inline-block; font-size: 3rem; /* Adjust size */ color: var(--glow-color-cyan); transition: transform 0.2s linear; }
+        /* Simple rotating animation - speed controlled by JS */
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .turbine-spinning { animation: spin linear infinite; } /* Applied via JS */
+
+        .power-output { text-align: center; font-size: 1.8em; font-weight: bold; color: var(--glow-color-yellow); text-shadow: 0 0 10px var(--glow-color-yellow); padding: 10px 0; }
 
         /* Responsive */
         @media (max-width: 1200px) {
-            .main-grid { grid-template-columns: 1fr 1.5fr; grid-template-rows: auto auto 1fr auto; } /* Left + Center/Right combined */
+            .main-grid { grid-template-columns: 1fr 1.5fr; grid-template-rows: auto auto 1fr auto; }
             .left-panel { grid-column: 1 / 2; grid-row: 2 / 3; }
             .center-panel { grid-column: 2 / 3; grid-row: 2 / 3; }
-            .right-panel { grid-column: 1 / 3; grid-row: 3 / 4; flex-direction: row; justify-content: space-around; align-items: flex-start; } /* Put right panel below */
-            .right-panel .panel { width: 48%; } /* Make right panel items take half width */
+            .right-panel { grid-column: 1 / 3; grid-row: 3 / 4; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; } /* Grid for right panel items */
             .footer-bar { grid-column: 1 / -1; grid-row: 4 / 5; }
         }
         @media (max-width: 768px) {
             body { padding: 0.5rem; font-size: 0.85rem; }
             .control-panel-bg { height: auto; max-height: 95vh; overflow-y: auto; padding: 15px; }
-            .main-grid { grid-template-columns: 1fr; grid-template-rows: auto auto auto auto auto; height: auto; } /* Stack all */
+            .main-grid { grid-template-columns: 1fr; grid-template-rows: auto auto auto auto auto; height: auto; }
             .left-panel { grid-column: 1 / -1; grid-row: 2 / 3; }
             .center-panel { grid-column: 1 / -1; grid-row: 3 / 4; }
-            .right-panel { grid-column: 1 / -1; grid-row: 4 / 5; flex-direction: column; } /* Stack right panel items */
-             .right-panel .panel { width: 100%; }
+            .right-panel { grid-column: 1 / -1; grid-row: 4 / 5; grid-template-columns: 1fr; } /* Stack right panel items */
             .footer-bar { grid-column: 1 / -1; grid-row: 5 / 6; }
             .screen { min-height: 150px; font-size: 0.8rem; }
             .header-bar h1 { font-size: 1.1rem; }
             .control-button { padding: 8px 14px; }
             .dial { width: 80px; height: 80px; }
             .blinking-light { width: 15px; height: 15px; }
+            .gauge { width: 80px; height: 40px; }
+            .gauge-needle { height: 38px; }
+            .level-indicator { height: 120px; }
+            .power-output { font-size: 1.5em; }
         }
 
-         /* Shake animation for meltdown */
-         @keyframes shake { /* Same as before */
+        /* Shake animation */
+        @keyframes shake { /* Same as before */
             0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); }
             20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); }
             40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); }
@@ -274,7 +211,7 @@
             <h1 class="text-xl lg:text-2xl font-bold text-glow text-cyan-400">SECTOR 9-X : CORE CONTROL INTERFACE</h1>
             <div class="flex items-center space-x-4">
                 <span id="system-time" class="text-sm text-blue-400 text-glow">--:--:--</span>
-                <div id="master-warning-light" class="blinking-light green" title="System Status: Nominal"></div>
+                <div id="master-warning-light" class="blinking-light off" title="System Status: Offline"></div>
                 <button id="audio-toggle" class="control-button text-xs">Enable Audio</button>
             </div>
         </div>
@@ -284,12 +221,13 @@
                 <div class="panel">
                     <h2 class="panel-title text-yellow-400">SYSTEM STATUS</h2>
                     <div class="space-y-2 text-sm">
-                        <p>Coolant Flow: <span id="coolant-status" class="font-bold text-green-400">NOMINAL</span> (<span id="coolant-flow-rate">0</span>%)</p>
-                        <p>Containment Field: <span id="containment-status" class="font-bold text-green-400">STABLE</span></p>
-                        <p>Turbine Speed: <span id="turbine-speed" class="font-bold text-green-400">0 RPM</span></p>
+                        <p>Coolant Flow: <span id="coolant-status" class="font-bold text-red-500">OFFLINE</span> (<span id="coolant-flow-rate">0</span>%)</p>
+                        <p>Containment Field: <span id="containment-status" class="font-bold text-gray-500">INACTIVE</span></p>
+                        <p>Turbine Speed: <span id="turbine-speed" class="font-bold text-gray-500">0 RPM</span></p>
                         <p>Aux Power: <span id="aux-power-status" class="font-bold text-red-500">OFFLINE</span></p>
                         <p>Core Temp: <span id="temp-readout" class="font-bold text-green-400">25.0°C</span></p>
                         <p>Core Pressure: <span id="pressure-readout" class="font-bold text-green-400">1.00 ATM</span></p>
+                         <p>Power Output: <span id="power-output-status" class="font-bold text-gray-500">0 MW</span></p>
                     </div>
                 </div>
                 <div class="panel">
@@ -342,854 +280,8 @@
             </div>
 
             <div class="right-panel">
-                <div class="panel flex-grow">
-                     <h2 class="panel-title text-blue-400">SECURITY FEED</h2>
-                     <div id="camera-feed" class="screen flicker flex-grow relative scanlines bg-black flex items-center justify-center min-h-[150px]">
-                         <span id="camera-placeholder" class="text-gray-500 text-center">FEED OFFLINE<br/>Establishing link...</span>
-                         <img id="feed-image" src="https://placehold.co/300x200/000000/333333?text=STATIC" alt="Security Feed" class="absolute inset-0 w-full h-full object-cover opacity-40 hidden" onerror="this.style.display='none'; document.getElementById('camera-placeholder').classList.remove('hidden');">
-                     </div>
-                </div>
                  <div class="panel">
-                    <h2 class="panel-title text-yellow-400">WARNING INDICATORS</h2>
-                     <div class="flex justify-around items-center h-16 space-x-4">
-                         <div class="text-center">
-                             <div id="warning-temp" class="blinking-light green mx-auto"></div>
-                             <span class="text-xs mt-1 block">TEMP</span>
-                         </div>
-                          <div class="text-center">
-                             <div id="warning-pressure" class="blinking-light green mx-auto"></div>
-                             <span class="text-xs mt-1 block">PRES</span>
-                         </div>
-                          <div class="text-center">
-                             <div id="warning-containment" class="blinking-light green mx-auto"></div>
-                             <span class="text-xs mt-1 block">CONT</span>
-                         </div>
-                     </div>
-                 </div>
-            </div>
-        </div>
-
-        <div class="footer-bar text-center text-xs text-gray-500">
-            Hyperion Energy Corp - Project Chimera - Interface Build v4.01 - Unauthorized Access Strictly Forbidden
-        </div>
-    </div>
-
-    <div id="alert-box">SYSTEM ALERT!</div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM Elements ---
-            const logScreen = document.getElementById('log-screen');
-            const commandInput = document.getElementById('command-input');
-            const systemTime = document.getElementById('system-time');
-            const coolantStatus = document.getElementById('coolant-status');
-            const coolantFlowRate = document.getElementById('coolant-flow-rate');
-            const containmentStatus = document.getElementById('containment-status');
-            const turbineSpeed = document.getElementById('turbine-speed');
-            const auxPowerStatus = document.getElementById('aux-power-status');
-            const tempReadout = document.getElementById('temp-readout');
-            const pressureReadout = document.getElementById('pressure-readout');
-            const cameraFeed = document.getElementById('camera-feed');
-            const feedImage = document.getElementById('feed-image');
-            const cameraPlaceholder = document.getElementById('camera-placeholder');
-            const initiateReactorBtn = document.getElementById('initiate-reactor-btn');
-            const reactorStatusMsg = document.getElementById('reactor-status-msg');
-            const resetAlertsBtn = document.getElementById('reset-alerts-btn');
-            const switches = document.querySelectorAll('.switch');
-            const coolantDial = document.getElementById('coolant-dial');
-            const coolantDialValue = document.getElementById('coolant-dial-value');
-            const warningLights = {
-                temp: document.getElementById('warning-temp'),
-                pressure: document.getElementById('warning-pressure'),
-                containment: document.getElementById('warning-containment'),
-                master: document.getElementById('master-warning-light')
-            };
-            const alertBox = document.getElementById('alert-box');
-            const audioToggleButton = document.getElementById('audio-toggle');
-            const controlPanel = document.getElementById('control-panel'); // For meltdown shake
-
-            // --- State ---
-            let systemLog = [];
-            let maxLogEntries = 100;
-            let reactorState = 'offline'; // offline, starting, online, warning, critical, meltdown
-            let coreTemp = 25;
-            let corePressure = 1;
-            let currentCoolantFlow = 0; // Percentage from dial
-            let audioEnabled = false;
-            let audioInitialized = false;
-            let humSynth, noiseSynth, alertSynth, clickSynth, dialSynth;
-            let reactorInterval = null;
-            let logInterval = null;
-            let glitchInterval = null;
-            let cameraInterval = null;
-            let alertTimeout = null; // To manage alert box display
-
-            const cameraImages = [
-                'https://placehold.co/400x300/0a0a0a/555555?text=Corridor+B9',
-                'https://placehold.co/400x300/050505/444444?text=Reactor+Observation+Deck',
-                'https://placehold.co/400x300/1a1a1a/666666?text=Coolant+Manifold+J-12',
-                'https://placehold.co/400x300/000000/333333?text=Containment+Airlock+3',
-                'https://placehold.co/400x300/080808/404040?text=Sub-level+Access+Tunnel',
-                'https://placehold.co/400x300/101010/505050?text=Turbine+Hall+(Standby)',
-            ];
-            let currentCameraImage = 0;
-
-            // --- Audio Setup (Tone.js) ---
-            function setupAudio() {
-                if (audioInitialized) return; // Don't re-initialize
-                try {
-                    humSynth = new Tone.Oscillator({ frequency: 45, type: "sawtooth6", volume: -35 }).toDestination();
-                    noiseSynth = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.1, decay: 0.5, sustain: 0, release: 0.5 }, volume: -28 }).toDestination();
-                    alertSynth = new Tone.Synth({ oscillator: { type: 'pulse', width: 0.3 }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.2 }, volume: -15 }).toDestination();
-                    clickSynth = new Tone.MembraneSynth({ pitchDecay: 0.008, octaves: 3, oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.15, sustain: 0.01, release: 0.1 }, volume: -18 }).toDestination();
-                    dialSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.005, decay: 0.05, sustain: 0.01, release: 0.1 }, volume: -25 }).toDestination();
-
-                    audioInitialized = true;
-                    logToScreen("Audio subsystems initialized.", "system");
-                } catch (error) {
-                    console.error("Tone.js setup error:", error);
-                    logToScreen(`Audio setup failed: ${error.message}`, "error");
-                    audioEnabled = false; // Ensure audio remains disabled
-                    audioToggleButton.textContent = "Enable Audio";
-                    audioToggleButton.classList.remove('button-glow-green');
-                }
-            }
-
-            function playSound(type, value = null) {
-                if (!audioEnabled || !audioInitialized || !Tone.context || Tone.context.state !== 'running') return;
-
-                try {
-                    const now = Tone.now();
-                    switch(type) {
-                        case 'hum': humSynth?.start(now); break;
-                        case 'noise': noiseSynth?.triggerAttackRelease("4n", now); break;
-                        case 'alert': alertSynth?.triggerAttackRelease("A5", "8n", now); break; // High alert
-                        case 'warning': alertSynth?.triggerAttackRelease("C5", "4n", now); break; // Lower warning
-                        case 'click': clickSynth?.triggerAttackRelease("C3", "16n", now); break;
-                        case 'dial':
-                            if (value !== null) {
-                                const freq = Tone.Frequency(200 + value * 2, "midi").toFrequency(); // Map 0-100 to MIDI range
-                                dialSynth?.triggerAttackRelease(freq, "32n", now);
-                            }
-                            break;
-                        case 'reactor_start':
-                            alertSynth?.triggerAttackRelease("G3", "1n", now);
-                            alertSynth?.triggerAttackRelease("C4", "1n", now + 0.6);
-                            noiseSynth?.triggerAttackRelease("1n", now + 1.2);
-                            break;
-                        case 'reactor_fail':
-                            alertSynth?.triggerAttackRelease("F#3", "1n", now);
-                            noiseSynth?.triggerAttackRelease("2n", now + 0.3);
-                            break;
-                        case 'meltdown':
-                            if (alertSynth) {
-                                alertSynth.volume.rampTo(-8, 0.5); // Louder
-                                alertSynth.frequency.rampTo("B5", 0.6);
-                                // Use Tone.Loop for continuous siren
-                                const sirenLoop = new Tone.Loop(time => {
-                                    alertSynth.triggerAttackRelease("B5", "8n", time);
-                                    alertSynth.triggerAttackRelease("A#5", "8n", time + 0.3);
-                                }, "0.6s").start(0);
-                                Tone.Transport.start();
-                            }
-                            break;
-                    }
-                } catch (error) {
-                    console.error("Tone.js playback error:", error);
-                    // Avoid logging audio errors to the main screen to prevent spam
-                    // logToScreen(`Audio playback error: ${error.message}`, "error");
-                }
-            }
-
-            // --- Logging ---
-            function logToScreen(message, type = "info") {
-                const timestamp = new Date().toLocaleTimeString([], { hour12: false });
-                let colorClass = "text-green-400"; let prefix = "[INFO]";
-                if (type === "error") { colorClass = "text-red-500 text-glow"; prefix = "[ERROR]"; }
-                else if (type === "warning") { colorClass = "text-yellow-400 text-glow"; prefix = "[WARN]"; }
-                else if (type === "system") { colorClass = "text-blue-400 text-glow"; prefix = "[SYSTEM]"; }
-                else if (type === "command") { colorClass = "text-cyan-300"; prefix = ">"; }
-
-                // Sanitize message to prevent potential XSS if user input is ever logged directly (though not the case here)
-                const sanitizedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-                systemLog.push(`<span class="${colorClass}"><span class="text-gray-500">${timestamp}</span> ${prefix} ${sanitizedMessage}</span>`);
-                if (systemLog.length > maxLogEntries) systemLog.shift();
-
-                logScreen.innerHTML = systemLog.join('\n');
-                logScreen.scrollTop = logScreen.scrollHeight;
-            }
-
-            // --- Updates ---
-            function updateClock() { systemTime.textContent = new Date().toLocaleTimeString([], { hour12: false }); }
-
-            function updateReadouts() {
-                // Update status based on core values
-                const tempColor = coreTemp > 1200 ? 'text-red-500 text-glow flicker' : coreTemp > 800 ? 'text-yellow-400 text-glow' : 'text-green-400';
-                const pressColor = corePressure > 40 ? 'text-red-500 text-glow flicker' : corePressure > 20 ? 'text-yellow-400 text-glow' : 'text-green-400';
-
-                tempReadout.textContent = `${coreTemp.toFixed(1)}°C`;
-                tempReadout.className = `font-bold ${tempColor}`;
-                pressureReadout.textContent = `${corePressure.toFixed(2)} ATM`;
-                pressureReadout.className = `font-bold ${pressColor}`;
-
-                // Update warning lights based on thresholds
-                updateWarningLight(warningLights.temp, coreTemp, 800, 1200); // Yellow > 800, Red > 1200
-                updateWarningLight(warningLights.pressure, corePressure, 20, 40); // Yellow > 20, Red > 40
-            }
-
-            function updateStatusDisplays() {
-                // Coolant Pump Switch
-                const coolantOn = document.getElementById('coolant-switch').classList.contains('on');
-                coolantStatus.textContent = coolantOn ? 'ACTIVE' : 'OFFLINE';
-                coolantStatus.className = `font-bold ${coolantOn ? 'text-green-400' : 'text-red-500'}`;
-                coolantFlowRate.textContent = `${currentCoolantFlow}`; // Show dial value
-
-                // Aux Power Switch
-                const auxPowerOn = document.getElementById('aux-power-switch').classList.contains('on');
-                auxPowerStatus.textContent = auxPowerOn ? 'ONLINE' : 'OFFLINE';
-                auxPowerStatus.className = `font-bold ${auxPowerOn ? 'text-green-400' : 'text-red-500'}`;
-
-                // Turbine Speed (simplified based on reactor state)
-                let currentSpeed = 0;
-                let speedColor = 'text-gray-500';
-                if (reactorState === 'online') {
-                    // Base speed on coolant flow and temp/pressure (simplified)
-                    currentSpeed = Math.max(0, Math.min(15000, Math.round(5000 + currentCoolantFlow * 100 - (coreTemp - 200) * 2 - (corePressure - 5) * 50 + (Math.random() - 0.5) * 500)));
-                    speedColor = currentSpeed > 12000 ? 'text-yellow-400 text-glow' : 'text-green-400';
-                } else if (reactorState === 'starting') {
-                    currentSpeed = Math.round(coreTemp * 5 + (Math.random() - 0.5) * 200); // Rising speed
-                    speedColor = 'text-yellow-400';
-                }
-                turbineSpeed.textContent = `${currentSpeed} RPM`;
-                turbineSpeed.className = `font-bold ${speedColor}`;
-
-                // Containment Status
-                let contState = 'INACTIVE';
-                let contColor = 'text-gray-500';
-                let contLightStatus = 'off'; // 'green', 'yellow', 'red'
-
-                if (reactorState === 'online' || reactorState === 'starting' || reactorState === 'warning' || reactorState === 'critical') {
-                    if (corePressure > 40 || coreTemp > 1200) {
-                        contState = 'BREACH IMMINENT'; contColor = 'text-red-500 text-glow flicker'; contLightStatus = 'red';
-                    } else if (corePressure > 20 || coreTemp > 800) {
-                        contState = 'FIELD STRESSED'; contColor = 'text-yellow-400 text-glow'; contLightStatus = 'yellow';
-                    } else {
-                        contState = 'STABLE'; contColor = 'text-green-400'; contLightStatus = 'green';
-                    }
-                }
-                containmentStatus.textContent = contState;
-                containmentStatus.className = `font-bold ${contColor}`;
-                setLightState(warningLights.containment, contLightStatus);
-
-                // Update Master Warning Light
-                const isCritical = warningLights.temp.classList.contains('red') || warningLights.pressure.classList.contains('red') || warningLights.containment.classList.contains('red');
-                const isWarning = warningLights.temp.classList.contains('yellow') || warningLights.pressure.classList.contains('yellow') || warningLights.containment.classList.contains('yellow');
-
-                if (isCritical) { setLightState(warningLights.master, 'red'); warningLights.master.title = "System Status: CRITICAL"; }
-                else if (isWarning) { setLightState(warningLights.master, 'yellow'); warningLights.master.title = "System Status: Warning"; }
-                else if (reactorState !== 'offline') { setLightState(warningLights.master, 'green'); warningLights.master.title = "System Status: Nominal"; }
-                else { setLightState(warningLights.master, 'off'); warningLights.master.title = "System Status: Offline"; } // Off when reactor is off
-            }
-
-            function updateWarningLight(lightElement, value, warnThreshold, criticalThreshold) {
-                if (!lightElement) return;
-                if (value >= criticalThreshold) setLightState(lightElement, 'red');
-                else if (value >= warnThreshold) setLightState(lightElement, 'yellow');
-                else setLightState(lightElement, 'green');
-            }
-
-            function setLightState(lightElement, state) { // state: 'green', 'yellow', 'red', 'off'
-                if (!lightElement) return;
-                lightElement.classList.remove('green', 'yellow', 'red', 'off');
-                lightElement.style.animation = ''; // Reset animation
-                void lightElement.offsetWidth; // Trigger reflow for animation restart
-
-                switch(state) {
-                    case 'red': lightElement.classList.add('red'); lightElement.style.animation = 'blink-fast 0.5s infinite step-end'; break;
-                    case 'yellow': lightElement.classList.add('yellow'); lightElement.style.animation = 'blink 1s infinite step-end'; break;
-                    case 'green': lightElement.classList.add('green'); break;
-                    case 'off': lightElement.classList.add('off'); break;
-                    default: lightElement.classList.add('off'); break;
-                }
-            }
-
-            function simulateGlitches() {
-                if (reactorState === 'meltdown') return; // No glitches during meltdown chaos
-                const elementsToGlitch = [logScreen, cameraFeed];
-                const targetElement = elementsToGlitch[Math.floor(Math.random() * elementsToGlitch.length)];
-                if (!targetElement) return;
-
-                const glitchType = Math.random();
-                if (glitchType < 0.5) { // Quick flicker
-                    targetElement.classList.add('flicker');
-                    setTimeout(() => targetElement.classList.remove('flicker'), 150 + Math.random() * 100);
-                } else { // Scanline jump/reset
-                    targetElement.classList.add('scanlines');
-                    const currentAnim = targetElement.style.animation;
-                    targetElement.style.animation = 'scanline-anim 0.1s linear infinite';
-                    setTimeout(() => { targetElement.style.animation = currentAnim || 'scanline-anim 15s linear infinite'; }, 100);
-                }
-                playSound('noise');
-            }
-
-             function cycleCameraFeed() {
-                 if (reactorState === 'meltdown') {
-                     feedImage.src = 'https://placehold.co/400x300/ff0000/000000?text=SIGNAL+LOST';
-                     feedImage.style.opacity = '1';
-                     feedImage.classList.remove('hidden');
-                     cameraPlaceholder.classList.add('hidden');
-                     return;
-                 };
-                 currentCameraImage = (currentCameraImage + 1) % cameraImages.length;
-                 feedImage.src = cameraImages[currentCameraImage];
-                 feedImage.onerror = () => { // Handle image load errors
-                     feedImage.classList.add('hidden');
-                     cameraPlaceholder.classList.remove('hidden');
-                     cameraPlaceholder.textContent = `CAM_${currentCameraImage + 1} OFFLINE`;
-                     logToScreen(`Error loading security feed CAM_${currentCameraImage + 1}`, "error");
-                 }
-                 feedImage.onload = () => { // Only show on successful load
-                    feedImage.classList.remove('hidden');
-                    cameraPlaceholder.classList.add('hidden');
-                    logToScreen(`Security feed switched to CAM_${currentCameraImage + 1}`, "system");
-                 }
-
-
-                 // Random offline state
-                 if (Math.random() < 0.1) {
-                     setTimeout(() => {
-                         feedImage.classList.add('hidden');
-                         cameraPlaceholder.classList.remove('hidden');
-                         cameraPlaceholder.textContent = `CAM_${currentCameraImage + 1} SIGNAL LOST`;
-                         logToScreen(`Security feed CAM_${currentCameraImage + 1} signal lost! Re-establishing...`, "warning");
-                         playSound('noise');
-                     }, Math.random() * 4000 + 1000);
-                 }
-            }
-
-            // --- Reactor Logic ---
-            function updateReactor() {
-                if (reactorState === 'offline' || reactorState === 'meltdown') return;
-
-                let tempChange = 0;
-                let pressureChange = 0;
-                const baseHeatGeneration = (reactorState === 'online' || reactorState === 'starting') ? 0.5 : (reactorState === 'warning' ? 1.5 : 3); // Heat increases faster in warning/critical
-                const basePressureGeneration = (reactorState === 'online' || reactorState === 'starting') ? 0.02 : (reactorState === 'warning' ? 0.08 : 0.2);
-
-                // Heat Generation
-                tempChange += baseHeatGeneration + Math.random() * 0.5; // Base heat + random fluctuations
-                pressureChange += basePressureGeneration + Math.random() * 0.03;
-
-                // Cooling Effect (based on pump ON and flow rate %)
-                const coolantPumpOn = document.getElementById('coolant-switch').classList.contains('on');
-                if (coolantPumpOn) {
-                    const coolingEfficiency = currentCoolantFlow / 100; // 0 to 1
-                    tempChange -= (1.5 + Math.random() * 0.5) * coolingEfficiency; // More flow = more cooling
-                    pressureChange -= (0.05 + Math.random() * 0.02) * coolingEfficiency; // Cooling reduces pressure slightly
-                }
-
-                 // Venting Effect
-                const ventingOn = document.getElementById('venting-switch').classList.contains('on');
-                if (ventingOn) {
-                    pressureChange -= 0.5 + Math.random() * 0.3; // Significant pressure drop
-                    tempChange += 0.1 + Math.random() * 0.1; // Venting might slightly increase local temp/instability
-                }
-
-                coreTemp += tempChange;
-                corePressure += pressureChange;
-
-                // Clamp values
-                coreTemp = Math.max(10, Math.min(coreTemp, 1500));
-                corePressure = Math.max(0.1, Math.min(corePressure, 50)); // Allow pressure to drop lower if vented heavily
-
-                // Check stability (only if not starting)
-                 if (reactorState !== 'starting') {
-                    checkReactorStability();
-                 }
-            }
-
-            function initiateReactor() {
-                if (reactorState !== 'offline') {
-                    logToScreen("Reactor sequence cannot be initiated. System not offline.", "warning");
-                    playSound('warning');
-                    return;
-                }
-
-                logToScreen("REACTOR STARTUP SEQUENCE INITIATED. Stand by...", "warning");
-                reactorState = 'starting';
-                reactorStatusMsg.textContent = "STATUS: STARTING UP";
-                reactorStatusMsg.className = 'mt-3 text-yellow-400 text-glow text-md font-bold';
-                initiateReactorBtn.disabled = true;
-                initiateReactorBtn.textContent = "SEQUENCE ACTIVE";
-                playSound('reactor_start');
-                setLightState(warningLights.master, 'yellow'); // Indicate activity
-
-                let startupTime = 0;
-                const totalStartupDuration = 15000; // 15 seconds
-
-                reactorInterval = setInterval(() => {
-                    startupTime += 500; // Update faster during startup
-                    updateReactor(); // Simulate physics during startup
-                    updateReadouts();
-                    updateStatusDisplays();
-
-                    const progress = startupTime / totalStartupDuration;
-                    logToScreen(`Reactor startup ${Math.round(progress * 100)}% complete. Core temp: ${coreTemp.toFixed(1)}°C`);
-
-                    // Check for failures during startup
-                    if (Math.random() < 0.03 && startupTime > 3000) { // Lower chance, only after 3s
-                        reactorFailure("Startup instability detected!");
-                        return;
-                    }
-                     if (coreTemp > 500 || corePressure > 10) { // Early critical condition check
-                         reactorFailure("Uncontrolled reaction during startup!");
-                         return;
-                     }
-
-                    if (startupTime >= totalStartupDuration) {
-                        reactorOnline();
-                    }
-                }, 500);
-            }
-
-            function reactorOnline() {
-                clearInterval(reactorInterval);
-                reactorInterval = null;
-                reactorState = 'online';
-                logToScreen("REACTOR CORE ONLINE. System nominal.", "system");
-                reactorStatusMsg.textContent = "STATUS: ONLINE";
-                reactorStatusMsg.className = 'mt-3 text-green-400 text-glow text-md font-bold';
-                initiateReactorBtn.disabled = false;
-                initiateReactorBtn.textContent = "INITIATE SHUTDOWN";
-                initiateReactorBtn.classList.remove('button-glow-red');
-                initiateReactorBtn.classList.add('button-glow-green');
-
-                // Start regular physics updates and stability checks
-                reactorInterval = setInterval(() => {
-                    updateReactor();
-                    updateReadouts(); // Update status based on new physics
-                    // Stability check is now inside updateReactor
-                }, 1000); // Check every second when online
-            }
-
-             function reactorShutdown() {
-                 if (reactorState === 'offline' || reactorState === 'starting') return; // Can't shutdown if offline or starting
-
-                 clearInterval(reactorInterval);
-                 reactorInterval = null;
-                 const previousState = reactorState; // Remember if we were warning/critical
-
-                 logToScreen("REACTOR SHUTDOWN SEQUENCE INITIATED.", "warning");
-                 reactorState = 'offline'; // Go directly to offline state for physics
-                 reactorStatusMsg.textContent = "STATUS: SHUTTING DOWN";
-                 reactorStatusMsg.className = 'mt-3 text-yellow-400 text-glow text-md font-bold';
-                 initiateReactorBtn.disabled = true;
-                 initiateReactorBtn.textContent = "SHUTDOWN IN PROGRESS";
-                 initiateReactorBtn.classList.remove('button-glow-green');
-                 initiateReactorBtn.classList.add('button-glow-red'); // Visually indicate shutdown intent
-
-                 // Simulate cooldown (passive - no active generation)
-                 const cooldownInterval = setInterval(() => {
-                     let tempDrop = 5 + Math.random() * 5;
-                     let pressDrop = 0.1 + Math.random() * 0.1;
-                     // Coolant helps cooldown
-                     if (document.getElementById('coolant-switch').classList.contains('on')) {
-                          tempDrop *= (1 + currentCoolantFlow / 100);
-                          pressDrop *= (1 + currentCoolantFlow / 100);
-                     }
-                     coreTemp -= tempDrop;
-                     corePressure -= pressDrop;
-                     coreTemp = Math.max(25, coreTemp);
-                     corePressure = Math.max(1, corePressure);
-
-                     updateReadouts();
-                     updateStatusDisplays(); // Update turbine speed etc.
-
-                     if (coreTemp <= 30 && corePressure <= 1.5) {
-                         clearInterval(cooldownInterval);
-                         logToScreen("REACTOR OFFLINE. Core parameters nominal.", "system");
-                         reactorStatusMsg.textContent = "STATUS: OFFLINE";
-                         reactorStatusMsg.className = 'mt-3 text-yellow-400 text-md font-bold';
-                         initiateReactorBtn.disabled = false;
-                         initiateReactorBtn.textContent = "INITIATE REACTOR";
-                         // Reset lights only if shutdown was successful and not during a failure
-                         if (previousState !== 'critical' && previousState !== 'meltdown') {
-                            resetAlerts(true); // Force reset lights on successful shutdown
-                         }
-                         setLightState(warningLights.master, 'off'); // Master light off
-                     }
-                 }, 500);
-            }
-
-            function reactorFailure(reason) {
-                clearInterval(reactorInterval);
-                reactorInterval = null;
-                reactorState = 'critical';
-                logToScreen(`REACTOR FAILURE: ${reason}`, "error");
-                reactorStatusMsg.textContent = "STATUS: CRITICAL FAILURE";
-                reactorStatusMsg.className = 'mt-3 text-red-500 text-glow flicker text-md font-bold';
-                initiateReactorBtn.disabled = true;
-                initiateReactorBtn.textContent = "SYSTEM LOCKOUT";
-                initiateReactorBtn.classList.remove('button-glow-green');
-                initiateReactorBtn.classList.add('button-glow-red');
-                playSound('reactor_fail');
-                triggerAlert(`REACTOR FAILURE: ${reason}`);
-                setLightState(warningLights.master, 'red');
-
-                // Start faster physics updates in critical state
-                 reactorInterval = setInterval(() => {
-                    updateReactor();
-                    updateReadouts();
-                    checkMeltdownCondition(); // Check frequently if meltdown occurs
-                }, 500);
-            }
-
-            function checkReactorStability() {
-                if (reactorState !== 'online' && reactorState !== 'warning') return; // Only check when online/warning
-
-                const isCritical = coreTemp > 1200 || corePressure > 40;
-                const isWarning = coreTemp > 800 || corePressure > 20;
-
-                if (isCritical) {
-                    reactorState = 'critical';
-                    logToScreen("CORE INTEGRITY CRITICAL! IMMEDIATE ACTION REQUIRED.", "error");
-                    reactorStatusMsg.textContent = "STATUS: CRITICAL";
-                    reactorStatusMsg.className = 'mt-3 text-red-500 text-glow flicker text-md font-bold';
-                    playSound('alert');
-                    triggerAlert("CORE INTEGRITY CRITICAL!");
-                    setLightState(warningLights.master, 'red');
-                     // Start faster updates and meltdown checks if not already in critical loop
-                    if (!reactorInterval) { // Should already be running if coming from online/warning
-                         reactorInterval = setInterval(() => {
-                            updateReactor(); updateReadouts(); checkMeltdownCondition();
-                        }, 500);
-                    }
-                } else if (isWarning) {
-                    if (reactorState !== 'warning') { // Only log transition once
-                         reactorState = 'warning';
-                         logToScreen("Core parameters exceeding nominal limits. Monitor closely.", "warning");
-                         reactorStatusMsg.textContent = "STATUS: WARNING";
-                         reactorStatusMsg.className = 'mt-3 text-yellow-400 text-glow text-md font-bold';
-                         playSound('warning');
-                         setLightState(warningLights.master, 'yellow');
-                    }
-                } else {
-                    // Return to stable online state
-                    if (reactorState === 'warning') {
-                        reactorState = 'online';
-                        logToScreen("Core parameters stabilized. System nominal.", "system");
-                        reactorStatusMsg.textContent = "STATUS: ONLINE";
-                        reactorStatusMsg.className = 'mt-3 text-green-400 text-glow text-md font-bold';
-                        setLightState(warningLights.master, 'green');
-                    }
-                }
-            }
-
-            function checkMeltdownCondition() {
-                if (reactorState !== 'critical') return;
-
-                if (coreTemp > 1450 || corePressure > 48) { // Slightly higher thresholds for meltdown
-                    triggerMeltdown();
-                }
-            }
-
-            function triggerMeltdown() {
-                if (reactorState === 'meltdown') return;
-
-                clearInterval(reactorInterval); reactorInterval = null;
-                clearInterval(logInterval); logInterval = null;
-                clearInterval(glitchInterval); glitchInterval = null;
-                clearInterval(cameraInterval); cameraInterval = null;
-                if(Tone.Transport.state === "started") Tone.Transport.stop(); // Stop Tone loops if any
-
-
-                reactorState = 'meltdown';
-                logToScreen("!!! MELTDOWN IMMINENT !!! CATASTROPHIC CORE FAILURE !!!", "error");
-                logToScreen("!!! CONTAINMENT FIELD COLLAPSING !!! EVACUATE !!!", "error");
-                reactorStatusMsg.textContent = "STATUS: MELTDOWN";
-                reactorStatusMsg.className = 'mt-3 text-red-500 text-glow flicker text-xl font-bold'; // Larger text
-                initiateReactorBtn.disabled = true;
-                initiateReactorBtn.textContent = "!!! MELTDOWN !!!";
-                playSound('meltdown');
-                triggerAlert("!!! MELTDOWN IMMINENT - EVACUATE !!!");
-
-                // Visual Chaos
-                controlPanel.classList.add('meltdown-shake');
-                document.querySelectorAll('.blinking-light').forEach(light => setLightState(light, 'red'));
-                document.querySelectorAll('.screen').forEach(s => s.style.borderColor = 'var(--glow-color-red)');
-
-                // Log spam
-                setInterval(() => logToScreen("SYSTEM INTEGRITY COMPROMISED - FATAL ERROR", "error"), 400);
-                // Constant glitches
-                setInterval(simulateGlitches, 200);
-            }
-
-            // --- Controls ---
-            function handleSwitchToggle(event) {
-                playSound('click');
-                const sw = event.currentTarget;
-                if (!sw) return;
-                sw.classList.toggle('on');
-                const controlName = sw.dataset.control;
-                const isOn = sw.classList.contains('on');
-
-                if (controlName === 'coolant') {
-                    logToScreen(`Primary coolant pump ${isOn ? 'activated' : 'deactivated'}.`, "system");
-                    // Physics handled in updateReactor
-                } else if (controlName === 'aux-power') {
-                    logToScreen(`Auxiliary power grid ${isOn ? 'online' : 'offline'}.`, "system");
-                } else if (controlName === 'venting') {
-                    logToScreen(`Emergency core venting ${isOn ? 'OPEN' : 'CLOSED'}.`, isOn ? "warning" : "system");
-                    if (isOn) playSound('noise'); // Venting sound
-                    // Auto-close venting after 5 seconds
-                    if (isOn) {
-                        setTimeout(() => {
-                            if(sw.classList.contains('on')) { // Check if still on
-                                sw.classList.remove('on');
-                                logToScreen("Emergency venting automatically closed.", "system");
-                                playSound('click');
-                                updateStatusDisplays(); // Update immediately
-                            }
-                        }, 5000);
-                    }
-                }
-                updateStatusDisplays(); // Update status panel immediately
-            }
-
-            function handleCommandInput(event) {
-                if (event.key === 'Enter' && commandInput.value.trim() !== '') {
-                    const command = commandInput.value.trim().toLowerCase();
-                    logToScreen(command, "command");
-                    commandInput.value = '';
-
-                    switch(command) {
-                        case 'help': logToScreen("Commands: help, status, clear, initiate, shutdown, reset, test_alert, set_coolant [0-100]", "system"); break;
-                        case 'status': logToScreen(`Reactor: ${reactorState}, Temp: ${coreTemp.toFixed(1)}°C, Pressure: ${corePressure.toFixed(2)} ATM, Coolant: ${currentCoolantFlow}%`, "info"); break;
-                        case 'clear': systemLog = []; logScreen.innerHTML = ''; logToScreen("Log cleared.", "system"); break;
-                        case 'initiate': initiateReactor(); break;
-                        case 'shutdown': reactorShutdown(); break;
-                        case 'reset': resetAlerts(); break;
-                        case 'test_alert': triggerAlert("This is a manual system test alert."); playSound('alert'); break;
-                        case 'set_coolant': // Intentional easter egg / debug command
-                        case 'set_coolant_flow':
-                            const parts = command.split(' ');
-                            if (parts.length === 2 && !isNaN(parts[1])) {
-                                const val = Math.max(0, Math.min(100, parseInt(parts[1])));
-                                setDialValue(coolantDial, val);
-                                logToScreen(`Coolant flow manually set to ${val}%`, "warning");
-                            } else {
-                                logToScreen("Usage: set_coolant [0-100]", "error");
-                            }
-                            break;
-                        default: logToScreen(`Unknown command: "${command}"`, "error");
-                    }
-                }
-            }
-
-            function resetAlerts(force = false) { // force=true used by shutdown
-                 if (!force && (reactorState === 'critical' || reactorState === 'meltdown')) {
-                     logToScreen("Cannot reset alerts during critical/meltdown state.", "warning");
-                     playSound('warning');
-                     return;
-                 }
-                 // Reset lights based on current actual conditions
-                 updateReadouts(); // Re-evaluates temp/pressure lights
-                 updateStatusDisplays(); // Re-evaluates containment/master lights
-
-                 // If state was warning, revert to online if conditions allow
-                 if (reactorState === 'warning') {
-                     const isStillWarning = coreTemp > 800 || corePressure > 20;
-                     if (!isStillWarning) {
-                         reactorState = 'online';
-                         reactorStatusMsg.textContent = "STATUS: ONLINE";
-                         reactorStatusMsg.className = 'mt-3 text-green-400 text-glow text-md font-bold';
-                         setLightState(warningLights.master, 'green');
-                         logToScreen("Warning condition cleared. System nominal.", "system");
-                     } else {
-                         logToScreen("Alerts reset, but warning condition persists.", "warning");
-                     }
-                 } else {
-                     logToScreen("Warning indicators reset.", "system");
-                 }
-                 // Hide alert box if shown
-                 hideAlert();
-            }
-
-            function triggerAlert(message) {
-                if (alertTimeout) clearTimeout(alertTimeout); // Clear previous timeout if any
-                alertBox.textContent = message;
-                alertBox.classList.add('show');
-                playSound('alert');
-
-                // Auto-hide after some time
-                alertTimeout = setTimeout(hideAlert, 6000); // Hide after 6 seconds
-            }
-            function hideAlert() {
-                 alertBox.classList.remove('show');
-            }
-
-            // --- Dial Logic ---
-            function setupDial(dialElement) {
-                let isDragging = false;
-                let startAngle = 0;
-                let currentAngle = 0;
-                const indicator = dialElement.querySelector('.dial-indicator');
-                const valueDisplay = document.getElementById('coolant-dial-value'); // Specific ID for value
-
-                const getAngle = (event) => {
-                    const rect = dialElement.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    // Use clientX/Y if available (mouse), otherwise use touch coordinates
-                    const clientX = event.clientX ?? event.touches?.[0]?.clientX;
-                    const clientY = event.clientY ?? event.touches?.[0]?.clientY;
-                     if (clientX === undefined || clientY === undefined) return currentAngle; // Exit if no coordinates
-
-                    const deltaX = clientX - centerX;
-                    const deltaY = clientY - centerY;
-                    // Calculate angle in degrees (adjusting for coordinate system)
-                    let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-                    angle += 90; // Rotate 90 degrees so 0 is at the top
-                    if (angle < 0) angle += 360; // Normalize to 0-360
-                    return angle;
-                };
-
-                const updateDial = (angle) => {
-                    // Clamp angle to prevent full circle jumps, e.g., -135 to 135 (270 degree range)
-                    const minAngle = -135; // Corresponds to 0%
-                    const maxAngle = 135;  // Corresponds to 100%
-                    angle = Math.max(minAngle, Math.min(maxAngle, angle));
-
-                    indicator.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-                    // Map angle range (270 degrees) to value (0-100)
-                    const value = Math.round(((angle - minAngle) / (maxAngle - minAngle)) * 100);
-                    valueDisplay.textContent = value;
-                    currentCoolantFlow = value; // Update global state
-                    playSound('dial', value); // Play sound based on value
-                    updateStatusDisplays(); // Update dependent statuses
-                };
-
-                const onMouseDown = (event) => {
-                    event.preventDefault(); // Prevent default drag behavior
-                    isDragging = true;
-                    dialElement.style.cursor = 'grabbing';
-                    startAngle = getAngle(event) - currentAngle; // Offset based on where clicked
-                };
-
-                const onMouseMove = (event) => {
-                    if (!isDragging) return;
-                    event.preventDefault();
-                    let newAngle = getAngle(event) - startAngle;
-                    // Handle angle wrapping (e.g., crossing the 0/360 boundary) - might need refinement
-                    // Simple clamping is used in updateDial instead for this example
-                    currentAngle = newAngle;
-                    updateDial(currentAngle);
-                };
-
-                const onMouseUp = (event) => {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    dialElement.style.cursor = 'grab';
-                };
-
-                 // Add touch events
-                dialElement.addEventListener('mousedown', onMouseDown);
-                document.addEventListener('mousemove', onMouseMove); // Listen on document for dragging outside
-                document.addEventListener('mouseup', onMouseUp); // Listen on document
-
-                dialElement.addEventListener('touchstart', (e) => { onMouseDown(e); }, { passive: false });
-                document.addEventListener('touchmove', (e) => { onMouseMove(e); }, { passive: false });
-                document.addEventListener('touchend', (e) => { onMouseUp(e); });
-
-                // Initialize dial position (e.g., to 0)
-                updateDial(-135); // Start at 0% (-135 degrees)
-            }
-
-             // Initialize the coolant dial
-            if (coolantDial) {
-                setupDial(coolantDial);
-            } else {
-                console.error("Coolant dial element not found!");
-            }
-
-
-            // --- Initialization ---
-            function initialize() {
-                logToScreen("System boot sequence initiated...");
-                logToScreen("Loading Sector 9-X Core Interface...");
-                updateClock();
-                setInterval(updateClock, 1000);
-
-                // Start periodic updates (only if not in meltdown)
-                setInterval(() => { if(reactorState !== 'meltdown') updateStatusDisplays(); }, 2000);
-                logInterval = setInterval(() => {
-                     if (reactorState === 'online' && Math.random() < 0.05) logToScreen("Periodic diagnostic scan running...", "system");
-                     else if (reactorState === 'warning' && Math.random() < 0.1) logToScreen("Energy signature unstable. Check parameters.", "info");
-                }, 15000);
-                glitchInterval = setInterval(simulateGlitches, 20000 + Math.random() * 10000);
-                cameraInterval = setInterval(cycleCameraFeed, 8000 + Math.random() * 4000);
-
-                // Add event listeners
-                initiateReactorBtn.addEventListener('click', () => {
-                    playSound('click');
-                    if (reactorState === 'online' || reactorState === 'warning' || reactorState === 'critical') {
-                        reactorShutdown();
-                    } else if (reactorState === 'offline') {
-                        initiateReactor();
-                    }
-                });
-                resetAlertsBtn.addEventListener('click', () => { playSound('click'); resetAlerts(); });
-                switches.forEach(sw => sw.addEventListener('click', handleSwitchToggle));
-                commandInput.addEventListener('keydown', handleCommandInput);
-
-                audioToggleButton.addEventListener('click', async () => {
-                     playSound('click'); // Play click sound regardless of state
-                     if (!audioEnabled) {
-                         try {
-                             if (!audioInitialized) {
-                                 await Tone.start(); // MUST be called by user gesture
-                                 console.log("Audio Context Started by user gesture.");
-                                 setupAudio(); // Setup synths now that context is running
-                             }
-                             if (audioInitialized) { // Check if setup was successful
-                                 audioEnabled = true;
-                                 audioToggleButton.textContent = "Disable Audio";
-                                 audioToggleButton.classList.add('button-glow-green');
-                                 playSound('hum');
-                                 logToScreen("Audio enabled.", "system");
-                             } else {
-                                 logToScreen("Audio setup failed previously. Cannot enable.", "error");
-                             }
-                         } catch (e) {
-                             console.error("Failed to start Audio Context:", e);
-                             logToScreen("Failed to enable audio. Browser interaction might be required or unsupported.", "error");
-                         }
-                     } else {
-                         humSynth?.stop();
-                         // Tone.Transport.stop(); // Stop loops if any were started (like meltdown)
-                         // Tone.Transport.cancel();
-                         audioEnabled = false;
-                         audioToggleButton.textContent = "Enable Audio";
-                         audioToggleButton.classList.remove('button-glow-green');
-                         logToScreen("Audio disabled.", "system");
-                     }
-                });
-
-                logToScreen("Interface loaded. System standing by.", "system");
-                logToScreen("Enter 'help' for available commands.", "info");
-
-                // Initial state updates
-                updateReadouts();
-                updateStatusDisplays();
-                setLightState(warningLights.master, 'off'); // Ensure master light is off initially
-            }
-
-            // --- Start the simulation ---
-            initialize();
-        });
-    </script>
-
-</body>
-</html>
-
+                     <h2 class="panel-title text-cyan-400">TURBINE STATUS</h2>
+                     <div class="turbine-viz">
+                         <svg id="turbine-icon" class="turbine-icon w-16 h-16 mx-auto" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                             <path d="M12 2C10.3 2 8.79 2.55 7.67 3.55L12 10.88V2zM4.04 5.85C2.79 7.34 2 9.08 2 11H8.03L4.04 5.85zM16.33 3.55C15.21 2.55 13.7 2 12 2V10.88L16.33 3.55zM19.96 5.85L15.97 11H22C22 9.08 21.
