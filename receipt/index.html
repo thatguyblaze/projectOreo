@@ -5,283 +5,337 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dairy Cup of Mount Carmel - Our Menu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lobster+Two:wght@700&display=swap" rel="stylesheet">
-    <script type="module" src="https://cdn.jsdelivr.net/npm/heroicons@2.1.3/24/outline/index.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* Apply Inter font globally, Lobster Two for headings */
+        /* Custom Tailwind configuration (simulated) */
+        const theme = {
+            extend: {
+                colors: {
+                    'cream': {
+                        '100': '#fdfbf5', /* Very light cream */
+                        '200': '#fbf5ea', /* Slightly deeper cream */
+                    },
+                    'brown': {
+                        '700': '#8c5a32', /* Warm heading brown */
+                        '900': '#5d4037', /* Darker brown for text */
+                    },
+                    'teal': {
+                        '600': '#0d9488', /* Muted teal accent */
+                        '700': '#0f766e',
+                    },
+                    'terracotta': {
+                        '500': '#e07a5f', /* Soft terracotta accent */
+                        '600': '#d45d3f',
+                    }
+                },
+                fontFamily: {
+                    'sans': ['Poppins', 'sans-serif'],
+                    'serif': ['Playfair Display', 'serif'],
+                },
+                boxShadow: {
+                    'subtle': '0 2px 8px rgba(93, 64, 55, 0.07)', /* Soft brown shadow */
+                    'lifted': '0 4px 15px rgba(93, 64, 55, 0.1)',
+                },
+                borderRadius: {
+                    'xl': '1rem',
+                }
+            }
+        };
+        tailwind.config = { theme: theme };
+
+        /* Apply base styles */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fffaf0; /* Floral White - a warm off-white */
+            font-family: theme.extend.fontFamily.sans;
+            background-color: theme.extend.colors.cream['100'];
+            color: theme.extend.colors.brown['900'];
+            /* Subtle background texture - optional */
+            /* background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fbf5ea' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E"); */
         }
-        h1, h2.menu-title {
-            font-family: 'Lobster Two', cursive;
-        }
-        /* Style for active nav link */
-        .nav-link.active {
-            background-color: #fef3c7; /* amber-100 */
-            color: #d97706; /* amber-600 */
-            font-weight: 600;
-        }
-        /* Style for menu sections */
+
+        /* Section styling */
         .menu-section {
             background-color: #ffffff;
-            border: 1px solid #f3eade; /* A light tan border */
-            border-radius: 0.5rem; /* rounded-lg */
-            padding: 2rem; /* p-8 */
-            margin-bottom: 2.5rem; /* mb-10 */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: theme.extend.borderRadius.xl;
+            padding: 2rem 2.5rem; /* p-8 md:p-10 */
+            margin-bottom: 3rem; /* mb-12 */
+            box-shadow: theme.extend.boxShadow.subtle;
+            border: 1px solid theme.extend.colors.cream['200'];
+            transition: box-shadow 0.3s ease-in-out;
         }
-        /* Style for section titles */
+        .menu-section:hover {
+             box-shadow: theme.extend.boxShadow.lifted;
+        }
+
+        /* Section title styling */
         .menu-title {
-            color: #c05621; /* orange-700 */
+            font-family: theme.extend.fontFamily.serif;
+            color: theme.extend.colors.terracotta['600'];
             text-align: center;
+            font-size: 2.5rem; /* text-4xl */
             margin-bottom: 1.5rem; /* mb-6 */
-            font-size: 2.25rem; /* text-4xl */
             padding-bottom: 0.5rem;
-            border-bottom: 2px dashed #fcd34d; /* amber-300 */
+            position: relative;
         }
-        /* Style for menu items */
+         /* Decorative element for title */
+        .menu-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: theme.extend.colors.teal['600'];
+            border-radius: 2px;
+            margin: 0.5rem auto 0; /* mt-2 */
+        }
+
+        /* Menu item styling */
         .menu-item {
             display: flex;
+            flex-direction: column;
+            sm:flex-direction: row; /* Items side-by-side on small screens+ */
             justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 0.75rem; /* mb-3 */
-            padding-bottom: 0.75rem; /* pb-3 */
-            border-bottom: 1px dotted #d1d5db; /* gray-300 */
+            align-items: flex-start; /* Align items to top */
+            sm:align-items: baseline; /* Align baseline on small screens+ */
+            padding: 1rem 0; /* py-4 */
+            border-bottom: 1px dashed theme.extend.colors.cream['200'];
+            transition: background-color 0.2s ease-in-out;
         }
-        .menu-item:last-child {
+         .menu-item:last-child {
             border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+        }
+        .menu-item:hover {
+            background-color: theme.extend.colors.cream['100']; /* Subtle hover */
+        }
+        .menu-item-details {
+             flex-grow: 1;
+             margin-right: 0;
+             sm:margin-right: 1rem; /* mr-4 on small screens+ */
+             margin-bottom: 0.5rem; /* mb-2 */
+             sm:mb-0;
         }
         .menu-item-name {
             font-weight: 600; /* font-semibold */
-            color: #8c5a32; /* A warm brown */
-            flex-grow: 1;
-            margin-right: 1rem; /* mr-4 */
+            color: theme.extend.colors.brown['700'];
+            font-size: 1.125rem; /* text-lg */
         }
         .menu-item-description {
             font-size: 0.875rem; /* text-sm */
-            color: #6b7280; /* gray-500 */
-            font-style: italic;
+            color: theme.extend.colors.brown['900'];
+            opacity: 0.8;
             margin-top: 0.25rem; /* mt-1 */
+            line-height: 1.4;
         }
         .menu-item-price {
             font-weight: 600;
-            color: #374151; /* gray-700 */
-             white-space: nowrap; /* Prevent price from wrapping */
+            color: theme.extend.colors.teal['700'];
+            font-size: 1rem; /* text-base */
+            white-space: nowrap;
+            margin-top: 0.5rem; /* Add space on mobile */
+            sm:margin-top: 0;
         }
         .price-placeholder {
-            color: #9ca3af; /* gray-400 */
+            color: theme.extend.colors.terracotta['500'];
             font-style: italic;
+            font-size: 0.9rem;
         }
-        /* Custom scrollbar for webkit browsers */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+
+        /* Navigation styling */
+        #main-nav {
+            background-color: rgba(253, 251, 245, 0.9); /* Semi-transparent cream */
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+            box-shadow: theme.extend.boxShadow.subtle;
+            border-bottom: 1px solid theme.extend.colors.cream['200'];
         }
-        ::-webkit-scrollbar-track {
-            background: #fffaf0;
+        .nav-link {
+            color: theme.extend.colors.brown['700'];
+            padding: 0.5rem 0.75rem; /* px-3 py-2 */
+            border-radius: 0.375rem; /* rounded-md */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 600;
+            transition: color 0.2s ease, background-color 0.2s ease;
+            position: relative; /* For pseudo-element */
+            overflow: hidden; /* Hide pseudo-element overflow */
         }
-        ::-webkit-scrollbar-thumb {
-            background: #fcd34d; /* amber-300 */
-            border-radius: 4px;
+        .nav-link::after { /* Subtle underline effect */
+             content: '';
+             position: absolute;
+             bottom: 0;
+             left: 50%;
+             transform: translateX(-50%);
+             width: 0;
+             height: 2px;
+             background-color: theme.extend.colors.teal['600'];
+             transition: width 0.3s ease;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #fbbf24; /* amber-400 */
+        .nav-link:hover, .nav-link.active {
+            color: theme.extend.colors.teal['700'];
+            background-color: theme.extend.colors.cream['200'];
         }
+         .nav-link:hover::after, .nav-link.active::after {
+             width: 70%; /* Animate underline width */
+         }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px;}
+        ::-webkit-scrollbar-track { background: theme.extend.colors.cream['200']; border-radius: 5px;}
+        ::-webkit-scrollbar-thumb { background: theme.extend.colors.terracotta['500']; border-radius: 5px;}
+        ::-webkit-scrollbar-thumb:hover { background: theme.extend.colors.terracotta['600']; }
+
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="bg-amber-500 text-white py-4 shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-            <h1 class="text-3xl font-bold mb-2 md:mb-0">Dairy Cup of Mount Carmel</h1>
-            <nav class="w-full md:w-auto overflow-x-auto whitespace-nowrap">
-                <ul class="flex space-x-1 justify-center md:justify-end">
-                    <li><a href="#combos" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Combos</a></li>
-                    <li><a href="#dinners" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Dinners</a></li>
-                    <li><a href="#burgers" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Burgers</a></li>
-                    <li><a href="#doghouse" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Doghouse</a></li>
-                    <li><a href="#sandwiches" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Sandwiches</a></li>
-                    <li><a href="#soups" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Soups</a></li>
-                    <li><a href="#shakes" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Shakes</a></li>
-                    <li><a href="#sundaes" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Sundaes</a></li>
-                    <li><a href="#treats" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Treats</a></li>
-                    <li><a href="#drinks" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Drinks</a></li>
-                    <li><a href="#value" class="nav-link px-3 py-2 hover:bg-amber-100 hover:text-amber-700 rounded-md text-sm font-medium transition-colors duration-150">Value</a></li>
-                </ul>
-            </nav>
-        </div>
+    <header id="main-nav" class="sticky top-0 z-50 w-full">
+        <nav class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
+            <a href="#" class="text-2xl font-serif font-bold text-terracotta-600 hover:text-terracotta-500 transition-colors">
+                Dairy Cup
+            </a>
+            <ul class="flex flex-wrap justify-center space-x-1 sm:space-x-2 mt-2 md:mt-0">
+                <li><a href="#combos" class="nav-link">Combos</a></li>
+                <li><a href="#dinners" class="nav-link">Dinners</a></li>
+                <li><a href="#burgers" class="nav-link">Burgers</a></li>
+                <li><a href="#doghouse" class="nav-link">Doghouse</a></li>
+                <li><a href="#sandwiches" class="nav-link">Sandwiches</a></li>
+                <li><a href="#soups" class="nav-link">Soups</a></li>
+                <li><a href="#shakes" class="nav-link">Shakes</a></li>
+                <li><a href="#sundaes" class="nav-link">Sundaes</a></li>
+                <li><a href="#treats" class="nav-link">Treats</a></li>
+                <li><a href="#drinks" class="nav-link">Drinks</a></li>
+                <li><a href="#value" class="nav-link">Value</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <main class="container mx-auto px-4 py-10 md:py-16">
+    <main class="container mx-auto px-4 py-12 md:py-16">
 
-         <div class="bg-amber-50 border-l-4 border-amber-400 text-amber-800 p-4 rounded-md mb-10 shadow-sm" role="alert">
-            <p class="font-semibold">Welcome to the Dairy Cup!</p>
-            <p class="text-sm">Please note: Menu items are based on the latest available information but may change. Prices are currently omitted online. Please visit or call us for the most up-to-date offerings and prices. Enjoy!</p>
-        </div>
+        <section class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-serif font-bold text-brown-700 mb-4">Welcome to the Dairy Cup!</h1>
+            <p class="text-lg text-brown-900 opacity-90 max-w-2xl mx-auto mb-6">
+                Your friendly neighborhood spot in Mount Carmel for delicious burgers, classic dinners, sweet treats, and creamy Mayfield ice cream. Pull up a chair and enjoy!
+            </p>
+            <div class="bg-cream-200 border border-terracotta-500 text-brown-900 p-4 rounded-lg max-w-xl mx-auto text-sm shadow-subtle" role="alert">
+                <p class="font-semibold mb-1 text-terracotta-600">Heads Up!</p>
+                <p>Menu items are based on our latest info but subject to change. Prices aren't listed online – please give us a call or stop by for the current scoop!</p>
+            </div>
+        </section>
 
-        <div class="space-y-10">
 
-            <section id="combos" class="menu-section pt-16 -mt-16"> {/* Offset for sticky header */}
+        <div class="space-y-12">
+
+            <section id="combos" class="menu-section pt-20 -mt-16"> {/* Offset for sticky header */}
                 <h2 class="menu-title">Top Ten Combos</h2>
-                <p class="text-center text-gray-600 mb-6 -mt-4">Great deals to satisfy your hunger! Ask us about the specifics for each combo.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                <p class="text-center text-gray-600 mb-8 -mt-4 italic">Great value meals to fill you up! Ask our friendly staff for combo details.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-1">
                     <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 1</span>
-                            <p class="menu-item-description">A satisfying meal deal - ask for details!</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 1</span><p class="menu-item-description">A satisfying classic to kick things off.</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                      <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 2</span>
-                            <p class="menu-item-description">Another great combo option!</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 2</span><p class="menu-item-description">Double the deliciousness (details vary!).</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                     <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 3</span>
-                            <p class="menu-item-description">Try this popular combination.</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 3</span><p class="menu-item-description">A popular choice for a reason!</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                      <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 4</span>
-                            <p class="menu-item-description">A delicious and convenient choice.</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 4</span><p class="menu-item-description">Fuel your day the Dairy Cup way.</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                      <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 5</span>
-                            <p class="menu-item-description">You can't go wrong with Combo 5.</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 5</span><p class="menu-item-description">Mid-menu magic, always a good pick.</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                      <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 6</span>
-                            <p class="menu-item-description">Check out this fantastic meal deal.</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 6</span><p class="menu-item-description">Get your grub on with this great deal.</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                     <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 7</span>
-                            <p class="menu-item-description">A local favorite combo.</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 7</span><p class="menu-item-description">Lucky number seven might be your new favorite.</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                      <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 8</span>
-                            <p class="menu-item-description">Perfect for a quick and tasty meal.</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 8</span><p class="menu-item-description">Perfect for lunch, dinner, or anytime!</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                     <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 9</span>
-                            <p class="menu-item-description">Deliciousness bundled in a combo.</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 9</span><p class="menu-item-description">Nearing the end, but still top-tier taste.</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                      <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Combo 10</span>
-                            <p class="menu-item-description">The final combo, always a good choice!</p>
-                        </div>
-                        <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Combo 10</span><p class="menu-item-description">Rounding out the list with a bang!</p></div>
+                        <span class="menu-item-price price-placeholder">Ask Us!</span>
                     </div>
                 </div>
             </section>
 
-            <section id="dinners" class="menu-section pt-16 -mt-16 bg-amber-50"> {/* Slight background variation */}
+            <section id="dinners" class="menu-section pt-20 -mt-16">
                 <h2 class="menu-title">Hearty Dinners</h2>
-                 <p class="text-center text-gray-600 mb-6 -mt-4">Served with your choice of sides (typically fries & slaw - please confirm).</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                 <p class="text-center text-gray-600 mb-8 -mt-4 italic">Comfort food classics, served with your choice of sides (ask for options!).</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-1">
                     <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Chicken Strip Dinner</span>
-                            <p class="menu-item-description">Crispy chicken strips served hot and golden.</p>
-                        </div>
-                         <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Chicken Strip Dinner</span><p class="menu-item-description">Golden-fried, tender chicken strips. A crowd-pleaser!</p></div>
+                         <span class="menu-item-price price-placeholder">Check Price</span>
                     </div>
                     <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Shrimp Dinner</span>
-                            <p class="menu-item-description">A generous portion of tasty fried shrimp.</p>
-                        </div>
-                         <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Shrimp Dinner</span><p class="menu-item-description">Generous portion of perfectly fried shrimp.</p></div>
+                         <span class="menu-item-price price-placeholder">Check Price</span>
                     </div>
                     <div class="menu-item">
-                        <div>
-                            <span class="menu-item-name">Fish Dinner</span>
-                            <p class="menu-item-description">Flaky fish fillets, fried to perfection.</p>
-                        </div>
-                         <span class="menu-item-price price-placeholder">Call</span>
+                        <div class="menu-item-details"><span class="menu-item-name">Fish Dinner</span><p class="menu-item-description">Flaky white fish, lightly breaded and fried golden.</p></div>
+                         <span class="menu-item-price price-placeholder">Check Price</span>
                     </div>
-                     </div>
+                </div>
             </section>
 
-            <section id="burgers" class="menu-section pt-16 -mt-16">
+            <section id="burgers" class="menu-section pt-20 -mt-16">
                 <h2 class="menu-title">Burgers 'n' Stuff</h2>
-                 <p class="text-center text-gray-600 mb-6 -mt-4">Classic American favorites, made fresh to order.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                     <div class="menu-item"><div><span class="menu-item-name">Hamburger</span><p class="menu-item-description">A simple classic, juicy and delicious.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Cheeseburger</span><p class="menu-item-description">Our classic burger topped with melted cheese.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Double Cheeseburger</span><p class="menu-item-description">Twice the beef, twice the cheese!</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Bacon Cheeseburger</span><p class="menu-item-description">Crispy bacon makes everything better.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Steak Sandwich</span><p class="menu-item-description">Tender steak on a bun.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Grilled Cheese</span><p class="menu-item-description">Warm, melty, and comforting.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Ham & Cheese</span><p class="menu-item-description">A classic combo, grilled or cold.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">BLT</span><p class="menu-item-description">Bacon, lettuce, and tomato perfection.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Chicken Sandwich</span><p class="menu-item-description">Choose grilled or crispy fried chicken.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Fish Sandwich</span><p class="menu-item-description">A crispy fish fillet on a bun.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Corn Dog</span><p class="menu-item-description">A fairground favorite, anytime.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
+                 <p class="text-center text-gray-600 mb-8 -mt-4 italic">Juicy burgers and classic sandwiches, made just the way you like 'em.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-1">
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Hamburger</span><p class="menu-item-description">Pure & simple beef patty perfection.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Cheeseburger</span><p class="menu-item-description">Topped with classic American cheese.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Double Cheeseburger</span><p class="menu-item-description">Two patties, double the cheese, double the yum.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Bacon Cheeseburger</span><p class="menu-item-description">Crispy bacon takes our cheeseburger up a notch.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Steak Sandwich</span><p class="menu-item-description">Grilled steak sandwich, a hearty choice.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Grilled Cheese</span><p class="menu-item-description">Buttery, golden, and perfectly melty.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Ham & Cheese</span><p class="menu-item-description">Classic comfort, served hot or cold.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">BLT</span><p class="menu-item-description">Crisp bacon, fresh lettuce, ripe tomato.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Chicken Sandwich</span><p class="menu-item-description">Your choice: tender grilled or crispy fried chicken breast.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Fish Sandwich</span><p class="menu-item-description">Crispy fried fish fillet on a soft bun.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                     <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Corn Dog</span><p class="menu-item-description">A classic favorite, dipped and fried.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
                 </div>
             </section>
 
-            <section id="doghouse" class="menu-section pt-16 -mt-16 bg-amber-50">
+            <section id="doghouse" class="menu-section pt-20 -mt-16">
                 <h2 class="menu-title">From the Doghouse</h2>
-                 <p class="text-center text-gray-600 mb-6 -mt-4">All your hot dog favorites!</p>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    <div class="menu-item"><div><span class="menu-item-name">Hot Dog</span><p class="menu-item-description">A classic American hot dog.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                    <div class="menu-item"><div><span class="menu-item-name">Chili Dog</span><p class="menu-item-description">Topped with our hearty chili.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                    <div class="menu-item"><div><span class="menu-item-name">Slaw Dog</span><p class="menu-item-description">A Southern favorite, topped with creamy coleslaw.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                    <div class="menu-item"><div><span class="menu-item-name">Corn Dog</span><p class="menu-item-description">Can't get enough? Have another!</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     </div>
-            </section>
-
-             <section id="sandwiches" class="menu-section pt-16 -mt-16">
-                <h2 class="menu-title">Specialty Sandwiches</h2>
-                 <p class="text-center text-gray-600 mb-6 -mt-4">Unique creations and local favorites.</p>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                     <div class="menu-item"><div><span class="menu-item-name">Specialty Sandwich 1</span><p class="menu-item-description">Ask about today's featured sandwich!</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Specialty Sandwich 2</span><p class="menu-item-description">Something different and delicious.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Specialty Sandwich 3</span><p class="menu-item-description">Try one of our unique sandwich creations.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                 </div>
-            </section>
-
-            <section id="soups" class="menu-section pt-16 -mt-16 bg-amber-50">
-                <h2 class="menu-title">Soups & Beans</h2>
-                 <p class="text-center text-gray-600 mb-6 -mt-4">Hearty and warming options.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    <div class="menu-item"><div><span class="menu-item-name">Chili</span><p class="menu-item-description">Our classic homemade chili.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                    <div class="menu-item"><div><span class="menu-item-name">Vegetable Soup</span><p class="menu-item-description">Packed with veggies, perfect any day.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                    <div class="menu-item"><div><span class="menu-item-name">Pinto Beans</span><p class="menu-item-description">A simple, satisfying side or meal.</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                </div>
-            </section>
-
-            <section id="shakes" class="menu-section pt-16 -mt-16">
-                <h2 class="menu-title">Shakes & Malts</h2>
-                 <p class="text-center text-gray-600 mb-6 -mt-4">Thick, creamy, and delicious hand-spun treats.</p>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                     <div class="menu-item"><div><span class="menu-item-name">Milkshakes</span><p class="menu-item-description">Vanilla, Chocolate, Strawberry & more flavors!</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Specialty Shakes</span><p class="menu-item-description">Ask about our unique shake creations!</p></div> <span class="menu-item-price price-placeholder">Call</span></div>
-                     <div class="menu-item"><div><span class="menu-item-name">Malts</span><p class="menu-item-description">Classic malt flavor in your favorit
+                 <p class="text-center text-gray-600 mb-8 -mt-4 italic">Top dogs, dressed up your way!</p>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-1">
+                    <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Hot Dog</span><p class="menu-item-description">The all-American classic.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                    <div class="menu-item">
+                        <div class="menu-item-details"><span class="menu-item-name">Chili Dog</span><p class="menu-item-description">Smothered in our signature meaty chili.</p></div>
+                        <span class="menu-item-price price-placeholder">Check Price</span></div>
+                    <div class="menu-item">
+                        <div class="menu-item-details"><spa
