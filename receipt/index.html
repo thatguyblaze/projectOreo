@@ -3,203 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grant Space Program</title>
+    <title>Grant Space Program - Partnering Space Innovation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* Apply Inter font globally */
+        /* Apply Poppins font globally */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* Dark background */
-            color: #e5e7eb; /* Light text */
+            font-family: 'Poppins', sans-serif;
+            background-color: #0a0a1a; /* Very dark blue base */
+            color: #e0e0e0; /* Off-white text */
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
-        /* Custom gradient for header/hero */
-        .gradient-hero {
-             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+
+        /* Animated Space Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(315deg, rgba(15, 15, 35, 0.95) 0%, rgba(10, 10, 26, 0.98) 25%, rgba(25, 15, 40, 0.95) 50%, rgba(10, 10, 26, 0.98) 75%, rgba(15, 15, 35, 0.95) 100%);
+            background-size: 400% 400%;
+            animation: animateSpace 45s ease infinite;
+            z-index: -1; /* Place behind content */
         }
-        /* Style for division cards */
-        .division-card {
-            background-color: #1f2937; /* Slightly lighter dark */
-            border: 1px solid #374151; /* Subtle border */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex; /* Use flexbox for alignment */
-            flex-direction: column; /* Stack items vertically */
-            align-items: center; /* Center items horizontally */
+
+        @keyframes animateSpace {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Glassmorphism Effect for Cards/Sections */
+        .glass-effect {
+            background: rgba(25, 25, 55, 0.3); /* Semi-transparent dark blue/purple */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); /* Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem; /* More rounded corners */
+            box-shadow: 0 8px 32px 0 rgba(10, 10, 26, 0.37);
+        }
+
+        /* Enhanced Button Styling */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border-radius: 50px; /* Pill shape */
+            font-weight: 600;
             text-align: center;
-            height: 100%; /* Make cards fill grid cell height */
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #5f4dee 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(95, 77, 238, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(95, 77, 238, 0.5);
+        }
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Section Heading Style */
+        .section-heading {
+            font-size: 2.5rem; /* Slightly larger */
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #c4b5fd; /* Light violet */
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        /* Underline effect for heading */
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #5f4dee 0%, #7c3aed 100%);
+            border-radius: 2px;
+        }
+
+        /* Division Card Enhancements */
+        .division-card {
+            background: rgba(30, 30, 60, 0.4); /* Darker glass */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1.75rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%; /* Ensure cards are same height in grid */
         }
         .division-card:hover {
-            transform: translateY(-6px) scale(1.02); /* Slightly lift and scale */
-            box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.2), 0 10px 10px -5px rgba(79, 70, 229, 0.1); /* Indigo glow */
+            transform: translateY(-8px);
+            background: rgba(40, 40, 70, 0.6);
+            box-shadow: 0 12px 40px rgba(10, 10, 26, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
         }
-        .division-logo {
-            width: 64px; /* Fixed logo width */
-            height: 64px; /* Fixed logo height */
-            margin-bottom: 1rem; /* Space below logo */
-            object-fit: contain; /* Ensure logo fits without distortion */
-            background-color: #374151; /* Placeholder background */
-            border-radius: 0.375rem; /* Rounded corners for placeholder */
+        .division-icon {
+            font-size: 2.5rem; /* Larger icons */
+            margin-bottom: 1rem;
+            color: #a78bfa; /* Violet accent */
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #9ca3af; /* Placeholder text color */
-            font-size: 0.75rem; /* Smaller text for placeholder */
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
         }
-        /* Button styling */
-        .btn {
-            display: inline-block;
-            padding: 0.85rem 1.75rem; /* Slightly larger padding */
-            border-radius: 0.5rem; /* Rounded corners */
+        /* Placeholder for Logo */
+        .division-logo-placeholder {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 0.7rem;
             font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease; /* Smooth transition for all properties */
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .btn-primary {
-            background-color: #4f46e5; /* Indigo */
-            color: white;
+        .division-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
         }
-        .btn-primary:hover {
-            background-color: #4338ca;
-            transform: translateY(-2px); /* Lift effect */
-            box-shadow: 0 7px 14px rgba(79, 70, 229, 0.25);
+        .division-card p {
+            font-size: 0.9rem;
+            color: #c0c0c0; /* Lighter gray */
+            line-height: 1.5;
         }
-        .btn-secondary {
-            background-color: #374151; /* Gray */
-            color: #e5e7eb;
-            border: 1px solid #4b5563;
-        }
-        .btn-secondary:hover {
-            background-color: #4b5563;
-            border-color: #6b7280;
-            transform: translateY(-2px); /* Lift effect */
-            box-shadow: 0 7px 14px rgba(55, 65, 81, 0.2);
-        }
-        /* Section heading style */
-        .section-heading {
-            font-size: 2.25rem; /* Larger heading */
-            line-height: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 2.5rem; /* Increased bottom margin */
-            color: #818cf8; /* Lighter Indigo */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
-        /* Ensure images/icons don't cause layout shifts */
-        img, svg {
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }
-        /* Card for the game section */
-        .game-card {
-            background-color: rgba(31, 41, 55, 0.8); /* Semi-transparent dark */
-            backdrop-filter: blur(10px); /* Frosted glass effect */
-            border: 1px solid #374151;
+
+        /* Ensure content is above the background */
+        header, main, footer {
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="gradient-hero shadow-xl py-16 sm:py-20 text-white">
-        <div class="container mx-auto px-6 text-center">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-3">
+    <header class="relative min-h-screen flex items-center justify-center text-center text-white overflow-hidden px-4">
+        <div class="relative z-10 max-w-4xl">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight" style="text-shadow: 0 0 15px rgba(196, 181, 253, 0.5);">
                 Grant Space Program
             </h1>
-            <p class="text-xl sm:text-2xl text-indigo-300 font-semibold">
+            <p class="text-xl sm:text-2xl md:text-3xl text-indigo-300 font-semibold mb-8" style="text-shadow: 0 0 10px rgba(167, 139, 250, 0.4);">
                 "Partnering Space Innovation"
             </p>
+            <p class="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mb-10">
+                The premier Ro-Space experience on Roblox. Join us for thrilling rocket missions, deep space exploration, and a vibrant community.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-5">
+                 <a href="#join" class="btn btn-primary">Join the Mission</a>
+                 <a href="#about" class="btn btn-secondary">Learn More</a>
+            </div>
         </div>
+        <div class="absolute inset-0 bg-black opacity-20 z-0"></div>
     </header>
 
-    <main class="container mx-auto px-6 py-16">
+    <main class="container mx-auto px-6 py-20 sm:py-24">
 
-        <section id="about" class="mb-20 scroll-mt-20">
-            <h2 class="section-heading">About Us</h2>
-            <div class="bg-gray-800 p-8 rounded-lg shadow-lg max-w-4xl mx-auto text-center">
-                <p class="text-lg sm:text-xl leading-relaxed mb-4">
-                    The Grant Space Program is the most dedicated and user involved Ro-Space group on Roblox. We strive to provide our community with an exciting experience for everyone to enjoy, including rocket missions and space exploration.
+        <section id="about" class="mb-24 scroll-mt-20">
+            <h2 class="section-heading">Who We Are</h2>
+            <div class="glass-effect p-8 md:p-10 max-w-4xl mx-auto text-center">
+                <i class="fas fa-users text-4xl text-indigo-300 mb-4"></i>
+                <p class="text-lg sm:text-xl leading-relaxed mb-4 text-gray-200">
+                    The Grant Space Program stands as the most dedicated and user-involved Ro-Space group on Roblox. Our core mission is to provide an exciting, immersive experience for everyone interested in space, from launching complex rocket missions to exploring the vast unknown.
                 </p>
-                <p class="text-lg sm:text-xl leading-relaxed">
-                    We hope to see you around! <span class="font-semibold text-indigo-300">Founded: 1/22/24</span>.
+                <p class="text-lg sm:text-xl leading-relaxed text-gray-300">
+                    We are a community built on passion and collaboration. Founded on <strong class="font-semibold text-indigo-300">January 22, 2024</strong>, we're constantly pushing the boundaries of what's possible in Ro-Space.
                 </p>
             </div>
         </section>
 
-        <section id="game" class="mb-20 scroll-mt-20">
-            <h2 class="section-heading">Our Ambitious Game</h2>
-            <div class="game-card p-8 rounded-lg shadow-xl max-w-4xl mx-auto text-center">
-                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /> {/* Rocket/Launch Icon */}
-                 </svg>
-                <h3 class="text-2xl font-semibold text-white mb-3">Interactive Space Exploration RP</h3>
+        <section id="game" class="mb-24 scroll-mt-20">
+            <h2 class="section-heading">The GSP Experience Game</h2>
+            <div class="glass-effect p-8 md:p-10 max-w-4xl mx-auto text-center">
+                 <i class="fas fa-rocket text-4xl text-indigo-300 mb-4"></i>
+                 <h3 class="text-2xl font-semibold text-white mb-3">An Ambitious Interactive RP</h3>
+                <p class="text-lg sm:text-xl leading-relaxed text-gray-200 mb-4">
+                    Prepare for liftoff! We're crafting a large-scale, highly ambitious interactive roleplaying game. Experience the thrill of designing, launching, and commanding rockets, managing space stations, and embarking on perilous missions across the solar system – all within Roblox.
+                </p>
                 <p class="text-lg sm:text-xl leading-relaxed text-gray-300">
-                    Get ready for an unparalleled adventure! We are developing a huge, ambitious, interactive roleplaying game centered around the thrill of launching rockets, exploring the cosmos, and managing space missions right within Roblox. Prepare for liftoff!
+                    This isn't just a game; it's an evolving universe shaped by our dedicated community. Stay tuned for updates!
                 </p>
                 </div>
         </section>
 
-        <section id="divisions" class="mb-20 scroll-mt-20">
+        <section id="divisions" class="mb-24 scroll-mt-20">
             <h2 class="section-heading">Our Divisions</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="division-card p-6 rounded-lg shadow-lg">
-                     <div class="division-logo">LOGO</div>
-                    <h3 class="text-xl font-semibold mt-2 mb-1 text-white">GSPFD</h3>
-                    <p class="text-gray-400">Grant Space Program Fire Department</p>
+                <div class="division-card">
+                    <div class="division-logo-placeholder">LOGO</div>
+                    <h3>GSPFD</h3>
+                    <p>Grant Space Program Fire Department - Ensuring safety during launches and operations.</p>
                 </div>
-                <div class="division-card p-6 rounded-lg shadow-lg">
-                     <div class="division-logo">LOGO</div>
-                    <h3 class="text-xl font-semibold mt-2 mb-1 text-white">GSPS</h3>
-                    <p class="text-gray-400">Grant Space Program Security</p>
+                <div class="division-card">
+                     <div class="division-logo-placeholder">LOGO</div>
+                    <h3>GSPS</h3>
+                    <p>Grant Space Program Security - Protecting assets and personnel across all GSP facilities.</p>
                 </div>
-                <div class="division-card p-6 rounded-lg shadow-lg">
-                     <div class="division-logo">LOGO</div>
-                    <h3 class="text-xl font-semibold mt-2 mb-1 text-white">GAPAC</h3>
-                    <p class="text-gray-400">Grant Astronaut Program and Astronaut Corps</p>
+                <div class="division-card">
+                     <div class="division-logo-placeholder">LOGO</div>
+                    <h3>GAPAC</h3>
+                    <p>Grant Astronaut Program and Astronaut Corps - Training and managing our elite astronaut crews.</p>
                 </div>
-                <div class="division-card p-6 rounded-lg shadow-lg">
-                     <div class="division-logo">LOGO</div>
-                    <h3 class="text-xl font-semibold mt-2 mb-1 text-white">Public Affairs</h3>
-                    <p class="text-gray-400">Community Engagement and Information</p>
+                <div class="division-card">
+                    <div class="division-logo-placeholder">LOGO</div>
+                    <h3>Public Affairs</h3>
+                    <p>Connecting GSP with the community, managing communications and outreach.</p>
                 </div>
-                <div class="division-card p-6 rounded-lg shadow-lg">
-                     <div class="division-logo">LOGO</div>
-                    <h3 class="text-xl font-semibold mt-2 mb-1 text-white">GSP PRL</h3>
-                    <p class="text-gray-400">GSP Propulsion and Research Laboratory</p>
+                <div class="division-card">
+                     <div class="division-logo-placeholder">LOGO</div>
+                    <h3>GSP PRL</h3>
+                    <p>Propulsion and Research Laboratory - Innovating the future of GSP's rocket technology.</p>
                 </div>
-                 <div class="division-card p-6 rounded-lg shadow-lg flex items-center justify-center border-dashed border-gray-600 hover:border-indigo-500 hover:bg-gray-700/50">
-                    <p class="text-gray-500">More divisions coming soon?</p>
-                 </div>
+                 <div class="division-card border-dashed border-gray-600 hover:border-indigo-400 items-center justify-center bg-transparent hover:bg-indigo-900/20">
+                    <div class="division-icon text-gray-500"><i class="fas fa-plus"></i></div>
+                    <h3 class="text-gray-400">You?</h3>
+                    <p class="text-gray-500">Join a division and make your mark!</p>
+                </div>
             </div>
         </section>
 
         <section id="join" class="mb-16 scroll-mt-16 text-center">
-            <h2 class="section-heading">Get Involved</h2>
-            <div class="bg-gradient-to-r from-indigo-900/50 via-purple-900/50 to-pink-900/50 p-10 rounded-lg shadow-xl max-w-4xl mx-auto border border-indigo-700">
+            <h2 class="section-heading">Become Part of GSP</h2>
+            <div class="glass-effect p-10 md:p-12 max-w-4xl mx-auto">
+                <i class="fas fa-user-plus text-4xl text-indigo-300 mb-4"></i>
                 <h3 class="text-2xl font-semibold text-white mb-4">
-                    Join the group for an exclusive Employee role!
+                    Ready for Adventure? Join Today!
                 </h3>
+                <p class="text-lg sm:text-xl leading-relaxed mb-6 text-gray-200">
+                    Gain exclusive access and the 'Employee' role by joining our official Roblox group. Connect with fellow space enthusiasts, get mission updates, and find your place in the GSP community by joining our communications server.
+                </p>
                 <p class="text-lg sm:text-xl leading-relaxed mb-8 text-gray-300">
-                    Interested in learning more or becoming part of the mission? Join our communications server! We welcome everyone who shares our passion for exploring the final frontier.
+                    We welcome all who share our passion for exploring the final frontier. Your journey starts here!
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-5">
-                     <a href="#" class="btn btn-primary">Join Roblox Group (Link)</a>
-                     <a href="#" class="btn btn-secondary">Join Comms Server (Link)</a>
+                     <a href="#" class="btn btn-primary">
+                        <i class="fab fa-roblox mr-2"></i> Join Roblox Group
+                     </a>
+                     <a href="#" class="btn btn-secondary">
+                        <i class="fas fa-comments mr-2"></i> Join Comms Server
+                     </a>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <footer class="bg-gray-900 text-gray-400 py-8 mt-16 border-t border-gray-700">
+    <footer class="bg-transparent text-gray-400 py-10 mt-16 border-t border-gray-700/50">
         <div class="container mx-auto px-6 text-center text-sm">
             <p>&copy; <script>document.write(new Date().getFullYear())</script> Grant Space Program. All Rights Reserved.</p>
-            <p class="mt-1">Founded: January 22, 2024</p>
-            </div>
+            <p class="mt-1">Founded: January 22, 2024 | Partnering Space Innovation</p>
+        </div>
     </footer>
 
 </body>
