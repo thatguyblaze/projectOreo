@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECHELON // Network Interface</title>
+    <title>ECH//ON</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0F0F1A; /* Very dark blue/purple */
-            --bg-secondary: #1A1A2E; /* Slightly lighter dark blue/purple */
-            --text-primary: #E0E0E0;
-            --text-secondary: #A0A0B0;
-            --accent-primary: #9333ea; /* Purple */
-            --accent-secondary: #c084fc; /* Lighter Purple */
-            --border-color: rgba(192, 132, 252, 0.2); /* Light purple transparent */
+            --bg-color: #000000;
+            --text-color: #FFFFFF;
+            --text-muted: #888888;
+            --accent-color: #FFFF00; /* Bright Yellow */
+            --border-color: #333333;
         }
 
         html {
@@ -25,327 +23,235 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             overflow-x: hidden;
-            position: relative;
+            line-height: 1.5;
         }
 
-        /* Animated Geometric Background */
-        #background-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.1; /* Make it very subtle */
+        /* Main container */
+        .container-main {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 2rem;
         }
 
-        /* Content Sections */
-        .content-section {
-            position: relative;
-            z-index: 1;
-            padding: 6rem 1rem; /* Increased padding */
-            min-height: 80vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Header/Logo */
+        .header {
+            padding: 3rem 0;
             border-bottom: 1px solid var(--border-color);
+            margin-bottom: 6rem; /* More space after header */
         }
-        .content-section:nth-child(odd) {
-            background-color: var(--bg-secondary);
-        }
-        .content-section:last-child {
-            border-bottom: none;
-        }
-
-        /* Header/Logo Styling */
         .header-logo {
             font-weight: 900;
-            font-size: 1.8rem; /* Slightly larger */
-            letter-spacing: 0.2em;
-            color: var(--text-primary);
-            transition: color 0.3s ease;
+            font-size: 2rem;
+            letter-spacing: 0.1em;
+            color: var(--text-color);
         }
         .header-logo span {
-            color: var(--accent-secondary);
-            opacity: 0.7;
-            transition: color 0.3s ease, opacity 0.3s ease;
-        }
-        .header-logo:hover {
-             color: var(--accent-secondary);
-        }
-         .header-logo:hover span {
-            color: var(--text-primary);
-            opacity: 1;
-         }
-
-        /* Section Title */
-        .section-title {
-             @apply text-3xl md:text-4xl font-bold mb-4 text-center;
-             background: linear-gradient(90deg, var(--accent-secondary), var(--text-primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .section-subtitle {
-            @apply text-lg md:text-xl text-text-secondary text-center max-w-3xl mx-auto mb-12;
+            color: var(--text-muted); /* Muted slash */
+            font-weight: 400;
         }
 
-        /* Card Styling */
-        .info-card {
-            background-color: rgba(26, 26, 46, 0.6); /* --bg-secondary transparent */
-            border: 1px solid var(--border-color);
-            border-radius: 0.75rem; /* rounded-xl */
-            padding: 2rem;
-            backdrop-filter: blur(8px);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        /* Hero Section - Asymmetrical */
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr; /* Default to single column */
+            align-items: center;
+            min-height: 60vh;
+            margin-bottom: 8rem;
         }
-        .info-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 30px rgba(147, 51, 234, 0.15); /* Purple shadow */
-            border-color: var(--accent-secondary);
-        }
-        .card-title {
-            @apply text-xl font-semibold mb-3 text-accent-secondary;
-        }
-        .card-text {
-            @apply text-text-secondary leading-relaxed;
-        }
-        .card-icon {
-             @apply w-10 h-10 mb-4 text-accent-primary;
+        @media (min-width: 768px) {
+             .hero-section {
+                grid-template-columns: 3fr 2fr; /* Asymmetrical layout on larger screens */
+                gap: 4rem;
+             }
         }
 
-        /* Button Styling */
-        .btn {
-            @apply inline-block px-8 py-3 rounded-lg font-semibold transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg-primary;
+        .hero-text h1 {
+            font-size: clamp(3rem, 8vw, 6rem); /* Responsive large font */
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
         }
-        .btn-primary {
-            @apply btn bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-md hover:from-purple-700 hover:to-violet-700 hover:shadow-lg hover:shadow-purple-500/30 focus:ring-violet-500 transform hover:-translate-y-1;
+        .hero-text h1 .highlight {
+            color: var(--accent-color);
         }
-        .btn-outline {
-             @apply btn border-2 border-accent-primary text-accent-secondary hover:bg-accent-primary hover:text-white focus:ring-accent-primary;
+        .hero-text p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin-bottom: 2rem;
         }
 
-        /* Scroll Animation Placeholders */
-        .scroll-fade-in {
+        /* Minimalist Button */
+        .btn-minimal {
+            display: inline-block;
+            font-weight: 500;
+            color: var(--accent-color);
+            text-decoration: none;
+            padding: 0.5rem 0; /* Only bottom padding for underline effect */
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .btn-minimal::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--accent-color);
+            transform: scaleX(0.3); /* Start with short underline */
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .btn-minimal:hover {
+            color: var(--text-color);
+        }
+        .btn-minimal:hover::after {
+            transform: scaleX(1);
+            background-color: var(--text-color);
+        }
+
+        /* Definition List Section */
+        .definition-section {
+            margin-bottom: 8rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 4rem;
+        }
+        .definition-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem 2rem; /* Row and column gap */
+        }
+        .definition-item dt {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+        }
+        .definition-item dd {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Connect Section */
+        .connect-section {
+            background-color: #111; /* Slightly different background */
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+        .connect-section h2 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .connect-section p {
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2.5rem auto;
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 3rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+        .footer span {
+            color: var(--accent-color);
+            opacity: 0.6;
+        }
+
+        /* Simple Fade-In Animation */
+        .fade-in {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            animation: fadeInAnimation 1s ease-out forwards;
         }
-        .scroll-fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        .delay-4 { animation-delay: 0.8s; }
+        .delay-5 { animation-delay: 1.0s; }
+
 
     </style>
 </head>
-<body class="relative">
+<body>
 
-    <canvas id="background-canvas"></canvas>
+    <div class="container-main">
+        <header class="header">
+            <div class="header-logo">ECH<span>//</span>ON</div>
+        </header>
 
-    <header class="fixed top-0 left-0 w-full p-4 z-50 mix-blend-difference">
-         <div class="container mx-auto">
-             <a href="#" class="header-logo">ECH<span>//</span>ON</a>
-             </div>
-    </header>
-
-    <section class="content-section min-h-screen flex flex-col justify-center text-center" id="hero">
-        <div class="max-w-4xl mx-auto scroll-fade-in">
-            <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
-                Where <span class="text-purple-400">Talent</span> Amplifies <span class="text-violet-400">Impact</span>.
-            </h1>
-            <p class="text-xl md:text-2xl text-text-secondary mb-10">
-                Echelon is a private network for proven developers dedicated to collaborative growth, knowledge sharing, and building what's next.
-            </p>
-            <a href="#about" class="btn-primary text-lg">Discover Echelon</a>
-        </div>
-    </section>
-
-    <section class="content-section" id="about">
-        <div class="container mx-auto text-center max-w-5xl scroll-fade-in">
-            <h2 class="section-title">A Curated Collective</h2>
-            <p class="section-subtitle">
-                We are more than just a group; we are a high-signal environment built on mutual respect, shared expertise, and a drive for excellence. We filter for skill and commitment, ensuring every interaction is meaningful.
-            </p>
-            <div class="grid md:grid-cols-3 gap-8 text-left">
-                <div class="info-card">
-                     <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>
-                    <h3 class="card-title">Peer-Driven Insight</h3>
-                    <p class="card-text">Engage with experienced developers across diverse domains. Share challenges, gain fresh perspectives, and accelerate your learning curve.</p>
-                </div>
-                 <div class="info-card">
-                     <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" /></svg>
-                    <h3 class="card-title">Selective Membership</h3>
-                    <p class="card-text">Our curated approach ensures a high concentration of talent and a focus on meaningful contribution, fostering genuine connections.</p>
-                </div>
-                 <div class="info-card">
-                     <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.63 2.25a14.98 14.98 0 0 0-5.84 7.38m6.16 12.12a14.98 14.98 0 0 1 6.16-12.12m-6.16 12.12v-4.8m0 4.8a14.98 14.98 0 0 1-6.16-12.12A14.98 14.98 0 0 1 9.63 2.25m-5.84 7.38a14.98 14.98 0 0 1-6.16-12.12m6.16 12.12v-4.8" /></svg>
-                    <h3 class="card-title">Beyond Code</h3>
-                    <p class="card-text">Discuss architecture, strategy, team dynamics, and the future of technology. Grow not just as a coder, but as a builder and leader.</p>
-                </div>
+        <section class="hero-section">
+            <div class="hero-text fade-in">
+                <h1>
+                    A <span class="highlight">Network</span><br>Beyond Code.
+                </h1>
+                <p>
+                    Echelon connects accomplished developers for high-level knowledge exchange, collaboration, and mutual growth.
+                </p>
+                <a href="#connect" class="btn-minimal">Explore Access &rarr;</a>
             </div>
-        </div>
-    </section>
+             <div class="hidden md:block fade-in delay-1">
+                </div>
+        </section>
 
-     <section class="content-section" id="process">
-        <div class="container mx-auto max-w-5xl scroll-fade-in">
-            <h2 class="section-title">The Echelon Flow</h2>
-            <p class="section-subtitle">
-                Our network facilitates connection and collaboration through structured channels and organic interaction. Find your collaborators, share your breakthroughs.
+        <section class="definition-section" id="about">
+            <dl class="definition-list">
+                <div class="definition-item fade-in delay-2">
+                    <dt>Curated Peers</dt>
+                    <dd>Engage directly with verified, experienced developers. We prioritize signal over noise through a selective admission process.</dd>
+                </div>
+                <div class="definition-item fade-in delay-3">
+                    <dt>Collaborative Spark</dt>
+                    <dd>Discover potential co-founders or key collaborators for your projects within a trusted, high-caliber network.</dd>
+                </div>
+                <div class="definition-item fade-in delay-4">
+                    <dt>Elevated Discourse</dt>
+                    <dd>Move beyond surface-level chat. Discuss complex architecture, strategy, and the future of technology with knowledgeable peers.</dd>
+                </div>
+                 <div class="definition-item fade-in delay-5">
+                    <dt>Shared Growth</dt>
+                    <dd>Leverage collective experience to accelerate your learning, refine your skills, and amplify your impact in the industry.</dd>
+                </div>
+            </dl>
+        </section>
+    </div> <section class="connect-section" id="connect">
+        <div class="fade-in">
+            <h2>Ready to Connect?</h2>
+            <p>
+                Membership is intended for developers with a proven track record and a commitment to contribution. If you align with this ethos, inquire about joining the network.
             </p>
-             <div class="grid md:grid-cols-2 gap-8 items-center">
-                 <div class="text-center p-8 border border-dashed border-border-color rounded-lg">
-                     <svg class="w-24 h-24 mx-auto text-text-secondary opacity-50" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" /></svg>
-                     <p class="mt-4 text-text-secondary italic">Abstract representation of network connections</p>
-                 </div>
-                 <div class="space-y-6 text-left">
-                    <div class="flex items-start space-x-4">
-                         <span class="text-accent-primary font-bold text-2xl mt-1">&rarr;</span>
-                         <div>
-                             <h4 class="font-semibold text-lg mb-1">Knowledge Streams</h4>
-                             <p class="text-text-secondary">Dedicated spaces for deep dives into specific technologies, design patterns, and industry trends.</p>
-                         </div>
-                     </div>
-                     <div class="flex items-start space-x-4">
-                         <span class="text-accent-primary font-bold text-2xl mt-1">&rarr;</span>
-                         <div>
-                             <h4 class="font-semibold text-lg mb-1">Project Signals</h4>
-                             <p class="text-text-secondary">Showcase your personal projects, seek feedback, or find skilled collaborators within the trusted network.</p>
-                         </div>
-                     </div>
-                     <div class="flex items-start space-x-4">
-                         <span class="text-accent-primary font-bold text-2xl mt-1">&rarr;</span>
-                         <div>
-                             <h4 class="font-semibold text-lg mb-1">Direct Connection</h4>
-                             <p class="text-text-secondary">Facilitated introductions and direct messaging allow for focused conversations and potential partnerships.</p>
-                         </div>
-                     </div>
-                 </div>
-             </div>
+            <a href="#" class="btn-minimal">Request Access Information</a>
+             <p class="text-xs text-text-muted mt-6 italic">Nominal dues apply upon acceptance to sustain network resources.</p>
         </div>
     </section>
 
-    <section class="content-section" id="connect">
-        <div class="container mx-auto text-center max-w-3xl scroll-fade-in">
-            <h2 class="section-title">Join the Network</h2>
-            <p class="section-subtitle">
-                Echelon membership is for established developers who are passionate about their craft and eager to contribute to a community of peers. If this resonates with you, express your interest.
-            </p>
-            <div class="info-card max-w-xl mx-auto text-left p-8">
-                 <h3 class="card-title text-center mb-4">Application Process</h3>
-                 <p class="card-text mb-6 text-center">Our process involves reviewing your background and experience to ensure alignment with the group's ethos. Be ready to share your work and discuss your motivations.</p>
-                 <a href="#" class="btn-outline w-full text-center block">Request Access Inquiry</a>
-                 <p class="text-xs text-text-secondary mt-4 text-center italic">A modest membership fee supports shared resources and platform costs upon acceptance.</p>
-            </div>
-        </div>
-    </section>
-
-    <footer class="py-8 text-center text-text-secondary text-sm relative z-10 bg-bg-primary">
-        <p>&copy; 2025 ECHELON // All rights reserved.</p>
-        <p class="mt-1 opacity-70">Network Integrity Protocol Active</p>
+    <footer class="footer">
+        <p>&copy; 2025 ECH<span>//</span>ON Network</p>
     </footer>
 
     <script>
-        // Background Animation (Simple Example - Replace with more complex if needed)
-        const canvas = document.getElementById('background-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let canvasWidth, canvasHeight;
-
-        function resizeCanvas() {
-            canvasWidth = canvas.width = window.innerWidth;
-            canvasHeight = canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvasWidth;
-                this.y = Math.random() * canvasHeight;
-                this.size = Math.random() * 1 + 0.5; // Smaller particles
-                this.speedX = Math.random() * 0.4 - 0.2; // Slower speed
-                this.speedY = Math.random() * 0.4 - 0.2;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x < 0 || this.x > canvasWidth) this.speedX *= -1;
-                if (this.y < 0 || this.y > canvasHeight) this.speedY *= -1;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(192, 132, 252, 0.5)'; // Lighter Purple particles
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function initParticles() {
-            particles = [];
-            let numberOfParticles = (canvasWidth * canvasHeight) / 15000; // Adjust density
-            for (let i = 0; i < numberOfParticles; i++) {
-                particles.push(new Particle());
-            }
-        }
-        initParticles();
-
-        function connectParticles() {
-            let opacityValue = 1;
-            for (let a = 0; a < particles.length; a++) {
-                for (let b = a + 1; b < particles.length; b++) { // Start b from a + 1
-                    let distance = Math.sqrt(
-                        Math.pow(particles[a].x - particles[b].x, 2) +
-                        Math.pow(particles[a].y - particles[b].y, 2)
-                    );
-                    if (distance < 100) { // Connection distance threshold
-                        opacityValue = 1 - (distance / 100);
-                        ctx.strokeStyle = `rgba(192, 132, 252, ${opacityValue * 0.3})`; // Adjust line opacity
-                        ctx.lineWidth = 0.5; // Thinner lines
-                        ctx.beginPath();
-                        ctx.moveTo(particles[a].x, particles[a].y);
-                        ctx.lineTo(particles[b].x, particles[b].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-
-
-        function animate() {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            particles.forEach(particle => {
-                particle.update();
-                particle.draw();
-            });
-            connectParticles();
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-
-        // Scroll Fade-In Animation
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    // Optional: Stop observing once visible
-                    // observer.unobserve(entry.target);
-                }
-                // Optional: Fade out when scrolling out of view
-                // else {
-                //     entry.target.classList.remove('visible');
-                // }
-            });
-        }, {
-            threshold: 0.1 // Trigger when 10% of the element is visible
+        // Simple script to add 'fade-in' class to elements on load for animation triggering
+        // More complex scroll-triggering could be added if needed
+        document.addEventListener('DOMContentLoaded', () => {
+            // Can add scroll triggering logic here if needed
         });
-
-        document.querySelectorAll('.scroll-fade-in').forEach((el) => {
-            observer.observe(el);
-        });
-
     </script>
 
 </body>
