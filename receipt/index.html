@@ -3,38 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dairy Cup | Mount Carmel, TN</title>
+    <title>Dairy Cup | Mount Carmel, TN - Menu & Info</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <script type="module" src="https://cdn.jsdelivr.net/npm/heroicons@2.1.3/24/outline/index.min.js"></script>
     <style>
         /* Custom Tailwind Configuration */
         const theme = {
             extend: {
                 colors: {
-                    'brand-blue': {
-                        '500': '#0ea5e9', /* sky-500 */
-                        '600': '#0284c7', /* sky-600 */
+                    'brand-teal': {
+                        '400': '#5eead4', /* cyan-300 */
+                        '500': '#2dd4bf', /* cyan-400 */
+                        '600': '#0d9488', /* teal-600 */
                     },
-                    'dark': {
-                        '800': '#1f2937', /* gray-800 */
-                        '900': '#111827', /* gray-900 */
+                    'brand-coral': {
+                         '400': '#fb923c', /* orange-400 */
+                         '500': '#f97316', /* orange-500 */
                     },
-                    'light': {
-                        '100': '#f8fafc', /* slate-50 */
-                        '200': '#f1f5f9', /* slate-100 */
-                    }
+                    'light-bg': '#f8fafc', /* slate-50 */
+                    'card-bg': '#ffffff',
+                    'text-dark': '#1e293b', /* slate-800 */
+                    'text-medium': '#475569', /* slate-600 */
+                    'text-light': '#94a3b8', /* slate-400 */
+                    'border-light': '#e2e8f0', /* slate-200 */
                 },
                 fontFamily: {
-                    'sans': ['Montserrat', 'sans-serif'],
+                    'sans': ['Lato', 'sans-serif'],
+                    'serif': ['Merriweather', 'serif'],
                 },
                 boxShadow: {
-                    'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-                    'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+                    'subtle': '0 2px 5px rgba(0, 0, 0, 0.05)',
+                    'card': '0 4px 10px rgba(0, 0, 0, 0.07)',
+                    'lifted': '0 6px 15px rgba(0, 0, 0, 0.1)',
                 },
-                transitionTimingFunction: {
-                    'in-out-hard': 'cubic-bezier(0.68, -0.55, 0.27, 1.55)',
-                },
+                borderRadius: {
+                    'lg': '0.5rem',
+                    'xl': '0.75rem',
+                }
             }
         };
         tailwind.config = { theme: theme };
@@ -42,34 +48,54 @@
         /* Base Styles */
         body {
             font-family: theme.extend.fontFamily.sans;
-            background-color: #ffffff; /* White background */
-            color: theme.extend.colors.dark['800'];
+            background-color: theme.extend.colors['light-bg'];
+            color: theme.extend.colors['text-dark'];
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
         /* Navigation Styling */
         #main-nav {
-            background-color: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid theme.extend.colors.light['200'];
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly less transparent white */
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid theme.extend.colors['border-light'];
+        }
+        .nav-brand {
+            font-family: theme.extend.fontFamily.serif;
+            font-weight: 700;
+            color: theme.extend.colors['brand-coral']['500']; /* Use accent for brand */
         }
         .nav-link {
-            color: theme.extend.colors.dark['800'];
-            font-weight: 600;
+            color: theme.extend.colors['text-medium'];
+            font-weight: 700; /* Bolder nav links */
             font-size: 0.875rem; /* text-sm */
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.6rem 0.8rem; /* Slightly more padding */
+            border-radius: theme.extend.borderRadius.lg;
             transition: color 0.2s ease, background-color 0.2s ease;
+            position: relative;
         }
+         .nav-link::after { /* Underline effect */
+             content: '';
+             position: absolute;
+             bottom: 4px; /* Position underline slightly higher */
+             left: 0.8rem;
+             right: 0.8rem;
+             height: 2px;
+             background-color: theme.extend.colors['brand-teal']['500'];
+             transform: scaleX(0);
+             transform-origin: center;
+             transition: transform 0.3s ease;
+         }
         .nav-link:hover {
-            color: theme.extend.colors.brand-blue['600'];
-            background-color: theme.extend.colors.brand-blue['500']/10;
+            color: theme.extend.colors['brand-teal']['600'];
+            background-color: theme.extend.colors['brand-teal']['500']/10;
         }
         .nav-link.active {
-            color: theme.extend.colors.brand-blue['600'];
-            background-color: theme.extend.colors.brand-blue['500']/15;
+            color: theme.extend.colors['brand-teal']['600'];
         }
+         .nav-link.active::after {
+             transform: scaleX(1); /* Show underline for active link */
+         }
 
         /* Section Styling */
         .section-padding {
@@ -79,103 +105,129 @@
             md:padding-bottom: 5rem; /* md:pb-20 */
         }
         .section-title {
-            font-size: 2.25rem; /* text-4xl */
+            font-family: theme.extend.fontFamily.serif;
+            font-size: 2.5rem; /* text-4xl */
             font-weight: 700;
-            color: theme.extend.colors.dark['900'];
+            color: theme.extend.colors['text-dark'];
             margin-bottom: 1rem; /* mb-4 */
             text-align: center;
         }
         .section-subtitle {
             font-size: 1.125rem; /* text-lg */
-            color: theme.extend.colors.dark['800'];
-            opacity: 0.8;
+            color: theme.extend.colors['text-medium'];
             text-align: center;
             margin-bottom: 3rem; /* mb-12 */
-            max-width: 600px;
+            max-width: 650px;
             margin-left: auto;
             margin-right: auto;
+            line-height: 1.6;
         }
 
-        /* Menu Item Styling */
-        .menu-category-title {
-             font-size: 1.5rem; /* text-2xl */
-             font-weight: 600;
-             color: theme.extend.colors.brand-blue['600'];
-             margin-bottom: 1.5rem; /* mb-6 */
+        /* Menu Card Styling */
+        .menu-card {
+             background-color: theme.extend.colors['card-bg'];
+             border-radius: theme.extend.borderRadius.xl;
+             padding: 1.5rem; /* p-6 */
+             box-shadow: theme.extend.boxShadow.card;
+             border: 1px solid theme.extend.colors['border-light'];
+             height: 100%; /* Make cards in a row equal height */
+             display: flex;
+             flex-direction: column;
+        }
+        .menu-card-title {
+             font-size: 1.25rem; /* text-xl */
+             font-weight: 700;
+             font-family: theme.extend.fontFamily.serif;
+             color: theme.extend.colors['brand-coral']['500']; /* Accent color title */
+             margin-bottom: 1rem; /* mb-4 */
              padding-bottom: 0.5rem; /* pb-2 */
-             border-bottom: 2px solid theme.extend.colors.brand-blue['500']/30;
+             border-bottom: 1px solid theme.extend.colors['border-light'];
+        }
+        .menu-card-content {
+             flex-grow: 1; /* Allow content to fill space */
         }
         .menu-item {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            margin-bottom: 1rem; /* mb-4 */
+            margin-bottom: 0.75rem; /* mb-3 */
+            padding-bottom: 0.5rem; /* pb-2 */
+            border-bottom: 1px dotted theme.extend.colors['border-light'];
+        }
+        .menu-item:last-child {
+             border-bottom: none;
+             margin-bottom: 0;
+             padding-bottom: 0;
         }
         .menu-item-name {
             font-weight: 600;
-            color: theme.extend.colors.dark['800'];
+            color: theme.extend.colors['text-dark'];
             flex-grow: 1;
             margin-right: 1rem; /* mr-4 */
+            font-size: 0.95rem; /* Slightly smaller item names */
         }
-        .menu-item-description {
-             font-size: 0.8rem; /* text-xs */
-             color: theme.extend.colors.dark['800'];
-             opacity: 0.7;
+        .menu-item-description { /* Optional description styling */
+             font-size: 0.8rem;
+             color: theme.extend.colors['text-medium'];
              margin-top: 0.1rem;
         }
         .menu-item-price {
-            font-weight: 600;
-            color: theme.extend.colors.dark['900'];
+            font-weight: 700; /* Bold price */
+            color: theme.extend.colors['brand-teal']['600']; /* Teal price */
             white-space: nowrap;
+            font-size: 0.9rem;
         }
         .price-placeholder {
-            color: theme.extend.colors.dark['800'];
-            opacity: 0.6;
+            color: theme.extend.colors['text-light'];
             font-style: italic;
-            font-size: 0.9em;
+            font-weight: 400; /* Less bold placeholder */
         }
 
         /* Button Styling */
         .btn {
             display: inline-block;
-            padding: 0.75rem 1.5rem; /* py-3 px-6 */
-            border-radius: 0.375rem; /* rounded-md */
-            font-weight: 600;
+            padding: 0.6rem 1.2rem; /* Smaller padding */
+            border-radius: theme.extend.borderRadius.lg;
+            font-weight: 700;
             text-align: center;
-            transition: background-color 0.3s ease, transform 0.1s ease;
+            transition: all 0.2s ease;
+            border: 2px solid transparent; /* Add border for consistent size */
         }
         .btn-primary {
-            background-color: theme.extend.colors.brand-blue['500'];
+            background-color: theme.extend.colors['brand-teal']['500'];
+            border-color: theme.extend.colors['brand-teal']['500'];
             color: #ffffff;
         }
         .btn-primary:hover {
-            background-color: theme.extend.colors.brand-blue['600'];
+            background-color: theme.extend.colors['brand-teal']['600'];
+            border-color: theme.extend.colors['brand-teal']['600'];
             transform: translateY(-2px);
+            box-shadow: theme.extend.boxShadow.lifted;
         }
         .btn-secondary {
-             background-color: theme.extend.colors.light['200'];
-             color: theme.extend.colors.dark['800'];
-             border: 1px solid theme.extend.colors.light['200'];
+             background-color: theme.extend.colors['card-bg'];
+             color: theme.extend.colors['brand-teal']['600'];
+             border-color: theme.extend.colors['brand-teal']['500'];
         }
          .btn-secondary:hover {
-             background-color: theme.extend.colors.light['100'];
-             border-color: theme.extend.colors.dark['800']/20;
+             background-color: theme.extend.colors['brand-teal']['500']/10;
+             border-color: theme.extend.colors['brand-teal']['600'];
              transform: translateY(-2px);
          }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px;}
-        ::-webkit-scrollbar-track { background: theme.extend.colors.light['100']; }
-        ::-webkit-scrollbar-thumb { background: theme.extend.colors.brand-blue['500']/50; border-radius: 4px;}
-        ::-webkit-scrollbar-thumb:hover { background: theme.extend.colors.brand-blue['500']/70; }
+        ::-webkit-scrollbar-track { background: theme.extend.colors['light-bg']; }
+        ::-webkit-scrollbar-thumb { background: theme.extend.colors['brand-teal']['400']; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: theme.extend.colors['brand-teal']['500']; }
 
     </style>
 </head>
 <body class="antialiased">
 
     <header id="main-nav" class="sticky top-0 z-50 w-full">
-        <nav class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
-            <a href="#hero" class="text-xl font-bold text-dark-900 hover:text-brand-blue-600 transition-colors">
+        <nav class="container mx-auto px-4 py-2 flex flex-wrap justify-between items-center">
+            <a href="#hero" class="nav-brand text-2xl hover:text-brand-coral-400 transition-colors">
                 Dairy Cup
             </a>
             <ul class="flex flex-wrap justify-center space-x-1 sm:space-x-2 mt-2 md:mt-0">
@@ -188,153 +240,124 @@
         </nav>
     </header>
 
-    <section id="hero" class="bg-gradient-to-br from-brand-blue-500 to-sky-700 text-white section-padding text-center min-h-[60vh] flex flex-col justify-center items-center">
+    <section id="hero" class="bg-gradient-to-br from-brand-teal-400 to-brand-teal-600 text-white section-padding text-center min-h-[50vh] flex flex-col justify-center items-center">
         <div class="container mx-auto px-4">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">Your Local Taste of Home</h1>
-            <p class="text-xl md:text-2xl mb-8 opacity-90 max-w-3xl mx-auto">Delicious food, friendly faces, and creamy Mayfield ice cream await you at the Dairy Cup in Mount Carmel.</p>
-            <a href="#menu" class="btn bg-white text-brand-blue-600 hover:bg-light-100 hover:text-brand-blue-600">View Our Menu</a>
+            <h1 class="text-4xl md:text-5xl font-serif font-bold mb-4 leading-tight">Taste the Tradition</h1>
+            <p class="text-lg md:text-xl mb-8 opacity-95 max-w-2xl mx-auto">Serving up smiles, delicious food, and creamy Mayfield ice cream in Mount Carmel.</p>
+            <a href="#menu" class="btn bg-white text-brand-teal-600 hover:bg-opacity-90">Explore Our Menu</a>
         </div>
     </section>
 
-    <section id="about" class="section-padding bg-light-100">
+    <section id="about" class="section-padding">
         <div class="container mx-auto px-4">
-            <h2 class="section-title">Our Story</h2>
-            <p class="section-subtitle">More than just a diner, we're a part of the Mount Carmel community.</p>
-            <div class="max-w-3xl mx-auto text-center text-dark-800 space-y-4 leading-relaxed">
-                <p>For years, the Dairy Cup has been a beloved spot for locals and visitors alike. We pride ourselves on serving up classic American comfort food made with care, from juicy burgers and crispy fries to hearty dinners and, of course, our famous hand-spun shakes and Mayfield ice cream treats.</p>
-                <p>We believe in good food, fair prices, and friendly service. Whether you're stopping by for a quick lunch, a family dinner, or a sweet treat after the game, we're always happy to see you. Thanks for being part of the Dairy Cup family!</p>
-                 </div>
-        </div>
-    </section>
-
-    <section id="menu" class="section-padding">
-        <div class="container mx-auto px-4">
-            <h2 class="section-title">Our Menu</h2>
-            <p class="section-subtitle">From savory bites to sweet delights, find your favorite here. (Prices omitted online - please call or visit!)</p>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
-
-                <div>
-                    <h3 class="menu-category-title">Top Ten Combos</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Combo 1-10</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
-                        <p class="text-xs text-gray-500 italic -mt-3">Ask our team about the delicious details for each combo number!</p>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="menu-category-title">Dinners</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Chicken Strip Dinner</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Shrimp Dinner</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Fish Dinner</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                 <div>
-                    <h3 class="menu-category-title">Burgers 'n' Stuff</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Hamburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Cheeseburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Double Cheeseburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Bacon Cheeseburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Steak Sandwich</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Grilled Cheese</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Ham & Cheese</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">BLT</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Chicken Sandwich (Grilled/Fried)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Fish Sandwich</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Corn Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                 <div>
-                    <h3 class="menu-category-title">Doghouse</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Hot Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Chili Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Slaw Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Corn Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                 <div>
-                    <h3 class="menu-category-title">Specialty Sandwiches</h3>
-                    <ul class="space-y-4">
-                         <li class="menu-item"><span class="menu-item-name">Specialty Sandwich 1-3</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
-                         <p class="text-xs text-gray-500 italic -mt-3">Ask about our unique sandwich creations!</p>
-                    </ul>
-                </div>
-
-                 <div>
-                    <h3 class="menu-category-title">Soups & Beans</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Chili</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Vegetable Soup</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Pinto Beans</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="menu-category-title">Shakes & Malts</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Milkshakes (Various Flavors)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Specialty Shakes</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Malts (Various Flavors)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="menu-category-title">Sundaes & Splits</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Hot Fudge Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Strawberry Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Chocolate Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Pineapple Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Butterscotch Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Caramel Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Banana Split</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h3 class="menu-category-title">Ice Cream & Treats</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Parfaits</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Mayfield Hand-Dipped</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Ice Cream Cones</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Floats</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Freezes</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Ice Cream Cakes</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Milk</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                 <div>
-                    <h3 class="menu-category-title">Drinks</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Soft Drinks (Pepsi)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Iced Tea (Sweet/Unsweet)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Coffee</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Milk</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                    </ul>
-                </div>
-
-                 <div>
-                    <h3 class="menu-category-title">Value & More</h3>
-                    <ul class="space-y-4">
-                        <li class="menu-item"><span class="menu-item-name">Value Meal</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Kids Meal</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
-                        <li class="menu-item"><span class="menu-item-name">Limited Time Offers</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
-                    </ul>
-                </div>
-
+            <h2 class="section-title">Your Neighborhood Diner</h2>
+            <p class="section-subtitle">Proudly serving the Mount Carmel community for years.</p>
+            <div class="max-w-3xl mx-auto text-center text-text-medium space-y-4 leading-relaxed">
+                <p>Welcome to the Dairy Cup! We're more than just a place to eat; we're a gathering spot where friends and family come together over classic American comfort food. From our juicy burgers and crispy fries to hearty dinners and hand-spun shakes, everything is made with care.</p>
+                <p>We believe in simple goodness: delicious food, friendly service, and a welcoming atmosphere. Whether it's a quick lunch or a sweet Mayfield ice cream treat, we're happy to be your go-to spot. Thanks for being part of our story!</p>
             </div>
         </div>
     </section>
 
-    <section id="specials" class="section-padding bg-light-100">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="section-title">Today's Specials</h2>
-            <p class="section-subtitle">Ask us about our delicious daily features when you visit or call!</p>
-            <div class="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto border border-
+    <section id="menu" class="section-padding bg-gradient-to-b from-white to-light-bg">
+        <div class="container mx-auto px-4">
+            <h2 class="section-title">What We're Serving</h2>
+            <p class="section-subtitle">Find your favorites below! (Prices omitted online - please call or visit for current pricing)</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+
+                <div class="menu-card">
+                    <h3 class="menu-card-title">Top Ten Combos</h3>
+                    <div class="menu-card-content">
+                        <ul class="space-y-3">
+                            <li class="menu-item"><span class="menu-item-name">Combo 1-10</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
+                            <p class="text-xs text-text-light italic -mt-2">Great value meals! Ask our team for the tasty details on each combo.</p>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="menu-card">
+                    <h3 class="menu-card-title">Hearty Dinners</h3>
+                     <div class="menu-card-content">
+                        <ul class="space-y-3">
+                            <li class="menu-item"><span class="menu-item-name">Chicken Strip Dinner</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Shrimp Dinner</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Fish Dinner</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="menu-card">
+                    <h3 class="menu-card-title">Burgers 'n' Stuff</h3>
+                     <div class="menu-card-content">
+                        <ul class="space-y-3">
+                            <li class="menu-item"><span class="menu-item-name">Hamburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Cheeseburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Double Cheeseburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Bacon Cheeseburger</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Steak Sandwich</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Grilled Cheese</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Ham & Cheese</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">BLT</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Chicken Sandwich (Grilled/Fried)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Fish Sandwich</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Corn Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="menu-card">
+                    <h3 class="menu-card-title">Doghouse</h3>
+                     <div class="menu-card-content">
+                        <ul class="space-y-3">
+                            <li class="menu-item"><span class="menu-item-name">Hot Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Chili Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Slaw Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Corn Dog</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="menu-card">
+                    <h3 class="menu-card-title">Specialty Sandwiches</h3>
+                     <div class="menu-card-content">
+                        <ul class="space-y-3">
+                             <li class="menu-item"><span class="menu-item-name">Specialty Sandwich 1-3</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
+                             <p class="text-xs text-text-light italic -mt-2">Try our unique sandwich creations!</p>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="menu-card">
+                    <h3 class="menu-card-title">Soups & Beans</h3>
+                     <div class="menu-card-content">
+                        <ul class="space-y-3">
+                            <li class="menu-item"><span class="menu-item-name">Chili</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Vegetable Soup</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Pinto Beans</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="menu-card">
+                    <h3 class="menu-card-title">Shakes & Malts</h3>
+                     <div class="menu-card-content">
+                        <ul class="space-y-3">
+                            <li class="menu-item"><span class="menu-item-name">Milkshakes (Various Flavors)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Specialty Shakes</span> <span class="menu-item-price price-placeholder">Ask Us!</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Malts (Various Flavors)</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="menu-card">
+                    <h3 class="menu-card-title">Sundaes & Splits</h3>
+                     <div class="menu-card-content">
+                        <ul class="space-y-3">
+                            <li class="menu-item"><span class="menu-item-name">Hot Fudge Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Strawberry Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Chocolate Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Pineapple Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Butterscotch Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Caramel Sundae</span> <span class="menu-item-price price-placeholder">Check Price</span></li>
+                            <li class="menu-item"><span class="menu-item-name">Banana Split</span> <span class="menu-item-p
