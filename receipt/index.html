@@ -3,158 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Echelon - [ACCESS GRANTED]</title>
+    <title>The Echelon - [Evolve // Construct]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles for the cryptic feel */
+        /* Base styles */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a; /* Very dark background */
-            color: #a0a0a0; /* Muted text color */
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            background-color: #050505; /* Even darker base */
+            color: #b0b0b0; /* Slightly brighter muted text */
+            overflow-x: hidden;
         }
-        /* Subtle glow effect for key elements */
-        .glow {
-            text-shadow: 0 0 8px rgba(0, 191, 255, 0.3), 0 0 12px rgba(0, 191, 255, 0.2); /* Deep sky blue glow */
+
+        /* Enhanced Glow Effects */
+        .glow-blue {
+            text-shadow: 0 0 5px rgba(0, 191, 255, 0.4), /* Sky Blue */
+                         0 0 10px rgba(0, 191, 255, 0.3),
+                         0 0 15px rgba(0, 191, 255, 0.2);
         }
-        .subtle-glow {
-             text-shadow: 0 0 5px rgba(0, 191, 255, 0.2);
+        .glow-magenta {
+             text-shadow: 0 0 5px rgba(255, 0, 255, 0.4), /* Magenta */
+                          0 0 10px rgba(255, 0, 255, 0.3),
+                          0 0 15px rgba(255, 0, 255, 0.2);
         }
-        /* Animated gradient border effect */
-        .gradient-border {
+        .subtle-glow-blue {
+             text-shadow: 0 0 6px rgba(0, 191, 255, 0.3);
+        }
+         .subtle-glow-magenta {
+             text-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+        }
+
+        /* More Vibrant Animated Gradient Border */
+        .gradient-border-animated {
             position: relative;
-            border-radius: 0.5rem; /* Corresponds to rounded-lg */
-            padding: 1px; /* Border thickness */
-            background: linear-gradient(90deg, #1f2937, #0a0a0a, #1f2937); /* Dark gradient */
-            background-size: 200% 100%;
-            animation: gradient-animation 5s linear infinite;
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 2px; /* Slightly thicker border */
+            background: linear-gradient(90deg, #00BFFF, #FF00FF, #00BFFF); /* Blue to Magenta loop */
+            background-size: 300% 100%;
+            animation: gradient-flow 4s linear infinite;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.2), 0 0 15px rgba(255, 0, 255, 0.2); /* Add outer glow */
         }
-        .gradient-border > * {
+        .gradient-border-animated > * {
             background-color: #111827; /* Inner background (gray-900) */
-            border-radius: calc(0.5rem - 1px); /* Adjust inner radius */
+            border-radius: calc(0.75rem - 2px); /* Adjust inner radius */
         }
 
-        @keyframes gradient-animation {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        @keyframes gradient-flow {
+            0% { background-position: 150% 0; }
+            100% { background-position: -150% 0; }
         }
 
-        /* Simple text reveal animation */
+        /* Text Reveal Animation (Unchanged) */
         .reveal-text {
             opacity: 0;
             animation: fadeIn 1.5s ease-out forwards;
         }
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { to { opacity: 1; } }
         .reveal-text-delayed { animation-delay: 0.5s; }
         .reveal-text-more-delayed { animation-delay: 1s; }
 
-        /* Style for section headers */
+        /* Section Header Styling */
         .section-header {
-            font-weight: 700;
-            font-size: 1.875rem; /* text-3xl */
-            letter-spacing: 0.1em; /* Wider spacing */
+            font-weight: 800; /* Slightly bolder */
+            font-size: 2rem; /* text-3xl */
+            letter-spacing: 0.15em; /* Wider spacing */
             text-transform: uppercase;
-            color: #e5e7eb; /* gray-200 */
-            margin-bottom: 1rem; /* mb-4 */
+            color: #f0f0f0; /* Brighter text */
+            margin-bottom: 1.5rem; /* mb-6 */
             text-align: center;
+            /* Alternating glow effect */
         }
+        #about .section-header { @apply subtle-glow-blue; }
+        #join .section-header { @apply subtle-glow-magenta; }
+        #projects .section-header { @apply subtle-glow-blue; }
 
-        /* Custom button style */
+
+        /* Enhanced Button Styles */
+        .btn {
+             @apply inline-block px-8 py-3 font-bold rounded-lg shadow-lg transition duration-300 ease-in-out transform focus:outline-none focus:ring-4;
+        }
         .btn-primary {
-             @apply inline-block px-6 py-3 bg-gradient-to-r from-sky-700 to-cyan-600 text-white font-semibold rounded-lg shadow-md hover:from-sky-600 hover:to-cyan-500 transition duration-300 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500;
+             @apply btn bg-gradient-to-r from-sky-500 via-sky-600 to-cyan-500 text-white hover:from-sky-600 hover:to-cyan-600 hover:shadow-cyan-400/40 hover:-translate-y-1 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-gray-900;
         }
         .btn-secondary {
-             @apply inline-block px-6 py-3 bg-gray-700 text-gray-300 font-semibold rounded-lg shadow-md hover:bg-gray-600 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-gray-500;
+             @apply btn bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 text-gray-300 hover:from-gray-600 hover:to-gray-600 hover:shadow-gray-500/30 hover:-translate-y-1 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900;
+        }
+         .btn-accent { /* New button style using magenta */
+             @apply btn bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 hover:shadow-fuchsia-500/40 hover:-translate-y-1 focus:ring-fuchsia-400 focus:ring-offset-2 focus:ring-offset-gray-900;
+        }
+
+        /* Hero Section Background Animation */
+        .hero-bg {
+            position: relative;
+            background: linear-gradient(160deg, #0a0a0a 0%, #111827 50%, #050505 100%);
+            overflow: hidden; /* Contain the pseudo-element */
+        }
+        .hero-bg::before { /* Subtle animated grid lines */
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(to right, rgba(0, 191, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 191, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.5;
+            animation: bg-pan 20s linear infinite;
+            z-index: 0; /* Behind content */
+        }
+         @keyframes bg-pan {
+            0% { background-position: 0 0; }
+            100% { background-position: 80px 80px; } /* Pan diagonally */
+        }
+        .hero-content {
+            position: relative; /* Ensure content is above the background */
+            z-index: 1;
+        }
+
+        /* Header Styling */
+         header {
+            background-color: rgba(5, 5, 5, 0.6); /* Darker, slightly less transparent */
+            backdrop-filter: blur(12px); /* Stronger blur */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Fainter border */
+         }
+         header h1 { @apply subtle-glow-blue; }
+         header nav a { @apply text-gray-400 hover:text-fuchsia-400 transition duration-300 px-3 py-2 rounded-md text-sm font-medium; } /* Added hover color */
+         header nav a:hover { @apply subtle-glow-magenta; }
+
+
+        /* Project Card Hover Effect */
+        .project-card {
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+        }
+        .project-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .project-card h4 { @apply subtle-glow-blue; } /* Add glow to project titles */
+
+        /* Footer */
+        footer {
+             border-top: 1px solid rgba(255, 255, 255, 0.1);
+             background-color: #050505;
         }
 
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-50 backdrop-blur-md p-4 border-b border-gray-800">
+    <header class="fixed top-0 left-0 right-0 z-50 p-4">
         <div class="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
-            <h1 class="text-xl font-bold text-gray-200 subtle-glow">// ECHELON</h1>
-            <nav class="hidden md:flex space-x-6">
-                <a href="#about" class="text-gray-400 hover:text-sky-400 transition duration-300">Manifesto</a>
-                <a href="#join" class="text-gray-400 hover:text-sky-400 transition duration-300">Initiation</a>
-                <a href="#projects" class="text-gray-400 hover:text-sky-400 transition duration-300">Constructs</a>
+            <h1 class="text-2xl font-bold text-gray-100">// ECHELON</h1>
+            <nav class="hidden md:flex space-x-2">
+                <a href="#about">Ethos</a>
+                <a href="#join">Engage</a>
+                <a href="#projects">Blueprints</a>
             </nav>
-             <button class="md:hidden text-gray-400 hover:text-white focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+             <button class="md:hidden text-gray-300 hover:text-white focus:outline-none">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
         </div>
     </header>
 
-    <section class="min-h-screen flex items-center justify-center text-center bg-gradient-to-b from-black via-gray-900 to-black px-4 pt-20">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-100 mb-4 glow reveal-text">TRANSCEND THE MUNDANE.</h2>
-            <p class="text-lg sm:text-xl text-gray-400 mb-8 reveal-text reveal-text-delayed">We are the architects of the next level. A collective bound by code, driven by evolution.</p>
-            <div class="reveal-text reveal-text-more-delayed">
-                <a href="#about" class="btn-primary mr-2 mb-2">Discover More</a>
-                 <a href="#join" class="btn-secondary mb-2">Seek Initiation</a>
+    <section class="min-h-screen flex items-center justify-center text-center hero-bg px-4 pt-20">
+        <div class="hero-content max-w-4xl mx-auto">
+            <h2 class="text-5xl sm:text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-fuchsia-500 to-sky-400 mb-6 glow-blue reveal-text" style="animation: gradient-flow 6s linear infinite; background-size: 200% auto;">
+                BUILD BEYOND LIMITS.
+            </h2>
+            <p class="text-xl sm:text-2xl text-gray-300 mb-10 reveal-text reveal-text-delayed">A collective for dedicated developers focused on growth, collaboration, and crafting ambitious games.</p>
+            <div class="reveal-text reveal-text-more-delayed space-x-4">
+                <a href="#about" class="btn-primary">Understand Our Ethos</a>
+                 <a href="#join" class="btn-secondary">Explore Engagement</a>
             </div>
-            </div>
+        </div>
     </section>
 
-    <section id="about" class="py-20 md:py-32 bg-gray-900 px-4">
+    <section id="about" class="py-24 md:py-36 bg-gray-900 px-4">
         <div class="container mx-auto max-w-4xl">
-            <h3 class="section-header subtle-glow">Our Mandate</h3>
-            <div class="gradient-border">
-                 <div class="p-8 md:p-12 rounded-lg text-gray-300 space-y-6 text-base md:text-lg leading-relaxed">
-                    <p>Mediocrity is the default state. We reject it. The Echelon is not merely a group; it's a crucible for talent. We are developers, thinkers, and creators committed to mutual elevation.</p>
-                    <p>Our focus is twofold: relentless self-improvement and the collaborative construction of ambitious digital worlds. We don't just write code; we forge experiences, pushing the boundaries of what's possible in game development and beyond.</p>
-                    <p>Entry is selective. Purpose is paramount. We seek those who understand that true growth requires challenge and contribution.</p>
+            <h3 class="section-header">Our Ethos</h3>
+            <div class="gradient-border-animated">
+                 <div class="p-10 md:p-14 rounded-[calc(0.75rem-2px)] text-gray-300 space-y-6 text-lg md:text-xl leading-relaxed">
+                    <p>Potential unrefined is potential wasted. The Echelon is where capable developers converge to sharpen their skills and build something significant, together.</p>
+                    <p>We're driven by two core principles: continuous personal improvement in our craft and the collaborative creation of large-scale games. We share knowledge, challenge assumptions, and push each other to elevate our work.</p>
+                    <p>This isn't a casual forum. We seek individuals ready to contribute, learn, and commit to building impressive projects and a stronger collective.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="join" class="py-20 md:py-32 bg-black px-4">
+    <section id="join" class="py-24 md:py-36 bg-black px-4">
          <div class="container mx-auto max-w-4xl text-center">
-             <h3 class="section-header subtle-glow">The Path</h3>
-             <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-lg">Membership is earned, not given. Prove your aptitude. Demonstrate your drive. Understand the commitment.</p>
-             <div class="bg-gray-900 p-8 rounded-lg shadow-xl border border-gray-700 inline-block max-w-xl text-left space-y-4">
-                <h4 class="text-xl font-semibold text-gray-200 mb-3">The Commitment:</h4>
-                <p class="text-gray-400">The Echelon operates on collective investment. Membership dues are required.</p>
-                <p class="text-gray-400">These contributions are not profit; they are fuel. They fund shared resources, exclusive member apparel <span class="italic">(uniforms)</span>, infrastructure for our projects, and the very tools we use to build.</p>
-                <p class="text-gray-400">This ensures every member is invested in our shared ascent and the tangible creation of large-scale games and initiatives.</p>
-                <p class="text-gray-300 font-semibold mt-4">Ready to prove your worth?</p>
-                <a href="#" class="btn-primary mt-4 block text-center">Begin Assessment</a>
+             <h3 class="section-header">Engage</h3>
+             <p class="text-gray-300 mb-10 max-w-2xl mx-auto text-xl">Joining means commitment. Show us your skills, your drive, and your understanding of collaborative growth.</p>
+             <div class="bg-gray-900 p-10 rounded-xl shadow-2xl border border-gray-700 inline-block max-w-2xl text-left space-y-5 relative overflow-hidden">
+                 <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-fuchsia-500/50 rounded-tl-lg"></div>
+                 <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-fuchsia-500/50 rounded-br-lg"></div>
+
+                <h4 class="text-2xl font-semibold text-gray-100 mb-4 subtle-glow-magenta">Collective Investment:</h4>
+                <p class="text-gray-400 text-lg">The Echelon requires member dues. Transparency is key: these funds are directly reinvested into the group.</p>
+                <p class="text-gray-400 text-lg">Your contribution fuels our collective engine. It pays for shared software licenses, development tools, server costs for our projects, and potentially unique member benefits like custom 'uniform' apparel or resources for our game builds.</p>
+                <p class="text-gray-400 text-lg">This shared investment ensures everyone has skin in the game and benefits from the resources needed to tackle ambitious projects.</p>
+                <p class="text-gray-200 font-semibold mt-6 text-lg">Think you align with our goals?</p>
+                <a href="#" class="btn-accent mt-5 block text-center text-lg">Signal Your Interest</a>
              </div>
          </div>
     </section>
 
-     <section id="projects" class="py-20 md:py-32 bg-gray-900 px-4">
-        <div class="container mx-auto max-w-4xl">
-            <h3 class="section-header subtle-glow">Constructs</h3>
-            <p class="text-gray-400 text-center mb-12 text-lg">Witness the blueprints of our ambition. Current directives focus on large-scale game development.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="gradient-border">
-                    <div class="p-6 rounded-lg">
-                        <h4 class="text-xl font-semibold text-gray-200 mb-2">[Project Chimera]</h4>
-                        <p class="text-gray-400">Status: // SPECIFICATION PHASE //</p>
-                        <p class="text-gray-400 mt-2">A multi-layered simulation exploring emergent systems. Requires advanced logic and architectural foresight.</p>
+     <section id="projects" class="py-24 md:py-36 bg-gray-900 px-4">
+        <div class="container mx-auto max-w-5xl"> <h3 class="section-header">Blueprints</h3>
+            <p class="text-gray-300 text-center mb-16 text-xl">Current vectors of our collective effort. Primarily focused on challenging game development initiatives.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="gradient-border-animated project-card">
+                    <div class="p-8 rounded-[calc(0.75rem-2px)]">
+                        <h4 class="text-2xl font-semibold text-gray-100 mb-3">[Project Chimera]</h4>
+                        <p class="text-fuchsia-400 font-medium mb-3">// COMPLEX SYSTEMS DESIGN //</p>
+                        <p class="text-gray-400 text-lg">Developing a simulation emphasizing emergent AI behavior and intricate world logic. A test of architectural skill.</p>
                     </div>
                 </div>
-                <div class="gradient-border">
-                     <div class="p-6 rounded-lg">
-                        <h4 class="text-xl font-semibold text-gray-200 mb-2">[Project Leviathan]</h4>
-                        <p class="text-gray-400">Status: // CORE ENGINE DEV //</p>
-                        <p class="text-gray-400 mt-2">Foundation for a persistent world experience. Focus on scalability and network optimization.</p>
+                <div class="gradient-border-animated project-card">
+                     <div class="p-8 rounded-[calc(0.75rem-2px)]">
+                        <h4 class="text-2xl font-semibold text-gray-100 mb-3">[Project Leviathan]</h4>
+                        <p class="text-fuchsia-400 font-medium mb-3">// SCALABLE WORLD INFRASTRUCTURE //</p>
+                        <p class="text-gray-400 text-lg">Building the foundational tech for a persistent online experience. Prioritizing performance and network efficiency.</p>
                     </div>
                 </div>
                  </div>
         </div>
     </section>
 
-    <footer class="py-8 bg-black border-t border-gray-800 px-4">
-        <div class="container mx-auto text-center text-gray-500 text-sm">
-            <p>&copy; 2025 The Echelon. Access Restricted. // Transmission Ends //</p>
+    <footer class="py-10 bg-black border-t border-gray-800 px-4">
+        <div class="container mx-auto text-center text-gray-500">
+            <p class="mb-2 text-sm">&copy; 2025 The Echelon. Commitment Required.</p>
+            <p class="text-xs">// System Offline //</p>
         </div>
     </footer>
 
@@ -166,37 +248,27 @@
                 const targetId = this.getAttribute('href');
                 const targetElement = document.querySelector(targetId);
                 if(targetElement) {
-                    // Calculate offset for fixed header
-                    const headerOffset = document.querySelector('header').offsetHeight || 70; // Adjust if header height changes
+                    const headerOffset = document.querySelector('header').offsetHeight || 70;
                     const elementPosition = targetElement.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: "smooth"
-                    });
+                    window.scrollTo({ top: offsetPosition, behavior: "smooth" });
                 }
             });
         });
 
-        // Add simple scroll reveal effect (optional)
+        // Scroll reveal effect
         const revealElements = document.querySelectorAll('.reveal-text');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.style.animationPlayState = 'running';
-                    // Optional: Stop observing after revealed
-                    // observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.1 }); // Trigger when 10% visible
-
+        }, { threshold: 0.1 });
         revealElements.forEach(el => {
-            // Ensure animation doesn't play immediately on load for elements already in view
              el.style.animationPlayState = 'paused';
             observer.observe(el);
         });
-
     </script>
 
 </body>
