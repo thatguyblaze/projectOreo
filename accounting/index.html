@@ -49,6 +49,22 @@
         li {
             margin-bottom: 0.5rem; /* Equivalent to mb-2 */
         }
+         /* Style for delete buttons */
+        .delete-button {
+             padding: 2px 6px;
+             border-radius: 4px;
+             font-size: 0.75rem; /* text-xs */
+             font-weight: 500; /* font-medium */
+             margin-left: 0.5rem; /* ml-2 */
+             background-color: #fee2e2; /* red-100 */
+             color: #dc2626; /* red-600 */
+             border: 1px solid #fecaca; /* red-200 */
+        }
+        .delete-button:hover {
+             background-color: #fecaca; /* red-200 */
+             color: #b91c1c; /* red-700 */
+             box-shadow: none; /* Override general button hover shadow */
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
@@ -169,20 +185,14 @@
         const payPeriodInfoDisplay = document.getElementById('pay-period-info');
 
         // --- Data Storage ---
-        // Initialize data structure, loading from localStorage if available
         let data = {
             weeklyIncome: null,
-            paydayOfWeek: null, // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            paydayOfWeek: null,
             expenses: [],
             recurringCharges: []
         };
 
         // --- Utility Functions ---
-        /**
-         * Formats a number as currency (USD).
-         * @param {number} amount - The number to format.
-         * @returns {string} Formatted currency string.
-         */
         function formatCurrency(amount) {
             if (amount === null || isNaN(amount)) {
                 return '$0.00';
@@ -190,72 +200,66 @@
             return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
         }
 
-        /**
-         * Gets the name of the day of the week.
-         * @param {number} dayIndex - 0 for Sunday, 1 for Monday, etc.
-         * @returns {string} Name of the day.
-         */
         function getDayName(dayIndex) {
              const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-             return days[dayIndex] ?? 'Not Set';
+             // Handle null or undefined dayIndex
+             return days[parseInt(dayIndex, 10)] ?? 'Not Set';
         }
 
-        /**
-         * Saves the current data state to localStorage.
-         */
         function saveData() {
             try {
                 localStorage.setItem('personalAccountingData', JSON.stringify(data));
+                console.log("Data saved:", data); // Log saved data
             } catch (e) {
                 console.error("Error saving data to localStorage:", e);
-                // Optionally, display an error message to the user
                 alert("Could not save data. LocalStorage might be full or disabled.");
             }
         }
 
-        /**
-         * Loads data from localStorage.
-         */
         function loadData() {
             const savedData = localStorage.getItem('personalAccountingData');
+            console.log("Raw loaded data:", savedData); // Log raw data
             if (savedData) {
                 try {
                     data = JSON.parse(savedData);
-                    // Ensure nested arrays exist if loading older data structure
+                    // Ensure nested arrays exist and dates are Date objects if needed (though storing as strings is fine here)
                     data.expenses = data.expenses || [];
                     data.recurringCharges = data.recurringCharges || [];
+                     // Convert date strings back to Date objects if necessary for sorting/filtering
+                     // data.expenses = data.expenses.map(exp => ({...exp, date: new Date(exp.date)}));
+                    console.log("Parsed loaded data:", data); // Log parsed data
                 } catch (e) {
                     console.error("Error parsing data from localStorage:", e);
-                    // Reset to default data if parsing fails
-                     data = { weeklyIncome: null, paydayOfWeek: null, expenses: [], recurringCharges: [] };
+                    data = { weeklyIncome: null, paydayOfWeek: null, expenses: [], recurringCharges: [] };
                 }
+            } else {
+                 console.log("No saved data found, initializing defaults.");
             }
-             // Set default date for expense input if empty
+            // Set default date for expense input if empty
             if (!expenseDateInput.value) {
                 expenseDateInput.valueAsDate = new Date();
             }
         }
 
         // --- Rendering Functions ---
-        /**
-         * Updates the UI to display the current income and payday.
-         */
         function renderIncome() {
+            console.log("Rendering income:", data.weeklyIncome, data.paydayOfWeek); // Log before rendering
             displayIncome.textContent = formatCurrency(data.weeklyIncome);
             displayPayday.textContent = getDayName(data.paydayOfWeek);
-            // Update the form inputs to reflect the loaded data
             if (data.weeklyIncome !== null) {
                 weeklyIncomeInput.value = data.weeklyIncome;
+            } else {
+                weeklyIncomeInput.value = ''; // Clear if null
             }
             if (data.paydayOfWeek !== null) {
                 paydaySelect.value = data.paydayOfWeek;
+            } else {
+                 paydaySelect.selectedIndex = -1; // Clear selection if null
             }
         }
 
-        /**
-         * Updates the UI list of expenses.
-         */
         function renderExpenses() {
+            console.log("Rendering expenses. Count:", data.expenses.length); // Log before rendering
             expenseList.innerHTML = ''; // Clear existing list
             if (data.expenses.length === 0) {
                 expenseList.innerHTML = '<li class="text-slate-500 italic">No expenses added yet.</li>';
@@ -264,63 +268,64 @@
             // Sort expenses by date, most recent first
             const sortedExpenses = [...data.expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            sortedExpenses.forEach((expense, index) => {
+            sortedExpenses.forEach((expense) => { // Removed index, using ID now
                 const li = document.createElement('li');
                 li.className = 'flex justify-between items-center p-2 rounded hover:bg-slate-50';
+                // Use data-id attribute to store the unique ID
                 li.innerHTML = `
                     <span>
                         <span class="font-medium">${expense.desc}</span> - ${formatCurrency(expense.amount)}
                         <span class="text-xs text-slate-500 ml-1">(${new Date(expense.date).toLocaleDateString()})</span>
                     </span>
-                    <button data-index="${index}" class="delete-expense text-red-500 hover:text-red-700 text-xs font-medium ml-2">Delete</button>
+                    <button data-id="${expense.id}" class="delete-expense delete-button">Delete</button>
                 `;
                 expenseList.appendChild(li);
             });
 
-             // Add event listeners to delete buttons
-             document.querySelectorAll('.delete-expense').forEach(button => {
-                button.addEventListener('click', handleDeleteExpense);
+             // Add event listeners to delete buttons *after* adding all list items
+             expenseList.querySelectorAll('.delete-expense').forEach(button => {
+                 // Remove existing listener before adding a new one to prevent duplicates if re-rendering often
+                 button.removeEventListener('click', handleDeleteExpense);
+                 button.addEventListener('click', handleDeleteExpense);
              });
         }
 
-        /**
-         * Updates the UI list of recurring charges.
-         */
+
         function renderRecurringCharges() {
+            console.log("Rendering recurring charges. Count:", data.recurringCharges.length); // Log before rendering
             recurringList.innerHTML = ''; // Clear existing list
             if (data.recurringCharges.length === 0) {
                 recurringList.innerHTML = '<li class="text-slate-500 italic">No recurring charges added yet.</li>';
                 return;
             }
-             // Sort recurring charges by due day
              const sortedCharges = [...data.recurringCharges].sort((a, b) => a.dayDue - b.dayDue);
 
-            sortedCharges.forEach((charge, index) => {
+            sortedCharges.forEach((charge) => { // Removed index, using ID now
                 const li = document.createElement('li');
                 li.className = 'flex justify-between items-center p-2 rounded hover:bg-slate-50';
+                 // Use data-id attribute to store the unique ID
                 li.innerHTML = `
                     <span>
                         <span class="font-medium">${charge.desc}</span> - ${formatCurrency(charge.amount)}
                         <span class="text-xs text-slate-500 ml-1">(Due day: ${charge.dayDue})</span>
                     </span>
-                     <button data-index="${index}" class="delete-recurring text-red-500 hover:text-red-700 text-xs font-medium ml-2">Delete</button>
+                     <button data-id="${charge.id}" class="delete-recurring delete-button">Delete</button>
                 `;
                 recurringList.appendChild(li);
             });
 
-             // Add event listeners to delete buttons
-             document.querySelectorAll('.delete-recurring').forEach(button => {
-                button.addEventListener('click', handleDeleteRecurring);
+             // Add event listeners to delete buttons *after* adding all list items
+             recurringList.querySelectorAll('.delete-recurring').forEach(button => {
+                 // Remove existing listener before adding a new one
+                 button.removeEventListener('click', handleDeleteRecurring);
+                 button.addEventListener('click', handleDeleteRecurring);
              });
         }
 
         // --- Event Handlers ---
-        /**
-         * Handles the submission of the income form.
-         * @param {Event} event - The form submission event.
-         */
         function handleIncomeSubmit(event) {
-            event.preventDefault(); // Prevent page reload
+            event.preventDefault();
+            console.log("Income form submitted."); // Log submission
             const incomeValue = parseFloat(weeklyIncomeInput.value);
             const paydayValue = parseInt(paydaySelect.value, 10);
 
@@ -335,23 +340,18 @@
 
             data.weeklyIncome = incomeValue;
             data.paydayOfWeek = paydayValue;
+            console.log("Income data updated:", data.weeklyIncome, data.paydayOfWeek); // Log updated data
             saveData();
             renderIncome();
-            calculateAndDisplaySavings(); // Recalculate savings when income/payday changes
-            console.log('Income and Payday Updated:', data);
-             // Optional: Give user feedback
-             // alert("Income and Payday saved successfully!");
+            calculateAndDisplaySavings();
         }
 
-        /**
-         * Handles the submission of the expense form.
-         * @param {Event} event - The form submission event.
-         */
         function handleExpenseSubmit(event) {
             event.preventDefault();
+            console.log("Expense form submitted."); // Log submission
             const desc = expenseDescInput.value.trim();
             const amount = parseFloat(expenseAmountInput.value);
-            const date = expenseDateInput.value; // Gets date as YYYY-MM-DD string
+            const date = expenseDateInput.value; // YYYY-MM-DD string
 
             if (!desc || isNaN(amount) || amount <= 0 || !date) {
                 alert("Please fill in all expense fields with valid values.");
@@ -359,47 +359,23 @@
             }
 
             const newExpense = {
-                id: Date.now().toString(), // Simple unique ID
+                id: Date.now().toString() + Math.random().toString(36).substring(2, 9), // More unique ID
                 desc,
                 amount,
-                date // Store date as string
+                date
             };
             data.expenses.push(newExpense);
+            console.log("Expense added to data:", newExpense); // Log added expense
             saveData();
-            renderExpenses();
-            // calculateAndDisplaySavings(); // One-time expenses don't directly affect future bill savings target
-            console.log('Expense Added:', newExpense);
+            renderExpenses(); // Re-render the list
+            // calculateAndDisplaySavings(); // Not needed for one-time expenses
 
-            // Clear the form
             expenseForm.reset();
             expenseDateInput.valueAsDate = new Date(); // Reset date to today
         }
 
-        /**
-         * Handles the submission of the recurring charge form.
-         * @param {Event} event - The form submission event.
-         */
         function handleRecurringSubmit(event) {
             event.preventDefault();
+            console.log("Recurring charge form submitted."); // Log submission
             const desc = recurringDescInput.value.trim();
             const amount = parseFloat(recurringAmountInput.value);
-            const dayDue = parseInt(recurringDayInput.value, 10);
-
-            if (!desc || isNaN(amount) || amount <= 0 || isNaN(dayDue) || dayDue < 1 || dayDue > 31) {
-                alert("Please fill in all recurring charge fields with valid values (Day Due: 1-31).");
-                return;
-            }
-
-            const newRecurringCharge = {
-                id: Date.now().toString(), // Simple unique ID
-                desc,
-                amount,
-                dayDue
-            };
-            data.recurringCharges.push(newRecurringCharge);
-            saveData();
-            renderRecurringCharges();
-            calculateAndDisplaySavings(); // Recalculate savings as bills changed
-            console.log('Recurring Charge Added:', newRecurringCharge);
-
-            // Clear the f
