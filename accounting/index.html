@@ -3,281 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Hub - Personal Accounting</title>
+    <title>Finance Hub - Core Functionality</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Custom styles */
+        /* Basic Styles - Keeping it simple for debugging */
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f7f9fc; /* Lighter Google-like background */
-            overscroll-behavior: none; /* Prevent pull-to-refresh issues */
+            background-color: #f7f9fc;
+            overscroll-behavior: none;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
         }
-        /* Sidebar active state */
-        .sidebar-link-active {
-            background-color: #e8f0fe; /* Google blue light background */
-            color: #1967d2; /* Google blue text */
-            font-weight: 500;
+        .sidebar {
+            width: 256px;
+            background-color: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 1rem;
+            height: 100%;
+            overflow-y: auto;
+            position: fixed; /* Changed for consistency */
+            top: 0;
+            left: -256px; /* Hidden by default */
+            z-index: 100;
+            transition: left 0.3s ease;
         }
-        .sidebar-link-active svg {
-             color: #1967d2;
+        .sidebar-open { left: 0; }
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            transition: margin-left 0.3s ease;
+            margin-left: 0; /* Default mobile */
         }
-        /* Simple transition for modal */
-        .modal {
-            transition: opacity 0.25s ease;
+        header {
+            height: 64px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
         }
-        .modal-content {
-             transition: transform 0.25s ease;
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
         }
-        /* Floating Action Button style */
-        .fab {
-            position: fixed;
-            bottom: 1.5rem; /* Adjusted for better mobile view */
-            right: 1.5rem;
-            z-index: 50;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        /* Hide scrollbar utility */
+        .sidebar-link { display: flex; align-items: center; space-x: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 0.375rem; color: #4b5563; }
+        .sidebar-link:hover { background-color: #f3f4f6; }
+        .sidebar-link-active { background-color: #e8f0fe; color: #1967d2; font-weight: 500; }
+        .sidebar-link-active svg { color: #1967d2; }
+        .fab { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 50; }
+        .modal { position: fixed; inset: 0; z-index: 101; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0s 0.25s linear; }
+        .modal.active { opacity: 1; visibility: visible; transition: opacity 0.25s ease, visibility 0s linear; }
+        .modal-content { background-color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transform: scale(0.95); transition: transform 0.25s ease; max-width: 90%; width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal.active .modal-content { transform: scale(1); }
+        .overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 99; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .overlay-visible { display: block; opacity: 1; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Ensure main content area takes remaining height */
-        .main-content-area {
-             /* Use flex-grow and overflow, height calc can be tricky with dynamic headers */
-            overflow-y: auto;
-        }
-         /* Responsive Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: -256px; /* Hidden by default */
-            width: 256px;
-            height: 100vh;
-            z-index: 100;
-            transition: left 0.3s ease;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            background-color: white; /* Ensure background */
-        }
-        .sidebar-open {
-            left: 0;
-        }
-        .main-container {
-            transition: margin-left 0.3s ease; /* Smooth transition for content */
-            margin-left: 0; /* Default for mobile */
-        }
-
+        /* Responsive */
         @media (min-width: 768px) {
-             .sidebar {
-                 position: sticky; /* Keep sidebar visible on desktop */
-                 left: 0;
-                 box-shadow: none;
-                 border-right: 1px solid #e5e7eb; /* Tailwind gray-200 */
-             }
-             .main-container {
-                 margin-left: 256px; /* Make space for sidebar */
-             }
-        }
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 99;
-            display: none; /* Hidden by default */
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .overlay-visible {
-            display: block;
-            opacity: 1;
-        }
-        /* Ensure header height is consistent */
-        header {
-            height: 64px;
+            .sidebar { position: sticky; left: 0; }
+            .main-container { margin-left: 256px; }
+            .mobile-menu-button { display: none; }
+            .overlay { display: none !important; } /* Ensure overlay is hidden on desktop */
         }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden"> <div id="overlay" class="overlay md:hidden" onclick="toggleSidebar()"></div>
+<body>
 
-    <aside id="sidebar" class="sidebar flex-shrink-0 p-4 space-y-4 no-scrollbar overflow-y-auto">
-        <div class="flex items-center space-x-2 mb-6 h-[64px] border-b border-gray-200"> <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1967d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-piggy-bank flex-shrink-0"><path d="M19 5c-1.5 0-2.8 1.4-3 2H8c-.2-1.1-1.4-2-2.7-2S2.8 5.9 3 7v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c.2-1.1-1-2-2.5-2z"/><path d="M5 10v1c0 .5.4 1 1 1h1"/><path d="M14 13.5V15h-4v-1.5c0-.8.7-1.5 1.5-1.5h1c.8 0 1.5.7 1.5 1.5z"/><path d="M10 9.5c.8-.8 2.2-.8 3 0"/><path d="M7 9.5c.8-.8 2.2-.8 3 0"/></svg>
+    <div id="overlay" class="overlay md:hidden"></div>
+
+    <aside id="sidebar" class="sidebar no-scrollbar">
+        <div class="flex items-center space-x-2 mb-6 h-[64px] border-b border-gray-200 flex-shrink-0">
+             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1967d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-piggy-bank flex-shrink-0"><path d="M19 5c-1.5 0-2.8 1.4-3 2H8c-.2-1.1-1.4-2-2.7-2S2.8 5.9 3 7v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c.2-1.1-1-2-2.5-2z"/><path d="M5 10v1c0 .5.4 1 1 1h1"/><path d="M14 13.5V15h-4v-1.5c0-.8.7-1.5 1.5-1.5h1c.8 0 1.5.7 1.5 1.5z"/><path d="M10 9.5c.8-.8 2.2-.8 3 0"/><path d="M7 9.5c.8-.8 2.2-.8 3 0"/></svg>
             <h1 class="text-xl font-bold text-gray-800 truncate">Finance Hub</h1>
         </div>
-        <nav class="space-y-2">
-            <a href="#" onclick="navigateTo('dashboard', event)" class="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100 sidebar-link sidebar-link-active" data-section="dashboard">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <nav id="sidebarNav" class="space-y-2">
+            <a href="#" class="sidebar-link sidebar-link-active" data-section="dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                 <span>Dashboard</span>
             </a>
-            <a href="#" onclick="navigateTo('transactions', event)" class="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100 sidebar-link" data-section="transactions">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+            <a href="#" class="sidebar-link" data-section="transactions">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
                 <span>Transactions</span>
             </a>
-            <a href="#" onclick="navigateTo('accounts', event)" class="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100 sidebar-link" data-section="accounts">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
+            <a href="#" class="sidebar-link" data-section="accounts">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
                 <span>Accounts</span>
             </a>
-            <a href="#" onclick="navigateTo('budgets', event)" class="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100 sidebar-link" data-section="budgets">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-target"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                <span>Budgets</span>
-            </a>
-            <a href="#" onclick="navigateTo('reports', event)" class="flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-gray-100 sidebar-link" data-section="reports">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bar-chart-3"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
-                <span>Reports</span>
-            </a>
-        </nav>
+            </nav>
     </aside>
 
-    <div class="flex-1 flex flex-col main-container overflow-hidden"> <header class="bg-white shadow-sm p-4 flex items-center justify-between md:justify-end flex-shrink-0 h-[64px]">
-             <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-600 hover:text-gray-800 mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+    <div class="main-container">
+        <header>
+             <button id="mobileMenuButton" class="mobile-menu-button p-2 text-gray-600 hover:text-gray-800 mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
-             <div class="relative hidden md:block">
-                 <input type="search" placeholder="Search transactions..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent w-64">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+             <div class="flex-grow text-center md:text-left">
+                 <h2 id="headerTitle" class="text-lg font-semibold text-gray-700">Dashboard</h2>
              </div>
-            <div class="ml-4">
+            <div class="ml-4 flex-shrink-0">
                 <button class="p-2 rounded-full hover:bg-gray-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-circle"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
                 </button>
             </div>
         </header>
 
-        <main id="mainContent" class="flex-1 p-6 overflow-y-auto main-content-area">
-
-            <section id="dashboard-section" class="space-y-6">
-                <h2 class="text-2xl font-semibold text-gray-800">Dashboard</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <main id="mainContent">
+            <section id="dashboard-section" class="content-section space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-white p-5 rounded-lg shadow">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Total Balance</h3>
                         <p id="dashboardTotalBalance" class="text-2xl font-semibold text-gray-800">$0.00</p>
-                         <p class="text-xs text-gray-400">Across all accounts</p>
                     </div>
                      <div class="bg-white p-5 rounded-lg shadow">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Month's Income</h3>
                         <p id="dashboardMonthIncome" class="text-2xl font-semibold text-green-600">$0.00</p>
-                        <p class="text-xs text-gray-400"><span id="dashboardCurrentMonth1">Month</span></p>
                     </div>
                      <div class="bg-white p-5 rounded-lg shadow">
                         <h3 class="text-sm font-medium text-gray-500 mb-1">Month's Expenses</h3>
                         <p id="dashboardMonthExpenses" class="text-2xl font-semibold text-red-600">$0.00</p>
-                         <p class="text-xs text-gray-400"><span id="dashboardCurrentMonth2">Month</span></p>
-                    </div>
-                     <div class="bg-white p-5 rounded-lg shadow">
-                        <h3 class="text-sm font-medium text-gray-500 mb-1">Month's Savings</h3>
-                        <p id="dashboardMonthSavings" class="text-2xl font-semibold text-blue-600">$0.00</p>
-                         <p class="text-xs text-gray-400"><span id="dashboardCurrentMonth3">Month</span></p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                     <div class="bg-white p-5 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Spending Categories (This Month)</h3>
-                        <div class="bg-gray-100 h-64 rounded flex items-center justify-center text-gray-400">
-                            Chart Placeholder
-                        </div>
-                    </div>
-                     <div class="bg-white p-5 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Income vs Expense Trend</h3>
-                        <div class="bg-gray-100 h-64 rounded flex items-center justify-center text-gray-400">
-                            Chart Placeholder
-                        </div>
-                    </div>
-                </div>
-                 <div class="bg-white p-5 rounded-lg shadow">
-                     <h3 class="text-lg font-semibold text-gray-700 mb-3">Recent Transactions</h3>
-                     <div id="dashboardRecentTransactions" class="space-y-3 max-h-60 overflow-y-auto no-scrollbar">
-                         <p class="text-gray-500 italic no-data-msg">No recent transactions.</p>
-                     </div>
-                 </div>
+                 <p class="text-center text-gray-500 mt-8">Welcome to Finance Hub!</p>
             </section>
 
-            <section id="transactions-section" class="hidden space-y-6">
-                 <h2 class="text-2xl font-semibold text-gray-800">Transactions</h2>
+            <section id="transactions-section" class="content-section hidden space-y-6">
                  <div class="flex flex-wrap gap-4 items-center bg-white p-4 rounded-lg shadow">
                      <div class="flex-grow sm:flex-grow-0">
                          <label for="transactionAccountFilter" class="sr-only">Account</label>
                          <select id="transactionAccountFilter" class="p-2 border rounded-md bg-white shadow-sm w-full sm:w-auto">
                              <option value="all">All Accounts</option>
-                             </select>
+                         </select>
                      </div>
                      <div class="flex-grow sm:flex-grow-0">
                           <label for="transactionMonthFilter" class="sr-only">Month</label>
                          <input type="month" id="transactionMonthFilter" class="p-2 border rounded-md bg-white shadow-sm w-full sm:w-auto">
                      </div>
-                     <button onclick="filterTransactions()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">Filter</button>
+                     <button id="filterTransactionsButton" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 w-full sm:w-auto">Filter</button>
                  </div>
-                 <div id="transactionListContainer" class="bg-white rounded-lg shadow p-4 space-y-3">
-                     <p class="text-gray-500 italic no-data-msg">No transactions found for the selected criteria.</p>
-                     </div>
+                 <div id="transactionListContainer" class="bg-white rounded-lg shadow p-4 space-y-3 min-h-[100px]">
+                     <p class="text-gray-500 italic no-data-msg">No transactions found.</p>
+                 </div>
             </section>
 
-            <section id="accounts-section" class="hidden space-y-6">
+            <section id="accounts-section" class="content-section hidden space-y-6">
                  <div class="flex justify-between items-center">
-                     <h2 class="text-2xl font-semibold text-gray-800">Accounts</h2>
-                     <button onclick="openAccountModal()" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center space-x-1 shadow">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                     <span class="text-xl font-semibold text-gray-800">Accounts</span>
+                     <button id="addAccountButton" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center space-x-1 shadow">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                           <span>Add Account</span>
                      </button>
                  </div>
-                 <div id="accountListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                 <div id="accountListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[100px]">
                      <p class="text-gray-500 italic col-span-full no-data-msg">No accounts added yet.</p>
-                     </div>
-            </section>
-
-            <section id="budgets-section" class="hidden space-y-6">
-                 <div class="flex justify-between items-center">
-                     <h2 class="text-2xl font-semibold text-gray-800">Budgets (<span id="budgetMonthDisplay">Month</span>)</h2>
-                     <button onclick="openBudgetModal()" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 flex items-center space-x-1 shadow">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                          <span>Add Budget</span>
-                     </button>
                  </div>
-                 <p class="text-sm text-gray-500">Showing budgets for the current month. Use the modal to add/edit budgets for specific months.</p>
-                 <div id="budgetListContainer" class="space-y-4">
-                     <p class="text-gray-500 italic no-data-msg">No budgets set for this month.</p>
-                     </div>
             </section>
-
-            <section id="reports-section" class="hidden space-y-6">
-                 <h2 class="text-2xl font-semibold text-gray-800">Reports</h2>
-                 <div class="bg-white p-5 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Monthly Summary Report</h3>
-                    <div class="flex flex-wrap gap-4 mb-4 items-center">
-                        <label for="reportMonth" class="text-sm font-medium text-gray-700">Select Month:</label>
-                        <input type="month" id="reportMonth" class="p-2 border rounded-md bg-white shadow-sm">
-                        <button onclick="generateReport()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Generate</button>
-                    </div>
-                    <div id="reportOutput" class="space-y-2 border-t pt-4 mt-4">
-                        <p class="text-gray-500 italic no-data-msg">Select a month and click Generate.</p>
-                    </div>
-                 </div>
-                 </section>
 
         </main>
     </div>
 
-    <button onclick="openTransactionModal()" title="Add Transaction" class="fab bg-blue-500 hover:bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+    <button id="addTransactionFab" title="Add Transaction" class="fab bg-blue-500 hover:bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
     </button>
 
     <div id="modalsContainer">
-        <div id="transactionModal" class="modal fixed inset-0 z-[101] overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center hidden opacity-0 p-4" onclick="closeModalOutside(event, 'transactionModal')">
-            <div class="modal-content bg-white w-full max-w-lg p-6 rounded-lg shadow-xl transform scale-95 max-h-[90vh] overflow-y-auto">
-                <div class="flex justify-between items-center mb-4 sticky top-0 bg-white py-2 border-b">
+        <div id="transactionModal" class="modal">
+            <div class="modal-content">
+                <div class="flex justify-between items-center mb-4 pb-2 border-b">
                     <h2 class="text-xl font-semibold">Add New Transaction</h2>
-                    <button onclick="closeModal('transactionModal')" class="text-gray-400 hover:text-gray-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
+                    <button class="close-modal-button text-gray-400 hover:text-gray-600" data-modal-id="transactionModal">&times;</button>
                 </div>
-                <form id="transactionForm" class="space-y-4 mt-4">
+                <form id="transactionForm" class="space-y-4">
                      <div>
                         <label for="transAccount" class="block text-sm font-medium text-gray-700 mb-1">Account <span class="text-red-500">*</span></label>
                         <select id="transAccount" name="accountId" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                              <option value="" disabled selected>Select an account</option>
-                             </select>
+                        </select>
                     </div>
                     <div>
                         <label for="transType" class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-500">*</span></label>
-                        <select id="transType" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline
+                        <select id="transType" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="expense">Expense</option>
+                            <option value="income">Income</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="transDescription" class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-red-500">*</span></label>
+                        <input type="text" id="transDescription" name="description" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div>
+                        <label for="transAmount" class="block text-sm font-medium text-gray-700 mb-1">Amount <span class="text-red-500">*</span></label>
+                        <input type="number" id="transAmount" name="amount" step="0.01" min="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div>
+                        <label for="transDate" class="block text-sm font-medium text-gray-700 mb-1">Date <span class="text-red-500">*</span></label>
+                        <input type="date" id="transDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div>
+                        <label for="transTags" class="block text-sm font-medium text-gray-700 mb-1">Category/Tags (comma-separated)</label>
+                        <input type="text" id="transTags" name="tags" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div class="flex justify-end space-x-3 pt-4 mt-4 border-t">
+                         <button type="button" class="close-modal-button px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition" data-modal-id="transactionModal">Cancel</button>
+                         <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">Add Transaction</button>
+                     </div>
+                </form>
+            </div>
+        </div>
+
+         <div id="accountModal" class="modal">
+            <div class="modal-content">
+                 <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                    <h2 id="accountModalTitle" class="text-xl font-semibold">Add New Account</h2>
+                    <button class="close-modal-button text-gray-400 hover:text-gray-600" data-modal-id="accountModal">&times;</button>
+                </div>
+                <form id="accountForm" class="space-y-4">
+                    <input type="hidden" id="accountId" name="id">
+                     <div>
+                        <label for="accountName" class="block text-sm font-medium text-gray-700 mb-1">Account Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="accountName" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div>
+                        <label for="accountType" class="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+                        <select id="accountType" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="checking">Checking</option>
+                            <option value="savings">Savings</option>
+                            <option value="credit_card">Credit Card</option>
+                            <option value="cash">Cash</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label id="accountBalanceLabel" for="accountBalance" class="block text-sm font-medium text-gray-700 mb-1">Starting Balance <span class="text-red-500">*</span></label>
+                        <input type="number" id="accountBalance" name="balance" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div class="flex justify-end space-x-3 pt-4 mt-4 border-t">
+                         <button type="button" class="close-modal-button px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition" data-modal-id="accountModal">Cancel</button>
+                         <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition">Save Account</button>
+                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- App State & Constants ---
+        let appState = {
+            transactions: [],
+            accounts: [],
+            currentView: 'dashboard' // Default view
+        };
+        const STORAGE_KEYS = {
+            transactions: 'financeHubTransactions_v4', // Use new keys to avoid conflicts
+            accounts: 'financeHubAccounts_v4'
+        };
+
+        // --- DOM Element References ---
+        // Defined globally for access within functions, but assigned in init
+        let sidebar, overlay, mainContent, headerTitle, sidebarNav;
+        let transactionModal, accountModal;
+        let transactionFormEl, accountFormEl;
+        let addTransactionFabEl, addAccountButtonEl, mobileMenuButtonEl, filterTransactionsButtonEl;
+        let transAccountSelectEl, transactionAccountFilterEl, transactionMonthFilterEl;
+
+        // --- Utility Functions ---
+        const formatCurrency = (amount) => {
+            const num = parseFloat(amount);
+            return isNaN(num) ? '$?.??' : num.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        };
+        const formatDate = (dateString) => {
+            if (!dateString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return 'Invalid Date';
+            const date = new Date(dateString + 'T00:00:00Z'); // Use UTC
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
+        };
+        const getYYYYMM = (date = new Date()) => {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            return `${year}-${month}`;
+        };
+        const getMonthName =
