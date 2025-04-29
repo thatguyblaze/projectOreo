@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleFinance - Personal Accounting</title>
+    <title>SimpleFinance - Functional Accounting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +36,18 @@
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
         }
+        /* Ensure consistent height for summary cards */
+        .summary-card {
+            min-height: 100px; /* Adjust as needed */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        /* Styling for weekly breakdown */
+        .weekly-summary {
+            background-color: #eef2ff; /* Tailwind indigo-50 */
+            border-left: 4px solid #6366f1; /* Tailwind indigo-500 */
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -52,196 +64,61 @@
 
     <main class="container mx-auto p-4 md:p-6 lg:p-8">
 
-        <section class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
-                <h3 class="text-sm font-medium text-gray-500 mb-1">Total Income (This Month)</h3>
-                <p class="text-2xl font-semibold text-green-600">$4,500.00</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
-                <h3 class="text-sm font-medium text-gray-500 mb-1">Total Expenses (This Month)</h3>
-                <p class="text-2xl font-semibold text-red-600">$1,850.50</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow duration-200">
-                <h3 class="text-sm font-medium text-gray-500 mb-1">Net Balance</h3>
-                <p class="text-2xl font-semibold text-blue-600">$2,649.50</p>
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">This Month's Overview (<span id="currentMonthName"></span>)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200 summary-card">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">Total Income</h3>
+                    <p id="summaryIncome" class="text-2xl font-semibold text-green-600">$0.00</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200 summary-card">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">Total Expenses</h3>
+                    <p id="summaryExpenses" class="text-2xl font-semibold text-red-600">$0.00</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow duration-200 summary-card">
+                    <h3 class="text-sm font-medium text-gray-500 mb-1">Net Balance</h3>
+                    <p id="summaryBalance" class="text-2xl font-semibold text-blue-600">$0.00</p>
+                </div>
             </div>
         </section>
 
+        <section class="mb-8">
+             <h2 class="text-xl font-semibold mb-3 text-gray-700">Weekly Breakdown (<span id="currentMonthNameWeekly"></span>)</h2>
+             <div id="weeklyBreakdownContainer" class="space-y-3">
+                 <p class="text-gray-500 italic">No transactions for this month yet.</p>
+             </div>
+        </section>
+
         <section class="mb-6 border-b border-gray-200">
-            <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                <button onclick="showTab('all')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium tab-active" data-tab-target="all">
+            <nav class="-mb-px flex space-x-6 overflow-x-auto no-scrollbar" aria-label="Tabs">
+                <button onclick="showTab('all')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium whitespace-nowrap tab-active" data-tab-target="all">
                     All Transactions
                 </button>
-                <button onclick="showTab('income')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium" data-tab-target="income">
+                <button onclick="showTab('income')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium whitespace-nowrap" data-tab-target="income">
                     Income
                 </button>
-                <button onclick="showTab('expenses')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium" data-tab-target="expenses">
+                <button onclick="showTab('expenses')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium whitespace-nowrap" data-tab-target="expenses">
                     Expenses
                 </button>
-                <button onclick="showTab('subscriptions')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium" data-tab-target="subscriptions">
+                <button onclick="showTab('subscriptions')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium whitespace-nowrap" data-tab-target="subscriptions">
                     Subscriptions
                 </button>
-                 <button onclick="showTab('charts')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium" data-tab-target="charts">
-                    Charts
-                </button>
-                 <button onclick="showTab('budgets')" class="tab py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 text-sm font-medium" data-tab-target="budgets">
-                    Budgets
-                </button>
-            </nav>
+                 </nav>
         </section>
 
         <section id="content-area">
             <div id="tab-all" class="tab-content space-y-4">
-                <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Salary - April</p>
-                        <p class="text-sm text-gray-500">April 28, 2025</p>
-                        <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Income</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Work</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-green-600">+$4,500.00</p>
-                </div>
-                <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Groceries</p>
-                        <p class="text-sm text-gray-500">April 27, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Expense</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Food</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Essentials</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-red-600">-$120.75</p>
-                </div>
-                 <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Streaming Service</p>
-                        <p class="text-sm text-gray-500">April 25, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">Subscription</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Entertainment</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-red-600">-$15.99</p>
-                </div>
-                </div>
-
+                <p class="text-gray-500 italic no-transactions-msg">No transactions recorded yet.</p>
+            </div>
             <div id="tab-income" class="tab-content space-y-4 hidden">
-                <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Salary - April</p>
-                        <p class="text-sm text-gray-500">April 28, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Income</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Work</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-green-600">+$4,500.00</p>
-                </div>
-                 <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Freelance Project</p>
-                        <p class="text-sm text-gray-500">April 15, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Income</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Side Hustle</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-green-600">+$800.00</p>
-                </div>
+                 <p class="text-gray-500 italic no-transactions-msg">No income recorded yet.</p>
             </div>
-
             <div id="tab-expenses" class="tab-content space-y-4 hidden">
-                <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Groceries</p>
-                        <p class="text-sm text-gray-500">April 27, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Expense</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Food</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Essentials</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-red-600">-$120.75</p>
-                </div>
-                 <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Dinner Out</p>
-                        <p class="text-sm text-gray-500">April 26, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Expense</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Food</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Social</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-red-600">-$65.00</p>
-                </div>
+                 <p class="text-gray-500 italic no-transactions-msg">No expenses recorded yet.</p>
             </div>
-
             <div id="tab-subscriptions" class="tab-content space-y-4 hidden">
-                <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Streaming Service</p>
-                        <p class="text-sm text-gray-500">Renews May 25, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">Subscription</span>
-                             <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Entertainment</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-red-600">-$15.99 / month</p>
-                </div>
-                 <div class="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">Cloud Storage</p>
-                        <p class="text-sm text-gray-500">Renews May 10, 2025</p>
-                         <div class="mt-1 flex flex-wrap gap-1">
-                             <span class="text-xs font-medium bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">Subscription</span>
-                              <span class="text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full">Utility</span>
-                        </div>
-                    </div>
-                    <p class="font-semibold text-red-600">-$9.99 / month</p>
-                </div>
-                 <div class="text-center text-gray-500 text-sm mt-6">
-                     Manage recurring payments easily. (Feature placeholder)
-                 </div>
+                <p class="text-gray-500 italic no-transactions-msg">No subscriptions recorded yet.</p>
             </div>
-
-            <div id="tab-charts" class="tab-content hidden">
-                 <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold mb-4">Expense Breakdown</h3>
-                    <div class="bg-gray-100 h-64 rounded flex items-center justify-center text-gray-400">
-                        Chart Area (e.g., Pie chart of expenses by tag)
-                    </div>
-                 </div>
-            </div>
-
-             <div id="tab-budgets" class="tab-content hidden">
-                 <div class="bg-white p-6 rounded-lg shadow space-y-4">
-                    <h3 class="text-lg font-semibold mb-2">Monthly Budgets</h3>
-                     <div>
-                         <div class="flex justify-between items-center mb-1">
-                             <span class="font-medium">Food & Groceries</span>
-                             <span class="text-sm text-gray-600">$350 / $500</span>
-                         </div>
-                         <div class="w-full bg-gray-200 rounded-full h-2.5">
-                             <div class="bg-blue-500 h-2.5 rounded-full" style="width: 70%"></div> </div>
-                     </div>
-                     <div>
-                         <div class="flex justify-between items-center mb-1">
-                             <span class="font-medium">Entertainment</span>
-                             <span class="text-sm text-gray-600">$85 / $150</span>
-                         </div>
-                         <div class="w-full bg-gray-200 rounded-full h-2.5">
-                             <div class="bg-green-500 h-2.5 rounded-full" style="width: 57%"></div> </div>
-                     </div>
-                      <div class="text-center text-gray-500 text-sm mt-6">
-                         Set and track spending goals. (Feature placeholder)
-                     </div>
-                 </div>
-            </div>
-
         </section>
 
     </main>
@@ -260,8 +137,7 @@
                     <select id="type" name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                         <option value="expense">Expense</option>
                         <option value="income">Income</option>
-                        <option value="subscription">Subscription</option>
-                    </select>
+                        <option value="subscription">Subscription</option> </select>
                 </div>
                  <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -269,7 +145,7 @@
                 </div>
                  <div>
                     <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-                    <input type="number" id="amount" name="amount" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="0.00">
+                    <input type="number" id="amount" name="amount" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="0.00">
                 </div>
                  <div>
                     <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
@@ -288,51 +164,204 @@
     </div>
 
     <footer class="text-center py-6 mt-12 text-sm text-gray-500">
-        © <span id="currentYear"></span> SimpleFinance. A modern way to track finances.
+        © <span id="currentYear"></span> SimpleFinance. Data stored locally in your browser.
     </footer>
 
     <script>
-        // --- Basic Tab Functionality ---
+        // --- Global State ---
+        let transactions = []; // Array to hold all transaction objects
+        let currentActiveTab = 'all'; // Track the currently active tab
+
+        // --- DOM Elements ---
+        const modal = document.getElementById('transactionModal');
+        const modalContent = modal.querySelector('.modal-content');
+        const transactionForm = document.getElementById('transactionForm');
+        const summaryIncomeEl = document.getElementById('summaryIncome');
+        const summaryExpensesEl = document.getElementById('summaryExpenses');
+        const summaryBalanceEl = document.getElementById('summaryBalance');
+        const currentMonthNameEl = document.getElementById('currentMonthName');
+        const currentMonthNameWeeklyEl = document.getElementById('currentMonthNameWeekly');
+        const weeklyBreakdownContainer = document.getElementById('weeklyBreakdownContainer');
+        const contentArea = document.getElementById('content-area');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
 
-        function showTab(targetId) {
-            // Hide all content
-            tabContents.forEach(content => {
-                content.classList.add('hidden');
-            });
-            // Deactivate all tabs
-            tabs.forEach(tab => {
-                tab.classList.remove('tab-active');
-                tab.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
-                tab.classList.remove('text-blue-600', 'font-semibold');
-            });
+        // --- Utility Functions ---
+        const formatCurrency = (amount) => {
+            return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        };
 
-            // Show target content
-            const targetContent = document.getElementById(`tab-${targetId}`);
-            if (targetContent) {
-                targetContent.classList.remove('hidden');
+        const formatDate = (dateString) => {
+            if (!dateString) return 'Invalid Date';
+            const date = new Date(dateString + 'T00:00:00'); // Ensure correct date parsing regardless of timezone
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        };
+
+         // Get the start of the week (Sunday) for a given date
+        const getStartOfWeek = (date) => {
+            const d = new Date(date);
+            const day = d.getDay(); // 0 = Sunday, 1 = Monday, ...
+            const diff = d.getDate() - day;
+            return new Date(d.setDate(diff));
+        };
+
+        // --- Data Persistence (localStorage) ---
+        const STORAGE_KEY = 'simpleFinanceTransactions';
+
+        const loadTransactions = () => {
+            const storedTransactions = localStorage.getItem(STORAGE_KEY);
+            if (storedTransactions) {
+                transactions = JSON.parse(storedTransactions);
+                // Ensure dates are Date objects (though we'll mostly use string comparison)
+                // transactions.forEach(t => t.date = new Date(t.date + 'T00:00:00'));
+            } else {
+                transactions = [];
+            }
+        };
+
+        const saveTransactions = () => {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        };
+
+        // --- Rendering Functions ---
+
+        // Renders a single transaction item HTML
+        const createTransactionElement = (transaction) => {
+            const div = document.createElement('div');
+            div.className = 'bg-white p-4 rounded-lg shadow flex justify-between items-center flex-wrap gap-2'; // Added flex-wrap and gap
+
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'flex-grow'; // Allow details to take available space
+
+            const descriptionP = document.createElement('p');
+            descriptionP.className = 'font-semibold';
+            descriptionP.textContent = transaction.description;
+            detailsDiv.appendChild(descriptionP);
+
+            const dateP = document.createElement('p');
+            dateP.className = 'text-sm text-gray-500';
+            dateP.textContent = formatDate(transaction.date);
+            detailsDiv.appendChild(dateP);
+
+            // Tags display
+            if (transaction.tags && transaction.tags.length > 0) {
+                const tagsDiv = document.createElement('div');
+                tagsDiv.className = 'mt-1 flex flex-wrap gap-1';
+
+                // Add type tag first
+                 let typeColor = 'bg-gray-100 text-gray-800'; // Default
+                 if (transaction.type === 'income') typeColor = 'bg-blue-100 text-blue-800';
+                 else if (transaction.type === 'expense') typeColor = 'bg-red-100 text-red-800';
+                 else if (transaction.type === 'subscription') typeColor = 'bg-yellow-100 text-yellow-800';
+
+                const typeSpan = document.createElement('span');
+                typeSpan.className = `text-xs font-medium ${typeColor} px-2 py-0.5 rounded-full capitalize`;
+                typeSpan.textContent = transaction.type;
+                tagsDiv.appendChild(typeSpan);
+
+                // Add user-defined tags
+                transaction.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'text-xs font-medium bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full';
+                    tagSpan.textContent = tag.trim();
+                    tagsDiv.appendChild(tagSpan);
+                });
+                detailsDiv.appendChild(tagsDiv);
             }
 
-            // Activate target tab
-            const activeTab = document.querySelector(`.tab[data-tab-target="${targetId}"]`);
-             if (activeTab) {
-                activeTab.classList.add('tab-active');
-                activeTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            div.appendChild(detailsDiv);
+
+            const amountP = document.createElement('p');
+            amountP.className = 'font-semibold whitespace-nowrap ml-2'; // Prevent wrapping, add margin
+            amountP.textContent = (transaction.type === 'income' ? '+' : '-') + formatCurrency(transaction.amount);
+            amountP.classList.add(transaction.type === 'income' ? 'text-green-600' : 'text-red-600');
+            div.appendChild(amountP);
+
+            // Optional: Add delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 text-gray-400 hover:text-red-500"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`;
+            deleteButton.className = 'ml-2 p-1'; // Add some spacing
+            deleteButton.onclick = () => deleteTransaction(transaction.id);
+            div.appendChild(deleteButton);
+
+
+            return div;
+        };
+
+        // Renders the list of transactions based on the filter
+        const renderTransactions = (filterType = 'all') => {
+            // Clear existing content in all tabs first
+             tabContents.forEach(content => {
+                const listContainer = content; // The tab content div itself is the container
+                listContainer.innerHTML = ''; // Clear previous items
+                // Add back the "No transactions" message initially
+                const noDataMsg = document.createElement('p');
+                noDataMsg.className = 'text-gray-500 italic no-transactions-msg';
+                noDataMsg.textContent = `No ${filterType === 'all' ? '' : filterType} transactions recorded yet.`;
+                listContainer.appendChild(noDataMsg);
+             });
+
+
+            let filteredTransactions = transactions;
+
+            if (filterType !== 'all') {
+                filteredTransactions = transactions.filter(t => t.type === filterType);
             }
-        }
 
-        // --- Modal Functionality ---
-        const modal = document.getElementById('transactionModal');
-        const modalContent = modal.querySelector('.modal-content');
+            // Sort by date, newest first
+            filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        function openModal() {
-            modal.classList.remove('hidden');
-            // Trigger reflow to enable transition
-            modal.offsetHeight;
-            modal.classList.remove('opacity-0');
-            modalContent.classList.remove('scale-95');
-        }
+            const targetContainer = document.getElementById(`tab-${filterType}`);
+            if (!targetContainer) return; // Should not happen
 
-        function closeModal() {
-            mod
+            const noDataMsgElement = targetContainer.querySelector('.no-transactions-msg');
+
+            if (filteredTransactions.length > 0) {
+                 if(noDataMsgElement) noDataMsgElement.remove(); // Remove "no transactions" message
+
+                filteredTransactions.forEach(transaction => {
+                    const transactionElement = createTransactionElement(transaction);
+                    targetContainer.appendChild(transactionElement);
+                });
+            } else {
+                // Ensure the "no transactions" message is present if the list is empty
+                if (!noDataMsgElement) {
+                    const noDataMsg = document.createElement('p');
+                    noDataMsg.className = 'text-gray-500 italic no-transactions-msg';
+                    noDataMsg.textContent = `No ${filterType === 'all' ? '' : filterType} transactions recorded yet.`;
+                    targetContainer.appendChild(noDataMsg);
+                }
+            }
+        };
+
+        // Calculates and renders the monthly summary
+        const renderSummary = () => {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); // 0-indexed
+
+            const monthName = now.toLocaleString('default', { month: 'long' });
+            currentMonthNameEl.textContent = monthName;
+            currentMonthNameWeeklyEl.textContent = monthName;
+
+
+            let monthlyIncome = 0;
+            let monthlyExpenses = 0;
+
+            transactions.forEach(t => {
+                const transactionDate = new Date(t.date + 'T00:00:00');
+                if (transactionDate.getFullYear() === currentYear && transactionDate.getMonth() === currentMonth) {
+                    if (t.type === 'income') {
+                        monthlyIncome += t.amount;
+                    } else { // expense or subscription
+                        monthlyExpenses += t.amount;
+                    }
+                }
+            });
+
+            const netBalance = monthlyIncome - monthlyExpenses;
+
+            summaryIncomeEl.textContent = formatCurrency(monthlyIncome);
+            summaryExpensesEl.textContent = formatCurrency(monthlyExpenses);
+            summaryBalanceEl.textContent = formatCurrency(netBalance);
+            sum
