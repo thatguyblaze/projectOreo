@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Accounting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .savings-highlight { background-color: #fef9c3; border: 1px solid #fde047; color: #ca8a04; }
+        form { width: 100%; }
+        button { transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        button:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        li { margin-bottom: 0.5rem; }
+        .delete-button { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin-left: 0.5rem; background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; cursor: pointer; }
+        .delete-button:hover { background-color: #fecaca; color: #b91c1c; box-shadow: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-8 text-slate-700">Personal Accounting Dashboard</h1>
+
+        <div id="savings-section" class="mb-8 p-6 bg-white rounded-lg shadow-md text-center">
+            <h2 class="text-xl font-semibold mb-3 text-slate-600">Savings Target for Next Pay Period</h2>
+            <p id="savings-needed" class="text-3xl font-bold savings-highlight p-4 rounded-md inline-block">Calculating...</p>
+            <p id="pay-period-info" class="text-sm text-slate-500 mt-2"></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-slate-600">Weekly Income</h2>
+                <form id="income-form" class="space-y-4">
+                    <div>
+                        <label for="weekly-income" class="block text-sm font-medium text-slate-700 mb-1">Enter Weekly Income Amount:</label>
+                        <input type="number" id="weekly-income" step="0.01" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="payday" class="block text-sm font-medium text-slate-700 mb-1">Select Payday:</label>
+                        <select id="payday" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                            <option value="" disabled selected>-- Select Day --</option> <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium">Set Income & Payday</button>
+                </form>
+                <div class="mt-4 text-center">
+                     <p class="text-lg">Current Weekly Income: <strong id="display-income" class="text-indigo-700">$0.00</strong></p>
+                     <p class="text-sm text-slate-500">Payday: <strong id="display-payday">Not Set</strong></p>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-slate-600">Add One-Time Expense</h2>
+                <form id="expense-form" class="space-y-4">
+                    <div>
+                        <label for="expense-desc" class="block text-sm font-medium text-slate-700 mb-1">Description:</label>
+                        <input type="text" id="expense-desc" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="expense-amount" class="block text-sm font-medium text-slate-700 mb-1">Amount:</label>
+                        <input type="number" id="expense-amount" step="0.01" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                     <div>
+                        <label for="expense-date" class="block text-sm font-medium text-slate-700 mb-1">Date:</label>
+                        <input type="date" id="expense-date" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 font-medium">Add Expense</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-slate-600">Add Recurring Charge (Bill)</h2>
+                <form id="recurring-form" class="space-y-4">
+                    <div>
+                        <label for="recurring-desc" class="block text-sm font-medium text-slate-700 mb-1">Description:</label>
+                        <input type="text" id="recurring-desc" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="recurring-amount" class="block text-sm font-medium text-slate-700 mb-1">Amount:</label>
+                        <input type="number" id="recurring-amount" step="0.01" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="recurring-day" class="block text-sm font-medium text-slate-700 mb-1">Day of Month Due (1-31):</label>
+                        <input type="number" id="recurring-day" min="1" max="31" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 font-medium">Add Recurring Charge</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md lg:col-span-1">
+                 <h2 class="text-xl font-semibold mb-4 text-slate-600">Recent Expenses</h2>
+                 <ul id="expense-list" class="space-y-2 max-h-60 overflow-y-auto text-sm">
+                     <li class="text-slate-500 italic">Loading expenses...</li>
+                 </ul>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
+                 <h2 class="text-xl font-semibold mb-4 text-slate-600">Recurring Charges (Monthly Bills)</h2>
+                 <ul id="recurring-list" class="space-y-2 max-h-60 overflow-y-auto text-sm">
+                     <li class="text-slate-500 italic">Loading recurring charges...</li>
+                 </ul>
+             </div>
+
+        </div>
+    </div>
+
+    <script>
+        console.log("Script execution started."); // Check if script runs at all
+
+        // --- DOM Elements ---
+        // Wrap element selection in a function to check for existence
+        function getElement(id, name) {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.error(`CRITICAL ERROR: Element with ID "${id}" (${name}) not found!`);
+                // Optionally throw an error to halt execution if element is critical
+                // throw new Error(`Element not found: ${id}`);
+                return null; // Return null to allow checks later
+            }
+            console.log(`Element found: ${id}`); // Confirm element is found
+            return element;
+        }
+
+        const incomeForm = getElement('income-form', 'Income Form');
+        const weeklyIncomeInput = getElement('weekly-income', 'Weekly Income Input');
+        const paydaySelect = getElement('payday', 'Payday Select');
+        const displayIncome = getElement('display-income', 'Display Income');
+        const displayPayday = getElement('display-payday', 'Display Payday');
+
+        const expenseForm = getElement('expense-form', 'Expense Form');
+        const expenseDescInput = getElement('expense-desc', 'Expense Description Input');
+        const expenseAmountInput = getElement('expense-amount', 'Expense Amount Input');
+        const expenseDateInput = getElement('expense-date', 'Expense Date Input');
+        const expenseList = getElement('expense-list', 'Expense List UL');
+
+        const recurringForm = getElement('recurring-form', 'Recurring Charge Form');
+        const recurringDescInput = getElement('recurring-desc', 'Recurring Description Input');
+        const recurringAmountInput = getElement('recurring-amount', 'Recurring Amount Input');
+        const recurringDayInput = getElement('recurring-day', 'Recurring Day Input');
+        const recurringList = getElement('recurring-list', 'Recurring List UL');
+
+        const savingsNeededDisplay = getElement('savings-needed', 'Savings Needed Display');
+        const payPeriodInfoDisplay = getElement('pay-period-info', 'Pay Period Info Display');
+
+        // --- Data Storage ---
+        let data = {
+            weeklyIncome: null,
+            paydayOfWeek: null,
+            expenses: [],
+            recurringCharges: []
+        };
+
+        // --- Utility Functions ---
+        function formatCurrency(amount) {
+            // Check if amount is null, undefined, or not a number
+            if (amount == null || isNaN(amount)) {
+                return '$0.00';
+            }
+            return Number(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        }
+
+
+        function getDayName(dayIndex) {
+             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+             const index = parseInt(dayIndex, 10); // Ensure it's an integer
+             return (index >= 0 && index <= 6) ? days[index] : 'Not Set';
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('personalAccountingData', JSON.stringify(data));
+                console.log("Data saved successfully:", JSON.parse(JSON.stringify(data))); // Log a copy
+            } catch (e) {
+                console.error("Error saving data to localStorage:", e);
+                alert("Could not save data. LocalStorage might be full or disabled.");
+            }
+        }
+
+        function loadData() {
+            console.log("Attempting to load data from localStorage...");
+            const savedData = localStorage.getItem('personalAccountingData');
+            if (savedData) {
+                console.log("Raw data found:", savedData);
+                try {
+                    const parsedData = JSON.parse(savedData);
+                     // Basic validation: Check if it's an object
+                     if (typeof parsedData === 'object' && parsedData !== null) {
+                         // Assign properties carefully, ensuring arrays exist
+                         data.weeklyIncome = parsedData.weeklyIncome ?? null;
+                         data.paydayOfWeek = parsedData.paydayOfWeek ?? null;
+                         data.expenses = Array.isArray(parsedData.expenses) ? parsedData.expenses : [];
+                         data.recurringCharges = Array.isArray(parsedData.recurringCharges) ? parsedData.recurringCharges : [];
+                         console.log("Data parsed and loaded successfully:", JSON.parse(JSON.stringify(data))); // Log a copy
+                     } else {
+                         console.warn("Loaded data is not a valid object. Resetting to defaults.");
+                         resetDataStructure(); // Reset if data is corrupted
+                     }
+                } catch (e) {
+                    console.error("Error parsing data from localStorage:", e);
+                    alert("Could not load saved data, it might be corrupted. Starting fresh.");
+                    resetDataStructure(); // Reset to defaults if parsing fails
+                    saveData(); // Save the fresh structure
+                }
+            } else {
+                 console.log("No saved data found. Using default structure.");
+                 resetDataStructure(); // Ensure data has the default structure if nothing is loaded
+            }
+            // Set default date for expense input if empty
+            if (expenseDateInput && !expenseDateInput.value) {
+                expenseDateInput.valueAsDate = new Date();
+            }
+        }
+
+        // Helper to reset data structure
+        function resetDataStructure() {
+            data = {
+                weeklyIncome: null,
+                paydayOfWeek: null,
+                expenses: [],
+                recurringCharges: []
+            };
+            console.log("Data structure reset to defaults.");
+        }
+
+
+        // --- Rendering Functions ---
+        function renderIncome() {
+            // Check if elements exist before trying to update them
+            if (displayIncome) displayIncome.textContent = formatCurrency(data.weeklyIncome);
+            if (displayPayday) displayPayday.textContent = getDayName(data.paydayOfWeek);
+            if (weeklyIncomeInput) weeklyIncomeInput.value = data.weeklyIncome ?? '';
+            if (paydaySelect) paydaySelect.value = data.paydayOfWeek ?? '';
+            console.log("Income display updated.");
+        }
+
+        function renderExpenses() {
+            if (!expenseList) return; // Don't proceed if list element doesn't exist
+            console.log("Rendering expenses...");
+            expenseList.innerHTML = '';
+            if (!data.expenses || data.expenses.length === 0) {
+                expenseList.innerHTML = '<li class="text-slate-500 italic">No expenses added yet.</li>';
+                return;
+            }
+            const sortedExpenses = [...data.expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
+            sortedExpenses.forEach((expense) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center p-2 rounded hover:bg-slate-50';
+                li.innerHTML = `
+                    <span>
+                        <span class="font-medium">${expense.desc || 'N/A'}</span> - ${formatCurrency(expense.amount)}
+                        <span class="text-xs text-slate-500 ml-1">(${expense.date ? new Date(expense.date).toLocaleDateString() : 'Invalid Date'})</span>
+                    </span>
+                    <button data-id="${expense.id}" class="delete-expense delete-button">Delete</button>
+                `;
+                // Add listener directly to the button here
+                const deleteButton = li.querySelector('.delete-expense');
+                 if (deleteButton) {
+                     deleteButton.addEventListener('click', handleDeleteExpense);
+                 } else {
+                     console.warn("Could not find delete button for expense:", expense.id);
+                 }
+                expenseList.appendChild(li);
+            });
+            console.log("Expense list rendered.");
+        }
+
+
+        function renderRecurringCharges() {
+             if (!recurringList) return; // Don't proceed if list element doesn't exist
+             console.log("Rendering recurring charges...");
+            recurringList.innerHTML = '';
+            if (!data.recurringCharges || data.recurringCharges.length === 0) {
+                recurringList.innerHTML = '<li class="text-slate-500 italic">No recurring charges added yet.</li>';
+                return;
+            }
+             const sortedCharges = [...data.recurringCharges].sort((a, b) => (a.dayDue || 0) - (b.dayDue || 0));
+            sortedCharges.forEach((charge) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center p-2 rounded hover:bg-slate-50';
+                li.innerHTML = `
+                    <span>
+                        <span class="font-medium">${charge.desc || 'N/A'}</span> - ${formatCurrency(charge.amount)}
+                        <span class="text-xs text-slate-500 ml-1">(Due day: ${charge.dayDue || 'N/A'})</span>
+                    </span>
+                     <button data-id="${charge.id}" class="delete-recurring delete-button">Delete</button>
+                `;
+                 // Add listener directly to the button here
+                 const deleteButton = li.querySelector('.delete-recurring');
+                 if (deleteButton) {
+                     deleteButton.addEventListener('click', handleDeleteRecurring);
+                 } else {
+                      console.warn("Could not find delete button for recurring charge:", charge.id);
+                 }
+                recurringList.appendChild(li);
+            });
+            console.log("Recurring charges list rendered.");
+        }
+
+        // --- Event Handlers ---
+        function handleIncomeSubmit(event) {
+            event.preventDefault();
+            console.log("Income form submitted.");
+            // Ensure inputs exist before accessing value
+            const incomeValue = weeklyIncomeInput ? parseFloat(weeklyIncomeInput.value) : NaN;
+            const paydayValue = paydaySelect ? parseInt(paydaySelect.value, 10) : NaN;
+
+            if (isNaN(incomeValue) || incomeValue < 0) {
+                alert("Please enter a valid positive income amount."); return;
+            }
+             // Check if paydayValue is a valid number (0-6)
+             if (isNaN(paydayValue) || paydayValue < 0 || paydayValue > 6) {
+                 alert("Please select a valid payday."); return;
+             }
+
+            data.weeklyIncome = incomeValue;
+            data.paydayOfWeek = paydayValue;
+            saveData();
+            renderIncome();
+            calculateAndDisplaySavings();
+        }
+
+        function handleExpenseSubmit(event) {
+            event.preventDefault();
+            console.log("Expense form submitted.");
+            // Ensure inputs exist
+            const desc = expenseDescInput ? expenseDescInput.value.trim() : '';
+            const amount = expenseAmountInput ? parseFloat(expenseAmountInput.value) : NaN;
+            const date = expenseDateInput ? expenseDateInput.value : '';
+
+            if (!desc || isNaN(amount) || amount <= 0 || !date) {
+                alert("Please fill in all expense fields wi
