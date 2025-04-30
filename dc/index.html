@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dairy Cup of Mount Carmel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f0f0f0; /* Light gray background */
+        }
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        .hero-section {
+             /* Modern 80s gradient with subtle overlay */
+            background: linear-gradient(to right, rgba(66, 153, 225, 0.8), rgba(147, 197, 253, 0.8)), url('https://th.bing.com/th/id/OLC.YqoDHCLvUVCnJw480x360?rs=1&pid=ImgDetMain') no-repeat center center/cover;
+            background-color: #60a5fa; /* Blue-400 fallback */
+            position: relative;
+            overflow: hidden; /* Hide potential overflow from subtle patterns */
+        }
+
+        /* Subtle geometric pattern overlay for 80s feel */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(#ffffff33 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+            z-index: 1;
+        }
+
+        .hero-section .container {
+            position: relative;
+            z-index: 2; /* Ensure content is above the pattern */
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0; /* Increased padding */
+            border-bottom: 1px dashed #a0aec0; /* Gray-500 dashed border */
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item span:first-child {
+            flex-grow: 1;
+            margin-right: 1rem;
+        }
+
+        /* Accordion styles */
+        .accordion-header {
+            background-color: #bfdbfe; /* Blue-200 */
+            color: #1e3a8a; /* Blue-900 */
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+        }
+        .accordion-header:hover {
+             background-color: #93c5fd; /* Blue-300 */
+        }
+        .accordion-content {
+            padding: 0 1.5rem 1rem 1.5rem;
+            background-color: #eef2ff; /* Indigo-50 */
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            max-height: 0; /* Initially hidden */
+        }
+        .accordion-content.active {
+            max-height: 1000px; /* Sufficiently large value */
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Business Card Widget */
+        .business-card {
+            background: linear-gradient(to bottom right, #60a5fa, #3b82f6); /* Blue gradient */
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2); /* More prominent shadow */
+            max-width: 400px;
+            margin: 0 auto; /* Center the card */
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+         .business-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+            background-size: 40px 40px;
+            opacity: 0.3;
+        }
+        .business-card h3 {
+            color: #e0f2f7; /* Light blue */
+            margin-bottom: 1rem;
+        }
+         .business-card p {
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+         }
+         .business-card a {
+            color: #e0f2f7;
+            text-decoration: underline;
+         }
+
+
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center rounded-lg">
+            <h1 class="text-2xl font-bold text-blue-700">Dairy Cup</h1>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="#menu" class="text-gray-600 hover:text-blue-700 transition duration-300">Menu</a></li>
+                    <li><a href="#location" class="text-gray-600 hover:text-blue-700 transition duration-300">Location</a></li>
+                    <li><a href="#contact" class="text-gray-600 hover:text-blue-700 transition duration-300">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero-section text-white py-20 text-center rounded-b-lg">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Welcome to Dairy Cup!</h2>
+            <p class="text-xl mb-8 drop-shadow-lg">Serving delicious fast food, dessert, and ice cream since 1980.</p>
+            <a href="#menu" class="bg-white text-blue-700 font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition duration-300 shadow-lg">View Our Menu</a>
+        </div>
+    </section>
+
+    <section id="menu" class="py-16 bg-white rounded-lg shadow-lg mx-4 md:mx-auto max-w-6xl mt-8">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Our Delicious Menu</h2>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        DINNERS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-sm text-gray-600 mb-4">All served with Fries or Tots, Salad or Slaw & Toast</p>
+                        <div class="menu-item"><span>2pc Fish (3oz pieces)</span><span>$9.93</span></div>
+                        <div class="menu-item"><span>3/4 lb. Hamburger Steak</span><span>$11.84</span></div>
+                        <div class="menu-item"><span>Chicken Nuggets</span><span>$7.97</span></div>
+                        <div class="menu-item"><span>Chicken Stix (4) (2oz pieces)</span><span>$9.48</span></div>
+                        <div class="menu-item"><span>Hamburger Steak</span><span>$7.82</span></div>
+                        <div class="menu-item"><span>Texas Style Hamburger Steak<br>(Served with Bar-B-Q Sauce and Grilled Onions)</span><span>$9.48</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        ELM HILL DOGHOUSE
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Short Hot Dog</span><span>$3.14</span></div>
+                        <div class="menu-item"><span>Foot Long Hot Dog</span><span>$4.34</span></div>
+                        <div class="menu-item"><span>Short Chili Bun</span><span>$3.14</span></div>
+                        <div class="menu-item"><span>Foot Long Chili Bun</span><span>$4.34</span></div>
+                        <div class="menu-item"><span>Short Hot Dog Weenie</span><span>$0.46</span></div>
+                        <div class="menu-item"><span>Foot Long Hot Dog Weenie</span><span>$0.64</span></div>
+                        <div class="menu-item"><span>Corn Dog</span><span>$2.34 ea or 2/$3.37</span></div>
+                        <div class="menu-item"><span>Foot Long Corn Dog</span><span>$4.95</span></div>
+                        <div class="menu-item"><span>Corn Dog Nugget</span><span>$1.30</span></div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        BURGERS-N-STUFF
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Cheeseburger</span><span>$5.65</span></div>
+                        <div class="menu-item"><span>Double Cheeseburger</span><span>$7.74</span></div>
+                        <div class="menu-item"><span>Bacon Cheeseburger</span><span>$6.40</span></div>
+                        <div class="menu-item"><span>Bacon Double Cheeseburger</span><span>$8.59</span></div>
+                        <div class="menu-item"><span>Hamburger</span><span>$5.01</span></div>
+                        <div class="menu-item"><span>Double Hamburger</span><span>$7.38</span></div>
+                        <div class="menu-item"><span>Bacon Hamburger</span><span>$5.72</span></div>
+                        <div class="menu-item"><span>Chili Burger</span><span>$5.24</span></div>
+                        <div class="menu-item"><span>The Dairy Cup Burger</span><span>$7.69</span></div>
+                        <div class="menu-item"><span>Mushroom & Swiss Burger</span><span>$5.61</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        SPECIALTY SANDWICH SHOP
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Bar-B-Q</span><span>$6.50</span></div>
+                        <div class="menu-item"><span>Cheddar Bacon</span><span>$5.45</span></div>
+                        <div class="menu-item"><span>Chicken Club</span><span>$6.44</span></div>
+                        <div class="menu-item"><span>Chicken Filet</span><span>$5.65</span></div>
+                        <div class="menu-item"><span>Grilled Chicken Sandwich</span><span>$6.25</span></div>
+                        <div class="menu-item"><span>Fish</span><span>$6.79</span></div>
+                        <div class="menu-item"><span>Grilled Cheese</span><span>$3.44</span></div>
+                        <div class="menu-item"><span>Monster Ham-N-Cheese or Beef</span><span>$5.31</span></div>
+                        <div class="menu-item"><span>Steak Sandwich</span><span>$5.10</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        SALADS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Small Chef Salad</span><span>$5.24</span></div>
+                        <div class="menu-item"><span>Chef's Salad</span><span>$7.24</span></div>
+                        <div class="menu-item"><span>Dinner Salad</span><span>$4.10</span></div>
+                        <div class="menu-item"><span>Garden Salad</span><span>$5.92</span></div>
+                        <div class="menu-item"><span>Chunky Chicken Salad</span><span>$7.29</span></div>
+                        <div class="menu-item"><span>Grilled Chicken Salad</span><span>$7.74</span></div>
+                        <p class="text-sm text-gray-600 mt-2">Dressings: 1000 Island, Blue Cheese, Honey French, Honey Mustard, Italian, & Ranch</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        SOUPS & BEANS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Small Homemade Soup (Seasonal)</span><span>$3.89</span></div>
+                        <div class="menu-item"><span>Large Homemade Soup (Seasonal)</span><span>$5.39</span></div>
+                        <div class="menu-item"><span>Small Soup Beans</span><span>$2.87</span></div>
+                        <div class="menu-item"><span>Large Soup Beans</span><span>$4.65</span></div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        AMERICA'S "TOP TEN COMBOS"
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-sm text-gray-600 mb-4">All Combos Served with 24oz Drink (Go Large - 32 oz FREE Just For Asking!)</p>
+                        <div class="menu-item"><span>#1 "JUST SAY COMBO"<br>Foot Long & Fries</span><span>$8.47</span></div>
+                        <div class="menu-item"><span>#2 "TWIN PUPPIES"<br>Two Short Hot Dogs & Fries</span><span>$9.18</span></div>
+                        <div class="menu-item"><span>#3 "GRILLED CHEESE-O"<br>Grilled Cheese & Fries</span><span>$8.29</span></div>
+                        <div class="menu-item"><span>#4 "BURGER & FRIES"<br>Hamburger & Fries</span><span>$8.84</span></div>
+                        <div class="menu-item"><span>#5 #4 - PLUS CHEESE<br>Cheeseburger & Fries</span><span>$9.11</span></div>
+                        <div class="menu-item"><span>#6 "SKINNY STEER"<br>Steak Sandwich & Fries</span><span>$8.84</span></div>
+                        <div class="menu-item"><span>#7 "CORNY-DOG-THREE-O"<br>3 Corn Dogs & Fries</span><span>$8.79</span></div>
+                        <div class="menu-item"><span>#8 "ROAD KILL SPECIAL"<br>Chicken Sandwich & Fries</span><span>$9.25</span></div>
+                        <div class="menu-item"><span>#9 "BIG BOB-O-Q"<br>Barb-B-Q & Fries</span><span>$9.20</span></div>
+                        <div class="menu-item"><span>#10 "MONSTER COMBO"<br>Monster Ham or Beef & Fries</span><span>$9.84</span></div>
+                        <p class="text-sm text-gray-600 mt-4">Tots - No Charge</p>
+                        <p class="text-sm text-gray-600">Onion Rings - $1.46</p>
+                        <p class="text-sm text-gray-600">Crunchies - $1.23</p>
+                        <p class="text-sm text-gray-600">Tater Babies - $1.46</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        HUNGRYMAN DELI SANDWICHES
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Deli Burger<br>(1/2lb. Ground Beef, Lettuce, Tomato, Grilled Onions w/cheese)</span><span>$7.79</span></div>
+                        <div class="menu-item"><span>Ham and Swiss Cheese</span><span>$7.79</span></div>
+                        <div class="menu-item"><span>Philly Steak<br>(with Peppers, Onions & Cheese)</span><span>$7.79</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        LAMB WESTON POTATO PLACE
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Small Fries</span><span>$2.73</span></div>
+                        <div class="menu-item"><span>French Fries</span><span>$3.83</span></div>
+                        <div class="menu-item"><span>Fries-N-Box w/ Chili & Cheese</span><span>$5.50</span></div>
+                        <div class="menu-item"><span>Crunchies</span><span>$4.24</span></div>
+                        <div class="menu-item"><span>Tater Babies</span><span>$4.60</span></div>
+                        <div class="menu-item"><span>Tater Tots</span><span>$3.83</span></div>
+                        <div class="menu-item"><span>Onion Rings</span><span>$4.65</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        MINI DINNERS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-sm text-gray-600 mb-4">All served with Fries, Slaw & Toast</p>
+                        <div class="menu-item"><span>1 piece Fish</span><span>$6.58</span></div>
+                        <div class="menu-item"><span>2 piece Chicken Stix</span><span>$6.42</span></div>
+                        <p class="text-sm text-gray-600 mt-2">Dinner Salad - $0.91 extra</p>
+                        <p class="text-sm text-gray-600">Small Chef - $1.82 extra</p>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        CAKES
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Brownie Fudge Delight</span><span>$4.29</span></div>
+                        <div class="menu-item"><span>Caramel Cake (Seasonal)</span><span>$4.65</span></div>
+                        <div class="menu-item"><span>Hot Fudge Cake</span><span>$4.56</span></div>
+                        <div class="menu-item"><span>All Shortcake (BB, Peach & Strawberry (Seasonal))</span><span>$4.65</span></div>
+                        <div class="menu-item"><span>Piece of Cake</span><span>$1.87</span></div>
+                        <div class="menu-item"><span>RIC on Cake</span><span>$1.37</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        16 FLAVORS OF MAYFIELD
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Cones / Cups (Per Scoop)</span><span>$2.53</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        BANANA SPLITS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Soft Serve</span><span>$5.42</span></div>
+                        <div class="menu-item"><span>Soft Serve w/ Nuts</span><span>$6.29</span></div>
+                        <div class="menu-item"><span>Ole Fashioned</span><span>$6.14</span></div>
+                        <div class="menu-item"><span>Ole Fashioned w/ Nuts</span><span>$6.83</span></div>
+                        <div class="menu-item"><span>Personal</span><span>$4.69</span></div>
+                        <div class="menu-item"><span>Personal w/ Nuts</span><span>$5.59</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        OLE STANDARDS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>One Egg Breakfast*</span><span>$3.46</span></div>
+                        <div class="menu-item"><span>Two Egg Breakfast*</span><span>$4.31</span></div>
+                        <div class="menu-item"><span>Egg Sandwich*</span><span>$3.60</span></div>
+                        <div class="menu-item"><span>Bacon & Egg Sandwich*</span><span>$5.10</span></div>
+                        <div class="menu-item"><span>Ham Sandwich</span><span>$4.74</span></div>
+                        <div class="menu-item"><span>Ham-N-Cheese</span><span>$4.28</span></div>
+                        <div class="menu-item"><span>Ham & Egg Sandwich*</span><span>$5.08</span></div>
+                        <div class="menu-item"><span>Ham-N-Swiss w/ Jalapeno</span><span>$5.13</span></div>
+                        <div class="menu-item"><span>B.L.T.</span><span>$4.58</span></div>
+                        <div class="menu-item"><span>Bologna</span><span>$5.08</span></div>
+                         <p class="text-sm text-gray-600 mt-4">* Consuming raw or undercooked meats, poultry, seafood, shellfish, or eggs may increase your risk of foodborne illness.</p>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        VALUE MEAL
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Two Hamburger Steaks</span><span>$11.75</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        DRINKS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Small</span><span>$1.94</span></div>
+                        <div class="menu-item"><span>Medium</span><span>$2.14</span></div>
+                        <div class="menu-item"><span>Large</span><span>$2.54</span></div>
+                         <p class="text-sm text-gray-600 mb-4">Coke, Diet Coke, Sprite, Pibb Xtra, Mello Yello, Hi-C Fruit Punch</p>
+                        <div class="menu-item"><span>32oz. Tea</span><span>$1.46</span></div>
+                        <div class="menu-item"><span>Gallon of Tea</span><span>$4.33</span></div>
+                        <div class="menu-item"><span>Lemonade</span><span>$1.64</span></div>
+                        <div class="menu-item"><span>Gallon of Lemonade</span><span>$6.38</span></div>
+                        <div class="menu-item"><span>Ice / Water</span><span>$0.32</span></div>
+                        <div class="menu-item"><span>Syrup</span><span>$0.50</span></div>
+                        <div class="menu-item"><span>Bottled Drink</span><span>$1.87</span></div>
+                        <div class="menu-item"><span>Hot Cocoa (Seasonal)</span><span>$1.29</span></div>
+                        <div class="menu-item"><span>Small Milk</span><span>$2.04</span></div>
+                        <div class="menu-item"><span>Large Milk</span><span>$2.34</span></div>
+                        <div class="menu-item"><span>Small Coffee</span><span>$0.91</span></div>
+                        <div class="menu-item"><span>Large Coffee</span><span>$1.37</span></div>
+                        <p class="text-sm text-gray-600 mt-4">Free Refills on Soft Drink and Coffee, NOT Milk</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        MEAT ONLY
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Chicken Fries (1)</span><span>$1.17</span></div>
+                        <div class="menu-item"><span>Chicken Nugget (1)</span><span>$1.18</span></div>
+                        <div class="menu-item"><span>Chicken Patty</span><span>$3.33</span></div>
+                        <div class="menu-item"><span>Chicken Stix (1)</span><span>$1.87</span></div>
+                        <div class="menu-item"><span>Chicken Stix (4)</span><span>$5.15</span></div>
+                        <div class="menu-item"><span>Extra Cheeseburger Patty</span><span>$2.30</span></div>
+                        <div class="menu-item"><span>Extra Hamburger Patty</span><span>$1.90</span></div>
+                        <div class="menu-item"><span>Extra BBQ</span><span>$3.14</span></div>
+                        <div class="menu-item"><span>Extra Bologna</span><span>$2.43</span></div>
+                        <div class="menu-item"><span>Extra Ham</span><span>$2.92</span></div>
+                        <div class="menu-item"><span>Extra Steak</span><span>$2.62</span></div>
+                        <div class="menu-item"><span>Fish</span><span>$3.69</span></div>
+                        <div class="menu-item"><span>Grilled Chicken Patty</span><span>$4.41</span></div>
+                        <div class="menu-item"><span>Hamburger Steak Patty</span><span>$4.37</span></div>
+                        <div class="menu-item"><span>1 Hamburger Steak Patty</span><span>$5.97</span></div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        LIMITED TIME ONLY
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Fried Pickles (Limited time only)</span><span>$6.25</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        KIDS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                         <p class="text-sm text-gray-600 mb-4">All served with Fries and a 12oz drink</p>
+                        <div class="menu-item"><span>K-1 Corn Dog</span><span>$5.01</span></div>
+                        <div class="menu-item"><span>K-2 Chicken Fries (8)</span><span>$5.01</span></div>
+                        <div class="menu-item"><span>K-3 Grilled Cheese</span><span>$5.01</span></div>
+                        <div class="menu-item"><span>K-4 Chicken Nuggets (4)</span><span>$5.01</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        MISCELLANEOUS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>8oz. Chili</span><span>$1.82</span></div>
+                        <div class="menu-item"><span>16oz. Chili</span><span>$3.64</span></div>
+                        <div class="menu-item"><span>Bacon Slice</span><span>$1.14</span></div>
+                        <div class="menu-item"><span>Cheese on French Fries</span><span>$0.95</span></div>
+                        <div class="menu-item"><span>Cheese on Sandwich</span><span>$0.59</span></div>
+                        <div class="menu-item"><span>Chili on French Fries</span><span>$0.95</span></div>
+                        <div class="menu-item"><span>Cornbread</span><span>$0.59</span></div>
+                        <div class="menu-item"><span>Cup of Cheese</span><span>$2.35</span></div>
+                        <div class="menu-item"><span>Cup of Pickles</span><span>$0.59</span></div>
+                        <div class="menu-item"><span>Egg*</span><span>$0.91</span></div>
+                        <div class="menu-item"><span>Extra Dressing</span><span>$0.64</span></div>
+                        <div class="menu-item"><span>FLHD Slaw</span><span>$0.82</span></div>
+                        <div class="menu-item"><span>Grilled Onions</span><span>$0.64</span></div>
+                        <div class="menu-item"><span>Grilled Peppers</span><span>$0.64</span></div>
+                        <div class="menu-item"><span>Individual Slaw</span><span>$2.64</span></div>
+                        <div class="menu-item"><span>Jalapenos</span><span>$0.77</span></div>
+                        <div class="menu-item"><span>Mushrooms</span><span>$0.82</span></div>
+                        <div class="menu-item"><span>Nacho Cheese on FLHD</span><span>$0.87</span></div>
+                        <div class="menu-item"><span>Nacho Cheese on SHD</span><span>$0.64</span></div>
+                        <div class="menu-item"><span>Pint of BBQ</span><span>$7.84</span></div>
+                        <div class="menu-item"><span>Pint of Slaw</span><span>$4.78</span></div>
+                        <div class="menu-item"><span>SHD Slaw</span><span>$0.41</span></div>
+                        <div class="menu-item"><span>Slaw on BBQ</span><span>$0.96</span></div>
+                        <div class="menu-item"><span>Sliced Cheese on FLHD</span><span>$0.77</span></div>
+                        <div class="menu-item"><span>Sliced Cheese on SHD</span><span>$0.50</span></div>
+                        <div class="menu-item"><span>Texas Toast</span><span>$0.64</span></div>
+                         <p class="text-sm text-gray-600 mt-4">* Consuming raw or undercooked meats, poultry, seafood, shellfish, or eggs may increase your risk of foodborne illness.</p>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        SHAKES
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-sm text-gray-600 mb-4">Chocolate, Strawberry, Vanilla & Cherry</p>
+                        <div class="menu-item"><span>16oz. (Small)</span><span>$3.39</span></div>
+                        <div class="menu-item"><span>24oz. (Medium)</span><span>$4.59</span></div>
+                        <div class="menu-item"><span>32oz (Large)</span><span>$6.19</span></div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        SPECIALTY SHAKES
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-sm text-gray-600 mb-4">Fruit, Candy or Dipped from the Cabinet</p>
+                        <div class="menu-item"><span>16oz. (Small)</span><span>$4.84</span></div>
+                        <div class="menu-item"><span>24oz. (Medium)</span><span>$6.24</span></div>
+                        <div class="menu-item"><span>32oz. (Large)</span><span>$8.04</span></div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        SOFT SERVE
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-sm text-gray-600 mb-4">Chocolate, Vanilla & Zebra</p>
+                        <div class="menu-item"><span>Cones</span><span>$2.05</span></div>
+                        <div class="menu-item"><span>w/ Chocolate Hard Shell</span><span>$2.64</span></div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        CUPS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Small (9oz.)</span><span>$2.62</span></div>
+                        <div class="menu-item"><span>Medium (12oz.)</span><span>$3.52</span></div>
+                        <div class="menu-item"><span>Large (20oz.)</span><span>$4.62</span></div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        SUNDAES
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>Small</span><span>$3.49</span></div>
+                        <div class="menu-item"><span>Medium</span><span>$4.39</span></div>
+                        <div class="menu-item"><span>Large</span><span>$5.49</span></div>
+                        <p class="text-sm text-gray-600 mt-2">Sundaes made with Ice Cream dipped from the cabinet $1.80</p>
+                         <p class="text-sm text-gray-600">Nuts or Candy $0.70</p>
+                         <p class="text-sm text-gray-600">Topping $0.85</p>
+                         <p class="text-sm text-gray-600">Toppings: Chocolate, Hot Fudge, Caramel, Strawberry, Pineapple, Butterscotch & Marshmallow</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        TWISTER
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="text-sm text-gray-600 mb-4">(Rich, Thick Ice Cream With Your Favorite Fruit or Candy or Both Blended In)</p>
+                        <div class="menu-item"><span>"1" Item Flavor</span><span>$4.20</span></div>
+                        <div class="menu-item"><span>"2" Items</span><span>$4.50</span></div>
+                        <div class="menu-item"><span>"3" Items</span><span>$4.92</span></div>
+                        <p class="text-sm text-gray-600 mt-2">Flavors: Butterfinger, Reese's, M & M, Oreo, Bananas, Pineapple, Strawberry, Brownie, Walnut, Peanut Butter and Lots More</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                     <div class="accordion-header">
+                        PARFAITS
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="menu-item"><span>24oz. Soft Serve w/ Three toppings & Nuts</span><span>$5.21</span></div>
+                    </div>
+                </div>
+
+                 <div class="accordion-item">
+                     <div class="accordion-header">
+                        MISCELLANEOUS - ICE CREAM
+                        <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    <div class="accordion-content">
+                         <div class="menu-item"><span>Extra Candy Topping</span><span>$1.05</span></div>
+                         <div class="menu-item"><span>Extra Caramel Fudge</span><span>$0.91</span></div>
+                         <div class="menu-item"><span>Extra Hot Fudge</span><span>$0.73</span></div>
+                         <div class="menu-item"><span>Extra Nuts</span><span>$0.82</span></div>
+                         <div class="menu-item"><span>Hard Shell Dip</span><span>$0.87</span></div>
+                         <div class="menu-item"><span>Root Bear Float</span><span>$2.79</span></div>
+                         <div class="menu-item"><span>Extra Ice Cream on HFC</span><span>$0.91</span></div>
+                         <div class="menu-item"><span>Kiddie SS Cup</span><span>$0.35</span></div>
+                         <div class="menu-item"><span>Kiddie RIC Cup</span><span>$1.61</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="location" class="py-16 bg-gray-800 text-white rounded-lg shadow-lg mx-4 md:mx-auto max-w-6xl mt-8">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-8 text-white">Find Us</h2>
+
+            <div class="business-card">
+                 <h3 class="text-2xl font-bold mb-4">Dairy Cup of Mount Carmel</h3>
+                 <p class="text-lg mb-2">110 Main St W, Mount Carmel, TN 37645</p>
+                 <p class="text-md text-gray-200 mb-4">(4.3 mi from your location)</p>
+                 <p class="text-lg mb-2">Phone: <a href="tel:+14233574181" class="hover:underline">(423) 357-4181</a></p>
+                 <p class="text-lg mb-2">Rating: 4.2/5 (21 reviews)</p>
+                 <p class="text-lg mb-4">Price Range: $$</p>
+                 <h3 class="text-xl font-semibold mb-2">Hours</h3>
+                 <p class="text-lg">Closed &middot; Opens tomorrow 9 AM</p>
+            </div>
+
+        </div>
+    </section>
+
+    <footer id="contact" class="bg-gray-900 text-gray-400 py-8 text-center mt-8 rounded-t-lg">
+        <div class="container mx-auto px-6">
+            <p>&copy; 2025 Dairy Cup of Mount Carmel. All rights reserved.</p>
+            <p class="text-sm mt-2">Menu & Prices subject to change without notice. Revised October 2022.</p>
+        </div>
+    </footer>
+
+    <script>
+        // JavaScript for accordion functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const headers = document.querySelectorAll('.accordion-header');
+
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const currentContent = header.nextElementSibling;
+                    const isActive = header.classList.contains('active');
+
+                    // Close all other accordions
+                    document.querySelectorAll('.accordion-header').forEach(h => {
+                        if (h !== header) {
+                            h.classList.remove('active');
+                            h.nextElementSibling.classList.remove('active');
+                        }
+                    });
+
+                    // Toggle the clicked accordion
+                    if (isActive) {
+                        header.classList.remove('active');
+                        currentContent.classList.remove('active');
+                    } else {
+                        header.classList.add('active');
+                        currentContent.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
