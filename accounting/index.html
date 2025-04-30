@@ -1,344 +1,603 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Accounting</title>
+    <title>Momentum Finance Hub - Cohesive Dark Theme</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .savings-highlight { background-color: #fef9c3; border: 1px solid #fde047; color: #ca8a04; }
-        form { width: 100%; }
-        button { transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
-        button:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
-        li { margin-bottom: 0.5rem; }
-        .delete-button { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; margin-left: 0.5rem; background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; cursor: pointer; }
-        .delete-button:hover { background-color: #fecaca; color: #b91c1c; box-shadow: none; }
+        /* --- UNIFIED COHESIVE THEME --- */
+        :root {
+            --bg-primary: #111827; /* gray-900 */
+            --bg-secondary: #1f2937; /* gray-800 */
+            --bg-tertiary: #374151; /* gray-700 */
+            --bg-card: #1f2937; /* gray-800 */
+            --bg-card-hover: #374151; /* gray-700 */
+            --bg-input: #111827; /* gray-900 */
+            --text-primary: #e5e7eb; /* gray-200 */
+            --text-secondary: #9ca3af; /* gray-400 */
+            --text-heading: #f9fafb; /* gray-50 */
+            --border-color: #374151; /* gray-700 */
+            --border-light: #4b5563; /* gray-600 */
+            --border-focus: #60a5fa; /* blue-400 */
+            --accent-primary: #60a5fa; /* blue-400 */
+            --accent-secondary: #34d399; /* emerald-400 */
+            --accent-negative: #f87171; /* red-400 */
+            --accent-purple: #c084fc; /* purple-400 */
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --link-color: #60a5fa;
+            --link-hover-color: #93c5fd; /* blue-300 */
+            --hero-gradient-start: #1e3a8a; /* blue-900 */
+            --hero-gradient-end: #111827; /* gray-900 */
+            --glow-color: rgba(96, 165, 250, 0.1); /* blue-400 glow */
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; border: 2px solid var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+        /* --- Layout & Sections --- */
+        header { background-color: rgba(17, 24, 39, 0.85); backdrop-filter: blur(10px) saturate(150%); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 30; }
+        main { /* Padding handled by sections */ }
+        footer { background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); padding: 2rem 0; margin-top: 4rem; }
+        .content-section { padding-top: 4rem; padding-bottom: 4rem; }
+        .content-card {
+            background-color: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 0.75rem; /* lg */ padding: 1.5rem;
+            box-shadow: 0 3px 10px var(--shadow-color);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .content-card:hover {
+            box-shadow: 0 5px 15px var(--shadow-color);
+            background-color: var(--bg-card-hover);
+            border-color: var(--border-light);
+        }
+        .container { max-width: 7xl; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+        @media (min-width: 640px) { .container { padding-left: 1.5rem; padding-right: 1.5rem; } }
+        @media (min-width: 1024px) { .container { padding-left: 2rem; padding-right: 2rem; } }
+
+        /* --- Hero Section --- */
+        #hero {
+            background: linear-gradient(145deg, var(--hero-gradient-start), var(--hero-gradient-end));
+            position: relative; overflow: hidden; padding-top: 8rem; padding-bottom: 8rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        #hero::before { /* Grid pattern overlay */
+            content: ''; position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(200, 200, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(200, 200, 255, 0.02) 1px, transparent 1px);
+            background-size: 25px 25px; opacity: 0.4;
+            mask-image: radial-gradient(circle at top center, white 10%, transparent 80%);
+        }
+         /* Subtle Glow Effect for Hero */
+        #hero::after {
+            content: ''; position: absolute; top: -30%; left: -30%; width: 160%; height: 160%;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 55%);
+            animation: pulseGlow 10s infinite ease-in-out; z-index: 0;
+        }
+        @keyframes pulseGlow { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.03); } }
+
+        /* --- Header Navigation --- */
+        .header-nav a {
+            color: var(--text-secondary); font-weight: 500; padding: 0.5rem 0.75rem; border-radius: 0.375rem;
+            transition: color 0.2s ease, background-color 0.2s ease; position: relative;
+        }
+        .header-nav a:hover { color: var(--text-primary); background-color: var(--bg-tertiary); }
+        .header-nav a.active { color: var(--text-primary); }
+
+        /* --- Forms & Inputs --- */
+        input, select, textarea {
+            background-color: var(--bg-input); border: 1px solid var(--border-color);
+            color: var(--text-primary); border-radius: 0.375rem; padding: 0.6rem 0.75rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; width: 100%;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--border-focus); background-color: var(--bg-primary);
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2); /* Adjusted focus glow */
+        }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%238b949e' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.1em 1.1em; padding-right: 2.5rem; }
+        input[type="date"] { color-scheme: dark; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+        label { display: block; text-sm font-medium text-slate-300 mb-1.5; }
+
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            border-radius: 0.375rem; transition: all 0.15s ease-in-out; font-weight: 500;
+            padding: 0.5rem 1rem; border: 1px solid var(--border-color);
+            cursor: pointer; color: var(--text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+        .btn-primary { background-color: var(--accent-primary); border-color: transparent; color: var(--bg-primary); font-weight: 600; }
+        .btn-primary:hover { background-color: var(--link-hover-color); filter: brightness(1.1); }
+        .btn-secondary { background-color: var(--bg-tertiary); border-color: var(--border-light); }
+        .btn-secondary:hover { background-color: var(--border-light); border-color: #6e7681; }
+        .btn-danger { background-color: transparent; border-color: transparent; color: var(--accent-negative); padding: 0.25rem; }
+        .btn-danger:hover { background-color: rgba(248, 81, 73, 0.1); color: #ff7b72; }
+        .btn-icon { width: 1rem; height: 1rem; }
+        .btn-print { background: none; border: none; color: var(--text-secondary); padding: 0.25rem; opacity: 0.6; }
+        .btn-print:hover { color: var(--text-primary); opacity: 1; }
+        .btn:active { transform: scale(0.97); }
+
+        /* --- Unified Transaction Form Tabs --- */
+        .tab-button-group { display: inline-flex; border-radius: 0.375rem; overflow: hidden; border: 1px solid var(--border-color); background-color: var(--bg-tertiary); }
+        .tab-button {
+            padding: 0.5rem 1rem; background-color: transparent; border: none;
+            color: var(--text-secondary); font-weight: 500; transition: all 0.2s ease; cursor: pointer;
+        }
+        .tab-button.active { background-color: var(--accent-primary); color: var(--bg-primary); }
+        .transaction-form-fields { display: none; animation: formFadeIn 0.4s ease-out forwards; }
+        .transaction-form-fields.active { display: block; }
+        @keyframes formFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Lists & Transitions --- */
+        .list-item { transition: background-color 0.2s ease; border-bottom: 1px solid var(--border-color); }
+        .list-item:last-child { border-bottom: none; }
+        .list-item:hover { background-color: rgba(55, 65, 81, 0.3); } /* gray-700 transparent */
+        .list-item-enter { opacity: 0; transform: translateY(5px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .list-item-enter-active { opacity: 1; transform: translateY(0); }
+        .list-item-exit { transition: opacity 0.2s ease; }
+        .list-item-exit-active { opacity: 0; }
+
+        /* --- Misc --- */
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .text-positive { color: var(--accent-secondary); }
+        .text-negative { color: var(--accent-negative); }
+        .category-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 500; line-height: 1; border: 1px solid; }
+        h1, h2, h3, h4 { color: var(--text-heading); }
+        h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; }
+        h2 { font-size: 1.875rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
+        h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; }
+        a { color: var(--link-color); text-decoration: none; }
+        a:hover { text-decoration: underline; color: var(--link-hover-color); }
+        .feature-icon { color: var(--accent-primary); }
+        /* Error message - non-fixed */
+        .error-message {
+            background-color: rgba(248, 81, 73, 0.1); color: var(--accent-negative);
+            border: 1px solid rgba(248, 81, 73, 0.3); border-radius: 0.5rem;
+            padding: 0.75rem 1rem; margin-top: 1rem; text-align: center;
+            font-size: 0.875rem; opacity: 0; transition: opacity 0.3s ease, height 0.3s ease;
+            height: 0; overflow: hidden;
+        }
+        .error-message.active { opacity: 1; height: auto; min-height: 2.5rem; }
+
+        /* --- Print Styles --- */
+        @media print {
+            body { background-color: white; color: black; font-size: 10pt; }
+            header, footer, #hero, #info, #about-app, #dashboard h2:first-child, .content-card form, .btn, .btn-danger, .btn-print { display: none !important; }
+            main, .container, .content-section, .content-card { padding: 0 !important; margin: 0 !important; border: none !important; box-shadow: none !important; background-color: white !important; }
+            h2, h3, h4 { color: black; border-bottom: 1px solid #ccc; margin-top: 1.5rem; }
+            .chart-container { height: 250px; page-break-inside: avoid; }
+            #expense-list, #recurring-list { max-height: none; }
+            .list-item { border-bottom: 1px solid #eee; }
+            .text-positive { color: green; }
+            .text-negative { color: red; }
+            .category-badge { border: 1px solid #ccc !important; background-color: #eee !important; color: black !important; }
+            a { color: blue; text-decoration: underline; }
+             canvas { display: block !important; max-width: 100%; }
+             #expense-chart-placeholder, #bills-chart-placeholder { display: none !important; }
+        }
+        .printable-section .btn-print { float: right; margin-top: -2.5rem; }
+
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
-    <div class="max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold text-center mb-8 text-slate-700">Personal Accounting Dashboard</h1>
+<body class="min-h-screen">
 
-        <div id="savings-section" class="mb-8 p-6 bg-white rounded-lg shadow-md text-center">
-            <h2 class="text-xl font-semibold mb-3 text-slate-600">Savings Target for Next Pay Period</h2>
-            <p id="savings-needed" class="text-3xl font-bold savings-highlight p-4 rounded-md inline-block">Calculating...</p>
-            <p id="pay-period-info" class="text-sm text-slate-500 mt-2"></p>
-        </div>
+    <header>
+        <nav class="container h-16 flex items-center justify-between">
+            <a href="#hero" class="flex items-center gap-2">
+                 <svg class="h-8 w-auto text-[var(--accent-primary)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"> <path fill-rule="evenodd" d="M12.577 3.69a.75.75 0 01.578.687l.002.225c.042 2.105.905 4.079 2.29 5.617l.12.134a.75.75 0 01.096.904l-.096.102c-1.384 1.536-2.247 3.51-2.287 5.614l-.002.225a.75.75 0 01-1.499.044l-.002-.22c-.041-2.104-.904-4.078-2.288-5.614l-.12-.134a.75.75 0 01-.096-.904l.096-.102c1.384-1.537 2.248-3.512 2.288-5.617l.002-.224a.75.75 0 01.921-.687zM12 1.5a.75.75 0 01.75.75v.755a8.95 8.95 0 012.964 1.693l.48-.48a.75.75 0 011.06 1.06l-.478.478a8.955 8.955 0 011.694 2.965h.754a.75.75 0 010 1.5h-.754a8.955 8.955 0 01-1.694 2.965l.478.478a.75.75 0 11-1.06 1.06l-.48-.48a8.95 8.95 0 01-2.964 1.693v.755a.75.75 0 01-1.5 0v-.755a8.95 8.95 0 01-2.964-1.693l-.48.48a.75.75 0 11-1.06-1.06l.478-.478A8.955 8.955 0 013.8 13.5H3.046a.75.75 0 010-1.5h.754a8.955 8.955 0 011.694-2.965l-.478-.478a.75.75 0 011.06-1.06l.48.48A8.95 8.95 0 0111.25 6v-.755a.75.75 0 01.75-.75z" clip-rule="evenodd" /> </svg>
+                <span class="font-semibold text-lg text-white">Momentum Finance</span>
+            </a>
+            <div class="header-nav flex items-center space-x-1 sm:space-x-2">
+                <a href="#hero">Home</a>
+                <a href="#info">Features</a>
+                <a href="#dashboard">Dashboard</a>
+                <a href="#about-app">About</a>
+            </div>
+        </nav>
+    </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <main>
+        <section id="hero" class="content-section text-center relative">
+            <div class="container relative z-10">
+                <h1 class="text-5xl md:text-6xl font-extrabold mb-4">Gain Financial Momentum</h1>
+                <p class="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">A simple, private, and effective way to track your spending, manage bills, and visualize your financial progress.</p>
+                <a href="#dashboard" class="btn btn-lg btn-primary">
+                     <svg class="btn-icon w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                    <span>Go to Dashboard</span>
+                </a>
+            </div>
+        </section>
 
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4 text-slate-600">Weekly Income</h2>
-                <form id="income-form" class="space-y-4">
-                    <div>
-                        <label for="weekly-income" class="block text-sm font-medium text-slate-700 mb-1">Enter Weekly Income Amount:</label>
-                        <input type="number" id="weekly-income" step="0.01" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        <section id="info" class="content-section container">
+             <div class="max-w-4xl mx-auto space-y-16">
+                 <div>
+                    <h2 class="text-center !border-none">Understand Your Finances, Effortlessly</h2>
+                    <p class="text-center text-lg text-slate-400 mb-12">Momentum Finance provides the essential tools you need without the complexity. Track everything in one place, visualize your habits, and stay on top of your bills.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div class="feature-item p-6 rounded-lg bg-gray-800/50 border border-gray-700/60 hover:border-gray-600 transition-colors">
+                             <svg class="feature-icon w-10 h-10 mx-auto mb-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg>
+                            <h3 class="text-lg font-semibold">Visualize Spending</h3>
+                            <p class="text-sm text-slate-400">See where your money goes each month with clear category breakdowns.</p>
+                        </div>
+                         <div class="feature-item p-6 rounded-lg bg-gray-800/50 border border-gray-700/60 hover:border-gray-600 transition-colors">
+                             <svg class="feature-icon w-10 h-10 mx-auto mb-4 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13.5H9.75m0 0l1.14-1.14M9.75 13.5L10.89 14.64" /></svg>
+                            <h3 class="text-lg font-semibold">Track Bills</h3>
+                            <p class="text-sm text-slate-400">Manage recurring payments and know your upcoming savings target.</p>
+                        </div>
+                         <div class="feature-item p-6 rounded-lg bg-gray-800/50 border border-gray-700/60 hover:border-gray-600 transition-colors">
+                             <svg class="feature-icon w-10 h-10 mx-auto mb-4 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+                            <h3 class="text-lg font-semibold">Stay Private</h3>
+                            <p class="text-sm text-slate-400">All data stays securely in your browser, never sent anywhere.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label for="payday" class="block text-sm font-medium text-slate-700 mb-1">Select Payday:</label>
-                        <select id="payday" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white">
-                            <option value="" disabled selected>-- Select Day --</option> <option value="0">Sunday</option>
-                            <option value="1">Monday</option>
-                            <option value="2">Tuesday</option>
-                            <option value="3">Wednesday</option>
-                            <option value="4">Thursday</option>
-                            <option value="5">Friday</option>
-                            <option value="6">Saturday</option>
-                        </select>
+                </div>
+
+                <div>
+                    <h2 class="text-center !border-none">What's Next?</h2>
+                     <p class="text-center text-lg text-slate-400 mb-10">We're always thinking about improvements. Future front-end explorations might include:</p>
+                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 list-inside text-slate-300 text-sm">
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-1 text-purple-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>Customizable spending categories & budget goals.</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-1 text-purple-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>Enhanced reporting with date range filtering.</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-1 text-purple-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>Ability to export your data (e.g., as CSV).</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-1 text-purple-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>More chart types and dashboard customization options.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="dashboard" class="content-section container">
+            <h2>Finance Dashboard</h2>
+            <div id="global-error" class="error-message mb-4"></div>
+
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                 <div class="content-card text-center">
+                     <div class="text-sm text-[var(--dash-text-secondary)] mb-1">Month Net</div>
+                     <div id="dashboard-summary-net" class="text-2xl font-semibold text-[var(--dash-text-heading)]">$0.00</div>
+                 </div>
+                 <div class="content-card text-center">
+                     <div class="text-sm text-[var(--dash-text-secondary)] mb-1">Month Income</div>
+                     <div id="dashboard-summary-income" class="text-2xl font-semibold text-positive">$0.00</div>
+                 </div>
+                 <div class="content-card text-center">
+                     <div class="text-sm text-[var(--dash-text-secondary)] mb-1">Month Spending</div>
+                     <div id="dashboard-summary-expenses" class="text-2xl font-semibold text-negative">$0.00</div>
+                 </div>
+             </div>
+
+            <div class="content-card mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="!mb-0">Add Transaction</h3>
+                    <div class="tab-button-group" role="group">
+                        <button type="button" id="tab-expense" class="tab-button" data-form="expense">Expense</button>
+                        <button type="button" id="tab-bill" class="tab-button" data-form="recurring">Bill</button>
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium">Set Income & Payday</button>
+                </div>
+
+                <form id="expense-form" class="transaction-form-fields space-y-3">
+                    <div><label for="expense-desc">Description:</label><input type="text" id="expense-desc" required></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div><label for="expense-category">Category:</label><select id="expense-category" required><option value="" disabled selected>Select</option><option value="Food">Food</option><option value="Transport">Transport</option><option value="Housing">Housing</option><option value="Utilities">Utilities</option><option value="Entertainment">Entertainment</option><option value="Shopping">Shopping</option><option value="Health">Health</option><option value="Personal">Personal</option><option value="Debt">Debt</option><option value="Other">Other</option></select></div>
+                        <div><label for="expense-amount">Amount:</label><input type="number" id="expense-amount" step="0.01" required></div>
+                        <div><label for="expense-date">Date:</label><input type="date" id="expense-date" required></div>
+                    </div>
+                    <div class="pt-1 flex justify-end"><button type="submit" class="btn btn-primary !py-1.5 !px-4 !text-sm">Add Expense</button></div>
                 </form>
-                <div class="mt-4 text-center">
-                     <p class="text-lg">Current Weekly Income: <strong id="display-income" class="text-indigo-700">$0.00</strong></p>
-                     <p class="text-sm text-slate-500">Payday: <strong id="display-payday">Not Set</strong></p>
+
+                <form id="recurring-form" class="transaction-form-fields space-y-3">
+                    <div><label for="recurring-desc">Description:</label><input type="text" id="recurring-desc" required></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div><label for="recurring-amount">Amount:</label><input type="number" id="recurring-amount" step="0.01" required></div>
+                        <div><label for="recurring-day">Day Due (1-31):</label><input type="number" id="recurring-day" min="1" max="31" required></div>
+                    </div>
+                    <div class="pt-1 flex justify-end"><button type="submit" class="btn btn-primary !py-1.5 !px-4 !text-sm">Add Bill</button></div>
+                </form>
+            </div>
+
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="content-card">
+                     <h3>Income Settings</h3>
+                     <form id="income-form" class="space-y-3">
+                         <div class="grid grid-cols-2 gap-3">
+                             <div><label for="weekly-income">Weekly Amount:</label><input type="number" id="weekly-income" step="0.01" required></div>
+                             <div><label for="payday">Payday:</label><select id="payday" required><option value="" disabled selected>Select</option><option value="0">Sun</option><option value="1">Mon</option><option value="2">Tue</option><option value="3">Wed</option><option value="4">Thu</option><option value="5">Fri</option><option value="6">Sat</option></select></div>
+                         </div>
+                         <div class="pt-1"><button type="submit" class="btn btn-secondary w-full !py-1.5 !text-sm">Save Income</button></div>
+                     </form>
+                      <div class="mt-3 text-center text-xs text-[var(--dash-text-secondary)]">Current: <strong id="display-income" class="text-[var(--dash-accent-primary)]">$0.00</strong> weekly, paid <strong id="display-payday" class="text-[var(--dash-accent-primary)]">N/A</strong></div>
+                 </div>
+                 <div class="content-card text-center flex flex-col justify-center">
+                     <h3>Savings Target</h3>
+                     <p id="savings-needed" class="text-3xl font-semibold text-sky-300 my-3">Calculating...</p>
+                     <p id="pay-period-info" class="text-xs text-[var(--dash-text-secondary)]">For next pay period</p>
+                 </div>
+             </div>
+
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 printable-section">
+                <div class="content-card relative">
+                    <button class="btn-print absolute top-4 right-4 print-button" title="Print Chart"> <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a8.956 8.956 0 01-2.25-1.417m2.25 1.417L6.1 17.25m2.25-1.417a8.956 8.956 0 002.25-1.417m0 0L9.5 21m-2.685-8.661A8.969 8.969 0 005.25 12c0-1.777.782-3.374 2.09-4.402m11.108 4.402A8.969 8.969 0 0018.75 12c0 1.777-.782 3.374-2.09 4.402m0-8.804c1.308 1.028 2.09 2.625 2.09 4.402s-.782 3.374-2.09 4.402m0-8.804L16.1 3m0 13.94V21m-4.5-6.06h.008v.008H11.25v-.008zM12 19.5h.008v.008H12v-.008zm-3.03-5.661A8.97 8.97 0 009.75 12c0-1.777.782-3.374 2.09-4.402m-2.09 8.804L9.5 3m0 13.94V21" /></svg> </button>
+                    <h3>Monthly Spending</h3>
+                    <div class="chart-container"> <canvas id="expenseChart"></canvas> </div>
+                    <p id="expense-chart-placeholder" class="text-center text-[var(--dash-text-secondary)] italic mt-4 text-sm">Add expenses to see breakdown.</p>
+                </div>
+                <div class="content-card relative">
+                     <button class="btn-print absolute top-4 right-4 print-button" title="Print Chart"> <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a8.956 8.956 0 01-2.25-1.417m2.25 1.417L6.1 17.25m2.25-1.417a8.956 8.956 0 002.25-1.417m0 0L9.5 21m-2.685-8.661A8.969 8.969 0 005.25 12c0-1.777.782-3.374 2.09-4.402m11.108 4.402A8.969 8.969 0 0018.75 12c0 1.777-.782 3.374-2.09 4.402m0-8.804c1.308 1.028 2.09 2.625 2.09 4.402s-.782 3.374-2.09 4.402m0-8.804L16.1 3m0 13.94V21m-4.5-6.06h.008v.008H11.25v-.008zM12 19.5h.008v.008H12v-.008zm-3.03-5.661A8.97 8.97 0 009.75 12c0-1.777.782-3.374 2.09-4.402m-2.09 8.804L9.5 3m0 13.94V21" /></svg> </button>
+                    <h3>Recurring Bills</h3>
+                    <div class="chart-container"> <canvas id="recurringBillsChart"></canvas> </div>
+                    <p id="bills-chart-placeholder" class="text-center text-[var(--dash-text-secondary)] italic mt-4 text-sm">Add bills to see amounts.</p>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4 text-slate-600">Add One-Time Expense</h2>
-                <form id="expense-form" class="space-y-4">
+            <div class="content-card printable-section relative">
+                <button class="btn-print absolute top-4 right-4 print-button" title="Print History"> <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a8.956 8.956 0 01-2.25-1.417m2.25 1.417L6.1 17.25m2.25-1.417a8.956 8.956 0 002.25-1.417m0 0L9.5 21m-2.685-8.661A8.969 8.969 0 005.25 12c0-1.777.782-3.374 2.09-4.402m11.108 4.402A8.969 8.969 0 0018.75 12c0 1.777-.782 3.374-2.09 4.402m0-8.804c1.308 1.028 2.09 2.625 2.09 4.402s-.782 3.374-2.09 4.402m0-8.804L16.1 3m0 13.94V21m-4.5-6.06h.008v.008H11.25v-.008zM12 19.5h.008v.008H12v-.008zm-3.03-5.661A8.97 8.97 0 009.75 12c0-1.777.782-3.374 2.09-4.402m-2.09 8.804L9.5 3m0 13.94V21" /></svg> </button>
+               <h3>Transaction History</h3>
+                <div class="flex flex-wrap gap-4 mb-4 pb-4 border-b border-[var(--dash-border-color)]">
                     <div>
-                        <label for="expense-desc" class="block text-sm font-medium text-slate-700 mb-1">Description:</label>
-                        <input type="text" id="expense-desc" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label for="expense-amount" class="block text-sm font-medium text-slate-700 mb-1">Amount:</label>
-                        <input type="number" id="expense-amount" step="0.01" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <label for="filter-category" class="text-xs text-[var(--dash-text-secondary)]">Filter Expenses by Category:</label>
+                        <select id="filter-category" class="!py-1 !text-sm !bg-gray-700 !border-gray-600">
+                            <option value="all">All Categories</option>
+                            </select>
                     </div>
                      <div>
-                        <label for="expense-date" class="block text-sm font-medium text-slate-700 mb-1">Date:</label>
-                        <input type="date" id="expense-date" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <label for="filter-date" class="text-xs text-[var(--dash-text-secondary)]">Filter by Date:</label>
+                        <select id="filter-date" class="!py-1 !text-sm !bg-gray-700 !border-gray-600">
+                            <option value="all">All Time</option>
+                            <option value="this-month">This Month</option>
+                            <option value="last-month">Last Month</option>
+                             </select>
                     </div>
-                    <button type="submit" class="w-full bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 font-medium">Add Expense</button>
-                </form>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4 text-slate-600">Add Recurring Charge (Bill)</h2>
-                <form id="recurring-form" class="space-y-4">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
-                        <label for="recurring-desc" class="block text-sm font-medium text-slate-700 mb-1">Description:</label>
-                        <input type="text" id="recurring-desc" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <h4 class="text-[var(--dash-text-primary)] mb-2">Recent Expenses</h4>
+                        <ul id="expense-list" class="space-y-1 max-h-96 overflow-y-auto text-sm pr-1">
+                            <li class="text-[var(--dash-text-secondary)] italic p-2">Loading...</li>
+                        </ul>
                     </div>
-                    <div>
-                        <label for="recurring-amount" class="block text-sm font-medium text-slate-700 mb-1">Amount:</label>
-                        <input type="number" id="recurring-amount" step="0.01" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                     <div>
+                        <h4 class="text-[var(--dash-text-primary)] mb-2">Recurring Bills</h4>
+                        <ul id="recurring-list" class="space-y-1 max-h-96 overflow-y-auto text-sm pr-1">
+                             <li class="text-[var(--dash-text-secondary)] italic p-2">Loading...</li>
+                        </ul>
                     </div>
-                    <div>
-                        <label for="recurring-day" class="block text-sm font-medium text-slate-700 mb-1">Day of Month Due (1-31):</label>
-                        <input type="number" id="recurring-day" min="1" max="31" required class="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <button type="submit" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 font-medium">Add Recurring Charge</button>
-                </form>
+                </div>
             </div>
+        </section>
 
-            <div class="bg-white p-6 rounded-lg shadow-md lg:col-span-1">
-                 <h2 class="text-xl font-semibold mb-4 text-slate-600">Recent Expenses</h2>
-                 <ul id="expense-list" class="space-y-2 max-h-60 overflow-y-auto text-sm">
-                     <li class="text-slate-500 italic">Loading expenses...</li>
-                 </ul>
+        <section id="about-app" class="content-section container">
+             <div class="max-w-4xl mx-auto space-y-12">
+                 <div>
+                    <h2>About Momentum Finance</h2>
+                    <div class="space-y-4 text-[var(--shell-text-secondary)] text-base leading-relaxed">
+                        <p>Momentum Finance is a client-side tool designed for simple personal finance tracking. It helps you monitor your income, categorize expenses, manage recurring bills, and visualize your financial habits, all within the privacy of your own browser.</p>
+                         <h3 class="!pt-4 text-[var(--shell-text-primary)]">Data Privacy & Storage</h3>
+                         <div class="text-sm bg-[var(--shell-bg-secondary)] border border-[rgba(0,230,161,0.3)] p-4 rounded-md text-[var(--shell-text-primary)]">
+                            <strong class="font-semibold block mb-1 text-[var(--shell-accent)]">Your Data Stays With You:</strong> All financial data entered into this tool is stored exclusively in your web browser's local storage. <strong class="underline">No data is ever sent to or stored on any external server.</strong> Your information remains private to the browser and device you are currently using. Consequently, clearing your browser data (cache, cookies, site data) will permanently delete all your saved financial entries.
+                        </div>
+                        <h3 class="!pt-4 text-[var(--shell-text-primary)]">Technology</h3>
+                        <p class="text-sm">This tool is built using standard web technologies: HTML, Tailwind CSS for styling, vanilla JavaScript for interactivity, and Chart.js for creating visualizations.</p>
+                    </div>
+                 </div>
             </div>
+        </section>
 
-            <div class="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
-                 <h2 class="text-xl font-semibold mb-4 text-slate-600">Recurring Charges (Monthly Bills)</h2>
-                 <ul id="recurring-list" class="space-y-2 max-h-60 overflow-y-auto text-sm">
-                     <li class="text-slate-500 italic">Loading recurring charges...</li>
-                 </ul>
-             </div>
+    </main>
 
+    <footer>
+        <div class="container text-center text-xs text-[var(--shell-text-secondary)]">
+            &copy; <span id="footer-year"></span> Momentum Finance. All data stored locally in your browser.
         </div>
-    </div>
+    </footer>
 
     <script>
-        console.log("Script execution started."); // Check if script runs at all
+        // --- Constants, State, Utilities, Persistence (largely same) ---
+        const LOCAL_STORAGE_KEY = 'momentumFinance_v3'; // Use new key
+        const CATEGORY_COLORS = { /* ... */ 'Food': 'rgba(234, 179, 8, 0.8)', 'Transport': 'rgba(14, 165, 233, 0.8)', 'Housing': 'rgba(139, 92, 246, 0.8)', 'Utilities': 'rgba(236, 72, 153, 0.8)', 'Entertainment': 'rgba(16, 185, 129, 0.8)', 'Shopping': 'rgba(99, 102, 241, 0.8)', 'Health': 'rgba(20, 184, 166, 0.8)', 'Personal': 'rgba(244, 63, 94, 0.8)', 'Debt': 'rgba(217, 70, 239, 0.8)', 'Other': 'rgba(100, 116, 139, 0.8)' };
+        const CATEGORY_BORDER_COLORS = { /* ... */ 'Food': 'rgba(234, 179, 8, 1)', 'Transport': 'rgba(14, 165, 233, 1)', 'Housing': 'rgba(139, 92, 246, 1)', 'Utilities': 'rgba(236, 72, 153, 1)', 'Entertainment': 'rgba(16, 185, 129, 1)', 'Shopping': 'rgba(99, 102, 241, 1)', 'Health': 'rgba(20, 184, 166, 1)', 'Personal': 'rgba(244, 63, 94, 1)', 'Debt': 'rgba(217, 70, 239, 1)', 'Other': 'rgba(100, 116, 139, 1)' };
+        const EXPENSE_CATEGORIES = Object.keys(CATEGORY_COLORS);
 
-        // --- DOM Elements ---
-        // Wrap element selection in a function to check for existence
-        function getElement(id, name) {
-            const element = document.getElementById(id);
-            if (!element) {
-                console.error(`CRITICAL ERROR: Element with ID "${id}" (${name}) not found!`);
-                // Optionally throw an error to halt execution if element is critical
-                // throw new Error(`Element not found: ${id}`);
-                return null; // Return null to allow checks later
-            }
-            console.log(`Element found: ${id}`); // Confirm element is found
-            return element;
-        }
-
-        const incomeForm = getElement('income-form', 'Income Form');
-        const weeklyIncomeInput = getElement('weekly-income', 'Weekly Income Input');
-        const paydaySelect = getElement('payday', 'Payday Select');
-        const displayIncome = getElement('display-income', 'Display Income');
-        const displayPayday = getElement('display-payday', 'Display Payday');
-
-        const expenseForm = getElement('expense-form', 'Expense Form');
-        const expenseDescInput = getElement('expense-desc', 'Expense Description Input');
-        const expenseAmountInput = getElement('expense-amount', 'Expense Amount Input');
-        const expenseDateInput = getElement('expense-date', 'Expense Date Input');
-        const expenseList = getElement('expense-list', 'Expense List UL');
-
-        const recurringForm = getElement('recurring-form', 'Recurring Charge Form');
-        const recurringDescInput = getElement('recurring-desc', 'Recurring Description Input');
-        const recurringAmountInput = getElement('recurring-amount', 'Recurring Amount Input');
-        const recurringDayInput = getElement('recurring-day', 'Recurring Day Input');
-        const recurringList = getElement('recurring-list', 'Recurring List UL');
-
-        const savingsNeededDisplay = getElement('savings-needed', 'Savings Needed Display');
-        const payPeriodInfoDisplay = getElement('pay-period-info', 'Pay Period Info Display');
-
-        // --- Data Storage ---
-        let data = {
-            weeklyIncome: null,
-            paydayOfWeek: null,
-            expenses: [],
-            recurringCharges: []
+        const elements = {
+            // Unified Transaction Form Elements
+            tabExpense: document.querySelector('#tab-expense'),
+            tabBill: document.querySelector('#tab-bill'),
+            expenseFormFields: document.querySelector('#expense-form'), // The actual form element
+            recurringFormFields: document.querySelector('#recurring-form'), // The actual form element
+            // Income Form (Separate Card)
+            incomeForm: document.querySelector('#income-form'), weeklyIncomeInput: document.querySelector('#weekly-income'), paydaySelect: document.querySelector('#payday'),
+            // Expense Form Inputs (Within combined form)
+            expenseDescInput: document.querySelector('#expense-desc'), expenseCategorySelect: document.querySelector('#expense-category'), expenseAmountInput: document.querySelector('#expense-amount'), expenseDateInput: document.querySelector('#expense-date'),
+            // Recurring Form Inputs (Within combined form)
+            recurringDescInput: document.querySelector('#recurring-desc'), recurringAmountInput: document.querySelector('#recurring-amount'), recurringDayInput: document.querySelector('#recurring-day'),
+            // Displays
+            displayIncome: document.querySelector('#display-income'), displayPayday: document.querySelector('#display-payday'), savingsNeededDisplay: document.querySelector('#savings-needed'), payPeriodInfoDisplay: document.querySelector('#pay-period-info'), globalErrorDisplay: document.querySelector('#global-error'),
+            // Lists & Filters
+            expenseList: document.querySelector('#expense-list'), recurringList: document.querySelector('#recurring-list'),
+            filterCategorySelect: document.querySelector('#filter-category'),
+            filterDateSelect: document.querySelector('#filter-date'),
+            // Charts
+            billsChartCanvas: document.querySelector('#recurringBillsChart'), billsChartPlaceholder: document.querySelector('#bills-chart-placeholder'),
+            expenseChartCanvas: document.querySelector('#expenseChart'), expenseChartPlaceholder: document.querySelector('#expense-chart-placeholder'),
+            // Summary (Dashboard View)
+            dashboardSummaryIncome: document.querySelector('#dashboard-summary-income'), dashboardSummaryExpenses: document.querySelector('#dashboard-summary-expenses'), dashboardSummaryNet: document.querySelector('#dashboard-summary-net'),
+            // Footer
+            footerYear: document.querySelector('#footer-year'),
+            // Header Nav Links
+            headerNavLinks: document.querySelectorAll('.header-nav a'),
         };
 
-        // --- Utility Functions ---
-        function formatCurrency(amount) {
-            // Check if amount is null, undefined, or not a number
-            if (amount == null || isNaN(amount)) {
-                return '$0.00';
-            }
-            return Number(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        let state = { weeklyIncome: null, paydayOfWeek: null, expenses: [], recurringCharges: [], currentFilterCategory: 'all', currentFilterDate: 'all' };
+        let billsChartInstance = null;
+        let expenseChartInstance = null;
+
+        function formatCurrency(amount) { /* ... */ if (amount == null || isNaN(amount)) return '$0.00'; return Number(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' }); }
+        function getDayName(dayIndex) { /* ... */ const d = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; const i = parseInt(dayIndex, 10); return (i >= 0 && i <= 6) ? d[i] : 'N/A'; }
+        function displayError(message) { // Updated for inline display
+            console.error("Error:", message);
+            if (elements.globalErrorDisplay) {
+                elements.globalErrorDisplay.textContent = message;
+                elements.globalErrorDisplay.classList.add('active'); // Make it visible
+                setTimeout(() => {
+                     if (elements.globalErrorDisplay) elements.globalErrorDisplay.classList.remove('active'); // Hide after delay
+                }, 5000);
+            } else { alert(message); }
+        }
+        function saveData() { /* ... */ try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state)); } catch (e) { displayError("Save failed."); } }
+        function loadData() { /* ... */ try { const d = localStorage.getItem(LOCAL_STORAGE_KEY); if (d) { const p = JSON.parse(d); state.weeklyIncome = p.weeklyIncome ?? null; state.paydayOfWeek = p.paydayOfWeek ?? null; state.expenses = (Array.isArray(p.expenses)?p.expenses:[]).map(e=>({...e, category: e.category||'Other'})); state.recurringCharges = Array.isArray(p.recurringCharges)?p.recurringCharges:[]; } } catch (e) { console.error("Load fail:", e); displayError("Load fail."); state = { weeklyIncome: null, paydayOfWeek: null, expenses: [], recurringCharges: [] }; localStorage.removeItem(LOCAL_STORAGE_KEY); } }
+
+        // --- Chart Rendering ---
+        function renderBillsChart() { /* ... (same logic) ... */
+             if (!elements.billsChartCanvas) return; const ctx = elements.billsChartCanvas.getContext('2d');
+             const charges = [...state.recurringCharges].sort((a, b) => b.amount - a.amount).slice(0, 8);
+             const labels = charges.map(c => c.desc); const data = charges.map(c => c.amount);
+             const hasData = data.length > 0;
+             if (elements.billsChartPlaceholder) elements.billsChartPlaceholder.style.display = hasData ? 'none' : 'block';
+             if (elements.billsChartCanvas) elements.billsChartCanvas.style.display = hasData ? 'block' : 'none';
+             if (billsChartInstance) billsChartInstance.destroy(); if (!hasData) return;
+             try { billsChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Bill Amount', data, backgroundColor: Object.values(CATEGORY_COLORS).slice(0, data.length).map(c => c.replace('0.8','0.7')), /* Slightly less opaque */ borderWidth: 0, borderRadius: 3 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: 'rgba(75, 85, 99, 0.2)' }, ticks: { color: 'var(--text-secondary)', font: { size: 10 }, callback: v => formatCurrency(v).replace('.00','') } }, y: { grid: { display: false }, ticks: { color: 'var(--text-secondary)', font: { size: 10 } } } }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', titleColor: 'var(--text-heading)', bodyColor: 'var(--text-primary)', borderColor: 'var(--border-color)', borderWidth: 1, padding: 8, callbacks: { label: c => `${c.label}: ${formatCurrency(c.parsed.x)}` } } } } }); } catch (e) { console.error("Bills chart err:", e); displayError("Bills chart error."); }
+        }
+        function renderExpenseChart() { /* ... (Uses filters) ... */
+            if (!elements.expenseChartCanvas) return; const ctx = elements.expenseChartCanvas.getContext('2d');
+            const filteredExpenses = getFilteredExpenses();
+            const totals = filteredExpenses.reduce((acc, e) => { acc[e.category] = (acc[e.category] || 0) + e.amount; return acc; }, {});
+            const labels = Object.keys(totals); const data = Object.values(totals); const colors = labels.map(l => CATEGORY_COLORS[l] || CATEGORY_COLORS['Other']);
+            const hasData = data.length > 0;
+            if (elements.expenseChartPlaceholder) elements.expenseChartPlaceholder.style.display = hasData ? 'none' : 'block';
+            if (elements.expenseChartCanvas) elements.expenseChartCanvas.style.display = hasData ? 'block' : 'none';
+            if (expenseChartInstance) expenseChartInstance.destroy(); if (!hasData) return;
+            try { expenseChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels, datasets: [{ label: 'Spending', data, backgroundColor: colors, borderColor: 'var(--bg-secondary)', borderWidth: 4, /* Increased border */ hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(17, 24, 39, 0.9)', titleColor: 'var(--text-heading)', bodyColor: 'var(--text-primary)', borderColor: 'var(--border-color)', borderWidth: 1, padding: 8, callbacks: { label: c => { const t = c.dataset.data.reduce((a, b) => a + b, 0); const p = t > 0 ? ((c.parsed / t) * 100).toFixed(0) + '%' : '0%'; return `${c.label}: ${formatCurrency(c.parsed)} (${p})`; } } } } } }); } catch (e) { console.error("Expense chart err:", e); displayError("Expense chart error."); }
         }
 
-
-        function getDayName(dayIndex) {
-             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-             const index = parseInt(dayIndex, 10); // Ensure it's an integer
-             return (index >= 0 && index <= 6) ? days[index] : 'Not Set';
-        }
-
-        function saveData() {
-            try {
-                localStorage.setItem('personalAccountingData', JSON.stringify(data));
-                console.log("Data saved successfully:", JSON.parse(JSON.stringify(data))); // Log a copy
-            } catch (e) {
-                console.error("Error saving data to localStorage:", e);
-                alert("Could not save data. LocalStorage might be full or disabled.");
-            }
-        }
-
-        function loadData() {
-            console.log("Attempting to load data from localStorage...");
-            const savedData = localStorage.getItem('personalAccountingData');
-            if (savedData) {
-                console.log("Raw data found:", savedData);
-                try {
-                    const parsedData = JSON.parse(savedData);
-                     // Basic validation: Check if it's an object
-                     if (typeof parsedData === 'object' && parsedData !== null) {
-                         // Assign properties carefully, ensuring arrays exist
-                         data.weeklyIncome = parsedData.weeklyIncome ?? null;
-                         data.paydayOfWeek = parsedData.paydayOfWeek ?? null;
-                         data.expenses = Array.isArray(parsedData.expenses) ? parsedData.expenses : [];
-                         data.recurringCharges = Array.isArray(parsedData.recurringCharges) ? parsedData.recurringCharges : [];
-                         console.log("Data parsed and loaded successfully:", JSON.parse(JSON.stringify(data))); // Log a copy
-                     } else {
-                         console.warn("Loaded data is not a valid object. Resetting to defaults.");
-                         resetDataStructure(); // Reset if data is corrupted
-                     }
-                } catch (e) {
-                    console.error("Error parsing data from localStorage:", e);
-                    alert("Could not load saved data, it might be corrupted. Starting fresh.");
-                    resetDataStructure(); // Reset to defaults if parsing fails
-                    saveData(); // Save the fresh structure
-                }
-            } else {
-                 console.log("No saved data found. Using default structure.");
-                 resetDataStructure(); // Ensure data has the default structure if nothing is loaded
-            }
-            // Set default date for expense input if empty
-            if (expenseDateInput && !expenseDateInput.value) {
-                expenseDateInput.valueAsDate = new Date();
-            }
-        }
-
-        // Helper to reset data structure
-        function resetDataStructure() {
-            data = {
-                weeklyIncome: null,
-                paydayOfWeek: null,
-                expenses: [],
-                recurringCharges: []
-            };
-            console.log("Data structure reset to defaults.");
-        }
-
+        // --- Summary & Savings Calculation ---
+        function renderMonthlySummary() { /* ... */ if (!elements.dashboardSummaryIncome || !elements.dashboardSummaryExpenses || !elements.dashboardSummaryNet) return; const m = new Date().getMonth(); const y = new Date().getFullYear(); const inc = (state.weeklyIncome || 0) * (52 / 12); const exp = state.expenses.filter(e => { const d = new Date(e.date); return d.getMonth() === m && d.getFullYear() === y; }).reduce((s, e) => s + e.amount, 0); const rec = state.recurringCharges.reduce((s, c) => s + c.amount, 0); const spend = exp + rec; const net = inc - spend; elements.dashboardSummaryIncome.textContent = formatCurrency(inc); elements.dashboardSummaryExpenses.textContent = formatCurrency(spend); elements.dashboardSummaryNet.textContent = formatCurrency(net); elements.dashboardSummaryNet.className = 'text-4xl font-bold text-white'; if (net > 0) elements.dashboardSummaryNet.classList.add('text-positive'); else if (net < 0) elements.dashboardSummaryNet.classList.add('text-negative'); }
+        function calculateSavingsNeeded() { /* ... */ if (state.paydayOfWeek === null || isNaN(state.paydayOfWeek) || state.recurringCharges.length === 0) { return { totalSavingsNeeded: 0, periodStart: null, periodEnd: null }; } const today = new Date(); today.setHours(0, 0, 0, 0); const currentDayOfWeek = today.getDay(); const numericPayday = state.paydayOfWeek; let daysUntilNextPayday = (numericPayday - currentDayOfWeek + 7) % 7; if (daysUntilNextPayday === 0) { daysUntilNextPayday = 7; } let nextPayday = new Date(today); nextPayday.setDate(today.getDate() + daysUntilNextPayday); nextPayday.setHours(0,0,0,0); let paydayAfterNext = new Date(nextPayday); paydayAfterNext.setDate(nextPayday.getDate() + 7); paydayAfterNext.setHours(0,0,0,0); const periodStart = nextPayday; const periodEnd = new Date(paydayAfterNext); periodEnd.setDate(periodEnd.getDate() - 1); let totalSavingsNeeded = 0; state.recurringCharges.forEach(charge => { if (!charge || isNaN(charge.amount) || isNaN(charge.dayDue)) return; let dueDate = new Date(); dueDate.setHours(0,0,0,0); const currentMonth = dueDate.getMonth(); const currentYear = dueDate.getFullYear(); let potentialDueDate = new Date(currentYear, currentMonth, charge.dayDue); if (potentialDueDate <= today) { potentialDueDate = new Date(currentYear, currentMonth + 1, charge.dayDue); } if (potentialDueDate >= periodStart && potentialDueDate <= periodEnd) { totalSavingsNeeded += charge.amount; } }); return { totalSavingsNeeded, periodStart, periodEnd }; }
+        function displaySavingsNeeded() { /* ... */ if (!elements.savingsNeededDisplay || !elements.payPeriodInfoDisplay) return; const savingsResult = calculateSavingsNeeded(); if (!savingsResult || savingsResult.totalSavingsNeeded === null) { elements.savingsNeededDisplay.textContent = 'Error'; elements.payPeriodInfoDisplay.textContent = 'Calc error.'; return; } elements.savingsNeededDisplay.textContent = formatCurrency(savingsResult.totalSavingsNeeded); elements.payPeriodInfoDisplay.classList.toggle('hidden', !(savingsResult.periodStart && savingsResult.periodEnd)); if (savingsResult.periodStart && savingsResult.periodEnd) { const s = savingsResult.periodStart.toLocaleDateString(); const e = savingsResult.periodEnd.toLocaleDateString(); if (savingsResult.totalSavingsNeeded > 0) { elements.payPeriodInfoDisplay.textContent = `For bills due ${s} - ${e}.`; } else { elements.payPeriodInfoDisplay.textContent = `No bills due ${s} - ${e}.`; } } else if (state.paydayOfWeek === null || isNaN(state.paydayOfWeek)) { elements.payPeriodInfoDisplay.textContent = "Set payday."; } else if (!state.recurringCharges || state.recurringCharges.length === 0) { elements.payPeriodInfoDisplay.textContent = "Add bills."; } else { elements.payPeriodInfoDisplay.textContent = ""; } }
 
         // --- Rendering Functions ---
-        function renderIncome() {
-            // Check if elements exist before trying to update them
-            if (displayIncome) displayIncome.textContent = formatCurrency(data.weeklyIncome);
-            if (displayPayday) displayPayday.textContent = getDayName(data.paydayOfWeek);
-            if (weeklyIncomeInput) weeklyIncomeInput.value = data.weeklyIncome ?? '';
-            if (paydaySelect) paydaySelect.value = data.paydayOfWeek ?? '';
-            console.log("Income display updated.");
-        }
+        function renderAll() { /* ... */ renderIncomeDisplay(); renderExpenses(); renderRecurringCharges(); displaySavingsNeeded(); renderBillsChart(); renderExpenseChart(); renderMonthlySummary(); populateFilterOptions(); }
+        function renderIncomeDisplay() { /* ... */ if (!elements.displayIncome || !elements.displayPayday || !elements.weeklyIncomeInput || !elements.paydaySelect) return; elements.displayIncome.textContent = formatCurrency(state.weeklyIncome); elements.displayPayday.textContent = getDayName(state.paydayOfWeek); elements.weeklyIncomeInput.value = state.weeklyIncome ?? ''; elements.paydaySelect.value = state.paydayOfWeek ?? ''; }
+        function addListItem(listElement, itemHtml) { /* ... */ const li = document.createElement('li'); li.className = 'list-item-enter'; li.innerHTML = itemHtml; listElement.appendChild(li); void li.offsetWidth; li.classList.add('list-item-enter-active'); li.addEventListener('transitionend', () => { li.classList.remove('list-item-enter', 'list-item-enter-active'); }, { once: true }); }
 
-        function renderExpenses() {
-            if (!expenseList) return; // Don't proceed if list element doesn't exist
-            console.log("Rendering expenses...");
-            expenseList.innerHTML = '';
-            if (!data.expenses || data.expenses.length === 0) {
-                expenseList.innerHTML = '<li class="text-slate-500 italic">No expenses added yet.</li>';
-                return;
-            }
-            const sortedExpenses = [...data.expenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-            sortedExpenses.forEach((expense) => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center p-2 rounded hover:bg-slate-50';
-                li.innerHTML = `
-                    <span>
-                        <span class="font-medium">${expense.desc || 'N/A'}</span> - ${formatCurrency(expense.amount)}
-                        <span class="text-xs text-slate-500 ml-1">(${expense.date ? new Date(expense.date).toLocaleDateString() : 'Invalid Date'})</span>
-                    </span>
-                    <button data-id="${expense.id}" class="delete-expense delete-button">Delete</button>
-                `;
-                // Add listener directly to the button here
-                const deleteButton = li.querySelector('.delete-expense');
-                 if (deleteButton) {
-                     deleteButton.addEventListener('click', handleDeleteExpense);
-                 } else {
-                     console.warn("Could not find delete button for expense:", expense.id);
-                 }
-                expenseList.appendChild(li);
+        // --- Filtering Logic ---
+        function getFilteredExpenses() { /* ... (same logic) ... */
+            const now = new Date(); const currentMonth = now.getMonth(); const currentYear = now.getFullYear();
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).getMonth();
+            const lastMonthYear = new Date(now.getFullYear(), now.getMonth() - 1, 1).getFullYear();
+            return state.expenses.filter(exp => {
+                const categoryMatch = state.currentFilterCategory === 'all' || exp.category === state.currentFilterCategory; if (!categoryMatch) return false;
+                if (state.currentFilterDate === 'all') return true;
+                const expenseDate = new Date(exp.date); const expenseMonth = expenseDate.getMonth(); const expenseYear = expenseDate.getFullYear();
+                if (state.currentFilterDate === 'this-month') return expenseMonth === currentMonth && expenseYear === currentYear;
+                if (state.currentFilterDate === 'last-month') return expenseMonth === lastMonth && expenseYear === lastMonthYear;
+                 return true;
             });
-            console.log("Expense list rendered.");
+        }
+        function populateFilterOptions() { /* ... (same logic) ... */
+            if (!elements.filterCategorySelect) return;
+            const currentVal = elements.filterCategorySelect.value; // Preserve selection
+            elements.filterCategorySelect.innerHTML = '<option value="all">All Categories</option>';
+            EXPENSE_CATEGORIES.forEach(cat => { const o = document.createElement('option'); o.value = cat; o.textContent = cat; elements.filterCategorySelect.appendChild(o); });
+            // Try to restore selection, default to 'all' if previous value doesn't exist
+            elements.filterCategorySelect.value = EXPENSE_CATEGORIES.includes(currentVal) ? currentVal : 'all';
+             state.currentFilterCategory = elements.filterCategorySelect.value; // Update state if changed
         }
 
-
-        function renderRecurringCharges() {
-             if (!recurringList) return; // Don't proceed if list element doesn't exist
-             console.log("Rendering recurring charges...");
-            recurringList.innerHTML = '';
-            if (!data.recurringCharges || data.recurringCharges.length === 0) {
-                recurringList.innerHTML = '<li class="text-slate-500 italic">No recurring charges added yet.</li>';
-                return;
-            }
-             const sortedCharges = [...data.recurringCharges].sort((a, b) => (a.dayDue || 0) - (b.dayDue || 0));
-            sortedCharges.forEach((charge) => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center p-2 rounded hover:bg-slate-50';
-                li.innerHTML = `
-                    <span>
-                        <span class="font-medium">${charge.desc || 'N/A'}</span> - ${formatCurrency(charge.amount)}
-                        <span class="text-xs text-slate-500 ml-1">(Due day: ${charge.dayDue || 'N/A'})</span>
-                    </span>
-                     <button data-id="${charge.id}" class="delete-recurring delete-button">Delete</button>
-                `;
-                 // Add listener directly to the button here
-                 const deleteButton = li.querySelector('.delete-recurring');
-                 if (deleteButton) {
-                     deleteButton.addEventListener('click', handleDeleteRecurring);
-                 } else {
-                      console.warn("Could not find delete button for recurring charge:", charge.id);
-                 }
-                recurringList.appendChild(li);
+        function renderExpenses() { /* ... (Uses filtered data) ... */
+            if (!elements.expenseList) return; elements.expenseList.innerHTML = '';
+            const filteredExpenses = getFilteredExpenses().sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (filteredExpenses.length === 0) { elements.expenseList.innerHTML = `<li class="text-[var(--dash-text-secondary)] italic p-2">No expenses match filters.</li>`; return; }
+            filteredExpenses.forEach(exp => {
+                const catColor = CATEGORY_COLORS[exp.category] || CATEGORY_COLORS['Other']; const catBorder = CATEGORY_BORDER_COLORS[exp.category] || CATEGORY_BORDER_COLORS['Other'];
+                const itemHtml = ` <div class="list-item flex justify-between items-center py-2.5 px-1"> <div class="flex-grow mr-2"> <span class="font-medium text-[var(--dash-text-primary)] block text-sm">${exp.desc || 'N/A'}</span> <span class="text-xs text-[var(--dash-text-secondary)] flex items-center flex-wrap gap-x-2 mt-0.5"> <span>${formatCurrency(exp.amount)}</span> <span>${exp.date ? new Date(exp.date).toLocaleDateString() : ''}</span> <span class="category-badge" style="background-color: ${catColor.replace('0.8', '0.15')}; color: ${catColor.replace('0.8', '1')}; border: 1px solid ${catBorder.replace('1', '0.3')}"> ${exp.category || 'Other'} </span> </span> </div> <button data-id="${exp.id}" data-type="expense" class="btn-danger flex-shrink-0"> <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg> </button> </div>`;
+                 addListItem(elements.expenseList, itemHtml);
             });
-            console.log("Recurring charges list rendered.");
         }
+        function renderRecurringCharges() { /* ... (No filtering needed here usually) ... */
+             if (!elements.recurringList) return; elements.recurringList.innerHTML = '';
+             if (state.recurringCharges.length === 0) { elements.recurringList.innerHTML = '<li class="text-[var(--dash-text-secondary)] italic p-2">No bills added.</li>'; return; }
+             const sorted = [...state.recurringCharges].sort((a, b) => (a.dayDue || 0) - (b.dayDue || 0));
+             sorted.forEach(charge => {
+                 const itemHtml = ` <div class="list-item flex justify-between items-center py-2.5 px-1"> <div class="flex-grow mr-2"> <span class="font-medium text-[var(--dash-text-primary)] block text-sm">${charge.desc || 'N/A'}</span> <span class="text-xs text-[var(--dash-text-secondary)]">${formatCurrency(charge.amount)} (Due day: ${charge.dayDue || 'N/A'})</span> </div> <button data-id="${charge.id}" data-type="recurring" class="btn-danger flex-shrink-0"> <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg> </button> </div>`;
+                  addListItem(elements.recurringList, itemHtml);
+             });
+        }
+
+        // --- Form Tab Switching (Corrected) ---
+        function switchTransactionForm(formType) {
+            const isExpense = formType === 'expense';
+            // Update tab buttons appearance
+            elements.tabExpense?.classList.toggle('active', isExpense);
+            elements.tabBill?.classList.toggle('active', !isExpense);
+            // Show/hide the correct form section using 'hidden' class for layout
+            elements.expenseFormFields?.classList.toggle('hidden', !isExpense);
+            elements.expenseFormFields?.classList.toggle('active', isExpense); // Use active for potential animations
+            elements.recurringFormFields?.classList.toggle('hidden', isExpense);
+            elements.recurringFormFields?.classList.toggle('active', !isExpense);
+        }
+
+         // --- Print Functionality ---
+         function handlePrintClick(event) { /* ... */ const button = event.target.closest('.print-button'); if (!button) return; window.print(); }
 
         // --- Event Handlers ---
-        function handleIncomeSubmit(event) {
-            event.preventDefault();
-            console.log("Income form submitted.");
-            // Ensure inputs exist before accessing value
-            const incomeValue = weeklyIncomeInput ? parseFloat(weeklyIncomeInput.value) : NaN;
-            const paydayValue = paydaySelect ? parseInt(paydaySelect.value, 10) : NaN;
+        function handleIncomeSubmit(event) { /* ... */ event.preventDefault(); const v = parseFloat(elements.weeklyIncomeInput.value); const p = elements.paydaySelect.value; if (isNaN(v) || v < 0) { alert("Invalid income."); return; } if (p === "" || p === null) { alert("Select payday."); return; } state.weeklyIncome = v; state.paydayOfWeek = parseInt(p, 10); saveData(); renderIncomeDisplay(); displaySavingsNeeded(); renderMonthlySummary(); alert('Income settings saved!'); }
+        function handleExpenseSubmit(event) { /* ... */ event.preventDefault(); const d = elements.expenseDescInput.value.trim(); const c = elements.expenseCategorySelect.value; const a = parseFloat(elements.expenseAmountInput.value); const dt = elements.expenseDateInput.value; if (!d || !c || isNaN(a) || a <= 0 || !dt) { alert("Fill all expense fields."); return; } const n = { id: Date.now().toString() + Math.random().toString(36).substring(2, 9), desc: d, category: c, amount: a, date: dt }; state.expenses.push(n); saveData(); renderExpenses(); renderExpenseChart(); renderMonthlySummary(); elements.expenseForm.reset(); elements.expenseDateInput.valueAsDate = new Date(); switchTransactionForm('expense'); }
+        function handleRecurringSubmit(event) { /* ... */ event.preventDefault(); const d = elements.recurringDescInput.value.trim(); const a = parseFloat(elements.recurringAmountInput.value); const dy = parseInt(elements.recurringDayInput.value, 10); if (!d || isNaN(a) || a <= 0 || isNaN(dy) || dy < 1 || dy > 31) { alert("Fill all bill fields."); return; } const n = { id: Date.now().toString() + Math.random().toString(36).substring(2, 9), desc: d, amount: a, dayDue: dy }; state.recurringCharges.push(n); saveData(); renderRecurringCharges(); displaySavingsNeeded(); renderBillsChart(); renderMonthlySummary(); elements.recurringForm.reset(); switchTransactionForm('bill'); }
+        function handleDeleteClick(event) { /* ... */ if (!event.target.closest('.btn-danger')) return; const button = event.target.closest('.btn-danger'); const id = button.dataset.id; const type = button.dataset.type; if (!id || !type) return; const li = button.closest('li'); if (li) { li.classList.add('list-item-exit', 'list-item-exit-active'); li.addEventListener('transitionend', () => { if (type === 'expense') { state.expenses = state.expenses.filter(i => i.id !== id); saveData(); renderExpenses(); renderExpenseChart(); renderMonthlySummary(); } else if (type === 'recurring') { state.recurringCharges = state.recurringCharges.filter(i => i.id !== id); saveData(); renderRecurringCharges(); displaySavingsNeeded(); renderBillsChart(); renderMonthlySummary(); } li.remove(); }, { once: true }); } else { /* Fallback */ if (type === 'expense') { state.expenses = state.expenses.filter(i => i.id !== id); saveData(); renderExpenses(); renderExpenseChart(); renderMonthlySummary(); } else if (type === 'recurring') { state.recurringCharges = state.recurringCharges.filter(i => i.id !== id); saveData(); renderRecurringCharges(); displaySavingsNeeded(); renderBillsChart(); renderMonthlySummary(); } } }
+        function handleFilterChange() { /* ... */ state.currentFilterCategory = elements.filterCategorySelect.value; state.currentFilterDate = elements.filterDateSelect.value; renderExpenses(); renderExpenseChart(); }
 
-            if (isNaN(incomeValue) || incomeValue < 0) {
-                alert("Please enter a valid positive income amount."); return;
-            }
-             // Check if paydayValue is a valid number (0-6)
-             if (isNaN(paydayValue) || paydayValue < 0 || paydayValue > 6) {
-                 alert("Please select a valid payday."); return;
-             }
+        // --- Initialization ---
+        function initializeApp() {
+            console.log('Initializing Momentum Finance Hub v3...');
+            if (!elements.incomeForm || !elements.expenseList || !elements.billsChartCanvas || !elements.expenseChartCanvas) { displayError("Core HTML elements missing."); return; }
 
-            data.weeklyIncome = incomeValue;
-            data.paydayOfWeek = paydayValue;
-            saveData();
-            renderIncome();
-            calculateAndDisplaySavings();
+            if(elements.footerYear) elements.footerYear.textContent = new Date().getFullYear();
+            elements.expenseDateInput.valueAsDate = new Date();
+
+            loadData();
+            renderAll(); // Initial render, includes populating filters
+
+            // Attach form submit listeners
+            elements.incomeForm.addEventListener('submit', handleIncomeSubmit);
+            elements.expenseFormFields.addEventListener('submit', handleExpenseSubmit); // Listen on the form itself
+            elements.recurringFormFields.addEventListener('submit', handleRecurringSubmit); // Listen on the form itself
+
+            // Attach list delete listeners
+            elements.expenseList.addEventListener('click', handleDeleteClick);
+            elements.recurringList.addEventListener('click', handleDeleteClick);
+
+             // Transaction Form Tab listeners
+             elements.tabExpense?.addEventListener('click', () => switchTransactionForm('expense'));
+             elements.tabBill?.addEventListener('click', () => switchTransactionForm('recurring'));
+
+             // Filter listeners
+             elements.filterCategorySelect?.addEventListener('change', handleFilterChange);
+             elements.filterDateSelect?.addEventListener('change', handleFilterChange);
+
+             // Print Button Listeners
+             document.querySelector('main')?.addEventListener('click', handlePrintClick);
+
+             // Initialize default tab view for transaction form
+             switchTransactionForm('expense');
+
+            console.log('Initialization complete.');
         }
 
-        function handleExpenseSubmit(event) {
-            event.preventDefault();
-            console.log("Expense form submitted.");
-            // Ensure inputs exist
-            const desc = expenseDescInput ? expenseDescInput.value.trim() : '';
-            const amount = expenseAmountInput ? parseFloat(expenseAmountInput.value) : NaN;
-            const date = expenseDateInput ? expenseDateInput.value : '';
+        // --- Start App ---
+        document.addEventListener('DOMContentLoaded', initializeApp);
 
-            if (!desc || isNaN(amount) || amount <= 0 || !date) {
-                alert("Please fill in all expense fields wi
+    </script>
+</body>
+</html>
