@@ -3,352 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEAF Archive // Helldiver Program // Galactic Threat Assessment // CLASSIFIED LEVEL 7</title>
+    <title>SEAF ARCHIVE // DOC REF: HDIVA-001 // SECURITY LEVEL: CRIMSON</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --color-background: #0a0a0f; /* Very dark blue/black */
-            --color-container-bg: #111118; /* Slightly lighter container */
-            --color-text-primary: #d1d5db; /* Light gray */
-            --color-text-secondary: #9ca3af; /* Medium gray */
-            --color-text-heading: #e5e7eb; /* Off-white */
-            --color-accent-gold: #FBBF24;
-            --color-accent-gold-dark: #D97706;
-            --color-accent-red: #EF4444;
-            --color-accent-blue: #3B82F6;
-            --color-border-primary: #374151; /* Darker border */
-            --color-border-secondary: #4b5563; /* Lighter border */
-            --font-primary: 'Inter', sans-serif;
-            --font-display: 'Orbitron', sans-serif; /* Techy display font */
+            --bg-color: #e9e9e9; /* Light gray document background */
+            --container-bg: #ffffff; /* White page */
+            --text-color: #222222; /* Dark text */
+            --text-muted: #555555;
+            --border-color: #cccccc;
+            --border-heavy: #aaaaaa;
+            --accent-red: #B91C1C; /* Muted red */
+            --accent-gold: #B45309; /* Muted gold/brown */
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+        }
+        html {
+             background-color: var(--bg-color);
         }
         body {
-            font-family: var(--font-primary);
-            background-color: var(--color-background);
-            color: var(--color-text-primary);
-            background-image: radial-gradient(var(--color-border-primary) 0.5px, transparent 0.5px),
-                              radial-gradient(var(--color-border-primary) 0.5px, var(--color-background) 0.5px);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
+            font-family: var(--font-main);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 1rem; /* Padding around the document */
         }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-display); /* Use display font for headings */
-            color: var(--color-text-heading);
-            letter-spacing: 0.05em;
+        .document-viewer {
+            max-width: 1000px; /* Fixed max width */
+            margin: 1rem auto;
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-heavy);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative; /* For watermark */
+            padding-bottom: 3rem; /* Space for footer */
+        }
+        /* Watermark */
+        .document-viewer::before {
+            content: 'SEAF CLASSIFIED';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 6rem;
+            color: rgba(180, 83, 9, 0.08); /* Very faint gold */
             font-weight: 700;
-        }
-        .text-accent-gold { color: var(--color-accent-gold); }
-        .border-accent-gold { border-color: var(--color-accent-gold); }
-        .bg-accent-gold { background-color: var(--color-accent-gold); }
-        .text-accent-red { color: var(--color-accent-red); }
-        .text-accent-blue { color: var(--color-accent-blue); }
-
-        .document-container {
-            max-width: 85rem; /* Slightly wider */
-            margin: 1rem auto; /* Reduced top/bottom margin */
-            background-color: var(--color-container-bg);
-            border: 1px solid var(--color-border-secondary);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
-            overflow: hidden; /* Contain elements */
-        }
-        header {
-            background-color: #1a1a22; /* Darker header */
-            border-bottom: 3px solid var(--color-accent-gold);
-            padding: 1rem 0;
-        }
-        nav a {
-            color: var(--color-text-secondary);
-            padding: 0.6rem 1.2rem;
-            border-radius: 0.25rem;
-            font-weight: 600; /* Bolder nav links */
-            transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+            z-index: 0;
+            pointer-events: none;
+            font-family: var(--font-main);
             text-transform: uppercase;
-            font-size: 0.85rem; /* Slightly larger nav font */
-            letter-spacing: 0.075em;
-            border: 1px solid transparent;
+            letter-spacing: 0.1em;
         }
-        nav a:hover {
-            background-color: var(--color-accent-gold);
-            color: var(--color-background);
-            transform: translateY(-1px);
-            border-color: var(--color-accent-gold-dark);
+        .doc-header, .doc-footer {
+            background-color: #f5f5f5; /* Slightly off-white */
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1; /* Above watermark */
         }
-        .section {
-            padding: 3rem 2.5rem; /* Increased padding */
-            border-bottom: 1px solid var(--color-border-primary);
-            position: relative; /* For potential pseudo-elements */
+        .doc-footer {
+            border-top: 1px solid var(--border-color);
+            border-bottom: none;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
         }
-        .section:last-child { border-bottom: none; }
-
-        .section-title {
-            font-size: 2rem; /* Larger section titles */
-            font-weight: 900;
+        .doc-header .classification {
+            color: var(--accent-red);
+            font-weight: 700;
             text-transform: uppercase;
-            margin-bottom: 2rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid var(--color-border-secondary);
-            color: var(--color-accent-gold);
-            display: flex;
-            align-items: center;
+            float: right;
         }
-        .section-title svg {
-            width: 1.5rem;
-            height: 1.5rem;
-            margin-right: 0.75rem;
-            fill: var(--color-accent-gold);
+        .doc-content {
+            padding: 2rem 2.5rem;
+            position: relative;
+            z-index: 1; /* Above watermark */
         }
+        h1, h2, h3, h4 {
+            font-family: var(--font-main);
+            font-weight: 700;
+            color: #111111; /* Near black headings */
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+            border-bottom: 1px solid var(--border-heavy);
+            padding-bottom: 0.5rem;
+        }
+        h1 { font-size: 1.6rem; }
+        h2 { font-size: 1.3rem; }
+        h3 { font-size: 1.1rem; border-bottom: none; margin-bottom: 0.5rem; }
+        h4 { font-size: 1rem; border-bottom: none; color: var(--text-muted); margin-bottom: 0.25rem; }
 
-        .propaganda-quote {
-            border-left: 4px solid var(--color-accent-gold);
-            background: linear-gradient(135deg, rgba(34, 34, 40, 0.8), rgba(26, 26, 30, 0.9));
-            padding: 1.5rem;
-            margin: 2rem 0;
-            border-radius: 0.375rem;
-            font-style: italic;
-            color: var(--color-text-primary);
-            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
-            backdrop-filter: blur(3px);
-        }
-        .propaganda-quote cite {
-            display: block;
-            margin-top: 0.75rem;
-            font-style: normal;
-            font-weight: 600;
-            color: var(--color-text-secondary);
-            text-align: right;
-            font-size: 0.9em;
+        .section-divider {
+            border-top: 2px solid var(--border-heavy);
+            margin: 2.5rem 0;
         }
         .official-list {
-            list-style-type: none;
-            padding-left: 0;
-            margin-top: 1rem;
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            padding-left: 0.5rem;
         }
-        .official-list li {
-            margin-bottom: 0.75rem;
-            padding-left: 1.75rem;
-            position: relative;
-        }
-        .official-list li::before {
-            content: '✔'; /* Checkmark or other symbol */
-            position: absolute;
-            left: 0;
-            top: 1px;
-            color: var(--color-accent-gold);
-            font-weight: bold;
-        }
-        .contract-text {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #18181f;
-            border: 1px solid var(--color-border-secondary);
-            padding: 2rem;
-            border-radius: 0.375rem;
-            white-space: pre-wrap;
-            color: #a6e22e; /* Brighter green terminal text */
-            font-size: 0.95rem;
-            line-height: 1.7;
-            max-height: 500px;
-            overflow-y: auto;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-        .threat-card {
-            background: linear-gradient(145deg, #1f1f27, #15151b);
-            border: 1px solid var(--color-border-primary);
-            border-radius: 0.5rem; /* More rounded */
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .threat-card:hover {
-            border-color: var(--color-accent-gold);
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.15);
-        }
-        .threat-icon {
-            width: 3.5rem;
-            height: 3.5rem;
-            margin-bottom: 1rem;
-            fill: var(--color-accent-gold);
-            opacity: 0.8;
-        }
-        footer {
-            background-color: #1a1a22;
-            border-top: 3px solid var(--color-accent-gold);
-            padding: 2rem 2.5rem;
+        .official-list li { margin-bottom: 0.4rem; }
+
+        .contract-box {
+            font-family: var(--font-mono);
+            background-color: #f9f9f9;
+            border: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
             font-size: 0.85rem;
-            color: var(--color-text-secondary);
+            line-height: 1.7;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #333; /* Darker mono text */
         }
-        .classified-banner {
-            background-color: var(--color-accent-red);
-            color: white;
-            text-align: center;
-            padding: 0.75rem; /* Thicker banner */
-            font-weight: 900; /* Bolder banner text */
-            font-family: var(--font-display);
-            text-transform: uppercase;
-            letter-spacing: 0.15em; /* Wider spacing */
-            position: sticky;
-            top: 0;
-            z-index: 60;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+        .emphasis-box {
+            border: 1px solid var(--accent-gold);
+            background-color: rgba(180, 83, 9, 0.05);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: #444;
         }
-        .image-placeholder {
-            border: 1px dashed var(--color-border-secondary);
-            background-color: rgba(255, 255, 255, 0.03);
+        .emphasis-box cite {
+            display: block;
+            text-align: right;
+            font-style: normal;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            color: var(--accent-gold);
+            font-size: 0.9em;
+        }
+        .threat-assessment {
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background-color: #fafafa;
+        }
+        .threat-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
+        }
+        .threat-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.5rem;
+            opacity: 0.7;
+        }
+        .disposition {
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+        .disposition.red { color: var(--accent-red); }
+        .disposition.gold { color: var(--accent-gold); }
+        .disposition.purple { color: #7E22CE; } /* Muted purple */
+
+        .image-placeholder {
+            border: 1px dashed var(--border-color);
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            color: var(--color-text-secondary);
-            font-size: 0.9rem;
-            min-height: 200px; /* Ensure placeholder has size */
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            min-height: 150px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .image-placeholder svg {
+            width: 2rem;
+            height: 2rem;
+            margin-bottom: 0.5rem;
+            fill: var(--border-color);
         }
         .redacted {
-            background-color: black;
-            color: black;
+            background-color: #222;
+            color: #222;
+            padding: 0 0.1em;
+            border-radius: 1px;
             user-select: none;
-            padding: 0 0.2em;
-            border-radius: 2px;
-            position: relative;
-            overflow: hidden;
         }
-        .redacted::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: repeating-linear-gradient(
-                -45deg,
-                black,
-                black 5px,
-                #111 5px,
-                #111 10px
-            );
-            animation: redacted-scan 1s linear infinite;
+        .stamp {
+            border: 2px solid var(--accent-red);
+            color: var(--accent-red);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.25rem 0.5rem;
+            display: inline-block;
+            margin-left: 1rem;
+            font-size: 0.9rem;
+            transform: rotate(-5deg);
         }
-        @keyframes redacted-scan {
-            0% { background-position: 0 0; }
-            100% { background-position: 15px 15px; }
-        }
+        a { color: var(--accent-gold); text-decoration: none; }
+        a:hover { text-decoration: underline; }
 
-        *:focus-visible {
-            outline: 3px solid var(--color-accent-blue);
-            outline-offset: 2px;
-            border-radius: 3px;
+        /* Basic responsiveness */
+        @media (max-width: 768px) {
+            body { padding: 0.5rem; }
+            .document-viewer { margin: 0.5rem auto; }
+            .doc-content { padding: 1.5rem; }
+            h1 { font-size: 1.4rem; }
+            h2 { font-size: 1.2rem; }
+            .doc-header, .doc-footer { font-size: 0.7rem; padding: 0.5rem 1rem; }
+            .document-viewer::before { font-size: 4rem; }
+            .threat-assessment { padding: 1rem; }
         }
-        html { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="antialiased">
+<body>
 
-    <div class="classified-banner">TOP SECRET // SEAF EYES ONLY // DISTRIBUTION PROHIBITED // CODE LIBERTY</div>
+    <div class="document-viewer">
+        <div class="doc-header">
+            <span>SEAF ARCHIVE // DOC REF: HDIVA-001-7C</span>
+            <span class="classification">CRIMSON LEVEL CLEARANCE</span>
+        </div>
 
-    <div class="document-container mt-4 mb-8">
-        <header>
-            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-20">
-                    <div class="flex-shrink-0">
-                        <a href="#" class="text-2xl font-black text-accent-gold uppercase tracking-widest flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 inline-block mr-2 fill-current" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
-                            SEAF ARCHIVES
-                        </a>
+        <div class="doc-content">
+            <h1>SUBJECT: Helldiver Program - Operational Doctrine & Threat Assessment</h1>
+            <h4>Document Revision: 7.3 | Effective Date: 2025.05.02 | Authority: SEAF High Command</h4>
+
+            <section id="super-earth">
+                <h2>1.0 Foundational Doctrine: Super Earth & Managed Democracy</h2>
+                <p>Super Earth represents the zenith of human civilization, established on the principles of Managed Democracy. This system ensures optimal governance, societal harmony, and the efficient allocation of Liberty across its territories. The Super Earth Armed Forces (SEAF) exist to protect these principles and project democratic influence throughout the galaxy.</p>
+                <p>All personnel must internalize the inherent superiority of the Super Earth model and act accordingly. Deviation from approved doctrine is not tolerated.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+                    <div class="image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                        <span>Fig 1.1: Super-Earth-Flag-Standard.png</span>
+                        <span>(Replace with Link)</span>
                     </div>
-                    <div class="hidden md:block">
-                        <div class="ml-10 flex items-baseline space-x-2">
-                            <a href="#super-earth">Super Earth</a>
-                            <a href="#helldiver-program">Helldiver Program</a>
-                            <a href="#stratagems">Stratagems</a>
-                            <a href="#threat-intel">Threat Intel</a>
-                            <a href="#ministry-of-truth">MinTruth</a>
-                            <a href="#malevelon-creek">Sector Status</a>
-                        </div>
-                    </div>
-                    <div class="md:hidden flex items-center">
-                        <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500" aria-controls="mobile-menu" aria-expanded="false">
-                            <span class="sr-only">Open menu</span>
-                            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-                            <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
+                     <div class="image-placeholder md:col-span-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                        <span>Fig 1.2: Super-Earth-Capitol-Panorama.png</span>
+                        <span>(Replace with Link)</span>
                     </div>
                 </div>
-            </nav>
-            </header>
 
-        <main>
-            <section id="super-earth" class="section scroll-mt-24">
-                <h2 class="section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 7.973 5 9.5 5c.075 0 .148.011.22.016l.007.002a7.01 7.01 0 01.312.033l.02.005c.18.024.355.057.526.096l.04.009a6.956 6.956 0 012.33 1.6l.004.003.002.002a6.975 6.975 0 011.6 2.33l.009.04c.039.17.072.346.096.526l.005.02a7.01 7.01 0 01.033.312l.002.007A6.994 6.994 0 0115 9.5c0 1.527-.73 2.988-1.973 3.668a6.012 6.012 0 01-2.706 1.912c-.73.366-1.5.62-2.32.758l-.01.002a6.973 6.973 0 01-.44.04l-.03.002a6.994 6.994 0 01-2.06 0l-.03-.002a6.973 6.973 0 01-.44-.04l-.01-.002c-.82-.138-1.59-.392-2.32-.758a6.012 6.012 0 01-2.706-1.912A6.994 6.994 0 015 9.5c0-.075.011-.148.016-.22l.002-.007a7.01 7.01 0 01.033-.312l.005-.02c.024-.18.057-.355.096-.526l.04-.009a6.956 6.956 0 011.6-2.33l.003-.004.002-.002z" clip-rule="evenodd" /></svg>
-                    Directive Alpha: Super Earth Supremacy
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div>
-                        <h3 class="text-xl font-semibold mb-4 text-accent-gold">The Foundation of Managed Democracy</h3>
-                        <p class="mb-4 leading-relaxed">Super Earth is the cradle of humanity and the sole purveyor of true Liberty via the flawless system of Managed Democracy. Our culture, technology, and military might are unparalleled, serving as the guiding light for all civilized space.</p>
-                        <p class="mb-4 leading-relaxed">All citizens share in the prosperity and security provided by Super Earth, protected by the unwavering vigilance of the Super Earth Armed Forces (SEAF). The Helldiver corps represents the tip of the spear, enforcing democratic principles across the galaxy.</p>
-                        <h4 class="text-lg font-semibold mt-6 mb-2 text-gray-300">Core Tenets (Mandatory Compliance):</h4>
-                        <ul class="official-list">
-                            <li>Unconditional Loyalty to Super Earth and its leadership.</li>
-                            <li>Active participation in Managed Democracy (voting as directed).</li>
-                            <li>Vigilance against xeno-threats and internal dissent.</li>
-                            <li>Embrace of technological superiority and Stratagem deployment.</li>
-                            <li>Upholding the Helldiver Oath as sacred duty.</li>
-                        </ul>
-                        <div class="propaganda-quote">
-                            <p>One People. One Nation. One Super Earth! Divided we fall, united we conquer the stars for Liberty!</p>
-                            <cite>– Ministry of Truth Unity Broadcast</cite>
-                        </div>
-                    </div>
-                    <div>
-                        <img src="https://placehold.co/600x400/111118/FBBF24?text=Official-Super-Earth-Flag.png" alt="Official Super Earth Flag - Replace with actual image" class="rounded border-2 border-accent-gold shadow-lg w-full h-auto object-cover mb-6" onerror="this.src='https://placehold.co/600x400/111118/cccccc?text=Flag+Load+Error'">
-                        <img src="https://placehold.co/600x350/111118/FBBF24?text=Super-Earth-Capitol-Skyline.png" alt="Super Earth Capitol City Skyline - Replace with actual image" class="rounded border border-gray-600 shadow-md w-full h-auto object-cover" onerror="this.src='https://placehold.co/600x350/111118/cccccc?text=Skyline+Load+Error'">
-                        <p class="text-xs text-center text-gray-500 mt-2">Fig 1.1: Standard of Super Earth; Fig 1.2: Unity Plaza, Super Earth Capitol</p>
-                    </div>
+                <div class="emphasis-box">
+                    "Managed Democracy is not merely a system; it is the scientifically proven optimal state for human existence. Its propagation is a moral imperative."
+                    <cite>– Ministry of Truth, Foundational Texts Vol. I</cite>
                 </div>
             </section>
 
-            <section id="helldiver-program" class="section scroll-mt-24">
-                 <h2 class="section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 011-1h.5a1.5 1.5 0 000-3H6a1 1 0 01-1-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" /></svg>
-                    Helldiver Program: Overview & Mandates
-                </h2>
-                <div class="mb-8">
-                     <h3 class="text-xl font-semibold mb-3 text-gray-300">Oath of Service (Recitation Mandatory)</h3>
-                     <p class="text-lg md:text-xl text-gray-200 font-medium leading-relaxed italic border border-gray-600 bg-gray-800/30 p-4 rounded text-center">
-                        "I pledge allegiance to the Flag of Super Earth, and to the Managed Democracy for which it stands, one superfamily, under guidance, with Liberty and Justice for All!"
-                    </p>
-                </div>
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold mb-3 text-gray-300">Enlistment Contract Summary (Form C-01 Rev. 7)</h3>
-                    <p class="mb-4 text-gray-400">Acceptance into the Helldiver program constitutes irrevocable agreement to the terms outlined in Form C-01. Key stipulations include:</p>
-                    <div class="contract-text text-sm">
-// SEAF HELLDIVER CONTRACT EXCERPT - FORM C-01 REV. 7 //
-STATUS: ACTIVE, NON-NEGOTIABLE
+            <div class="section-divider"></div>
 
-1.  TERM: Perpetual, until Cessation of Biological Function (See Article 7: Post-Mortem Obligations).
-2.  RISK ACCEPTANCE: Enlistee acknowledges and accepts probability of extreme bodily harm, psychological trauma, and/or total vaporization in service to Super Earth. Liability waived.
-3.  EQUIPMENT PROTOCOL: All issued gear, including NXL-Stim™, remains property of SEAF. Misuse or loss punishable by forfeiture of accrued Liberty Points.
-4.  FREEDOM ADJUSTMENT: Certain individual liberties superseded by operational necessity and ideological conformity requirements. Dissent classified as Treason.
-5.  BIOCHEMICAL COMPLIANCE: Mandatory administration of performance enhancers (NXL-Stim™, etc.) as required by mission parameters. Refusal is desertion.
-6.  SUCCESS METRICS: Performance evaluated based on enemy neutralization, objective completion, and adherence to Managed Democracy principles. Citizenship status contingent on satisfactory service*.
+            <section id="helldiver-program">
+                <h2>2.0 Helldiver Program</h2>
+                <h3>2.1 Oath of Service</h3>
+                <p>Upon induction, all Helldivers are required to recite and internalize the Oath of Service. This oath supersedes all prior allegiances.</p>
+                <blockquote class="border-l-4 border-gray-400 pl-4 italic my-4 text-gray-700">
+                    "I pledge allegiance to the Flag of Super Earth, and to the Managed Democracy for which it stands, one superfamily, under guidance, with Liberty and Justice for All!"
+                </blockquote>
 
-*Citizenship, promotions, and survival are privileges, not rights. Terms subject to revision by SEAF High Command. FOR SUPER EARTH!
-                    </div>
+                <h3>2.2 Enlistment Contract (Form C-01) - Key Terms</h3>
+                <p>The standard enlistment contract (Form C-01 Rev. 7) outlines the non-negotiable terms of service. Personnel are expected to be familiar with all clauses. Key excerpts below:</p>
+                <div class="contract-box">
+ARTICLE 1: DURATION - Service is perpetual until biological cessation. Post-mortem asset utilization protocols apply (Ref: Addendum G-12).
+ARTICLE 2: RISK - Acknowledgment of extreme hazard probability including, but not limited to, kinetic trauma, energy weapon effects, biological infestation, environmental hazards, friendly fire incidents, and psychological degradation. SEAF assumes no liability.
+ARTICLE 3: EQUIPMENT - All issued equipment (weaponry, armor, Stratagems, NXL-Stim™) remains SEAF property. Asset liable for loss/damage.
+ARTICLE 4: COMPLIANCE - Unquestioning obedience to SEAF command structure and Ministry of Truth directives is mandatory. Dissent = Treason.
+ARTICLE 5: BIOCHEMICALS - Mandatory use of NXL-Stim™ and other authorized enhancers as required. Refusal constitutes dereliction of duty.
                 </div>
-                 <div>
-                    <h3 class="text-xl font-semibold mb-3 text-gray-300">Standard Equipment: NXL-Stim™</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                        <div class="md:col-span-2">
-                            <p class="mb-4 leading-relaxed">The NXL-Stim™ injector delivers rapid battlefield revitalization, crucial for mission success. Its patented formula ensures peak Helldiver performance. Usage is mandatory when wounded or fatigued.</p>
-                            <p class="text-gray-400 text-sm">Rumors of adverse effects are enemy propaganda. Trust Super Earth science. Trust your Stims.</p>
-                        </div>
-                        <div>
-                            <img src="https://placehold.co/300x300/111118/FBBF24?text=NXL-Stim-Injector.png" alt="NXL-Stim Injector - Replace with actual image" class="rounded border border-gray-600 shadow-md w-full max-w-xs mx-auto h-auto object-contain" onerror="this.src='https://placehold.co/300x300/111118/cccccc?text=Stim+Load+Error'">
-                        </div>
-                    </div>
+
+                <h3>2.3 Standard Equipment: NXL-Stim™</h3>
+                <p>The NXL-Stim™ provides essential battlefield medical support and performance enhancement. Its use is critical for maintaining operational tempo. Side effects are statistically insignificant and often psychosomatic or attributable to inadequate patriotism.</p>
+                 <div class="image-placeholder w-1/3 mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                    <span>Fig 2.1: NXL-Stim-Injector-Schematic.png</span>
+                    <span>(Replace with Link)</span>
                 </div>
             </section>
 
-            <section id="stratagems" class="section scroll-mt-24">
-                 <h2 class="section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="
+            <div class="section-divider"></div>
+
+            <section id="stratagems">
+                <h2>3.0 Stratagem Deployment Protocols</h2>
+                <p>Stratagems are force multipliers delivered via orbital support from Super Destroyers. They provide critical offensive, defensive, and logistical capabilities. Mastery of Stratagem codes and timely deployment is a core Helldiver competency.</p>
+                <h4 class="font-semibold">Standard Categories:</h4>
+                <ul class="official-list">
+                    <li>Orbital Offensive (Barrages, Precision Strikes)</li>
+                    <li>Eagle Support (Airstrikes, Rearm)</li>
+                    <li>Defensive Emplacements (Sentries, Minefields)</li>
+                    <li>Support Weapons & Backpacks</li>
+                    <li>Supply & Reinforcement</li>
+                </ul>
+                 <div class="grid grid-cols-2 gap-4 my-4">
+                     <div class="image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                        <span>Fig 3.1: Stratagem-Terminal-Display.png</span>
+                        <span>(Replace with Link)</span>
+                    </div>
+                     <div class="image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                        <span>Fig 3.2: Eagle-Airstrike-Execution.png</span>
+                        <span>(Replace with Link)</span>
+                    </div>
+                 </div>
+                 <div class="emphasis-box">
+                    "The correct Stratagem, applied decisively, is the difference between glorious victory and becoming alien chow. Know your codes."
+                    <cite>– Helldiver Field Manual, Chapter 4</cite>
+                </div>
+            </section>
+
+            <div class="section-divider"></div>
+
+            <section id="threat-intel">
+                 <h2>4.0 Galactic Threat Assessment <span class="stamp">CRIMSON LEVEL</span></h2>
+                 <p class="text-muted">Summary of primary hostile entities encountered by SEAF Helldiver units. This assessment is subject to continuous revision.</p>
+
+                 <div class="threat-assessment">
+                    <h3 class="threat-title">
+                        <svg class="threat-icon fill-red-700" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v2h-2v-2zm0 4h2v6h-2v-6zM7 11h2v2H7v-2zm8 0h2v2h-2v-2z"/></svg>
+                        4.1 THREAT: TERMINIDS
+                    </h3>
+                    <p>Insectoid xenoforms characterized by rapid reproduction and swarm tactics. Primary drive appears to be consumption and propagation. Significant bio-diversity observed across numerous worlds.</p>
+                    <h4>Known Variants Include:</h4>
+                    <ul class="official-list text-sm">
+                        <li>Hunters / Stalkers (Stealth/Ambush)</li>
+                        <li>Warriors / Chargers (Armored Assault)</li>
+                        <li>Bile Spewers / Titans (Heavy / Ranged / Area Denial)</li>
+                    </ul>
+                    <div class="image-placeholder my-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                        <span>Fig 4.1: Terminid-Charger-Anatomy.png</span>
+                        <span>(Replace with Link)</span>
+                    </div>
+                    <p class="disposition red">Disposition: Extermination Protocol Active. Containment Ineffective.</p>
+                 </div>
+
+                 <div class="threat-assessment">
+                    <h3 class="threat-title">
+                         <svg class="threat-icon fill-blue-700" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6h-2V4c0-1.1-.9-2-2-2h-6c-1.1 0-2 .9-2 2v2H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-9-2h4v2h-4V4zm7 14H7V8h10v10zm-3-5h-4v-2h4v2z"/></svg>
+                        4.2 THREAT: AUTOMATONS
+                    </h3>
+                    <p>Networked collective of cyborg and robotic units adhering to anti-democratic principles. Employ ranged energy/ballistic weapons and heavily armored chassis. Utilize fortified positions and air deployment.</p>
+                     <h4>Known Variants Include:</h4>
+                    <ul class="official-list text-sm">
+                        <li>Troopers / Devastators (Infantry / Heavy Weapons)</li>
+                        <li>Scout Striders / Hulks (Armored Walkers)</li>
+                        <li>Tanks / Fabricator Bases (Heavy Armor / Production)</li>
+                    </ul>
+                     <div class="image-placeholder my-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                        <span>Fig 4.2: Automaton-Devastator-Profile.png</span>
+                        <span>(Replace with Link)</span>
+                    </div>
+                    <p class="disposition gold">Disposition: Dismantle Collective. Prioritize Command Units & Fabricators.</p>
+                 </div>
+
+                 <div class="threat-assessment">
+                    <h3 class="threat-title">
+                        <svg class="threat-icon fill-purple-700" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v2h-2V7zm0 4h2v6h-2v-6zm-4 1h2v2H7v-2zm8 0h2v2h-2v-2z"/></svg>
+                        4.3 THREAT: THE ILLUMINATE <span class="text-sm ml-2 text-gray-500">[HISTORICAL - MONITORING ACTIVE]</span>
+                    </h3>
+                    <p>Highly advanced aquatic/psionic species. Officially designated eradicated post-First Galactic War. Possessed sophisticated energy shielding, teleportation, and mind-control capabilities.</p>
+                    <h4>Historical Units Included:</h4>
+                    <ul class="official-list text-sm">
+                        <li>Observers / Adepts (Scouting / Psionic)</li>
+                        <li>Council Members / Illusionists (Command / Cloaking)</li>
+                        <li>Tripods / Obelisks (Heavy Weapon Platforms)</li>
+                    </ul>
+                     <div class="image-placeholder my-2">
+                        <svg xmlns="http:/
