@@ -3,379 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEAF ARCHIVE // DOC REF: HDIVA-001 // SECURITY LEVEL: CRIMSON</title>
+    <title>Helldivers 2 // Galactic Archives</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #e9e9e9; /* Light gray document background */
-            --container-bg: #ffffff; /* White page */
-            --text-color: #222222; /* Dark text */
-            --text-muted: #555555;
-            --border-color: #cccccc;
-            --border-heavy: #aaaaaa;
-            --accent-red: #B91C1C; /* Muted red */
-            --accent-gold: #B45309; /* Muted gold/brown */
-            --font-main: 'Inter', sans-serif;
-            --font-mono: 'Roboto Mono', monospace;
-        }
-        html {
-             background-color: var(--bg-color);
-        }
         body {
-            font-family: var(--font-main);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 1rem; /* Padding around the document */
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #e0e0e0;
+            overflow-x: hidden;
         }
-        .document-viewer {
-            max-width: 1000px; /* Fixed max width */
-            margin: 1rem auto;
-            background-color: var(--container-bg);
-            border: 1px solid var(--border-heavy);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            position: relative; /* For watermark */
-            padding-bottom: 3rem; /* Space for footer */
+
+        .text-gradient-yellow {
+            background: linear-gradient(to right, #FDE047, #FBBF24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
         }
-        /* Watermark */
-        .document-viewer::before {
-            content: 'SEAF CLASSIFIED';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 6rem;
-            color: rgba(180, 83, 9, 0.08); /* Very faint gold */
-            font-weight: 700;
-            z-index: 0;
-            pointer-events: none;
-            font-family: var(--font-main);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+
+        .content-section {
+            padding: 8rem 1.5rem;
+            max-width: 1300px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .doc-header, .doc-footer {
-            background-color: #f5f5f5; /* Slightly off-white */
-            padding: 0.75rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            position: relative;
-            z-index: 1; /* Above watermark */
+
+        @media (min-width: 768px) {
+            .content-section {
+                padding: 10rem 3rem;
+            }
         }
-        .doc-footer {
-            border-top: 1px solid var(--border-color);
-            border-bottom: none;
-            position: absolute;
-            bottom: 0;
+
+        .sharp {
+            border-radius: 0 !important;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
             left: 0;
             right: 0;
+            bottom: 0;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.4;
+            z-index: -1;
         }
-        .doc-header .classification {
-            color: var(--accent-red);
-            font-weight: 700;
-            text-transform: uppercase;
-            float: right;
-        }
-        .doc-content {
-            padding: 2rem 2.5rem;
-            position: relative;
-            z-index: 1; /* Above watermark */
-        }
-        h1, h2, h3, h4 {
-            font-family: var(--font-main);
-            font-weight: 700;
-            color: #111111; /* Near black headings */
-            margin-bottom: 1rem;
-            margin-top: 1.5rem;
-            border-bottom: 1px solid var(--border-heavy);
-            padding-bottom: 0.5rem;
-        }
-        h1 { font-size: 1.6rem; }
-        h2 { font-size: 1.3rem; }
-        h3 { font-size: 1.1rem; border-bottom: none; margin-bottom: 0.5rem; }
-        h4 { font-size: 1rem; border-bottom: none; color: var(--text-muted); margin-bottom: 0.25rem; }
 
-        .section-divider {
-            border-top: 2px solid var(--border-heavy);
-            margin: 2.5rem 0;
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .official-list {
-            list-style-type: disc;
-            margin-left: 1.5rem;
-            margin-top: 0.5rem;
-            padding-left: 0.5rem;
-        }
-        .official-list li { margin-bottom: 0.4rem; }
 
-        .contract-box {
-            font-family: var(--font-mono);
-            background-color: #f9f9f9;
-            border: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
-            font-size: 0.85rem;
-            line-height: 1.7;
-            margin-top: 1rem;
-            white-space: pre-wrap;
-            max-height: 400px;
-            overflow-y: auto;
-            color: #333; /* Darker mono text */
+        html {
+            scroll-behavior: smooth;
         }
-        .emphasis-box {
-            border: 1px solid var(--accent-gold);
-            background-color: rgba(180, 83, 9, 0.05);
-            padding: 1rem;
-            margin: 1.5rem 0;
-            font-style: italic;
-            color: #444;
+
+        *:focus-visible {
+            outline: 2px solid #FBBF24;
+            outline-offset: 2px;
+            border-radius: 2px;
         }
-        .emphasis-box cite {
-            display: block;
-            text-align: right;
-            font-style: normal;
-            font-weight: 600;
-            margin-top: 0.5rem;
-            color: var(--accent-gold);
-            font-size: 0.9em;
-        }
-        .threat-assessment {
-            border: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
-            padding: 1.5rem;
-            background-color: #fafafa;
-        }
-        .threat-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
+
+        .img-container {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
-            align-items: center;
-        }
-        .threat-icon {
-            width: 1.5rem;
-            height: 1.5rem;
-            margin-right: 0.5rem;
-            opacity: 0.7;
-        }
-        .disposition {
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-top: 0.5rem;
-        }
-        .disposition.red { color: var(--accent-red); }
-        .disposition.gold { color: var(--accent-gold); }
-        .disposition.purple { color: #7E22CE; } /* Muted purple */
-
-        .image-placeholder {
-            border: 1px dashed var(--border-color);
-            background-color: #f0f0f0;
-            display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            min-height: 150px;
+            overflow: hidden;
+        }
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+         .img-container.logo img {
+            object-fit: contain;
             padding: 1rem;
-            margin: 1rem 0;
+            max-height: 80%;
+            max-width: 80%;
         }
-        .image-placeholder svg {
-            width: 2rem;
-            height: 2rem;
-            margin-bottom: 0.5rem;
-            fill: var(--border-color);
+        .img-container span {
+             color: #a0a0a0;
+             font-size: 0.9rem;
+             text-align: center;
+             padding: 1rem;
         }
-        .redacted {
-            background-color: #222;
-            color: #222;
-            padding: 0 0.1em;
-            border-radius: 1px;
-            user-select: none;
-        }
-        .stamp {
-            border: 2px solid var(--accent-red);
-            color: var(--accent-red);
-            font-family: var(--font-mono);
+
+        .enlist-button {
+            display: inline-block;
+            background: linear-gradient(to right, #FDE047, #FBBF24);
+            color: #111827;
+            padding: 0.75rem 2rem;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 0.25rem 0.5rem;
-            display: inline-block;
-            margin-left: 1rem;
-            font-size: 0.9rem;
-            transform: rotate(-5deg);
+            letter-spacing: 0.05em;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
         }
-        a { color: var(--accent-gold); text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        .enlist-button:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+        }
 
-        /* Basic responsiveness */
-        @media (max-width: 768px) {
-            body { padding: 0.5rem; }
-            .document-viewer { margin: 0.5rem auto; }
-            .doc-content { padding: 1.5rem; }
-            h1 { font-size: 1.4rem; }
-            h2 { font-size: 1.2rem; }
-            .doc-header, .doc-footer { font-size: 0.7rem; padding: 0.5rem 1rem; }
-            .document-viewer::before { font-size: 4rem; }
-            .threat-assessment { padding: 1rem; }
-        }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <div class="document-viewer">
-        <div class="doc-header">
-            <span>SEAF ARCHIVE // DOC REF: HDIVA-001-7C</span>
-            <span class="classification">CRIMSON LEVEL CLEARANCE</span>
+    <header class="sticky top-0 z-50 w-full">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-xl font-bold text-gradient-yellow tracking-wider">HELLDIVERS // ARCHIVES</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#super-earth" class="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Super Earth</a>
+                    <a href="#stims" class="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Stims</a>
+                    <a href="#ministry" class="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Ministry</a>
+                    <a href="#threats" class="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Threats</a>
+                    <a href="#creek" class="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">Sector Log</a>
+                </div>
+                 <div class="md:hidden">
+                     <button type="button" class="inline-flex items-center justify-center p-2 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-yellow-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 12h16" /></svg>
+                     </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="relative h-screen flex items-center justify-center text-center overflow-hidden sharp">
+            <div class="absolute inset-0 z-0 sharp">
+                 <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/0c3e9ce2-d203-4d7b-ae87-18a8368d8545/dgy8s4z-eae9a1b0-0500-4f1a-a38d-de76fae24535.png/v1/fill/w_1208,h_661/helldivers_2_by_iggyrender_dgy8s4z-pre.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9ODc2IiwicGF0aCI6IlwvZlwvMGMzZTljZTItZDIwMy00ZDdiLWFlODctMThhODM2OGQ4NTQ1XC9kZ3k4czR6LWVhZTlhMWIwLTA1MDAtNGYxYS1hMzhkLWRlNzZmYWUyNDUzNS5wbmciLCJ3aWR0aCI6Ijw9MTYwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.WAySSPhIThRtqRy4aUzEyos_06kNwsMD8knCHxfvyYo" alt="Helldivers Cinematic Pose Background" class="w-full h-full object-cover sharp opacity-40"/>
+                 <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/70 to-black"></div>
+            </div>
+
+            <div class="relative z-10 px-4">
+                <img src="https://avatars.akamai.steamstatic.com/2c9c8d90917d85e8502cb668393a25a4bd402a51_full.jpg" alt="Helldivers Skull Icon" class="h-32 w-32 md:h-48 md:w-48 mx-auto mb-8 sharp drop-shadow-lg" />
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter mb-4 drop-shadow-md">
+                    <span class="text-gradient-yellow">Managed</span> Democracy
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto drop-shadow">
+                    Accessing SEAF Archives. Explore the foundations of Liberty, the tools of war, and the threats that challenge Super Earth's mandate.
+                </p>
+                <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+                    <svg class="w-6 h-6 text-gray-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                </div>
+            </div>
+        </section>
+
+        <section id="enlist" class="content-section bg-gradient-to-b from-black via-gray-900/80 to-black sharp text-center">
+             <h2 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight text-gradient-yellow">Answer the Call!</h2>
+             <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Super Earth needs YOU! Join the Helldivers, the elite peacekeepers defending humanity against the alien scourge. Secure your place among heroes and fight for Liberty!
+             </p>
+             <a href="#purchase-link" class="enlist-button sharp">
+                Enlist Now / Secure Access
+             </a>
+             <p class="text-xs text-gray-500 mt-4">Service Guarantees Citizenship* (*Terms and Conditions Apply)</p>
+        </section>
+
+        <section id="super-earth" class="content-section sharp">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div class="order-2 md:order-1">
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">Super Earth</h2>
+                    <p class="text-gray-300 mb-4 leading-relaxed text-lg">
+                        The heart of humanity and the undisputed bastion of Managed Democracy. Super Earth provides prosperity, security, and purpose under the guidance of its benevolent leadership and the protection of the SEAF.
+                    </p>
+                    <p class="text-gray-300 leading-relaxed text-lg">
+                        Its gleaming ecumenopoleis stand as monuments to human achievement, powered by unwavering patriotism and the resources liberated across the galaxy.
+                    </p>
+                </div>
+                <div class="order-1 md:order-2 img-container aspect-video sharp">
+                    <img src="https://static1.thegamerimages.com/wordpress/wp-content/uploads/2024/03/super-earth-from-space-with-the-sun-poking-out-over-the-horizon-of-the-planet.jpg" alt="Super Earth from space" class="sharp" onerror="this.style.display='none'; this.parentElement.innerHTML = '<span>Super Earth from space (Image Load Error)</span>';">
+                </div>
+            </div>
+        </section>
+
+        <section id="stims" class="content-section bg-black sharp">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                 <div class="img-container aspect-square sharp">
+                     <img src="https://i.pinimg.com/736x/46/ad/7c/46ad7c2f5a15b8b1676eed2350c65701.jpg" alt="Helldiver giving thumbs up" class="sharp" onerror="this.style.display='none'; this.parentElement.innerHTML = '<span>Helldiver Thumbs Up (Image Load Error)</span>';">
+                 </div>
+                <div>
+                    <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">NXL-Stim™</h2>
+                    <p class="text-gray-300 mb-4 leading-relaxed text-lg">
+                        Standard issue performance enhancement and rapid medical aid. The NXL-Stim™ ensures Helldivers remain combat-effective under extreme duress, instantly restoring vitality and mending injuries.
+                    </p>
+                    <p class="text-gray-300 leading-relaxed text-lg">
+                        Mandatory equipment for all deployed personnel. Reports of adverse effects are classified as <span class="text-yellow-400 font-medium">dissident misinformation</span> by the Ministry of Truth. Use liberally for Liberty.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ministry" class="content-section sharp">
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="img-container logo w-48 h-24 mx-auto mb-8 sharp">
+                     <img src="https://thisreallyisnta.questionable.link/769bZYJCV.png" alt="Ministry of Truth Symbol" class="sharp" onerror="this.style.display='none'; this.parentElement.innerHTML = '<span>Ministry of Truth Symbol (Image Load Error)</span>';">
+                </div>
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">Ministry of Truth</h2>
+                <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                    The sole purveyor of verified facts and approved narratives within Super Earth territory. The Ministry safeguards citizens from harmful disinformation and ensures unwavering ideological alignment.
+                </p>
+                <p class="text-lg text-gray-500 italic">
+                    "Truth isn't found, it's distributed. Trust the Ministry."
+                </p>
+            </div>
+        </section>
+
+        <section id="threats" class="content-section bg-black sharp">
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-16 tracking-tight text-center">Galactic Threats</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="border border-white/10 p-8 sharp transition-transform duration-300 hover:scale-105 hover:border-yellow-400/50 bg-black/30">
+                    <div class="img-container logo aspect-square mb-6 sharp">
+                         <img src="https://helldivers.wiki.gg/images/b/ba/Terminid_icon.png" alt="Terminid Faction Logo" class="sharp" onerror="this.style.display='none'; this.parentElement.innerHTML = '<span>Terminid Logo (Image Load Error)</span>';">
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-3 text-red-500">Terminids</h3>
+                    <p class="text-md text-gray-300 leading-relaxed">
+                        Insectoid swarm intelligence driven by consumption and propagation. Utilize overwhelming numbers and biological weaponry. Primary Objective: Extermination.
+                    </p>
+                </div>
+                <div class="border border-white/10 p-8 sharp transition-transform duration-300 hover:scale-105 hover:border-yellow-400/50 bg-black/30">
+                     <div class="img-container logo aspect-square mb-6 sharp">
+                         <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/bb575bae-aaba-44c8-95b1-8a540a27e194/dgw9wyt-3d02f250-b650-40e0-9c25-7c7f779867d3.png/v1/fill/w_894,h_894,q_70,strp/helldivers_2__automatons_logo__n_flag__by_nesckter_dgw9wyt-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTUwMCIsInBhdGgiOiJcL2ZcL2JiNTc1YmFlLWFhYmEtNDRjOC05NWIxLThhNTQwYTI3ZTE5NFwvZGd3OXd5dC0zZDAyZjI1MC1iNjUwLTQwZTAtOWMyNS03YzdmNzc5ODY3ZDMucG5nIiwid2lkdGgiOiI8PTE1MDAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.V3VQPtQiUxXToC1HqoqfRBVzUP2Du5SziRuGxnP7_MY" alt="Automaton Faction Logo" class="sharp" onerror="this.style.display='none'; this.parentElement.innerHTML = '<span>Automaton Logo (Image Load Error)</span>';">
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-3 text-blue-500">Automatons</h3>
+                    <p class="text-md text-gray-300 leading-relaxed">
+                        Cyborg collective adhering to anti-democratic ideals. Employ advanced ranged weaponry, armored units, and fortified positions. Primary Objective: Dismantlement.
+                    </p>
+                </div>
+                <div class="border border-white/10 p-8 sharp transition-transform duration-300 hover:scale-105 hover:border-yellow-400/50 bg-black/30">
+                    <div class="img-container logo aspect-square mb-6 sharp">
+                         <img src="https://placehold.co/600x600/000000/A855F7?text=Illuminate+Threat+(Replace).png" alt="Illuminate Placeholder" class="sharp" onerror="this.style.display='none'; this.parentElement.innerHTML = '<span>Illuminate Threat (Replace).png</span>';">
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-3 text-purple-500">The Illuminate</h3>
+                    <p class="text-md text-gray-300 leading-relaxed">
+                        Highly advanced psionic species (Status: <span class="font-medium text-yellow-400">Presumed Eradicated</span>). Possessed shielding, teleportation, and energy weapons. Primary Objective: Monitor & Report.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="creek" class="content-section sharp">
+            <div class="text-center max-w-4xl mx-auto">
+                 <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">Sector Log: <span class="text-red-500">Malevelon Creek</span></h2>
+                 <p class="text-xl text-gray-300 mb-10 leading-relaxed">
+                    Operational status remains <span class="font-semibold text-green-400">Nominal</span>. SEAF forces continue to valiantly spread Managed Democracy against Automaton insurgents. Reports of significant setbacks are <span class="font-semibold text-red-500">TREASONOUS</span>.
+                 </p>
+                 <div class="img-container aspect-video sharp border-red-600/50 border-2">
+                      <img src="https://cdn.mos.cms.futurecdn.net/zmjjrwAMyxwTzhqoYWdqnk.jpg" alt="Malevelon Creek Landscape" class="sharp opacity-80" onerror="this.style.display='none'; this.parentElement.innerHTML = '<span>Malevelon Creek Landscape (Image Load Error)</span>';">
+                 </div>
+                 <p class="text-md text-gray-500 mt-6 italic">
+                    "Remember the Creek - For Liberty!" - Official SEAF Slogan
+                 </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="py-10 border-t border-white/10 mt-20 sharp">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>Super Earth Ministry of Truth. Information accurate as of last broadcast cycle.</p>
+            <p>Unauthorized access is a violation of Managed Democracy. Service Guarantees Citizenship.</p>
+            <p class="mt-3">Fan-created concept inspired by Helldivers 2. Not affiliated with Arrowhead Game Studios or Sony.</p>
         </div>
+    </footer>
 
-        <div class="doc-content">
-            <h1>SUBJECT: Helldiver Program - Operational Doctrine & Threat Assessment</h1>
-            <h4>Document Revision: 7.3 | Effective Date: 2025.05.02 | Authority: SEAF High Command</h4>
+    <script>
+        console.log("SEAF Archives Initialized - For Liberty!");
+    </script>
 
-            <section id="super-earth">
-                <h2>1.0 Foundational Doctrine: Super Earth & Managed Democracy</h2>
-                <p>Super Earth represents the zenith of human civilization, established on the principles of Managed Democracy. This system ensures optimal governance, societal harmony, and the efficient allocation of Liberty across its territories. The Super Earth Armed Forces (SEAF) exist to protect these principles and project democratic influence throughout the galaxy.</p>
-                <p>All personnel must internalize the inherent superiority of the Super Earth model and act accordingly. Deviation from approved doctrine is not tolerated.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
-                    <div class="image-placeholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                        <span>Fig 1.1: Super-Earth-Flag-Standard.png</span>
-                        <span>(Replace with Link)</span>
-                    </div>
-                     <div class="image-placeholder md:col-span-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                        <span>Fig 1.2: Super-Earth-Capitol-Panorama.png</span>
-                        <span>(Replace with Link)</span>
-                    </div>
-                </div>
-
-                <div class="emphasis-box">
-                    "Managed Democracy is not merely a system; it is the scientifically proven optimal state for human existence. Its propagation is a moral imperative."
-                    <cite>– Ministry of Truth, Foundational Texts Vol. I</cite>
-                </div>
-            </section>
-
-            <div class="section-divider"></div>
-
-            <section id="helldiver-program">
-                <h2>2.0 Helldiver Program</h2>
-                <h3>2.1 Oath of Service</h3>
-                <p>Upon induction, all Helldivers are required to recite and internalize the Oath of Service. This oath supersedes all prior allegiances.</p>
-                <blockquote class="border-l-4 border-gray-400 pl-4 italic my-4 text-gray-700">
-                    "I pledge allegiance to the Flag of Super Earth, and to the Managed Democracy for which it stands, one superfamily, under guidance, with Liberty and Justice for All!"
-                </blockquote>
-
-                <h3>2.2 Enlistment Contract (Form C-01) - Key Terms</h3>
-                <p>The standard enlistment contract (Form C-01 Rev. 7) outlines the non-negotiable terms of service. Personnel are expected to be familiar with all clauses. Key excerpts below:</p>
-                <div class="contract-box">
-ARTICLE 1: DURATION - Service is perpetual until biological cessation. Post-mortem asset utilization protocols apply (Ref: Addendum G-12).
-ARTICLE 2: RISK - Acknowledgment of extreme hazard probability including, but not limited to, kinetic trauma, energy weapon effects, biological infestation, environmental hazards, friendly fire incidents, and psychological degradation. SEAF assumes no liability.
-ARTICLE 3: EQUIPMENT - All issued equipment (weaponry, armor, Stratagems, NXL-Stim™) remains SEAF property. Asset liable for loss/damage.
-ARTICLE 4: COMPLIANCE - Unquestioning obedience to SEAF command structure and Ministry of Truth directives is mandatory. Dissent = Treason.
-ARTICLE 5: BIOCHEMICALS - Mandatory use of NXL-Stim™ and other authorized enhancers as required. Refusal constitutes dereliction of duty.
-                </div>
-
-                <h3>2.3 Standard Equipment: NXL-Stim™</h3>
-                <p>The NXL-Stim™ provides essential battlefield medical support and performance enhancement. Its use is critical for maintaining operational tempo. Side effects are statistically insignificant and often psychosomatic or attributable to inadequate patriotism.</p>
-                 <div class="image-placeholder w-1/3 mx-auto">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                    <span>Fig 2.1: NXL-Stim-Injector-Schematic.png</span>
-                    <span>(Replace with Link)</span>
-                </div>
-            </section>
-
-            <div class="section-divider"></div>
-
-            <section id="stratagems">
-                <h2>3.0 Stratagem Deployment Protocols</h2>
-                <p>Stratagems are force multipliers delivered via orbital support from Super Destroyers. They provide critical offensive, defensive, and logistical capabilities. Mastery of Stratagem codes and timely deployment is a core Helldiver competency.</p>
-                <h4 class="font-semibold">Standard Categories:</h4>
-                <ul class="official-list">
-                    <li>Orbital Offensive (Barrages, Precision Strikes)</li>
-                    <li>Eagle Support (Airstrikes, Rearm)</li>
-                    <li>Defensive Emplacements (Sentries, Minefields)</li>
-                    <li>Support Weapons & Backpacks</li>
-                    <li>Supply & Reinforcement</li>
-                </ul>
-                 <div class="grid grid-cols-2 gap-4 my-4">
-                     <div class="image-placeholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                        <span>Fig 3.1: Stratagem-Terminal-Display.png</span>
-                        <span>(Replace with Link)</span>
-                    </div>
-                     <div class="image-placeholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                        <span>Fig 3.2: Eagle-Airstrike-Execution.png</span>
-                        <span>(Replace with Link)</span>
-                    </div>
-                 </div>
-                 <div class="emphasis-box">
-                    "The correct Stratagem, applied decisively, is the difference between glorious victory and becoming alien chow. Know your codes."
-                    <cite>– Helldiver Field Manual, Chapter 4</cite>
-                </div>
-            </section>
-
-            <div class="section-divider"></div>
-
-            <section id="threat-intel">
-                 <h2>4.0 Galactic Threat Assessment <span class="stamp">CRIMSON LEVEL</span></h2>
-                 <p class="text-muted">Summary of primary hostile entities encountered by SEAF Helldiver units. This assessment is subject to continuous revision.</p>
-
-                 <div class="threat-assessment">
-                    <h3 class="threat-title">
-                        <svg class="threat-icon fill-red-700" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-12h2v2h-2v-2zm0 4h2v6h-2v-6zM7 11h2v2H7v-2zm8 0h2v2h-2v-2z"/></svg>
-                        4.1 THREAT: TERMINIDS
-                    </h3>
-                    <p>Insectoid xenoforms characterized by rapid reproduction and swarm tactics. Primary drive appears to be consumption and propagation. Significant bio-diversity observed across numerous worlds.</p>
-                    <h4>Known Variants Include:</h4>
-                    <ul class="official-list text-sm">
-                        <li>Hunters / Stalkers (Stealth/Ambush)</li>
-                        <li>Warriors / Chargers (Armored Assault)</li>
-                        <li>Bile Spewers / Titans (Heavy / Ranged / Area Denial)</li>
-                    </ul>
-                    <div class="image-placeholder my-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                        <span>Fig 4.1: Terminid-Charger-Anatomy.png</span>
-                        <span>(Replace with Link)</span>
-                    </div>
-                    <p class="disposition red">Disposition: Extermination Protocol Active. Containment Ineffective.</p>
-                 </div>
-
-                 <div class="threat-assessment">
-                    <h3 class="threat-title">
-                         <svg class="threat-icon fill-blue-700" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6h-2V4c0-1.1-.9-2-2-2h-6c-1.1 0-2 .9-2 2v2H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-9-2h4v2h-4V4zm7 14H7V8h10v10zm-3-5h-4v-2h4v2z"/></svg>
-                        4.2 THREAT: AUTOMATONS
-                    </h3>
-                    <p>Networked collective of cyborg and robotic units adhering to anti-democratic principles. Employ ranged energy/ballistic weapons and heavily armored chassis. Utilize fortified positions and air deployment.</p>
-                     <h4>Known Variants Include:</h4>
-                    <ul class="official-list text-sm">
-                        <li>Troopers / Devastators (Infantry / Heavy Weapons)</li>
-                        <li>Scout Striders / Hulks (Armored Walkers)</li>
-                        <li>Tanks / Fabricator Bases (Heavy Armor / Production)</li>
-                    </ul>
-                     <div class="image-placeholder my-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4V5h12v10zM9 9a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
-                        <span>Fig 4.2: Automaton-Devastator-Profile.png</span>
-                        <span>(Replace with Link)</span>
-                    </div>
-                    <p class="disposition gold">Disposition: Dismantle Collective. Prioritize Command Units & Fabricators.</p>
-                 </div>
-
-                 <div class="threat-assessment">
-                    <h3 class="threat-title">
-                        <svg class="threat-icon fill-purple-700" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 7h2v2h-2V7zm0 4h2v6h-2v-6zm-4 1h2v2H7v-2zm8 0h2v2h-2v-2z"/></svg>
-                        4.3 THREAT: THE ILLUMINATE <span class="text-sm ml-2 text-gray-500">[HISTORICAL - MONITORING ACTIVE]</span>
-                    </h3>
-                    <p>Highly advanced aquatic/psionic species. Officially designated eradicated post-First Galactic War. Possessed sophisticated energy shielding, teleportation, and mind-control capabilities.</p>
-                    <h4>Historical Units Included:</h4>
-                    <ul class="official-list text-sm">
-                        <li>Observers / Adepts (Scouting / Psionic)</li>
-                        <li>Council Members / Illusionists (Command / Cloaking)</li>
-                        <li>Tripods / Obelisks (Heavy Weapon Platforms)</li>
-                    </ul>
-                     <div class="image-placeholder my-2">
-                        <svg xmlns="http:/
+</body>
+</html>
