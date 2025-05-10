@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Hub - Your Personal Finance Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,8 +13,8 @@
             --bg-primary: #000000;
             --bg-secondary: #1c1c1e;
             --bg-tertiary: #2c2c2e;
-            --bg-hero: #0d0d0d; /* Darker hero */
-            --bg-modal: rgba(20, 20, 22, 0.9); 
+            --bg-hero: #0a0a0a; /* Even darker hero for more depth */
+            --bg-modal: rgba(20, 20, 22, 0.92); 
             --text-primary: #ffffff;
             --text-secondary: #8e8e93;
             --text-tertiary: #636366;
@@ -30,11 +28,15 @@
             --accent-teal: #64d2ff; 
             --accent-orange: #ff9500; 
             --accent-pink: #ff2d55;
+            --accent-cyan: #5ac8fa; /* New accent for subscriptions or net worth */
+
 
             --accent-bill-icon: var(--accent-red);
             --accent-paycheck-icon: var(--accent-green);
             --accent-birthday-icon: var(--accent-purple);
             --accent-holiday-icon: var(--accent-orange);
+            --accent-subscription-icon: var(--accent-cyan);
+
 
             --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
@@ -46,36 +48,41 @@
             color: var(--text-primary);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            overflow-x: hidden; /* Prevent horizontal scroll from animations */
+            overflow-x: hidden; 
         }
 
         /* Animation Classes */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-        .animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+        .animate-fadeInUp { animation: fadeInUp 0.7s ease-out forwards; }
+        .animate-scaleUp { animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
         .animate-delay-100 { animation-delay: 0.1s; }
         .animate-delay-200 { animation-delay: 0.2s; }
         .animate-delay-300 { animation-delay: 0.3s; }
         .animate-delay-500 { animation-delay: 0.5s; }
+        .animate-delay-700 { animation-delay: 0.7s; }
 
 
         .apple-card {
-            background-color: var(--bg-secondary); border-radius: 1.25rem; /* Slightly more rounding */
+            background-color: var(--bg-secondary); border-radius: 1.25rem; 
             padding: 1.5rem; border: 1px solid var(--border-color);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2); /* Softer, more diffused shadow */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25); 
             opacity: 0; /* For entry animation */
         }
 
         .apple-input {
             background-color: var(--bg-tertiary); border: 1px solid var(--border-color); 
-            color: var(--text-primary); border-radius: 0.625rem; /* Consistent rounding */
+            color: var(--text-primary); border-radius: 0.625rem; 
             padding: 0.75rem 1rem; font-size: 1rem; width: 100%;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .apple-input:focus {
             outline: none; border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3.5px rgba(10, 132, 255, 0.35); /* Slightly larger focus ring */
+            box-shadow: 0 0 0 3.5px rgba(10, 132, 255, 0.35); 
         }
         .apple-input::placeholder { color: var(--text-tertiary); }
         select.apple-input {
@@ -89,55 +96,61 @@
 
         .apple-button {
             display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-            border-radius: 0.75rem; /* Consistent rounding */
-            transition: background-color 0.2s ease, transform 0.15s ease, filter 0.2s ease; /* Smoother transform */
+            border-radius: 0.75rem; 
+            transition: background-color 0.2s ease, transform 0.15s ease, filter 0.2s ease, box-shadow 0.2s ease;
             font-weight: 600; padding: 0.75rem 1.5rem;
             border: none; cursor: pointer; font-size: 1rem; text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .apple-button-primary { background-color: var(--accent-primary); color: var(--text-primary); }
-        .apple-button-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .apple-button-primary:active { transform: scale(0.96); filter: brightness(0.85); }
+        .apple-button-primary:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(10, 132, 255, 0.2); }
+        .apple-button-primary:active { transform: scale(0.96) translateY(0); filter: brightness(0.85); box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
         .apple-button-secondary { background-color: var(--bg-tertiary); color: var(--accent-primary); }
-        .apple-button-secondary:hover { filter: brightness(1.15); transform: translateY(-1px); }
-        .apple-button-secondary:active { transform: scale(0.96); filter: brightness(0.9); }
+        .apple-button-secondary:hover { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .apple-button-secondary:active { transform: scale(0.96) translateY(0); filter: brightness(0.9); box-shadow: 0 1px 2px rgba(0,0,0,0.1);}
 
         /* Hero Section Styles */
         #heroSection {
             background-color: var(--bg-hero);
-            background-image: linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
-            background-size: 25px 25px; /* Subtle grid */
-            min-height: 100vh; /* Full viewport height */
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(10, 132, 255, 0.05) 0%, transparent 50%), /* Subtle blue glow */
+                radial-gradient(circle at 75% 75%, rgba(48, 209, 88, 0.04) 0%, transparent 50%), /* Subtle green glow */
+                linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            min-height: 100vh; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; padding: 2rem 1rem;
-            position: relative; /* For streak counter positioning */
+            position: relative; 
         }
-        .hero-title { font-size: 3.5rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; margin-bottom: 1.5rem; }
-        @media (min-width: 768px) { .hero-title { font-size: 5.5rem; } } /* Larger on desktop */
-        .hero-subtitle { font-size: 1.35rem; color: var(--text-secondary); max-width: 700px; margin: 0 auto 2.5rem auto; line-height: 1.7; }
-        .hero-button { padding: 1rem 2.5rem; font-size: 1.125rem; }
+        .hero-title { font-size: 3.8rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.025em;}
+        @media (min-width: 768px) { .hero-title { font-size: 6rem; } } 
+        .hero-subtitle { font-size: 1.4rem; color: var(--text-secondary); max-width: 750px; margin: 0 auto 2.5rem auto; line-height: 1.7; }
+        .hero-button { padding: 1.1rem 2.75rem; font-size: 1.125rem; }
         #visitStreakCounter {
-            position: absolute; top: 1.5rem; right: 1.5rem;
-            background-color: rgba(255,255,255,0.1); backdrop-filter: blur(5px);
-            padding: 0.5rem 1rem; border-radius: 0.75rem;
-            font-size: 0.875rem; font-weight: 500; color: var(--text-primary);
-            display: flex; align-items: center; gap: 0.5rem;
-            opacity: 0; /* For animation */
+            position: absolute; top: 2rem; right: 2rem;
+            background-color: rgba(44, 44, 46, 0.7); backdrop-filter: blur(8px);
+            padding: 0.6rem 1.2rem; border-radius: 0.875rem;
+            font-size: 0.9rem; font-weight: 500; color: var(--text-primary);
+            display: flex; align-items: center; gap: 0.6rem;
+            opacity: 0; border: 1px solid rgba(255,255,255,0.1);
         }
         #visitStreakCounter.visible { opacity: 1; transition: opacity 0.5s ease-in-out; }
-        #visitStreakCounter svg { width: 1.25rem; height: 1.25rem; color: var(--accent-orange); }
+        #visitStreakCounter svg { width: 1.35rem; height: 1.35rem; color: var(--accent-orange); }
 
 
         /* Calendar Styles */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; } /* Slightly more gap */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; } 
         .calendar-header-cell, .calendar-day-cell { text-align: center; padding: 0.5rem 0.25rem; font-size: 0.875rem; }
         .calendar-header-cell { color: var(--text-secondary); font-weight: 500; }
         .calendar-day-cell {
             background-color: var(--bg-tertiary); border-radius: 0.625rem; min-height: 100px;
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            padding: 0.5rem; cursor: pointer; transition: background-color 0.2s, transform 0.2s; position: relative;
+            padding: 0.5rem; cursor: pointer; transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s; position: relative;
+            border: 1px solid transparent; /* For hover/active states */
         }
-        .calendar-day-cell:hover { background-color: #3a3a3c; transform: translateY(-2px); }
-        .calendar-day-cell.today { background-color: var(--accent-primary); color: var(--text-primary); font-weight: 700; }
+        .calendar-day-cell:hover { background-color: #3a3a3c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .calendar-day-cell.today { background-color: var(--accent-primary); color: var(--text-primary); font-weight: 700; border-color: var(--accent-primary); }
         .calendar-day-cell.today .day-number { color: var(--text-primary) !important; }
         .calendar-day-cell.other-month { color: var(--text-tertiary); opacity: 0.4; pointer-events: none; }
         .calendar-day-cell.other-month .day-number { color: var(--text-tertiary) !important; }
@@ -151,10 +164,12 @@
         .holiday-name-display { color: var(--accent-holiday-icon); }
         .birthday-name-display { color: var(--accent-birthday-icon); }
 
-        .calendar-day-cell.holiday-cell { border: 1px solid var(--accent-holiday-icon); }
-        .calendar-day-cell.birthday-cell { border: 1px solid var(--accent-birthday-icon); }
-        .calendar-day-cell.holiday-cell.today { border-color: var(--accent-holiday-icon); }
-        .calendar-day-cell.birthday-cell.today { border-color: var(--accent-birthday-icon); }
+        .calendar-day-cell.holiday-cell { border-color: var(--accent-holiday-icon); }
+        .calendar-day-cell.birthday-cell { border-color: var(--accent-birthday-icon); }
+        /* Today overrides other borders unless specified */
+        .calendar-day-cell.holiday-cell.today { border-color: var(--accent-primary); /* Or keep holiday border: var(--accent-holiday-icon) */ }
+        .calendar-day-cell.birthday-cell.today { border-color: var(--accent-primary); /* Or keep birthday border: var(--accent-birthday-icon) */ }
+
 
         .item-indicator-container {
             display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end;
@@ -166,54 +181,55 @@
         #fabAddTransaction {
             position: fixed; bottom: 2rem; right: 2rem;
             background-color: var(--accent-primary); color: white;
-            width: 3.5rem; height: 3.5rem; border-radius: 50%;
+            width: 3.75rem; height: 3.75rem; border-radius: 50%; /* Slightly larger */
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 20px rgba(10, 132, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(10, 132, 255, 0.45);
             cursor: pointer; z-index: 30;
-            transition: transform 0.2s ease-out, background-color 0.2s ease;
-            opacity: 0; transform: scale(0.5); /* Initial state for animation */
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease, box-shadow 0.2s ease;
+            opacity: 0; transform: scale(0.5) translateY(20px); 
         }
-        #fabAddTransaction.visible { opacity: 1; transform: scale(1); }
-        #fabAddTransaction:hover { background-color: #0077ee; transform: scale(1.05); }
+        #fabAddTransaction.visible { opacity: 1; transform: scale(1) translateY(0); }
+        #fabAddTransaction:hover { background-color: #0077ee; transform: scale(1.08); box-shadow: 0 10px 30px rgba(10, 132, 255, 0.55); }
         #fabAddTransaction svg { width: 1.75rem; height: 1.75rem; }
 
 
         /* Modal Styles (General & Day Details) */
         .modal-backdrop {
-            position: fixed; inset: 0; background-color: rgba(0,0,0,0.75); 
+            position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); 
             display: flex; align-items: center; justify-content: center; z-index: 50;
             opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
         }
         .modal-backdrop.active { opacity: 1; visibility: visible; }
         .modal-content {
-            background-color: var(--bg-modal); backdrop-filter: blur(12px) saturate(180%); 
-            padding: 1.5rem; border-radius: 1.25rem; width: 90%; max-width: 500px;
-            max-height: 90vh; overflow-y: auto; transform: scale(0.95) translateY(10px);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; /* Springy open */
+            background-color: var(--bg-modal); backdrop-filter: blur(16px) saturate(180%); 
+            padding: 1.75rem; border-radius: 1.5rem; width: 90%; max-width: 520px; /* Slightly wider */
+            max-height: 90vh; overflow-y: auto; transform: scale(0.9) translateY(15px);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease; 
              border: 1px solid var(--border-light);
+             box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
         .modal-backdrop.active .modal-content { transform: scale(1) translateY(0); opacity: 1; }
 
         #dayDetailsModalContent .day-details-item {
-            display: flex; align-items: center; padding: 0.6rem 0;
-            border-bottom: 1px solid var(--border-color); font-size: 0.875rem;
+            display: flex; align-items: center; padding: 0.75rem 0.25rem; /* More padding */
+            border-bottom: 1px solid var(--border-color); font-size: 0.9rem; /* Slightly larger font */
         }
         #dayDetailsModalContent .day-details-item:last-child { border-bottom: none; }
-        #dayDetailsModalContent .day-details-item-icon { margin-right: 0.75rem; flex-shrink: 0; width: 1.25rem; height: 1.25rem;}
-        #dayDetailsModalContent .day-details-item-desc { flex-grow: 1; }
-        #dayDetailsModalContent .day-details-item-amount { font-weight: 500; }
+        #dayDetailsModalContent .day-details-item-icon { margin-right: 0.875rem; flex-shrink: 0; width: 1.35rem; height: 1.35rem;}
+        #dayDetailsModalContent .day-details-item-desc { flex-grow: 1; color: var(--text-primary); }
+        #dayDetailsModalContent .day-details-item-amount { font-weight: 500; color: var(--text-secondary); }
         #dayDetailsModalContent .day-details-actions { margin-top: 1.5rem; display: flex; justify-content: flex-end;}
         .day-details-add-btn {
-            position: absolute; bottom: 1rem; right: 1rem;
+            position: absolute; bottom: 1.25rem; right: 1.25rem;
             background-color: var(--accent-primary); color: white;
-            width: 3rem; height: 3rem; border-radius: 50%;
+            width: 3.25rem; height: 3.25rem; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.2s ease;
         }
-        .day-details-add-btn:hover { transform: scale(1.1); }
-        .day-details-add-btn svg { width: 1.5rem; height: 1.5rem; }
-        .day-details-item-clickable { cursor: pointer; transition: background-color 0.15s ease; }
+        .day-details-add-btn:hover { transform: scale(1.1); background-color: #0077ee; }
+        .day-details-add-btn svg { width: 1.6rem; height: 1.6rem; }
+        .day-details-item-clickable { cursor: pointer; transition: background-color 0.15s ease; border-radius: 0.5rem; margin: 0 -0.25rem; } /* Add rounding and negative margin for hover */
         .day-details-item-clickable:hover { background-color: rgba(255,255,255,0.05); }
 
         ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -229,22 +245,30 @@
         }
         .category-badge-list svg { width: 12px; height: 12px; }
 
-        .summary-card, .insight-card { 
-            background-color: var(--bg-secondary); padding: 1rem; border-radius: 0.75rem;
+        .summary-card, .insight-card, .new-feature-card { /* Shared style for consistency */
+            background-color: var(--bg-secondary); padding: 1.25rem; border-radius: 1rem; /* Consistent rounding */
         }
-        .summary-card-title, .insight-card-title { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
+        .card-title { /* Generic card title */
+            font-size: 1.125rem; /* Slightly larger */
+            font-weight: 600; 
+            color: var(--text-primary); 
+            margin-bottom: 0.75rem; 
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .summary-card-title { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.25rem; border-bottom: none; padding-bottom: 0;}
         .summary-card-value { font-size: 1.75rem; font-weight: 600; }
-        .insight-card-content { font-size: 0.95rem; color: var(--text-primary); margin-top: 0.5rem; }
+        .insight-card-content, .new-feature-card-content { font-size: 0.95rem; color: var(--text-primary); margin-top: 0.5rem; }
         .text-positive { color: var(--accent-green); }
         .text-negative { color: var(--accent-red); }
 
-        .transaction-list-item {
+        .transaction-list-item, .sidebar-list-item { /* Generic list item for sidebar */
             display: flex; justify-content: space-between; align-items: center;
             padding: 0.75rem 0.25rem; border-bottom: 1px solid var(--border-color);
             transition: background-color 0.15s ease;
         }
-        .transaction-list-item:last-child { border-bottom: none; }
-        .transaction-list-item:hover { background-color: var(--bg-tertiary); }
+        .sidebar-list-item:last-child { border-bottom: none; }
+        .sidebar-list-item:hover { background-color: var(--bg-tertiary); }
         .transaction-delete-button { background: none; border: none; color: var(--accent-red); padding: 0.25rem; cursor: pointer; opacity: 0.7; }
         .transaction-delete-button:hover { opacity: 1; }
         .transaction-delete-button svg { width: 1.1rem; height: 1.1rem; }
@@ -255,6 +279,17 @@
         .savings-goal-progress-bar-bg { background-color: var(--bg-tertiary); border-radius: 0.25rem; height: 8px; overflow: hidden; }
         .savings-goal-progress-bar-fg { background-color: var(--accent-orange); height: 100%; border-radius: 0.25rem; transition: width 0.3s ease; }
         .add-to-goal-btn { font-size: 0.75rem !important; padding: 0.25rem 0.5rem !important; }
+
+        /* New Feature Card Specifics */
+        .list-item-sm { font-size: 0.875rem; padding: 0.4rem 0; border-bottom: 1px dashed var(--border-color); }
+        .list-item-sm:last-child { border-bottom: none; }
+        .list-item-sm .item-name { color: var(--text-primary); }
+        .list-item-sm .item-value { color: var(--text-secondary); }
+        .list-item-sm .item-renewal { color: var(--accent-orange); font-size: 0.75rem; }
+
+        .net-worth-section h4 { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 0.25rem; }
+        #netWorthDisplay { font-size: 1.5rem; font-weight: 700; margin-top: 0.75rem; text-align: center; }
+
 
         .literacy-section details { margin-bottom: 1rem; }
         .literacy-section summary {
@@ -281,8 +316,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <section id="heroSection" class="opacity-0 animate-fadeIn">
-        <div id="visitStreakCounter" class="opacity-0">
+    <section id="heroSection" class="opacity-0"> <div id="visitStreakCounter" class="opacity-0">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.39-3.423 3.356c-.82.804-.293 2.185.837 2.185h6.957a.75.75 0 0 1 .75.75v6.957c0 1.13.913 2.043 2.043 2.043h.009c1.13 0 2.043-.913 2.043-2.043v-6.957a.75.75 0 0 1 .75-.75h6.957c1.13 0 1.657-1.38.837-2.185l-3.423-3.356-4.753-.39-1.83-4.401Z" clip-rule="evenodd" /></svg>
             <span id="streakCountText">0 Day Streak</span>
         </div>
@@ -334,8 +368,8 @@
                 </div>
                 
                 <div class="apple-card animate-fadeInUp animate-delay-200">
-                    <h3 class="text-lg font-semibold mb-3">Income</h3>
-                    <form id="income-form" class="space-y-3">
+                    <h3 class="card-title">Income</h3>
+                    <form id="income-form" class="space-y-3 mt-3">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label for="weekly-income" class="text-sm text-[var(--text-secondary)] mb-1 block">Weekly Amount</label>
@@ -360,18 +394,47 @@
 
                 <div class="apple-card animate-fadeInUp animate-delay-300">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-lg font-semibold">Recent Expenses</h3>
+                        <h3 class="card-title !border-none !p-0 !m-0">Recent Expenses</h3>
                         <select id="filter-category-sidebar" class="apple-input !text-xs !py-1 !w-auto"></select>
                     </div>
                     <ul id="expense-list-sidebar" class="space-y-1 max-h-60 overflow-y-auto text-sm"></ul>
                 </div>
                 <div class="apple-card animate-fadeInUp animate-delay-300" id="recurring-bills-sidebar-card">
-                    <h3 class="text-lg font-semibold mb-3">Upcoming Bills</h3>
-                    <ul id="recurring-list-sidebar" class="space-y-1 max-h-60 overflow-y-auto text-sm"></ul>
+                    <h3 class="card-title">Upcoming Bills</h3>
+                    <ul id="recurring-list-sidebar" class="space-y-1 max-h-60 overflow-y-auto text-sm mt-3"></ul>
                 </div>
+
+                <div class="apple-card new-feature-card animate-fadeInUp animate-delay-500" id="subscription-tracker-card">
+                    <h3 class="card-title">Subscription Tracker</h3>
+                    <form id="add-subscription-form" class="space-y-2 mb-4 mt-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="subscription-name" class="apple-input !text-sm" placeholder="Service Name (e.g., Netflix)" required>
+                            <input type="number" id="subscription-amount" class="apple-input !text-sm" placeholder="Amount ($)" step="0.01" required>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                             <input type="date" id="subscription-renewal-date" class="apple-input !text-sm" required title="Next Renewal Date">
+                             <select id="subscription-category" class="apple-input !text-sm" required>
+                                <option value="" disabled selected>Category</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Software">Software</option>
+                                <option value="Productivity">Productivity</option>
+                                <option value="News">News</option>
+                                <option value="Other">Other</option>
+                             </select>
+                        </div>
+                        <button type="submit" class="apple-button apple-button-secondary w-full !text-sm !py-1.5">Add Subscription</button>
+                    </form>
+                    <ul id="subscription-list" class="space-y-1 max-h-60 overflow-y-auto text-sm">
+                        <li class="text-center text-xs text-[var(--text-secondary)]">No subscriptions tracked yet.</li>
+                        </ul>
+                    <div id="total-monthly-subscriptions" class="text-right text-sm font-semibold mt-3 pt-2 border-t border-[var(--border-color)]">
+                        Total Monthly: $0.00
+                    </div>
+                </div>
+
                 <div class="apple-card animate-fadeInUp animate-delay-500" id="savings-goals-card">
-                    <h3 class="text-lg font-semibold mb-3">Savings Goals</h3>
-                    <form id="add-goal-form" class="grid grid-cols-3 gap-2 mb-4 items-end">
+                    <h3 class="card-title">Savings Goals</h3>
+                    <form id="add-goal-form" class="grid grid-cols-3 gap-2 mb-4 mt-3 items-end">
                         <div class="col-span-2">
                             <label for="goal-name" class="text-xs text-[var(--text-secondary)] mb-1 block">Goal Name</label>
                             <input type="text" id="goal-name" class="apple-input !text-sm !py-1.5" placeholder="e.g., Vacation">
@@ -386,16 +449,70 @@
                         <li class="text-center text-xs text-[var(--text-secondary)]">No savings goals yet.</li>
                     </ul>
                 </div>
+
+                <div class="apple-card new-feature-card animate-fadeInUp animate-delay-500" id="net-worth-card">
+                    <h3 class="card-title">Net Worth Tracker</h3>
+                    <div class="grid grid-cols-2 gap-4 mt-3">
+                        <div>
+                            <h4 class="text-sm font-medium text-green-400 mb-1">Assets</h4>
+                            <form id="add-asset-form" class="space-y-2 mb-2">
+                                <input type="text" id="asset-name" class="apple-input !text-xs" placeholder="Asset Name (e.g., Savings Acc)">
+                                <input type="number" id="asset-value" class="apple-input !text-xs" placeholder="Value ($)">
+                                <button type="submit" class="apple-button apple-button-secondary w-full !text-xs !py-1">Add Asset</button>
+                            </form>
+                            <ul id="asset-list" class="text-xs space-y-1 max-h-28 overflow-y-auto"></ul>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-red-400 mb-1">Liabilities</h4>
+                            <form id="add-liability-form" class="space-y-2 mb-2">
+                                <input type="text" id="liability-name" class="apple-input !text-xs" placeholder="Liability (e.g., Loan)">
+                                <input type="number" id="liability-value" class="apple-input !text-xs" placeholder="Amount Owed ($)">
+                                <button type="submit" class="apple-button apple-button-secondary w-full !text-xs !py-1">Add Liability</button>
+                            </form>
+                            <ul id="liability-list" class="text-xs space-y-1 max-h-28 overflow-y-auto"></ul>
+                        </div>
+                    </div>
+                    <div id="netWorthDisplay" class="text-xl font-bold mt-4 pt-3 border-t border-[var(--border-color)] text-center">
+                        Net Worth: $0.00
+                    </div>
+                </div>
+                
+                <div class="apple-card new-feature-card animate-fadeInUp animate-delay-500" id="debt-planner-card">
+                    <h3 class="card-title">Debt Paydown Planner</h3>
+                     <form id="add-debt-form" class="space-y-2 mb-3 mt-3">
+                        <input type="text" id="debt-name" class="apple-input !text-sm" placeholder="Debt Name (e.g., Credit Card)" required>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="debt-balance" class="apple-input !text-sm" placeholder="Balance ($)" step="0.01" required>
+                            <input type="number" id="debt-apr" class="apple-input !text-sm" placeholder="APR (%)" step="0.01" required>
+                            <input type="number" id="debt-min-payment" class="apple-input !text-sm" placeholder="Min. Pay ($)" step="0.01" required>
+                        </div>
+                        <button type="submit" class="apple-button apple-button-secondary w-full !text-sm !py-1.5">Add Debt to Plan</button>
+                    </form>
+                    <ul id="debt-list-planner" class="space-y-1 text-sm max-h-40 overflow-y-auto mb-3">
+                        <li class="text-center text-xs text-[var(--text-secondary)]">No debts added to planner.</li>
+                    </ul>
+                    <div id="debt-plan-output" class="text-xs text-[var(--text-secondary)]">
+                        Select a strategy and available extra payment to see plan.
+                    </div>
+                </div>
+
+
                 <div class="insight-card apple-card animate-fadeInUp animate-delay-500" id="financial-insights-card">
-                    <h3 class="insight-card-title text-lg font-semibold">Financial Insights</h3>
+                    <h3 class="card-title !border-none !p-0 !m-0 mb-2">Financial Insights</h3>
                     <div id="insight-content" class="insight-card-content text-sm space-y-2">
                         <p class="text-[var(--text-secondary)]">Insights will appear here once you have more data.</p>
                     </div>
                 </div>
+                 <div class="apple-card new-feature-card animate-fadeInUp animate-delay-500" id="budget-tips-card">
+                    <h3 class="card-title">Budget Tips</h3>
+                    <ul id="budget-tips-list" class="space-y-2 text-sm mt-3">
+                        <li class="text-[var(--text-secondary)]">Smart tips based on your spending will appear here.</li>
+                        </ul>
+                </div>
             </aside>
         </div>
 
-        <section id="financialLiteracySection" class="apple-card mt-8 literacy-section animate-fadeInUp animate-delay-500">
+        <section id="financialLiteracySection" class="apple-card mt-8 literacy-section animate-fadeInUp animate-delay-700">
             <h2 class="text-2xl font-semibold mb-6 text-center">Boost Your Financial Knowledge</h2>
             <details>
                 <summary>The Importance of Budgeting</summary>
@@ -521,485 +638,5 @@
         </div>
     </div>
 
-    <script>
-    // --- Constants, State, Utilities, Persistence ---
-    const LOCAL_STORAGE_KEY = 'financeHubApple_v5_gamified'; // New key for major update
-    const CATEGORY_DETAILS = { 
-        'Food': { color: 'var(--accent-yellow)', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path d="M12.018 3.207 8.055 2.012A3.001 3.001 0 0 0 4.803 7.17a3.001 3.001 0 0 0 2.63 2.805l3.963 1.196A3.001 3.001 0 0 0 15.197 6.03a3.001 3.001 0 0 0-3.179-2.823ZM9.244 12.012l-.002-.002-.002-.002a1.5 1.5 0 0 0-2.088 1.994l.002.002.002.002L10.5 17.25l3.344-3.244a1.5 1.5 0 0 0-2.088-1.994l-.002.002Z" /></svg>` },
-        'Transport': { color: 'var(--accent-teal)', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path fill-rule="evenodd" d="M6.622 4.062A9.502 9.502 0 0 0 3.5 10.5c0 1.463.33 2.84.917 4.065a.75.75 0 0 1-1.215.87 11 11 0 1 1 13.595 0 .75.75 0 0 1-1.214-.87A9.503 9.503 0 0 0 16.5 10.5c0-1.463-.33-2.84-.917-4.065a.75.75 0 0 1 1.214-.87 11.003 11.003 0 0 1-13.595 0 .75.75 0 0 1 1.214.87ZM10 13.25a.75.75 0 0 0 .75-.75V8.75a.75.75 0 0 0-1.5 0v3.75a.75.75 0 0 0 .75.75Z" clip-rule="evenodd" /></svg>` },
-        'Housing': { color: 'var(--accent-purple)', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path fill-rule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z" clip-rule="evenodd" /></svg>` },
-        'Utilities': { color: 'var(--accent-orange)', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path d="M11.983 3.004a1 1 0 0 0-1.415-1.415L3.3 8.855a1 1 0 0 0 0 1.414l7.268 7.269a1 1 0 0 0 1.415-1.415L5.414 10l6.57-6.996Z" /><path d="m13.222 6.344 2.468-2.468a.75.75 0 0 1 1.061 0l.353.353a.75.75 0 0 1 0 1.06L14.282 8.12l-1.06-1.061Z" /><path d="m16.531 9.656-2.469 2.469a.75.75 0 0 1-1.06 0l-.354-.354a.75.75 0 0 1 0-1.06L15.47 7.88l1.061 1.06Z" /></svg>` },
-        'Entertainment': { color: 'var(--accent-pink)', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>` },
-        'Shopping': { color: '#ff80ed', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path fill-rule="evenodd" d="M10.237 4.22A2.25 2.25 0 0 0 8.5 3.25H7.25a.75.75 0 0 0 0 1.5h1.25a.75.75 0 0 1 .75.75v.128a3.738 3.738 0 0 0-2.438 1.242l-.08.088a3.75 3.75 0 0 0 .08 5.212l.092.09a3.75 3.75 0 0 0 5.212-.08l.088-.08a3.738 3.738 0 0 0 1.242-2.438V5.5a.75.75 0 0 1 .75-.75h1.25a.75.75 0 0 0 0-1.5h-1.25a2.25 2.25 0 0 0-1.963-1.03ZM10 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" clip-rule="evenodd" /></svg>` },
-        'Health': { color: 'var(--accent-red)', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v2.5h-2.5a.75.75 0 0 0 0 1.5h2.5v2.5a.75.75 0 0 0 1.5 0v-2.5h2.5a.75.75 0 0 0 0-1.5h-2.5v-2.5Z" clip-rule="evenodd" /></svg>` },
-        'Personal': { color: '#a0a0a5', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.957 9.957 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003Z" /></svg>` },
-        'Debt': { color: '#ff6b2e', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path fill-rule="evenodd" d="M1 10a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 10Z" clip-rule="evenodd" /></svg>` },
-        'Other': { color: 'var(--text-tertiary)', icon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" /></svg>` }
-    };
-    const EXPENSE_CATEGORIES = Object.keys(CATEGORY_DETAILS);
-    
-    const BILL_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon" style="color: var(--accent-bill-icon);"><path d="M3.505 2.365A4.5 4.5 0 0 1 7.75 1.5h4.5a4.5 4.5 0 0 1 4.245.865L18.5 3.75a.5.5 0 0 1 .5.5v11.5a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5V4.25a.5.5 0 0 1 .5-.5l2.005-1.385ZM7.5 3a2.5 2.5 0 0 0-2.359.501L3.5 4.754V15.5h13V4.754l-1.641-1.253A2.5 2.5 0 0 0 12.5 3h-5Z" /><path d="M12.5 8.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5Z" /><path d="M7.5 8.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5Z" /><path d="M12.5 11.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5Z" /><path d="M7.5 11.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1a.5.5 0 0 1 .5-.5Z" /></svg>`;
-    const PAYCHECK_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon" style="color: var(--accent-paycheck-icon);"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm1.91-6.776A.75.75 0 0 0 11.25 11h-2.5a.75.75 0 0 0 0 1.5h.098a1.607 1.607 0 0 1 .02 0l.09.006a2.005 2.005 0 0 1 1.606 1.037c.36.648.584 1.352.584 2.081a.75.75 0 0 0 .75.75c.414 0 .75-.336.75-.75 0-1.119-.386-2.172-1.03-3.048Zm-3.74-4.446a.75.75 0 0 0-1.06-1.06L6.049 6.775A3.505 3.505 0 0 0 8.75 6a.75.75 0 0 0 0-1.5A5.006 5.006 0 0 0 4.25 8.5a.75.75 0 0 0 .75.75c.414 0 .75-.336.75-.75a3.502 3.502 0 0 1 2.728-3.427Z" clip-rule="evenodd" /></svg>`;
-    const BIRTHDAY_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon" style="color: var(--accent-birthday-icon);"><path d="M10 4a2 2 0 1 0-4 0 2 2 0 0 0 4 0Z" /><path fill-rule="evenodd" d="M8 1a1.5 1.5 0 0 0-1.447 1.035L4.273 7.5H2.5A1.5 1.5 0 0 0 1 9v3.5A1.5 1.5 0 0 0 2.5 14h15a1.5 1.5 0 0 0 1.5-1.5V9a1.5 1.5 0 0 0-1.5-1.5h-1.773l-2.28-5.465A1.5 1.5 0 0 0 12 1H8Zm0 1.5h4l2.053 4.928A1.5 1.5 0 0 0 15.447 9H14.5a.5.5 0 0 1 0-1h.447L13 5.5H7l-1.947 2.5H5.5a.5.5 0 0 1 0 1h-.947a1.5 1.5 0 0 0 1.394-1.572L8 2.5Z" clip-rule="evenodd" /><path d="M3.5 10.5a.5.5 0 0 0 0 1h13a.5.5 0 0 0 0-1h-13Z" /></svg>`;
-    const HOLIDAY_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="calendar-icon" style="color: var(--accent-holiday-icon);"><path fill-rule="evenodd" d="M9.422 2.22a.75.75 0 0 1 1.156 0l1.348 1.753c.1.13.25.214.416.237l2.14.295a.75.75 0 0 1 .416 1.28l-1.58 1.483a.753.753 0 0 0-.22.515l.41 2.094a.75.75 0 0 1-1.096.796l-1.882-1.03a.75.75 0 0 0-.702 0l-1.882 1.03a.75.75 0 0 1-1.096-.796l.41-2.094a.753.753 0 0 0-.22-.515L2.08 5.885a.75.75 0 0 1 .416-1.28l2.14-.295a.75.75 0 0 0 .416-.237l1.348-1.753Zm0 11.058a.75.75 0 0 1 1.156 0l1.348 1.753c.1.13.25.214.416.237l2.14.295a.75.75 0 0 1 .416 1.28l-1.58 1.483a.753.753 0 0 0-.22.515l.41 2.094a.75.75 0 0 1-1.096.796l-1.882-1.03a.75.75 0 0 0-.702 0l-1.882 1.03a.75.75 0 0 1-1.096-.796l.41-2.094a.753.753 0 0 0-.22-.515L2.08 17.165a.75.75 0 0 1 .416-1.28l2.14-.295a.75.75 0 0 0 .416-.237l1.348-1.753Z" clip-rule="evenodd" /></svg>`;
-
-    const HOLIDAYS_2025 = { 
-        "2025-01-01": "New Year's Day", "2025-01-20": "MLK Jr. Day", 
-        "2025-02-17": "Washington's Birthday", "2025-05-26": "Memorial Day",
-        "2025-06-19": "Juneteenth", "2025-07-04": "Independence Day",
-        "2025-09-01": "Labor Day", "2025-10-13": "Columbus Day",
-        "2025-11-11": "Veterans Day", "2025-11-27": "Thanksgiving Day",
-        "2025-12-25": "Christmas Day"
-    };
-    const USER_BIRTHDAY = { month: 3, day: 11, name: "Your Birthday!" }; // April 11th
-
-    const elements = {
-        // Hero & General UI
-        heroSection: document.getElementById('heroSection'),
-        heroSubtitle: document.getElementById('heroSubtitle'),
-        visitStreakCounter: document.getElementById('visitStreakCounter'),
-        streakCountText: document.getElementById('streakCountText'),
-        getStartedBtn: document.getElementById('getStartedBtn'), 
-        mainContent: document.getElementById('mainContent'),
-        fabAddTransaction: document.getElementById('fabAddTransaction'), // FAB
-        
-        // Calendar
-        calendarGrid: document.getElementById('calendarGrid'), calendarHeaders: document.getElementById('calendarHeaders'),
-        currentMonthYearDisplay: document.getElementById('currentMonthYear'), prevMonthBtn: document.getElementById('prevMonthBtn'),
-        nextMonthBtn: document.getElementById('nextMonthBtn'), calendarPlaceholder: document.getElementById('calendar-placeholder'),
-        
-        // Day Details Modal
-        dayDetailsModal: document.getElementById('dayDetailsModal'), 
-        dayDetailsModalTitle: document.getElementById('dayDetailsModalTitle'),
-        dayDetailsList: document.getElementById('dayDetailsList'),
-        closeDayDetailsModalBtn: document.getElementById('closeDayDetailsModalBtn'),
-        dayDetailsAddBtn: document.getElementById('dayDetailsAddBtn'),
-
-        // Transaction Modal
-        transactionModal: document.getElementById('transactionModal'), modalTitle: document.getElementById('modalTitle'),
-        // addTransactionBtnHeader: document.getElementById('addTransactionBtnHeader'), // Removed
-        closeModalBtn: document.getElementById('closeModalBtn'),
-        cancelModalBtn: document.getElementById('cancelModalBtn'), cancelModalBtnRecurring: document.getElementById('cancelModalBtnRecurring'),
-        globalErrorModal: document.getElementById('global-error-modal'), tabExpense: document.getElementById('tab-expense'),
-        tabBill: document.getElementById('tab-bill'), expenseFormModal: document.getElementById('expense-form-modal'),
-        expenseIdModal: document.getElementById('expense-id-modal'), expenseDescInputModal: document.getElementById('expense-desc-modal'),
-        expenseCategorySelectModal: document.getElementById('expense-category-modal'), expenseAmountInputModal: document.getElementById('expense-amount-modal'),
-        expenseDateInputModal: document.getElementById('expense-date-modal'), recurringFormModal: document.getElementById('recurring-form-modal'),
-        recurringIdModal: document.getElementById('recurring-id-modal'), recurringDescInputModal: document.getElementById('recurring-desc-modal'),
-        recurringAmountInputModal: document.getElementById('recurring-amount-modal'), recurringDayInputModal: document.getElementById('recurring-day-modal'),
-        
-        // Sidebar
-        incomeForm: document.getElementById('income-form'), weeklyIncomeInput: document.getElementById('weekly-income'),
-        paydaySelect: document.getElementById('payday'), displayIncome: document.getElementById('display-income'),
-        displayPayday: document.getElementById('display-payday'), expenseListSidebar: document.getElementById('expense-list-sidebar'),
-        filterCategorySelectSidebar: document.getElementById('filter-category-sidebar'), recurringListSidebar: document.getElementById('recurring-list-sidebar'),
-        dashboardSummaryIncome: document.getElementById('dashboard-summary-income'), dashboardSummaryExpenses: document.getElementById('dashboard-summary-expenses'),
-        dashboardSummaryNet: document.getElementById('dashboard-summary-net'), 
-        
-        // Savings Goals
-        addGoalForm: document.getElementById('add-goal-form'), goalNameInput: document.getElementById('goal-name'),
-        goalTargetInput: document.getElementById('goal-target'), savingsGoalsList: document.getElementById('savings-goals-list'),
-        
-        // Insights
-        insightContent: document.getElementById('insight-content'),
-        
-        footerYear: document.getElementById('footer-year'),
-    };
-
-    let state = {
-        weeklyIncome: null, paydayOfWeek: null, expenses: [], recurringCharges: [], 
-        savingsGoals: [], 
-        currentCalendarDate: new Date(), editingExpenseId: null, editingRecurringId: null, 
-        currentFilterCategorySidebar: 'all',
-        selectedDateForDayDetails: null,
-        lastVisitDate: null, // For visit tracking
-        visitStreak: 0,      // For visit streak
-        hasCelebratedToday: false // To ensure confetti fires once per day
-    };
-    
-    // Initial calendar date setting
-    const todayForCalendarInit = new Date();
-    if (!state.currentCalendarDate || isNaN(state.currentCalendarDate.getTime())) { // Check if it's undefined or invalid
-         state.currentCalendarDate = new Date(todayForCalendarInit.getFullYear() === 2025 ? 2025 : todayForCalendarInit.getFullYear(), 0, 1);
-    }
-
-
-    // --- Utility Functions ---
-    function formatCurrency(amount) { if (amount == null || isNaN(amount)) return '$0.00'; return Number(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' }); }
-    function getDayName(dayIndex) { const d = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; const i = parseInt(dayIndex, 10); return (i >= 0 && i <= 6) ? d[i] : 'N/A'; }
-    function displayModalError(message, modalElement = elements.globalErrorModal) {
-        if (modalElement) {
-            modalElement.textContent = message;
-            modalElement.classList.remove('hidden');
-            setTimeout(() => { modalElement.classList.add('hidden'); }, 4000);
-        } else { alert(message); }
-    }
-    function playConfetti(options = {}) {
-        const defaults = { particleCount: 100, spread: 70, origin: { y: 0.6 }, zIndex: 10000 };
-        confetti({ ...defaults, ...options });
-    }
-
-
-    // --- Data Persistence ---
-    function saveData() { try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state)); } catch (e) { displayModalError("Save failed. LocalStorage might be full or disabled."); } }
-    function loadData() {
-        try {
-            const d = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (d) {
-                const parsed = JSON.parse(d);
-                parsed.expenses = (parsed.expenses || []).map(exp => ({ ...exp, date: exp.date ? new Date(exp.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0] }));
-                parsed.savingsGoals = parsed.savingsGoals || [];
-                if (parsed.currentCalendarDate) { parsed.currentCalendarDate = new Date(parsed.currentCalendarDate); } 
-                else { const todayForCalendar = new Date(); parsed.currentCalendarDate = new Date(todayForCalendar.getFullYear() === 2025 ? 2025 : todayForCalendar.getFullYear(), 0, 1); }
-                // Load visit data
-                parsed.lastVisitDate = parsed.lastVisitDate ? new Date(parsed.lastVisitDate) : null;
-                parsed.visitStreak = parsed.visitStreak || 0;
-                // hasCelebratedToday is session-based, not stored
-                state = { ...state, ...parsed, hasCelebratedToday: false }; // Reset celebration status on load
-            }
-        } catch (e) { console.error("Load fail:", e); displayModalError("Could not load saved data."); localStorage.removeItem(LOCAL_STORAGE_KEY); }
-    }
-
-    // --- Visit Tracking & Streak Logic ---
-    function checkDailyVisit() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize to start of day
-
-        if (state.lastVisitDate) {
-            const lastVisit = new Date(state.lastVisitDate); // Ensure it's a Date object
-            lastVisit.setHours(0, 0, 0, 0);
-
-            if (today.getTime() > lastVisit.getTime()) { // New day visit
-                state.hasCelebratedToday = false; // Reset celebration for the new day
-                if (today.getTime() === lastVisit.getTime() + (24 * 60 * 60 * 1000)) { // Consecutive day
-                    state.visitStreak++;
-                } else { // Missed a day or more
-                    state.visitStreak = 1; // Reset to 1 for the current visit
-                }
-                if (!state.hasCelebratedToday) {
-                    playConfetti({ particleCount: 150, spread: 90, origin: { y: 0.5 }});
-                    state.hasCelebratedToday = true;
-                }
-            } else if (today.getTime() === lastVisit.getTime() && !state.hasCelebratedToday) {
-                 // First visit of the day, but already visited today (e.g. page reload)
-                 // Only celebrate if not already celebrated for this "session" of the day.
-                 // This 'hasCelebratedToday' is more like 'hasCelebratedThisSession'
-                 // The actual daily celebration logic is handled above for new day visits.
-            }
-        } else { // First ever visit
-            state.visitStreak = 1;
-            if (!state.hasCelebratedToday) {
-                playConfetti({ particleCount: 200, spread: 100, origin: { y: 0.4 }}); // Bigger confetti for first visit
-                state.hasCelebratedToday = true;
-            }
-        }
-        state.lastVisitDate = today;
-        elements.streakCountText.textContent = `${state.visitStreak} Day Streak`;
-        elements.visitStreakCounter.classList.add('visible');
-        
-        // Update hero subtitle based on streak
-        if (state.visitStreak > 1) {
-            elements.heroSubtitle.textContent = `Welcome back! You're on a ${state.visitStreak}-day streak. Keep crushing those financial goals!`;
-        } else {
-            elements.heroSubtitle.textContent = `Visually track spending, manage bills, and reach your savings goals. Your financial journey, simplified.`;
-        }
-
-        saveData(); // Save updated visit data
-    }
-
-
-    // --- Calendar Logic ---
-    function renderCalendar() {
-        elements.calendarGrid.innerHTML = ''; elements.calendarHeaders.innerHTML = ''; 
-        const today = new Date(); today.setHours(0,0,0,0); 
-        const year = state.currentCalendarDate.getFullYear(); const month = state.currentCalendarDate.getMonth();
-        elements.currentMonthYearDisplay.textContent = `${state.currentCalendarDate.toLocaleString('default', { month: 'long' })} ${year}`;
-        const firstDayOfMonth = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        dayNames.forEach(day => { const h = document.createElement('div'); h.classList.add('calendar-header-cell'); h.textContent = day; elements.calendarHeaders.appendChild(h); });
-        let itemsInMonth = false;
-        for (let i = 0; i < firstDayOfMonth; i++) { const p = document.createElement('div'); p.classList.add('calendar-day-cell', 'other-month'); elements.calendarGrid.appendChild(p); }
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayCell = document.createElement('div'); dayCell.classList.add('calendar-day-cell');
-            const currentDate = new Date(year, month, day); currentDate.setHours(0,0,0,0); 
-            const currentDateStr = currentDate.toISOString().split('T')[0];
-            if (currentDate.getTime() === today.getTime()) { dayCell.classList.add('today'); }
-            const dayNumSpan = document.createElement('span'); dayNumSpan.classList.add('day-number'); dayNumSpan.textContent = day; dayCell.appendChild(dayNumSpan);
-            const itemIndicatorContainer = document.createElement('div'); itemIndicatorContainer.classList.add('item-indicator-container');
-            let dayHasItems = false;
-
-            if (year === 2025 && HOLIDAYS_2025[currentDateStr]) {
-                dayCell.classList.add('holiday-cell');
-                const nameSpan = document.createElement('span'); nameSpan.classList.add('event-name-display', 'holiday-name-display'); nameSpan.textContent = HOLIDAYS_2025[currentDateStr]; dayCell.appendChild(nameSpan);
-                const iconDiv = document.createElement('div'); iconDiv.innerHTML = HOLIDAY_ICON_SVG; itemIndicatorContainer.appendChild(iconDiv.firstChild);
-                dayHasItems = true;
-            }
-            if (currentDate.getMonth() === USER_BIRTHDAY.month && currentDate.getDate() === USER_BIRTHDAY.day) {
-                dayCell.classList.add('birthday-cell');
-                const nameSpan = document.createElement('span'); nameSpan.classList.add('event-name-display', 'birthday-name-display'); nameSpan.textContent = USER_BIRTHDAY.name; dayCell.appendChild(nameSpan);
-                const iconDiv = document.createElement('div'); iconDiv.innerHTML = BIRTHDAY_ICON_SVG; itemIndicatorContainer.appendChild(iconDiv.firstChild);
-                dayHasItems = true;
-            }
-            const expensesForDay = state.expenses.filter(e => { const ed = new Date(e.date+'T00:00:00'); return ed.getTime() === currentDate.getTime(); });
-            expensesForDay.forEach(exp => {
-                dayHasItems = true;
-                const catDet = CATEGORY_DETAILS[exp.category] || CATEGORY_DETAILS['Other'];
-                const ind = document.createElement('div'); ind.innerHTML = catDet.icon;
-                const svg = ind.querySelector('svg'); if (svg) { let c = catDet.color; if (c.startsWith('var(')) c = getComputedStyle(document.documentElement).getPropertyValue(c.substring(4,c.length-1)).trim(); svg.style.color = c; }
-                itemIndicatorContainer.appendChild(ind.firstChild);
-            });
-            const billsForDay = state.recurringCharges.filter(b => b.dayDue === day);
-            billsForDay.forEach(() => { dayHasItems = true; const iconDiv = document.createElement('div'); iconDiv.innerHTML = BILL_ICON_SVG; itemIndicatorContainer.appendChild(iconDiv.firstChild); });
-            if (state.weeklyIncome && state.paydayOfWeek !== null && currentDate.getDay() === state.paydayOfWeek) {
-                dayHasItems = true; const iconDiv = document.createElement('div'); iconDiv.innerHTML = PAYCHECK_ICON_SVG; itemIndicatorContainer.appendChild(iconDiv.firstChild);
-            }
-            if (dayHasItems) itemsInMonth = true;
-            if (itemIndicatorContainer.hasChildNodes()) dayCell.appendChild(itemIndicatorContainer);
-            dayCell.addEventListener('click', () => openDayDetailsModal(currentDateStr));
-            elements.calendarGrid.appendChild(dayCell);
-        }
-        elements.calendarPlaceholder.classList.toggle('hidden', itemsInMonth);
-        const totalCells = firstDayOfMonth + daysInMonth; const remainingCells = (7-(totalCells % 7))%7;
-        for (let i=0; i<remainingCells; i++) { const n = document.createElement('div'); n.classList.add('calendar-day-cell','other-month'); elements.calendarGrid.appendChild(n); }
-    }
-
-    // --- Day Details Modal ---
-    function openDayDetailsModal(dateStr) {
-        state.selectedDateForDayDetails = dateStr;
-        const dateObj = new Date(dateStr + 'T00:00:00'); 
-        elements.dayDetailsModalTitle.textContent = `Details for ${dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
-        elements.dayDetailsList.innerHTML = ''; 
-        let itemsFound = false;
-
-        if (dateObj.getFullYear() === 2025 && HOLIDAYS_2025[dateStr]) {
-            elements.dayDetailsList.appendChild(createDayDetailItem(HOLIDAYS_2025[dateStr], '', HOLIDAY_ICON_SVG, 'var(--accent-holiday-icon)')); itemsFound = true;
-        }
-        if (dateObj.getMonth() === USER_BIRTHDAY.month && dateObj.getDate() === USER_BIRTHDAY.day) {
-            elements.dayDetailsList.appendChild(createDayDetailItem(USER_BIRTHDAY.name, '', BIRTHDAY_ICON_SVG, 'var(--accent-birthday-icon)')); itemsFound = true;
-        }
-        if (state.weeklyIncome && state.paydayOfWeek !== null && dateObj.getDay() === state.paydayOfWeek) {
-            elements.dayDetailsList.appendChild(createDayDetailItem('Paycheck Received', formatCurrency(state.weeklyIncome), PAYCHECK_ICON_SVG, 'var(--accent-paycheck-icon)')); itemsFound = true;
-        }
-        state.expenses.filter(exp => exp.date === dateStr).forEach(exp => {
-            const catDet = CATEGORY_DETAILS[exp.category] || CATEGORY_DETAILS['Other'];
-            elements.dayDetailsList.appendChild(createDayDetailItem(exp.desc, formatCurrency(exp.amount), catDet.icon, catDet.color, 'expense', exp.id)); itemsFound = true;
-        });
-        state.recurringCharges.filter(bill => bill.dayDue === dateObj.getDate()).forEach(bill => {
-            elements.dayDetailsList.appendChild(createDayDetailItem(bill.desc, formatCurrency(bill.amount) + " (Bill)", BILL_ICON_SVG, 'var(--accent-bill-icon)', 'recurring', bill.id)); itemsFound = true;
-        });
-
-        if (!itemsFound) { elements.dayDetailsList.innerHTML = `<p class="text-center text-[var(--text-secondary)] p-4">Nothing scheduled for this day.</p>`; }
-        elements.dayDetailsModal.classList.add('active');
-    }
-    function createDayDetailItem(description, amountText, iconSvgStr, iconColorVar, itemType = null, itemId = null) {
-        const itemDiv = document.createElement('div'); itemDiv.className = 'day-details-item';
-        if (itemType && itemId) { 
-            itemDiv.classList.add('day-details-item-clickable');
-            itemDiv.addEventListener('click', () => {
-                closeDayDetailsModal(); 
-                if (itemType === 'expense') openTransactionModal(state.selectedDateForDayDetails, itemId, null);
-                if (itemType === 'recurring') openTransactionModal(state.selectedDateForDayDetails, null, itemId);
-            });
-        }
-        let iconColor = iconColorVar.startsWith('var(') ? getComputedStyle(document.documentElement).getPropertyValue(iconColorVar.substring(4, iconColorVar.length - 1)).trim() : iconColorVar;
-        const tempIconDiv = document.createElement('div'); tempIconDiv.innerHTML = iconSvgStr;
-        const svgElement = tempIconDiv.querySelector('svg');
-        if(svgElement) { svgElement.style.color = iconColor; svgElement.classList.add('day-details-item-icon'); }
-        itemDiv.innerHTML = `${svgElement ? svgElement.outerHTML : '<div class="day-details-item-icon"></div>'}<span class="day-details-item-desc">${description}</span><span class="day-details-item-amount">${amountText}</span>`;
-        return itemDiv;
-    }
-    function closeDayDetailsModal() { elements.dayDetailsModal.classList.remove('active'); }
-
-    // --- Transaction Modal Logic (Add/Edit) ---
-    function openTransactionModal(date = null, expenseId = null, recurringId = null) {
-        elements.transactionModal.classList.add('active');
-        elements.modalTitle.textContent = 'Add Transaction';
-        elements.globalErrorModal.classList.add('hidden'); 
-        elements.expenseFormModal.reset(); elements.recurringFormModal.reset();
-        state.editingExpenseId = null; state.editingRecurringId = null;
-        elements.expenseIdModal.value = ''; elements.recurringIdModal.value = '';
-        elements.expenseDateInputModal.value = date ? date : new Date().toISOString().split('T')[0];
-
-        if (expenseId) { 
-            const exp = state.expenses.find(e => e.id === expenseId);
-            if (exp) {
-                elements.modalTitle.textContent = 'Edit Expense'; state.editingExpenseId = expenseId;
-                elements.expenseIdModal.value = exp.id; elements.expenseDescInputModal.value = exp.desc;
-                elements.expenseCategorySelectModal.value = exp.category; elements.expenseAmountInputModal.value = exp.amount;
-                elements.expenseDateInputModal.value = exp.date; 
-                switchModalForm('expense');
-            }
-        } else if (recurringId) { 
-             const bill = state.recurringCharges.find(b => b.id === recurringId);
-            if (bill) {
-                elements.modalTitle.textContent = 'Edit Bill'; state.editingRecurringId = recurringId;
-                elements.recurringIdModal.value = bill.id; elements.recurringDescInputModal.value = bill.desc;
-                elements.recurringAmountInputModal.value = bill.amount; elements.recurringDayInputModal.value = bill.dayDue;
-                switchModalForm('bill');
-            }
-        } else { switchModalForm('expense'); }
-    }
-    function closeModal() { elements.transactionModal.classList.remove('active'); state.editingExpenseId = null; state.editingRecurringId = null;}
-    function switchModalForm(formType) {
-        const isExpense = formType === 'expense';
-        ['tabExpense', 'tabBill'].forEach(tabId => {
-            const tab = elements[tabId];
-            const isActive = (tabId === 'tab-expense' && isExpense) || (tabId === 'tab-bill' && !isExpense);
-            tab.classList.toggle('active', isActive); tab.classList.toggle('border-[var(--accent-primary)]', isActive);
-            tab.classList.toggle('text-[var(--accent-primary)]', isActive); tab.classList.toggle('text-[var(--text-secondary)]', !isActive);
-            tab.classList.toggle('border-transparent', !isActive);
-        });
-        elements.expenseFormModal.classList.toggle('hidden', !isExpense); elements.recurringFormModal.classList.toggle('hidden', isExpense);
-        if (isExpense && !state.editingExpenseId) elements.modalTitle.textContent = 'Add Expense';
-        if (!isExpense && !state.editingRecurringId) elements.modalTitle.textContent = 'Add Bill';
-    }
-
-    // --- Form Handlers ---
-    function handleExpenseSubmitModal(event) {
-        event.preventDefault();
-        const id = elements.expenseIdModal.value || Date.now().toString() + Math.random().toString(36).substring(2, 9);
-        const desc = elements.expenseDescInputModal.value.trim(); const category = elements.expenseCategorySelectModal.value;
-        const amount = parseFloat(elements.expenseAmountInputModal.value); const date = elements.expenseDateInputModal.value; 
-        if (!desc || !category || isNaN(amount) || amount <= 0 || !date) { displayModalError("Please fill all expense fields correctly."); return; }
-        const newExpense = { id, desc, category, amount, date };
-        if (state.editingExpenseId) { state.expenses = state.expenses.map(exp => exp.id === state.editingExpenseId ? newExpense : exp); } 
-        else { state.expenses.push(newExpense); }
-        saveData(); renderAll(); closeModal();
-    }
-    function handleRecurringSubmitModal(event) {
-        event.preventDefault();
-        const id = elements.recurringIdModal.value || Date.now().toString() + Math.random().toString(36).substring(2,9);
-        const desc = elements.recurringDescInputModal.value.trim(); const amount = parseFloat(elements.recurringAmountInputModal.value);
-        const dayDue = parseInt(elements.recurringDayInputModal.value, 10);
-        if (!desc || isNaN(amount) || amount <= 0 || isNaN(dayDue) || dayDue < 1 || dayDue > 31) { displayModalError("Please fill all bill fields correctly."); return; }
-        const newBill = { id, desc, amount, dayDue };
-        if (state.editingRecurringId) { state.recurringCharges = state.recurringCharges.map(b => b.id === state.editingRecurringId ? newBill : b); } 
-        else { state.recurringCharges.push(newBill); }
-        saveData(); renderAll(); closeModal();
-    }
-    function handleIncomeSubmit(event) {
-        event.preventDefault();
-        const weeklyAmount = parseFloat(elements.weeklyIncomeInput.value); const payday = elements.paydaySelect.value;
-        if (isNaN(weeklyAmount) || weeklyAmount < 0) { displayModalError("Invalid income amount."); return; }
-        if (payday === "" || payday === null) { displayModalError("Please select a payday."); return; }
-        state.weeklyIncome = weeklyAmount; state.paydayOfWeek = parseInt(payday, 10);
-        saveData(); renderIncomeDisplay(); renderMonthlySummary(); renderCalendar();
-    }
-    function handleAddGoalSubmit(event) {
-        event.preventDefault();
-        const name = elements.goalNameInput.value.trim(); const targetAmount = parseFloat(elements.goalTargetInput.value);
-        if (!name || isNaN(targetAmount) || targetAmount <= 0) { displayModalError("Valid goal name & target amount required.", elements.savingsGoalsList.parentElement.querySelector('h3')); return; }
-        const newGoal = { id: Date.now().toString(), name, targetAmount, currentAmount: 0 };
-        state.savingsGoals.push(newGoal); saveData(); renderSavingsGoals(); elements.addGoalForm.reset();
-    }
-    function handleAddToGoal(goalId, amount) {
-        const goal = state.savingsGoals.find(g => g.id === goalId);
-        if (goal && !isNaN(amount) && amount > 0) {
-            goal.currentAmount = Math.min(goal.targetAmount, (goal.currentAmount || 0) + amount);
-            saveData(); renderSavingsGoals();
-            playConfetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } }); // Confetti for goal contribution
-        } else if (goal && (isNaN(amount) || amount <=0)) { alert("Please enter a valid positive amount to add."); }
-    }
-    function handleDeleteGoal(goalId) {
-        if (confirm("Are you sure you want to delete this savings goal?")) { state.savingsGoals = state.savingsGoals.filter(g => g.id !== goalId); saveData(); renderSavingsGoals(); }
-    }
-
-    // --- Rendering Sidebar Lists & Summaries ---
-    function renderIncomeDisplay() { /* ... (same as before, ensure elements exist) ... */ }
-    function renderExpensesSidebar() { /* ... (same as before, ensure elements exist) ... */ }
-    function renderRecurringBillsSidebar() { /* ... (same as before, ensure elements exist) ... */ }
-    function renderSavingsGoals() { /* ... (same as before, ensure elements exist) ... */ }
-    function renderFinancialInsights() { /* ... (same as before, ensure elements exist and add confetti logic) ... */ 
-        elements.insightContent.innerHTML = ''; let insightsGenerated = 0;
-        if (state.weeklyIncome && state.paydayOfWeek !== null) {
-            const currentMonth = state.currentCalendarDate.getMonth(); const currentYear = state.currentCalendarDate.getFullYear();
-            let paydaysInMonth = 0; const daysInCurrentMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            for (let day = 1; day <= daysInCurrentMonth; day++) { if (new Date(currentYear, currentMonth, day).getDay() === state.paydayOfWeek) paydaysInMonth++; }
-            const monthlyIncome = state.weeklyIncome * paydaysInMonth;
-            const monthlyExpensesTotal = state.expenses.filter(exp => { const d=new Date(exp.date+'T00:00:00'); return d.getMonth()===currentMonth && d.getFullYear()===currentYear; }).reduce((s,e)=>s+e.amount,0);
-            const monthlyRecurringTotal = state.recurringCharges.reduce((s,c)=>s+c.amount,0);
-            const totalSpending = monthlyExpensesTotal + monthlyRecurringTotal; const netSavings = monthlyIncome - totalSpending;
-            if (monthlyIncome > 0) {
-                const savingsRate = (netSavings / monthlyIncome) * 100;
-                const p = document.createElement('p');
-                p.innerHTML = `This month's est. savings rate: <strong class="${savingsRate >= 0 ? 'text-positive' : 'text-negative'}">${savingsRate.toFixed(1)}%</strong>`;
-                elements.insightContent.appendChild(p); insightsGenerated++;
-                if (netSavings > 0 && !state.hasCelebratedTodaySavings) { // Check if already celebrated this specific saving
-                    playConfetti({particleCount: 120, spread: 80, origin: {y: 0.6}});
-                    state.hasCelebratedTodaySavings = true; // Mark as celebrated to avoid multiple confetti for same summary render
-                } else if (netSavings <= 0) {
-                    state.hasCelebratedTodaySavings = false; // Reset if no longer saving
-                }
-            }
-        }
-        // ... (rest of insights logic)
-        if (insightsGenerated === 0) { elements.insightContent.innerHTML = `<p class="text-[var(--text-secondary)]">Add more income and expense data to see insights.</p>`; state.hasCelebratedTodaySavings = false;}
-    }
-    function renderMonthlySummary() { /* ... (same as before, ensure elements exist) ... */ }
-    function populateCategoryFilters() { /* ... (same as before, ensure elements exist) ... */ }
-    
-    function handleDeleteClickSidebar(event) { /* ... (same as before) ... */ }
-    function handleEditClickSidebar(event) { /* ... (same as before) ... */ }
-
-    // --- Initialization ---
-    function renderAll() {
-        renderCalendar(); renderIncomeDisplay(); renderExpensesSidebar(); renderRecurringBillsSidebar();
-        renderMonthlySummary(); populateCategoryFilters(); renderSavingsGoals(); renderFinancialInsights();
-        // Animate cards on first load or significant re-render
-        document.querySelectorAll('.apple-card, #financialLiteracySection').forEach((el, index) => {
-            el.classList.add('animate-fadeInUp');
-            el.style.animationDelay = `${index * 0.05}s`; // Stagger animation
-        });
-        elements.fabAddTransaction.classList.add('visible'); // Make FAB visible after initial render
-    }
-    function initializeApp() {
-        elements.footerYear.textContent = new Date().getFullYear(); 
-        loadData(); 
-        checkDailyVisit(); // Check visit status and update streak
-        renderAll(); 
-        
-        elements.getStartedBtn.addEventListener('click', () => elements.mainContent.scrollIntoView({ behavior: 'smooth' }));
-        elements.prevMonthBtn.addEventListener('click', () => { state.currentCalendarDate.setMonth(state.currentCalendarDate.getMonth() - 1); saveData(); renderAll(); });
-        elements.nextMonthBtn.addEventListener('click', () => { state.currentCalendarDate.setMonth(state.currentCalendarDate.getMonth() + 1); saveData(); renderAll(); });
-        
-        elements.fabAddTransaction.addEventListener('click', () => openTransactionModal(state.selectedDateForDayDetails || new Date().toISOString().split('T')[0] ));
-        elements.closeModalBtn.addEventListener('click', closeModal);
-        elements.cancelModalBtn.addEventListener('click', closeModal);
-        elements.cancelModalBtnRecurring.addEventListener('click', closeModal);
-        elements.tabExpense.addEventListener('click', () => switchModalForm('expense'));
-        elements.tabBill.addEventListener('click', () => switchModalForm('bill'));
-        elements.expenseFormModal.addEventListener('submit', handleExpenseSubmitModal);
-        elements.recurringFormModal.addEventListener('submit', handleRecurringSubmitModal);
-        elements.incomeForm.addEventListener('submit', handleIncomeSubmit);
-        elements.addGoalForm.addEventListener('submit', handleAddGoalSubmit);
-
-        elements.filterCategorySelectSidebar.addEventListener('change', (e) => { state.currentFilterCategorySidebar = e.target.value; renderExpensesSidebar(); });
-        elements.expenseListSidebar.addEventListener('click', (event) => { handleDeleteClickSidebar(event); handleEditClickSidebar(event); });
-        elements.recurringListSidebar.addEventListener('click', (event) => { handleDeleteClickSidebar(event); handleEditClickSidebar(event); });
-        
-        elements.transactionModal.addEventListener('click', (e) => { if (e.target === elements.transactionModal) closeModal(); });
-        elements.dayDetailsModal.addEventListener('click', (e) => { if (e.target === elements.dayDetailsModal) closeDayDetailsModal(); });
-        elements.closeDayDetailsModalBtn.addEventListener('click', closeDayDetailsModal);
-        elements.dayDetailsAddBtn.addEventListener('click', () => {
-            const selectedDate = state.selectedDateForDayDetails || new Date().toISOString().split('T')[0];
-            closeDayDetailsModal(); 
-            openTransactionModal(selectedDate); 
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (elements.dayDetailsModal.classList.contains('active')) closeDayDetailsModal();
-                else if (elements.transactionModal.classList.contains('active')) closeModal();
-            }
-        });
-
-        // Initial animation for hero section elements
-        elements.heroSection.style.opacity = '1'; // Make hero visible after its own animation class is added
-        elements.visitStreakCounter.classList.add('animate-fadeIn', 'animate-delay-500');
-
-    }
-    document.addEventListener('DOMContentLoaded', initializeApp);
-    </script>
-</body>
+    </body>
 </html>
