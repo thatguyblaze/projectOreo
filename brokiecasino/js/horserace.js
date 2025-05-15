@@ -17,9 +17,9 @@ let horseLaneElements = []; // Array to store references to lane div elements
 const NUM_HORSES = 6;
 const HORSERACE_WIN_MULTIPLIER = 10; // Adjusted payout multiplier
 const BASE_SPEED_FACTOR = 1.8; // Base speed multiplier for advancement calculation
-// --- Balancing Adjustments (v4 - Increased Randomness & Stamina Impact) ---
-const STAMINA_DRAIN_FACTOR = 0.75; // How much stamina affects speed loss over the race (Increased from 0.6)
-const CONSISTENCY_FACTOR = 3.5; // How much consistency reduces randomness (higher = less random, but wider swings for low consistency) (Increased from 3.0)
+// --- Balancing Adjustments (v6 - Mathematically Rebalanced Attributes) ---
+const STAMINA_DRAIN_FACTOR = 0.85; // How much stamina affects speed loss (Was 0.95)
+const CONSISTENCY_FACTOR = 4.5; // How much consistency impacts randomness (Was 5.5)
 // --- End Adjustments ---
 
 // --- Horse Data with Attributes ---
@@ -28,12 +28,12 @@ const CONSISTENCY_FACTOR = 3.5; // How much consistency reduces randomness (high
 // - stamina: Resistance to slowing down (higher is better)
 // - consistency: How reliably the horse performs to its potential (higher is less random variation)
 const HORSES = [
-    { name: "Panda", color: '#ef4444', attributes: { speed: 1.1, stamina: 0.9, consistency: 0.7 }, statsDisplay: "Fast Starter" },
-    { name: "Quinton", color: '#f97316', attributes: { speed: 1.0, stamina: 1.1, consistency: 0.9 }, statsDisplay: "Good Stamina" },
-    { name: "Blaze", color: '#3b82f6', attributes: { speed: 1.2, stamina: 0.8, consistency: 0.6 }, statsDisplay: "Very Fast, Tires" },
-    { name: "Matt", color: '#a855f7', attributes: { speed: 0.9, stamina: 1.0, consistency: 1.0 }, statsDisplay: "Mr. Consistent" },
-    { name: "Liqhtu", color: '#10b981', attributes: { speed: 1.0, stamina: 1.0, consistency: 0.8 }, statsDisplay: "Well Rounded" },
-    { name: "Joker", color: '#eab308', attributes: { speed: 1.0, stamina: 0.9, consistency: 0.4 }, statsDisplay: "Wild Card" } // Lower consistency = more random
+    { name: "Panda", color: '#ef4444', attributes: { speed: 1.1, stamina: 0.85, consistency: 0.7 }, statsDisplay: "Quick Start, Fades Bit" },
+    { name: "Quinton", color: '#f97316', attributes: { speed: 0.95, stamina: 1.1, consistency: 0.9 }, statsDisplay: "Steady, Strong Finisher" },
+    { name: "Blaze", color: '#3b82f6', attributes: { speed: 1.2, stamina: 0.8, consistency: 0.55 }, statsDisplay: "Pure Speed, Risky Bet" },
+    { name: "Matt", color: '#a855f7', attributes: { speed: 0.9, stamina: 1.0, consistency: 1.0 }, statsDisplay: "Reliable, Steady Pace" },
+    { name: "Liqhtu", color: '#10b981', attributes: { speed: 1.0, stamina: 1.0, consistency: 0.8 }, statsDisplay: "Solid All-Rounder" },
+    { name: "Joker", color: '#eab308', attributes: { speed: 1.05, stamina: 0.85, consistency: 0.4 }, statsDisplay: "Explosive or Bust!" }
 ];
 
 // --- DOM Elements (Horse Race Specific) ---
@@ -47,7 +47,7 @@ const finishLinePos = 25; // Target position (pixels from left edge of track) fo
  * Called by main.js on DOMContentLoaded.
  */
 function initHorserace() {
-    console.log("Initializing Horse Race (Balanced v4 - Increased Randomness & Stamina Impact)..."); // Log version
+    console.log("Initializing Horse Race (Balanced v6 - Mathematically Rebalanced Attributes)..."); // Log version
     // Get DOM elements
     horseraceBetInput = document.getElementById('horserace-bet');
     horseraceSelectionContainer = document.getElementById('horserace-selection');
@@ -74,7 +74,13 @@ function initHorserace() {
     horseraceStartButton.addEventListener('click', startHorserace);
 
     // Add bet adjustment listeners using the factory function from main.js
-    addBetAdjustmentListeners('horserace', horseraceBetInput); // uses main.js
+    // Ensure this function exists in your main.js or is included/polyfilled
+    if (typeof addBetAdjustmentListeners === 'function') {
+        addBetAdjustmentListeners('horserace', horseraceBetInput);
+    } else {
+        console.warn('addBetAdjustmentListeners function not found. Bet buttons may not work.');
+    }
+
 
     console.log("Horse Race Initialized.");
 }
@@ -111,7 +117,7 @@ function createHorseSelectionUI() {
 
         button.addEventListener('click', () => {
             if (horseraceActive) return; // Don't allow selection during race
-            playSound('click'); // uses main.js
+            if (typeof playSound === 'function') playSound('click'); // uses main.js
             // Remove selected class from all buttons
             horseraceSelectionContainer.querySelectorAll('.horse-select-btn').forEach(btn => btn.classList.remove('selected'));
             // Add selected class to clicked button
@@ -176,7 +182,7 @@ function resetHorserace() {
         raceAnimationId = null;
     }
     horseraceActive = false;
-    horseraceBet = 0;
+    // horseraceBet = 0; // Bet is reset when a new race starts or on full game reset
     // Don't reset selectedHorseIndex here, allow selection before starting
     horsePositions = new Array(NUM_HORSES).fill(10); // Reset positions to start (10px from right)
 
@@ -215,27 +221,43 @@ function resetHorserace() {
  */
 function startHorserace() {
     if (horseraceActive) return; // Don't start if already active
-    if (!horseraceBetInput || !horseraceStartButton || !horseraceStatus || !horseraceSelectionContainer || !horseraceTrack) return; // Check elements
+    if (!horseraceBetInput || !horseraceStartButton || !horseraceStatus || !horseraceSelectionContainer || !horseraceTrack) {
+        console.error("Cannot start race, essential DOM elements missing.");
+        if (typeof showMessage === 'function') showMessage("Error: Race components not loaded.", 3000);
+        return;
+    }
 
     const betAmount = parseInt(horseraceBetInput.value);
-    if (isNaN(betAmount) || betAmount <= 0) { showMessage("Please enter a valid positive bet amount.", 2000); return; } // uses main.js
-    if (betAmount > currency) { showMessage("Not enough currency!", 2000); return; } // uses main.js
-    if (selectedHorseIndex < 0 || selectedHorseIndex >= NUM_HORSES) { showMessage("Please select a horse to bet on.", 2000); return; } // uses main.js
+
+    // Ensure main.js functions are available or provide fallbacks
+    const safeShowMessage = typeof showMessage === 'function' ? showMessage : (msg, dur) => console.log(`Message: ${msg}`);
+    const currentCurrency = typeof currency !== 'undefined' ? currency : 0; // Assuming currency is global in main.js
+
+    if (isNaN(betAmount) || betAmount <= 0) { safeShowMessage("Please enter a valid positive bet amount.", 2000); return; }
+    if (betAmount > currentCurrency) { safeShowMessage("Not enough currency!", 2000); return; }
+    if (selectedHorseIndex < 0 || selectedHorseIndex >= NUM_HORSES) { safeShowMessage("Please select a horse to bet on.", 2000); return; }
 
     // Ensure horses are created and track width is known
     if (horseElements.length === 0 || trackWidth <= 0) {
         createHorses(); // Attempt to create horses and get track width
         if (horseElements.length === 0 || trackWidth <= 0) { // Still couldn't create them or get width
-            showMessage("Error initializing race track. Try switching tabs or resizing.", 3000); // uses main.js
+            safeShowMessage("Error initializing race track. Try switching tabs or resizing.", 3000);
             return;
         }
     }
 
-    startTone(); // uses main.js
-    playSound('race_start'); // uses main.js
+    if (typeof startTone === 'function') startTone();
+    if (typeof playSound === 'function') playSound('race_start');
     horseraceBet = betAmount;
-    currency -= betAmount; // uses main.js
-    updateCurrencyDisplay('loss'); // uses main.js
+
+    // Safely update currency and display
+    if (typeof currency !== 'undefined' && typeof updateCurrencyDisplay === 'function') {
+        currency -= betAmount;
+        updateCurrencyDisplay('loss');
+    } else {
+        console.warn('Currency or updateCurrencyDisplay not found in main.js');
+    }
+
 
     horseraceActive = true;
     // Disable controls during race
@@ -252,7 +274,9 @@ function startHorserace() {
             horse.classList.remove('animate-pulse');
         }
     });
-    horseraceTrack.querySelectorAll('.horse-trail').forEach(trail => trail.remove()); // Clear old trails
+    if (horseraceTrack) {
+        horseraceTrack.querySelectorAll('.horse-trail').forEach(trail => trail.remove()); // Clear old trails
+    }
     let raceFrameCounter = 0; // Reset frame counter for trails/sound
 
     let startTime = null;
@@ -284,11 +308,14 @@ function startHorserace() {
             let baseAdvancement = horseData.attributes.speed * BASE_SPEED_FACTOR;
 
             // 2. Randomness based on consistency (less consistent = more random range)
+            //    (Math.random() - 0.5) gives a range from -0.5 to +0.5
+            //    (1 - horseData.attributes.consistency) makes it so lower consistency = higher multiplier for randomness
             let randomFactor = (Math.random() - 0.5) * CONSISTENCY_FACTOR * (1 - horseData.attributes.consistency);
             let variedAdvancement = baseAdvancement * (1 + randomFactor);
 
             // 3. Stamina effect (slows down over race distance) - NON-LINEAR
-            let raceProgress = Math.max(0, (pos - 10)) / (trackWidth - finishLinePos - 10); // Approximate progress 0 to 1
+            let raceProgress = Math.max(0, (pos - 10)) / (trackWidth - finishLinePos - 10 - horseWidth); // Approximate progress 0 to 1, account for horse width
+            raceProgress = Math.min(1, Math.max(0, raceProgress)); // Clamp progress between 0 and 1
 
             // Calculate drain: Use Math.pow on progress for non-linear effect.
             // Amplify effect based on (1.5 - stamina) - lower stamina = higher multiplier for drain.
@@ -299,10 +326,10 @@ function startHorserace() {
             let staminaEffect = 1.0 - drain;
 
             // Set a floor for the effect to prevent horses stopping completely, but allow significant slowdown.
-            staminaEffect = Math.max(0.30, staminaEffect); // Adjusted floor (was 0.35)
+            staminaEffect = Math.max(0.15, staminaEffect); // Current floor for stamina effect
 
             // 4. Final advancement for this frame
-            const finalAdvancement = Math.max(0.1, variedAdvancement * staminaEffect); // Ensure minimum movement
+            const finalAdvancement = Math.max(0.05, variedAdvancement * staminaEffect); // Ensure minimum movement, can be very small
 
             const newPos = pos + finalAdvancement;
 
@@ -314,20 +341,22 @@ function startHorserace() {
                 const trail = document.createElement('div');
                 trail.className = 'horse-trail'; // Class defined in style.css
                 trail.style.backgroundColor = horseData.color;
-                trail.style.right = `${newPos - 5}px`;
-                trail.style.top = '50%';
+                trail.style.right = `${newPos - 5}px`; // Position trail slightly behind horse
+                trail.style.top = `${horseElem.offsetTop + horseElem.offsetHeight / 2 - 2}px`; // Center trail in lane vertically
                 horseLaneElements[i].appendChild(trail);
-                setTimeout(() => trail.remove(), 500);
+                setTimeout(() => trail.remove(), 500); // Trail fades quickly
             }
             // Play step sound less frequently
-            if (raceFrameCounter % 12 === 0) playSound('race_step'); // uses main.js
+            if (raceFrameCounter % 12 === 0 && typeof playSound === 'function') playSound('race_step');
 
             // Check if this horse crossed the finish line NOW
             const newLeftPos = trackWidth - newPos - horseWidth;
             if (newLeftPos <= finishLinePos && winner === -1) {
                 winner = i;
-                horseElem.style.right = `${trackWidth - finishLinePos - horseWidth}px`;
-                return trackWidth - finishLinePos - horseWidth;
+                // Ensure horse is exactly at finish line visually
+                const finalRightPos = trackWidth - finishLinePos - horseWidth;
+                horseElem.style.right = `${finalRightPos}px`;
+                return finalRightPos; // Return the exact finishing position
             }
 
             return newPos; // Return updated right position
@@ -342,7 +371,7 @@ function startHorserace() {
     }
 
     raceAnimationId = requestAnimationFrame(raceStep); // Start the first frame
-    saveGameState(); // uses main.js
+    if (typeof saveGameState === 'function') saveGameState();
 }
 
 /**
@@ -351,7 +380,10 @@ function startHorserace() {
  */
 function finishRace(winnerIndex) {
     if (!horseraceActive) return; // Prevent finishing multiple times
-    if (!horseraceStatus || !horseraceStartButton || !horseraceBetInput || !horseraceSelectionContainer) return; // Check elements
+    if (!horseraceStatus || !horseraceStartButton || !horseraceBetInput || !horseraceSelectionContainer) {
+        console.error("Cannot finish race, essential DOM elements missing.");
+        return;
+    }
 
     cancelAnimationFrame(raceAnimationId); // Stop animation loop
     raceAnimationId = null;
@@ -365,20 +397,29 @@ function finishRace(winnerIndex) {
         horseElements[winnerIndex].classList.add('animate-pulse'); // Uses Tailwind pulse
     }
 
+    // Ensure main.js functions are available or provide fallbacks
+    const safeFormatWin = typeof formatWin === 'function' ? formatWin : (amount) => `${amount} currency`;
+    const safePlaySound = typeof playSound === 'function' ? playSound : (sound) => console.log(`Sound: ${sound}`);
+    const safeAddWinToLeaderboard = typeof addWinToLeaderboard === 'function' ? addWinToLeaderboard : (game, amount) => console.log(`Leaderboard: ${game} +${amount}`);
+    const safeUpdateCurrencyDisplay = typeof updateCurrencyDisplay === 'function' ? updateCurrencyDisplay : (status) => console.log(`Currency display updated: ${status || 'loss'}`);
+
+
     if (playerWon) {
         const winAmount = horseraceBet * HORSERACE_WIN_MULTIPLIER;
         const profit = winAmount; // Profit is the full win amount since bet was already deducted
-        currency += winAmount; // uses main.js
-        totalGain += Math.max(0, profit); // uses main.js
-        horseraceStatus.textContent = `Horse #${winnerIndex + 1} (${winnerName}) wins! You won ${formatWin(profit)}!`; // uses main.js
-        playSound('race_win'); // uses main.js
-        addWinToLeaderboard('Race', profit); // uses main.js
-        updateCurrencyDisplay('win'); // uses main.js
+
+        if (typeof currency !== 'undefined') currency += winAmount;
+        if (typeof totalGain !== 'undefined') totalGain += Math.max(0, profit);
+
+        horseraceStatus.textContent = `Horse #${winnerIndex + 1} (${winnerName}) wins! You won ${safeFormatWin(profit)}!`;
+        safePlaySound('race_win');
+        safeAddWinToLeaderboard('Race', profit);
+        safeUpdateCurrencyDisplay('win');
     } else {
-        totalLoss += horseraceBet; // uses main.js
-        horseraceStatus.textContent = `Horse #${winnerIndex + 1} (${winnerName}) wins! You lost ${formatWin(horseraceBet)}.`; // uses main.js
-        playSound('lose'); // uses main.js
-        updateCurrencyDisplay(); // uses main.js
+        if (typeof totalLoss !== 'undefined') totalLoss += horseraceBet;
+        horseraceStatus.textContent = `Horse #${winnerIndex + 1} (${winnerName}) wins! You lost ${safeFormatWin(horseraceBet)}.`;
+        safePlaySound('lose');
+        safeUpdateCurrencyDisplay(); // Default is loss or no change
     }
 
     // Re-enable controls after a short delay
@@ -388,9 +429,8 @@ function finishRace(winnerIndex) {
         }
     }, 2500); // Longer delay to see winner pulse
 
-    saveGameState(); // uses main.js
+    if (typeof saveGameState === 'function') saveGameState();
 }
 
-// Note: The initHorserace() function will be called from main.js
-// Ensure main.js includes: if (typeof initHorserace === 'function') initHorserace();
-// within its DOMContentLoaded listener.
+// Defensive check for initHorserace call, assuming it's called from main.js
+// Example: document.addEventListener('DOMContentLoaded', () => { if (typeof initHorserace === 'function') initHorserace(); });
