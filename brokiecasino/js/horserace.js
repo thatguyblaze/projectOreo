@@ -17,9 +17,9 @@ let horseLaneElements = []; // Array to store references to lane div elements
 const NUM_HORSES = 6;
 const HORSERACE_WIN_MULTIPLIER = 10; // Adjusted payout multiplier
 const BASE_SPEED_FACTOR = 1.8; // Base speed multiplier for advancement calculation
-// --- Balancing Adjustments ---
-const STAMINA_DRAIN_FACTOR = 0.6; // How much stamina affects speed loss over the race
-const CONSISTENCY_FACTOR = 3.0; // How much consistency reduces randomness (higher = less random)
+// --- Balancing Adjustments (v4 - Increased Randomness & Stamina Impact) ---
+const STAMINA_DRAIN_FACTOR = 0.75; // How much stamina affects speed loss over the race (Increased from 0.6)
+const CONSISTENCY_FACTOR = 3.5; // How much consistency reduces randomness (higher = less random, but wider swings for low consistency) (Increased from 3.0)
 // --- End Adjustments ---
 
 // --- Horse Data with Attributes ---
@@ -47,7 +47,7 @@ const finishLinePos = 25; // Target position (pixels from left edge of track) fo
  * Called by main.js on DOMContentLoaded.
  */
 function initHorserace() {
-    console.log("Initializing Horse Race (Balanced v3 - Stamina Tweak)..."); // Log version
+    console.log("Initializing Horse Race (Balanced v4 - Increased Randomness & Stamina Impact)..."); // Log version
     // Get DOM elements
     horseraceBetInput = document.getElementById('horserace-bet');
     horseraceSelectionContainer = document.getElementById('horserace-selection');
@@ -299,7 +299,7 @@ function startHorserace() {
             let staminaEffect = 1.0 - drain;
 
             // Set a floor for the effect to prevent horses stopping completely, but allow significant slowdown.
-            staminaEffect = Math.max(0.35, staminaEffect); // Adjusted floor
+            staminaEffect = Math.max(0.30, staminaEffect); // Adjusted floor (was 0.35)
 
             // 4. Final advancement for this frame
             const finalAdvancement = Math.max(0.1, variedAdvancement * staminaEffect); // Ensure minimum movement
