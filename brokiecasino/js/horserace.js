@@ -16,10 +16,10 @@ let horseElements = []; // Array to store references to horse div elements
 let horseLaneElements = []; // Array to store references to lane div elements
 const NUM_HORSES = 6;
 const HORSERACE_WIN_MULTIPLIER = 10; // Adjusted payout multiplier
-// --- Balancing Adjustments (v7 - Enhanced Competitive Balance) ---
-const BASE_SPEED_FACTOR = 1.7; // Base speed multiplier (Was 1.8)
-const STAMINA_DRAIN_FACTOR = 0.9; // How much stamina affects speed loss (Was 0.85)
-const CONSISTENCY_FACTOR = 5.0; // How much consistency impacts randomness (Was 4.5)
+// --- Balancing Adjustments (v8 - Fine-tuned Competitive Field) ---
+const BASE_SPEED_FACTOR = 1.7; // Base speed multiplier (Maintained from v7)
+const STAMINA_DRAIN_FACTOR = 0.9; // How much stamina affects speed loss (Maintained from v7)
+const CONSISTENCY_FACTOR = 4.0; // How much consistency impacts randomness (Was 5.0)
 // --- End Adjustments ---
 
 // --- Horse Data with Attributes ---
@@ -28,12 +28,12 @@ const CONSISTENCY_FACTOR = 5.0; // How much consistency impacts randomness (Was 
 // - stamina: Resistance to slowing down (higher is better)
 // - consistency: How reliably the horse performs to its potential (higher is less random variation)
 const HORSES = [
-    { name: "Panda", color: '#ef4444', attributes: { speed: 1.1, stamina: 0.8, consistency: 0.7 }, statsDisplay: "Fast Out The Gate, Tires" },
-    { name: "Quinton", color: '#f97316', attributes: { speed: 0.9, stamina: 1.15, consistency: 0.9 }, statsDisplay: "Slow Start, Powerful Finish" },
-    { name: "Blaze", color: '#3b82f6', attributes: { speed: 1.18, stamina: 0.75, consistency: 0.5 }, statsDisplay: "Extreme Speed, Very Risky" },
-    { name: "Matt", color: '#a855f7', attributes: { speed: 0.9, stamina: 1.0, consistency: 1.0 }, statsDisplay: "Ultra Reliable, Average Pace" },
-    { name: "Liqhtu", color: '#10b981', attributes: { speed: 1.0, stamina: 1.0, consistency: 0.8 }, statsDisplay: "Good All-Rounder" },
-    { name: "Joker", color: '#eab308', attributes: { speed: 1.1, stamina: 0.85, consistency: 0.35 }, statsDisplay: "Total Gamble: Fast or Flop!" }
+    { name: "Panda", color: '#ef4444', attributes: { speed: 1.1, stamina: 0.8, consistency: 0.7 }, statsDisplay: "Quick Starter, Fades Later" },
+    { name: "Quinton", color: '#f97316', attributes: { speed: 0.92, stamina: 1.15, consistency: 0.9 }, statsDisplay: "Slow Starter, Tireless Finisher" },
+    { name: "Blaze", color: '#3b82f6', attributes: { speed: 1.18, stamina: 0.75, consistency: 0.5 }, statsDisplay: "High Speed, Erratic, Fragile" },
+    { name: "Matt", color: '#a855f7', attributes: { speed: 0.95, stamina: 1.0, consistency: 1.0 }, statsDisplay: "Very Reliable, Decent Pace" },
+    { name: "Liqhtu", color: '#10b981', attributes: { speed: 1.02, stamina: 1.02, consistency: 0.8 }, statsDisplay: "Solid & Versatile" },
+    { name: "Joker", color: '#eab308', attributes: { speed: 1.05, stamina: 0.85, consistency: 0.4 }, statsDisplay: "Huge Swings, Risky Play" }
 ];
 
 // --- DOM Elements (Horse Race Specific) ---
@@ -47,7 +47,7 @@ const finishLinePos = 25; // Target position (pixels from left edge of track) fo
  * Called by main.js on DOMContentLoaded.
  */
 function initHorserace() {
-    console.log("Initializing Horse Race (Balanced v7 - Enhanced Competitive Balance)..."); // Log version
+    console.log("Initializing Horse Race (Balanced v8 - Fine-tuned Competitive Field)..."); // Log version
     // Get DOM elements
     horseraceBetInput = document.getElementById('horserace-bet');
     horseraceSelectionContainer = document.getElementById('horserace-selection');
@@ -202,7 +202,6 @@ function resetHorserace() {
  */
 function startHorserace() {
     if (horseraceActive) return;
-    // Ensure all necessary DOM elements are available
     if (!horseraceBetInput || !horseraceStartButton || !horseraceStatus || !horseraceSelectionContainer || !horseraceTrack) {
         console.error("Cannot start race, essential DOM elements missing for horse race.");
         if (typeof showMessage === 'function') showMessage("Error: Race components not loaded.", 3000);
@@ -284,9 +283,9 @@ function startHorserace() {
 
             let staminaAttributeFactor = Math.max(0.1, 1.5 - horseData.attributes.stamina);
             let drain = Math.pow(raceProgress, 1.5) * STAMINA_DRAIN_FACTOR * staminaAttributeFactor;
-            let staminaEffect = Math.max(0.15, 1.0 - drain); // Min stamina effect is 0.15
+            let staminaEffect = Math.max(0.15, 1.0 - drain); 
 
-            const finalAdvancement = Math.max(0.05, variedAdvancement * staminaEffect); // Min movement 0.05
+            const finalAdvancement = Math.max(0.05, variedAdvancement * staminaEffect);
             const newPos = pos + finalAdvancement;
             horseElem.style.right = `${newPos}px`;
 
@@ -328,12 +327,9 @@ function startHorserace() {
  */
 function finishRace(winnerIndex) {
     if (!horseraceActive) return;
-     // Ensure all necessary DOM elements are available
     if (!horseraceStatus || !horseraceStartButton || !horseraceBetInput || !horseraceSelectionContainer) {
         console.error("Cannot finish race, essential DOM elements missing for horse race UI update.");
-        // Attempt to proceed with logic even if UI elements are missing for status updates
     }
-
 
     cancelAnimationFrame(raceAnimationId);
     raceAnimationId = null;
