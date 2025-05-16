@@ -1,10 +1,15 @@
+/* _headers */
+
+Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted-cdn.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin /* A common, good default if no-referrer is too strict */
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Strict-Transport-Security: max-age=31536000; includeSubDomains /* Removed 'preload' unless you're sure */
+Cache-Control: public, max-age=0, must-revalidate /* A safer default for dynamic HTML. Set more specific caching for static assets. */
+
+/* Example for static assets in an /assets/ path - this would go in a path-specific block if your platform supports it, or manage via server config */
 /*
-  Content-Security-Policy: default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https:; frame-ancestors 'none';
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: no-referrer
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-  Cache-Control: no-store
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted-cdn.com;
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
 */
