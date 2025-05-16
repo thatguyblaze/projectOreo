@@ -1,10 +1,25 @@
 /* _headers */
 
-Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted-cdn.com; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';
+Content-Security-Policy: default-src 'self'; \
+script-src 'self' https://trusted-cdn.com; \
+style-src 'self' 'unsafe-inline' https:; \
+img-src 'self' data: https:; \
+font-src 'self' https:; \
+frame-ancestors 'none'; \
+object-src 'none'; \
+base-uri 'self'; \
+form-action 'self'; \
+report-uri https://your-csp-report-endpoint.com/report; \
+report-to csp-endpoint;
+/* Note: For report-to, you also need a Report-To HTTP header configuring the 'csp-endpoint' group. This is more advanced. Start with report-uri if simpler. */
+
+/* Example Report-To header (place this with other headers if you implement report-to) */
+/* Report-To: {"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url":"https://your-json-reporting-endpoint.com/csp-reports"}]} */
+
 X-Frame-Options: DENY
 X-Content-Type-Options: nosniff
-Referrer-Policy: strict-origin-when-cross-origin /* A common, good default if no-referrer is too strict */
-Permissions-Policy: camera=(), microphone=(), geolocation=()
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=() /* Added more examples */
 Strict-Transport-Security: max-age=31536000; includeSubDomains /* Removed 'preload' unless you're sure */
 Cache-Control: public, max-age=0, must-revalidate /* A safer default for dynamic HTML. Set more specific caching for static assets. */
 
