@@ -1,9 +1,9 @@
 /**
  * Brokie Casino - Horse Race Game Logic (horserace.js)
  *
- * v9.1 - Error Fixes & State Reset
- * Features unique horse abilities and dynamic odds-based payouts.
- * Corrected state management for abilities between races.
+ * v9.1 - Randomized Race Logic
+ * Features a purely random horse race. Odds-based payouts.
+ * All unique horse abilities and complex stats have been removed for a random outcome.
  * Depends on functions and variables defined in main.js.
  */
 
@@ -15,196 +15,37 @@ let raceAnimationId = null;
 let horsePositions = [];
 let horseElements = [];
 let horseLaneElements = [];
-// let horseCurrentSpeedModifiers = []; // REMOVED - Unused
 let horseOdds = []; // To store calculated odds for the current race
 
 const NUM_HORSES = 6;
-const BASE_SPEED_FACTOR = 1.7; // Base for speed calculation
-const STAMINA_DRAIN_FACTOR = 0.9; // How much stamina affects speed loss
-const CONSISTENCY_FACTOR = 0.3; // Max random performance swing (e.g., 0.3 means up to +/-30% for a horse with 0 baseConsistency)
+// Constants for random advancement in raceStep
+const MIN_ADVANCE_PER_FRAME = 0.5; // Minimum pixels a horse can advance per frame
+const MAX_ADVANCE_PER_FRAME = 2.5; // Maximum pixels a horse can advance per frame
 
-// --- New Horse Data with Abilities ---
+
+// --- Simplified Horse Data (No Abilities/Stats) ---
 const HORSES = [
-    {
-        name: "Panda", color: '#ef4444',
-        baseSpeed: 1.05, baseStamina: 0.9, baseConsistency: 0.8,
-        ability: {
-            name: "Early Bird",
-            description: "Gains a 20% speed boost for the first 30% of the race, but stamina drains 15% faster.",
-            activate: (horse, progress, horseState) => {
-                // Applied during the first 30% of the race
-                if (progress < 0.30) {
-                    if (!horseState.earlyBirdPhaseActive) { // Apply only once at the start of this phase
-                        horseState.speedModifier *= 1.20;       // Apply boost multiplicatively
-                        horseState.staminaDrainMultiplier *= 1.15; // Apply penalty multiplicatively
-                        horseState.earlyBirdPhaseActive = true;    // Mark that the effect is currently active
-                    }
-                } else {
-                    // After 30% progress, if the effect was active, revert it
-                    if (horseState.earlyBirdPhaseActive) {
-                        horseState.speedModifier /= 1.20;       // Revert boost
-                        horseState.staminaDrainMultiplier /= 1.15; // Revert penalty
-                        horseState.earlyBirdPhaseActive = false;   // Mark that the effect is no longer active
-                    }
-                }
-            }
-        }
-    },
-    {
-        name: "Quinton", color: '#f97316',
-        baseSpeed: 0.92, baseStamina: 1.15, baseConsistency: 0.9,
-        ability: {
-            name: "Marathoner",
-            description: "Stamina drains 20% slower. Gains a 10% speed boost in the last 25% of the race.",
-            activate: (horse, progress, horseState) => {
-                // Stamina drain reduction is always active for Quinton if not already set
-                if (horseState.staminaDrainMultiplier === 1.0) { // Check if not already modified by this ability
-                    horseState.staminaDrainMultiplier = 0.80; // Persistent effect for the race
-                }
-
-                // Late boost in the last 25%
-                if (progress > 0.75 && !horseState.lateBoostAppliedMarathoner) {
-                    horseState.speedModifier *= 1.10; // Apply boost multiplicatively
-                    horseState.lateBoostAppliedMarathoner = true; // Ensure it only applies once per race
-                }
-            }
-        }
-    },
-    {
-        name: "Blaze", color: '#3b82f6',
-        baseSpeed: 1.18, baseStamina: 0.75, baseConsistency: 0.5,
-        ability: {
-            name: "Glass Cannon",
-            description: "Very high top speed but low consistency. Speed can vary wildly. Stamina drains 10% faster.",
-            activate: (horse, progress, horseState) => {
-                // Stamina drain increase is always active for Blaze if not already set
-                 if (horseState.staminaDrainMultiplier === 1.0) { // Check if not already modified
-                    horseState.staminaDrainMultiplier = 1.10; // Persistent
-                 }
-            }
-        }
-    },
-    {
-        name: "Matt", color: '#a855f7',
-        baseSpeed: 0.95, baseStamina: 1.0, baseConsistency: 0.95,
-        ability: {
-            name: "Mr. Reliable",
-            description: "Extremely consistent performance. Rarely has a bad day.",
-            activate: (horse, progress, horseState) => {
-                // High baseConsistency is the main effect. No dynamic changes needed here.
-            }
-        }
-    },
-    {
-        name: "Liqhtu", color: '#10b981',
-        baseSpeed: 1.0, baseStamina: 1.0, baseConsistency: 0.85,
-        ability: {
-            name: "Momentum",
-            description: "Gains a small (2%) cumulative speed boost every 20% of the race if not in last place.",
-            activate: (horse, progress, horseState, currentHorsePixelPositions) => {
-                const interval = 0.20;
-                // currentInterval will be 0 for 0-19.99% progress, 1 for 20-39.99%, etc.
-                const currentInterval = Math.floor(progress / interval);
-
-                // Check if this interval's boost has been applied and progress is meaningful
-                if (progress > 0 && !horseState.momentumIntervalsApplied[currentInterval]) {
-                    let isLast = true;
-                    // Find Liqhtu's index to get its current pixel position
-                    const liqhtuIndex = HORSES.findIndex(h => h.name === horse.name);
-                    const liqhtuPixelPos = currentHorsePixelPositions[liqhtuIndex];
-
-                    for (let j = 0; j < currentHorsePixelPositions.length; j++) {
-                        if (j !== liqhtuIndex && currentHorsePixelPositions[j] < liqhtuPixelPos) {
-                            // If another horse 'j' has a smaller 'right' position, it's ahead
-                            isLast = false;
-                            break;
-                        }
-                    }
-
-                    if (!isLast) {
-                        horseState.speedModifier *= 1.02; // Apply cumulative boost
-                    }
-                    horseState.momentumIntervalsApplied[currentInterval] = true; // Mark this interval's check as done
-                }
-            }
-        }
-    },
-    {
-        name: "Joker", color: '#eab308',
-        baseSpeed: 1.0, baseStamina: 0.85, baseConsistency: 0.4,
-        ability: {
-            name: "Chaos Theory",
-            description: "Highly unpredictable. Randomly gains a large (30%) speed boost or (20%) penalty for short bursts (approx every 15-25% of race progress).",
-            activate: (horse, progress, horseState) => {
-                // chaosEvents should be initialized in resetHorserace/startHorserace
-                if (!horseState.chaosEvents) return; // Should not happen if initialized correctly
-
-                // If current event duration has passed, reset its effect
-                if (progress > horseState.chaosEvents.activeUntil && horseState.chaosEvents.currentEffect !== 1.0) {
-                    horseState.speedModifier /= horseState.chaosEvents.currentEffect; // Revert effect
-                    horseState.chaosEvents.currentEffect = 1.0; // Reset effect tracker
-                }
-
-                // If it's time for a new potential event and no event is currently active
-                if (progress > horseState.chaosEvents.nextTriggerTime && horseState.chaosEvents.currentEffect === 1.0) {
-                    if (Math.random() < 0.6) { // 60% chance to trigger an event
-                        const isBoost = Math.random() < 0.5;
-                        horseState.chaosEvents.currentEffect = isBoost ? 1.30 : 0.80;
-                        horseState.speedModifier *= horseState.chaosEvents.currentEffect; // Apply new effect
-                        horseState.chaosEvents.activeUntil = progress + (0.05 + Math.random() * 0.05); // Active for 5-10% of race progress
-                    }
-                    // Schedule next potential trigger point regardless of whether an event triggered now
-                    horseState.chaosEvents.nextTriggerTime = progress + (0.15 + Math.random() * 0.10);
-                }
-            }
-        }
-    }
+    { name: "Panda", color: '#ef4444' },
+    { name: "Quinton", color: '#f97316' },
+    { name: "Blaze", color: '#3b82f6' },
+    { name: "Matt", color: '#a855f7' },
+    { name: "Liqhtu", color: '#10b981' },
+    { name: "Joker", color: '#eab308' }
 ];
 
 // --- DOM Elements ---
 let horseraceBetInput, horseraceSelectionContainer, horseraceTrack;
 let horseraceStartButton, horseraceStatus;
 let trackWidth = 0;
-const finishLinePos = 25;
+const finishLinePos = 25; // Position of the finish line from the left edge of the track
 
-// --- Per-Race Horse State ---
-let horseRaceStates = [];
-
-/**
- * Initializes ability-specific states for all horses.
- * Called at the beginning of each race and on full reset.
- */
-function initializeHorseRaceStates() {
-    horseRaceStates = HORSES.map(horse => {
-        const initialState = {
-            speedModifier: 1.0,
-            staminaDrainMultiplier: 1.0,
-            // Panda
-            earlyBirdPhaseActive: false,
-            // Quinton
-            lateBoostAppliedMarathoner: false,
-            // Liqhtu
-            momentumIntervalsApplied: {}, // Stores { intervalIndex: true }
-            // Joker
-            chaosEvents: {
-                nextTriggerTime: 0.10 + Math.random() * 0.15, // Initial time for first potential event
-                activeUntil: 0,      // Time until current event effect wears off
-                currentEffect: 1.0   // Multiplier of current event (1.0 if no event active)
-            }
-        };
-        // For abilities that have a persistent base effect not tied to progress (like Quinton's base stamina drain or Blaze's)
-        // It's better to apply them once when states are initialized or let the ability manage it.
-        // Here, Quinton and Blaze's activate functions will set their persistent multipliers if they are at default.
-        return initialState;
-    });
-}
-
+// Per-Race Horse State is no longer needed as abilities are removed.
 
 /**
  * Initializes the Horse Race game.
  */
 function initHorserace() {
-    console.log("Initializing Horse Race (v9.1 - Abilities & Odds Overhaul)...");
+    console.log("Initializing Horse Race (v9.1 - Randomized Logic)...");
     horseraceBetInput = document.getElementById('horserace-bet');
     horseraceSelectionContainer = document.getElementById('horserace-selection');
     horseraceTrack = document.getElementById('horserace-track');
@@ -220,7 +61,7 @@ function initHorserace() {
     }
 
     createHorseSelectionUI();
-    resetHorserace(); // This will call initializeHorseRaceStates and calculateAndDisplayOdds
+    resetHorserace(); // This will calculate and display odds
 
     horseraceStartButton.addEventListener('click', startHorserace);
     if (typeof addBetAdjustmentListeners === 'function') {
@@ -233,19 +74,11 @@ function initHorserace() {
 
 /**
  * Calculates a 'power rating' for each horse.
+ * In a purely random system, all horses have an equal chance.
  */
 function calculatePowerRatings() {
-    return HORSES.map(horse => {
-        let rating = (horse.baseSpeed * 40) + (horse.baseStamina * 30) + (horse.baseConsistency * 25); // Adjusted consistency weight
-        // Simplified heuristic for ability impact on base rating
-        if (horse.ability.name === "Early Bird") rating += 5;  // Panda
-        if (horse.ability.name === "Marathoner") rating += 12; // Quinton
-        if (horse.ability.name === "Glass Cannon") rating += 2;  // Blaze (high speed is base, ability is risk)
-        if (horse.ability.name === "Mr. Reliable") rating += 8; // Matt
-        if (horse.ability.name === "Momentum") rating += 7;   // Liqhtu
-        if (horse.ability.name === "Chaos Theory") rating -= 2; // Joker (unpredictability slightly lowers base expectation)
-        return Math.max(1, rating);
-    });
+    // Assign a flat, equal rating to all horses.
+    return HORSES.map(() => 50); // Arbitrary equal rating (e.g., 50)
 }
 
 /**
@@ -256,6 +89,7 @@ function calculateAndDisplayOdds() {
     const totalPower = powerRatings.reduce((sum, rating) => sum + rating, 0);
 
     if (totalPower === 0) {
+        // Fallback if totalPower is zero (shouldn't happen with flat ratings)
         horseOdds = HORSES.map(() => 10);
     } else {
         const houseEdge = 0.10; // 10% house edge
@@ -264,14 +98,15 @@ function calculateAndDisplayOdds() {
             const chance = rating / totalPower;
             if (chance <= 0) return 100;
             let calculatedOdds = (1 / chance) * (1 - houseEdge);
-            return parseFloat(Math.max(1.5, Math.min(calculatedOdds, 50)).toFixed(2)); // Cap and format
+            // Cap odds between a minimum (e.g., 1.5:1) and a maximum (e.g., 50:1)
+            return parseFloat(Math.max(1.5, Math.min(calculatedOdds, 50)).toFixed(2));
         });
     }
 
     const buttons = horseraceSelectionContainer.querySelectorAll('.horse-select-btn');
     buttons.forEach((button, index) => {
         const oddsDisplay = button.querySelector('.horse-odds-display');
-        if (oddsDisplay && horseOdds[index] != null) { // Check for null or undefined
+        if (oddsDisplay && horseOdds[index] != null) {
             oddsDisplay.textContent = ` (${horseOdds[index].toFixed(2)}:1)`;
         } else if (oddsDisplay) {
             oddsDisplay.textContent = ` (N/A)`;
@@ -282,6 +117,7 @@ function calculateAndDisplayOdds() {
 
 /**
  * Creates the horse selection buttons UI.
+ * Ability information is removed.
  */
 function createHorseSelectionUI() {
     if (!horseraceSelectionContainer) return;
@@ -298,24 +134,15 @@ function createHorseSelectionUI() {
 
         const nameSpan = document.createElement('span');
         nameSpan.textContent = ` ${index + 1}. ${horse.name} `;
-
-        const abilityNameSpan = document.createElement('span');
-        abilityNameSpan.className = 'text-sm text-gray-300 ml-1 italic';
-        abilityNameSpan.textContent = `"${horse.ability.name}"`;
         
         const oddsDisplaySpan = document.createElement('span');
         oddsDisplaySpan.className = 'horse-odds-display text-sm text-yellow-400 ml-1';
-        oddsDisplaySpan.textContent = ` (Calculating...)`;
-
-        const abilityDescSpan = document.createElement('p');
-        abilityDescSpan.className = 'text-xs text-gray-400 mt-1 w-full';
-        abilityDescSpan.textContent = horse.ability.description;
+        oddsDisplaySpan.textContent = ` (Calculating...)`; // Odds will be filled by calculateAndDisplayOdds
 
         button.appendChild(colorIndicator);
         button.appendChild(nameSpan);
-        button.appendChild(abilityNameSpan);
         button.appendChild(oddsDisplaySpan);
-        button.appendChild(abilityDescSpan);
+        // Removed ability name and description spans
 
         button.addEventListener('click', () => {
             if (horseraceActive) return;
@@ -325,12 +152,12 @@ function createHorseSelectionUI() {
             selectedHorseIndex = index;
             if(horseraceStatus) {
                 const currentOdds = horseOdds[index] != null ? horseOdds[index].toFixed(2) + ':1' : '...';
-                horseraceStatus.textContent = `Selected ${horse.name} (${currentOdds}) Place bet & start!`;
+                horseraceStatus.textContent = `Selected ${horse.name} (${currentOdds}). Place bet & start!`;
             }
         });
         horseraceSelectionContainer.appendChild(button);
     });
-    // calculateAndDisplayOdds(); // Removed: Called by resetHorserace during init
+    // calculateAndDisplayOdds(); // Called by resetHorserace during init and after races
 }
 
 /**
@@ -355,9 +182,9 @@ function createHorses() {
         const horse = document.createElement('div');
         horse.className = 'horse';
         horse.dataset.horseId = i;
-        horse.textContent = '🐎';
+        horse.textContent = '🐎'; // Horse emoji
         horse.style.color = HORSES[i].color;
-        horse.style.right = '10px';
+        horse.style.right = '10px'; // Initial position from the right (start line)
 
         lane.appendChild(horse);
         horseraceTrack.appendChild(lane);
@@ -365,8 +192,10 @@ function createHorses() {
         horseLaneElements.push(lane);
     }
 
+    // Create a visual finish line
     const finishLine = document.createElement('div');
     finishLine.id = 'horserace-finish-line';
+    // Style the finish line via CSS (e.g., position absolute, left: finishLinePos + 'px', border, height)
     horseraceTrack.appendChild(finishLine);
     console.log("Horse elements created. Track width:", trackWidth);
 }
@@ -380,17 +209,18 @@ function resetHorserace() {
         raceAnimationId = null;
     }
     horseraceActive = false;
-    horsePositions = new Array(NUM_HORSES).fill(10);
+    horsePositions = new Array(NUM_HORSES).fill(10); // Reset to initial start position (10px from right)
     
-    initializeHorseRaceStates(); // Centralized state initialization
+    // initializeHorseRaceStates(); // REMOVED - No complex states anymore
 
     horseElements.forEach((horse, index) => {
         if (horse) {
             horse.style.right = `${horsePositions[index]}px`;
-            horse.classList.remove('animate-pulse');
+            horse.classList.remove('animate-pulse'); // Remove winner pulse if any
         }
     });
 
+    // Clear any trails from previous race
     if (horseraceTrack) {
         horseraceTrack.querySelectorAll('.horse-trail').forEach(trail => trail.remove());
     }
@@ -401,15 +231,15 @@ function resetHorserace() {
         horseraceSelectionContainer.querySelectorAll('.horse-select-btn').forEach(btn => btn.disabled = false);
     }
     
-    calculateAndDisplayOdds(); // Recalculate odds on reset for UI
+    calculateAndDisplayOdds(); // Recalculate and display odds for the new round
 
     if (horseraceStatus) {
         if (selectedHorseIndex === -1 || !HORSES[selectedHorseIndex]) {
             horseraceStatus.textContent = 'Place your bet and pick a horse!';
         } else {
-            const horse = HORSES[selectedHorseIndex];
+            const horse = HORSES[selectedHorseIndex]; // Get selected horse
             const currentOdds = horseOdds[selectedHorseIndex] != null ? horseOdds[selectedHorseIndex].toFixed(2) + ':1' : '...';
-            horseraceStatus.textContent = `Selected ${horse.name} (${currentOdds}) Place bet & start!`;
+            horseraceStatus.textContent = `Selected ${horse.name} (${currentOdds}). Place bet & start!`;
         }
     }
 }
@@ -426,33 +256,35 @@ function startHorserace() {
     }
 
     const betAmount = parseInt(horseraceBetInput.value);
+    // Use a safe wrapper for showMessage in case it's not defined in main.js
     const safeShowMessage = typeof showMessage === 'function' ? showMessage : (msg, dur) => console.log(`Message: ${msg}`);
-    const currentCurrency = typeof currency !== 'undefined' ? currency : 0;
+    const currentCurrency = typeof currency !== 'undefined' ? currency : 0; // Get currency from main.js
 
     if (isNaN(betAmount) || betAmount <= 0) { safeShowMessage("Please enter a valid positive bet amount.", 2000); return; }
     if (betAmount > currentCurrency) { safeShowMessage("Not enough currency!", 2000); return; }
     if (selectedHorseIndex < 0 || selectedHorseIndex >= NUM_HORSES) { safeShowMessage("Please select a horse.", 2000); return; }
 
+    // Ensure horses are created and track width is known
     if (horseElements.length === 0 || trackWidth <= 0) {
-        createHorses();
+        createHorses(); // Attempt to create horses if not already done
         if (horseElements.length === 0 || trackWidth <= 0) {
             safeShowMessage("Error initializing race track. Try switching tabs or resizing.", 3000);
             return;
         }
     }
     
-    initializeHorseRaceStates(); // Ensure fresh states for the new race
-    calculateAndDisplayOdds(); // Ensure odds are based on fresh state if anything could change them (though unlikely here)
+    // initializeHorseRaceStates(); // REMOVED - No complex states
+    calculateAndDisplayOdds(); // Ensure odds are up-to-date (though they are flat now)
 
-    if (typeof startTone === 'function') startTone();
-    if (typeof playSound === 'function') playSound('race_start');
+    if (typeof startTone === 'function') startTone(); // From main.js
+    if (typeof playSound === 'function') playSound('race_start'); // From main.js
     horseraceBet = betAmount;
 
     if (typeof currency !== 'undefined' && typeof updateCurrencyDisplay === 'function') {
-        currency -= betAmount;
-        updateCurrencyDisplay('loss');
+        currency -= betAmount; // Deduct bet from main.js currency
+        updateCurrencyDisplay('loss'); // Update display in main.js
     } else {
-        console.warn('Currency or updateCurrencyDisplay not found.');
+        console.warn('Currency or updateCurrencyDisplay not found in main.js.');
     }
 
     horseraceActive = true;
@@ -461,8 +293,9 @@ function startHorserace() {
     horseraceSelectionContainer.querySelectorAll('.horse-select-btn').forEach(btn => btn.disabled = true);
     horseraceStatus.textContent = 'And they\'re off!';
 
-    horsePositions = new Array(NUM_HORSES).fill(10);
+    horsePositions = new Array(NUM_HORSES).fill(10); // Reset positions to start (10px from right)
 
+    // Reset visual positions and clear trails
     horseElements.forEach((horse, i) => {
         if(horse) {
             horse.style.right = `${horsePositions[i]}px`;
@@ -477,65 +310,57 @@ function startHorserace() {
 
     function raceStep(timestamp) {
         if (!startTime) startTime = timestamp;
-        if (!horseraceActive) return;
+        if (!horseraceActive) return; // Stop animation if race is no longer active
 
         let winner = -1;
         raceFrameCounter++;
 
-        const currentHorsePixelPositions = horsePositions.slice();
-
         horsePositions = horsePositions.map((pos, i) => {
-            if (!horseElements[i] || !HORSES[i]) return pos;
+            if (!horseElements[i] || !HORSES[i]) return pos; // Skip if horse element or data doesn't exist
 
-            const horseData = HORSES[i];
             const horseElem = horseElements[i];
-            const horseState = horseRaceStates[i];
-            const horseWidth = horseElem.offsetWidth || 20;
-            const currentLeftPos = trackWidth - pos - horseWidth;
-
-            if (currentLeftPos <= finishLinePos) {
-                if (winner === -1) winner = i;
-                return pos;
-            }
-
-            if (horseData.ability && typeof horseData.ability.activate === 'function') {
-                const raceProgress = Math.max(0, (pos - 10)) / (trackWidth - finishLinePos - 10 - horseWidth);
-                horseData.ability.activate(horseData, Math.min(1, Math.max(0, raceProgress)), horseState, currentHorsePixelPositions);
-            }
-
-            let currentSpeed = horseData.baseSpeed * horseState.speedModifier; // speedModifier defaults to 1.0
-            let randomPerformance = (Math.random() - 0.5) * 2 * (1 - horseData.baseConsistency) * CONSISTENCY_FACTOR;
-            currentSpeed *= (1 + randomPerformance);
+            const horseWidth = horseElem.offsetWidth || 20; // Get horse element width, fallback to 20px
             
-            let effectiveRaceProgress = Math.max(0, (pos - 10)) / (trackWidth - finishLinePos - 10 - horseWidth);
-            effectiveRaceProgress = Math.min(1, Math.max(0, effectiveRaceProgress));
+            // Calculate current position from the left edge for finish line check
+            // pos is distance from right. trackWidth - pos is distance from left (of right edge of horse).
+            // trackWidth - pos - horseWidth is distance from left (of left edge of horse).
+            const currentLeftEdgePos = trackWidth - pos - horseWidth;
 
-            let staminaFactor = Math.max(0.1, 1.5 - horseData.baseStamina);
-            let drain = Math.pow(effectiveRaceProgress, 1.5) * STAMINA_DRAIN_FACTOR * staminaFactor * horseState.staminaDrainMultiplier; // staminaDrainMultiplier defaults to 1.0
-            let staminaEffect = Math.max(0.10, 1.0 - drain);
+            // Check if horse has crossed the finish line (finishLinePos from left)
+            if (currentLeftEdgePos <= finishLinePos) {
+                if (winner === -1) winner = i; // Declare first horse to cross as winner
+                // Ensure horse stops exactly at the finish line visually
+                return trackWidth - finishLinePos - horseWidth;
+            }
 
-            const finalAdvancement = Math.max(0.05, currentSpeed * staminaEffect * BASE_SPEED_FACTOR);
-            const newPos = pos + finalAdvancement;
+            // --- RANDOM ADVANCEMENT LOGIC ---
+            const advancement = Math.random() * (MAX_ADVANCE_PER_FRAME - MIN_ADVANCE_PER_FRAME) + MIN_ADVANCE_PER_FRAME;
+            const newPos = pos + advancement;
+            // --- END RANDOM ADVANCEMENT LOGIC ---
+            
             horseElem.style.right = `${newPos}px`;
 
+            // Add a visual trail effect (optional)
             if (raceFrameCounter % 5 === 0 && horseLaneElements[i]) {
                 const trail = document.createElement('div');
                 trail.className = 'horse-trail';
-                trail.style.backgroundColor = horseData.color;
-                trail.style.right = `${newPos - 5}px`;
-                trail.style.top = `${horseElem.offsetTop + horseElem.offsetHeight / 2 - 2}px`;
+                trail.style.backgroundColor = HORSES[i].color;
+                trail.style.right = `${newPos - 5}px`; // Position trail slightly behind horse
+                trail.style.top = `${horseElem.offsetTop + horseElem.offsetHeight / 2 - 2}px`; // Center trail vertically
                 horseLaneElements[i].appendChild(trail);
-                setTimeout(() => trail.remove(), 500);
+                setTimeout(() => trail.remove(), 500); // Trail fades quickly
             }
 
+            // Play step sound periodically
             if (raceFrameCounter % 12 === 0 && typeof playSound === 'function') playSound('race_step');
 
-            const newLeftPos = trackWidth - newPos - horseWidth;
-            if (newLeftPos <= finishLinePos && winner === -1) {
+            // Re-check for finish after moving
+            const newLeftEdgePos = trackWidth - newPos - horseWidth;
+            if (newLeftEdgePos <= finishLinePos && winner === -1) {
                 winner = i;
-                const finalRightPos = trackWidth - finishLinePos - horseWidth;
-                horseElem.style.right = `${finalRightPos}px`;
-                return finalRightPos;
+                const finalVisualPos = trackWidth - finishLinePos - horseWidth;
+                horseElem.style.right = `${finalVisualPos}px`;
+                return finalVisualPos;
             }
             return newPos;
         });
@@ -547,63 +372,69 @@ function startHorserace() {
         }
     }
     raceAnimationId = requestAnimationFrame(raceStep);
-    if (typeof saveGameState === 'function') saveGameState();
+    if (typeof saveGameState === 'function') saveGameState(); // From main.js
 }
 
 /**
  * Finishes the horse race and processes results.
  */
 function finishRace(winnerIndex) {
-    if (!horseraceActive) return;
+    if (!horseraceActive) return; // Should not happen, but good check
     if (!horseraceStatus || !horseraceStartButton || !horseraceBetInput || !horseraceSelectionContainer) {
         console.error("Cannot finish race, essential DOM elements missing.");
+        // Allow reset to happen anyway
     }
 
     cancelAnimationFrame(raceAnimationId);
     raceAnimationId = null;
-    horseraceActive = false;
+    horseraceActive = false; // Mark race as inactive
 
     const winnerHorse = HORSES[winnerIndex];
-    const winnerName = winnerHorse?.name || `Horse ${winnerIndex + 1}`;
+    const winnerName = winnerHorse?.name || `Horse ${winnerIndex + 1}`; // Fallback name
     const playerWon = winnerIndex === selectedHorseIndex;
 
+    // Add a visual cue for the winning horse
     if(horseElements[winnerIndex]) {
-        horseElements[winnerIndex].classList.add('animate-pulse');
+        horseElements[winnerIndex].classList.add('animate-pulse'); // Requires Tailwind or custom CSS for pulse
     }
 
+    // Safe wrappers for functions from main.js
     const safeFormatWin = typeof formatWin === 'function' ? formatWin : (amount) => `${amount} currency`;
     const safePlaySound = typeof playSound === 'function' ? playSound : (sound) => console.log(`Sound: ${sound}`);
     const safeAddWinToLeaderboard = typeof addWinToLeaderboard === 'function' ? addWinToLeaderboard : (game, amount) => console.log(`Leaderboard: ${game} +${amount}`);
     const safeUpdateCurrencyDisplay = typeof updateCurrencyDisplay === 'function' ? updateCurrencyDisplay : (status) => console.log(`Currency display updated: ${status || 'loss'}`);
 
-    if (playerWon) {
-        const winnerOdds = horseOdds[winnerIndex] != null ? horseOdds[winnerIndex] : 2.0; // Fallback odds
-        const winAmount = Math.floor(horseraceBet * winnerOdds);
-        const profit = winAmount;
 
-        if (typeof currency !== 'undefined') currency += winAmount;
-        if (typeof totalGain !== 'undefined') totalGain += Math.max(0, profit);
+    if (playerWon) {
+        const winnerOdds = horseOdds[winnerIndex] != null ? horseOdds[winnerIndex] : 2.0; // Fallback odds if not found
+        const winAmount = Math.floor(horseraceBet * winnerOdds); // Total amount returned to player
+        // const profit = winAmount - horseraceBet; // This is incorrect, winAmount is the total, bet already deducted visually
+        const profit = winAmount; // The actual amount won, on top of getting the bet back (which is handled by adding winAmount)
+
+        if (typeof currency !== 'undefined') currency += winAmount; // Add winnings to main.js currency
+        if (typeof totalGain !== 'undefined') totalGain += profit; // Track total gain in main.js
         
         if(horseraceStatus) horseraceStatus.textContent = `${winnerName} wins at ${winnerOdds.toFixed(2)}:1! You won ${safeFormatWin(profit)}!`;
         safePlaySound('race_win');
         safeAddWinToLeaderboard('Race', profit);
         safeUpdateCurrencyDisplay('win');
     } else {
-        if (typeof totalLoss !== 'undefined') totalLoss += horseraceBet;
-        const winnerOddsValue = horseOdds[winnerIndex] != null ? horseOdds[winnerIndex] : 0;
+        if (typeof totalLoss !== 'undefined') totalLoss += horseraceBet; // Track total loss in main.js
+        const winnerOddsValue = horseOdds[winnerIndex] != null ? horseOdds[winnerIndex] : 0; // Odds of actual winner
         if(horseraceStatus) horseraceStatus.textContent = `${winnerName} wins (${winnerOddsValue.toFixed(2)}:1). You lost ${safeFormatWin(horseraceBet)}.`;
         safePlaySound('lose');
-        safeUpdateCurrencyDisplay();
+        safeUpdateCurrencyDisplay(); // Default to 'loss' or no status change if that's how main.js handles it
     }
 
+    // Enable UI for next race after a delay
     setTimeout(() => {
-        if (!horseraceActive) {
+        if (!horseraceActive) { // Ensure race hasn't been restarted somehow
              resetHorserace();
         }
-    }, 3000);
+    }, 3000); // 3 second delay before resetting UI
 
-    if (typeof saveGameState === 'function') saveGameState();
+    if (typeof saveGameState === 'function') saveGameState(); // Save game state from main.js
 }
 
-// Ensure initHorserace is called, e.g., in main.js on DOMContentLoaded
-// document.addEventListener('DOMContentLoaded', () => { if (typeof initHorserace === 'function') initHorserace(); });
+// Ensure initHorserace is called, typically from main.js after DOM is loaded.
+// Example: document.addEventListener('DOMContentLoaded', () => { if (typeof initHorserace === 'function') initHorserace(); });
