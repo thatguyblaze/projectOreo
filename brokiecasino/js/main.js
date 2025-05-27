@@ -15,7 +15,7 @@
  */
 
 // --- Global State ---
-let currency = 500;
+let currency = 100;
 let totalLoanAmount = 0;
 let leaderboard = []; // Array to store { type: 'GameName', win: 150 }
 let totalGain = 0;
