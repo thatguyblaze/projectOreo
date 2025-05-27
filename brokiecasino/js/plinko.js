@@ -20,6 +20,9 @@
  * over many plays. This is achieved by adjusting the random component
  * of the drift strength based on the ball's current horizontal position
  * relative to the center of the canvas.
+ *
+ * MODIFICATION (User Request):
+ * - Ball drop position is now randomized to be closer to the center of the canvas.
  * ==========================================================================
  */
 
@@ -305,10 +308,23 @@ if (typeof initPlinko === 'undefined') {
         LocalBrokieAPI.updateBalance(-betAmount);
 
         const canvasWidth = plinkoCanvas.width;
-        const randomX = canvasWidth * 0.2 + canvasWidth * 0.6 * Math.random(); // Standard random drop
+
+        // MODIFIED: Calculate randomX to be closer to the center
+        const centerX = canvasWidth / 2;
+        // Define how wide the random drop zone should be, as a percentage of canvas width.
+        // 0.2 means the zone is 20% of the canvas width, centered.
+        // So, the ball will drop within 10% to the left or 10% to the right of the center.
+        const dropZoneWidthPercentage = 0.2;
+        const offsetFromCenter = (Math.random() - 0.5) * canvasWidth * dropZoneWidthPercentage;
+        const randomX = centerX + offsetFromCenter;
+        // Example: if canvasWidth is 300, centerX is 150.
+        // dropZoneWidthPercentage = 0.2 means the drop zone is 300 * 0.2 = 60 units wide.
+        // offsetFromCenter will be between -30 and +30.
+        // So, randomX will be between 120 (150-30) and 180 (150+30).
+
         const newBall = {
             x: randomX,
-            y: 20,
+            y: 20, // Stays close to the top
             vx: 0,
             vy: 0,
             radius: BALL_RADIUS,
@@ -383,59 +399,28 @@ if (typeof initPlinko === 'undefined') {
                     ball.vy *= BOUNCE_FACTOR;
 
                     // --- RIGGED HORIZONTAL DRIFT (HOUSE EDGE) ---
-                    // The goal is to subtly nudge the ball towards the center of the board
-                    // where lower multipliers are typically located.
-
-                    // Original M factor random part: Math.random() * 0.4, gives [0, 0.4)
-                    // Original M factor: 0.8 + (Math.random() * 0.4), gives [0.8, 1.2)
                     const M_BASE_RANDOM_PART = Math.random() * 0.4;
                     let M_base = 0.8 + M_BASE_RANDOM_PART;
-
-                    // BIAS_EFFECT_STRENGTH determines how much the M factor is shifted.
-                    // A small value (e.g., 0.05 to 0.1) makes the bias less noticeable.
-                    // This value is an absolute shift applied to M_base.
-                    // Max range of M_base is 0.4 (from 0.8 to 1.2).
-                    // A BIAS_EFFECT_STRENGTH of 0.075 is about 18.75% of this random range.
                     const BIAS_EFFECT_STRENGTH = 0.075;
-
-                    let M_final = M_base; // Default to unbiased M factor
+                    let M_final = M_base;
                     const canvasCenter = plinkoCanvas.width / 2;
-                    // Don't apply bias if the ball is already very close to the center line
-                    const centerBiasThreshold = PEG_RADIUS * 3; // A small zone around the center
+                    const centerBiasThreshold = PEG_RADIUS * 3;
 
                     if (ball.x < canvasCenter - centerBiasThreshold) {
-                        // Ball is to the LEFT of center, encourage movement to the RIGHT.
-                        if (nx > 0) {
-                            // Collision's natural horizontal push (via nx) is to the RIGHT. Enhance it.
-                            M_final = Math.min(1.2, M_base + BIAS_EFFECT_STRENGTH);
-                        } else if (nx < 0) {
-                            // Collision's natural horizontal push (via nx) is to the LEFT. Weaken it.
-                            M_final = Math.max(0.8, M_base - BIAS_EFFECT_STRENGTH);
-                        }
+                        if (nx > 0) { M_final = Math.min(1.2, M_base + BIAS_EFFECT_STRENGTH); }
+                        else if (nx < 0) { M_final = Math.max(0.8, M_base - BIAS_EFFECT_STRENGTH); }
                     } else if (ball.x > canvasCenter + centerBiasThreshold) {
-                        // Ball is to the RIGHT of center, encourage movement to the LEFT.
-                        if (nx < 0) {
-                            // Collision's natural horizontal push (via nx) is to the LEFT. Enhance it.
-                            M_final = Math.min(1.2, M_base + BIAS_EFFECT_STRENGTH);
-                        } else if (nx > 0) {
-                            // Collision's natural horizontal push (via nx) is to the RIGHT. Weaken it.
-                            M_final = Math.max(0.8, M_base - BIAS_EFFECT_STRENGTH);
-                        }
+                        if (nx < 0) { M_final = Math.min(1.2, M_base + BIAS_EFFECT_STRENGTH); }
+                        else if (nx > 0) { M_final = Math.max(0.8, M_base - BIAS_EFFECT_STRENGTH); }
                     }
-                    // If ball is within `centerBiasThreshold` of `canvasCenter`, M_final remains M_base (no bias).
-
                     ball.vx += nx * HORIZONTAL_DRIFT_FACTOR * M_final;
                     // --- END RIGGED HORIZONTAL DRIFT ---
 
-                    // Original non-rigged line:
-                    // ball.vx += nx * HORIZONTAL_DRIFT_FACTOR * (0.8 + Math.random() * 0.4);
-
-                    // Small vertical boost if ball gets too slow on a peg (helps prevent getting stuck high)
                     if (Math.abs(ball.vy) < 0.15 && ball.y < canvasHeight - plinkoBuckets[0].height - 20) {
-                       ball.vy += 0.35; // Add some downward velocity
-                       ball.vx += (Math.random() - 0.5) * 0.3; // Add a bit of random horizontal nudge
+                       ball.vy += 0.35;
+                       ball.vx += (Math.random() - 0.5) * 0.3;
                     }
-                    break; // Process only one peg collision per frame
+                    break;
                 }
             }
 
@@ -458,7 +443,7 @@ if (typeof initPlinko === 'undefined') {
                         break;
                     }
                 }
-                 if (!landedInBucket && ball.y > bucketTopY + ball.radius + 5) { // Ball clearly missed and went below
+                 if (!landedInBucket && ball.y > bucketTopY + ball.radius + 5) {
                      console.warn("Ball missed buckets, assigning to closest.");
                      let closestBucket = plinkoBuckets[0];
                      let minDist = Math.abs(ball.x - (closestBucket.x + closestBucket.width / 2));
@@ -478,8 +463,8 @@ if (typeof initPlinko === 'undefined') {
             if (totalVelocity < MIN_VELOCITY_THRESHOLD && ball.y < bucketTopY - ball.radius * 2) {
                 ball.stuckFrames++;
                 if (ball.stuckFrames > STUCK_FRAMES_THRESHOLD) {
-                    ball.vx += (Math.random() - 0.5) * 0.1; // Small random horizontal jiggle
-                    ball.vy += Math.random() * 0.1;       // Small random downward jiggle
+                    ball.vx += (Math.random() - 0.5) * 0.1;
+                    ball.vy += Math.random() * 0.1;
                     ball.stuckFrames = 0;
                     console.log("Applied anti-stuck jiggle.");
                 }
@@ -508,21 +493,21 @@ if (typeof initPlinko === 'undefined') {
     function handlePlinkoWin(bucket, betAmount) {
         if (!plinkoStatus || !LocalBrokieAPI) return;
         const multiplier = bucket.multiplier;
-        const winAmount = Math.floor(betAmount * multiplier); // Use Math.floor for integer winnings
+        const winAmount = Math.floor(betAmount * multiplier);
         LocalBrokieAPI.updateBalance(winAmount);
 
         let statusText = `Ball landed in ${multiplier}x. `;
-        const profit = winAmount - betAmount; // Calculate net profit/loss
+        const profit = winAmount - betAmount;
         if (profit > 0) {
             statusText += `Won ${LocalBrokieAPI.formatWin(profit)}!`;
             LocalBrokieAPI.addWin('Plinko', profit);
-            LocalBrokieAPI.playSound('plinko_win_high'); // Or a generic win sound
+            LocalBrokieAPI.playSound('plinko_win_high');
         } else if (profit < 0) {
              statusText += `Lost ${LocalBrokieAPI.formatWin(Math.abs(profit))}.`;
-             LocalBrokieAPI.playSound('plinko_win_low'); // Or a generic lose sound
-        } else { // profit === 0 (e.g. 0.1x multiplier might lead to this if betAmount is small)
+             LocalBrokieAPI.playSound('plinko_win_low');
+        } else {
              statusText += `Almost nothing back.`;
-             LocalBrokieAPI.playSound('plinko_peg_hit'); // A neutral sound
+             LocalBrokieAPI.playSound('plinko_peg_hit');
         }
         LocalBrokieAPI.showMessage(statusText, 2500);
         highlightBucket(bucket);
@@ -537,38 +522,32 @@ if (typeof initPlinko === 'undefined') {
        const originalColor = bucket.color;
        const highlightFill = 'rgba(255, 255, 255, 0.9)';
        const highlightBorder = '#FFFFFF';
-       const highlightTextColor = '#000000'; // Black text for high contrast on white highlight
+       const highlightTextColor = '#000000';
 
-       // Draw highlight
        ctx.fillStyle = highlightFill;
        ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
        ctx.strokeStyle = highlightBorder;
        ctx.lineWidth = 2;
-       ctx.strokeRect(bucket.x + 1, bucket.y + 1, bucket.width - 2, bucket.height - 2); // Inset border
+       ctx.strokeRect(bucket.x + 1, bucket.y + 1, bucket.width - 2, bucket.height - 2);
 
-       // Draw text on highlight
        ctx.fillStyle = highlightTextColor;
-       ctx.font = 'bold 13px Inter, sans-serif'; // Slightly larger for emphasis
+       ctx.font = 'bold 13px Inter, sans-serif';
        ctx.textAlign = 'center';
        ctx.textBaseline = 'middle';
        ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
-       ctx.lineWidth = 1; // Reset line width
+       ctx.lineWidth = 1;
 
        setTimeout(() => {
-           // Redraw only the specific bucket to its original state
-           // This is a simplified redraw; for perfect redraw, the entire board might be needed
-           // if balls are still falling or other dynamic elements are present.
-           // However, since balls are removed upon landing, this should be mostly fine.
            if (plinkoCtx) {
                ctx.fillStyle = originalColor;
                ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
-               ctx.fillStyle = '#FFFFFF'; // Original text color
-               ctx.font = 'bold 12px Inter, sans-serif'; // Original font
+               ctx.fillStyle = '#FFFFFF';
+               ctx.font = 'bold 12px Inter, sans-serif';
                ctx.textAlign = 'center';
                ctx.textBaseline = 'middle';
                ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
            }
-       }, 350); // Duration of highlight
+       }, 350);
     }
 
     // Expose initPlinko to be called from main.js or HTML
