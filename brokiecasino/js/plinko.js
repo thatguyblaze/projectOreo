@@ -401,7 +401,7 @@ if (typeof initPlinko === 'undefined') {
                     // --- RIGGED HORIZONTAL DRIFT (HOUSE EDGE) ---
                     const M_BASE_RANDOM_PART = Math.random() * 0.4;
                     let M_base = 0.8 + M_BASE_RANDOM_PART;
-                    const BIAS_EFFECT_STRENGTH = 70;
+                    const BIAS_EFFECT_STRENGTH = 150;
                     let M_final = M_base;
                     const canvasCenter = plinkoCanvas.width / 2;
                     const centerBiasThreshold = PEG_RADIUS * 3;
