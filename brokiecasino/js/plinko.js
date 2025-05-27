@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * Brokie Casino - Plinko Game Logic (plinko.js) - v2.5 (Design Enhancements)
+ * Brokie Casino - Plinko Game Logic (plinko.js) - v2.5.1 (House Edge Mod)
  *
  * Handles Plinko game logic using HTML Canvas.
  * - Enhanced Peg design (gradient/3D look).
@@ -13,6 +13,13 @@
  * - Improved ball visual appearance with gradient.
  * - Enhanced bucket highlight effect.
  * - Depends on functions and variables defined in main.js (BrokieAPI).
+ *
+ * HOUSE EDGE MODIFICATION:
+ * - The horizontal drift when a ball hits a peg is subtly biased
+ * to favor balls moving towards the center of the board (lower multipliers)
+ * over many plays. This is achieved by adjusting the random component
+ * of the drift strength based on the ball's current horizontal position
+ * relative to the center of the canvas.
  * ==========================================================================
  */
 
@@ -29,17 +36,16 @@ if (typeof initPlinko === 'undefined') {
     const PLINKO_ROWS = 12;
     const PEG_RADIUS = 5;
     const BALL_RADIUS = 7;
-    const BALL_HISTORY_LENGTH = 5; // *** NEW: How many previous positions to store for trail ***
-    // Peg colors are now handled by gradient in drawPlinkoBoard
+    const BALL_HISTORY_LENGTH = 5;
     const GRAVITY = 0.15;
     const BOUNCE_FACTOR = 0.6;
-    const HORIZONTAL_DRIFT_FACTOR = 0.2;
+    const HORIZONTAL_DRIFT_FACTOR = 0.2; // Main factor for horizontal drift strength
     const BALL_LIFETIME_MS = 20000;
     const MIN_VELOCITY_THRESHOLD = 0.05;
     const STUCK_FRAMES_THRESHOLD = 60;
 
     // Bucket definitions (multipliers and colors)
-    const BUCKET_MULTIPLIERS = [5, 2, 0.5, 0.1, 0.5, 2, 5];
+    const BUCKET_MULTIPLIERS = [5, 2, 0.5, 0.1, 0.5, 2, 5]; // Central buckets have lower multipliers
     const BUCKET_COLORS = ['#ef4444', '#fb923c', '#a3a3a3', '#6b7280', '#a3a3a3', '#fb923c', '#ef4444'];
 
     // --- DOM Elements (Plinko Specific) ---
@@ -53,7 +59,7 @@ if (typeof initPlinko === 'undefined') {
      * @param {object} API - The BrokieAPI object from main.js.
      */
     function initPlinko(API) {
-        console.log("Initializing Plinko (v2.5 Guarded)...");
+        console.log("Initializing Plinko (v2.5.1 Guarded - House Edge Mod)...");
         LocalBrokieAPI = API;
 
         plinkoBetInput = document.getElementById('plinko-bet');
@@ -90,7 +96,7 @@ if (typeof initPlinko === 'undefined') {
              console.error("BrokieAPI.addBetAdjustmentListeners not found in plinko.js init");
         }
 
-        console.log("Plinko Initialized (v2.5 Guarded).");
+        console.log("Plinko Initialized (v2.5.1 Guarded - House Edge Mod).");
     }
 
     /**
@@ -103,7 +109,7 @@ if (typeof initPlinko === 'undefined') {
         plinkoPegs = [];
         plinkoBuckets = [];
 
-        const startY = 60; // *** Adjusted slightly for drop zone hint ***
+        const startY = 60;
         const rowSpacing = 30;
         const pegSpacing = 35;
 
@@ -146,75 +152,66 @@ if (typeof initPlinko === 'undefined') {
         const canvasWidth = plinkoCanvas.width;
         const canvasHeight = plinkoCanvas.height;
 
-        // *** NEW: Draw Drop Zone Hint ***
-        const dropZoneY = 40; // Y-level for the hint line/area
-        ctx.fillStyle = 'rgba(74, 74, 74, 0.1)'; // Faint background hint (fluent-border alpha)
+        // Draw Drop Zone Hint
+        const dropZoneY = 40;
+        ctx.fillStyle = 'rgba(74, 74, 74, 0.1)';
         ctx.fillRect(0, 0, canvasWidth, dropZoneY);
-        ctx.strokeStyle = 'rgba(156, 163, 175, 0.3)'; // Faint gray line (gray-400 alpha)
+        ctx.strokeStyle = 'rgba(156, 163, 175, 0.3)';
         ctx.lineWidth = 1;
-        ctx.setLineDash([5, 5]); // Dashed line
+        ctx.setLineDash([5, 5]);
         ctx.beginPath();
         ctx.moveTo(0, dropZoneY);
         ctx.lineTo(canvasWidth, dropZoneY);
         ctx.stroke();
-        ctx.setLineDash([]); // Reset line dash
+        ctx.setLineDash([]);
 
-        // *** CHANGED: Draw Pegs with Gradient ***
+        // Draw Pegs with Gradient
         plinkoPegs.forEach(peg => {
             const pegGradient = ctx.createRadialGradient(
-                peg.x - peg.radius * 0.3, peg.y - peg.radius * 0.3, peg.radius * 0.1, // Inner highlight
-                peg.x, peg.y, peg.radius // Outer circle
+                peg.x - peg.radius * 0.3, peg.y - peg.radius * 0.3, peg.radius * 0.1,
+                peg.x, peg.y, peg.radius
             );
-            pegGradient.addColorStop(0, '#e5e7eb'); // Lighter Gray (gray-200)
-            pegGradient.addColorStop(0.8, '#9ca3af'); // Main Gray (gray-400)
-            pegGradient.addColorStop(1, '#6b7280'); // Darker Gray edge (gray-500)
+            pegGradient.addColorStop(0, '#e5e7eb');
+            pegGradient.addColorStop(0.8, '#9ca3af');
+            pegGradient.addColorStop(1, '#6b7280');
 
             ctx.fillStyle = pegGradient;
             ctx.beginPath();
             ctx.arc(peg.x, peg.y, peg.radius, 0, Math.PI * 2);
             ctx.fill();
-            // Optional: Add subtle border
-            // ctx.strokeStyle = '#4b5563'; // gray-600
-            // ctx.lineWidth = 0.5;
-            // ctx.stroke();
         });
 
         // Draw Buckets
         plinkoBuckets.forEach((bucket, index) => {
-            // Draw Bucket Base Color
             ctx.fillStyle = bucket.color;
             ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
 
-            // Draw multiplier text
             ctx.fillStyle = '#FFFFFF';
             ctx.font = 'bold 12px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
 
-            // *** CHANGED: Draw Enhanced Bucket Dividers ***
             if (index > 0) {
                 const dividerX = bucket.x;
                 const dividerTopY = bucket.y;
                 const dividerBottomY = canvasHeight;
 
-                // Draw main divider line (darker)
-                ctx.strokeStyle = '#1c1c1c'; // fluent-bg
-                ctx.lineWidth = 2; // Slightly thicker
+                ctx.strokeStyle = '#1c1c1c';
+                ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(dividerX, dividerTopY);
                 ctx.lineTo(dividerX, dividerBottomY);
                 ctx.stroke();
 
-                // Add subtle highlight/shadow for bevel effect
-                ctx.strokeStyle = 'rgba(74, 74, 74, 0.6)'; // fluent-border alpha (highlight)
+                ctx.strokeStyle = 'rgba(74, 74, 74, 0.6)';
                 ctx.lineWidth = 0.5;
                 ctx.beginPath();
                 ctx.moveTo(dividerX + 1, dividerTopY);
                 ctx.lineTo(dividerX + 1, dividerBottomY);
                 ctx.stroke();
 
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)'; // Shadow
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
                 ctx.lineWidth = 0.5;
                 ctx.beginPath();
                 ctx.moveTo(dividerX - 1, dividerTopY);
@@ -222,7 +219,7 @@ if (typeof initPlinko === 'undefined') {
                 ctx.stroke();
             }
         });
-        ctx.lineWidth = 1; // Reset line width
+        ctx.lineWidth = 1;
     }
 
     /**
@@ -233,19 +230,19 @@ if (typeof initPlinko === 'undefined') {
         const ctx = plinkoCtx;
 
         plinkoBalls.forEach(ball => {
-            // *** NEW: Draw Trail ***
+            // Draw Trail
             if (ball.history && ball.history.length > 0) {
                 ball.history.forEach((pos, index) => {
-                    const alpha = 0.5 * (index / ball.history.length); // Fade out
-                    const radius = ball.radius * (0.5 + 0.5 * (index / ball.history.length)); // Shrink slightly
+                    const alpha = 0.5 * (index / ball.history.length);
+                    const radius = ball.radius * (0.5 + 0.5 * (index / ball.history.length));
 
                     const trailGradient = ctx.createRadialGradient(
                         pos.x - radius * 0.3, pos.y - radius * 0.3, radius * 0.1,
                         pos.x, pos.y, radius
                     );
-                    trailGradient.addColorStop(0, `rgba(255, 255, 204, ${alpha * 0.8})`); // Highlight with alpha
-                    trailGradient.addColorStop(0.7, `rgba(250, 204, 21, ${alpha})`); // Main color with alpha
-                    trailGradient.addColorStop(1, `rgba(234, 179, 8, ${alpha * 0.7})`); // Edge with alpha
+                    trailGradient.addColorStop(0, `rgba(255, 255, 204, ${alpha * 0.8})`);
+                    trailGradient.addColorStop(0.7, `rgba(250, 204, 21, ${alpha})`);
+                    trailGradient.addColorStop(1, `rgba(234, 179, 8, ${alpha * 0.7})`);
 
                     ctx.fillStyle = trailGradient;
                     ctx.beginPath();
@@ -254,14 +251,14 @@ if (typeof initPlinko === 'undefined') {
                 });
             }
 
-            // Draw Main Ball (Gradient from v2.4)
+            // Draw Main Ball
             const gradient = ctx.createRadialGradient(
                 ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.1,
                 ball.x, ball.y, ball.radius
             );
-            gradient.addColorStop(0, '#ffffcc'); // Light yellow highlight
-            gradient.addColorStop(0.7, '#facc15'); // Main yellow (Tailwind yellow-400)
-            gradient.addColorStop(1, '#eab308'); // Darker yellow edge (Tailwind yellow-500)
+            gradient.addColorStop(0, '#ffffcc');
+            gradient.addColorStop(0.7, '#facc15');
+            gradient.addColorStop(1, '#eab308');
 
             ctx.fillStyle = gradient;
             ctx.beginPath();
@@ -282,7 +279,7 @@ if (typeof initPlinko === 'undefined') {
         if (plinkoDropButton) plinkoDropButton.disabled = false;
         if (plinkoCtx && plinkoCanvas) {
             plinkoCtx.clearRect(0, 0, plinkoCanvas.width, plinkoCanvas.height);
-            drawPlinkoBoard(); // Redraw the static board elements
+            drawPlinkoBoard();
         }
         console.log("Plinko reset.");
     }
@@ -308,17 +305,17 @@ if (typeof initPlinko === 'undefined') {
         LocalBrokieAPI.updateBalance(-betAmount);
 
         const canvasWidth = plinkoCanvas.width;
-        const randomX = canvasWidth * 0.2 + canvasWidth * 0.6 * Math.random();
+        const randomX = canvasWidth * 0.2 + canvasWidth * 0.6 * Math.random(); // Standard random drop
         const newBall = {
             x: randomX,
-            y: 20, // Start above the pegs
+            y: 20,
             vx: 0,
             vy: 0,
             radius: BALL_RADIUS,
             betAmount: betAmount,
             startTime: Date.now(),
             stuckFrames: 0,
-            history: [] // *** ADDED: Initialize history array for trail ***
+            history: []
         };
         plinkoBalls.push(newBall);
 
@@ -345,24 +342,20 @@ if (typeof initPlinko === 'undefined') {
 
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        // --- Update and Check Each Ball ---
         for (let i = plinkoBalls.length - 1; i >= 0; i--) {
             const ball = plinkoBalls[i];
 
-            // *** NEW: Update Ball History for Trail ***
             ball.history.push({ x: ball.x, y: ball.y });
             if (ball.history.length > BALL_HISTORY_LENGTH) {
-                ball.history.shift(); // Remove oldest position
+                ball.history.shift();
             }
 
-            // Timer Check
             if (currentTime - ball.startTime > BALL_LIFETIME_MS) {
                 console.log("Ball timed out and removed.");
                 plinkoBalls.splice(i, 1);
                 continue;
             }
 
-            // Physics Update
             ball.vy += GRAVITY;
             ball.x += ball.vx;
             ball.y += ball.vy;
@@ -378,8 +371,8 @@ if (typeof initPlinko === 'undefined') {
 
                 if (distance < minDist) {
                     collisionOccurredThisFrame = true;
-                    const nx = dx / distance;
-                    const ny = dy / distance;
+                    const nx = dx / distance; // Normalized collision vector x
+                    const ny = dy / distance; // Normalized collision vector y
                     const overlap = minDist - distance;
                     ball.x += nx * overlap;
                     ball.y += ny * overlap;
@@ -388,13 +381,61 @@ if (typeof initPlinko === 'undefined') {
                     ball.vy -= 2 * dotProduct * ny;
                     ball.vx *= BOUNCE_FACTOR;
                     ball.vy *= BOUNCE_FACTOR;
-                    ball.vx += nx * HORIZONTAL_DRIFT_FACTOR * (0.8 + Math.random() * 0.4);
 
-                    if (Math.abs(ball.vy) < 0.15 && ball.y < canvasHeight - plinkoBuckets[0].height - 20) {
-                       ball.vy += 0.35;
-                       ball.vx += (Math.random() - 0.5) * 0.3;
+                    // --- RIGGED HORIZONTAL DRIFT (HOUSE EDGE) ---
+                    // The goal is to subtly nudge the ball towards the center of the board
+                    // where lower multipliers are typically located.
+
+                    // Original M factor random part: Math.random() * 0.4, gives [0, 0.4)
+                    // Original M factor: 0.8 + (Math.random() * 0.4), gives [0.8, 1.2)
+                    const M_BASE_RANDOM_PART = Math.random() * 0.4;
+                    let M_base = 0.8 + M_BASE_RANDOM_PART;
+
+                    // BIAS_EFFECT_STRENGTH determines how much the M factor is shifted.
+                    // A small value (e.g., 0.05 to 0.1) makes the bias less noticeable.
+                    // This value is an absolute shift applied to M_base.
+                    // Max range of M_base is 0.4 (from 0.8 to 1.2).
+                    // A BIAS_EFFECT_STRENGTH of 0.075 is about 18.75% of this random range.
+                    const BIAS_EFFECT_STRENGTH = 0.075;
+
+                    let M_final = M_base; // Default to unbiased M factor
+                    const canvasCenter = plinkoCanvas.width / 2;
+                    // Don't apply bias if the ball is already very close to the center line
+                    const centerBiasThreshold = PEG_RADIUS * 3; // A small zone around the center
+
+                    if (ball.x < canvasCenter - centerBiasThreshold) {
+                        // Ball is to the LEFT of center, encourage movement to the RIGHT.
+                        if (nx > 0) {
+                            // Collision's natural horizontal push (via nx) is to the RIGHT. Enhance it.
+                            M_final = Math.min(1.2, M_base + BIAS_EFFECT_STRENGTH);
+                        } else if (nx < 0) {
+                            // Collision's natural horizontal push (via nx) is to the LEFT. Weaken it.
+                            M_final = Math.max(0.8, M_base - BIAS_EFFECT_STRENGTH);
+                        }
+                    } else if (ball.x > canvasCenter + centerBiasThreshold) {
+                        // Ball is to the RIGHT of center, encourage movement to the LEFT.
+                        if (nx < 0) {
+                            // Collision's natural horizontal push (via nx) is to the LEFT. Enhance it.
+                            M_final = Math.min(1.2, M_base + BIAS_EFFECT_STRENGTH);
+                        } else if (nx > 0) {
+                            // Collision's natural horizontal push (via nx) is to the RIGHT. Weaken it.
+                            M_final = Math.max(0.8, M_base - BIAS_EFFECT_STRENGTH);
+                        }
                     }
-                    break;
+                    // If ball is within `centerBiasThreshold` of `canvasCenter`, M_final remains M_base (no bias).
+
+                    ball.vx += nx * HORIZONTAL_DRIFT_FACTOR * M_final;
+                    // --- END RIGGED HORIZONTAL DRIFT ---
+
+                    // Original non-rigged line:
+                    // ball.vx += nx * HORIZONTAL_DRIFT_FACTOR * (0.8 + Math.random() * 0.4);
+
+                    // Small vertical boost if ball gets too slow on a peg (helps prevent getting stuck high)
+                    if (Math.abs(ball.vy) < 0.15 && ball.y < canvasHeight - plinkoBuckets[0].height - 20) {
+                       ball.vy += 0.35; // Add some downward velocity
+                       ball.vx += (Math.random() - 0.5) * 0.3; // Add a bit of random horizontal nudge
+                    }
+                    break; // Process only one peg collision per frame
                 }
             }
 
@@ -417,7 +458,7 @@ if (typeof initPlinko === 'undefined') {
                         break;
                     }
                 }
-                 if (!landedInBucket && ball.y > bucketTopY + ball.radius + 5) {
+                 if (!landedInBucket && ball.y > bucketTopY + ball.radius + 5) { // Ball clearly missed and went below
                      console.warn("Ball missed buckets, assigning to closest.");
                      let closestBucket = plinkoBuckets[0];
                      let minDist = Math.abs(ball.x - (closestBucket.x + closestBucket.width / 2));
@@ -432,27 +473,24 @@ if (typeof initPlinko === 'undefined') {
                  }
             }
 
-            // Anti-Stuck Jiggle Logic (from v2.4)
+            // Anti-Stuck Jiggle Logic
             const totalVelocity = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
             if (totalVelocity < MIN_VELOCITY_THRESHOLD && ball.y < bucketTopY - ball.radius * 2) {
                 ball.stuckFrames++;
                 if (ball.stuckFrames > STUCK_FRAMES_THRESHOLD) {
-                    ball.vx += (Math.random() - 0.5) * 0.1;
-                    ball.vy += Math.random() * 0.1;
+                    ball.vx += (Math.random() - 0.5) * 0.1; // Small random horizontal jiggle
+                    ball.vy += Math.random() * 0.1;       // Small random downward jiggle
                     ball.stuckFrames = 0;
                     console.log("Applied anti-stuck jiggle.");
                 }
             } else {
                 ball.stuckFrames = 0;
             }
+        }
 
-        } // End ball loop
+        drawPlinkoBoard();
+        drawPlinkoBalls();
 
-        // --- Draw ---
-        drawPlinkoBoard(); // Redraw static board elements (now includes drop zone hint)
-        drawPlinkoBalls(); // Draw balls (now includes trail)
-
-        // --- Continue/Stop ---
         if (plinkoBalls.length > 0) {
             plinkoAnimationId = requestAnimationFrame(animatePlinko);
         } else {
@@ -470,18 +508,21 @@ if (typeof initPlinko === 'undefined') {
     function handlePlinkoWin(bucket, betAmount) {
         if (!plinkoStatus || !LocalBrokieAPI) return;
         const multiplier = bucket.multiplier;
-        const winAmount = Math.floor(betAmount * multiplier);
+        const winAmount = Math.floor(betAmount * multiplier); // Use Math.floor for integer winnings
         LocalBrokieAPI.updateBalance(winAmount);
 
         let statusText = `Ball landed in ${multiplier}x. `;
-        const profit = winAmount - betAmount;
+        const profit = winAmount - betAmount; // Calculate net profit/loss
         if (profit > 0) {
             statusText += `Won ${LocalBrokieAPI.formatWin(profit)}!`;
             LocalBrokieAPI.addWin('Plinko', profit);
+            LocalBrokieAPI.playSound('plinko_win_high'); // Or a generic win sound
         } else if (profit < 0) {
              statusText += `Lost ${LocalBrokieAPI.formatWin(Math.abs(profit))}.`;
-        } else {
+             LocalBrokieAPI.playSound('plinko_win_low'); // Or a generic lose sound
+        } else { // profit === 0 (e.g. 0.1x multiplier might lead to this if betAmount is small)
              statusText += `Almost nothing back.`;
+             LocalBrokieAPI.playSound('plinko_peg_hit'); // A neutral sound
         }
         LocalBrokieAPI.showMessage(statusText, 2500);
         highlightBucket(bucket);
@@ -491,42 +532,49 @@ if (typeof initPlinko === 'undefined') {
      * Briefly highlights a specific bucket.
      */
     function highlightBucket(bucket) {
-         if (!plinkoCtx || !plinkoCanvas) return;
-         const ctx = plinkoCtx;
-         const originalColor = bucket.color;
-         const highlightFill = 'rgba(255, 255, 255, 0.9)';
-         const highlightBorder = '#FFFFFF';
-         const highlightTextColor = '#000000';
+       if (!plinkoCtx || !plinkoCanvas) return;
+       const ctx = plinkoCtx;
+       const originalColor = bucket.color;
+       const highlightFill = 'rgba(255, 255, 255, 0.9)';
+       const highlightBorder = '#FFFFFF';
+       const highlightTextColor = '#000000'; // Black text for high contrast on white highlight
 
-         ctx.fillStyle = highlightFill;
-         ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
-         ctx.strokeStyle = highlightBorder;
-         ctx.lineWidth = 2;
-         ctx.strokeRect(bucket.x + 1, bucket.y + 1, bucket.width - 2, bucket.height - 2);
-         ctx.fillStyle = highlightTextColor;
-         ctx.font = 'bold 13px Inter, sans-serif';
-         ctx.textAlign = 'center';
-         ctx.textBaseline = 'middle';
-         ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
-         ctx.lineWidth = 1; // Reset line width
+       // Draw highlight
+       ctx.fillStyle = highlightFill;
+       ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
+       ctx.strokeStyle = highlightBorder;
+       ctx.lineWidth = 2;
+       ctx.strokeRect(bucket.x + 1, bucket.y + 1, bucket.width - 2, bucket.height - 2); // Inset border
 
-         setTimeout(() => {
-             // Simple redraw logic (as before) - best effort redraw
-             if (plinkoCtx) {
-                ctx.fillStyle = originalColor;
-                ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = 'bold 12px Inter, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
-             }
-         }, 350);
+       // Draw text on highlight
+       ctx.fillStyle = highlightTextColor;
+       ctx.font = 'bold 13px Inter, sans-serif'; // Slightly larger for emphasis
+       ctx.textAlign = 'center';
+       ctx.textBaseline = 'middle';
+       ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
+       ctx.lineWidth = 1; // Reset line width
+
+       setTimeout(() => {
+           // Redraw only the specific bucket to its original state
+           // This is a simplified redraw; for perfect redraw, the entire board might be needed
+           // if balls are still falling or other dynamic elements are present.
+           // However, since balls are removed upon landing, this should be mostly fine.
+           if (plinkoCtx) {
+               ctx.fillStyle = originalColor;
+               ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
+               ctx.fillStyle = '#FFFFFF'; // Original text color
+               ctx.font = 'bold 12px Inter, sans-serif'; // Original font
+               ctx.textAlign = 'center';
+               ctx.textBaseline = 'middle';
+               ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
+           }
+       }, 350); // Duration of highlight
     }
 
+    // Expose initPlinko to be called from main.js or HTML
     window.initPlinko = initPlinko;
 
 // End of the guard block
 } else {
-    console.warn("Plinko script (v2.5) already loaded. Skipping re-initialization.");
+    console.warn("Plinko script (v2.5.1 - House Edge Mod) already loaded. Skipping re-initialization.");
 }
