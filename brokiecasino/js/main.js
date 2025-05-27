@@ -504,6 +504,8 @@ function setActiveTab(selectedTab) {
 /**
  * Adjusts the value of a bet input field based on a specified operation.
  * Handles min/max bet logic based on current currency.
+ * Uses parseFloat for reading input to handle potential scientific notation for large numbers.
+ * Assumes bets are ultimately integers, so Math.floor is used after parsing.
  * @param {HTMLInputElement} inputElement - The bet input field element.
  * @param {number} amount - The amount for the operation.
  * @param {'add'|'subtract'|'multiply'|'divide'|'min'|'max'|'set'} operation - The operation type.
@@ -513,12 +515,23 @@ function adjustBet(inputElement, amount, operation) {
         console.error("adjustBet called with invalid inputElement");
         return;
     }
-    let currentBet = parseInt(inputElement.value);
-    if (isNaN(currentBet) || currentBet < 1) currentBet = 1; // Default to 1 if invalid
 
-    let newBet = currentBet;
+    // Read current bet using parseFloat to handle potential scientific notation (e.g., "1e7")
+    // Then floor it, assuming bets are integers.
+    let parsedValue = parseFloat(inputElement.value);
+    let currentBet;
+    if (isNaN(parsedValue) || parsedValue < 1) {
+        currentBet = 1; // Default to 1 if invalid or less than 1
+    } else {
+        currentBet = Math.floor(parsedValue);
+    }
+
+    let newBet = currentBet; // Initialize newBet with the current (floored) bet value.
+                           // This will be overridden by 'min', 'max', and 'set' operations.
+
     const minBet = 1;
-    const maxBet = Math.max(minBet, currency); // Max bet is currency, but at least 1
+    // maxBet is the maximum amount the player can possibly bet, based on their current currency.
+    const maxBet = Math.max(minBet, Math.floor(currency)); // Floor currency for max bet if currency can be float
 
     switch (operation) {
         case 'add': newBet = currentBet + amount; break;
@@ -526,26 +539,29 @@ function adjustBet(inputElement, amount, operation) {
         case 'multiply': newBet = Math.floor(currentBet * amount); break;
         case 'divide': newBet = Math.floor(currentBet / amount); break;
         case 'min': newBet = minBet; break;
-        case 'max': newBet = maxBet; break;
-        case 'set': newBet = amount; break; // Directly set the value
+        case 'max': newBet = maxBet; break; // Set to the maximum possible bet (floored currency)
+        case 'set': newBet = Math.floor(amount); break; // Directly set the value (and floor it)
         default: console.warn("Invalid operation in adjustBet:", operation); return;
     }
 
-    // Clamp the new bet between min and max allowed values
-    newBet = Math.max(minBet, newBet); // Ensure at least minBet
-    // Only clamp to maxBet if the user actually has currency
+    // Clamp the new bet: ensure it's at least minBet.
+    newBet = Math.max(minBet, newBet);
+
+    // Further clamp: ensure it doesn't exceed maxBet (player's current floored currency).
+    // This check is crucial. If currency is 0, maxBet would be 1 (due to Math.max(minBet, 0)).
     if (currency > 0) {
         newBet = Math.min(maxBet, newBet);
     } else {
-        newBet = minBet; // If broke, bet resets to min
+        // If currency is 0 (or less, though should not happen), bet must be minBet.
+        newBet = minBet;
     }
 
-    // Handle potential NaN
+    // Handle potential NaN from operations if inputs were weird, though parseFloat helps.
     if (isNaN(newBet)) {
         newBet = minBet;
     }
 
-    inputElement.value = newBet; // Update the input field value
+    inputElement.value = newBet; // Update the input field value.
     // playSound('click'); // Optional sound feedback
 }
 
@@ -586,7 +602,7 @@ function setupMainEventListeners() {
     if (atmButtons) {
         atmButtons.forEach(button => {
             button.addEventListener('click', () => {
-                const amount = parseInt(button.dataset.amount);
+                const amount = parseInt(button.dataset.amount); // ATM amounts are fixed integers
                 if (isNaN(amount) || amount <= 0) return;
                 currency += amount;
                 totalLoanAmount += amount;
@@ -665,16 +681,32 @@ function addBetAdjustmentListeners(gamePrefix, betInputElement) {
     if (minBtn) minBtn.addEventListener('click', () => adjustBet(betInputElement, 1, 'min'));
     if (halfBtn) halfBtn.addEventListener('click', () => adjustBet(betInputElement, 2, 'divide'));
     if (doubleBtn) doubleBtn.addEventListener('click', () => adjustBet(betInputElement, 2, 'multiply'));
+    // For 'max', pass the current currency. adjustBet will handle flooring if necessary.
     if (maxBtn) maxBtn.addEventListener('click', () => adjustBet(betInputElement, currency, 'max'));
+
 
     // Add listener to the input field itself for validation on change/input
     if (betInputElement) {
         betInputElement.addEventListener('change', () => { // Validate on 'change'
-            let value = parseInt(betInputElement.value);
-            if (isNaN(value) || value < 1) value = 1;
-            adjustBet(betInputElement, value, 'set'); // Use adjustBet to clamp
+            // Use parseFloat to correctly read potentially large numbers (e.g., scientific notation)
+            let tempValue = parseFloat(betInputElement.value);
+            let valueToSet;
+            if (isNaN(tempValue) || tempValue < 1) {
+                valueToSet = 1;
+            } else {
+                valueToSet = Math.floor(tempValue); // Assume integer bets
+            }
+            // Use adjustBet with 'set' operation to apply clamping and update.
+            // adjustBet will also floor the 'amount' for 'set' operation.
+            adjustBet(betInputElement, valueToSet, 'set');
         });
-        betInputElement.addEventListener('input', () => { // Prevent non-numeric input
+        betInputElement.addEventListener('input', () => { // Prevent non-numeric input, allow 'e' for scientific notation
+                                                      // but rely on parseFloat for final validation.
+            // This regex is a bit more permissive to allow typing scientific notation,
+            // but parseFloat and subsequent logic will handle validation.
+            // A simpler alternative if not wanting to support typing 'e':
+            // betInputElement.value = betInputElement.value.replace(/[^0-9]/g, '');
+            // For now, let's stick to original non-numeric filtering, as parseFloat handles 'e'.
             betInputElement.value = betInputElement.value.replace(/[^0-9]/g, '');
         });
     }
@@ -771,4 +803,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log("Brokie Casino Initialized.");
 });
-
