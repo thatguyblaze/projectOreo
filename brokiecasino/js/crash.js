@@ -18,16 +18,16 @@
  */
 
 // --- Crash Game Constants ---
-const CRASH_MAX_TIME_MS = 60000; // Max time 60 seconds
+const CRASH_MAX_TIME_MS = 6000000; // Max time 60 seconds
 // const CRASH_UPDATE_INTERVAL_MS = 50; // Target interval (RAF controls actual timing)
 const CRASH_STARTING_MAX_Y = 2.0;
 const CRASH_Y_AXIS_PADDING_FACTOR = 1.15;
-const CRASH_RESCALE_THRESHOLD = 0.90;
+const CRASH_RESCALE_THRESHOLD = 0.80;
 const CRASH_GRID_LINES_X = 5;
 const CRASH_GRID_LINES_Y = 4;
-const SVG_VIEWBOX_WIDTH = 700;
+const SVG_VIEWBOX_WIDTH = 900;
 const SVG_VIEWBOX_HEIGHT = 250;
-const CRASH_TICK_SOUND_START_MULTIPLIER = 5.0; // Multiplier threshold to start tick sound
+const CRASH_TICK_SOUND_START_MULTIPLIER = 1000.0; // Multiplier threshold to start tick sound
 
 // --- Crash Game State Variables ---
 let crashGameActive = false;
