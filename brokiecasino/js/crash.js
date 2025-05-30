@@ -25,8 +25,8 @@ const CRASH_Y_AXIS_PADDING_FACTOR = 1.15;
 const CRASH_RESCALE_THRESHOLD = 0.90;
 const CRASH_GRID_LINES_X = 5;
 const CRASH_GRID_LINES_Y = 4;
-const SVG_VIEWBOX_WIDTH = 100;
-const SVG_VIEWBOX_HEIGHT = 100;
+const SVG_VIEWBOX_WIDTH = 700;
+const SVG_VIEWBOX_HEIGHT = 250;
 const CRASH_TICK_SOUND_START_MULTIPLIER = 5.0; // Multiplier threshold to start tick sound
 
 // --- Crash Game State Variables ---
