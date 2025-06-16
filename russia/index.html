@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Decree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto Slab', serif;
+            background-color: #f0ebe5; /* A slightly aged paper color */
+        }
+        .paper {
+            background-color: #faf8f2;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border: 1px solid #dcdcdc;
+            position: relative;
+        }
+        .seal-text {
+            border: 3px double #8B0000; /* Dark red double border */
+            border-radius: 50%;
+            color: #8B0000;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1.2;
+            transform: rotate(-10deg);
+        }
+        .translation {
+            font-size: 0.8rem;
+            color: #555;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 sm:p-6 md:p-8">
+
+    <!-- Main document container -->
+    <div class="paper max-w-2xl w-full mx-auto p-8 sm:p-10 md:p-12">
+        
+        <button id="edit-button" class="absolute top-4 right-4 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+            Edit Decree
+        </button>
+
+        <!-- Header Section -->
+        <header class="text-center mb-8 border-b-2 border-gray-400 pb-4">
+            <img src="https://pngimg.com/uploads/coat_arms_russia/coat_arms_russia_PNG52.png" 
+                 alt="Coat of Arms of Russia" 
+                 class="h-24 mx-auto mb-4"
+                 onerror="this.onerror=null; this.src='https://placehold.co/100x100/e2e8f0/4a5568?text=Logo';">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800">СОВЕТ НАРОДНЫХ КОМИССАРОВ</h1>
+            <p class="translation">COUNCIL OF PEOPLE'S COMMISSARS</p>
+        </header>
+
+        <!-- Bill Title Section -->
+        <div class="text-center mb-10">
+            <h2 class="text-2xl sm:text-3xl font-bold text-red-800 tracking-wider">УКАЗ</h2>
+            <p class="translation -mt-1">DECREE</p>
+        </div>
+
+        <!-- Bill Details Section -->
+        <div class="space-y-6 text-base text-gray-900">
+            <!-- Party Information -->
+            <div class="flex">
+                <strong class="w-1/4 min-w-[100px] text-gray-700">Партия:<p class="translation">Party:</p></strong>
+                <span id="party-display" class="flex-1 border-b border-dotted border-gray-400 pb-1"></span>
+            </div>
+            
+            <!-- Bill Name -->
+            <div class="flex">
+                 <strong class="w-1/4 min-w-[100px] text-gray-700">Законопроект:<p class="translation">Bill:</p></strong>
+                 <span id="bill-name-display" class="flex-1 border-b border-dotted border-gray-400 pb-1"></span>
+            </div>
+
+            <!-- Description Section -->
+            <div>
+                <strong class="text-gray-700">Описание:<p class="translation">Description:</p></strong>
+                <div id="description-display" class="mt-2 p-4 border border-gray-300 bg-gray-50 rounded-md leading-relaxed">
+                </div>
+            </div>
+        </div>
+
+        <!-- Voting and Signature Section -->
+        <div class="mt-12 pt-8 flex justify-between items-end">
+             <!-- Voting Result -->
+            <div id="vote-result-container" class="w-1/2">
+                <strong class="text-lg text-gray-800">Результат голосования:</strong>
+                <p class="translation">Result of the vote:</p>
+                <p id="vote-tally-display" class="text-xl font-bold text-green-700 mt-2"></p>
+            </div>
+            
+            <!-- Official Seal -->
+            <div class="w-1/2 flex flex-col items-center">
+                 <div class="seal-text">
+                    НАРОДНЫЙ КОМИССАРИАТ
+                 </div>
+                 <p class="text-xs text-gray-500 mt-2">Официальная печать</p>
+                 <p class="translation text-xs">Official Seal</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 sm:p-8 w-full max-w-lg max-h-full overflow-y-auto">
+            <h3 class="text-2xl font-bold mb-6 text-gray-800">Edit Decree Information</h3>
+            <form id="edit-form">
+                <div class="space-y-4">
+                    <div>
+                        <label for="party-input" class="block text-sm font-medium text-gray-700">Party</label>
+                        <input type="text" id="party-input" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="bill-name-input" class="block text-sm font-medium text-gray-700">Bill Name</label>
+                        <input type="text" id="bill-name-input" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="description-input" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea id="description-input" rows="6" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    </div>
+                    <fieldset class="border-t pt-4">
+                        <legend class="text-lg font-medium text-gray-900">Voting Status</legend>
+                        <div class="mt-4 space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input id="accepted-toggle" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="accepted-toggle" class="font-medium text-gray-700">Bill Accepted</label>
+                                </div>
+                            </div>
+                            <div id="vote-inputs" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="votes-for-input" class="block text-sm font-medium text-gray-700">Votes For</label>
+                                    <input type="number" id="votes-for-input" min="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="votes-against-input" class="block text-sm font-medium text-gray-700">Votes Against</label>
+                                    <input type="number" id="votes-against-input" min="0" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="button" id="cancel-button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Cancel</button>
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- STATE MANAGEMENT ---
+            // The single source of truth for the bill's data.
+            let billData = {
+                party: "КПСС (CPSU)",
+                billName: "Host new Chairman of the Council of Ministers elections in 2 weeks.",
+                description: "We need finally the government full and operational as each Ministry has its political leader and representative here. The prolonged vacancy in the office of the Chairman undermines the stability of the Soviet state and hinders the implementation of crucial five-year plans. It is imperative that we hold elections to select a new leader who embodies the will of the proletariat and can guide our great nation towards a triumphant communist future.",
+                isAccepted: true,
+                votesFor: 5,
+                votesAgainst: 0
+            };
+
+            // --- ELEMENT SELECTORS ---
+            const editButton = document.getElementById('edit-button');
+            const modal = document.getElementById('edit-modal');
+            const cancelButton = document.getElementById('cancel-button');
+            const editForm = document.getElementById('edit-form');
+            
+            // Display elements
+            const partyDisplay = document.getElementById('party-display');
+            const billNameDisplay = document.getElementById('bill-name-display');
+            const descriptionDisplay = document.getElementById('description-display');
+            const voteResultContainer = document.getElementById('vote-result-container');
+            const voteTallyDisplay = document.getElementById('vote-tally-display');
+
+            // Modal form inputs
+            const partyInput = document.getElementById('party-input');
+            const billNameInput = document.getElementById('bill-name-input');
+            const descriptionInput = document.getElementById('description-input');
+            const acceptedToggle = document.getElementById('accepted-toggle');
+            const voteInputs = document.getElementById('vote-inputs');
+            const votesForInput = document.getElementById('votes-for-input');
+            const votesAgainstInput = document.getElementById('votes-against-input');
+
+            // --- FUNCTIONS ---
+
+            /**
+             * Updates the main document display with data from the billData object.
+             */
+            function updateDocumentDisplay() {
+                partyDisplay.textContent = billData.party;
+                billNameDisplay.textContent = billData.billName;
+                descriptionDisplay.innerHTML = billData.description.replace(/\n/g, '<br>');
+
+                if (billData.isAccepted) {
+                    voteResultContainer.style.display = 'block';
+                    voteTallyDisplay.textContent = `Принято ${billData.votesFor} - ${billData.votesAgainst} (Accepted ${billData.votesFor} - ${billData.votesAgainst})`;
+                } else {
+                    voteResultContainer.style.display = 'none';
+                }
+            }
+
+            /**
+             * Populates the modal's form fields with the current bill data.
+             */
+            function populateModal() {
+                partyInput.value = billData.party;
+                billNameInput.value = billData.billName;
+                descriptionInput.value = billData.description;
+                acceptedToggle.checked = billData.isAccepted;
+                votesForInput.value = billData.votesFor;
+                votesAgainstInput.value = billData.votesAgainst;
+                
+                // Show/hide vote inputs based on the checkbox state
+                if (billData.isAccepted) {
+                    voteInputs.classList.remove('hidden');
+                } else {
+                    voteInputs.classList.add('hidden');
+                }
+            }
+            
+            // --- EVENT LISTENERS ---
+
+            // Open the modal
+            editButton.addEventListener('click', () => {
+                populateModal();
+                modal.classList.remove('hidden');
+            });
+
+            // Close the modal with the cancel button or by clicking the background
+            cancelButton.addEventListener('click', () => modal.classList.add('hidden'));
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+
+            // Toggle visibility of vote inputs when checkbox is clicked
+            acceptedToggle.addEventListener('change', () => {
+                voteInputs.classList.toggle('hidden');
+            });
+
+            // Handle form submission
+            editForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent page reload
+                
+                // Update the state object with values from the form
+                billData.party = partyInput.value;
+                billData.billName = billNameInput.value;
+                billData.description = descriptionInput.value;
+                billData.isAccepted = acceptedToggle.checked;
+                billData.votesFor = votesForInput.value || 0;
+                billData.votesAgainst = votesAgainstInput.value || 0;
+
+                // Update the main document and close the modal
+                updateDocumentDisplay();
+                modal.classList.add('hidden');
+            });
+
+
+            // --- INITIALIZATION ---
+            // Populate the document with the initial data when the page loads.
+            updateDocumentDisplay();
+        });
+    </script>
+</body>
+</html>
