@@ -13,7 +13,7 @@
             /* A dark, textured background resembling a wooden desk */
             background-color: #3d3a36;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%232a2825' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h4v-9H0v-1h5v1h9v-1h1v1h9v-1h1v1h9v-1h1v1h9v-1h1v1h9v-1h1v1h9v-1h1v1h9v-1h1v1h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            padding-top: 5rem; /* Space for the fixed edit button */
+            padding: 5rem 0; /* Add padding for visual spacing */
         }
         
         .paper-container {
@@ -29,10 +29,33 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 0 1px #444;
             color: #2a2a2a;
             position: relative;
-            overflow: visible; /* Let the seal bleed over the edge slightly */
+            overflow: hidden;
             border-radius: 2px;
         }
+        
+        /* Faint watermark */
+        .paper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 70%;
+            height: 70%;
+            background-image: url('https://pngimg.com/uploads/soviet_union/soviet_union_PNG54.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform: translate(-50%, -50%);
+            opacity: 0.04;
+            z-index: 0;
+        }
+        
+        .paper > * {
+            position: relative;
+            z-index: 1;
+        }
 
+        /* Subtle vertical fold line */
         .paper::after {
             content: '';
             position: absolute;
@@ -42,6 +65,7 @@
             height: 100%;
             background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.04), rgba(0,0,0,0));
             transform: translateX(-1px);
+            z-index: 2; /* Above watermark */
         }
         
         .header-title, .decree-title, .field-label {
@@ -70,42 +94,26 @@
             border-left: 3px solid #a62121;
             padding: 1rem;
         }
-
-        /* --- NEW WAX SEAL --- */
-        .seal-container {
-            position: absolute;
-            bottom: 2.5rem;
-            right: 4rem;
-            transform: rotate(-15deg);
+        
+        .office-stamp {
+            border: 3px double #b43434;
+            color: #b43434;
+            padding: 0.5rem 1rem;
+            transform: rotate(-10deg);
+            text-align: center;
+            opacity: 0.8;
+            font-family: 'Roboto Condensed', sans-serif;
         }
-        .wax-seal {
-            position: relative;
-            width: 130px;
-            height: 130px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 50% 40%, #c43a3a, #a62121 80%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 
-                inset 0 0 15px rgba(0,0,0,0.5),
-                inset 0 0 25px rgba(0,0,0,0.5),
-                2px 2px 15px rgba(0,0,0,0.6);
-        }
-        .wax-seal::before {
-            content: '';
-            position: absolute;
-            top: -7px; left: -7px; right: -7px; bottom: -7px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 50% 40%, #c43a3a, #a62121 80%);
-            filter: url(#wavy);
-            z-index: -1;
-        }
-        .wax-seal-symbol {
-            width: 70%;
-            height: 70%;
-            fill: rgba(0,0,0,0.2);
-            filter: drop-shadow(1px 1px 1px rgba(255,255,255,0.15));
+        .office-stamp-title { font-size: 1.1rem; letter-spacing: 0.1em; font-weight: 700; }
+        .office-stamp-date { font-size: 0.9rem; letter-spacing: 0.05em; border-top: 1px dotted #b43434; margin-top: 0.25rem; padding-top: 0.25rem; }
+        
+        .signature-line {
+            font-family: 'Marck Script', cursive;
+            color: #3a5a78;
+            font-size: 1.5rem;
+            border-bottom: 1px solid #777;
+            padding: 0 1rem;
+            margin-bottom: 0.25rem;
         }
 
         .edit-button {
@@ -125,24 +133,14 @@
         .edit-button:hover { background-color: #a62121; }
     </style>
 </head>
-<body class="bg-gray-800 flex items-center justify-center min-h-screen p-4 sm:p-6 md:p-8">
+<body class="bg-gray-800 flex items-center justify-center min-h-screen">
     
     <button id="edit-button" class="edit-button font-bold py-2 px-4 transition-colors duration-200">
         Edit Decree
     </button>
     
-    <!-- SVG Filter for Wavy Edge Effect -->
-    <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
-      <defs>
-        <filter id="wavy">
-          <feTurbulence x="0" y="0" baseFrequency="0.025" numOctaves="5" seed="3" type="fractalNoise"></feTurbulence>
-          <feDisplacementMap in="SourceGraphic" scale="15"></feDisplacementMap>
-        </filter>
-      </defs>
-    </svg>
-
     <!-- Main document container -->
-    <div class="paper-container max-w-2xl w-full mx-auto">
+    <div class="paper-container max-w-2xl w-full mx-auto my-12">
         <div class="paper p-8 sm:p-10 md:p-12">
             <!-- Header Section -->
             <header class="text-center mb-10">
@@ -192,21 +190,27 @@
             </div>
 
             <!-- Voting and Signature Section -->
-            <div class="mt-16 pt-8 flex justify-between items-end h-32">
-                <div id="vote-result-container" class="w-1/2">
-                    <strong class="text-xl field-label">Результат Голосования:</strong>
-                    <p class="translation">Result of the vote</p>
+            <div class="mt-16 pt-8 flex justify-between items-end">
+                <div id="vote-result-container" class="w-1/3">
+                    <strong class="text-xl field-label">Результат:</strong>
+                    <p class="translation">Result:</p>
                     <p id="vote-tally-display" class="text-3xl font-bold mt-2 text-gray-800"></p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Seal placed in the container, but positioned absolutely -->
-        <div class="seal-container">
-            <div class="wax-seal">
-                <svg class="wax-seal-symbol" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13 3v3.88l6.7 6.7a1 1 0 0 1-1.4 1.42L11.6 8.3v.02L5.88 14.1a1 1 0 0 1-1.42-1.4l6.7-6.7V3a1 1 0 0 1 2 0zm-1.12 9.88a1 1 0 0 1 1.42 0l4.38 4.38a1 1 0 0 1-1.42 1.42L12 14.4l-4.38 4.38a1 1 0 0 1-1.42-1.42l4.38-4.38z"/>
-                </svg>
+                
+                <div class="w-1/3 flex justify-center">
+                    <div class="office-stamp">
+                        <div class="office-stamp-title">ОДОБРЕНО</div>
+                        <div id="stamp-date-display" class="office-stamp-date"></div>
+                    </div>
+                </div>
+                
+                <div class="w-1/3 text-center">
+                    <div class="signature-line">
+                        <span id="signature-placeholder"></span>
+                    </div>
+                    <strong class="field-label">Подпись</strong>
+                    <p class="translation text-sm">Signature</p>
+                </div>
             </div>
         </div>
     </div>
@@ -238,6 +242,10 @@
                     <div>
                         <label for="description-input" class="block text-sm font-medium text-gray-700">Description</label>
                         <textarea id="description-input" rows="6" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-red-700 focus:border-red-700"></textarea>
+                    </div>
+                    <div>
+                        <label for="signature-input" class="block text-sm font-medium text-gray-700">Signature Placeholder</label>
+                        <input type="text" id="signature-input" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-red-700 focus:border-red-700">
                     </div>
                     <fieldset class="border-t border-gray-400 pt-4">
                         <legend class="text-lg font-medium text-gray-900">Voting Status</legend>
@@ -280,6 +288,7 @@
                 party: "КПСС (CPSU)",
                 billName: "Host new Chairman of the Council of Ministers elections in 2 weeks.",
                 description: "We need finally the government full and operational as each Ministry has its political leader and representative here. The prolonged vacancy in the office of the Chairman undermines the stability of the Soviet state and hinders the implementation of crucial five-year plans. It is imperative that we hold elections to select a new leader who embodies the will of the proletariat and can guide our great nation towards a triumphant communist future.",
+                signature: "K. Chernenko",
                 isAccepted: true,
                 votesFor: 5,
                 votesAgainst: 0
@@ -293,9 +302,11 @@
             
             const decreeNoDisplay = document.getElementById('decree-no-display');
             const dateDisplay = document.getElementById('date-display');
+            const stampDateDisplay = document.getElementById('stamp-date-display');
             const partyDisplay = document.getElementById('party-display');
             const billNameDisplay = document.getElementById('bill-name-display');
             const descriptionDisplay = document.getElementById('description-display');
+            const signaturePlaceholder = document.getElementById('signature-placeholder');
             const voteResultContainer = document.getElementById('vote-result-container');
             const voteTallyDisplay = document.getElementById('vote-tally-display');
 
@@ -304,6 +315,7 @@
             const partyInput = document.getElementById('party-input');
             const billNameInput = document.getElementById('bill-name-input');
             const descriptionInput = document.getElementById('description-input');
+            const signatureInput = document.getElementById('signature-input');
             const acceptedToggle = document.getElementById('accepted-toggle');
             const voteInputs = document.getElementById('vote-inputs');
             const votesForInput = document.getElementById('votes-for-input');
@@ -313,9 +325,11 @@
             function updateDocumentDisplay() {
                 decreeNoDisplay.textContent = billData.decreeNo;
                 dateDisplay.textContent = billData.date;
+                stampDateDisplay.textContent = billData.date;
                 partyDisplay.textContent = billData.party;
                 billNameDisplay.textContent = billData.billName;
                 descriptionDisplay.innerHTML = billData.description.replace(/\n/g, '<br>');
+                signaturePlaceholder.textContent = billData.signature;
 
                 if (billData.isAccepted) {
                     voteResultContainer.style.display = 'block';
@@ -331,6 +345,7 @@
                 partyInput.value = billData.party;
                 billNameInput.value = billData.billName;
                 descriptionInput.value = billData.description;
+                signatureInput.value = billData.signature;
                 acceptedToggle.checked = billData.isAccepted;
                 votesForInput.value = billData.votesFor;
                 votesAgainstInput.value = billData.votesAgainst;
@@ -363,6 +378,7 @@
                 billData.party = partyInput.value;
                 billData.billName = billNameInput.value;
                 billData.description = descriptionInput.value;
+                billData.signature = signatureInput.value;
                 billData.isAccepted = acceptedToggle.checked;
                 billData.votesFor = votesForInput.value || 0;
                 billData.votesAgainst = votesAgainstInput.value || 0;
