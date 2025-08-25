@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treadz - Pro Tire Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0078D4; /* Microsoft Blue */
+            --primary-hover: #005A9E;
+            --border-color: #E1E1E1;
+            --background-color: #F5F5F5;
+            --card-background: #FFFFFF;
+            --text-dark: #201F1E;
+            --text-light: #605E5C;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-dark);
+        }
+        .main-nav {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .container-box {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            box-shadow: 0 1.2px 3.6px rgba(0,0,0,0.02), 0 6.4px 14.4px rgba(0,0,0,0.03);
+        }
+        .search-bar-wrapper {
+            position: relative;
+        }
+        .search-bar {
+            background-color: #F5F5F5;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding-right: 2.5rem;
+        }
+        .search-bar:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+        }
+        .clear-search-btn {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            display: none;
+        }
+        .clear-search-btn:hover {
+            color: var(--text-dark);
+        }
+        .btn { transition: all 0.2s ease-in-out; border-radius: 0.375rem; }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: #F5F5F5; color: var(--text-dark); border: 1px solid #C8C6C4;}
+        .btn-secondary:hover { background-color: #E1E1E1; }
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+        .tire-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: fadeIn 0.5s ease forwards;
+            border-radius: 0.5rem;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tire-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .exact-match { border-left: 4px solid #107C10; background-color: #F1FAF1; }
+        .similar-match { border-left: 4px solid #F7A923; background-color: #FFF9F0; }
+        .toast {
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            transform: translateY(-120%); opacity: 0;
+            background-color: var(--text-dark);
+            color: var(--background-color);
+            border-radius: 0.5rem;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .remove-btn-group button {
+            background-color: #F5F5F5;
+            border: 1px solid #C8C6C4;
+            color: var(--text-light);
+        }
+        .remove-btn-group button:hover {
+            background-color: #DC3B0B;
+            color: white;
+            border-color: #DC3B0B;
+            transform: scale(1.05);
+        }
+        .analytics-section {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, margin 0.5s ease-in-out;
+        }
+        .analytics-section.open {
+            max-height: 1000px;
+            padding: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        .log-item { animation: fadeIn 0.3s ease forwards; }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="app">
+        <div id="toast" class="toast fixed top-5 right-5 z-50 p-4 shadow-lg flex items-center"></div>
+        <nav class="main-nav sticky top-0 z-40 p-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <svg role="img" width="28" height="28" viewBox="0 0 24 24" fill="var(--primary-color)" xmlns="http://www.w3.org/2000/svg"><title>Treadz</title><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 22c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10zm0-15c-2.761 0-5 2.239-5 5s2.239 5 5 5 5-2.239 5-5-2.239-5-5-5zm0 8c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
+                    <h1 class="text-xl font-semibold text-gray-800 hidden sm:block">Treadz Inventory</h1>
+                </div>
+                <button id="add-multiple-btn" class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2">Add Multiple</button>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+            <section class="mb-8 p-6 container-box">
+                <div class="search-bar-wrapper max-w-2xl mx-auto">
+                    <div class="search-bar flex items-center p-2">
+                        <input type="text" id="search-input" class="w-full bg-transparent text-xl focus:outline-none px-3" placeholder="Search or Add a tire size...">
+                    </div>
+                    <button id="clear-search-btn" class="clear-search-btn p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div id="search-actions" class="max-w-2xl mx-auto mt-4"></div>
+                <div id="external-search-container" class="max-w-4xl mx-auto mt-6"></div>
+            </section>
+            
+            <div id="search-results-container" class="mb-8"></div>
+            
+            <section class="mb-8 p-6 container-box">
+                 <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
+                    <button id="clear-history-btn" class="text-xs text-gray-500 hover:text-red-500 transition-colors">Clear Log</button>
+                </div>
+                <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+            </section>
+
+            <div id="inventory-container"></div>
+            <div id="empty-state" class="text-center py-20">
+                <h2 class="text-2xl font-semibold text-gray-800">Inventory is Empty</h2>
+                <p class="text-gray-500 mt-2">Add your first tire using the search bar above.</p>
+            </div>
+
+            <section class="mt-12">
+                <button id="analytics-toggle" class="w-full text-left p-4 rounded-xl bg-white border border-gray-200 shadow-sm flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-800">Analytics</h2>
+                    <svg id="analytics-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="analytics-section" class="analytics-section">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Most Searched Sizes</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="w-full h-64 md:h-80"><canvas id="analytics-chart"></canvas></div>
+                        <div id="most-searched-list" class="space-y-2"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl m-4 border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Add Multiple Tires</h2>
+            <textarea id="tire-input-modal" rows="6" class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="e.g., 255/55/16, 2254517..."></textarea>
+            <div class="flex justify-end gap-4 mt-6">
+                <button id="close-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="add-tires-modal-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM ELEMENTS ---
+            const searchInput = document.getElementById('search-input');
+            const clearSearchBtn = document.getElementById('clear-search-btn');
+            const inventoryContainer = document.getElementById('inventory-container');
+            const emptyState = document.getElementById('empty-state');
+            const searchActions = document.getElementById('search-actions');
+            const searchResultsContainer = document.getElementById('search-results-container');
+            const activityLogContainer = document.getElementById('activity-log');
+            const externalSearchContainer = document.getElementById('external-search-container');
+            const toast = document.getElementById('toast');
+            const clearHistoryBtn = document.getElementById('clear-history-btn');
+            const analyticsToggle = document.getElementById('analytics-toggle');
+            const analyticsSection = document.getElementById('analytics-section');
+            const analyticsArrow = document.getElementById('analytics-arrow');
+            const mostSearchedList = document.getElementById('most-searched-list');
+            const analyticsChartCanvas = document.getElementById('analytics-chart');
+            const addModal = document.getElementById('add-modal');
+            const addMultipleBtn = document.getElementById('add-multiple-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const tireInputModal = document.getElementById('tire-input-modal');
+            const addTiresModalBtn = document.getElementById('add-tires-modal-btn');
+
+            let inventory = [];
+            let activityLog = [];
+            let analyticsChart = null;
+            
+            const distributors = [
+                { name: 'TireRack', urlTemplate: 'https://www.tirerack.com/tires/tires.jsp?width={W}&ratio={R}&diameter={D}' },
+                { name: 'Discount Tire', urlTemplate: 'https://www.discounttire.com/buy-tires/tires/size/{W}-{R}-{D}' },
+                { name: 'SimpleTire', urlTemplate: 'https://simpletire.com/sizes/{W}-{R}r{D}-tires' }
+            ];
+
+            // --- DATA MANAGEMENT ---
+            const loadData = () => {
+                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV4')) || [];
+                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV4')) || [];
+            };
+
+            const saveData = () => {
+                localStorage.setItem('treadzTireInventoryV4', JSON.stringify(inventory));
+                localStorage.setItem('treadzActivityLogV4', JSON.stringify(activityLog));
+            };
+
+            // --- UTILITIES ---
+            const parseTireSize = (input) => {
+                if (!input) return null;
+                const cleaned = input.replace(/[\s/rR-]/g, '');
+                const match = cleaned.match(/^(\d{2,3})(\d{2})(\d{2,3})$/);
+                if (match) {
+                    const [_, width, ratio, diameter] = match.map(n => parseInt(n, 10));
+                    if (width > 100 && width < 400 && ratio > 10 && ratio < 100 && diameter > 10 && diameter < 30) {
+                        return { width, ratio, diameter };
+                    }
+                }
+                return null;
+            };
+            
+            const formatTireSize = (size) => `${size.width}/${size.ratio}R${size.diameter}`;
+
+            // --- MAIN RENDER FUNCTION ---
+            const renderAll = () => {
+                renderInventory();
+                renderSearchResults();
+                renderActivityLog();
+                renderSearchActions();
+                renderExternalSearches();
+                renderAnalytics();
+                clearSearchBtn.style.display = searchInput.value ? 'block' : 'none';
+            };
+
+            // --- RENDER COMPONENTS ---
+            const renderInventory = () => {
+                inventoryContainer.innerHTML = '';
+                if (inventory.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    inventoryContainer.classList.add('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    inventoryContainer.classList.remove('hidden');
+                    const grouped = inventory.reduce((acc, tire) => {
+                        (acc[tire.size.diameter] = acc[tire.size.diameter] || []).push(tire);
+                        return acc;
+                    }, {});
+                    Object.keys(grouped).sort((a, b) => a - b).forEach(diameter => {
+                        const section = document.createElement('section');
+                        section.className = 'mb-8';
+                        section.innerHTML = `<h2 class="text-xl font-semibold text-gray-800 mb-4">${diameter}" Tires</h2>`;
+                        const grid = document.createElement('div');
+                        grid.className = 'inventory-grid';
+                        grouped[diameter].sort((a,b) => a.size.width - b.size.width || a.size.ratio - b.size.ratio).forEach(tire => {
+                            grid.appendChild(createTireCardElement(tire));
+                        });
+                        section.appendChild(grid);
+                        inventoryContainer.appendChild(section);
+                    });
+                }
+            };
+            
+            const createTireCardElement = (tire, matchClass = '') => {
+                const card = document.createElement('div');
+                card.className = `tire-card p-4 rounded-lg relative ${matchClass}`;
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <p class="font-mono text-lg text-gray-800 font-semibold">${formatTireSize(tire.size)}</p>
+                            <p class="text-xs text-gray-500">Stock: ${tire.quantity}</p>
+                        </div>
+                        <div class="remove-btn-group flex gap-1.5 mt-3 sm:mt-0" data-size='${JSON.stringify(tire.size)}'>
+                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="1">1</button>
+                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="2">2</button>
+                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="3">3</button>
+                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="4">4</button>
+                        </div>
+                    </div>
+                `;
+                return card;
+            };
+
+            const renderSearchResults = () => {
+                const term = searchInput.value.trim();
+                const searchSize = parseTireSize(term);
+                searchResultsContainer.innerHTML = '';
+                if (!searchSize) return;
+
+                const exactMatches = inventory.filter(t => JSON.stringify(t.size) === JSON.stringify(searchSize));
+                const similarMatches = inventory.filter(t => 
+                    JSON.stringify(t.size) !== JSON.stringify(searchSize) &&
+                    t.size.diameter === searchSize.diameter && 
+                    Math.abs(t.size.width - searchSize.width) <= 10 && 
+                    Math.abs(t.size.ratio - searchSize.ratio) <= 5
+                );
+
+                if (exactMatches.length === 0 && similarMatches.length === 0) return;
+
+                const resultsContainer = document.createElement('div');
+                resultsContainer.innerHTML = `<h2 class="text-xl font-semibold text-gray-800 mb-4">Search Results</h2>`;
+                const resultsGrid = document.createElement('div');
+                resultsGrid.className = 'space-y-3';
+                exactMatches.forEach(t => resultsGrid.appendChild(createTireCardElement(t, 'exact-match')));
+                similarMatches.forEach(t => resultsGrid.appendChild(createTireCardElement(t, 'similar-match')));
+                resultsContainer.appendChild(resultsGrid);
+                searchResultsContainer.appendChild(resultsContainer);
+            };
+
+            const renderSearchActions = () => {
+                const term = searchInput.value.trim();
+                const parsed = parseTireSize(term);
+                searchActions.innerHTML = '';
+                if (parsed) {
+                    const formatted = formatTireSize(parsed);
+                    searchActions.innerHTML = `<button id="add-single-btn" class="btn btn-primary w-full py-2.5 px-4 font-semibold">Add "${formatted}" to Inventory</button>`;
+                    document.getElementById('add-single-btn').onclick = () => addTire(parsed);
+                }
+            };
+
+            const renderExternalSearches = () => {
+                const term = searchInput.value.trim();
+                const parsed = parseTireSize(term);
+                externalSearchContainer.innerHTML = '';
+                if (parsed) {
+                    const linksHTML = distributors.map(dist => {
+                        const url = dist.urlTemplate.replace('{W}', parsed.width).replace('{R}', parsed.ratio).replace('{D}', parsed.diameter);
+                        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="distributor-card flex items-center gap-3 p-3 rounded-lg" data-distributor="${dist.name}"><span class="font-semibold text-gray-800">${dist.name}</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
+                    }).join('');
+                    externalSearchContainer.innerHTML = `<h3 class="text-sm font-semibold text-gray-500 mb-3 text-center">Check Distributors</h3><div class="flex flex-wrap gap-4 justify-center">${linksHTML}</div>`;
+                }
+            };
+            
+            const renderActivityLog = () => {
+                activityLogContainer.innerHTML = activityLog.length ? '' : '<p class="text-gray-500 text-center w-full">No activity yet.</p>';
+                activityLog.slice(0, 50).forEach(log => {
+                    let statusHTML = '';
+                    let actionsHTML = '';
+                    
+                    if (log.action === 'Sold') {
+                        statusHTML = `<div class="font-semibold text-red-500">Sold ${log.details.quantitySold}</div>`;
+                    } else if (log.action === 'Checked Distributor') {
+                        statusHTML = `<div class="text-blue-500">Checked ${log.details.distributor}</div>`;
+                    } else { // Searched
+                        statusHTML = log.details.inStock 
+                            ? `<div class="font-semibold text-green-600">In Stock, Not Sold</div>`
+                            : `<div class="text-gray-500">Not In Stock</div>`;
+                        if (log.details.inStock) {
+                            actionsHTML = `<div class="log-action-buttons" data-log-id="${log.id}"><button class="btn btn-secondary text-xs px-2 py-1" data-action="mark-sold">Mark Sold</button></div>`;
+                        }
+                    }
+
+                    const logEl = document.createElement('div');
+                    logEl.className = 'log-item flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-200';
+                    logEl.innerHTML = `
+                        <div class="flex-grow">
+                            <p class="font-mono font-medium text-gray-800">${log.term}</p>
+                            <p class="text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm text-right w-32">${statusHTML}</div>
+                            <div class="flex items-center justify-end gap-2 w-32">
+                                ${actionsHTML}
+                                <button class="text-gray-400 hover:text-red-500" data-log-id="${log.id}" data-action="delete-log">&times;</button>
+                            </div>
+                        </div>
+                    `;
+                    activityLogContainer.appendChild(logEl);
+                });
+            };
+
+            const renderAnalytics = () => {
+                if (analyticsChart) {
+                    analyticsChart.destroy();
+                }
+
+                if (activityLog.length === 0) {
+                    mostSearchedList.innerHTML = '<p class="text-gray-500">Not enough data yet.</p>';
+                    return;
+                }
+                const counts = activityLog.reduce((acc, log) => {
+                    if (log.action === 'Searched') {
+                        acc[log.term] = (acc[log.term] || 0) + 1;
+                    }
+                    return acc;
+                }, {});
+
+                const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                
+                if (sorted.length === 0) {
+                    mostSearchedList.innerHTML = '<p class="text-gray-500">No search data to analyze.</p>';
+                    return;
+                }
+
+                mostSearchedList.innerHTML = sorted.map(([term, count]) => `
+                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                        <span class="font-mono font-medium text-gray-700">${term}</span>
+                        <span class="text-sm text-gray-500">${count} searches</span>
+                    </div>
+                `).join('');
+                
+                const chartData = {
+                    labels: sorted.map(item => item[0]),
+                    datasets: [{
+                        label: 'Most Searched Tires',
+                        data: sorted.map(item => item[1]),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ef4444'],
+                        hoverOffset: 4
+                    }]
+                };
+
+                analyticsChart = new Chart(analyticsChartCanvas, {
+                    type: 'pie',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: '#4b5563'
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            // --- ACTIONS & LOGIC ---
+            const addLogEntry = (term, action, details = {}) => {
+                const lastLog = activityLog[0];
+                if (lastLog && lastLog.term === term && lastLog.action === 'Searched' && action === 'Searched') {
+                    const now = new Date();
+                    const lastLogTime = new Date(lastLog.timestamp);
+                    const timeDiffMinutes = (now - lastLogTime) / (1000 * 60);
+                    if (timeDiffMinutes < 20) {
+                        return;
+                    }
+                }
+
+                if (action === 'Searched') {
+                    const parsedSize = parseTireSize(term);
+                    const sizeString = JSON.stringify(parsedSize);
+                    details.inStock = inventory.some(t => JSON.stringify(t.size) === sizeString);
+                }
+
+                activityLog.unshift({ id: Date.now(), term, action, details, timestamp: new Date().toISOString() });
+                saveData();
+                renderActivityLog();
+                renderAnalytics();
+            };
+            
+            const updateLogEntry = (logId, newAction, newDetails) => {
+                const logIndex = activityLog.findIndex(log => log.id === logId);
+                if (logIndex > -1) {
+                    activityLog[logIndex].action = newAction;
+                    activityLog[logIndex].details = newDetails;
+                    saveData();
+                    renderActivityLog();
+                }
+            };
+
+            const showToast = (message) => {
+                toast.innerHTML = `<p class="font-medium">${message}</p>`;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            };
+
+            const addTire = (parsedSize, quantity = 1) => {
+                if (!parsedSize) return;
+                const sizeString = JSON.stringify(parsedSize);
+                const existingTire = inventory.find(t => JSON.stringify(t.size) === sizeString);
+                if (existingTire) {
+                    existingTire.quantity += quantity;
+                } else {
+                    inventory.unshift({ size: parsedSize, quantity: quantity });
+                }
+                showToast(`Added ${formatTireSize(parsedSize)}.`);
+                if(document.activeElement === searchInput) searchInput.value = '';
+                saveData();
+                renderAll();
+            };
+
+            const removeTire = (parsedSize, quantity, logIdToUpdate = null) => {
+                const sizeString = JSON.stringify(parsedSize);
+                const tireIndex = inventory.findIndex(t => JSON.stringify(t.size) === sizeString);
+                if (tireIndex > -1) {
+                    const tire = inventory[tireIndex];
+                    const removeQty = Math.min(tire.quantity, quantity);
+                    tire.quantity -= removeQty;
+                    
+                    if (logIdToUpdate) {
+                        updateLogEntry(logIdToUpdate, 'Sold', { quantitySold: removeQty });
+                    } else {
+                        const relevantLog = activityLog.find(log => log.term === formatTireSize(parsedSize) && log.action === 'Searched');
+                        if (relevantLog) {
+                            updateLogEntry(relevantLog.id, 'Sold', { quantitySold: removeQty });
+                        } else {
+                            addLogEntry(formatTireSize(parsedSize), 'Sold', { quantitySold: removeQty });
+                        }
+                    }
+
+                    showToast(`Sold ${removeQty}x ${formatTireSize(parsedSize)}. Stock: ${tire.quantity}`);
+                    if (tire.quantity <= 0) {
+                        inventory.splice(tireIndex, 1);
+                    }
+                    saveData();
+                    renderAll();
+                }
+            };
+
+            const toggleModal = (show) => {
+                addModal.classList.toggle('hidden', !show);
+                addModal.classList.toggle('flex', show);
+            };
+
+            // --- EVENT LISTENERS ---
+            searchInput.addEventListener('input', () => {
+                renderAll();
+                const term = formatTireSize(parseTireSize(searchInput.value));
+                if (term) {
+                    addLogEntry(term, 'Searched');
+                }
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                renderAll();
+            });
+
+            document.addEventListener('click', e => {
+                if (e.target.matches('.remove-btn-group button') && !e.target.closest('.log-action-buttons')) {
+                    const group = e.target.closest('.remove-btn-group');
+                    const size = JSON.parse(group.dataset.size);
+                    const qty = parseInt(e.target.dataset.qty);
+                    removeTire(size, qty);
+                }
+                if (e.target.matches('.log-action-buttons .remove-btn-group button')) {
+                    const group = e.target.closest('.remove-btn-group');
+                    const logId = parseInt(group.dataset.logId);
+                    const qty = parseInt(e.target.dataset.qty);
+                    const logEntry = activityLog.find(log => log.id === logId);
+                    if (logEntry) {
+                        const parsedSize = parseTireSize(logEntry.term);
+                        removeTire(parsedSize, qty, logId);
+                    }
+                }
+
+                if (e.target.closest('.distributor-card')) {
+                    const term = formatTireSize(parseTireSize(searchInput.value));
+                    const dist = e.target.closest('.distributor-card').dataset.distributor;
+                    if (term) addLogEntry(term, 'Checked Distributor', { distributor: dist });
+                }
+                if (e.target.matches('#add-multiple-btn')) toggleModal(true);
+                if (e.target.matches('#close-modal-btn') || e.target === addModal) toggleModal(false);
+                if (e.target.matches('#add-tires-modal-btn')) {
+                    const inputs = tireInputModal.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+                    inputs.forEach(inputStr => addTire(parseTireSize(inputStr)));
+                    if (inputs.length > 0) {
+                        tireInputModal.value = '';
+                        toggleModal(false);
+                    }
+                }
+                if (e.target.matches('#clear-history-btn')) {
+                    activityLog = [];
+                    saveData();
+                    renderActivityLog();
+                    renderAnalytics();
+                }
+                if (e.target.closest('#analytics-toggle')) {
+                    analyticsSection.classList.toggle('open');
+                    analyticsArrow.classList.toggle('rotate-180');
+                }
+                if (e.target.dataset.action === 'delete-log') {
+                    const logId = parseInt(e.target.dataset.logId);
+                    activityLog = activityLog.filter(log => log.id !== logId);
+                    saveData();
+                    renderActivityLog();
+                }
+                if (e.target.dataset.action === 'mark-sold') {
+                    const actionContainer = e.target.parentElement;
+                    const logId = parseInt(actionContainer.dataset.logId);
+                    actionContainer.innerHTML = `<div class="remove-btn-group flex gap-1.5" data-log-id="${logId}">
+                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="1">1</button>
+                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="2">2</button>
+                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="3">3</button>
+                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="4">4</button>
+                    </div>`;
+                }
+            });
+
+            // --- INITIALIZATION ---
+            loadData();
+            renderAll();
+        });
+    </script>
+</body>
+</html>
