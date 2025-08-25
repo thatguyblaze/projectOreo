@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treadz - Tire Inventory</title>
+    <title>Treadz - Pro Tire Inventory</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -78,7 +78,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .tire-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .exact-match { border-left: 4px solid #107C10; background-color: #F1FAF1; }
-        .similar-match { border-left: 4px solid #F7A923; background-color: #FFF9F0; }
         .toast {
             transition: transform 0.4s ease, opacity 0.4s ease;
             transform: translateY(-120%); opacity: 0;
@@ -311,7 +310,7 @@
             // --- UTILITIES ---
             const parseTireSize = (input) => {
                 if (!input) return null;
-                const cleaned = input.replace(/[\s/rR.-]/g, ''); // CORRECTED REGEX
+                const cleaned = input.replace(/[\s/rR.-]/g, '');
                 const flotationMatch = cleaned.match(/^(\d{2})(\d{4})(\d{2})$/);
                 if (flotationMatch) {
                     const [_, diameter, widthRaw, rim] = flotationMatch;
@@ -395,7 +394,10 @@
                     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <p class="font-mono text-lg text-gray-800 font-semibold">${formatTireSize(tire.size)}</p>
-                            <p class="text-xs text-gray-500">Stock: ${tire.quantity}</p>
+                            <div class="flex items-center gap-2">
+                                <p class="text-xs text-gray-500">Stock: ${tire.quantity}</p>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded-full ${tire.condition === 'new' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">${tire.condition.toUpperCase()}</span>
+                            </div>
                         </div>
                         <div class="remove-btn-group flex gap-1.5 mt-3 sm:mt-0" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
                             <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="1">1</button>
@@ -415,13 +417,24 @@
                 if (!searchSize) return;
                 const exactMatches = inventory.filter(t => JSON.stringify(t.size) === JSON.stringify(searchSize));
                 if (exactMatches.length === 0) return;
-                const resultsContainer = document.createElement('div');
-                resultsContainer.innerHTML = `<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">Search Results</h2>`;
-                const resultsGrid = document.createElement('div');
-                resultsGrid.className = 'space-y-3';
-                exactMatches.forEach(t => resultsGrid.appendChild(createTireCardElement(t, 'exact-match')));
-                resultsContainer.appendChild(resultsGrid);
-                searchResultsContainer.appendChild(resultsContainer);
+
+                const newTires = exactMatches.filter(t => t.condition === 'new');
+                const usedTires = exactMatches.filter(t => t.condition === 'used');
+
+                let html = '';
+                if (newTires.length > 0) {
+                    html += `<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">Search Results - New</h2>`;
+                    html += '<div class="space-y-3 mb-6">';
+                    newTires.forEach(t => { html += createTireCardElement(t, 'exact-match').outerHTML; });
+                    html += '</div>';
+                }
+                if (usedTires.length > 0) {
+                    html += `<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">Search Results - Used</h2>`;
+                    html += '<div class="space-y-3">';
+                    usedTires.forEach(t => { html += createTireCardElement(t, 'exact-match').outerHTML; });
+                    html += '</div>';
+                }
+                searchResultsContainer.innerHTML = html;
             };
 
             const renderSearchActions = () => {
