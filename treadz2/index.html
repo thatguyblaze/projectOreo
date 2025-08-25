@@ -78,6 +78,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .tire-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .exact-match { border-left: 4px solid #107C10; background-color: #F1FAF1; }
+        .similar-match { border-left: 4px solid #F7A923; background-color: #FFF9F0; }
         .toast {
             transition: transform 0.4s ease, opacity 0.4s ease;
             transform: translateY(-120%); opacity: 0;
@@ -310,7 +311,7 @@
             // --- UTILITIES ---
             const parseTireSize = (input) => {
                 if (!input) return null;
-                const cleaned = input.replace(/[\s/rR-.]/g, '');
+                const cleaned = input.replace(/[\s/rR.-]/g, ''); // CORRECTED REGEX
                 const flotationMatch = cleaned.match(/^(\d{2})(\d{4})(\d{2})$/);
                 if (flotationMatch) {
                     const [_, diameter, widthRaw, rim] = flotationMatch;
