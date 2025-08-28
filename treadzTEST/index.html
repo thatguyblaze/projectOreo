@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treadz - Tire Inventory</title>
+    <title>Treadz - Pro Tire Inventory</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -78,6 +78,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .tire-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .exact-match { border-left: 4px solid #107C10; background-color: #F1FAF1; }
+        .similar-match { border-left: 4px solid #F7A923; background-color: #FFF9F0; }
         .toast {
             transition: transform 0.4s ease, opacity 0.4s ease;
             transform: translateY(-120%); opacity: 0;
@@ -246,7 +247,7 @@
                     NEW
                 </label>
             </div>
-            <textarea id="tire-input-modal" rows="6" class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="e.g., 255/55/16, 3110.5015..."></textarea>
+            <textarea id="tire-input-modal" rows="6" class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="e.g., 255/55/16, 31105015..."></textarea>
             <div class="flex justify-end gap-4 mt-6">
                 <button id="close-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
                 <button id="add-tires-modal-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
@@ -330,13 +331,14 @@
                 return `${size.width}/${size.ratio}R${size.rim}`;
             };
 
-            const formatQueryForDistributor = (size, format) => {
-                if (!size || format === 'none') return '';
+            const formatQueryForDistributor = (rawInput, size, format) => {
+                if (format === 'none') return '';
                 if (format === 'p-metric-no-slash') {
-                    if (size.type === 'p-metric') return `${size.width}${size.ratio}${size.rim}`;
-                    return '';
+                    if (size && size.type === 'p-metric') return `${size.width}${size.ratio}${size.rim}`;
+                    // For flotation or partial input, just send the raw numbers
+                    return rawInput.replace(/[\s/rR.-]/g, '');
                 }
-                return '';
+                return rawInput;
             };
 
             // --- MAIN RENDER FUNCTION ---
@@ -411,12 +413,19 @@
                 const term = searchInput.value.trim();
                 const searchSize = parseTireSize(term);
                 searchResultsContainer.innerHTML = '';
-                if (!searchSize) return;
-                const exactMatches = inventory.filter(t => JSON.stringify(t.size) === JSON.stringify(searchSize));
-                if (exactMatches.length === 0) return;
+                
+                let matches = [];
+                if (searchSize) { // Full size entered
+                    matches = inventory.filter(t => JSON.stringify(t.size) === JSON.stringify(searchSize));
+                } else if (term.length > 2) { // Partial search
+                    const cleanedTerm = term.replace(/[\s/rR.-]/g, '');
+                    matches = inventory.filter(t => formatTireSize(t.size).replace(/[\s/rR.-]/g, '').startsWith(cleanedTerm));
+                }
 
-                const newTires = exactMatches.filter(t => t.condition === 'new');
-                const usedTires = exactMatches.filter(t => t.condition === 'used');
+                if (matches.length === 0) return;
+
+                const newTires = matches.filter(t => t.condition === 'new');
+                const usedTires = matches.filter(t => t.condition === 'used');
 
                 let html = '';
                 if (newTires.length > 0) {
@@ -463,9 +472,9 @@
                 const term = searchInput.value.trim();
                 const parsed = parseTireSize(term);
                 externalSearchContainer.innerHTML = '';
-                if (parsed) {
+                if (term) { // Show as long as there is text
                     const linksHTML = distributors.map(dist => {
-                        const query = formatQueryForDistributor(parsed, dist.queryFormat);
+                        const query = formatQueryForDistributor(term, parsed, dist.queryFormat);
                         if (dist.queryFormat !== 'none' && !query) return '';
                         const url = dist.urlTemplate.replace('{QUERY}', query);
                         return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="distributor-btn btn" data-distributor="${dist.name}"><span>${dist.name}</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
