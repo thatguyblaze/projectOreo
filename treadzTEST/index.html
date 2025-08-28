@@ -172,6 +172,19 @@
         input:checked + .slider:before {
             transform: translateX(22px);
         }
+        /* Batch Entry Styles */
+        .batch-grid-header, .batch-grid-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 50px;
+            gap: 1rem;
+            align-items: center;
+        }
+        .batch-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -183,7 +196,10 @@
                     <svg role="img" width="28" height="28" viewBox="0 0 24 24" fill="var(--primary-color)" xmlns="http://www.w3.org/2000/svg"><title>Treadz</title><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 22c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10zm0-15c-2.761 0-5 2.239-5 5s2.239 5 5 5 5-2.239 5-5-2.239-5-5-5zm0 8c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"/></svg>
                     <h1 class="text-xl font-semibold text-gray-800 hidden sm:block">Treadz Inventory</h1>
                 </div>
-                <button id="add-multiple-btn" class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2">Add Multiple</button>
+                <div class="flex items-center gap-2">
+                    <button id="batch-entry-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">Batch Entry</button>
+                    <button id="add-multiple-btn" class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2">Add Multiple</button>
+                </div>
             </div>
         </nav>
 
@@ -232,7 +248,7 @@
         </main>
     </div>
 
-    <!-- MODAL -->
+    <!-- ADD MULTIPLE MODAL -->
     <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
         <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl m-4 border border-gray-200">
             <div class="flex justify-between items-center mb-4">
@@ -250,6 +266,26 @@
             <div class="flex justify-end gap-4 mt-6">
                 <button id="close-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
                 <button id="add-tires-modal-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BATCH ENTRY MODAL -->
+     <div id="batch-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Batch Entry</h2>
+            <div class="batch-grid-header text-sm font-semibold text-gray-500 px-2 pb-2 border-b">
+                <span>Tire Size</span>
+                <span>Quantity</span>
+                <span>Condition</span>
+                <span></span>
+            </div>
+            <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2 py-2">
+                <!-- Batch rows will be injected here -->
+            </div>
+            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <button id="close-batch-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="add-batch-tires-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
             </div>
         </div>
     </div>
@@ -277,6 +313,11 @@
             const tireInputModal = document.getElementById('tire-input-modal');
             const addTiresModalBtn = document.getElementById('add-tires-modal-btn');
             const conditionToggleModal = document.getElementById('condition-toggle-modal');
+            const batchModal = document.getElementById('batch-modal');
+            const batchEntryBtn = document.getElementById('batch-entry-btn');
+            const closeBatchModalBtn = document.getElementById('close-batch-modal-btn');
+            const addBatchTiresBtn = document.getElementById('add-batch-tires-btn');
+            const batchGrid = document.getElementById('batch-grid');
 
             let inventory = [];
             let activityLog = [];
@@ -310,7 +351,7 @@
             // --- UTILITIES ---
             const parseTireSize = (input) => {
                 if (!input) return null;
-                const cleaned = input.replace(/[\s/rR.-]/g, '');
+                const cleaned = input.replace(/[\s/rR.\-]/g, ''); // CORRECTED REGEX
                 const flotationMatch = cleaned.match(/^(\d{2})(\d{4})(\d{2})$/);
                 if (flotationMatch) {
                     const [_, diameter, widthRaw, rim] = flotationMatch;
@@ -500,7 +541,7 @@
                     }
                     const logEl = document.createElement('div');
                     logEl.className = 'log-item flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-200';
-                    logEl.innerHTML = `<div class="flex-grow"><p class="font-mono font-medium text-gray-800">${log.term}</p><p class="text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</p></div><div class="flex items-center gap-4"><div class="text-sm text-right w-32">${statusHTML}</div><div class="flex items-center justify-end gap-2 w-32">${actionsHTML}<button class="text-gray-400 hover:text-red-500" data-log-id="${log.id}" data-action="delete-log">&times;</button></div></div>`;
+                    logEl.innerHTML = `<div class="flex-grow"><p class="font-mono font-medium text-gray-800">${log.term}</p><p class="text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</p></div><div class="flex items-center gap-4"><div class="text-sm text-right w-32">${statusHTML}</div><div class="flex items-center justify-end gap-2 w-32">${actionsHTML}</div></div>`;
                     activityLogContainer.appendChild(logEl);
                 });
             };
@@ -617,6 +658,52 @@
                 addModal.classList.toggle('hidden', !show);
                 addModal.classList.toggle('flex', show);
             };
+            
+            const createBatchRow = () => {
+                const row = document.createElement('div');
+                row.className = 'batch-grid-row';
+                row.innerHTML = `
+                    <input type="text" class="batch-input batch-size" placeholder="e.g., 2254517">
+                    <input type="number" class="batch-input batch-qty" value="1" min="1">
+                    <select class="batch-input batch-condition">
+                        <option value="used" selected>Used</option>
+                        <option value="new">New</option>
+                    </select>
+                    <button class="text-gray-400 hover:text-red-500 remove-batch-row">&times;</button>
+                `;
+                batchGrid.appendChild(row);
+                row.querySelector('.batch-size').focus();
+
+                row.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        createBatchRow();
+                    }
+                });
+            };
+            
+            const processBatchEntries = () => {
+                const rows = batchGrid.querySelectorAll('.batch-grid-row');
+                let addedCount = 0;
+                rows.forEach(row => {
+                    const sizeInput = row.querySelector('.batch-size').value;
+                    const qtyInput = row.querySelector('.batch-qty').value;
+                    const condition = row.querySelector('.batch-condition').value;
+                    
+                    const parsedSize = parseTireSize(sizeInput);
+                    const quantity = parseInt(qtyInput, 10);
+
+                    if (parsedSize && quantity > 0) {
+                        addTire(parsedSize, quantity, condition);
+                        addedCount++;
+                    }
+                });
+                if (addedCount > 0) {
+                    showToast(`Successfully added entries for ${addedCount} tire size(s).`);
+                }
+                toggleModal(false);
+            };
+
 
             // --- EVENT LISTENERS ---
             searchInput.addEventListener('input', () => {
@@ -683,6 +770,23 @@
                         <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="3">3</button>
                         <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="4">4</button>
                     </div>`;
+                }
+                // Batch modal listeners
+                if (e.target.matches('#batch-entry-btn')) {
+                    batchGrid.innerHTML = ''; // Clear previous entries
+                    createBatchRow();
+                    batchModal.classList.remove('hidden');
+                    batchModal.classList.add('flex');
+                }
+                if (e.target.matches('#close-batch-modal-btn') || e.target === batchModal) {
+                    batchModal.classList.add('hidden');
+                    batchModal.classList.remove('flex');
+                }
+                if (e.target.matches('#add-batch-tires-btn')) {
+                    processBatchEntries();
+                }
+                if (e.target.matches('.remove-batch-row')) {
+                    e.target.parentElement.remove();
                 }
             });
 
