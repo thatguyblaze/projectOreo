@@ -603,30 +603,48 @@
 
             function getEventsForMonth(year, month) {
                 const monthEvents = [];
-                const startDate = new Date(year, month, 1);
-                const endDate = new Date(year, month + 1, 0);
-                const daysInMonth = endDate.getDate();
+                const viewStartDate = new Date(year, month, 1);
+                const viewEndDate = new Date(year, month + 1, 0);
+                const daysInMonth = viewEndDate.getDate();
 
-                // Get user-created events that fall within the month
+                // 1. Add original user-created events that are visible in the current month
                 events.forEach(event => {
                     const eventStart = new Date(`${event.date}T12:00:00`);
                     const eventEnd = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStart;
-                    if (eventStart <= endDate && eventEnd >= startDate) {
+                    if (eventStart <= viewEndDate && eventEnd >= viewStartDate) {
                          monthEvents.push(event);
                     }
                 });
 
-                // Add holidays for the month
+                // 2. Project recurring events for the current month
+                const recurringEvents = events.filter(e => e.recurring && e.recurring !== 'none');
+                recurringEvents.forEach(event => {
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const currentDate = new Date(year, month, day);
+                        const isoDate = getISODate(currentDate);
+
+                        // Check if a recurring instance should start on this day, ensuring not to duplicate the original event
+                        if (isoDate > event.date && checkRecurring(event, currentDate)) {
+                            const newEndDate = event.endDate ? getISODate(new Date(currentDate.getTime() + (new Date(event.endDate) - new Date(event.date)))) : null;
+                            
+                            monthEvents.push({
+                                ...event,
+                                id: `${event.id}-${isoDate}`, // Create a unique ID for the instance
+                                date: isoDate,
+                                endDate: newEndDate,
+                                isRecurringInstance: true
+                            });
+                        }
+                    }
+                });
+
+                // 3. Add holidays for the month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const isoDate = getISODate(new Date(year, month, day));
                     const monthDay = isoDate.substring(5);
                     if (holidays[monthDay]) {
                         monthEvents.push({ 
-                            id: `holiday-${isoDate}`, 
-                            date: isoDate, 
-                            title: holidays[monthDay], 
-                            type: 'holiday', 
-                            color: '#10B981' 
+                            id: `holiday-${isoDate}`, date: isoDate, title: holidays[monthDay], type: 'holiday', color: '#10B981' 
                         });
                     }
                 }
@@ -853,3 +871,13 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
