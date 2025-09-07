@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A16 - Modern Calendar</title>
+    <title>Calendar Project</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #121212;
-            --bg-secondary: #1E1E1E;
-            --bg-tertiary: #2a2a2a;
-            --bg-weekend: #22252a; /* Color for weekend days */
-            --text-primary: #E0E0E0;
-            --text-secondary: #B0B0B0;
-            --accent-primary: #3B82F6; /* Blue */
-            --accent-secondary: #00BCD4;
+            --bg-primary: #1A1A1A;
+            --bg-secondary: #252525;
+            --bg-tertiary: #333333;
+            --bg-weekend: #222224; /* A more subtle, neutral dark background */
+            --text-primary: #EDEDED;
+            --text-secondary: #9E9E9E; /* A softer grey for secondary text */
+            --accent-primary: #3B82F6; /* A standard, professional blue */
+            --accent-secondary: var(--text-secondary); /* Weekends now use the subtle secondary text color */
             --accent-danger: #EF4444;
-            --season-winter-bg: #2a3a4a;
-            --season-spring-bg: #2a4a3a;
-            --season-summer-bg: #4a422a;
-            --season-autumn-bg: #4a3a2a;
+            --season-winter-bg: #2D3A47;
+            --season-spring-bg: #33453B;
+            --season-summer-bg: #454333;
+            --season-autumn-bg: #453C33;
         }
 
         html, body {
@@ -32,12 +32,15 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
         }
         
         #app {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            flex-grow: 1;
+            height: calc(100vh - 40px); /* Adjust height for footer */
         }
 
         main {
@@ -60,7 +63,7 @@
         #calendarGrid {
             flex-grow: 1;
             /* Updated to ensure day cells have enough space */
-            grid-template-rows: auto repeat(6, minmax(110px, 1fr));
+            grid-template-rows: auto repeat(6, minmax(0, 1fr));
         }
 
         .view-hidden {
@@ -103,6 +106,10 @@
         .day-cell-weekend { background-color: var(--bg-weekend); }
         .day-cell-weekend .day-number { color: var(--accent-secondary) !important; }
         
+        .day-cell-other-month .day-number {
+            opacity: 0.3;
+        }
+
         .month-card {
             transition: all 0.3s ease-in-out;
             opacity: 0;
@@ -111,6 +118,7 @@
         }
 
         @keyframes fade-in { to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
 
         .month-card-winter { background-color: var(--season-winter-bg); }
         .month-card-spring { background-color: var(--season-spring-bg); }
@@ -232,6 +240,18 @@
             white-space: nowrap;
         }
 
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+        footer .heart {
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-secondary); }
         ::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 4px; }
@@ -247,7 +267,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-accent-primary"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <div class="flex items-center gap-2">
                     <button id="prevYearBtn" class="p-2 rounded-full hover:bg-gray-700 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24" viewBox="0 0 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
                     <h1 id="viewTitle" class="text-2xl font-bold text-white w-28 text-center">2025</h1>
                      <button id="nextYearBtn" class="p-2 rounded-full hover:bg-gray-700 transition-colors">
@@ -282,7 +302,9 @@
                 </div>
             </div>
         </main>
-        <div id="eventModal" class="modal-backdrop fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
+    </div>
+    <!-- Modals -->
+    <div id="eventModal" class="modal-backdrop fixed inset-0 flex items-center justify-center p-4 z-50 hidden">
         <div class="modal-content w-full max-w-sm p-6 rounded-2xl shadow-lg max-h-[90vh] flex flex-col">
             <h3 id="modalTitle" class="text-xl font-semibold mb-4 flex-shrink-0">Add New Item</h3>
             <div class="flex-grow overflow-y-auto -mr-2 pr-2">
@@ -359,12 +381,16 @@
             <div id="detailsContent" class="mt-4 space-y-3 max-h-64 overflow-y-auto pr-2"></div>
         </div>
     </div>
+    
+    <footer>
+        made with <span class="heart">❤️</span> by Blazinik
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             let currentYear = new Date().getFullYear();
             let currentMonth = new Date().getMonth();
-            let events = JSON.parse(localStorage.getItem('calendarEvents')) || [];
+            let events = JSON.parse(localStorage.getItem('calendarEvents-v2')) || []; // Use a new key for safety
             let currentView = 'year';
             
             // DOM Elements
@@ -462,34 +488,60 @@
             function generateMonthView() {
                 calendarGrid.innerHTML = dayNamesShort.map(day => `<div class="text-center font-semibold text-text-secondary text-sm py-2">${day}</div>`).join('');
                 monthYearHeader.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                
                 const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
                 const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                
-                // Add container for event bars
+
+                // Clear previous bars and add container
+                const oldBarsContainer = document.getElementById('event-bars-container');
+                if(oldBarsContainer) oldBarsContainer.remove();
                 const eventBarsContainer = document.createElement('div');
                 eventBarsContainer.id = 'event-bars-container';
                 calendarGrid.style.position = 'relative';
                 calendarGrid.appendChild(eventBarsContainer);
 
                 let dayCounter = 0;
+                let gridCells = [];
 
-                for (let i = 0; i < firstDayOfMonth; i++) calendarGrid.insertAdjacentHTML('beforeend', '<div class="day-cell-wrapper"></div>');
+                // Days from previous month
+                const prevMonth = new Date(currentYear, currentMonth, 0);
+                const daysInPrevMonth = prevMonth.getDate();
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                    const day = daysInPrevMonth - firstDayOfMonth + i + 1;
+                    const date = new Date(currentYear, currentMonth - 1, day);
+                    gridCells.push({ day, date, isOtherMonth: true });
+                }
 
+                // Days from current month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(currentYear, currentMonth, day);
+                    gridCells.push({ day, date, isOtherMonth: false });
+                }
+
+                // Days from next month
+                const gridTotal = 42; // Always render a 6-week grid
+                let nextMonthDay = 1;
+                while (gridCells.length < gridTotal) {
+                    const date = new Date(currentYear, currentMonth + 1, nextMonthDay++);
+                    gridCells.push({ day: date.getDate(), date, isOtherMonth: true });
+                }
+                
+                gridCells.forEach(cell => {
+                    const { day, date, isOtherMonth } = cell;
                     const isoDate = getISODate(date);
                     const isWeekend = date.getDay() === 0 || date.getDay() === 6;
                     
                     const dayCellHTML = `<div class="day-cell-wrapper">
-                        <div class="day-cell flex flex-col p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''}" data-date="${isoDate}" style="animation-delay:${dayCounter++ * 0.01}s">
+                        <div class="day-cell flex flex-col p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''} ${isOtherMonth ? 'day-cell-other-month' : ''}" data-date="${isoDate}" style="animation-delay:${dayCounter++ * 0.01}s">
                             <div class="add-day-event-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
                             <span class="self-start day-number">${day}</span>
                         </div>
                     </div>`;
                     calendarGrid.insertAdjacentHTML('beforeend', dayCellHTML);
-                }
+                });
                 
-                renderEventBars(firstDayOfMonth, daysInMonth);
+                // Use a timeout to ensure DOM has rendered and cells have height
+                setTimeout(() => renderEventBars(firstDayOfMonth, daysInMonth), 50);
 
                 calendarGrid.querySelectorAll('.day-cell').forEach(cell => {
                     cell.addEventListener('click', () => openDetailsModal(cell.dataset.date));
@@ -499,6 +551,7 @@
             
             function renderEventBars(firstDayOfMonth, daysInMonth) {
                 const eventBarsContainer = document.getElementById('event-bars-container');
+                if (!eventBarsContainer) return;
                 eventBarsContainer.innerHTML = '';
                 const monthEvents = getEventsForMonth(currentYear, currentMonth);
 
@@ -508,21 +561,19 @@
                     const startDate = new Date(`${event.date}T12:00:00`);
                     const endDate = event.endDate ? new Date(`${event.endDate}T12:00:00`) : startDate;
 
-                    // Clamp event dates to the visible month to determine its placement
                     const viewStartDate = new Date(currentYear, currentMonth, 1);
                     const viewEndDate = new Date(currentYear, currentMonth, daysInMonth);
                     
-                    // Skip if event is completely outside the current month's view dates
-                    if (endDate.getFullYear() < currentYear || (endDate.getFullYear() === currentYear && endDate.getMonth() < currentMonth)) return;
-                    if (startDate.getFullYear() > currentYear || (startDate.getFullYear() === currentYear && startDate.getMonth() > currentMonth)) return;
+                    if (endDate < viewStartDate || startDate > viewEndDate) return;
 
                     let startDay = (startDate < viewStartDate) ? 1 : startDate.getDate();
                     let endDay = (endDate > viewEndDate) ? daysInMonth : endDate.getDate();
                     
                     if (startDate.getMonth() < currentMonth) startDay = 1;
                     if (endDate.getMonth() > currentMonth) endDay = daysInMonth;
+                    if (startDate.getFullYear() < currentYear) startDay = 1;
+                    if (endDate.getFullYear() > currentYear) endDay = daysInMonth;
 
-                    // Find an available vertical track for the event
                     let track = 0;
                     while (true) {
                         let collision = false;
@@ -536,7 +587,6 @@
                         track++;
                     }
 
-                    // Reserve the track for this event's days in the current month
                     for (let i = startDay; i <= endDay; i++) {
                         if (!layout[i]) layout[i] = [];
                         layout[i][track] = true;
@@ -544,14 +594,12 @@
 
                     const dayCellHeight = calendarGrid.querySelector('.day-cell-wrapper')?.offsetHeight || 110;
 
-                    // Render the event bar, segmenting it by week
                     let currentRenderDay = startDay;
                     while (currentRenderDay <= endDay) {
                         const weekRow = Math.floor((firstDayOfMonth + currentRenderDay - 1) / 7);
                         const startColumn = (firstDayOfMonth + currentRenderDay - 1) % 7;
                         
                         let segmentEndDay = currentRenderDay;
-                        // Find the last day of this event segment in the current week row
                         while (segmentEndDay + 1 <= endDay && Math.floor((firstDayOfMonth + segmentEndDay) / 7) === weekRow) {
                             segmentEndDay++;
                         }
@@ -560,21 +608,20 @@
 
                         const bar = document.createElement('div');
                         bar.className = 'event-bar';
-                        bar.style.top = `${weekRow * dayCellHeight + 30 + track * 28}px`; // 30px for day number, 28px per track
+                        bar.style.top = `${weekRow * dayCellHeight + 30 + track * 28}px`;
                         bar.style.left = `calc(${startColumn / 7 * 100}% + 4px)`;
                         bar.style.width = `calc(${durationInDays / 7 * 100}% - 8px)`;
                         bar.style.backgroundColor = event.color || '#3B82F6';
                         bar.dataset.eventId = event.id;
                         bar.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            openDetailsModal(event.date); // Always open details for the event's actual start date
+                            openDetailsModal(event.date);
                         });
                         
                         const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
                         bar.innerHTML = `<span>${icon}</span><span class="truncate">${event.title}</span>`;
                         eventBarsContainer.appendChild(bar);
 
-                        // Move to the day after the segment we just rendered
                         currentRenderDay = segmentEndDay + 1;
                     }
                 });
@@ -623,7 +670,6 @@
                         const currentDate = new Date(year, month, day);
                         const isoDate = getISODate(currentDate);
 
-                        // Check if a recurring instance should start on this day, ensuring not to duplicate the original event
                         if (isoDate > event.date && checkRecurring(event, currentDate)) {
                             const newEndDate = event.endDate ? getISODate(new Date(currentDate.getTime() + (new Date(event.endDate) - new Date(event.date)))) : null;
                             
@@ -731,7 +777,7 @@
             const switchToMonthView = () => switchToView('month');
             const switchToYearView = () => switchToView('year');
             
-            function saveEvents() { localStorage.setItem('calendarEvents', JSON.stringify(events)); }
+            function saveEvents() { localStorage.setItem('calendarEvents-v2', JSON.stringify(events)); }
 
             function initPickers() {
                 emojiPicker.innerHTML = emojis.map(emoji => `<div class="emoji-option" data-emoji="${emoji}">${emoji}</div>`).join('');
@@ -805,7 +851,7 @@
             function openDetailsModal(isoDate) {
                 openModal(detailsModal);
                 const date = new Date(`${isoDate}T12:00:00`);
-                detailsDate.textContent = `${monthNames[date.getMonth()]} ${date.getDate()}, ${currentYear}`;
+                detailsDate.textContent = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
                 detailsDay.textContent = dayNames[date.getDay()];
                 const dayEvents = getEventsForDate(isoDate);
                 detailsContent.innerHTML = dayEvents.length === 0 
@@ -873,4 +919,7 @@
     </script>
 </body>
 </html>
+
+
+
 
