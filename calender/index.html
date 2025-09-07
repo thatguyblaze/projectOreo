@@ -6,6 +6,7 @@
     <title>Calendar Project</title>
     <!-- New Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'></rect><line x1='16' y1='2' x2='16' y2='6'></line><line x1='8' y1='2' x2='8' y2='6'></line><line x1='3' y1='10' x2='21' y2='10'></line></svg>">
+    <!-- Corrected Tailwind CSS CDN Link -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -13,11 +14,11 @@
             --bg-primary: #1A1A1A;
             --bg-secondary: #252525;
             --bg-tertiary: #333333;
-            --bg-weekend: #222224; 
+            --bg-weekend: #222224; /* A more subtle, neutral dark background */
             --text-primary: #EDEDED;
-            --text-secondary: #9E9E9E; 
-            --accent-primary: #3B82F6; 
-            --accent-secondary: var(--text-secondary); 
+            --text-secondary: #9E9E9E; /* A softer grey for secondary text */
+            --accent-primary: #3B82F6; /* A standard, professional blue */
+            --accent-secondary: var(--text-secondary); /* Weekends now use the subtle secondary text color */
             --accent-danger: #EF4444;
             --season-winter-bg: #2D3A47;
             --season-spring-bg: #33453B;
@@ -42,7 +43,7 @@
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            height: calc(100vh - 40px); 
+            height: calc(100vh - 40px); /* Adjust height for footer */
         }
 
         main {
@@ -397,8 +398,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             let currentYear = new Date().getFullYear();
             let currentMonth = new Date().getMonth();
-            let events = JSON.parse(localStorage.getItem('calendarEvents-v2')) || []; // Use a new key for safety
+            let events = JSON.parse(localStorage.getItem('calendarEvents-v2')) || [];
             let currentView = 'year';
+            let isWheeling = false; // Throttling flag for scroll navigation
             
             // DOM Elements
             const yearView = document.getElementById('yearView');
@@ -441,7 +443,7 @@
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             const dayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const emojis = ['🎉', '💼', '🎂', '✈️', '❤️', '💰', '💳', '🏡', '💪', '🍽️', '🎓', '🩺'];
+            const emojis = ['📱', '💼', '🎂', '✈️', '❤️', '💰', '💳', '🏡', '💪', '🍽️', '🎓', '🩺', '🚗', '🛜'];
             const eventColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
             
             const holidayIcons = { "new year": '🥳', "valentine": '❤️', "patrick": '🍀', "easter": '🐰', "mother": '👩‍👧‍👦', "father": '👨‍👧‍👦', "juneteenth": '✊🏿', "independence": '🎆', "halloween": '🎃', "thanksgiving": '🦃', "christmas": '🎄', "king": '🕊️' };
@@ -890,6 +892,20 @@
             
             prevYearBtn.addEventListener('click', () => { currentYear--; updateViewTitle(); generateYearView(); });
             nextYearBtn.addEventListener('click', () => { currentYear++; updateViewTitle(); generateYearView(); });
+
+            monthView.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (isWheeling) return;
+                isWheeling = true;
+
+                if (e.deltaY < 0) { // Scrolling Up -> Previous Month
+                    prevMonthBtn.click();
+                } else { // Scrolling Down -> Next Month
+                    nextMonthBtn.click();
+                }
+
+                setTimeout(() => { isWheeling = false; }, 200); // Throttle to prevent rapid scrolling
+            });
 
             eventForm.addEventListener('submit', (e) => {
                 e.preventDefault();
