@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar Project</title>
+    <!-- New Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233B82F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'></rect><line x1='16' y1='2' x2='16' y2='6'></line><line x1='8' y1='2' x2='8' y2='6'></line><line x1='3' y1='10' x2='21' y2='10'></line></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,11 +13,11 @@
             --bg-primary: #1A1A1A;
             --bg-secondary: #252525;
             --bg-tertiary: #333333;
-            --bg-weekend: #222224; /* A more subtle, neutral dark background */
+            --bg-weekend: #222224; 
             --text-primary: #EDEDED;
-            --text-secondary: #9E9E9E; /* A softer grey for secondary text */
-            --accent-primary: #3B82F6; /* A standard, professional blue */
-            --accent-secondary: var(--text-secondary); /* Weekends now use the subtle secondary text color */
+            --text-secondary: #9E9E9E; 
+            --accent-primary: #3B82F6; 
+            --accent-secondary: var(--text-secondary); 
             --accent-danger: #EF4444;
             --season-winter-bg: #2D3A47;
             --season-spring-bg: #33453B;
@@ -40,7 +42,7 @@
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            height: calc(100vh - 40px); /* Adjust height for footer */
+            height: calc(100vh - 40px); 
         }
 
         main {
@@ -50,7 +52,7 @@
         }
 
         .calendar-container {
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             height: 100%;
         }
 
@@ -62,13 +64,12 @@
 
         #calendarGrid {
             flex-grow: 1;
-            /* Updated to ensure day cells have enough space */
             grid-template-rows: auto repeat(6, minmax(0, 1fr));
         }
 
         .view-hidden {
             opacity: 0;
-            transform: scale(0.95);
+            transform: scale(0.98);
             pointer-events: none;
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -78,14 +79,14 @@
 
         .modal-backdrop { 
             background-color: rgba(0,0,0,0.7); 
-            transition: opacity 0.3s ease-in-out; 
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
             backdrop-filter: blur(4px);
         }
 
         .modal-content {
             background-color: var(--bg-secondary);
             border: 1px solid var(--bg-tertiary);
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateY(20px) scale(0.98);
             opacity: 0;
         }
@@ -93,7 +94,7 @@
         .modal-visible .modal-content { transform: translateY(0) scale(1); opacity: 1; }
 
         .day-cell {
-            transition: all 0.2s ease-in-out;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             opacity: 0;
             transform: translateY(10px);
@@ -101,17 +102,15 @@
             height: 100%;
         }
         
-        .day-cell-wrapper { position: relative; } /* Changed from overflow:hidden to allow pop-out effect */
-        .day-cell:hover { background-color: var(--bg-tertiary); transform: scale(1.02); z-index: 10; }
+        .day-cell-wrapper { position: relative; }
+        .day-cell:hover { background-color: var(--bg-tertiary); transform: scale(1.03); z-index: 10; }
         .day-cell-weekend { background-color: var(--bg-weekend); }
         .day-cell-weekend .day-number { color: var(--accent-secondary) !important; }
         
-        .day-cell-other-month .day-number {
-            opacity: 0.3;
-        }
+        .day-cell-other-month .day-number { opacity: 0.3; }
 
         .month-card {
-            transition: all 0.3s ease-in-out;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 0;
             transform: translateY(20px);
             animation: fade-in 0.5s forwards;
@@ -124,7 +123,7 @@
         .month-card-spring { background-color: var(--season-spring-bg); }
         .month-card-summer { background-color: var(--season-summer-bg); }
         .month-card-autumn { background-color: var(--season-autumn-bg); }
-        .month-card:hover { transform: scale(1.03); border-color: var(--accent-primary); }
+        .month-card:hover { transform: scale(1.03) translateY(-2px); border-color: var(--accent-primary); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
 
         .today-highlight {
             box-shadow: 0 0 0 2px var(--accent-primary), 0 0 10px var(--accent-primary);
@@ -143,23 +142,22 @@
             background-color: var(--accent-primary); color: white; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; opacity: 0; transform: scale(0.8);
-            transition: opacity 0.2s ease, transform 0.2s ease; z-index: 20;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); z-index: 20;
         }
 
         .day-cell:hover .add-day-event-btn { opacity: 1; transform: scale(1); }
-        .add-day-event-btn:hover { background-color: var(--accent-primary-hover); }
+        .add-day-event-btn:hover { background-color: #2563EB; /* Slightly darker blue */ transform: scale(1.1); }
 
         .event-list-container { display: flex; flex-direction: column; gap: 4px; margin-top: auto; padding-top: 4px; overflow-y: auto; max-height: 80px; }
         
-        /* New styles for multi-day event bars */
         #event-bars-container {
             position: absolute;
             top: 4rem; /* Height of weekday headers */
             left: 0;
             right: 0;
             bottom: 0;
-            pointer-events: none; /* Allows clicks to go through to day cells */
-            z-index: 15; /* Ensures event bars render above hovered day cells */
+            pointer-events: none;
+            z-index: 15;
         }
         .event-bar {
             position: absolute;
@@ -172,16 +170,17 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            pointer-events: all; /* Make the bars clickable */
+            pointer-events: all;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 6px;
         }
         .event-bar:hover {
             filter: brightness(1.2);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .event-item { display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 1.2; padding: 2px 4px; border-radius: 4px; background-color: var(--bg-tertiary); }
@@ -189,7 +188,7 @@
         .event-color-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
         .emoji-picker, .color-picker { display: flex; flex-wrap: wrap; gap: 8px; background-color: var(--bg-tertiary); padding: 10px; border-radius: 8px; margin-top: 8px; }
-        .emoji-option, .color-option { cursor: pointer; font-size: 20px; padding: 4px; border-radius: 50%; transition: transform 0.2s; }
+        .emoji-option, .color-option { cursor: pointer; font-size: 20px; padding: 4px; border-radius: 50%; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .color-option { width: 28px; height: 28px; border: 2px solid transparent; }
         
         .emoji-option:hover, .color-option:hover { transform: scale(1.1); }
@@ -200,33 +199,35 @@
             background-color: var(--bg-tertiary);
             border: 1px solid #4a4a4a;
             color: var(--text-primary);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .form-input:focus {
             outline: none;
-            ring: 2px;
-            ring-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px var(--accent-primary);
             border-color: var(--accent-primary);
         }
 
         .btn {
-            font-weight: 600; /* semibold */
-            font-size: 0.875rem; /* text-sm */
-            padding: 0.5rem 1rem; /* py-2 px-4 */
-            border-radius: 0.5rem; /* rounded-lg */
-            transition: all 0.15s ease-in-out;
+            font-weight: 600;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid transparent;
         }
         .btn:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.15);
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
-        .btn-accent { background-color: var(--accent-primary); color: white; }
+        .btn-accent { background-color: var(--accent-primary); color: white; box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39); }
+        .btn-accent:hover { box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.45); }
         .btn-secondary {
             background-color: var(--bg-tertiary);
             color: var(--text-primary);
             border: 1px solid #4a4a4a;
         }
-        .btn-danger { background-color: var(--accent-danger); color: white; }
+        .btn-danger { background-color: var(--accent-danger); color: white; box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39); }
+        .btn-danger:hover { box-shadow: 0 6px 20px 0 rgba(239, 68, 68, 0.45); }
         
         .countdown-item {
             background-color: var(--bg-tertiary);
@@ -238,6 +239,12 @@
             border-radius: 0.5rem;
             animation: fade-in 0.5s forwards;
             white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .countdown-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
         }
 
         footer {
@@ -312,30 +319,30 @@
                     <input type="hidden" id="eventId">
                     <div>
                         <label for="eventTitle" class="block text-sm font-medium text-text-secondary mb-1">Title</label>
-                        <input type="text" id="eventTitle" name="eventTitle" class="form-input w-full rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent-primary" required>
+                        <input type="text" id="eventTitle" name="eventTitle" class="form-input w-full rounded-lg px-3 py-2" required>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div>
                             <label for="eventStartDate" class="block text-sm font-medium text-text-secondary mb-1">Start Date</label>
-                            <input type="date" id="eventStartDate" name="eventStartDate" class="form-input w-full rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent-primary" required>
+                            <input type="date" id="eventStartDate" name="eventStartDate" class="form-input w-full rounded-lg px-3 py-2" required>
                         </div>
                         <div>
                             <label for="eventEndDate" class="block text-sm font-medium text-text-secondary mb-1">End Date (optional)</label>
-                            <input type="date" id="eventEndDate" name="eventEndDate" class="form-input w-full rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent-primary">
+                            <input type="date" id="eventEndDate" name="eventEndDate" class="form-input w-full rounded-lg px-3 py-2">
                         </div>
                     </div>
 
                     <div class="mt-4">
                         <label for="eventType" class="block text-sm font-medium text-text-secondary mb-1">Type</label>
-                        <select id="eventType" name="eventType" class="form-input w-full rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent-primary">
+                        <select id="eventType" name="eventType" class="form-input w-full rounded-lg px-3 py-2">
                             <option value="event">Event</option><option value="bill">Bill</option>
                         </select>
                     </div>
                     
                     <div class="mt-4">
                         <label for="eventDescription" class="block text-sm font-medium text-text-secondary mb-1">Description (optional)</label>
-                        <textarea id="eventDescription" name="eventDescription" rows="2" class="form-input w-full rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent-primary"></textarea>
+                        <textarea id="eventDescription" name="eventDescription" rows="2" class="form-input w-full rounded-lg px-3 py-2"></textarea>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-text-secondary mb-1">Icon</label>
@@ -348,7 +355,7 @@
                     <div class="mt-4 grid grid-cols-2 gap-4 items-end">
                         <div>
                             <label for="eventRecurring" class="block text-sm font-medium text-text-secondary mb-1">Frequency</label>
-                            <select id="eventRecurring" name="eventRecurring" class="form-input w-full rounded-lg px-3 py-2 focus:ring-2 focus:ring-accent-primary">
+                            <select id="eventRecurring" name="eventRecurring" class="form-input w-full rounded-lg px-3 py-2">
                                 <option value="none">None</option>
                                 <option value="weekly">Weekly</option>
                                 <option value="biweekly">Biweekly</option>
@@ -358,7 +365,7 @@
                         </div>
                         <div class="flex justify-start pb-1">
                             <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" id="eventCountdown" name="eventCountdown" class="form-checkbox h-5 w-5 text-accent-primary bg-bg-tertiary border-gray-600 rounded focus:ring-accent-primary">
+                                <input type="checkbox" id="eventCountdown" name="eventCountdown" class="form-checkbox h-5 w-5 text-accent-primary bg-bg-tertiary border-gray-600 rounded">
                                 <span class="ml-2 text-text-primary">Set as Countdown</span>
                             </label>
                         </div>
@@ -434,7 +441,7 @@
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             const dayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const emojis = ['📱', '💼', '🎂', '✈️', '❤️', '💰', '💳', '🏡', '💪', '🍽️', '🎓', '🩺', '🚗', '🛜'];
+            const emojis = ['🎉', '💼', '🎂', '✈️', '❤️', '💰', '💳', '🏡', '💪', '🍽️', '🎓', '🩺'];
             const eventColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
             
             const holidayIcons = { "new year": '🥳', "valentine": '❤️', "patrick": '🍀', "easter": '🐰', "mother": '👩‍👧‍👦', "father": '👨‍👧‍👦', "juneteenth": '✊🏿', "independence": '🎆', "halloween": '🎃', "thanksgiving": '🦃', "christmas": '🎄', "king": '🕊️' };
@@ -492,7 +499,6 @@
                 const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
                 const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-                // Clear previous bars and add container
                 const oldBarsContainer = document.getElementById('event-bars-container');
                 if(oldBarsContainer) oldBarsContainer.remove();
                 const eventBarsContainer = document.createElement('div');
@@ -503,7 +509,6 @@
                 let dayCounter = 0;
                 let gridCells = [];
 
-                // Days from previous month
                 const prevMonth = new Date(currentYear, currentMonth, 0);
                 const daysInPrevMonth = prevMonth.getDate();
                 for (let i = 0; i < firstDayOfMonth; i++) {
@@ -512,14 +517,12 @@
                     gridCells.push({ day, date, isOtherMonth: true });
                 }
 
-                // Days from current month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(currentYear, currentMonth, day);
                     gridCells.push({ day, date, isOtherMonth: false });
                 }
 
-                // Days from next month
-                const gridTotal = 42; // Always render a 6-week grid
+                const gridTotal = 42;
                 let nextMonthDay = 1;
                 while (gridCells.length < gridTotal) {
                     const date = new Date(currentYear, currentMonth + 1, nextMonthDay++);
@@ -540,7 +543,6 @@
                     calendarGrid.insertAdjacentHTML('beforeend', dayCellHTML);
                 });
                 
-                // Use a timeout to ensure DOM has rendered and cells have height
                 setTimeout(() => renderEventBars(firstDayOfMonth, daysInMonth), 50);
 
                 calendarGrid.querySelectorAll('.day-cell').forEach(cell => {
@@ -555,7 +557,7 @@
                 eventBarsContainer.innerHTML = '';
                 const monthEvents = getEventsForMonth(currentYear, currentMonth);
 
-                const layout = []; // tracks which vertical slots are taken on a per-day basis
+                const layout = [];
 
                 monthEvents.forEach(event => {
                     const startDate = new Date(`${event.date}T12:00:00`);
@@ -627,7 +629,6 @@
                 });
             }
 
-            // Helper function to check for recurring instances
             function checkRecurring(event, currentDate) {
                 const eventDate = new Date(`${event.date}T12:00:00`);
                 if (currentDate < eventDate) return false;
@@ -640,7 +641,7 @@
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                         return currentDate.getDay() === eventDate.getDay() && Math.floor(diffDays / 7) % 2 === 0;
                     case 'monthly':
-                    case true: // Backward compatibility
+                    case true:
                         return currentDate.getDate() === eventDate.getDate();
                     case 'yearly':
                         return currentDate.getMonth() === eventDate.getMonth() && currentDate.getDate() === eventDate.getDate();
@@ -654,7 +655,6 @@
                 const viewEndDate = new Date(year, month + 1, 0);
                 const daysInMonth = viewEndDate.getDate();
 
-                // 1. Add original user-created events that are visible in the current month
                 events.forEach(event => {
                     const eventStart = new Date(`${event.date}T12:00:00`);
                     const eventEnd = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStart;
@@ -663,7 +663,6 @@
                     }
                 });
 
-                // 2. Project recurring events for the current month
                 const recurringEvents = events.filter(e => e.recurring && e.recurring !== 'none');
                 recurringEvents.forEach(event => {
                     for (let day = 1; day <= daysInMonth; day++) {
@@ -675,7 +674,7 @@
                             
                             monthEvents.push({
                                 ...event,
-                                id: `${event.id}-${isoDate}`, // Create a unique ID for the instance
+                                id: `${event.id}-${isoDate}`,
                                 date: isoDate,
                                 endDate: newEndDate,
                                 isRecurringInstance: true
@@ -684,7 +683,6 @@
                     }
                 });
 
-                // 3. Add holidays for the month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const isoDate = getISODate(new Date(year, month, day));
                     const monthDay = isoDate.substring(5);
@@ -723,14 +721,14 @@
             }
 
             function updateCountdownBanner() {
-                countdownContainer.innerHTML = ''; // Clear previous countdowns
+                countdownContainer.innerHTML = '';
 
                 const today = new Date(new Date().toISOString().split('T')[0] + "T12:00:00");
 
                 const futureCountdowns = events
                     .filter(e => e.isCountdown && new Date(e.date + "T12:00:00") >= today)
                     .sort((a, b) => new Date(a.date + "T12:00:00") - new Date(b.date + "T12:00:00"))
-                    .slice(0, 3); // Get up to 3 next countdowns
+                    .slice(0, 3);
 
                 if (futureCountdowns.length > 0) {
                     futureCountdowns.forEach(countdown => {
@@ -749,7 +747,7 @@
                         
                         const countdownEl = document.createElement('div');
                         countdownEl.textContent = countdownText;
-                        countdownEl.className = 'countdown-item'; // Use the new class for styling
+                        countdownEl.className = 'countdown-item';
                         countdownContainer.appendChild(countdownEl);
                     });
                 }
