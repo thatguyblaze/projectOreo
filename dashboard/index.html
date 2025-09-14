@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @keyframes zoom-grid-animation {
+            0% { transform: scale(1) translate(0, 0); opacity: 0; }
+            50% { transform: scale(1.5) translate(15px, -15px); opacity: 0.1; }
+            100% { transform: scale(1) translate(0, 0); opacity: 0; }
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #f0f0f0;
+            overflow: hidden;
+            background-color: #0a0a0a;
+            position: relative;
+        }
+        .grid-overlay {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background-image:
+                linear-gradient(rgba(128, 0, 128, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(128, 0, 128, 0.15) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: zoom-grid-animation 15s ease-in-out infinite;
+            z-index: 0; pointer-events: none;
+        }
+        body.edit-mode .delete-site-btn { opacity: 1; transform: scale(1); }
+
+        .page-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #notes-panel {
+            width: 0;
+            opacity: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #050505;
+            border-right: 1px solid rgba(255, 255, 255, 0);
+            transition: width 0.4s ease, opacity 0.3s ease, padding 0.4s ease, border-color 0.4s ease;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        #notes-panel.active {
+            width: 350px;
+            opacity: 1;
+            padding: 2rem;
+            border-right-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #main-content {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-container {
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; width: 100%;
+            padding: 2rem;
+            gap: 1.5rem; position: relative; z-index: 1; transition: justify-content 0.4s ease;
+        }
+
+        /* Top Right Controls */
+        #top-right-controls {
+            position: absolute; top: 2rem; right: 2rem;
+            display: flex; align-items: center; gap: 1rem;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .control-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem; border-radius: 8px; color: #ccc;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .control-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        .control-btn.active { background: rgba(167, 139, 250, 0.2); color: #fff; }
+
+        /* Weather Widget Styles */
+        #weather-container { 
+            display: flex; align-items: center; gap: 0.75rem; 
+            font-size: 1rem; color: #ccc;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        #weather-container svg { width: 28px; height: 28px; }
+
+        /* Clock Wrapper */
+        .clock-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 1.5rem;
+            transition: transform 0.4s ease;
+        }
+        
+        /* Flip Clock Styles */
+        .flip-clock { 
+            display: flex; gap: 1.5rem;
+        }
+        .flip-unit {
+            position: relative; perspective: 600px; width: 100px;
+            height: 120px; font-size: 5rem; font-weight: 700;
+        }
+        /* AM/PM specific styles */
+        .flip-unit.ampm {
+            width: 80px;
+            font-size: 3.5rem;
+        }
+        .upper-card, .lower-card, .flipper-front, .flipper-back {
+            background-color: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 1024px) {
+            #notes-panel.active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                z-index: 30;
+                width: 320px;
+            }
+        }
+        @media (max-width: 768px) {
+            #top-right-controls { position: static; order: -1; justify-content: center; width: 100%; }
+        }
+        @media (max-width: 640px) {
+            .flip-unit { width: 70px; height: 90px; font-size: 3rem; }
+            .main-container { gap: 2rem; }
+            .flip-unit.ampm { width: 60px; font-size: 2.5rem; }
+            #notes-panel.active { width: 100%; }
+        }
+
+        .upper-card, .lower-card {
+            position: absolute; left: 0; width: 100%; height: 50%;
+            overflow: hidden; display: flex; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); border-radius: 8px;
+        }
+        .upper-card { top: 0; align-items: flex-end; border-bottom: 1px solid rgba(0,0,0,0.5); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        .upper-card span { transform: translateY(50%); }
+        .lower-card { bottom: 0; align-items: flex-start; border-top-left-radius: 0; border-top-right-radius: 0; }
+        .lower-card span { transform: translateY(-50%); }
+        .flipper { position: absolute; left: 0; top: 0; width: 100%; height: 50%; transform-origin: bottom; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53); z-index: 10; }
+        .flipper.flipping { transform: rotateX(-180deg); }
+        .flipper-front, .flipper-back {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: flex-end; overflow: hidden;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-bottom: 1px solid rgba(0,0,0,0.5); border-radius: 8px 8px 0 0;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
+        }
+        .flipper-front span, .flipper-back span { transform: translateY(50%); }
+        .flipper-back { transform: rotateX(180deg); align-items: flex-start; }
+        .flipper-back span { transform: translateY(-50%); }
+
+        /* Calendar Display */
+        #calendar-link { font-size: 1.125rem; color: #ccc; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; text-align: center; }
+        #calendar-link:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
+
+        /* Search Bar & Pinned Sites */
+        .widget {
+            width: 100%; max-width: 500px;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease;
+            max-height: 1000px;
+        }
+        .search-input { width: 100%; padding: 1rem 1rem 1rem 3rem; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: #f0f0f0; font-size: 1rem; transition: all 0.2s ease-in-out; outline: none; }
+        .search-input:focus { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(167, 139, 250, 0.5); box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2); }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.4); pointer-events: none; }
+        
+        /* Pinned Sites & Edit Button */
+        .sites-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+        #edit-sites-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+        #edit-sites-btn:hover { background: rgba(255,255,255,0.15); }
+        .pinned-sites { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1.5rem; width: 100%;}
+        .site-link-container { position: relative; }
+        .site-link { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; text-decoration: none; color: #ccc; transition: transform 0.2s ease, color 0.2s ease; }
+        .site-link:hover { transform: translateY(-4px); color: #fff; }
+        .site-icon-wrapper { width: 64px; height: 64px; border-radius: 16px; background-color: rgba(255, 255, 255, 0.05); display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .site-link:hover .site-icon-wrapper { background-color: rgba(167, 139, 250, 0.2); border-color: rgba(167, 139, 250, 0.5); }
+        .site-icon { width: 32px; height: 32px; object-fit: contain; }
+        .delete-site-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 9999px; background-color: #f43f5e; color: white; display: flex; justify-content: center; align-items: center; opacity: 0; transform: scale(0.8); z-index: 10; pointer-events: none; }
+        body.edit-mode .delete-site-btn { opacity: 1; transform: scale(1); pointer-events: auto; }
+
+        /* Scratchpad */
+        #scratchpad-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .toolbar-btn {
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #ccc;
+            border-radius: 6px;
+            padding: 0.4rem;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .toolbar-btn:hover {
+            background-color: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        .toolbar-btn.active {
+             background-color: rgba(167, 139, 250, 0.2); 
+             color: #fff; 
+        }
+        #scratchpad-editor {
+            width: 100%;
+            height: 100%;
+            flex-grow: 1;
+            margin: 0;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            outline: none;
+            background-color: rgba(255,255,255,0.03);
+            overflow-y: auto;
+        }
+        #scratchpad-editor:focus {
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2);
+        }
+        #scratchpad-editor ul {
+            list-style: disc;
+            margin-left: 1.5rem;
+        }
+        #scratchpad-editor blockquote {
+            border-left: 3px solid #666;
+            padding-left: 1rem;
+            color: #aaa;
+        }
+
+
+        /* Focus Mode */
+        body.focus-mode .main-container { justify-content: center; }
+        body.focus-mode .clock-wrapper { transform: scale(1.2); }
+        body.focus-mode .search-wrapper,
+        body.focus-mode .sites-wrapper,
+        body.focus-mode #top-right-controls,
+        body.focus-mode #calendar-link {
+            visibility: hidden; opacity: 0; max-height: 0; margin: 0; padding: 0;
+        }
+
+        /* Modal Styles */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background-color: #1e1e1e; padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="">
+    <div class="page-wrapper">
+        <div id="notes-panel">
+            <h2 class="text-xl font-bold text-gray-300">Notes</h2>
+            <div id="scratchpad-toolbar">
+                <button class="toolbar-btn" data-command="bold" title="Bold (Ctrl+B)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055a2.176 2.176 0 0 0 1.852-2.14c0-1.346-1.123-2.43-2.734-2.43H3.602V13h4.608ZM4.695 4.002h2.355c.734 0 1.294.431 1.294 1.055 0 .6-.573.984-1.33.984H4.695V4.002Zm3.405 5.09c.854 0 1.496.486 1.496 1.229 0 .733-.61 1.22-1.55 1.22H4.695V9.092h2.405Z"/></svg>
+                </button>
+                <button class="toolbar-btn" data-command="italic" title="Italic (Ctrl+I)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.71h.231V2.73L9.736 2.73c-1.355 0-1.72.709-1.527 1.693L6.764 11.8c-.12.59-.244.665-1.348.665h-.23L4 13.269h1.247c1.355 0 1.72-.709 1.527-1.693Z"/></svg>
+                </button>
+                <button class="toolbar-btn" data-command="strikeThrough" title="Strikethrough">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="transform: rotate(90deg);"><path d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.71h.231V2.73L9.736 2.73c-1.355 0-1.72.709-1.527 1.693L6.764 11.8c-.12.59-.244.665-1.348.665h-.23L4 13.269h1.247c1.355 0 1.72-.709 1.527-1.693Z" transform="scale(1, -1) translate(0, -16)"/></svg>
+                </button>
+                <button class="toolbar-btn" data-command="insertUnorderedList" title="Bulleted List">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>
+                </button>
+                 <button class="toolbar-btn" data-command="formatBlock" data-value="blockquote" title="Quote">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12 12a1 1 0 0 0 1-1V5.5c0-.816-.136-1.5-.702-1.884-.57-.387-1.44-.387-2.314 0l-.089.056-.019.012a1.31 1.31 0 0 0-.332.22c-.243.262-.33.645-.33.95V11a1 1 0 0 0 1 1h2Zm-6 0a1 1 0 0 0 1-1V5.5c0-.816-.136-1.5-.702-1.884-.57-.387-1.44-.387-2.314 0l-.089.056-.019.012a1.31 1.31 0 0 0-.332.22c-.243.262-.33.645-.33.95V11a1 1 0 0 0 1 1h2Z"/></svg>
+                </button>
+            </div>
+            <div id="scratchpad-editor" contenteditable="true" spellcheck="false"></div>
+        </div>
+
+        <div id="main-content">
+            <div class="grid-overlay"></div>
+            <div class="main-container">
+                <!-- Top Right Controls -->
+                <div id="top-right-controls">
+                    <div id="weather-container"></div>
+                    <button id="notes-btn" class="control-btn" title="Toggle Notes">Notes</button>
+                    <button id="focus-mode-btn" class="control-btn" title="Toggle Focus Mode">Focus</button>
+                </div>
+                
+                <div class="clock-wrapper">
+                    <div class="flip-clock">
+                        <div class="flip-unit" id="hours"></div>
+                        <div class="flip-unit" id="minutes"></div>
+                        <div class="flip-unit" id="seconds"></div>
+                    </div>
+                    <div class="flip-unit ampm" id="ampm"></div>
+                </div>
+                
+                <!-- Calendar Link -->
+                <a id="calendar-link">
+                    <span id="date-display"></span>
+                </a>
+
+                <!-- Search Bar -->
+                <div class="search-wrapper widget">
+                    <form id="search-form" class="relative">
+                        <div class="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </div>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search with Bing or enter URL" autofocus autocomplete="off">
+                    </form>
+                </div>
+
+                <!-- Pinned Websites -->
+                <div class="sites-wrapper widget">
+                    <div id="pinned-sites-container" class="pinned-sites"></div>
+                    <button id="edit-sites-btn">Edit Sites</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Add Site Modal -->
+    <div id="add-site-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold mb-4">Add New Site</h2>
+            <form id="add-site-form">
+                <div class="mb-4">
+                    <label for="site-name" class="block text-sm font-medium text-gray-300 mb-1">Site Name (Optional)</label>
+                    <input type="text" id="site-name" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div class="mb-6">
+                    <label for="site-url" class="block text-sm font-medium text-gray-300 mb-1">Site URL</label>
+                    <input type="url" id="site-url" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500" required placeholder="https://example.com">
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="cancel-add-site" class="py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition-colors">Cancel</button>
+                    <button type="submit" class="py-2 px-4 rounded-lg bg-purple-600 hover:bg-purple-500 transition-colors font-semibold">Add Site</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Element Selectors ---
+            const mainContainer = document.querySelector('.main-container');
+            const sitesContainer = document.getElementById('pinned-sites-container');
+            const editSitesBtn = document.getElementById('edit-sites-btn');
+            const calendarLink = document.getElementById('calendar-link');
+            const dateDisplay = document.getElementById('date-display');
+            const addSiteModal = document.getElementById('add-site-modal');
+            const addSiteForm = document.getElementById('add-site-form');
+            const cancelAddSiteBtn = document.getElementById('cancel-add-site');
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const notesPanel = document.getElementById('notes-panel');
+            const scratchpadEditor = document.getElementById('scratchpad-editor');
+            const notesBtn = document.getElementById('notes-btn');
+            const focusModeBtn = document.getElementById('focus-mode-btn');
+            
+            let sites = [];
+
+            // --- DATE & CALENDAR ---
+            function updateDate() {
+                const now = new Date();
+                const options = { weekday: 'long', month: 'long', day: 'numeric' };
+                dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+            }
+            calendarLink.addEventListener('click', () => { window.open('https://blazinik.com/calender/', '_blank'); });
+
+            // --- FOCUS MODE ---
+            function setFocusMode(isFocused) {
+                document.body.classList.toggle('focus-mode', isFocused);
+                localStorage.setItem('focusMode', isFocused);
+            }
+            focusModeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isFocused = document.body.classList.contains('focus-mode');
+                setFocusMode(!isFocused);
+            });
+            document.querySelector('#main-content').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget && document.body.classList.contains('focus-mode')) {
+                    setFocusMode(false);
+                }
+            });
+            function loadFocusMode() {
+                const savedFocusMode = localStorage.getItem('focusMode') === 'true';
+                setFocusMode(savedFocusMode);
+            }
+
+            // --- WIDGET TOGGLING ---
+            notesBtn.addEventListener('click', () => {
+                notesPanel.classList.toggle('active');
+                notesBtn.classList.toggle('active');
+            });
+
+            // --- STABLE WYSIWYG NOTES EDITOR ---
+             function setupToolbar() {
+                const toolbar = document.getElementById('scratchpad-toolbar');
+                toolbar.addEventListener('mousedown', (e) => { // Use mousedown to prevent editor from losing focus
+                    e.preventDefault();
+                    const button = e.target.closest('.toolbar-btn');
+                    if (button) {
+                        const command = button.dataset.command;
+                        const value = button.dataset.value || null;
+                        document.execCommand(command, false, value);
+                    }
+                });
+            }
+
+            function saveScratchpad() {
+                localStorage.setItem('scratchpadContent', scratchpadEditor.innerHTML);
+            }
+            
+            function loadScratchpad() {
+                const savedContent = localStorage.getItem('scratchpadContent');
+                if (savedContent) {
+                    scratchpadEditor.innerHTML = savedContent;
+                } else {
+                    scratchpadEditor.innerHTML = '<p>Welcome to your notes!</p><ul><li>Use the toolbar to format text.</li></ul>';
+                }
+            }
+
+            scratchpadEditor.addEventListener('blur', saveScratchpad);
+
+
+            // --- SITE MANAGEMENT ---
+            function loadSites() {
+                const storedSites = localStorage.getItem('pinnedSites');
+                sites = storedSites ? JSON.parse(storedSites) : [
+                    { name: 'Bing', url: 'https://bing.com' }, { name: 'YouTube', url: 'https://youtube.com' },
+                    { name: 'GitHub', url: 'https://github.com' }, { name: 'Reddit', url: 'https://reddit.com' },
+                ];
+            }
+            function saveSites() { localStorage.setItem('pinnedSites', JSON.stringify(sites)); }
+            function renderSites() {
+                sitesContainer.innerHTML = '';
+                sites.forEach((site, index) => {
+                    const domain = new URL(site.url).hostname;
+                    const iconUrl = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+                    const siteName = site.name || domain;
+                    const container = document.createElement('div');
+                    container.className = 'site-link-container';
+                    container.innerHTML = `<button class="delete-site-btn" data-index="${index}">&#x2715;</button><a href="${site.url}" class="site-link"><div class="site-icon-wrapper"><img src="${iconUrl}" alt="${siteName} icon" class="site-icon" onerror="this.onerror=null; this.src='https://placehold.co/64x64/2a2a2a/f0f0f0?text=${siteName.charAt(0)}'"></div><span class="text-sm">${siteName}</span></a>`;
+                    sitesContainer.appendChild(container);
+                });
+                const addButtonContainer = document.createElement('div');
+                addButtonContainer.className = 'site-link-container';
+                addButtonContainer.innerHTML = `<div class="site-link add-site-btn"><div class="site-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span class="text-sm">Add New</span></div>`;
+                sitesContainer.appendChild(addButtonContainer);
+            }
+            sitesContainer.addEventListener('click', e => {
+                if (e.target.closest('.add-site-btn')) { addSiteModal.classList.add('active'); }
+                if (e.target.matches('.delete-site-btn')) {
+                    sites.splice(parseInt(e.target.dataset.index), 1);
+                    saveSites(); renderSites();
+                }
+            });
+            editSitesBtn.addEventListener('click', () => {
+                document.body.classList.toggle('edit-mode');
+                editSitesBtn.textContent = document.body.classList.contains('edit-mode') ? 'Done' : 'Edit Sites';
+            });
+            addSiteForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const siteName = document.getElementById('site-name').value.trim();
+                let siteUrl = document.getElementById('site-url').value.trim();
+                if (!siteUrl.startsWith('http')) siteUrl = `https://${siteUrl}`;
+                sites.push({ name: siteName, url: siteUrl });
+                saveSites(); renderSites(); addSiteForm.reset(); addSiteModal.classList.remove('active');
+            });
+            cancelAddSiteBtn.addEventListener('click', () => addSiteModal.classList.remove('active'));
+            addSiteModal.addEventListener('click', (e) => { if (e.target === addSiteModal) addSiteModal.classList.remove('active'); });
+
+            // --- SEARCH FUNCTIONALITY ---
+            function performSearch(query) {
+                if (!query) return;
+                try { 
+                    new URL(query); 
+                    window.location.href = query.startsWith('http') ? query : `https://${query}`;
+                } catch (_) {
+                    window.location.href = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+                }
+            }
+            searchForm.addEventListener('submit', (e) => { e.preventDefault(); performSearch(searchInput.value.trim()); });
+
+            // --- FLIP CLOCK LOGIC ---
+            class FlipUnit {
+                constructor(container, initialValue) {
+                    this.container = container; this.currentValue = initialValue; this.isFlipping = false;
+                    this.upperCard = document.createElement('div'); this.upperCard.className = 'upper-card'; this.upperCard.innerHTML = `<span>${initialValue}</span>`;
+                    this.lowerCard = document.createElement('div'); this.lowerCard.className = 'lower-card'; this.lowerCard.innerHTML = `<span>${initialValue}</span>`;
+                    this.flipper = document.createElement('div'); this.flipper.className = 'flipper';
+                    this.flipperFront = document.createElement('div'); this.flipperFront.className = 'flipper-front'; this.flipperFront.innerHTML = `<span>${initialValue}</span>`;
+                    this.flipperBack = document.createElement('div'); this.flipperBack.className = 'flipper-back'; this.flipperBack.innerHTML = `<span>${initialValue}</span>`;
+                    this.flipper.appendChild(this.flipperFront); this.flipper.appendChild(this.flipperBack);
+                    this.container.appendChild(this.upperCard); this.container.appendChild(this.lowerCard); this.container.appendChild(this.flipper);
+                }
+                flip(newValue) {
+                    if (this.isFlipping || newValue === this.currentValue) return;
+                    const oldValue = this.currentValue; this.isFlipping = true;
+                    this.upperCard.firstChild.textContent = newValue; this.flipperFront.firstChild.textContent = oldValue;
+                    this.flipperBack.firstChild.textContent = newValue; this.flipper.classList.add('flipping');
+                    setTimeout(() => {
+                        this.lowerCard.firstChild.textContent = newValue; this.flipperFront.firstChild.textContent = newValue;
+                        this.flipper.style.transition = 'none'; this.flipper.classList.remove('flipping');
+                        this.flipper.offsetHeight; this.flipper.style.transition = '';
+                        this.currentValue = newValue; this.isFlipping = false;
+                    }, 500);
+                }
+            }
+            
+            function updateClock() {
+                const now = new Date();
+                let hours = now.getHours();
+                
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                ampmUnit.flip(ampm);
+
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+
+                hoursUnit.flip(String(hours).padStart(2, '0'));
+                minutesUnit.flip(String(now.getMinutes()).padStart(2, '0'));
+                secondsUnit.flip(String(now.getSeconds()).padStart(2, '0'));
+            }
+
+            const initialDate = new Date();
+            let initialHours = initialDate.getHours();
+            const initialAmpm = initialHours >= 12 ? 'PM' : 'AM';
+            initialHours = initialHours % 12;
+            initialHours = initialHours ? initialHours : 12;
+            
+            const hoursUnit = new FlipUnit(document.getElementById('hours'), String(initialHours).padStart(2, '0'));
+            const minutesUnit = new FlipUnit(document.getElementById('minutes'), String(initialDate.getMinutes()).padStart(2, '0'));
+            const secondsUnit = new FlipUnit(document.getElementById('seconds'), String(initialDate.getSeconds()).padStart(2, '0'));
+            const ampmUnit = new FlipUnit(document.getElementById('ampm'), initialAmpm);
+
+            // --- WEATHER WIDGET LOGIC (identical) ---
+            function getWeather() {
+                const weatherContainer = document.getElementById('weather-container');
+                if (!navigator.geolocation) { weatherContainer.style.display = 'none'; return; }
+                const weatherIcons = { 0: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>', 1: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>', 3: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"></path><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path></svg>', 61: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13.3A5.4 5.4 0 1 0 5.2 8"></path><path d="M16 13.3a3.8 3.8 0 1 0-7.6 0"></path><path d="M12 12v6"></path><path d="M16 16v6"></path><path d="M8 16v6"></path></svg>', 95: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 17H2.5"></path><path d="M16 4.4A5.4 5.4 0 1 0 5.2 8"></path><path d="M16 4.4a3.8 3.8 0 1 0-7.6 0"></path><path d="M13 12l-2 5h4l-2 5"></path></svg>',};
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+                        try {
+                            const response = await fetch(apiUrl); const data = await response.json();
+                            const temp = Math.round(data.current_weather.temperature); const code = data.current_weather.weathercode;
+                            const icon = weatherIcons[code] || weatherIcons[0];
+                            weatherContainer.innerHTML = `${icon}<span>${temp}°C</span>`;
+                        } catch (error) { weatherContainer.style.display = 'none'; }
+                    },
+                    () => { weatherContainer.style.display = 'none'; }
+                );
+            }
+
+            // --- INITIALIZATION ---
+            loadSites(); renderSites();
+            setupToolbar();
+            loadScratchpad();
+            loadFocusMode();
+            getWeather();
+            updateDate();
+            updateClock(); // Initial clock set
+            setInterval(updateClock, 1000);
+        });
+    </script>
+</body>
+</html>
+
