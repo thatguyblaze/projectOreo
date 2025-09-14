@@ -79,6 +79,7 @@
             position: absolute; top: 2rem; right: 2rem;
             display: flex; align-items: center; gap: 1rem;
             transition: opacity 0.3s ease-in-out;
+            z-index: 20;
         }
         .control-btn {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
@@ -132,9 +133,7 @@
                 width: 320px;
             }
         }
-        @media (max-width: 768px) {
-            #top-right-controls { position: static; order: -1; justify-content: center; width: 100%; }
-        }
+      
         @media (max-width: 640px) {
             .flip-unit { width: 70px; height: 90px; font-size: 3rem; }
             .main-container { gap: 2rem; }
@@ -293,14 +292,14 @@
 
         <div id="main-content">
             <div class="grid-overlay"></div>
+             <!-- Top Right Controls -->
+            <div id="top-right-controls">
+                <div id="weather-container"></div>
+                <button id="notes-btn" class="control-btn" title="Toggle Notes">Notes</button>
+                <button id="focus-mode-btn" class="control-btn" title="Toggle Focus Mode">Focus</button>
+            </div>
             <div class="main-container">
-                <!-- Top Right Controls -->
-                <div id="top-right-controls">
-                    <div id="weather-container"></div>
-                    <button id="notes-btn" class="control-btn" title="Toggle Notes">Notes</button>
-                    <button id="focus-mode-btn" class="control-btn" title="Toggle Focus Mode">Focus</button>
-                </div>
-                
+               
                 <div class="clock-wrapper">
                     <div class="flip-clock">
                         <div class="flip-unit" id="hours"></div>
@@ -383,7 +382,7 @@
                 const options = { weekday: 'long', month: 'long', day: 'numeric' };
                 dateDisplay.textContent = now.toLocaleDateString('en-US', options);
             }
-            calendarLink.addEventListener('click', () => { window.open('https://blazinik.com/calender/', '_blank'); });
+            calendarLink.addEventListener('click', () => { window.location.href = 'https://calendar.google.com'; });
 
             // --- FOCUS MODE ---
             function setFocusMode(isFocused) {
@@ -552,7 +551,7 @@
             const secondsUnit = new FlipUnit(document.getElementById('seconds'), String(initialDate.getSeconds()).padStart(2, '0'));
             const ampmUnit = new FlipUnit(document.getElementById('ampm'), initialAmpm);
 
-            // --- WEATHER WIDGET LOGIC (identical) ---
+            // --- WEATHER WIDGET LOGIC ---
             function getWeather() {
                 const weatherContainer = document.getElementById('weather-container');
                 if (!navigator.geolocation) { weatherContainer.style.display = 'none'; return; }
@@ -560,12 +559,12 @@
                 navigator.geolocation.getCurrentPosition(
                     async (position) => {
                         const { latitude, longitude } = position.coords;
-                        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+                        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&temperature_unit=fahrenheit`;
                         try {
                             const response = await fetch(apiUrl); const data = await response.json();
                             const temp = Math.round(data.current_weather.temperature); const code = data.current_weather.weathercode;
                             const icon = weatherIcons[code] || weatherIcons[0];
-                            weatherContainer.innerHTML = `${icon}<span>${temp}°C</span>`;
+                            weatherContainer.innerHTML = `${icon}<span>${temp}°F</span>`;
                         } catch (error) { weatherContainer.style.display = 'none'; }
                     },
                     () => { weatherContainer.style.display = 'none'; }
