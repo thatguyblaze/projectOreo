@@ -173,18 +173,14 @@
             transform: translateX(22px);
         }
         /* Batch/Audit Entry Styles */
-        .data-grid-header, .data-grid-row {
+        .data-grid-header, .batch-grid-row {
             display: grid;
+            grid-template-columns: 2fr 1fr 1.5fr 50px;
             gap: 1rem;
             align-items: center;
             padding: 0 0.5rem;
         }
-        .batch-grid-header, .batch-grid-row {
-            grid-template-columns: 2fr 1fr 1.5fr 50px;
-        }
-        .audit-grid-header, .audit-grid-row {
-             grid-template-columns: 2fr 1fr 1fr 1fr;
-        }
+
         .data-input {
             width: 100%;
             padding: 0.5rem;
@@ -203,6 +199,18 @@
             font-weight: 600;
             border-bottom-color: var(--primary-color);
         }
+        
+        /* Audit Summary Styles */
+        .audit-summary-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+        }
+        .audit-summary-row.match { background-color: #F8F8F8; color: var(--text-light); }
+        .audit-summary-row.shortage { background-color: #FDF4F4; color: #DC3B0B; font-weight: 500; }
+        .audit-summary-row.surplus { background-color: #F1FAF1; color: #107C10; font-weight: 500; }
     </style>
 </head>
 <body class="antialiased">
@@ -280,10 +288,9 @@
                     <div id="modal-tab-batch" class="modal-tab inline-block active">Batch Entry</div>
                     <div id="modal-tab-multiple" class="modal-tab inline-block">Quick Add</div>
                 </div>
-                <button id="close-entry-modal-btn" class="p-1 -mt-1">&times;</button>
+                <button id="close-entry-modal-btn" class="p-1 -mt-1 font-bold text-2xl">&times;</button>
             </div>
             
-            <!-- Batch Entry View -->
             <div id="batch-entry-view">
                 <div class="data-grid-header batch-grid-header text-sm font-semibold text-gray-500 pb-2 mb-2 border-b">
                     <span>Tire Size</span>
@@ -291,12 +298,9 @@
                     <span>Condition</span>
                     <span></span>
                 </div>
-                <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2" style="max-height: 60vh;">
-                    <!-- Batch rows will be injected here -->
-                </div>
+                <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2" style="max-height: 60vh;"></div>
             </div>
 
-            <!-- Add Multiple View -->
             <div id="add-multiple-view" class="hidden">
                  <div class="flex justify-end mb-4">
                     <label class="toggle-label text-sm font-medium text-gray-700">
@@ -322,22 +326,36 @@
     <div id="audit-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
         <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Inventory Audit</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Paste & Count Audit</h2>
                 <button id="close-audit-modal-btn" class="p-1 font-bold text-2xl">&times;</button>
             </div>
-            <p class="text-sm text-gray-500 mb-4">Enter the new physical count for each tire. Any differences will be logged as an adjustment.</p>
-            <div class="data-grid-header audit-grid-header text-sm font-semibold text-gray-500 pb-2 mb-2 border-b">
-                <span>Tire Size</span>
-                <span>Condition</span>
-                <span class="text-center">Current Qty</span>
-                <span class="text-center">New Count</span>
+            
+            <div id="audit-input-step">
+                <div class="flex justify-between items-center mb-4">
+                    <p class="text-sm text-gray-600">Paste your entire list of counted tire sizes below.</p>
+                    <select id="audit-condition-select" class="data-input w-auto">
+                        <option value="used" selected>For USED Tires</option>
+                        <option value="new">For NEW Tires</option>
+                    </select>
+                </div>
+                <textarea id="audit-paste-area" rows="12" class="w-full p-3 font-mono text-sm rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="2255517, 2255517, 2354518..."></textarea>
             </div>
-            <div id="audit-grid" class="flex-grow overflow-y-auto space-y-2">
-                <!-- Audit rows will be injected here -->
+            
+            <div id="audit-summary-step" class="hidden">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Discrepancy Report</h3>
+                <div class="text-sm font-semibold text-gray-500 audit-summary-row mb-2">
+                    <span>Tire Size</span>
+                    <span class="text-center">System</span>
+                    <span class="text-center">Counted</span>
+                    <span class="text-center">Variance</span>
+                </div>
+                <div id="audit-summary-content" class="space-y-1 overflow-y-auto" style="max-height: 50vh;"></div>
             </div>
+
             <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
                 <button id="cancel-audit-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
-                <button id="submit-audit-btn" class="btn btn-primary font-semibold py-2 px-5">Submit Audit</button>
+                <button id="process-audit-btn" class="btn btn-primary font-semibold py-2 px-5">Process & Review</button>
+                <button id="confirm-audit-btn" class="btn btn-primary font-semibold py-2 px-5 hidden">Confirm & Update Inventory</button>
             </div>
         </div>
     </div>
@@ -361,7 +379,7 @@
             const mostSearchedList = document.getElementById('most-searched-list');
             const analyticsChartCanvas = document.getElementById('analytics-chart');
             
-            // New/Modified Modal Elements
+            // Entry Modal Elements
             const addTiresBtn = document.getElementById('add-tires-btn');
             const entryModal = document.getElementById('entry-modal');
             const closeEntryModalBtn = document.getElementById('close-entry-modal-btn');
@@ -380,13 +398,19 @@
             const auditModal = document.getElementById('audit-modal');
             const closeAuditModalBtn = document.getElementById('close-audit-modal-btn');
             const cancelAuditModalBtn = document.getElementById('cancel-audit-modal-btn');
-            const submitAuditBtn = document.getElementById('submit-audit-btn');
-            const auditGrid = document.getElementById('audit-grid');
+            const auditInputStep = document.getElementById('audit-input-step');
+            const auditSummaryStep = document.getElementById('audit-summary-step');
+            const auditPasteArea = document.getElementById('audit-paste-area');
+            const auditConditionSelect = document.getElementById('audit-condition-select');
+            const processAuditBtn = document.getElementById('process-audit-btn');
+            const confirmAuditBtn = document.getElementById('confirm-audit-btn');
+            const auditSummaryContent = document.getElementById('audit-summary-content');
 
             let inventory = [];
             let activityLog = [];
             let analyticsChart = null;
-            let currentEntryMode = 'batch'; // 'batch' or 'multiple'
+            let currentEntryMode = 'batch';
+            let processedAuditData = null;
             
             const distributors = [
                 { name: 'ATD', urlTemplate: 'https://atdonline.com/es-search/refine?text={QUERY}', queryFormat: 'p-metric-no-slash' },
@@ -400,13 +424,13 @@
 
             // --- DATA MANAGEMENT ---
             const loadData = () => {
-                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV8')) || [];
-                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV8')) || [];
+                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV9')) || [];
+                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV9')) || [];
             };
 
             const saveData = () => {
-                localStorage.setItem('treadzTireInventoryV8', JSON.stringify(inventory));
-                localStorage.setItem('treadzActivityLogV8', JSON.stringify(activityLog));
+                localStorage.setItem('treadzTireInventoryV9', JSON.stringify(inventory));
+                localStorage.setItem('treadzActivityLogV9', JSON.stringify(activityLog));
             };
 
             // --- UTILITIES ---
@@ -596,7 +620,9 @@
                     } else if (log.action === 'Checked Distributor') {
                         statusHTML = `<div class="text-blue-500">Checked ${log.details.distributor}</div>`;
                     } else if (log.action === 'Audit') {
-                        statusHTML = `<div class="text-purple-600">Audit Adj: ${log.details.adjustment}</div>`;
+                        const adj = log.details.adjustment;
+                        const color = adj.includes('→ 0') || adj.startsWith('-') ? 'text-red-500' : 'text-green-600';
+                        statusHTML = `<div class="${color} font-semibold">Audit Adj: ${adj}</div>`;
                     } else { // Searched
                         statusHTML = log.details.inStock 
                             ? `<div class="font-semibold text-green-600">In Stock, Not Sold</div>`
@@ -727,7 +753,6 @@
                 entryModal.classList.toggle('hidden', !show);
                 entryModal.classList.toggle('flex', show);
                 if (show) {
-                    // Reset to batch entry mode when opening
                     switchEntryMode('batch');
                     batchGrid.innerHTML = '';
                     createBatchRow();
@@ -752,7 +777,7 @@
             
             const createBatchRow = () => {
                 const row = document.createElement('div');
-                row.className = 'data-grid-row batch-grid-row';
+                row.className = 'batch-grid-row';
                 row.innerHTML = `
                     <input type="text" class="data-input batch-size" placeholder="e.g., 2254517">
                     <input type="number" class="data-input batch-qty" value="1" min="1">
@@ -771,7 +796,7 @@
                 let processedTires = 0;
 
                 if (currentEntryMode === 'batch') {
-                    const rows = batchGrid.querySelectorAll('.data-grid-row');
+                    const rows = batchGrid.querySelectorAll('.batch-grid-row');
                     rows.forEach(row => {
                         const sizeInput = row.querySelector('.batch-size').value;
                         const qtyInput = row.querySelector('.batch-qty').value;
@@ -784,7 +809,7 @@
                             addedCount++;
                         }
                     });
-                } else { // 'multiple' mode
+                } else {
                     const inputs = tireInputModal.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
                     const condition = conditionToggleModal.checked ? 'new' : 'used';
                     inputs.forEach(inputStr => {
@@ -807,62 +832,112 @@
             const toggleAuditModal = (show) => {
                 auditModal.classList.toggle('hidden', !show);
                 auditModal.classList.toggle('flex', show);
-                if (show) renderAuditForm();
+                if (show) {
+                    // Reset modal to input step
+                    auditInputStep.classList.remove('hidden');
+                    auditSummaryStep.classList.add('hidden');
+                    processAuditBtn.classList.remove('hidden');
+                    confirmAuditBtn.classList.add('hidden');
+                    auditPasteArea.value = '';
+                    processedAuditData = null;
+                }
             };
 
-            const renderAuditForm = () => {
-                auditGrid.innerHTML = '';
-                if (inventory.length === 0) {
-                    auditGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full">No inventory to audit.</p>';
+            const processAndReviewAudit = () => {
+                const auditCondition = auditConditionSelect.value;
+                const rawInput = auditPasteArea.value;
+                const entries = rawInput.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+
+                if (entries.length === 0) {
+                    showToast("Please paste your counted tire list.");
                     return;
                 }
-                const sorted = getSortedInventory();
-                sorted.forEach(tire => {
-                    const row = document.createElement('div');
-                    row.className = 'data-grid-row audit-grid-row';
-                    row.dataset.size = JSON.stringify(tire.size);
-                    row.dataset.condition = tire.condition;
-                    
-                    row.innerHTML = `
-                        <span class="font-mono">${formatTireSize(tire.size)}</span>
-                        <span class="capitalize text-sm ${tire.condition === 'new' ? 'text-blue-600' : 'text-gray-600'}">${tire.condition}</span>
-                        <span class="text-center font-semibold text-gray-500">${tire.quantity}</span>
-                        <input type="number" class="data-input audit-qty text-center" value="${tire.quantity}" min="0">
-                    `;
-                    auditGrid.appendChild(row);
-                });
-            };
 
-            const processAudit = () => {
-                const rows = auditGrid.querySelectorAll('.data-grid-row');
-                let adjustments = 0;
-                rows.forEach(row => {
-                    const size = JSON.parse(row.dataset.size);
-                    const condition = row.dataset.condition;
-                    const newCount = parseInt(row.querySelector('.audit-qty').value, 10);
-
-                    const tire = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(size) && t.condition === condition);
-                    if (tire && !isNaN(newCount)) {
-                        const oldCount = tire.quantity;
-                        if (oldCount !== newCount) {
-                            tire.quantity = newCount;
-                            const adjustment = newCount - oldCount;
-                            const term = `${formatTireSize(size)} (${condition})`;
-                            addLogEntry(term, 'Audit', { adjustment: `${oldCount} → ${newCount}` });
-                            adjustments++;
-                        }
+                // 1. Create a map of the physical count
+                const physicalCountMap = new Map();
+                entries.forEach(entry => {
+                    const parsedSize = parseTireSize(entry);
+                    if (parsedSize) {
+                        const formatted = formatTireSize(parsedSize);
+                        physicalCountMap.set(formatted, (physicalCountMap.get(formatted) || 0) + 1);
                     }
                 });
-                
-                // Remove items with zero quantity after audit
-                inventory = inventory.filter(tire => tire.quantity > 0);
 
+                // 2. Create a map of the current inventory for the selected condition
+                const inventoryCountMap = new Map();
+                inventory.filter(t => t.condition === auditCondition).forEach(tire => {
+                    inventoryCountMap.set(formatTireSize(tire.size), tire.quantity);
+                });
+
+                // 3. Compare and generate summary
+                const allSizes = new Set([...physicalCountMap.keys(), ...inventoryCountMap.keys()]);
+                let summaryHTML = '';
+                const summaryData = [];
+
+                allSizes.forEach(sizeStr => {
+                    const physicalQty = physicalCountMap.get(sizeStr) || 0;
+                    const inventoryQty = inventoryCountMap.get(sizeStr) || 0;
+                    const variance = physicalQty - inventoryQty;
+
+                    if (variance !== 0) {
+                        let rowClass = variance > 0 ? 'surplus' : 'shortage';
+                        let varianceStr = variance > 0 ? `+${variance}` : variance;
+                        summaryHTML += `<div class="audit-summary-row ${rowClass}">
+                            <span>${sizeStr}</span>
+                            <span class="text-center">${inventoryQty}</span>
+                            <span class="text-center">${physicalQty}</span>
+                            <span class="text-center">${varianceStr}</span>
+                        </div>`;
+                    }
+                     summaryData.push({ sizeStr, physicalQty, inventoryQty, variance });
+                });
+                
+                if (!summaryHTML) {
+                    summaryHTML = `<div class="audit-summary-row match"><span class="col-span-full text-center">Perfect match! No discrepancies found.</span></div>`;
+                }
+
+                auditSummaryContent.innerHTML = summaryHTML;
+                processedAuditData = { physicalCountMap, auditCondition, summaryData };
+
+                // Switch to summary view
+                auditInputStep.classList.add('hidden');
+                auditSummaryStep.classList.remove('hidden');
+                processAuditBtn.classList.add('hidden');
+                confirmAuditBtn.classList.remove('hidden');
+            };
+            
+            const confirmAndUpdateAudit = () => {
+                if (!processedAuditData) return;
+
+                const { physicalCountMap, auditCondition, summaryData } = processedAuditData;
+                let adjustmentsCount = 0;
+                
+                // Keep all inventory of the OTHER condition
+                const otherInventory = inventory.filter(t => t.condition !== auditCondition);
+                const newAuditedInventory = [];
+
+                physicalCountMap.forEach((quantity, sizeStr) => {
+                    const parsedSize = parseTireSize(sizeStr);
+                    if (parsedSize) {
+                        newAuditedInventory.push({ size: parsedSize, quantity: quantity, condition: auditCondition });
+                    }
+                });
+
+                // Log adjustments
+                summaryData.filter(d => d.variance !== 0).forEach(d => {
+                     const term = `${d.sizeStr} (${auditCondition})`;
+                     const adjustment = `${d.inventoryQty} → ${d.physicalQty}`;
+                     addLogEntry(term, 'Audit', { adjustment });
+                     adjustmentsCount++;
+                });
+
+                inventory = [...otherInventory, ...newAuditedInventory];
+                
                 saveData();
                 renderAll();
-                showToast(`Audit complete. ${adjustments} adjustment(s) made.`);
                 toggleAuditModal(false);
+                showToast(`Audit confirmed. ${adjustmentsCount} adjustment(s) logged.`);
             };
-
 
             // --- EVENT LISTENERS ---
             searchInput.addEventListener('input', () => {
@@ -870,29 +945,18 @@
                 const term = formatTireSize(parseTireSize(searchInput.value));
                 if (term) addLogEntry(term, 'Searched');
             });
-            clearSearchBtn.addEventListener('click', () => {
-                searchInput.value = '';
-                renderAll();
-            });
+            clearSearchBtn.addEventListener('click', () => { searchInput.value = ''; renderAll(); });
 
             document.addEventListener('click', e => {
-                // Remove tire buttons
                 if (e.target.matches('.remove-btn-group button') && !e.target.closest('.log-action-buttons')) {
                     const group = e.target.closest('.remove-btn-group');
-                    const size = JSON.parse(group.dataset.size);
-                    const condition = group.dataset.condition;
-                    const qty = parseInt(e.target.dataset.qty);
-                    removeTire(size, qty, condition);
+                    removeTire(JSON.parse(group.dataset.size), parseInt(e.target.dataset.qty), group.dataset.condition);
                 }
-                // Log action buttons
                 if (e.target.matches('.log-action-buttons button[data-action="mark-sold"]')) {
                     const actionContainer = e.target.parentElement;
                     const logId = parseInt(actionContainer.dataset.logId);
                     actionContainer.innerHTML = `<div class="remove-btn-group flex gap-1.5" data-log-id="${logId}">
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="1">1</button>
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="2">2</button>
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="3">3</button>
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="4">4</button>
+                        ${[1,2,3,4].map(q => `<button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="${q}">${q}</button>`).join('')}
                     </div>`;
                 }
                 if (e.target.matches('.log-action-buttons .remove-btn-group button')) {
@@ -903,27 +967,21 @@
                     if (logEntry) {
                         const parsedSize = parseTireSize(logEntry.term);
                         const tireInStock = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(parsedSize));
-                        if (tireInStock) {
-                           removeTire(parsedSize, qty, tireInStock.condition, logId);
-                        } else {
-                            showToast("Cannot mark sold, tire is no longer in stock.");
-                        }
+                        if (tireInStock) removeTire(parsedSize, qty, tireInStock.condition, logId);
+                        else showToast("Cannot mark sold, tire is no longer in stock.");
                     }
                 }
-                // Distributor links
                 if (e.target.closest('.distributor-btn')) {
                     const term = formatTireSize(parseTireSize(searchInput.value));
-                    const dist = e.target.closest('.distributor-btn').dataset.distributor;
-                    if (term) addLogEntry(term, 'Checked Distributor', { distributor: dist });
+                    if (term) addLogEntry(term, 'Checked Distributor', { distributor: e.target.closest('.distributor-btn').dataset.distributor });
                 }
-                // Analytics
                 if (e.target.closest('#analytics-toggle')) {
                     analyticsSection.classList.toggle('open');
                     analyticsArrow.classList.toggle('rotate-180');
                 }
             });
             
-            // Entry Modal Listeners
+            // Entry Modal
             addTiresBtn.addEventListener('click', () => toggleEntryModal(true));
             closeEntryModalBtn.addEventListener('click', () => toggleEntryModal(false));
             cancelEntryModalBtn.addEventListener('click', () => toggleEntryModal(false));
@@ -938,20 +996,18 @@
                 }
             });
             batchGrid.addEventListener('click', (e) => {
-                if (e.target.matches('.remove-batch-row')) {
-                    if (batchGrid.querySelectorAll('.data-grid-row').length > 1) {
-                        e.target.closest('.data-grid-row').remove();
-                    }
+                if (e.target.matches('.remove-batch-row') && batchGrid.querySelectorAll('.batch-grid-row').length > 1) {
+                    e.target.closest('.batch-grid-row').remove();
                 }
             });
 
-            // Audit Modal Listeners
+            // Audit Modal
             auditBtn.addEventListener('click', () => toggleAuditModal(true));
             closeAuditModalBtn.addEventListener('click', () => toggleAuditModal(false));
             cancelAuditModalBtn.addEventListener('click', () => toggleAuditModal(false));
             auditModal.addEventListener('click', (e) => { if (e.target === auditModal) toggleAuditModal(false); });
-            submitAuditBtn.addEventListener('click', processAudit);
-
+            processAuditBtn.addEventListener('click', processAndReviewAudit);
+            confirmAuditBtn.addEventListener('click', confirmAndUpdateAudit);
 
             // --- INITIALIZATION ---
             loadData();
@@ -960,3 +1016,4 @@
     </script>
 </body>
 </html>
+
