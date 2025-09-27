@@ -172,18 +172,36 @@
         input:checked + .slider:before {
             transform: translateX(22px);
         }
-        /* Batch Entry Styles */
-        .batch-grid-header, .batch-grid-row {
+        /* Batch/Audit Entry Styles */
+        .data-grid-header, .data-grid-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 50px;
             gap: 1rem;
             align-items: center;
+            padding: 0 0.5rem;
         }
-        .batch-input {
+        .batch-grid-header, .batch-grid-row {
+            grid-template-columns: 2fr 1fr 1.5fr 50px;
+        }
+        .audit-grid-header, .audit-grid-row {
+             grid-template-columns: 2fr 1fr 1fr 1fr;
+        }
+        .data-input {
             width: 100%;
             padding: 0.5rem;
             border: 1px solid var(--border-color);
             border-radius: 0.375rem;
+            background-color: #F8F8F8;
+        }
+        .modal-tab {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-bottom: 2px solid transparent;
+            color: var(--text-light);
+        }
+        .modal-tab.active {
+            color: var(--primary-color);
+            font-weight: 600;
+            border-bottom-color: var(--primary-color);
         }
     </style>
 </head>
@@ -197,8 +215,14 @@
                     <h1 class="text-xl font-semibold text-gray-800 hidden sm:block">Treadz Inventory</h1>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="batch-entry-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">Batch Entry</button>
-                    <button id="add-multiple-btn" class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2">Add Multiple</button>
+                    <button id="audit-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v2H6V3a2 2 0 0 1 2-2zM6 6h4v4H6V6z"/><path d="M9 0a3 3 0 0 0-3 3v2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1V3a3 3 0 0 0-3-3zM5 6h6v5a.5.5 0 0 1-.5.5H5.5a.5.5 0 0 1-.5-.5V6z"/></svg>
+                        Audit
+                    </button>
+                    <button id="add-tires-btn" class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+                        Add Tires
+                    </button>
                 </div>
             </div>
         </nav>
@@ -221,9 +245,9 @@
             
             <section class="mb-8 p-6 container-box">
                  <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
-                </div>
-                <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+                     <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
+                 </div>
+                 <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
             </section>
 
             <div id="inventory-container"></div>
@@ -248,47 +272,76 @@
         </main>
     </div>
 
-    <!-- ADD MULTIPLE MODAL -->
-    <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
-        <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl m-4 border border-gray-200">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Add Multiple Tires</h2>
-                <label class="toggle-label text-sm font-medium text-gray-700">
-                    USED
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="condition-toggle-modal">
-                        <span class="slider"></span>
-                    </div>
-                    NEW
-                </label>
+    <!-- ADD TIRES MODAL (Combined) -->
+    <div id="entry-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
+            <div class="flex justify-between items-start mb-4 border-b">
+                <div>
+                    <div id="modal-tab-batch" class="modal-tab inline-block active">Batch Entry</div>
+                    <div id="modal-tab-multiple" class="modal-tab inline-block">Quick Add</div>
+                </div>
+                <button id="close-entry-modal-btn" class="p-1 -mt-1">&times;</button>
             </div>
-            <textarea id="tire-input-modal" rows="6" class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="e.g., 255/55/16, 31105015..."></textarea>
-            <div class="flex justify-end gap-4 mt-6">
-                <button id="close-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
-                <button id="add-tires-modal-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
+            
+            <!-- Batch Entry View -->
+            <div id="batch-entry-view">
+                <div class="data-grid-header batch-grid-header text-sm font-semibold text-gray-500 pb-2 mb-2 border-b">
+                    <span>Tire Size</span>
+                    <span>Quantity</span>
+                    <span>Condition</span>
+                    <span></span>
+                </div>
+                <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2" style="max-height: 60vh;">
+                    <!-- Batch rows will be injected here -->
+                </div>
+            </div>
+
+            <!-- Add Multiple View -->
+            <div id="add-multiple-view" class="hidden">
+                 <div class="flex justify-end mb-4">
+                    <label class="toggle-label text-sm font-medium text-gray-700">
+                        USED
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="condition-toggle-modal">
+                            <span class="slider"></span>
+                        </div>
+                        NEW
+                    </label>
+                </div>
+                <textarea id="tire-input-modal" rows="10" class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="Enter one tire size per line or separate by commas. e.g., 255/55/16, 31105015..."></textarea>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <button id="cancel-entry-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="confirm-add-tires-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AUDIT MODAL -->
+    <div id="audit-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Inventory Audit</h2>
+                <button id="close-audit-modal-btn" class="p-1 font-bold text-2xl">&times;</button>
+            </div>
+            <p class="text-sm text-gray-500 mb-4">Enter the new physical count for each tire. Any differences will be logged as an adjustment.</p>
+            <div class="data-grid-header audit-grid-header text-sm font-semibold text-gray-500 pb-2 mb-2 border-b">
+                <span>Tire Size</span>
+                <span>Condition</span>
+                <span class="text-center">Current Qty</span>
+                <span class="text-center">New Count</span>
+            </div>
+            <div id="audit-grid" class="flex-grow overflow-y-auto space-y-2">
+                <!-- Audit rows will be injected here -->
+            </div>
+            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <button id="cancel-audit-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="submit-audit-btn" class="btn btn-primary font-semibold py-2 px-5">Submit Audit</button>
             </div>
         </div>
     </div>
 
-    <!-- BATCH ENTRY MODAL -->
-     <div id="batch-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
-        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Batch Entry</h2>
-            <div class="batch-grid-header text-sm font-semibold text-gray-500 px-2 pb-2 border-b">
-                <span>Tire Size</span>
-                <span>Quantity</span>
-                <span>Condition</span>
-                <span></span>
-            </div>
-            <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2 py-2">
-                <!-- Batch rows will be injected here -->
-            </div>
-            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
-                <button id="close-batch-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
-                <button id="add-batch-tires-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -307,21 +360,33 @@
             const analyticsArrow = document.getElementById('analytics-arrow');
             const mostSearchedList = document.getElementById('most-searched-list');
             const analyticsChartCanvas = document.getElementById('analytics-chart');
-            const addModal = document.getElementById('add-modal');
-            const addMultipleBtn = document.getElementById('add-multiple-btn');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            const tireInputModal = document.getElementById('tire-input-modal');
-            const addTiresModalBtn = document.getElementById('add-tires-modal-btn');
-            const conditionToggleModal = document.getElementById('condition-toggle-modal');
-            const batchModal = document.getElementById('batch-modal');
-            const batchEntryBtn = document.getElementById('batch-entry-btn');
-            const closeBatchModalBtn = document.getElementById('close-batch-modal-btn');
-            const addBatchTiresBtn = document.getElementById('add-batch-tires-btn');
+            
+            // New/Modified Modal Elements
+            const addTiresBtn = document.getElementById('add-tires-btn');
+            const entryModal = document.getElementById('entry-modal');
+            const closeEntryModalBtn = document.getElementById('close-entry-modal-btn');
+            const cancelEntryModalBtn = document.getElementById('cancel-entry-modal-btn');
+            const confirmAddTiresBtn = document.getElementById('confirm-add-tires-btn');
+            const modalTabBatch = document.getElementById('modal-tab-batch');
+            const modalTabMultiple = document.getElementById('modal-tab-multiple');
+            const batchEntryView = document.getElementById('batch-entry-view');
+            const addMultipleView = document.getElementById('add-multiple-view');
             const batchGrid = document.getElementById('batch-grid');
+            const tireInputModal = document.getElementById('tire-input-modal');
+            const conditionToggleModal = document.getElementById('condition-toggle-modal');
+
+            // Audit Modal Elements
+            const auditBtn = document.getElementById('audit-btn');
+            const auditModal = document.getElementById('audit-modal');
+            const closeAuditModalBtn = document.getElementById('close-audit-modal-btn');
+            const cancelAuditModalBtn = document.getElementById('cancel-audit-modal-btn');
+            const submitAuditBtn = document.getElementById('submit-audit-btn');
+            const auditGrid = document.getElementById('audit-grid');
 
             let inventory = [];
             let activityLog = [];
             let analyticsChart = null;
+            let currentEntryMode = 'batch'; // 'batch' or 'multiple'
             
             const distributors = [
                 { name: 'ATD', urlTemplate: 'https://atdonline.com/es-search/refine?text={QUERY}', queryFormat: 'p-metric-no-slash' },
@@ -335,23 +400,19 @@
 
             // --- DATA MANAGEMENT ---
             const loadData = () => {
-                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV7')) || [];
-                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
-                if (inventory.length > 0 && typeof inventory[0].condition === 'undefined') {
-                    inventory.forEach(tire => tire.condition = 'used');
-                    saveData();
-                }
+                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV8')) || [];
+                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV8')) || [];
             };
 
             const saveData = () => {
-                localStorage.setItem('treadzTireInventoryV7', JSON.stringify(inventory));
-                localStorage.setItem('treadzActivityLogV7', JSON.stringify(activityLog));
+                localStorage.setItem('treadzTireInventoryV8', JSON.stringify(inventory));
+                localStorage.setItem('treadzActivityLogV8', JSON.stringify(activityLog));
             };
 
             // --- UTILITIES ---
             const parseTireSize = (input) => {
                 if (!input) return null;
-                const cleaned = input.replace(/[\s/rR.\-]/g, ''); // CORRECTED REGEX
+                const cleaned = input.replace(/[\s/rR.\-]/g, '');
                 const flotationMatch = cleaned.match(/^(\d{2})(\d{4})(\d{2})$/);
                 if (flotationMatch) {
                     const [_, diameter, widthRaw, rim] = flotationMatch;
@@ -379,6 +440,15 @@
                 }
                 return rawInput;
             };
+            
+            const getSortedInventory = () => {
+                 return [...inventory].sort((a, b) => {
+                    if (a.size.rim !== b.size.rim) return a.size.rim - b.size.rim;
+                    const widthA = a.size.width || a.size.diameter;
+                    const widthB = b.size.width || b.size.diameter;
+                    return widthA - widthB;
+                });
+            };
 
             // --- MAIN RENDER FUNCTION ---
             const renderAll = () => {
@@ -400,8 +470,9 @@
                 } else {
                     emptyState.classList.add('hidden');
                     inventoryContainer.classList.remove('hidden');
-                    const newTires = inventory.filter(t => t.condition === 'new');
-                    const usedTires = inventory.filter(t => t.condition === 'used');
+                    const sorted = getSortedInventory();
+                    const newTires = sorted.filter(t => t.condition === 'new');
+                    const usedTires = sorted.filter(t => t.condition === 'used');
                     inventoryContainer.appendChild(createInventorySection('New Tire Inventory', newTires));
                     inventoryContainer.appendChild(createInventorySection('Used Tire Inventory', usedTires));
                 }
@@ -414,15 +485,7 @@
                     section.innerHTML = `<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">${title} (${tires.reduce((acc, t) => acc + t.quantity, 0)})</h2>`;
                     const grid = document.createElement('div');
                     grid.className = 'inventory-grid';
-                    const grouped = tires.reduce((acc, tire) => {
-                        (acc[tire.size.rim] = acc[tire.size.rim] || []).push(tire);
-                        return acc;
-                    }, {});
-                    Object.keys(grouped).sort((a, b) => a - b).forEach(rim => {
-                        grouped[rim].sort((a,b) => (a.size.width || a.size.diameter) - (b.size.width || b.size.diameter)).forEach(tire => {
-                            grid.appendChild(createTireCardElement(tire));
-                        });
-                    });
+                    tires.forEach(tire => grid.appendChild(createTireCardElement(tire)));
                     section.appendChild(grid);
                 }
                 return section;
@@ -454,15 +517,16 @@
                 searchResultsContainer.innerHTML = '';
                 
                 let matches = [];
-                if (searchSize) { // Full size entered
+                if (searchSize) { 
                     matches = inventory.filter(t => JSON.stringify(t.size) === JSON.stringify(searchSize));
-                } else if (term.length > 2) { // Partial search
+                } else if (term.length > 2) { 
                     const cleanedTerm = term.replace(/[\s/rR.-]/g, '');
                     matches = inventory.filter(t => formatTireSize(t.size).replace(/[\s/rR.-]/g, '').startsWith(cleanedTerm));
                 }
 
                 if (matches.length === 0) return;
-
+                
+                matches = matches.sort((a,b) => (a.size.width || a.size.diameter) - (b.size.width || b.size.diameter));
                 const newTires = matches.filter(t => t.condition === 'new');
                 const usedTires = matches.filter(t => t.condition === 'used');
 
@@ -531,6 +595,8 @@
                         statusHTML = `<div class="font-semibold text-red-500">Sold ${log.details.quantitySold}</div>`;
                     } else if (log.action === 'Checked Distributor') {
                         statusHTML = `<div class="text-blue-500">Checked ${log.details.distributor}</div>`;
+                    } else if (log.action === 'Audit') {
+                        statusHTML = `<div class="text-purple-600">Audit Adj: ${log.details.adjustment}</div>`;
                     } else { // Searched
                         statusHTML = log.details.inStock 
                             ? `<div class="font-semibold text-green-600">In Stock, Not Sold</div>`
@@ -620,8 +686,10 @@
                 } else {
                     inventory.unshift({ size: parsedSize, quantity: quantity, condition: condition });
                 }
-                showToast(`Added ${quantity}x ${formatTireSize(parsedSize)} (${condition.toUpperCase()}).`);
-                if(document.activeElement === searchInput) searchInput.value = '';
+                if(document.activeElement === searchInput) {
+                    showToast(`Added ${quantity}x ${formatTireSize(parsedSize)} (${condition.toUpperCase()}).`);
+                    searchInput.value = '';
+                }
                 saveData();
                 renderAll();
             };
@@ -654,54 +722,145 @@
                 }
             };
 
-            const toggleModal = (show) => {
-                addModal.classList.toggle('hidden', !show);
-                addModal.classList.toggle('flex', show);
+            // --- Modal Logic ---
+            const toggleEntryModal = (show) => {
+                entryModal.classList.toggle('hidden', !show);
+                entryModal.classList.toggle('flex', show);
+                if (show) {
+                    // Reset to batch entry mode when opening
+                    switchEntryMode('batch');
+                    batchGrid.innerHTML = '';
+                    createBatchRow();
+                    tireInputModal.value = '';
+                }
+            };
+
+            const switchEntryMode = (mode) => {
+                currentEntryMode = mode;
+                if (mode === 'batch') {
+                    modalTabBatch.classList.add('active');
+                    modalTabMultiple.classList.remove('active');
+                    batchEntryView.classList.remove('hidden');
+                    addMultipleView.classList.add('hidden');
+                } else {
+                    modalTabBatch.classList.remove('active');
+                    modalTabMultiple.classList.add('active');
+                    batchEntryView.classList.add('hidden');
+                    addMultipleView.classList.remove('hidden');
+                }
             };
             
             const createBatchRow = () => {
                 const row = document.createElement('div');
-                row.className = 'batch-grid-row';
+                row.className = 'data-grid-row batch-grid-row';
                 row.innerHTML = `
-                    <input type="text" class="batch-input batch-size" placeholder="e.g., 2254517">
-                    <input type="number" class="batch-input batch-qty" value="1" min="1">
-                    <select class="batch-input batch-condition">
+                    <input type="text" class="data-input batch-size" placeholder="e.g., 2254517">
+                    <input type="number" class="data-input batch-qty" value="1" min="1">
+                    <select class="data-input batch-condition">
                         <option value="used" selected>Used</option>
                         <option value="new">New</option>
                     </select>
-                    <button class="text-gray-400 hover:text-red-500 remove-batch-row">&times;</button>
+                    <button class="text-gray-400 hover:text-red-500 remove-batch-row text-2xl font-bold">&times;</button>
                 `;
                 batchGrid.appendChild(row);
                 row.querySelector('.batch-size').focus();
-
-                row.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        createBatchRow();
-                    }
-                });
             };
             
-            const processBatchEntries = () => {
-                const rows = batchGrid.querySelectorAll('.batch-grid-row');
+            const processEntries = () => {
                 let addedCount = 0;
-                rows.forEach(row => {
-                    const sizeInput = row.querySelector('.batch-size').value;
-                    const qtyInput = row.querySelector('.batch-qty').value;
-                    const condition = row.querySelector('.batch-condition').value;
-                    
-                    const parsedSize = parseTireSize(sizeInput);
-                    const quantity = parseInt(qtyInput, 10);
+                let processedTires = 0;
 
-                    if (parsedSize && quantity > 0) {
-                        addTire(parsedSize, quantity, condition);
-                        addedCount++;
+                if (currentEntryMode === 'batch') {
+                    const rows = batchGrid.querySelectorAll('.data-grid-row');
+                    rows.forEach(row => {
+                        const sizeInput = row.querySelector('.batch-size').value;
+                        const qtyInput = row.querySelector('.batch-qty').value;
+                        const condition = row.querySelector('.batch-condition').value;
+                        const parsedSize = parseTireSize(sizeInput);
+                        const quantity = parseInt(qtyInput, 10);
+                        if (parsedSize && quantity > 0) {
+                            addTire(parsedSize, quantity, condition);
+                            processedTires += quantity;
+                            addedCount++;
+                        }
+                    });
+                } else { // 'multiple' mode
+                    const inputs = tireInputModal.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+                    const condition = conditionToggleModal.checked ? 'new' : 'used';
+                    inputs.forEach(inputStr => {
+                        const parsedSize = parseTireSize(inputStr)
+                        if (parsedSize) {
+                            addTire(parsedSize, 1, condition);
+                            processedTires++;
+                            addedCount++;
+                        }
+                    });
+                }
+
+                if (addedCount > 0) {
+                    showToast(`Successfully added ${processedTires} tire(s) across ${addedCount} size(s).`);
+                }
+                toggleEntryModal(false);
+            };
+
+            // --- Audit Logic ---
+            const toggleAuditModal = (show) => {
+                auditModal.classList.toggle('hidden', !show);
+                auditModal.classList.toggle('flex', show);
+                if (show) renderAuditForm();
+            };
+
+            const renderAuditForm = () => {
+                auditGrid.innerHTML = '';
+                if (inventory.length === 0) {
+                    auditGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full">No inventory to audit.</p>';
+                    return;
+                }
+                const sorted = getSortedInventory();
+                sorted.forEach(tire => {
+                    const row = document.createElement('div');
+                    row.className = 'data-grid-row audit-grid-row';
+                    row.dataset.size = JSON.stringify(tire.size);
+                    row.dataset.condition = tire.condition;
+                    
+                    row.innerHTML = `
+                        <span class="font-mono">${formatTireSize(tire.size)}</span>
+                        <span class="capitalize text-sm ${tire.condition === 'new' ? 'text-blue-600' : 'text-gray-600'}">${tire.condition}</span>
+                        <span class="text-center font-semibold text-gray-500">${tire.quantity}</span>
+                        <input type="number" class="data-input audit-qty text-center" value="${tire.quantity}" min="0">
+                    `;
+                    auditGrid.appendChild(row);
+                });
+            };
+
+            const processAudit = () => {
+                const rows = auditGrid.querySelectorAll('.data-grid-row');
+                let adjustments = 0;
+                rows.forEach(row => {
+                    const size = JSON.parse(row.dataset.size);
+                    const condition = row.dataset.condition;
+                    const newCount = parseInt(row.querySelector('.audit-qty').value, 10);
+
+                    const tire = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(size) && t.condition === condition);
+                    if (tire && !isNaN(newCount)) {
+                        const oldCount = tire.quantity;
+                        if (oldCount !== newCount) {
+                            tire.quantity = newCount;
+                            const adjustment = newCount - oldCount;
+                            const term = `${formatTireSize(size)} (${condition})`;
+                            addLogEntry(term, 'Audit', { adjustment: `${oldCount} → ${newCount}` });
+                            adjustments++;
+                        }
                     }
                 });
-                if (addedCount > 0) {
-                    showToast(`Successfully added entries for ${addedCount} tire size(s).`);
-                }
-                toggleModal(false);
+                
+                // Remove items with zero quantity after audit
+                inventory = inventory.filter(tire => tire.quantity > 0);
+
+                saveData();
+                renderAll();
+                showToast(`Audit complete. ${adjustments} adjustment(s) made.`);
+                toggleAuditModal(false);
             };
 
 
@@ -717,6 +876,7 @@
             });
 
             document.addEventListener('click', e => {
+                // Remove tire buttons
                 if (e.target.matches('.remove-btn-group button') && !e.target.closest('.log-action-buttons')) {
                     const group = e.target.closest('.remove-btn-group');
                     const size = JSON.parse(group.dataset.size);
@@ -724,44 +884,8 @@
                     const qty = parseInt(e.target.dataset.qty);
                     removeTire(size, qty, condition);
                 }
-                if (e.target.matches('.log-action-buttons .remove-btn-group button')) {
-                    const group = e.target.closest('.remove-btn-group');
-                    const logId = parseInt(group.dataset.logId);
-                    const qty = parseInt(e.target.dataset.qty);
-                    const logEntry = activityLog.find(log => log.id === logId);
-                    if (logEntry) {
-                        const parsedSize = parseTireSize(logEntry.term);
-                        const condition = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(parsedSize))?.condition || 'used';
-                        removeTire(parsedSize, qty, condition, logId);
-                    }
-                }
-                if (e.target.closest('.distributor-card')) {
-                    const term = formatTireSize(parseTireSize(searchInput.value));
-                    const dist = e.target.closest('.distributor-card').dataset.distributor;
-                    if (term) addLogEntry(term, 'Checked Distributor', { distributor: dist });
-                }
-                if (e.target.matches('#add-multiple-btn')) toggleModal(true);
-                if (e.target.matches('#close-modal-btn') || e.target === addModal) toggleModal(false);
-                if (e.target.matches('#add-tires-modal-btn')) {
-                    const inputs = tireInputModal.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-                    const condition = conditionToggleModal.checked ? 'new' : 'used';
-                    inputs.forEach(inputStr => addTire(parseTireSize(inputStr), 1, condition));
-                    if (inputs.length > 0) {
-                        tireInputModal.value = '';
-                        toggleModal(false);
-                    }
-                }
-                if (e.target.closest('#analytics-toggle')) {
-                    analyticsSection.classList.toggle('open');
-                    analyticsArrow.classList.toggle('rotate-180');
-                }
-                if (e.target.dataset.action === 'delete-log') {
-                    const logId = parseInt(e.target.dataset.logId);
-                    activityLog = activityLog.filter(log => log.id !== logId);
-                    saveData();
-                    renderActivityLog();
-                }
-                if (e.target.dataset.action === 'mark-sold') {
+                // Log action buttons
+                if (e.target.matches('.log-action-buttons button[data-action="mark-sold"]')) {
                     const actionContainer = e.target.parentElement;
                     const logId = parseInt(actionContainer.dataset.logId);
                     actionContainer.innerHTML = `<div class="remove-btn-group flex gap-1.5" data-log-id="${logId}">
@@ -771,24 +895,63 @@
                         <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="4">4</button>
                     </div>`;
                 }
-                // Batch modal listeners
-                if (e.target.matches('#batch-entry-btn')) {
-                    batchGrid.innerHTML = ''; // Clear previous entries
-                    createBatchRow();
-                    batchModal.classList.remove('hidden');
-                    batchModal.classList.add('flex');
+                if (e.target.matches('.log-action-buttons .remove-btn-group button')) {
+                    const group = e.target.closest('.remove-btn-group');
+                    const logId = parseInt(group.dataset.logId);
+                    const qty = parseInt(e.target.dataset.qty);
+                    const logEntry = activityLog.find(log => log.id === logId);
+                    if (logEntry) {
+                        const parsedSize = parseTireSize(logEntry.term);
+                        const tireInStock = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(parsedSize));
+                        if (tireInStock) {
+                           removeTire(parsedSize, qty, tireInStock.condition, logId);
+                        } else {
+                            showToast("Cannot mark sold, tire is no longer in stock.");
+                        }
+                    }
                 }
-                if (e.target.matches('#close-batch-modal-btn') || e.target === batchModal) {
-                    batchModal.classList.add('hidden');
-                    batchModal.classList.remove('flex');
+                // Distributor links
+                if (e.target.closest('.distributor-btn')) {
+                    const term = formatTireSize(parseTireSize(searchInput.value));
+                    const dist = e.target.closest('.distributor-btn').dataset.distributor;
+                    if (term) addLogEntry(term, 'Checked Distributor', { distributor: dist });
                 }
-                if (e.target.matches('#add-batch-tires-btn')) {
-                    processBatchEntries();
-                }
-                if (e.target.matches('.remove-batch-row')) {
-                    e.target.parentElement.remove();
+                // Analytics
+                if (e.target.closest('#analytics-toggle')) {
+                    analyticsSection.classList.toggle('open');
+                    analyticsArrow.classList.toggle('rotate-180');
                 }
             });
+            
+            // Entry Modal Listeners
+            addTiresBtn.addEventListener('click', () => toggleEntryModal(true));
+            closeEntryModalBtn.addEventListener('click', () => toggleEntryModal(false));
+            cancelEntryModalBtn.addEventListener('click', () => toggleEntryModal(false));
+            entryModal.addEventListener('click', (e) => { if (e.target === entryModal) toggleEntryModal(false); });
+            modalTabBatch.addEventListener('click', () => switchEntryMode('batch'));
+            modalTabMultiple.addEventListener('click', () => switchEntryMode('multiple'));
+            confirmAddTiresBtn.addEventListener('click', processEntries);
+            batchGrid.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target.classList.contains('batch-size')) {
+                    e.preventDefault();
+                    createBatchRow();
+                }
+            });
+            batchGrid.addEventListener('click', (e) => {
+                if (e.target.matches('.remove-batch-row')) {
+                    if (batchGrid.querySelectorAll('.data-grid-row').length > 1) {
+                        e.target.closest('.data-grid-row').remove();
+                    }
+                }
+            });
+
+            // Audit Modal Listeners
+            auditBtn.addEventListener('click', () => toggleAuditModal(true));
+            closeAuditModalBtn.addEventListener('click', () => toggleAuditModal(false));
+            cancelAuditModalBtn.addEventListener('click', () => toggleAuditModal(false));
+            auditModal.addEventListener('click', (e) => { if (e.target === auditModal) toggleAuditModal(false); });
+            submitAuditBtn.addEventListener('click', processAudit);
+
 
             // --- INITIALIZATION ---
             loadData();
