@@ -66,9 +66,20 @@
             border-radius: .5rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             animation: fadeIn 0.5s ease forwards;
+            position: relative;
+            overflow: hidden;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .tire-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        
+        .card-actions {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .tire-card:hover .card-actions {
+            opacity: 1;
+        }
+
         .exact-match { border-left: 4px solid #107C10; background-color: #F1FAF1; }
         
         .toast {
@@ -84,6 +95,15 @@
         .modal-tab { cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent; color: var(--text-light); }
         .modal-tab.active { color: var(--primary-color); font-weight: 600; border-bottom-color: var(--primary-color); }
         .data-input { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem; background-color: #F8F8F8; }
+        #rim-filter-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23605E5C%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+        }
 
         /* Audit Styles */
         .audit-summary-section { margin-bottom: 1.5rem; }
@@ -112,17 +132,6 @@
         }
         .audit-history-list-item.active .text-gray-500 { color: rgba(255,255,255,0.8); }
 
-        .remove-btn-group button {
-            background-color: #F5F5F5;
-            border: 1px solid #C8C6C4;
-            color: var(--text-light);
-        }
-        .remove-btn-group button:hover {
-            background-color: #DC3B0B;
-            color: white;
-            border-color: #DC3B0B;
-            transform: scale(1.05);
-        }
          /* Toggle Switch Styles */
         .toggle-label { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
         .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
@@ -160,6 +169,17 @@
             padding: 1.5rem;
             margin-top: 0.5rem;
         }
+        /* Direct Quantity Edit Styles */
+        .stock-quantity-wrapper { cursor: pointer; position: relative; }
+        .quantity-edit-input {
+            width: 60px;
+            text-align: center;
+            padding: 2px;
+            border-radius: 4px;
+            border: 1px solid var(--primary-color);
+            background-color: white;
+            color: var(--text-dark);
+        }
 
     </style>
 </head>
@@ -195,13 +215,23 @@
             </section>
             
             <div id="search-results-container" class="mb-8"></div>
+
+            <div class="flex justify-end mb-4">
+                <select id="rim-filter-select" class="btn btn-secondary font-semibold py-2 px-4">
+                    <option value="all">Filter by Rim Size: ALL</option>
+                </select>
+            </div>
             
-            <section class="mb-8 p-6 container-box">
-                 <div class="flex justify-between items-center mb-4">
-                     <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
-                 </div>
-                 <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+            <section class="mb-8">
+                <button id="activity-log-toggle" class="w-full text-left p-4 rounded-xl bg-white border border-gray-200 shadow-sm flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
+                    <svg id="activity-log-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="activity-log-section" class="analytics-section">
+                    <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+                </div>
             </section>
+
 
             <div id="inventory-container"></div>
             <div id="empty-state" class="text-center py-20">
@@ -340,14 +370,14 @@
 
             // --- DATA MANAGEMENT ---
             const loadData = () => {
-                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV14')) || [];
-                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV14')) || [];
-                auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV14')) || [];
+                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV16')) || [];
+                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV16')) || [];
+                auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV16')) || [];
             };
             const saveData = () => {
-                localStorage.setItem('treadzTireInventoryV14', JSON.stringify(inventory));
-                localStorage.setItem('treadzActivityLogV14', JSON.stringify(activityLog));
-                localStorage.setItem('treadzAuditHistoryV14', JSON.stringify(auditHistory));
+                localStorage.setItem('treadzTireInventoryV16', JSON.stringify(inventory));
+                localStorage.setItem('treadzActivityLogV16', JSON.stringify(activityLog));
+                localStorage.setItem('treadzAuditHistoryV16', JSON.stringify(auditHistory));
             };
 
             // --- UTILITIES ---
@@ -387,45 +417,90 @@
             };
 
             // --- CORE LOGIC ---
-             const addTire = (parsedSize, quantity = 1, condition = 'used', fromSearch = false) => {
+             const addTire = (parsedSize, quantity = 1, condition = 'used', options = {}) => {
+                const { fromSearch = false, suppressToast = false } = options;
                 if (!parsedSize) return;
                 const sizeString = JSON.stringify(parsedSize);
                 const existingTire = inventory.find(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
+                
+                let isUpdate = false;
+
                 if (existingTire) {
                     existingTire.quantity += quantity;
+                    isUpdate = true;
                 } else {
                     inventory.unshift({ size: parsedSize, quantity: quantity, condition: condition });
                 }
-                if (fromSearch || !getEl('entry-modal').classList.contains('hidden')) {
+                
+                if (!suppressToast) {
                     showToast(`Added ${quantity}x ${formatTireSize(parsedSize)} (${condition.toUpperCase()}).`);
                 }
                 if(fromSearch) getEl('search-input').value = '';
-                saveData();
-                renderAll();
-            };
-            
-            const removeTire = (parsedSize, quantity, condition, logIdToUpdate = null) => {
-                const sizeString = JSON.stringify(parsedSize);
-                const tireIndex = inventory.findIndex(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
-                if (tireIndex > -1) {
-                    const tire = inventory[tireIndex];
-                    const removeQty = Math.min(tire.quantity, quantity);
-                    tire.quantity -= removeQty;
-                    
-                    if (logIdToUpdate) {
-                        updateLogEntry(logIdToUpdate, 'Sold', { quantitySold: removeQty });
-                    } else {
-                        addLogEntry(formatTireSize(parsedSize), 'Sold', { quantitySold: removeQty });
-                    }
 
-                    showToast(`Sold ${removeQty}x ${formatTireSize(parsedSize)}. Stock: ${tire.quantity}`);
-                    if (tire.quantity <= 0) {
-                        inventory.splice(tireIndex, 1);
-                    }
-                    saveData();
-                    renderAll();
+                addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Added', { quantityAdded: quantity });
+                saveData();
+
+                if (isUpdate) {
+                     updateTireQuantityDOM(parsedSize, condition, existingTire.quantity);
+                } else {
+                     renderAll();
                 }
             };
+            
+            const updateTireQuantity = (parsedSize, condition, newQuantity) => {
+                const sizeString = JSON.stringify(parsedSize);
+                const tire = inventory.find(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
+                if (tire) {
+                    const oldQuantity = tire.quantity;
+                    if (oldQuantity !== newQuantity) {
+                        const change = newQuantity - oldQuantity;
+                        tire.quantity = newQuantity;
+
+                        if (change > 0) {
+                             addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Added', { quantityAdded: change });
+                             showToast(`Added ${change}x ${formatTireSize(parsedSize)}.`);
+                        } else {
+                             addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Sold', { quantitySold: -change });
+                             showToast(`Sold ${-change}x ${formatTireSize(parsedSize)}.`);
+                        }
+
+                        saveData();
+                        updateTireQuantityDOM(parsedSize, condition, newQuantity);
+                    }
+                }
+            };
+            
+            const updateTireQuantityDOM = (parsedSize, condition, newQuantity) => {
+                const cardId = `card-${formatTireSize(parsedSize).replace(/[\/\sR.]/g, '')}-${condition}`;
+                const cardElement = document.getElementById(cardId);
+                
+                if (newQuantity <= 0) {
+                     inventory = inventory.filter(t => !(JSON.stringify(t.size) === JSON.stringify(parsedSize) && t.condition === condition));
+                     if(cardElement) {
+                         cardElement.remove();
+                     }
+                } else {
+                    if (cardElement) {
+                        const display = cardElement.querySelector('.stock-quantity-display');
+                        const input = cardElement.querySelector('.quantity-edit-input');
+                        if (display) display.textContent = newQuantity;
+                        if (input) input.value = newQuantity;
+                    }
+                }
+
+                // Update section totals
+                const newTotal = inventory.filter(t => t.condition === 'new').reduce((sum, t) => sum + t.quantity, 0);
+                const usedTotal = inventory.filter(t => t.condition === 'used').reduce((sum, t) => sum + t.quantity, 0);
+                const newTitle = document.getElementById('new-tires-title');
+                const usedTitle = document.getElementById('used-tires-title');
+                if (newTitle) newTitle.textContent = `New Tire Inventory (${newTotal})`;
+                if (usedTitle) usedTitle.textContent = `Used Tire Inventory (${usedTotal})`;
+                
+                 if (getEl('inventory-container').querySelectorAll('.tire-card').length === 0) {
+                    renderInventory(); // Fallback to full render if a filter makes it empty
+                }
+            }
+
 
             // --- MAIN RENDER ---
             const renderAll = () => {
@@ -435,6 +510,7 @@
                 renderSearchActions();
                 renderExternalSearches();
                 renderAnalytics();
+                populateMainRimFilter();
                 getEl('clear-search-btn').style.display = getEl('search-input').value ? 'block' : 'none';
             };
 
@@ -442,17 +518,30 @@
                 const container = getEl('inventory-container');
                 container.innerHTML = '';
                 const emptyState = getEl('empty-state');
+                const rimFilterValue = getEl('rim-filter-select').value;
+                
+                let filteredInventory = inventory;
+                if(rimFilterValue !== 'all') {
+                    filteredInventory = inventory.filter(t => t.size.rim == rimFilterValue);
+                }
 
-                if (inventory.length === 0) {
+                if (filteredInventory.length === 0) {
                     emptyState.classList.remove('hidden');
                     container.classList.add('hidden');
+                     if (inventory.length > 0) { // Show message if filtering results in empty
+                        emptyState.querySelector('h2').textContent = `No tires found for Rim Size ${rimFilterValue}"`;
+                        emptyState.querySelector('p').textContent = 'Select "ALL" to see your full inventory.';
+                    } else {
+                        emptyState.querySelector('h2').textContent = 'Inventory is Empty';
+                        emptyState.querySelector('p').textContent = 'Add your first tire using the search bar above.';
+                    }
                     return;
                 }
                 
                 emptyState.classList.add('hidden');
                 container.classList.remove('hidden');
 
-                const sorted = [...inventory].sort((a,b) => {
+                const sorted = [...filteredInventory].sort((a,b) => {
                     if (a.size.rim !== b.size.rim) return a.size.rim - b.size.rim;
                     return (a.size.width || a.size.diameter) - (b.size.width || b.size.diameter);
                 });
@@ -469,7 +558,8 @@
                 section.className = 'mb-8';
                 
                 const total = tires.reduce((acc, t) => acc + t.quantity, 0);
-                section.innerHTML = `<h2 class="text-xl font-semibold mb-4" style="color: var(--primary-color);">${title} (${total})</h2>`;
+                const titleId = title.toLowerCase().includes('new') ? 'new-tires-title' : 'used-tires-title';
+                section.innerHTML = `<h2 id="${titleId}" class="text-xl font-semibold mb-4" style="color: var(--primary-color);">${title} (${total})</h2>`;
                 
                 const grid = document.createElement('div');
                 grid.className = 'inventory-grid';
@@ -480,17 +570,22 @@
             };
 
             const createTireCardElement = (tire, matchClass = '') => {
+                const cardId = `card-${formatTireSize(tire.size).replace(/[\/\sR.]/g, '')}-${tire.condition}`;
                 const card = document.createElement('div');
-                card.className = `tire-card p-4 ${matchClass}`;
+                card.id = cardId;
+                card.className = `tire-card p-4 flex justify-between items-center ${matchClass}`;
                 card.innerHTML = `
-                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <p class="font-mono text-lg font-semibold">${formatTireSize(tire.size)}</p>
-                            <p class="text-xs text-gray-500">Stock: ${tire.quantity}</p>
-                        </div>
-                        <div class="remove-btn-group flex gap-1.5 mt-3 sm:mt-0" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
-                           ${[1,2,3,4].map(q => `<button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="${q}">${q}</button>`).join('')}
-                        </div>
+                    <div class="pr-4">
+                        <p class="font-mono text-lg font-semibold">${formatTireSize(tire.size)}</p>
+                        <p class="text-xs text-gray-500 stock-quantity-wrapper" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
+                            Stock: 
+                            <span class="stock-quantity-display font-semibold">${tire.quantity}</span>
+                            <input type="number" value="${tire.quantity}" class="quantity-edit-input hidden">
+                        </p>
+                    </div>
+                    <div class="card-actions flex flex-col space-y-2" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
+                        <button class="btn btn-secondary h-8 w-8 rounded-full font-bold text-lg adjust-qty-btn" data-amount="1">+</button>
+                        <button class="btn btn-secondary h-8 w-8 rounded-full font-bold text-lg adjust-qty-btn" data-amount="-1">-</button>
                     </div>`;
                 return card;
             };
@@ -537,7 +632,7 @@
                         </div>`;
                     getEl('add-single-btn').onclick = () => {
                         const condition = getEl('condition-toggle-single').checked ? 'new' : 'used';
-                        addTire(parsed, 1, condition, true);
+                        addTire(parsed, 1, condition, { fromSearch: true });
                     };
                 }
             };
@@ -559,9 +654,20 @@
             };
             
             const addLogEntry = (term, action, details = {}) => {
+                 if (action === 'Searched') {
+                    const lastLog = activityLog[0];
+                    if (lastLog && lastLog.term === term && lastLog.action === 'Searched') {
+                        const now = new Date();
+                        const lastLogTime = new Date(lastLog.timestamp);
+                        if ((now - lastLogTime) / (1000 * 60) < 5) return;
+                    }
+                    const parsedSize = parseTireSize(term);
+                    details.inStock = inventory.some(t => JSON.stringify(t.size) === JSON.stringify(parsedSize));
+                }
                 activityLog.unshift({ id: Date.now(), term, action, details, timestamp: new Date().toISOString() });
                 saveData();
                 renderActivityLog();
+                renderAnalytics();
             };
             
             const renderActivityLog = () => {
@@ -573,8 +679,12 @@
                      let detailsHTML = '';
                      if (log.action === 'Sold') {
                          detailsHTML = `<div class="font-semibold text-red-500">Sold ${log.details.quantitySold}</div>`;
+                     } else if (log.action === 'Added') {
+                         detailsHTML = `<div class="font-semibold text-green-600">Added ${log.details.quantityAdded}</div>`;
                      } else if (log.action === 'Audit') {
                          detailsHTML = `<div class="font-semibold text-blue-500">Audit Adj: ${log.details.adjustment}</div>`;
+                     } else if (log.action === 'Searched') {
+                         detailsHTML = log.details.inStock ? `<div class="font-semibold text-green-600">In Stock</div>` : `<div class="text-gray-500">Not In Stock</div>`;
                      }
                      logEl.innerHTML = `<div><p class="font-mono font-medium">${log.term}</p><p class="text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</p></div><div>${detailsHTML}</div>`;
                      container.appendChild(logEl);
@@ -589,7 +699,8 @@
                     return;
                 }
                 const counts = activityLog.reduce((acc, log) => {
-                    if (log.action === 'Searched') acc[log.term] = (acc[log.term] || 0) + 1;
+                    const term = log.term.split(' (')[0]; // Ignore condition for analytics
+                    if (log.action === 'Searched') acc[term] = (acc[term] || 0) + 1;
                     return acc;
                 }, {});
                 const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -597,7 +708,7 @@
                     mostSearchedList.innerHTML = '<p class="text-gray-500">No search data to analyze.</p>';
                     return;
                 }
-                mostSearchedList.innerHTML = sorted.map(([term, count]) => `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-md"><span class="font-mono font-medium text-gray-700">${term}</span><span class="text-sm text-gray-500">${count} searches</span></div>`).join('');
+                mostSearchedList.innerHTML = sorted.map(([term, count]) => `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-md"><span class="font-mono font-medium text-gray-700">${term}</span><span class="text-sm text-gray-500">${count} times</span></div>`).join('');
                 analyticsChart = new Chart(getEl('analytics-chart'), {
                     type: 'pie',
                     data: {
@@ -649,7 +760,7 @@
                         const parsed = parseTireSize(row.querySelector('.batch-size').value);
                         const qty = parseInt(row.querySelector('.batch-qty').value, 10);
                         if (parsed && qty > 0) {
-                            addTire(parsed, qty, row.querySelector('.batch-condition').value);
+                            addTire(parsed, qty, row.querySelector('.batch-condition').value, { suppressToast: true });
                             processedTires += qty; addedCount++;
                         }
                     });
@@ -659,7 +770,7 @@
                     inputs.forEach(input => {
                         const parsed = parseTireSize(input);
                         if (parsed) {
-                            addTire(parsed, 1, condition);
+                            addTire(parsed, 1, condition, { suppressToast: true });
                             processedTires++; addedCount++;
                         }
                     });
@@ -680,10 +791,10 @@
                     getEl('confirm-audit-btn').classList.add('hidden');
                     getEl('audit-paste-area').value = '';
                     processedAuditData = null;
-                    populateRimFilter();
+                    populateAuditRimFilter();
                 }
             };
-            const populateRimFilter = () => {
+            const populateAuditRimFilter = () => {
                 const rimSizes = [...new Set(inventory.map(t => t.size.rim))].sort((a, b) => a - b);
                 const select = getEl('audit-rim-select');
                 select.innerHTML = '<option value="all" selected>Rim Size: ALL</option>';
@@ -691,6 +802,15 @@
                     select.innerHTML += `<option value="${rim}">Rim Size: ${rim}"</option>`;
                 });
             };
+            const populateMainRimFilter = () => {
+                const rimSizes = [...new Set(inventory.map(t => t.size.rim))].sort((a, b) => a - b);
+                const select = getEl('rim-filter-select');
+                const currentValue = select.value;
+                select.innerHTML = '<option value="all" selected>Filter by Rim Size: ALL</option>';
+                rimSizes.forEach(rim => {
+                    select.innerHTML += `<option value="${rim}" ${currentValue == rim ? 'selected' : ''}>Rim Size: ${rim}"</option>`;
+                });
+            }
             const generateDiscrepancyReportHTML = (summary) => {
                 let html = '';
                 const createRow = (d, type) => {
@@ -834,7 +954,14 @@
             };
 
             // --- EVENT LISTENERS ---
-            getEl('search-input').addEventListener('input', renderAll);
+            getEl('search-input').addEventListener('input', ()=>{
+                renderAll();
+                const term = getEl('search-input').value.trim();
+                const parsed = parseTireSize(term);
+                if(parsed){
+                    addLogEntry(formatTireSize(parsed), 'Searched');
+                }
+            });
             getEl('clear-search-btn').addEventListener('click', () => { getEl('search-input').value = ''; renderAll(); });
             getEl('add-tires-btn').addEventListener('click', () => toggleEntryModal(true));
             getEl('close-entry-modal-btn').addEventListener('click', () => toggleEntryModal(false));
@@ -881,10 +1008,8 @@
                 if (e.target.classList.contains('quick-add-btn')) {
                     const btn = e.target;
                     const parsed = parseTireSize(btn.dataset.sizeStr);
-                    const qty = processedAuditData.summary.newItemsFound.find(d => d.sizeStr === btn.dataset.sizeStr).physicalQty;
-
                     if (parsed) {
-                        addTire(parsed, 0, processedAuditData.auditCondition); // Add with 0 qty initially
+                        addTire(parsed, 0, processedAuditData.auditCondition, { suppressToast: true }); // Add with 0 qty initially
                         showToast(`Added ${btn.dataset.sizeStr} to system. Quantity will be updated upon audit confirmation.`);
                         btn.textContent = 'Added'; btn.disabled = true;
                     }
@@ -892,12 +1017,18 @@
             });
 
              document.addEventListener('click', e => {
-                if (e.target.matches('.remove-btn-group button')) {
-                    const group = e.target.closest('.remove-btn-group');
+                 if (e.target.matches('.adjust-qty-btn')) {
+                    const group = e.target.closest('[data-size]');
                     const size = JSON.parse(group.dataset.size);
                     const condition = group.dataset.condition;
-                    const qty = parseInt(e.target.dataset.qty);
-                    removeTire(size, qty, condition);
+                    const amount = parseInt(e.target.dataset.amount);
+                    const tire = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(size) && t.condition === condition);
+                    if(tire) {
+                        const newQuantity = tire.quantity + amount;
+                        if(newQuantity >= 0) {
+                             updateTireQuantity(size, condition, newQuantity);
+                        }
+                    }
                 }
                  if (e.target.closest('.distributor-btn')) {
                     const term = formatTireSize(parseTireSize(getEl('search-input').value));
@@ -907,7 +1038,54 @@
                     getEl('analytics-section').classList.toggle('open');
                     getEl('analytics-arrow').classList.toggle('rotate-180');
                 }
+                if (e.target.closest('#activity-log-toggle')) {
+                    getEl('activity-log-section').classList.toggle('open');
+                    getEl('activity-log-arrow').classList.toggle('rotate-180');
+                }
              });
+
+             const handleQuantityUpdate = (input) => {
+                const wrapper = input.closest('.stock-quantity-wrapper');
+                if (!wrapper) return;
+                const newQuantity = parseInt(input.value, 10);
+                const size = JSON.parse(wrapper.dataset.size);
+                const condition = wrapper.dataset.condition;
+                if (!isNaN(newQuantity) && newQuantity >= 0) {
+                    updateTireQuantity(size, condition, newQuantity);
+                } else {
+                    renderAll(); // Rerender to revert invalid input
+                }
+            };
+
+            getEl('inventory-container').addEventListener('click', e => {
+                if (e.target.classList.contains('stock-quantity-display')) {
+                    const wrapper = e.target.closest('.stock-quantity-wrapper');
+                    const display = wrapper.querySelector('.stock-quantity-display');
+                    const input = wrapper.querySelector('.quantity-edit-input');
+                    display.classList.add('hidden');
+                    input.classList.remove('hidden');
+                    input.focus();
+                    input.select();
+                }
+            });
+
+            getEl('inventory-container').addEventListener('focusout', e => {
+                if (e.target.classList.contains('quantity-edit-input')) {
+                    handleQuantityUpdate(e.target);
+                }
+            });
+
+            getEl('inventory-container').addEventListener('keydown', e => {
+                if (e.key === 'Enter' && e.target.classList.contains('quantity-edit-input')) {
+                    handleQuantityUpdate(e.target);
+                } else if (e.key === 'Escape' && e.target.classList.contains('quantity-edit-input')) {
+                    const display = e.target.previousElementSibling;
+                    display.classList.remove('hidden');
+                    e.target.classList.add('hidden');
+                }
+            });
+
+            getEl('rim-filter-select').addEventListener('change', renderInventory);
             
             // --- INITIALIZATION ---
             loadData();
