@@ -203,14 +203,43 @@
         /* Audit Summary Styles */
         .audit-summary-row {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2.5fr 1fr 1fr 1fr;
             gap: 1rem;
-            padding: 0.5rem;
-            border-radius: 0.25rem;
+            padding: 0.75rem 0.5rem;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
         }
-        .audit-summary-row.match { background-color: #F8F8F8; color: var(--text-light); }
-        .audit-summary-row.shortage { background-color: #FDF4F4; color: #DC3B0B; font-weight: 500; }
-        .audit-summary-row.surplus { background-color: #F1FAF1; color: #107C10; font-weight: 500; }
+        .audit-summary-row:last-child {
+             border-bottom: none;
+        }
+        .audit-summary-row.shortage { background-color: rgba(220, 59, 11, 0.05); }
+        .audit-summary-row.surplus { background-color: rgba(16, 124, 16, 0.05); }
+        .variance-cell {
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        .variance-cell.shortage { color: #DC3B0B; }
+        .variance-cell.surplus { color: #107C10; }
+        
+        /* Audit History Modal Styles */
+        .audit-history-list-item {
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background-color: #FFFFFF;
+        }
+        .audit-history-list-item:hover {
+            background-color: #F5F5F5;
+        }
+        .audit-history-list-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-hover);
+        }
+         .audit-history-list-item.active .text-gray-500 {
+            color: rgba(255,255,255,0.8);
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -223,6 +252,10 @@
                     <h1 class="text-xl font-semibold text-gray-800 hidden sm:block">Treadz Inventory</h1>
                 </div>
                 <div class="flex items-center gap-2">
+                     <button id="audit-history-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.5 5.5a.5.5 0 0 0-1 0v3.354l-1.146 1.147a.5.5 0 0 0 .708.708l1.5-1.5a.5.5 0 0 0 0-.708V5.5z"/><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
+                        History
+                    </button>
                     <button id="audit-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v2H6V3a2 2 0 0 1 2-2zM6 6h4v4H6V6z"/><path d="M9 0a3 3 0 0 0-3 3v2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1V3a3 3 0 0 0-3-3zM5 6h6v5a.5.5 0 0 1-.5.5H5.5a.5.5 0 0 1-.5-.5V6z"/></svg>
                         Audit
@@ -359,6 +392,24 @@
             </div>
         </div>
     </div>
+    
+    <!-- AUDIT HISTORY MODAL -->
+    <div id="audit-history-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-6xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4 border-b pb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Audit History</h2>
+                <button id="close-audit-history-modal-btn" class="p-1 font-bold text-2xl">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow overflow-hidden">
+                <div id="audit-history-list" class="space-y-2 overflow-y-auto pr-2">
+                    <!-- History list items will be injected here -->
+                </div>
+                <div id="audit-history-detail" class="md:col-span-2 bg-gray-50 p-4 rounded-lg overflow-y-auto">
+                    <p class="text-center text-gray-500">Select an audit from the left to view details.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -406,8 +457,16 @@
             const confirmAuditBtn = document.getElementById('confirm-audit-btn');
             const auditSummaryContent = document.getElementById('audit-summary-content');
 
+            // Audit History Modal Elements
+            const auditHistoryBtn = document.getElementById('audit-history-btn');
+            const auditHistoryModal = document.getElementById('audit-history-modal');
+            const closeAuditHistoryModalBtn = document.getElementById('close-audit-history-modal-btn');
+            const auditHistoryList = document.getElementById('audit-history-list');
+            const auditHistoryDetail = document.getElementById('audit-history-detail');
+
             let inventory = [];
             let activityLog = [];
+            let auditHistory = [];
             let analyticsChart = null;
             let currentEntryMode = 'batch';
             let processedAuditData = null;
@@ -424,13 +483,15 @@
 
             // --- DATA MANAGEMENT ---
             const loadData = () => {
-                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV7')) || [];
-                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
+                inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV10')) || [];
+                activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV10')) || [];
+                auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV10')) || [];
             };
 
             const saveData = () => {
-                localStorage.setItem('treadzTireInventoryV9', JSON.stringify(inventory));
-                localStorage.setItem('treadzActivityLogV9', JSON.stringify(activityLog));
+                localStorage.setItem('treadzTireInventoryV10', JSON.stringify(inventory));
+                localStorage.setItem('treadzActivityLogV10', JSON.stringify(activityLog));
+                localStorage.setItem('treadzAuditHistoryV10', JSON.stringify(auditHistory));
             };
 
             // --- UTILITIES ---
@@ -828,12 +889,11 @@
                 toggleEntryModal(false);
             };
 
-            // --- Audit Logic ---
+            // --- Audit & History Logic ---
             const toggleAuditModal = (show) => {
                 auditModal.classList.toggle('hidden', !show);
                 auditModal.classList.toggle('flex', show);
                 if (show) {
-                    // Reset modal to input step
                     auditInputStep.classList.remove('hidden');
                     auditSummaryStep.classList.add('hidden');
                     processAuditBtn.classList.remove('hidden');
@@ -841,6 +901,38 @@
                     auditPasteArea.value = '';
                     processedAuditData = null;
                 }
+            };
+            
+            const generateDiscrepancyReportHTML = (summaryData) => {
+                if (summaryData.length === 0) {
+                    return `<div class="audit-summary-row match"><span class="col-span-full text-center">Perfect match! No discrepancies found.</span></div>`;
+                }
+
+                // Sort to show surpluses first, then shortages
+                summaryData.sort((a, b) => b.variance - a.variance);
+
+                return summaryData.map(d => {
+                    const variance = d.physicalQty - d.inventoryQty;
+                    let rowClass = 'match';
+                    let varianceStr = `<strong>${variance}</strong>`;
+                    let varianceIcon = '';
+
+                    if (variance > 0) {
+                        rowClass = 'surplus';
+                        varianceStr = `+${variance}`;
+                        varianceIcon = `<svg class="inline-block w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.03 9.83a.75.75 0 01-1.06-1.06l5.25-5.25a.75.75 0 011.06 0l5.25 5.25a.75.75 0 11-1.06 1.06L10.75 5.612V16.25A.75.75 0 0110 17z" clip-rule="evenodd" /></svg>`;
+                    } else if (variance < 0) {
+                        rowClass = 'shortage';
+                        varianceIcon = `<svg class="inline-block w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l4.22-4.22a.75.75 0 111.06 1.06l-5.25 5.25a.75.75 0 01-1.06 0l-5.25-5.25a.75.75 0 111.06-1.06l4.22 4.22V3.75A.75.75 0 0110 3z" clip-rule="evenodd" /></svg>`;
+                    }
+
+                    return `<div class="audit-summary-row ${rowClass}">
+                        <span class="font-mono font-semibold">${d.sizeStr}</span>
+                        <span class="text-center text-gray-500">${d.inventoryQty}</span>
+                        <span class="text-center font-bold">${d.physicalQty}</span>
+                        <span class="text-center variance-cell ${rowClass}">${varianceIcon}${varianceStr}</span>
+                    </div>`;
+                }).join('');
             };
 
             const processAndReviewAudit = () => {
@@ -853,7 +945,6 @@
                     return;
                 }
 
-                // 1. Create a map of the physical count
                 const physicalCountMap = new Map();
                 entries.forEach(entry => {
                     const parsedSize = parseTireSize(entry);
@@ -863,43 +954,24 @@
                     }
                 });
 
-                // 2. Create a map of the current inventory for the selected condition
                 const inventoryCountMap = new Map();
                 inventory.filter(t => t.condition === auditCondition).forEach(tire => {
                     inventoryCountMap.set(formatTireSize(tire.size), tire.quantity);
                 });
 
-                // 3. Compare and generate summary
                 const allSizes = new Set([...physicalCountMap.keys(), ...inventoryCountMap.keys()]);
-                let summaryHTML = '';
                 const summaryData = [];
-
                 allSizes.forEach(sizeStr => {
                     const physicalQty = physicalCountMap.get(sizeStr) || 0;
                     const inventoryQty = inventoryCountMap.get(sizeStr) || 0;
-                    const variance = physicalQty - inventoryQty;
-
-                    if (variance !== 0) {
-                        let rowClass = variance > 0 ? 'surplus' : 'shortage';
-                        let varianceStr = variance > 0 ? `+${variance}` : variance;
-                        summaryHTML += `<div class="audit-summary-row ${rowClass}">
-                            <span>${sizeStr}</span>
-                            <span class="text-center">${inventoryQty}</span>
-                            <span class="text-center">${physicalQty}</span>
-                            <span class="text-center">${varianceStr}</span>
-                        </div>`;
+                    if (physicalQty !== inventoryQty) {
+                         summaryData.push({ sizeStr, physicalQty, inventoryQty, variance: physicalQty - inventoryQty });
                     }
-                     summaryData.push({ sizeStr, physicalQty, inventoryQty, variance });
                 });
                 
-                if (!summaryHTML) {
-                    summaryHTML = `<div class="audit-summary-row match"><span class="col-span-full text-center">Perfect match! No discrepancies found.</span></div>`;
-                }
-
-                auditSummaryContent.innerHTML = summaryHTML;
+                auditSummaryContent.innerHTML = generateDiscrepancyReportHTML(summaryData);
                 processedAuditData = { physicalCountMap, auditCondition, summaryData };
 
-                // Switch to summary view
                 auditInputStep.classList.add('hidden');
                 auditSummaryStep.classList.remove('hidden');
                 processAuditBtn.classList.add('hidden');
@@ -908,35 +980,82 @@
             
             const confirmAndUpdateAudit = () => {
                 if (!processedAuditData) return;
-
                 const { physicalCountMap, auditCondition, summaryData } = processedAuditData;
-                let adjustmentsCount = 0;
                 
-                // Keep all inventory of the OTHER condition
                 const otherInventory = inventory.filter(t => t.condition !== auditCondition);
                 const newAuditedInventory = [];
-
                 physicalCountMap.forEach((quantity, sizeStr) => {
                     const parsedSize = parseTireSize(sizeStr);
-                    if (parsedSize) {
-                        newAuditedInventory.push({ size: parsedSize, quantity: quantity, condition: auditCondition });
-                    }
+                    if (parsedSize) newAuditedInventory.push({ size: parsedSize, quantity, condition: auditCondition });
                 });
+                
+                inventory = [...otherInventory, ...newAuditedInventory];
+                
+                // Save audit to history
+                const auditRecord = {
+                    timestamp: new Date().toISOString(),
+                    condition: auditCondition,
+                    discrepancies: summaryData
+                };
+                auditHistory.unshift(auditRecord);
 
-                // Log adjustments
-                summaryData.filter(d => d.variance !== 0).forEach(d => {
+                // Log individual adjustments
+                summaryData.forEach(d => {
                      const term = `${d.sizeStr} (${auditCondition})`;
                      const adjustment = `${d.inventoryQty} → ${d.physicalQty}`;
                      addLogEntry(term, 'Audit', { adjustment });
-                     adjustmentsCount++;
                 });
 
-                inventory = [...otherInventory, ...newAuditedInventory];
-                
                 saveData();
                 renderAll();
                 toggleAuditModal(false);
-                showToast(`Audit confirmed. ${adjustmentsCount} adjustment(s) logged.`);
+                showToast(`Audit confirmed. ${summaryData.length} adjustment(s) logged.`);
+            };
+
+            const toggleAuditHistoryModal = (show) => {
+                auditHistoryModal.classList.toggle('hidden', !show);
+                auditHistoryModal.classList.toggle('flex', show);
+                if (show) renderAuditHistory();
+            };
+            
+            const renderAuditHistory = () => {
+                auditHistoryList.innerHTML = '';
+                auditHistoryDetail.innerHTML = '<p class="text-center text-gray-500">Select an audit from the left to view details.</p>';
+                if (auditHistory.length === 0) {
+                     auditHistoryList.innerHTML = '<p class="text-center text-gray-500">No past audits found.</p>';
+                     return;
+                }
+                
+                auditHistory.forEach((record, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'audit-history-list-item';
+                    item.dataset.index = index;
+                    const date = new Date(record.timestamp);
+                    item.innerHTML = `
+                        <p class="font-semibold">Audit of ${record.condition.toUpperCase()} Tires</p>
+                        <p class="text-sm text-gray-500">${date.toLocaleString()}</p>
+                    `;
+                    item.addEventListener('click', () => {
+                        renderAuditHistoryDetail(record);
+                        document.querySelectorAll('.audit-history-list-item').forEach(el => el.classList.remove('active'));
+                        item.classList.add('active');
+                    });
+                    auditHistoryList.appendChild(item);
+                });
+            };
+
+            const renderAuditHistoryDetail = (record) => {
+                const summaryHTML = generateDiscrepancyReportHTML(record.discrepancies);
+                auditHistoryDetail.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Discrepancy Report</h3>
+                    <div class="text-sm font-semibold text-gray-500 audit-summary-row mb-2">
+                        <span>Tire Size</span>
+                        <span class="text-center">System</span>
+                        <span class="text-center">Counted</span>
+                        <span class="text-center">Variance</span>
+                    </div>
+                    <div>${summaryHTML}</div>
+                `;
             };
 
             // --- EVENT LISTENERS ---
@@ -1001,16 +1120,20 @@
                 }
             });
 
-            // Audit Modal
+            // Audit & History Modals
             auditBtn.addEventListener('click', () => toggleAuditModal(true));
             closeAuditModalBtn.addEventListener('click', () => toggleAuditModal(false));
             cancelAuditModalBtn.addEventListener('click', () => toggleAuditModal(false));
             auditModal.addEventListener('click', (e) => { if (e.target === auditModal) toggleAuditModal(false); });
             processAuditBtn.addEventListener('click', processAndReviewAudit);
             confirmAuditBtn.addEventListener('click', confirmAndUpdateAudit);
+            auditHistoryBtn.addEventListener('click', () => toggleAuditHistoryModal(true));
+            closeAuditHistoryModalBtn.addEventListener('click', () => toggleAuditHistoryModal(false));
+            auditHistoryModal.addEventListener('click', (e) => { if (e.target === auditHistoryModal) toggleAuditHistoryModal(false); });
+
 
             // --- INITIALIZATION ---
-            load();
+            loadData();
             renderAll();
         });
     </script>
