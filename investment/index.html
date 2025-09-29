@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestaTrack - Clear Market Insights</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>">
+    <style>
+        :root {
+            --background: #F9F9F9;
+            --surface: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #6B7280;
+            --accent-blue: #007AFF;
+            --accent-green: #34C759;
+            --accent-red: #FF3B30;
+            --border-color: #E5E5EA;
+        }
+
+        html.dark {
+            --background: #000000;
+            --surface: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #8E8E93;
+            --border-color: #3A3A3C;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        #hero { min-height: 80vh; }
+        
+        .btn-primary {
+            background-color: var(--text-primary);
+            color: var(--surface);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary:hover { transform: scale(1.05); }
+        
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.07);
+            transform: translateY(-4px);
+            border-color: #D1D1D6;
+        }
+        html.dark .card:hover {
+             border-color: #555;
+        }
+        
+        .positive-change { color: var(--accent-green); }
+        .negative-change { color: var(--accent-red); }
+
+        .loader {
+            width: 40px; height: 40px; border: 4px solid var(--border-color);
+            border-bottom-color: var(--text-primary);
+            border-radius: 50%; display: inline-block; box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .fade-in-up {
+            opacity: 0; transform: translateY(20px);
+            animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen">
+    
+    <div id="app" class="p-4 md:p-8 max-w-5xl mx-auto">
+        <header class="flex justify-between items-center py-4">
+            <h1 class="text-2xl font-bold tracking-tight">InvestaTrack</h1>
+            <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-800">
+                <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            </button>
+        </header>
+
+        <!-- Hero Section -->
+        <section id="hero" class="w-full flex flex-col justify-center items-center text-center p-6">
+            <h1 class="text-5xl md:text-8xl font-extrabold tracking-tighter mb-4 fade-in-up" style="animation-delay: 0.1s;">High Signal. Low Noise.</h1>
+            <p class="max-w-xl text-lg md:text-xl text-text-secondary mb-8 fade-in-up" style="animation-delay: 0.2s;">
+                A curated feed of actionable investment insights from proven sources. No hype, just data.
+            </p>
+            <a href="#main-content" class="btn-primary font-bold py-3 px-8 rounded-full text-lg fade-in-up" style="animation-delay: 0.3s;">
+                View Insights
+            </a>
+        </section>
+
+        <main id="main-content">
+            <h2 class="text-3xl font-bold tracking-tight mb-6 fade-in-up" style="animation-delay: 0.4s;">Insights Feed</h2>
+            <div id="loader-container" class="text-center py-12"><div class="loader"></div></div>
+            <div id="insights-feed" class="space-y-6"></div>
+             <footer class="text-center mt-16">
+                <p class="text-xs text-text-secondary">Disclaimer: For informational purposes only. Not financial advice. Data is sourced from public APIs and may have delays.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- "What If" Calculator Modal -->
+    <div id="calculator-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+         <div id="calculator-content" class="card w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">"What If" Simulation</h3>
+                <button id="close-modal-btn" class="text-text-secondary text-3xl leading-none hover:text-text-primary">&times;</button>
+            </div>
+            <div id="modal-body">
+                <p class="mb-4 text-text-secondary">Simulate buying <span id="modal-ticker-name" class="font-bold text-text-primary"></span> on a past date.</p>
+                <div>
+                    <label for="modal-amount" class="block text-sm font-medium text-text-secondary mb-1">Investment Amount ($)</label>
+                    <input type="number" id="modal-amount" value="10000" class="bg-gray-50 dark:bg-gray-800 border border-border-color rounded-lg w-full p-2.5 text-text-primary">
+                </div>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-text-secondary mb-2">Investment Date</label>
+                    <div class="grid grid-cols-2 gap-2" id="date-options"></div>
+                </div>
+            </div>
+            <div id="modal-results" class="hidden"></div>
+            <div id="modal-loader" class="text-center py-12 hidden"><div class="loader"></div></div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_KEY = 'YOUR_API_KEY_HERE'; // IMPORTANT: GET YOUR FREE KEY from financialmodelingprep.com
+            const tickers = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'LLY', 'BAC', 'AXP', 'KO', 'CVX'];
+            
+            // --- THEME TOGGLE ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const lightIcon = document.getElementById('theme-icon-light');
+            const darkIcon = document.getElementById('theme-icon-dark');
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    lightIcon.classList.add('hidden');
+                    darkIcon.classList.remove('hidden');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    lightIcon.classList.remove('hidden');
+                    darkIcon.classList.add('hidden');
+                }
+            };
+            
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+
+            // --- API FUNCTIONS ---
+            const fetchQuote = async (tickerList) => {
+                if (API_KEY === '3QZrBXjqcGSww5dqqKB5a2PFzBpOFikR') return null;
+                const response = await fetch(`https://financialmodelingprep.com/api/v3/quote/${tickerList.join(',')}?apikey=${API_KEY}`);
+                return await response.json();
+            };
+
+            const fetchHistoricalData = async (ticker, from, to) => {
+                if (API_KEY === '3QZrBXjqcGSww5dqqKB5a2PFzBpOFikR') return null;
+                const response = await fetch(`https://financialmodelingprep.com/api/v3/historical-price-full/${ticker}?from=${from}&to=${to}&apikey=${API_KEY}`);
+                const data = await response.json();
+                return data.historical || [];
+            };
+            
+            // --- MAIN DATA LOADING ---
+            const renderInsightsFeed = (quotes) => {
+                const feedContainer = document.getElementById('insights-feed');
+                feedContainer.innerHTML = '';
+                if (!quotes || quotes.length === 0) {
+                    feedContainer.innerHTML = `<div class="card p-5 text-center text-text-secondary">Could not load live data. Please ensure your API key is set correctly in the script.</div>`;
+                    return;
+                }
+                quotes.forEach((quote, index) => {
+                    const card = `
+                        <div class="card p-5 fade-in-up" style="animation-delay: ${index * 100}ms;">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-semibold text-text-secondary">${quote.name}</p>
+                                    <h3 class="text-2xl font-bold mt-1">${quote.symbol}</h3>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold">$${quote.price.toFixed(2)}</p>
+                                    <p class="text-sm font-semibold ${quote.changesPercentage >= 0 ? 'positive-change' : 'negative-change'}">
+                                        ${quote.change.toFixed(2)} (${quote.changesPercentage.toFixed(2)}%)
+                                    </p>
+                                </div>
+                            </div>
+                             <button class="simulate-trade-btn mt-4 w-full sm:w-auto text-sm font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-primary py-2 px-4 rounded-lg" data-ticker="${quote.symbol}">
+                                "What If" Simulation
+                            </button>
+                        </div>`;
+                    feedContainer.innerHTML += card;
+                });
+
+                document.querySelectorAll('.simulate-trade-btn').forEach(button => {
+                    button.addEventListener('click', () => openCalculatorModal(button.dataset.ticker));
+                });
+            };
+
+            // --- CALCULATOR MODAL LOGIC ---
+            const calculatorModal = document.getElementById('calculator-modal');
+            const modalBody = document.getElementById('modal-body');
+            const modalResults = document.getElementById('modal-results');
+            const modalLoader = document.getElementById('modal-loader');
+            
+            const openCalculatorModal = (ticker) => {
+                modalBody.classList.remove('hidden');
+                modalResults.innerHTML = '';
+                modalResults.classList.add('hidden');
+                modalLoader.classList.add('hidden');
+                document.getElementById('modal-ticker-name').textContent = ticker;
+                document.getElementById('modal-amount').value = '10000';
+                
+                const dateOptionsContainer = document.getElementById('date-options');
+                const today = new Date();
+                const dates = {
+                    "1 Year Ago": new Date(new Date().setFullYear(today.getFullYear() - 1)),
+                    "3 Years Ago": new Date(new Date().setFullYear(today.getFullYear() - 3)),
+                    "5 Years Ago": new Date(new Date().setFullYear(today.getFullYear() - 5)),
+                    "Year-to-Date": new Date(today.getFullYear(), 0, 1),
+                };
+
+                dateOptionsContainer.innerHTML = Object.entries(dates).map(([label, date]) => 
+                    `<button class="date-btn text-sm p-2 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700" data-date="${date.toISOString().split('T')[0]}">${label}</button>`
+                ).join('');
+                
+                document.querySelectorAll('.date-btn').forEach(btn => {
+                    btn.addEventListener('click', () => handlePaperTrade(ticker, document.getElementById('modal-amount').value, btn.dataset.date));
+                });
+
+                calculatorModal.classList.remove('hidden');
+            };
+
+            const closeCalculatorModal = () => calculatorModal.classList.add('hidden');
+            document.getElementById('close-modal-btn').addEventListener('click', closeCalculatorModal);
+            calculatorModal.addEventListener('click', (e) => { if (e.target === calculatorModal) closeCalculatorModal(); });
+
+            const handlePaperTrade = async (ticker, amountStr, date) => {
+                const amount = parseFloat(amountStr);
+                if (!ticker || isNaN(amount) || !date) return;
+
+                modalBody.classList.add('hidden');
+                modalLoader.classList.remove('hidden');
+                
+                const today = new Date().toISOString().split('T')[0];
+                const fiveYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 5)).toISOString().split('T')[0];
+
+                const historicalData = await fetchHistoricalData(ticker, fiveYearsAgo, today);
+
+                if (!historicalData || historicalData.length < 2) {
+                    modalResults.innerHTML = `<p class="text-red-500">Could not retrieve sufficient historical data for ${ticker}.</p>`;
+                    modalLoader.classList.add('hidden');
+                    modalResults.classList.remove('hidden');
+                    return;
+                }
+
+                const findClosestDataPoint = (targetDate) => {
+                     return historicalData.reduce((prev, curr) => {
+                        const prevDiff = Math.abs(new Date(prev.date) - new Date(targetDate));
+                        const currDiff = Math.abs(new Date(curr.date) - new Date(targetDate));
+                        return currDiff < prevDiff ? curr : prev;
+                    });
+                }
+                
+                const pastData = findClosestDataPoint(date);
+                const currentPrice = historicalData[0].close;
+                const pastPrice = pastData.close;
+                const sharesBought = amount / pastPrice;
+                const currentValue = sharesBought * currentPrice;
+                const gainLoss = currentValue - amount;
+                const percentageChange = (gainLoss / amount) * 100;
+                const isGain = gainLoss >= 0;
+
+                // Projected Gains Calculation (CAGR)
+                const endValue = currentPrice;
+                const startValue = historicalData[historicalData.length - 1].close;
+                const years = (new Date(historicalData[0].date) - new Date(historicalData[historicalData.length - 1].date)) / (1000 * 60 * 60 * 24 * 365.25);
+                const cagr = (Math.pow(endValue / startValue, 1 / years) - 1);
+
+                const projection1Y = (currentValue * Math.pow(1 + cagr, 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const projection3Y = (currentValue * Math.pow(1 + cagr, 3)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const projection5Y = (currentValue * Math.pow(1 + cagr, 5)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+
+                 modalResults.innerHTML = `
+                    <h4 class="font-bold text-lg mb-4">Simulated Return for ${ticker}</h4>
+                    <div class="space-y-3 text-left mb-6">
+                        <div class="flex justify-between items-center"><span class="text-text-secondary">Initial Investment:</span><span class="font-bold">$${amount.toLocaleString()}</span></div>
+                        <div class="flex justify-between items-center"><span class="text-text-secondary">Date Invested (Approx.):</span><span class="font-bold">${new Date(pastData.date).toLocaleDateString()}</span></div>
+                        <div class="flex justify-between items-center"><span class="text-text-secondary">Current Value:</span><span class="font-bold">$${currentValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                        <hr class="border-border-color my-2">
+                        <div class="flex justify-between items-center"><span class="text-text-secondary">Total Return:</span>
+                        <span class="font-bold text-xl ${isGain ? 'positive-change' : 'negative-change'}">
+                            ${isGain ? '+' : ''}$${gainLoss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${isGain ? '+' : ''}${percentageChange.toFixed(2)}%)
+                        </span></div>
+                    </div>
+
+                    <h4 class="font-bold text-lg mb-4">Future Projections</h4>
+                    <p class="text-xs text-text-secondary mb-3">Based on a ${ (cagr * 100).toFixed(2) }% compound annual growth rate (CAGR) from the last ${years.toFixed(1)} years. Past performance is not indicative of future results.</p>
+                     <div class="space-y-3 text-left">
+                        <div class="flex justify-between items-center"><span class="text-text-secondary">In 1 Year:</span><span class="font-bold">$${projection1Y}</span></div>
+                        <div class="flex justify-between items-center"><span class="text-text-secondary">In 3 Years:</span><span class="font-bold">$${projection3Y}</span></div>
+                        <div class="flex justify-between items-center"><span class="text-text-secondary">In 5 Years:</span><span class="font-bold">$${projection5Y}</span></div>
+                    </div>
+                    <button id="recalculate-btn" class="w-full mt-6 text-sm font-semibold bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-primary py-2 px-4 rounded-lg">Simulate Another</button>
+                `;
+                
+                modalLoader.classList.add('hidden');
+                modalResults.classList.remove('hidden');
+                document.getElementById('recalculate-btn').addEventListener('click', () => {
+                    modalResults.classList.add('hidden');
+                    modalBody.classList.remove('hidden');
+                });
+            };
+
+            // --- INITIAL LOAD ---
+            const loadData = async () => {
+                document.getElementById('loader-container').classList.remove('hidden');
+                const quotes = await fetchQuote(tickers);
+                renderInsightsFeed(quotes);
+                document.getElementById('loader-container').classList.add('hidden');
+            };
+
+            loadData();
+        });
+    </script>
+</body>
+</html>
+
