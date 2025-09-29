@@ -160,6 +160,9 @@
         </section>
 
         <main id="main-content">
+            <div id="api-error-banner" class="hidden card bg-yellow-500/10 border-yellow-500/30 text-yellow-300 p-4 mb-6 text-sm">
+                <p><span class="font-bold">Displaying Sample Data:</span> Could not connect to the live data feed. Please verify your API key and plan permissions. The data shown below is for demonstration purposes only.</p>
+            </div>
             <h2 class="text-3xl font-bold tracking-tight mb-6 fade-in-up" style="animation-delay: 0.4s;">Insights Feed</h2>
             <div id="loader-container" class="text-center py-12"><div class="loader"></div></div>
             <div id="insights-feed" class="space-y-6"></div>
@@ -198,6 +201,24 @@
             const API_KEY = '3QZrBXjqcGSww5dqqKB5a2PFzBpOFikR'; // Hardcoded API Key
             const tickers = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'LLY', 'BAC', 'AXP', 'KO', 'CVX', 'TSLA', 'AMZN', 'JPM'];
             
+            // --- MOCK DATA FALLBACK ---
+            const mockQuotes = [
+                { symbol: 'AAPL', name: 'Apple Inc.', price: 171.48, change: 1.2, changesPercentage: 0.7 },
+                { symbol: 'MSFT', name: 'Microsoft Corporation', price: 420.72, change: -2.5, changesPercentage: -0.59 },
+                { symbol: 'NVDA', name: 'NVIDIA Corporation', price: 903.56, change: 10.1, changesPercentage: 1.13 },
+                { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 151.24, change: 0.8, changesPercentage: 0.53 },
+                { symbol: 'TSLA', name: 'Tesla, Inc.', price: 175.79, change: -4.5, changesPercentage: -2.49 },
+                { symbol: 'AMZN', name: 'Amazon.com, Inc.', price: 180.38, change: 1.1, changesPercentage: 0.61 },
+            ];
+
+            const mockHistoricalData = {
+                "historical": [
+                    { "date": "2024-03-28", "close": 171.48 }, { "date": "2023-09-29", "close": 171.21 },
+                    { "date": "2022-09-30", "close": 138.20 }, { "date": "2021-09-30", "close": 141.50 },
+                    { "date": "2020-09-30", "close": 115.81 }, { "date": "2019-09-30", "close": 55.99 }
+                ]
+            };
+            
             // --- THEME TOGGLE ---
             const themeToggle = document.getElementById('theme-toggle');
             const lightIcon = document.getElementById('theme-icon-light');
@@ -211,7 +232,6 @@
                     lightIcon.classList.add('hidden');
                     darkIcon.classList.remove('hidden');
                     if (newIcon) newIcon.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>";
-
                 } else {
                     document.documentElement.classList.add('light');
                     document.documentElement.classList.remove('dark');
@@ -221,7 +241,7 @@
                 }
             };
             
-            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark mode
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             applyTheme(savedTheme);
 
             themeToggle.addEventListener('click', () => {
@@ -231,45 +251,61 @@
             });
 
             // --- API FUNCTIONS ---
-            const fetchWithCache = async (url, cacheKey, ttl = 3600000) => { // Default TTL: 1 hour
+            const fetchWithCache = async (url, cacheKey, ttl = 3600000) => {
                 const cachedItem = localStorage.getItem(cacheKey);
                 if (cachedItem) {
-                    const { timestamp, data } = JSON.parse(cachedItem);
-                    if (Date.now() - timestamp < ttl) {
-                        return data;
+                    try {
+                        const { timestamp, data } = JSON.parse(cachedItem);
+                        if (Date.now() - timestamp < ttl) { return data; }
+                    } catch (e) {
+                        console.warn(`Could not parse cached data for ${cacheKey}. Refetching...`, e);
+                        localStorage.removeItem(cacheKey);
                     }
                 }
                 try {
                     const response = await fetch(url);
-                    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                    if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText} for URL ${url}`);
                     const data = await response.json();
+                    if (data && typeof data === 'object' && !Array.isArray(data) && data['Error Message']) {
+                        console.error("API returned an error message:", data['Error Message']);
+                        return null; 
+                    }
                     localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
                     return data;
                 } catch (error) {
                     console.error("Fetch failed:", error);
-                    // Return stale data if available
                     if (cachedItem) return JSON.parse(cachedItem).data;
-                    return null; // Or handle error appropriately
+                    return null;
                 }
             };
 
             const fetchQuote = async (tickerList) => {
-                if (API_KEY === 'YOUR_API_KEY_HERE') return null;
+                if (API_KEY === 'YOUR_API_KEY_HERE') {
+                    console.log("Using mock quote data because API key is not set.");
+                    return mockQuotes;
+                }
                 const url = `https://financialmodelingprep.com/api/v3/quote/${tickerList.join(',')}?apikey=${API_KEY}`;
                 return await fetchWithCache(url, `quote_${tickerList.join('_')}`);
             };
 
             const fetchHistoricalData = async (ticker, from, to) => {
-                if (API_KEY === 'YOUR_API_KEY_HERE') return null;
+                 if (API_KEY === 'YOUR_API_KEY_HERE') {
+                    console.log(`Using mock historical data for ${ticker}.`);
+                    return mockHistoricalData;
+                }
                 const url = `https://financialmodelingprep.com/api/v3/historical-price-full/${ticker}?from=${from}&to=${to}&apikey=${API_KEY}`;
                 return await fetchWithCache(url, `historical_${ticker}_${from}_${to}`);
             };
             
             // --- RENDER FUNCTIONS ---
-            const renderInsightsFeed = (quotes) => {
+            const renderInsightsFeed = (quotes, isMock = false) => {
                 const feedContainer = document.getElementById('insights-feed');
                 feedContainer.innerHTML = '';
-                if (!quotes || quotes.length === 0) {
+                if (isMock) {
+                    document.getElementById('api-error-banner').classList.remove('hidden');
+                }
+                
+                if (!quotes || !Array.isArray(quotes) || quotes.length === 0) {
                     feedContainer.innerHTML = `<div class="card p-5 text-center text-text-secondary">Could not load live data. This may be due to API rate limits or an incorrect API key. Please try again later.</div>`;
                     return;
                 }
@@ -302,22 +338,21 @@
 
             const renderProjectionsTicker = async (quotes) => {
                 const tickerContent = document.getElementById('projections-ticker-content');
-                if (!quotes || quotes.length === 0) {
+                if (!quotes || !Array.isArray(quotes) || quotes.length === 0) {
                      document.getElementById('projections-loader').classList.add('hidden');
                      return;
                 }
 
                 let tickerHTML = '';
-                // Use a smaller subset for the ticker to avoid excessive API calls on load
                 const tickerQuotes = quotes.slice(0, 8); 
 
                 for (const quote of tickerQuotes) {
                     const today = new Date().toISOString().split('T')[0];
                     const fiveYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 5)).toISOString().split('T')[0];
-                    const historicalData = await fetchHistoricalData(quote.symbol, fiveYearsAgo, today);
+                    const historicalResponse = await fetchHistoricalData(quote.symbol, fiveYearsAgo, today);
 
-                    if (historicalData && historicalData.historical && historicalData.historical.length > 1) {
-                         const history = historicalData.historical;
+                    if (historicalResponse && historicalResponse.historical && historicalResponse.historical.length > 1) {
+                         const history = historicalResponse.historical;
                          const years = (new Date(history[0].date) - new Date(history[history.length - 1].date)) / (1000 * 60 * 60 * 24 * 365.25);
                          if (years > 0) {
                             const cagr = (Math.pow(history[0].close / history[history.length - 1].close, 1 / years) - 1);
@@ -342,7 +377,6 @@
                     }
                 }
                 
-                // Duplicate content for seamless scroll
                 tickerContent.innerHTML = tickerHTML + tickerHTML; 
                 document.getElementById('projections-loader').classList.add('hidden');
                 document.getElementById('projections-ticker-wrap').classList.remove('hidden');
@@ -389,23 +423,19 @@
             const handlePaperTrade = async (ticker, amountStr, date) => {
                 const amount = parseFloat(amountStr);
                 if (!ticker || isNaN(amount) || !date) return;
-
                 modalBody.classList.add('hidden');
                 modalLoader.classList.remove('hidden');
-                
                 const today = new Date().toISOString().split('T')[0];
                 const fiveYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 5)).toISOString().split('T')[0];
-
                 const historicalResponse = await fetchHistoricalData(ticker, fiveYearsAgo, today);
-                const historicalData = historicalResponse.historical;
-
-                if (!historicalData || historicalData.length < 2) {
+                
+                if (!historicalResponse || !historicalResponse.historical || historicalResponse.historical.length < 2) {
                     modalResults.innerHTML = `<p class="text-red-500">Could not retrieve sufficient historical data for ${ticker}.</p>`;
                     modalLoader.classList.add('hidden');
                     modalResults.classList.remove('hidden');
                     return;
                 }
-
+                const historicalData = historicalResponse.historical;
                 const findClosestDataPoint = (targetDate) => {
                      return historicalData.reduce((prev, curr) => {
                         const prevDiff = Math.abs(new Date(prev.date) - new Date(targetDate));
@@ -413,7 +443,6 @@
                         return currDiff < prevDiff ? curr : prev;
                     });
                 }
-                
                 const pastData = findClosestDataPoint(date);
                 const currentPrice = historicalData[0].close;
                 const pastPrice = pastData.close;
@@ -422,20 +451,14 @@
                 const gainLoss = currentValue - amount;
                 const percentageChange = (gainLoss / amount) * 100;
                 const isGain = gainLoss >= 0;
-
                 const endValue = currentPrice;
                 const startValue = historicalData[historicalData.length - 1].close;
                 const years = (new Date(historicalData[0].date) - new Date(historicalData[historicalData.length - 1].date)) / (1000 * 60 * 60 * 24 * 365.25);
-                
                 let cagr = 0;
-                if (years > 0 && startValue > 0) {
-                    cagr = (Math.pow(endValue / startValue, 1 / years) - 1);
-                }
-
+                if (years > 0 && startValue > 0) { cagr = (Math.pow(endValue / startValue, 1 / years) - 1); }
                 const projection1Y = (currentValue * Math.pow(1 + cagr, 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const projection3Y = (currentValue * Math.pow(1 + cagr, 3)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const projection5Y = (currentValue * Math.pow(1 + cagr, 5)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
 
                  modalResults.innerHTML = `
                     <h4 class="font-bold text-lg mb-4">Simulated Return for ${ticker}</h4>
@@ -472,9 +495,18 @@
             const loadData = async () => {
                 document.getElementById('loader-container').classList.remove('hidden');
                 document.getElementById('projections-loader').classList.remove('hidden');
-                const quotes = await fetchQuote(tickers);
-                renderInsightsFeed(quotes);
+                let quotes = await fetchQuote(tickers);
+                let isMockData = false;
+                
+                if (!quotes || !Array.isArray(quotes)) {
+                    console.log("API fetch failed or returned invalid data. Falling back to mock data.");
+                    quotes = mockQuotes;
+                    isMockData = true;
+                }
+                
+                renderInsightsFeed(quotes, isMockData);
                 await renderProjectionsTicker(quotes);
+
                 document.getElementById('loader-container').classList.add('hidden');
             };
 
