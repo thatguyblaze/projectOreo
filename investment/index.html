@@ -6,25 +6,25 @@
     <title>InvestaTrack - Clear Market Insights</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>">
     <style>
         :root {
-            --background: #F9F9F9;
-            --surface: #FFFFFF;
-            --text-primary: #000000;
-            --text-secondary: #6B7280;
-            --accent-blue: #007AFF;
-            --accent-green: #34C759;
-            --accent-red: #FF3B30;
-            --border-color: #E5E5EA;
-        }
-
-        html.dark {
             --background: #000000;
             --surface: #1C1C1E;
             --text-primary: #FFFFFF;
             --text-secondary: #8E8E93;
+            --accent-blue: #0A84FF;
+            --accent-green: #34C759;
+            --accent-red: #FF3B30;
             --border-color: #3A3A3C;
+        }
+
+        html.light {
+            --background: #F9F9F9;
+            --surface: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #6B7280;
+            --border-color: #E5E5EA;
         }
 
         html { scroll-behavior: smooth; }
@@ -43,9 +43,16 @@
         .btn-primary {
             background-color: var(--text-primary);
             color: var(--surface);
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .btn-primary:hover { transform: scale(1.05); }
+        .btn-primary:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 8px 25px rgba(0,122,255,0.3);
+        }
+        html.light .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
         
         .card {
             background-color: var(--surface);
@@ -54,12 +61,12 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .card:hover {
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.07);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
             transform: translateY(-4px);
-            border-color: #D1D1D6;
+            border-color: #555;
         }
-        html.dark .card:hover {
-             border-color: #555;
+        html.light .card:hover {
+             border-color: #D1D1D6;
         }
         
         .positive-change { color: var(--accent-green); }
@@ -73,7 +80,7 @@
         }
 
         .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
@@ -88,6 +95,36 @@
             100% { transform: rotate(360deg); }
         }
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Auto-scrolling Ticker --- */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            padding: 2rem 0;
+            background-color: var(--surface);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .ticker {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: ticker-scroll 60s linear infinite;
+        }
+        .ticker:hover {
+            animation-play-state: paused;
+        }
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 0 2rem;
+            font-size: 1rem;
+        }
+        @keyframes ticker-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
     </style>
 </head>
 <body class="min-h-screen">
@@ -110,6 +147,16 @@
             <a href="#main-content" class="btn-primary font-bold py-3 px-8 rounded-full text-lg fade-in-up" style="animation-delay: 0.3s;">
                 View Insights
             </a>
+        </section>
+
+        <!-- Projections Ticker Section -->
+        <section id="projections-section" class="mb-12 fade-in-up" style="animation-delay: 0.5s;">
+            <div id="projections-loader" class="text-center py-8"><div class="loader"></div></div>
+            <div id="projections-ticker-wrap" class="ticker-wrap hidden">
+                <div class="ticker">
+                    <div id="projections-ticker-content" class="flex"></div>
+                </div>
+            </div>
         </section>
 
         <main id="main-content">
@@ -148,8 +195,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const API_KEY = 'YOUR_API_KEY_HERE'; // IMPORTANT: GET YOUR FREE KEY from financialmodelingprep.com
-            const tickers = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'LLY', 'BAC', 'AXP', 'KO', 'CVX'];
+            const API_KEY = '3QZrBXjqcGSww5dqqKB5a2PFzBpOFikR'; // Hardcoded API Key
+            const tickers = ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'LLY', 'BAC', 'AXP', 'KO', 'CVX', 'TSLA', 'AMZN', 'JPM'];
             
             // --- THEME TOGGLE ---
             const themeToggle = document.getElementById('theme-toggle');
@@ -157,18 +204,24 @@
             const darkIcon = document.getElementById('theme-icon-dark');
 
             const applyTheme = (theme) => {
+                const newIcon = document.querySelector(`link[rel="icon"]`);
                 if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
                     lightIcon.classList.add('hidden');
                     darkIcon.classList.remove('hidden');
+                    if (newIcon) newIcon.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>";
+
                 } else {
+                    document.documentElement.classList.add('light');
                     document.documentElement.classList.remove('dark');
                     lightIcon.classList.remove('hidden');
                     darkIcon.classList.add('hidden');
+                    if (newIcon) newIcon.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='12' y1='1' x2='12' y2='23'></line><path d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'></path></svg>";
                 }
             };
             
-            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark mode
             applyTheme(savedTheme);
 
             themeToggle.addEventListener('click', () => {
@@ -178,25 +231,46 @@
             });
 
             // --- API FUNCTIONS ---
+            const fetchWithCache = async (url, cacheKey, ttl = 3600000) => { // Default TTL: 1 hour
+                const cachedItem = localStorage.getItem(cacheKey);
+                if (cachedItem) {
+                    const { timestamp, data } = JSON.parse(cachedItem);
+                    if (Date.now() - timestamp < ttl) {
+                        return data;
+                    }
+                }
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                    const data = await response.json();
+                    localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
+                    return data;
+                } catch (error) {
+                    console.error("Fetch failed:", error);
+                    // Return stale data if available
+                    if (cachedItem) return JSON.parse(cachedItem).data;
+                    return null; // Or handle error appropriately
+                }
+            };
+
             const fetchQuote = async (tickerList) => {
-                if (API_KEY === '3QZrBXjqcGSww5dqqKB5a2PFzBpOFikR') return null;
-                const response = await fetch(`https://financialmodelingprep.com/api/v3/quote/${tickerList.join(',')}?apikey=${API_KEY}`);
-                return await response.json();
+                if (API_KEY === 'YOUR_API_KEY_HERE') return null;
+                const url = `https://financialmodelingprep.com/api/v3/quote/${tickerList.join(',')}?apikey=${API_KEY}`;
+                return await fetchWithCache(url, `quote_${tickerList.join('_')}`);
             };
 
             const fetchHistoricalData = async (ticker, from, to) => {
-                if (API_KEY === '3QZrBXjqcGSww5dqqKB5a2PFzBpOFikR') return null;
-                const response = await fetch(`https://financialmodelingprep.com/api/v3/historical-price-full/${ticker}?from=${from}&to=${to}&apikey=${API_KEY}`);
-                const data = await response.json();
-                return data.historical || [];
+                if (API_KEY === 'YOUR_API_KEY_HERE') return null;
+                const url = `https://financialmodelingprep.com/api/v3/historical-price-full/${ticker}?from=${from}&to=${to}&apikey=${API_KEY}`;
+                return await fetchWithCache(url, `historical_${ticker}_${from}_${to}`);
             };
             
-            // --- MAIN DATA LOADING ---
+            // --- RENDER FUNCTIONS ---
             const renderInsightsFeed = (quotes) => {
                 const feedContainer = document.getElementById('insights-feed');
                 feedContainer.innerHTML = '';
                 if (!quotes || quotes.length === 0) {
-                    feedContainer.innerHTML = `<div class="card p-5 text-center text-text-secondary">Could not load live data. Please ensure your API key is set correctly in the script.</div>`;
+                    feedContainer.innerHTML = `<div class="card p-5 text-center text-text-secondary">Could not load live data. This may be due to API rate limits or an incorrect API key. Please try again later.</div>`;
                     return;
                 }
                 quotes.forEach((quote, index) => {
@@ -204,13 +278,13 @@
                         <div class="card p-5 fade-in-up" style="animation-delay: ${index * 100}ms;">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="text-sm font-semibold text-text-secondary">${quote.name}</p>
+                                    <p class="text-sm font-semibold text-text-secondary">${quote.name || 'N/A'}</p>
                                     <h3 class="text-2xl font-bold mt-1">${quote.symbol}</h3>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-2xl font-bold">$${quote.price.toFixed(2)}</p>
+                                    <p class="text-2xl font-bold">$${(quote.price || 0).toFixed(2)}</p>
                                     <p class="text-sm font-semibold ${quote.changesPercentage >= 0 ? 'positive-change' : 'negative-change'}">
-                                        ${quote.change.toFixed(2)} (${quote.changesPercentage.toFixed(2)}%)
+                                        ${(quote.change || 0).toFixed(2)} (${(quote.changesPercentage || 0).toFixed(2)}%)
                                     </p>
                                 </div>
                             </div>
@@ -224,6 +298,54 @@
                 document.querySelectorAll('.simulate-trade-btn').forEach(button => {
                     button.addEventListener('click', () => openCalculatorModal(button.dataset.ticker));
                 });
+            };
+
+            const renderProjectionsTicker = async (quotes) => {
+                const tickerContent = document.getElementById('projections-ticker-content');
+                if (!quotes || quotes.length === 0) {
+                     document.getElementById('projections-loader').classList.add('hidden');
+                     return;
+                }
+
+                let tickerHTML = '';
+                // Use a smaller subset for the ticker to avoid excessive API calls on load
+                const tickerQuotes = quotes.slice(0, 8); 
+
+                for (const quote of tickerQuotes) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const fiveYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 5)).toISOString().split('T')[0];
+                    const historicalData = await fetchHistoricalData(quote.symbol, fiveYearsAgo, today);
+
+                    if (historicalData && historicalData.historical && historicalData.historical.length > 1) {
+                         const history = historicalData.historical;
+                         const years = (new Date(history[0].date) - new Date(history[history.length - 1].date)) / (1000 * 60 * 60 * 24 * 365.25);
+                         if (years > 0) {
+                            const cagr = (Math.pow(history[0].close / history[history.length - 1].close, 1 / years) - 1);
+                            const projection1Y = (quote.price * (1 + cagr));
+                            const isPositive = projection1Y > quote.price;
+
+                            tickerHTML += `
+                                <div class="ticker-item">
+                                    <span class="font-bold text-lg">${quote.symbol}</span>
+                                    <div class="text-left">
+                                        <p class="text-sm text-text-secondary">Current</p>
+                                        <p class="font-semibold">$${quote.price.toFixed(2)}</p>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="text-sm text-text-secondary">1Y Projection</p>
+                                        <p class="font-semibold ${isPositive ? 'positive-change' : 'negative-change'}">$${projection1Y.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                                <div class="w-px h-8 bg-border-color"></div>
+                            `;
+                        }
+                    }
+                }
+                
+                // Duplicate content for seamless scroll
+                tickerContent.innerHTML = tickerHTML + tickerHTML; 
+                document.getElementById('projections-loader').classList.add('hidden');
+                document.getElementById('projections-ticker-wrap').classList.remove('hidden');
             };
 
             // --- CALCULATOR MODAL LOGIC ---
@@ -274,7 +396,8 @@
                 const today = new Date().toISOString().split('T')[0];
                 const fiveYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 5)).toISOString().split('T')[0];
 
-                const historicalData = await fetchHistoricalData(ticker, fiveYearsAgo, today);
+                const historicalResponse = await fetchHistoricalData(ticker, fiveYearsAgo, today);
+                const historicalData = historicalResponse.historical;
 
                 if (!historicalData || historicalData.length < 2) {
                     modalResults.innerHTML = `<p class="text-red-500">Could not retrieve sufficient historical data for ${ticker}.</p>`;
@@ -300,11 +423,14 @@
                 const percentageChange = (gainLoss / amount) * 100;
                 const isGain = gainLoss >= 0;
 
-                // Projected Gains Calculation (CAGR)
                 const endValue = currentPrice;
                 const startValue = historicalData[historicalData.length - 1].close;
                 const years = (new Date(historicalData[0].date) - new Date(historicalData[historicalData.length - 1].date)) / (1000 * 60 * 60 * 24 * 365.25);
-                const cagr = (Math.pow(endValue / startValue, 1 / years) - 1);
+                
+                let cagr = 0;
+                if (years > 0 && startValue > 0) {
+                    cagr = (Math.pow(endValue / startValue, 1 / years) - 1);
+                }
 
                 const projection1Y = (currentValue * Math.pow(1 + cagr, 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 const projection3Y = (currentValue * Math.pow(1 + cagr, 3)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -345,8 +471,10 @@
             // --- INITIAL LOAD ---
             const loadData = async () => {
                 document.getElementById('loader-container').classList.remove('hidden');
+                document.getElementById('projections-loader').classList.remove('hidden');
                 const quotes = await fetchQuote(tickers);
                 renderInsightsFeed(quotes);
+                await renderProjectionsTicker(quotes);
                 document.getElementById('loader-container').classList.add('hidden');
             };
 
