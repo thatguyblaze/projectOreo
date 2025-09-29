@@ -558,30 +558,32 @@
                 if (!eventBarsContainer) return;
                 eventBarsContainer.innerHTML = '';
                 const monthEvents = getEventsForMonth(currentYear, currentMonth);
-
-                const layout = [];
-
+            
+                const layout = []; // This will be indexed 0-41
+            
+                // Define the start date of the 42-day grid view
+                const gridViewStartDate = new Date(currentYear, currentMonth, 1 - firstDayOfMonth);
+                const startOfGridView = new Date(`${getISODate(gridViewStartDate)}T12:00:00`);
+            
                 monthEvents.forEach(event => {
-                    const startDate = new Date(`${event.date}T12:00:00`);
-                    const endDate = event.endDate ? new Date(`${event.endDate}T12:00:00`) : startDate;
-
-                    const viewStartDate = new Date(currentYear, currentMonth, 1);
-                    const viewEndDate = new Date(currentYear, currentMonth, daysInMonth);
-                    
-                    if (endDate < viewStartDate || startDate > viewEndDate) return;
-
-                    let startDay = (startDate < viewStartDate) ? 1 : startDate.getDate();
-                    let endDay = (endDate > viewEndDate) ? daysInMonth : endDate.getDate();
-                    
-                    if (startDate.getMonth() < currentMonth) startDay = 1;
-                    if (endDate.getMonth() > currentMonth) endDay = daysInMonth;
-                    if (startDate.getFullYear() < currentYear) startDay = 1;
-                    if (endDate.getFullYear() > currentYear) endDay = daysInMonth;
-
+                    const eventStartDate = new Date(`${event.date}T12:00:00`);
+                    const eventEndDate = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStartDate;
+            
+                    // Calculate day index relative to the start of the grid (0-41)
+                    const startIndex = (eventStartDate - startOfGridView) / (1000 * 60 * 60 * 24);
+                    const endIndex = (eventEndDate - startOfGridView) / (1000 * 60 * 60 * 24);
+            
+                    // Only render events that are at all visible in the 42-day grid
+                    if (endIndex < 0 || startIndex > 41) return;
+            
+                    const effectiveStartIndex = Math.max(0, startIndex);
+                    const effectiveEndIndex = Math.min(41, endIndex);
+            
+                    // Find the first available vertical track for this event
                     let track = 0;
                     while (true) {
                         let collision = false;
-                        for (let i = startDay; i <= endDay; i++) {
+                        for (let i = effectiveStartIndex; i <= effectiveEndIndex; i++) {
                             if (layout[i] && layout[i][track]) {
                                 collision = true;
                                 break;
@@ -590,43 +592,45 @@
                         if (!collision) break;
                         track++;
                     }
-
-                    for (let i = startDay; i <= endDay; i++) {
+            
+                    // Mark the track as occupied for the duration of the event
+                    for (let i = effectiveStartIndex; i <= effectiveEndIndex; i++) {
                         if (!layout[i]) layout[i] = [];
                         layout[i][track] = true;
                     }
-
+            
                     const dayCellHeight = calendarGrid.querySelector('.day-cell-wrapper')?.offsetHeight || 110;
-
-                    let currentRenderDay = startDay;
-                    while (currentRenderDay <= endDay) {
-                        const weekRow = Math.floor((firstDayOfMonth + currentRenderDay - 1) / 7);
-                        const startColumn = (firstDayOfMonth + currentRenderDay - 1) % 7;
-                        
-                        let segmentEndDay = currentRenderDay;
-                        while (segmentEndDay + 1 <= endDay && Math.floor((firstDayOfMonth + segmentEndDay) / 7) === weekRow) {
-                            segmentEndDay++;
+            
+                    // Render the event bar, splitting it by week if it spans multiple weeks
+                    let currentRenderIndex = effectiveStartIndex;
+                    while (currentRenderIndex <= effectiveEndIndex) {
+                        const weekRow = Math.floor(currentRenderIndex / 7);
+                        const startColumn = currentRenderIndex % 7;
+            
+                        let segmentEndIndex = currentRenderIndex;
+                        while (segmentEndIndex + 1 <= effectiveEndIndex && Math.floor((segmentEndIndex + 1) / 7) === weekRow) {
+                            segmentEndIndex++;
                         }
-                        
-                        const durationInDays = segmentEndDay - currentRenderDay + 1;
-
+            
+                        const durationInDays = segmentEndIndex - currentRenderIndex + 1;
+            
                         const bar = document.createElement('div');
                         bar.className = 'event-bar';
                         bar.style.top = `${weekRow * dayCellHeight + 30 + track * 28}px`;
                         bar.style.left = `calc(${startColumn / 7 * 100}% + 4px)`;
                         bar.style.width = `calc(${durationInDays / 7 * 100}% - 8px)`;
                         bar.style.backgroundColor = event.color || '#3B82F6';
-                        bar.dataset.eventId = event.id;
+                        bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
                         bar.addEventListener('click', (e) => {
                             e.stopPropagation();
                             openDetailsModal(event.date);
                         });
-                        
+            
                         const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
                         bar.innerHTML = `<span>${icon}</span><span class="truncate">${event.title}</span>`;
                         eventBarsContainer.appendChild(bar);
-
-                        currentRenderDay = segmentEndDay + 1;
+            
+                        currentRenderIndex = segmentEndIndex + 1;
                     }
                 });
             }
@@ -652,50 +656,65 @@
             }
 
             function getEventsForMonth(year, month) {
-                const monthEvents = [];
-                const viewStartDate = new Date(year, month, 1);
-                const viewEndDate = new Date(year, month + 1, 0);
-                const daysInMonth = viewEndDate.getDate();
-
+                const uniqueEvents = new Map();
+            
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const gridStartDate = new Date(year, month, 1 - firstDayOfMonth);
+                const gridEndDate = new Date(gridStartDate);
+                gridEndDate.setDate(gridStartDate.getDate() + 41);
+            
+                // 1. Add all base events (recurring or not) that overlap with the grid view
                 events.forEach(event => {
                     const eventStart = new Date(`${event.date}T12:00:00`);
                     const eventEnd = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStart;
-                    if (eventStart <= viewEndDate && eventEnd >= viewStartDate) {
-                         monthEvents.push(event);
+                    if (eventStart <= gridEndDate && eventEnd >= gridStartDate) {
+                        uniqueEvents.set(event.id, event);
                     }
                 });
-
-                const recurringEvents = events.filter(e => e.recurring && e.recurring !== 'none');
-                recurringEvents.forEach(event => {
-                    for (let day = 1; day <= daysInMonth; day++) {
-                        const currentDate = new Date(year, month, day);
-                        const isoDate = getISODate(currentDate);
-
-                        if (isoDate > event.date && checkRecurring(event, currentDate)) {
-                            const newEndDate = event.endDate ? getISODate(new Date(currentDate.getTime() + (new Date(event.endDate) - new Date(event.date)))) : null;
-                            
-                            monthEvents.push({
-                                ...event,
-                                id: `${event.id}-${isoDate}`,
+            
+                // 2. Generate recurring instances and holidays for the entire grid view
+                for (let i = 0; i < 42; i++) {
+                    const currentDate = new Date(gridStartDate);
+                    currentDate.setDate(gridStartDate.getDate() + i);
+                    const isoDate = getISODate(currentDate);
+            
+                    // Handle recurring events
+                    events.forEach(event => {
+                        if (event.recurring && event.recurring !== 'none') {
+                            if (isoDate > event.date && checkRecurring(event, currentDate)) {
+                                const instanceId = `${event.id}-${isoDate}`;
+                                if (!uniqueEvents.has(instanceId)) {
+                                     const newEndDate = event.endDate ? getISODate(new Date(currentDate.getTime() + (new Date(event.endDate) - new Date(event.date)))) : null;
+                                     uniqueEvents.set(instanceId, {
+                                        ...event,
+                                        id: instanceId,
+                                        date: isoDate,
+                                        endDate: newEndDate,
+                                        isRecurringInstance: true
+                                    });
+                                }
+                            }
+                        }
+                    });
+            
+                    // Handle holidays
+                    const monthDay = isoDate.substring(5);
+                    if (holidays[monthDay]) {
+                        const holidayId = `holiday-${isoDate}`;
+                        if (!uniqueEvents.has(holidayId)) {
+                            uniqueEvents.set(holidayId, {
+                                id: holidayId,
                                 date: isoDate,
-                                endDate: newEndDate,
-                                isRecurringInstance: true
+                                title: holidays[monthDay],
+                                type: 'holiday',
+                                color: '#10B981'
                             });
                         }
                     }
-                });
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const isoDate = getISODate(new Date(year, month, day));
-                    const monthDay = isoDate.substring(5);
-                    if (holidays[monthDay]) {
-                        monthEvents.push({ 
-                            id: `holiday-${isoDate}`, date: isoDate, title: holidays[monthDay], type: 'holiday', color: '#10B981' 
-                        });
-                    }
                 }
-                
-                return monthEvents.sort((a,b) => new Date(a.date) - new Date(b.date));
+            
+                const monthEvents = Array.from(uniqueEvents.values());
+                return monthEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
             }
 
             function getEventsForDate(isoDate) {
@@ -703,7 +722,7 @@
                 const currentDate = new Date(`${isoDate}T12:00:00`);
 
                 events.forEach(event => {
-                     const eventStart = new Date(`${event.date}T12:00:00`);
+                       const eventStart = new Date(`${event.date}T12:00:00`);
                     const eventEnd = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStart;
                     if (currentDate >= eventStart && currentDate <= eventEnd) {
                         dayEvents.push(event);
@@ -937,4 +956,3 @@
     </script>
 </body>
 </html>
-
