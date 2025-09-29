@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,9 +34,7 @@
             border-radius: 0.75rem;
             box-shadow: 0 1.2px 3.6px rgba(0,0,0,0.02), 0 6.4px 14.4px rgba(0,0,0,0.03);
         }
-        .search-bar-wrapper {
-            position: relative;
-        }
+        .search-bar-wrapper { position: relative; }
         .search-bar {
             background-color: #F5F5F5;
             border: 1px solid var(--border-color);
@@ -48,21 +46,15 @@
             box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
         }
         .clear-search-btn {
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            display: none;
-        }
-        .clear-search-btn:hover {
-            color: var(--text-dark);
+            position: absolute; right: 0.5rem; top: 50%;
+            transform: translateY(-50%); color: var(--text-light); display: none;
         }
         .btn { transition: all 0.2s ease-in-out; border-radius: 0.375rem; }
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-secondary { background-color: #F5F5F5; color: var(--text-dark); border: 1px solid #C8C6C4;}
         .btn-secondary:hover { background-color: #E1E1E1; }
+        
         .inventory-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -71,13 +63,25 @@
         .tire-card {
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
+            border-radius: .5rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             animation: fadeIn 0.5s ease forwards;
-            border-radius: 0.5rem;
+            position: relative;
+            overflow: hidden;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .tire-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        
+        .card-actions {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .tire-card:hover .card-actions {
+            opacity: 1;
+        }
+
         .exact-match { border-left: 4px solid #107C10; background-color: #F1FAF1; }
+        
         .toast {
             transition: transform 0.4s ease, opacity 0.4s ease;
             transform: translateY(-120%); opacity: 0;
@@ -86,31 +90,58 @@
             border-radius: 0.5rem;
         }
         .toast.show { transform: translateY(0); opacity: 1; }
-        .remove-btn-group button {
-            background-color: #F5F5F5;
-            border: 1px solid #C8C6C4;
-            color: var(--text-light);
+        
+        /* Modal Styles */
+        .modal-tab { cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent; color: var(--text-light); }
+        .modal-tab.active { color: var(--primary-color); font-weight: 600; border-bottom-color: var(--primary-color); }
+        .data-input { width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem; background-color: #F8F8F8; }
+        #rim-filter-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23605E5C%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
         }
-        .remove-btn-group button:hover {
-            background-color: #DC3B0B;
-            color: white;
-            border-color: #DC3B0B;
-            transform: scale(1.05);
+
+        /* Audit Styles */
+        .audit-summary-section { margin-bottom: 1.5rem; }
+        .audit-summary-section h4 { font-weight: 600; color: var(--text-dark); margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .audit-summary-row {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr 1fr 1fr;
+            gap: 1rem; padding: 0.5rem; align-items: center;
         }
-        .analytics-section {
-            background: var(--card-background);
-            border: 1px solid var(--border-color);
-            border-radius: 0.75rem;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, margin 0.5s ease-in-out;
+        .new-item-row { grid-template-columns: 2.5fr 1fr 1.5fr; align-items: center; padding: 0.5rem; }
+
+        .audit-summary-row.shortage { background-color: rgba(220, 59, 11, 0.05); }
+        .audit-summary-row.surplus { background-color: rgba(16, 124, 16, 0.05); }
+        .variance-cell { font-weight: 700; }
+        .variance-cell.shortage { color: #DC3B0B; }
+        .variance-cell.surplus { color: #107C10; }
+        .audit-edit-qty {
+            width: 100%; text-align: center; padding: .25rem;
+            border-radius: .25rem; border: 1px solid var(--border-color);
+            background-color: var(--card-background);
         }
-        .analytics-section.open {
-            max-height: 1000px;
-            padding: 1.5rem;
-            margin-top: 0.5rem;
+        .audit-history-list-item { padding: 0.75rem; border-radius: 0.375rem; cursor: pointer; border: 1px solid var(--border-color); background-color: var(--card-background); }
+        .audit-history-list-item:hover { background-color: #f0f0f0; }
+        .audit-history-list-item.active {
+            background-color: var(--primary-color); color: white; border-color: var(--primary-hover);
         }
-        .log-item { animation: fadeIn 0.3s ease forwards; }
+        .audit-history-list-item.active .text-gray-500 { color: rgba(255,255,255,0.8); }
+
+         /* Toggle Switch Styles */
+        .toggle-label { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        .data-grid-header, .batch-grid-row { display: grid; grid-template-columns: 2fr 1fr 1.5fr 50px; gap: 1rem; align-items: center; padding: 0 0.5rem; }
+
         .distributor-btn {
             background-color: #F5F5F5;
             border: 1px solid #C8C6C4;
@@ -125,66 +156,31 @@
         .distributor-btn:hover {
             background-color: #E1E1E1;
         }
-        /* Toggle Switch Styles */
-        .toggle-label {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 28px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: var(--primary-color);
-        }
-        input:checked + .slider:before {
-            transform: translateX(22px);
-        }
-        /* Batch Entry Styles */
-        .batch-grid-header, .batch-grid-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 50px;
-            gap: 1rem;
-            align-items: center;
-        }
-        .batch-input {
-            width: 100%;
-            padding: 0.5rem;
+        .analytics-section {
+            background: var(--card-background);
             border: 1px solid var(--border-color);
-            border-radius: 0.375rem;
+            border-radius: 0.75rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, margin 0.5s ease-in-out;
         }
+        .analytics-section.open {
+            max-height: 1000px;
+            padding: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        /* Direct Quantity Edit Styles */
+        .stock-quantity-wrapper { cursor: pointer; position: relative; }
+        .quantity-edit-input {
+            width: 60px;
+            text-align: center;
+            padding: 2px;
+            border-radius: 4px;
+            border: 1px solid var(--primary-color);
+            background-color: white;
+            color: var(--text-dark);
+        }
+
     </style>
 </head>
 <body class="antialiased">
@@ -197,8 +193,9 @@
                     <h1 class="text-xl font-semibold text-gray-800 hidden sm:block">Treadz Inventory</h1>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="batch-entry-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">Batch Entry</button>
-                    <button id="add-multiple-btn" class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2">Add Multiple</button>
+                     <button id="audit-history-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">History</button>
+                    <button id="audit-btn" class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2">Audit</button>
+                    <button id="add-tires-btn" class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2">Add Tires</button>
                 </div>
             </div>
         </nav>
@@ -218,13 +215,23 @@
             </section>
             
             <div id="search-results-container" class="mb-8"></div>
+
+            <div class="flex justify-end mb-4">
+                <select id="rim-filter-select" class="btn btn-secondary font-semibold py-2 px-4">
+                    <option value="all">Filter by Rim Size: ALL</option>
+                </select>
+            </div>
             
-            <section class="mb-8 p-6 container-box">
-                 <div class="flex justify-between items-center mb-4">
+            <section class="mb-8">
+                <button id="activity-log-toggle" class="w-full text-left p-4 rounded-xl bg-white border border-gray-200 shadow-sm flex justify-between items-center">
                     <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
+                    <svg id="activity-log-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-transform"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="activity-log-section" class="analytics-section">
+                    <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
                 </div>
-                <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
             </section>
+
 
             <div id="inventory-container"></div>
             <div id="empty-state" class="text-center py-20">
@@ -248,79 +255,107 @@
         </main>
     </div>
 
-    <!-- ADD MULTIPLE MODAL -->
-    <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
-        <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-2xl m-4 border border-gray-200">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Add Multiple Tires</h2>
-                <label class="toggle-label text-sm font-medium text-gray-700">
-                    USED
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="condition-toggle-modal">
-                        <span class="slider"></span>
-                    </div>
-                    NEW
-                </label>
+    <!-- ADD TIRES MODAL (Combined) -->
+    <div id="entry-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
+            <div class="flex justify-between items-start mb-4 border-b">
+                <div>
+                    <div id="modal-tab-batch" class="modal-tab inline-block active">Batch Entry</div>
+                    <div id="modal-tab-multiple" class="modal-tab inline-block">Quick Add</div>
+                </div>
+                <button id="close-entry-modal-btn" class="p-1 -mt-1 font-bold text-2xl">&times;</button>
             </div>
-            <textarea id="tire-input-modal" rows="6" class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="e.g., 255/55/16, 31105015..."></textarea>
-            <div class="flex justify-end gap-4 mt-6">
-                <button id="close-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
-                <button id="add-tires-modal-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
+            
+            <div id="batch-entry-view">
+                <div class="data-grid-header text-sm font-semibold text-gray-500 pb-2 mb-2 border-b">
+                    <span>Tire Size</span>
+                    <span>Quantity</span>
+                    <span>Condition</span>
+                    <span></span>
+                </div>
+                <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2" style="max-height: 60vh;"></div>
+            </div>
+
+            <div id="add-multiple-view" class="hidden">
+                 <div class="flex justify-end mb-4">
+                    <label class="toggle-label text-sm font-medium text-gray-700">
+                        USED
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="condition-toggle-modal">
+                            <span class="slider"></span>
+                        </div>
+                        NEW
+                    </label>
+                </div>
+                <textarea id="tire-input-modal" rows="10" class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none" placeholder="Enter one tire size per line or separate by commas. e.g., 255/55/16, 31105015..."></textarea>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <button id="cancel-entry-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="confirm-add-tires-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AUDIT MODAL -->
+    <div id="audit-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Paste & Count Audit</h2>
+                <button id="close-audit-modal-btn" class="p-1 font-bold text-2xl">&times;</button>
+            </div>
+            
+            <div id="audit-input-step">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                     <select id="audit-condition-select" class="data-input w-full">
+                        <option value="used" selected>Audit For: USED Tires</option>
+                        <option value="new">Audit For: NEW Tires</option>
+                    </select>
+                    <select id="audit-rim-select" class="data-input w-full">
+                        <option value="all" selected>Rim Size: ALL</option>
+                        <!-- Rim sizes will be populated here -->
+                    </select>
+                </div>
+                <textarea id="audit-paste-area" rows="12" class="w-full p-3 font-mono text-sm rounded-md bg-gray-50 border" placeholder="Paste your entire counted list here..."></textarea>
+            </div>
+            
+            <div id="audit-summary-step" class="hidden flex-grow overflow-y-auto">
+                <div id="audit-summary-content" class="space-y-1" style="max-height: 55vh;"></div>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <button id="cancel-audit-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="process-audit-btn" class="btn btn-primary font-semibold py-2 px-5">Process & Review</button>
+                <button id="confirm-audit-btn" class="btn btn-primary font-semibold py-2 px-5 hidden">Confirm & Update Inventory</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AUDIT HISTORY MODAL -->
+    <div id="audit-history-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-6xl p-6 rounded-xl shadow-2xl m-4 border flex flex-col" style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4 border-b pb-4">
+                <h2 class="text-2xl font-bold">Audit History</h2>
+                <button id="close-audit-history-modal-btn" class="p-1 font-bold text-2xl">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow overflow-hidden">
+                <div id="audit-history-list" class="space-y-2 overflow-y-auto pr-2"></div>
+                <div id="audit-history-detail" class="md:col-span-2 bg-gray-50 p-4 rounded-lg overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
-    <!-- BATCH ENTRY MODAL -->
-     <div id="batch-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33, 37, 41, 0.6);">
-        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Batch Entry</h2>
-            <div class="batch-grid-header text-sm font-semibold text-gray-500 px-2 pb-2 border-b">
-                <span>Tire Size</span>
-                <span>Quantity</span>
-                <span>Condition</span>
-                <span></span>
-            </div>
-            <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2 py-2">
-                <!-- Batch rows will be injected here -->
-            </div>
-            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
-                <button id="close-batch-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
-                <button id="add-batch-tires-btn" class="btn btn-primary font-semibold py-2 px-5">Add to Inventory</button>
-            </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- DOM ELEMENTS ---
-            const searchInput = document.getElementById('search-input');
-            const clearSearchBtn = document.getElementById('clear-search-btn');
-            const inventoryContainer = document.getElementById('inventory-container');
-            const emptyState = document.getElementById('empty-state');
-            const searchActions = document.getElementById('search-actions');
-            const searchResultsContainer = document.getElementById('search-results-container');
-            const activityLogContainer = document.getElementById('activity-log');
-            const externalSearchContainer = document.getElementById('external-search-container');
-            const toast = document.getElementById('toast');
-            const analyticsToggle = document.getElementById('analytics-toggle');
-            const analyticsSection = document.getElementById('analytics-section');
-            const analyticsArrow = document.getElementById('analytics-arrow');
-            const mostSearchedList = document.getElementById('most-searched-list');
-            const analyticsChartCanvas = document.getElementById('analytics-chart');
-            const addModal = document.getElementById('add-modal');
-            const addMultipleBtn = document.getElementById('add-multiple-btn');
-            const closeModalBtn = document.getElementById('close-modal-btn');
-            const tireInputModal = document.getElementById('tire-input-modal');
-            const addTiresModalBtn = document.getElementById('add-tires-modal-btn');
-            const conditionToggleModal = document.getElementById('condition-toggle-modal');
-            const batchModal = document.getElementById('batch-modal');
-            const batchEntryBtn = document.getElementById('batch-entry-btn');
-            const closeBatchModalBtn = document.getElementById('close-batch-modal-btn');
-            const addBatchTiresBtn = document.getElementById('add-batch-tires-btn');
-            const batchGrid = document.getElementById('batch-grid');
-
+            const getEl = (id) => document.getElementById(id);
+            
             let inventory = [];
             let activityLog = [];
+            let auditHistory = [];
+            let processedAuditData = null;
+            let currentEntryMode = 'batch';
             let analyticsChart = null;
             
             const distributors = [
@@ -337,21 +372,18 @@
             const loadData = () => {
                 inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV7')) || [];
                 activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
-                if (inventory.length > 0 && typeof inventory[0].condition === 'undefined') {
-                    inventory.forEach(tire => tire.condition = 'used');
-                    saveData();
-                }
+                auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV7')) || [];
             };
-
             const saveData = () => {
                 localStorage.setItem('treadzTireInventoryV7', JSON.stringify(inventory));
                 localStorage.setItem('treadzActivityLogV7', JSON.stringify(activityLog));
+                localStorage.setItem('treadzAuditHistoryV7', JSON.stringify(auditHistory));
             };
 
             // --- UTILITIES ---
             const parseTireSize = (input) => {
                 if (!input) return null;
-                const cleaned = input.replace(/[\s/rR.\-]/g, ''); // CORRECTED REGEX
+                const cleaned = input.replace(/[\s/rR.\-]/g, '');
                 const flotationMatch = cleaned.match(/^(\d{2})(\d{4})(\d{2})$/);
                 if (flotationMatch) {
                     const [_, diameter, widthRaw, rim] = flotationMatch;
@@ -364,13 +396,11 @@
                 }
                 return null;
             };
-            
             const formatTireSize = (size) => {
                 if (!size) return '';
                 if (size.type === 'flotation') return `${size.diameter}x${size.width.toFixed(2)}R${size.rim}`;
                 return `${size.width}/${size.ratio}R${size.rim}`;
             };
-
             const formatQueryForDistributor = (rawInput, size, format) => {
                 if (format === 'none') return '';
                 if (format === 'p-metric-no-slash') {
@@ -379,8 +409,100 @@
                 }
                 return rawInput;
             };
+            const showToast = (message) => {
+                const toast = getEl('toast');
+                toast.innerHTML = `<p class="font-medium">${message}</p>`;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            };
 
-            // --- MAIN RENDER FUNCTION ---
+            // --- CORE LOGIC ---
+             const addTire = (parsedSize, quantity = 1, condition = 'used', options = {}) => {
+                const { fromSearch = false, suppressToast = false } = options;
+                if (!parsedSize) return;
+                const sizeString = JSON.stringify(parsedSize);
+                const existingTire = inventory.find(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
+                
+                let isUpdate = false;
+
+                if (existingTire) {
+                    existingTire.quantity += quantity;
+                    isUpdate = true;
+                } else {
+                    inventory.unshift({ size: parsedSize, quantity: quantity, condition: condition });
+                }
+                
+                if (!suppressToast) {
+                    showToast(`Added ${quantity}x ${formatTireSize(parsedSize)} (${condition.toUpperCase()}).`);
+                }
+                if(fromSearch) getEl('search-input').value = '';
+
+                addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Added', { quantityAdded: quantity });
+                saveData();
+
+                if (isUpdate) {
+                     updateTireQuantityDOM(parsedSize, condition, existingTire.quantity);
+                } else {
+                     renderAll();
+                }
+            };
+            
+            const updateTireQuantity = (parsedSize, condition, newQuantity) => {
+                const sizeString = JSON.stringify(parsedSize);
+                const tire = inventory.find(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
+                if (tire) {
+                    const oldQuantity = tire.quantity;
+                    if (oldQuantity !== newQuantity) {
+                        const change = newQuantity - oldQuantity;
+                        tire.quantity = newQuantity;
+
+                        if (change > 0) {
+                             addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Added', { quantityAdded: change });
+                             showToast(`Added ${change}x ${formatTireSize(parsedSize)}.`);
+                        } else {
+                             addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Sold', { quantitySold: -change });
+                             showToast(`Sold ${-change}x ${formatTireSize(parsedSize)}.`);
+                        }
+
+                        saveData();
+                        updateTireQuantityDOM(parsedSize, condition, newQuantity);
+                    }
+                }
+            };
+            
+            const updateTireQuantityDOM = (parsedSize, condition, newQuantity) => {
+                const cardId = `card-${formatTireSize(parsedSize).replace(/[\/\sR.]/g, '')}-${condition}`;
+                const cardElement = document.getElementById(cardId);
+                
+                if (newQuantity <= 0) {
+                     inventory = inventory.filter(t => !(JSON.stringify(t.size) === JSON.stringify(parsedSize) && t.condition === condition));
+                     if(cardElement) {
+                         cardElement.remove();
+                     }
+                } else {
+                    if (cardElement) {
+                        const display = cardElement.querySelector('.stock-quantity-display');
+                        const input = cardElement.querySelector('.quantity-edit-input');
+                        if (display) display.textContent = newQuantity;
+                        if (input) input.value = newQuantity;
+                    }
+                }
+
+                // Update section totals
+                const newTotal = inventory.filter(t => t.condition === 'new').reduce((sum, t) => sum + t.quantity, 0);
+                const usedTotal = inventory.filter(t => t.condition === 'used').reduce((sum, t) => sum + t.quantity, 0);
+                const newTitle = document.getElementById('new-tires-title');
+                const usedTitle = document.getElementById('used-tires-title');
+                if (newTitle) newTitle.textContent = `New Tire Inventory (${newTotal})`;
+                if (usedTitle) usedTitle.textContent = `Used Tire Inventory (${usedTotal})`;
+                
+                 if (getEl('inventory-container').querySelectorAll('.tire-card').length === 0) {
+                    renderInventory(); // Fallback to full render if a filter makes it empty
+                }
+            }
+
+
+            // --- MAIN RENDER ---
             const renderAll = () => {
                 renderInventory();
                 renderSearchResults();
@@ -388,107 +510,115 @@
                 renderSearchActions();
                 renderExternalSearches();
                 renderAnalytics();
-                clearSearchBtn.style.display = searchInput.value ? 'block' : 'none';
+                populateMainRimFilter();
+                getEl('clear-search-btn').style.display = getEl('search-input').value ? 'block' : 'none';
             };
 
-            // --- RENDER COMPONENTS ---
             const renderInventory = () => {
-                inventoryContainer.innerHTML = '';
-                if (inventory.length === 0) {
-                    emptyState.classList.remove('hidden');
-                    inventoryContainer.classList.add('hidden');
-                } else {
-                    emptyState.classList.add('hidden');
-                    inventoryContainer.classList.remove('hidden');
-                    const newTires = inventory.filter(t => t.condition === 'new');
-                    const usedTires = inventory.filter(t => t.condition === 'used');
-                    inventoryContainer.appendChild(createInventorySection('New Tire Inventory', newTires));
-                    inventoryContainer.appendChild(createInventorySection('Used Tire Inventory', usedTires));
+                const container = getEl('inventory-container');
+                container.innerHTML = '';
+                const emptyState = getEl('empty-state');
+                const rimFilterValue = getEl('rim-filter-select').value;
+                
+                let filteredInventory = inventory;
+                if(rimFilterValue !== 'all') {
+                    filteredInventory = inventory.filter(t => t.size.rim == rimFilterValue);
                 }
+
+                if (filteredInventory.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    container.classList.add('hidden');
+                     if (inventory.length > 0) { // Show message if filtering results in empty
+                        emptyState.querySelector('h2').textContent = `No tires found for Rim Size ${rimFilterValue}"`;
+                        emptyState.querySelector('p').textContent = 'Select "ALL" to see your full inventory.';
+                    } else {
+                        emptyState.querySelector('h2').textContent = 'Inventory is Empty';
+                        emptyState.querySelector('p').textContent = 'Add your first tire using the search bar above.';
+                    }
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                container.classList.remove('hidden');
+
+                const sorted = [...filteredInventory].sort((a,b) => {
+                    if (a.size.rim !== b.size.rim) return a.size.rim - b.size.rim;
+                    return (a.size.width || a.size.diameter) - (b.size.width || b.size.diameter);
+                });
+
+                const newTires = sorted.filter(t => t.condition === 'new');
+                const usedTires = sorted.filter(t => t.condition === 'used');
+                
+                if (newTires.length > 0) container.appendChild(createInventorySection('New Tire Inventory', newTires));
+                if (usedTires.length > 0) container.appendChild(createInventorySection('Used Tire Inventory', usedTires));
             };
 
             const createInventorySection = (title, tires) => {
                 const section = document.createElement('section');
                 section.className = 'mb-8';
-                if (tires.length > 0) {
-                    section.innerHTML = `<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">${title} (${tires.reduce((acc, t) => acc + t.quantity, 0)})</h2>`;
-                    const grid = document.createElement('div');
-                    grid.className = 'inventory-grid';
-                    const grouped = tires.reduce((acc, tire) => {
-                        (acc[tire.size.rim] = acc[tire.size.rim] || []).push(tire);
-                        return acc;
-                    }, {});
-                    Object.keys(grouped).sort((a, b) => a - b).forEach(rim => {
-                        grouped[rim].sort((a,b) => (a.size.width || a.size.diameter) - (b.size.width || b.size.diameter)).forEach(tire => {
-                            grid.appendChild(createTireCardElement(tire));
-                        });
-                    });
-                    section.appendChild(grid);
-                }
+                
+                const total = tires.reduce((acc, t) => acc + t.quantity, 0);
+                const titleId = title.toLowerCase().includes('new') ? 'new-tires-title' : 'used-tires-title';
+                section.innerHTML = `<h2 id="${titleId}" class="text-xl font-semibold mb-4" style="color: var(--primary-color);">${title} (${total})</h2>`;
+                
+                const grid = document.createElement('div');
+                grid.className = 'inventory-grid';
+                tires.forEach(tire => grid.appendChild(createTireCardElement(tire)));
+                
+                section.appendChild(grid);
                 return section;
             };
-            
+
             const createTireCardElement = (tire, matchClass = '') => {
+                const cardId = `card-${formatTireSize(tire.size).replace(/[\/\sR.]/g, '')}-${tire.condition}`;
                 const card = document.createElement('div');
-                card.className = `tire-card p-4 rounded-lg relative ${matchClass}`;
+                card.id = cardId;
+                card.className = `tire-card p-4 flex justify-between items-center ${matchClass}`;
                 card.innerHTML = `
-                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <p class="font-mono text-lg text-gray-800 font-semibold">${formatTireSize(tire.size)}</p>
-                            <p class="text-xs text-gray-500">Stock: ${tire.quantity}</p>
-                        </div>
-                        <div class="remove-btn-group flex gap-1.5 mt-3 sm:mt-0" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
-                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="1">1</button>
-                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="2">2</button>
-                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="3">3</button>
-                            <button class="btn h-8 w-8 rounded-md text-xs font-bold" data-qty="4">4</button>
-                        </div>
+                    <div class="pr-4">
+                        <p class="font-mono text-lg font-semibold">${formatTireSize(tire.size)}</p>
+                        <p class="text-xs text-gray-500 stock-quantity-wrapper" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
+                            Stock: 
+                            <span class="stock-quantity-display font-semibold">${tire.quantity}</span>
+                            <input type="number" value="${tire.quantity}" class="quantity-edit-input hidden">
+                        </p>
                     </div>
-                `;
+                    <div class="card-actions flex flex-col space-y-2" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
+                        <button class="btn btn-secondary h-8 w-8 rounded-full font-bold text-lg adjust-qty-btn" data-amount="1">+</button>
+                        <button class="btn btn-secondary h-8 w-8 rounded-full font-bold text-lg adjust-qty-btn" data-amount="-1">-</button>
+                    </div>`;
                 return card;
             };
-
+            
             const renderSearchResults = () => {
-                const term = searchInput.value.trim();
+                const term = getEl('search-input').value.trim();
                 const searchSize = parseTireSize(term);
-                searchResultsContainer.innerHTML = '';
+                getEl('search-results-container').innerHTML = '';
                 
                 let matches = [];
-                if (searchSize) { // Full size entered
+                if (searchSize) { 
                     matches = inventory.filter(t => JSON.stringify(t.size) === JSON.stringify(searchSize));
-                } else if (term.length > 2) { // Partial search
+                } else if (term.length > 2) { 
                     const cleanedTerm = term.replace(/[\s/rR.-]/g, '');
                     matches = inventory.filter(t => formatTireSize(t.size).replace(/[\s/rR.-]/g, '').startsWith(cleanedTerm));
                 }
 
                 if (matches.length === 0) return;
-
-                const newTires = matches.filter(t => t.condition === 'new');
-                const usedTires = matches.filter(t => t.condition === 'used');
-
-                let html = '';
-                if (newTires.length > 0) {
-                    html += `<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">Search Results - New</h2>`;
-                    html += '<div class="space-y-3 mb-6">';
-                    newTires.forEach(t => { html += createTireCardElement(t, 'exact-match').outerHTML; });
-                    html += '</div>';
-                }
-                if (usedTires.length > 0) {
-                    html += `<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">Search Results - Used</h2>`;
-                    html += '<div class="space-y-3">';
-                    usedTires.forEach(t => { html += createTireCardElement(t, 'exact-match').outerHTML; });
-                    html += '</div>';
-                }
-                searchResultsContainer.innerHTML = html;
+                
+                let html = '<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">Search Results</h2>';
+                html += '<div class="space-y-3">';
+                matches.forEach(t => { html += createTireCardElement(t, 'exact-match').outerHTML; });
+                html += '</div>';
+                getEl('search-results-container').innerHTML = html;
             };
-
+            
             const renderSearchActions = () => {
-                const term = searchInput.value.trim();
+                const term = getEl('search-input').value.trim();
                 const parsed = parseTireSize(term);
-                searchActions.innerHTML = '';
+                getEl('search-actions').innerHTML = '';
                 if (parsed) {
                     const formatted = formatTireSize(parsed);
-                    searchActions.innerHTML = `
+                    getEl('search-actions').innerHTML = `
                         <div class="flex items-center justify-center gap-4">
                             <button id="add-single-btn" class="btn btn-primary flex-grow py-2.5 px-4 font-semibold">Add "${formatted}"</button>
                             <label class="toggle-label text-sm font-medium text-gray-700">
@@ -500,92 +630,37 @@
                                 NEW
                             </label>
                         </div>`;
-                    document.getElementById('add-single-btn').onclick = () => {
-                        const condition = document.getElementById('condition-toggle-single').checked ? 'new' : 'used';
-                        addTire(parsed, 1, condition);
+                    getEl('add-single-btn').onclick = () => {
+                        const condition = getEl('condition-toggle-single').checked ? 'new' : 'used';
+                        addTire(parsed, 1, condition, { fromSearch: true });
                     };
                 }
             };
-
+            
             const renderExternalSearches = () => {
-                const term = searchInput.value.trim();
+                const term = getEl('search-input').value.trim();
                 const parsed = parseTireSize(term);
-                externalSearchContainer.innerHTML = '';
+                const container = getEl('external-search-container');
+                container.innerHTML = '';
                 if (term) {
                     const linksHTML = distributors.map(dist => {
                         const query = formatQueryForDistributor(term, parsed, dist.queryFormat);
                         if (dist.queryFormat !== 'none' && !query) return '';
                         const url = dist.urlTemplate.replace('{QUERY}', query);
-                        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="distributor-btn btn" data-distributor="${dist.name}"><span>${dist.name}</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
+                        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="distributor-btn" data-distributor="${dist.name}"><span>${dist.name}</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
                     }).join('');
-                    externalSearchContainer.innerHTML = `<h3 class="text-sm font-semibold text-gray-500 mb-3 text-center">Check Distributors</h3><div class="flex flex-wrap gap-4 justify-center">${linksHTML}</div>`;
+                    container.innerHTML = `<h3 class="text-sm font-semibold text-gray-500 mb-3 text-center">Check Distributors</h3><div class="flex flex-wrap gap-4 justify-center">${linksHTML}</div>`;
                 }
             };
             
-            const renderActivityLog = () => {
-                activityLogContainer.innerHTML = activityLog.length ? '' : '<p class="text-gray-500 text-center w-full">No activity yet.</p>';
-                activityLog.slice(0, 50).forEach(log => {
-                    let statusHTML = '';
-                    let actionsHTML = '';
-                    if (log.action === 'Sold') {
-                        statusHTML = `<div class="font-semibold text-red-500">Sold ${log.details.quantitySold}</div>`;
-                    } else if (log.action === 'Checked Distributor') {
-                        statusHTML = `<div class="text-blue-500">Checked ${log.details.distributor}</div>`;
-                    } else { // Searched
-                        statusHTML = log.details.inStock 
-                            ? `<div class="font-semibold text-green-600">In Stock, Not Sold</div>`
-                            : `<div class="text-gray-500">Not In Stock</div>`;
-                        if (log.details.inStock) {
-                            actionsHTML = `<div class="log-action-buttons" data-log-id="${log.id}"><button class="btn btn-secondary text-xs px-2 py-1" data-action="mark-sold">Mark Sold</button></div>`;
-                        }
-                    }
-                    const logEl = document.createElement('div');
-                    logEl.className = 'log-item flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-200';
-                    logEl.innerHTML = `<div class="flex-grow"><p class="font-mono font-medium text-gray-800">${log.term}</p><p class="text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</p></div><div class="flex items-center gap-4"><div class="text-sm text-right w-32">${statusHTML}</div><div class="flex items-center justify-end gap-2 w-32">${actionsHTML}</div></div>`;
-                    activityLogContainer.appendChild(logEl);
-                });
-            };
-
-            const renderAnalytics = () => {
-                if (analyticsChart) analyticsChart.destroy();
-                if (activityLog.length === 0) {
-                    mostSearchedList.innerHTML = '<p class="text-gray-500">Not enough data yet.</p>';
-                    return;
-                }
-                const counts = activityLog.reduce((acc, log) => {
-                    if (log.action === 'Searched') acc[log.term] = (acc[log.term] || 0) + 1;
-                    return acc;
-                }, {});
-                const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-                if (sorted.length === 0) {
-                    mostSearchedList.innerHTML = '<p class="text-gray-500">No search data to analyze.</p>';
-                    return;
-                }
-                mostSearchedList.innerHTML = sorted.map(([term, count]) => `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-md"><span class="font-mono font-medium text-gray-700">${term}</span><span class="text-sm text-gray-500">${count} searches</span></div>`).join('');
-                analyticsChart = new Chart(analyticsChartCanvas, {
-                    type: 'pie',
-                    data: {
-                        labels: sorted.map(item => item[0]),
-                        datasets: [{
-                            label: 'Most Searched Tires',
-                            data: sorted.map(item => item[1]),
-                            backgroundColor: ['#0078D4', '#107C10', '#F7A923', '#7719AA', '#D83B01'],
-                            hoverOffset: 4
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#4b5563' } } } }
-                });
-            };
-
-            // --- ACTIONS & LOGIC ---
             const addLogEntry = (term, action, details = {}) => {
-                const lastLog = activityLog[0];
-                if (lastLog && lastLog.term === term && lastLog.action === 'Searched' && action === 'Searched') {
-                    const now = new Date();
-                    const lastLogTime = new Date(lastLog.timestamp);
-                    if ((now - lastLogTime) / (1000 * 60) < 20) return;
-                }
-                if (action === 'Searched') {
+                 if (action === 'Searched') {
+                    const lastLog = activityLog[0];
+                    if (lastLog && lastLog.term === term && lastLog.action === 'Searched') {
+                        const now = new Date();
+                        const lastLogTime = new Date(lastLog.timestamp);
+                        if ((now - lastLogTime) / (1000 * 60) < 5) return;
+                    }
                     const parsedSize = parseTireSize(term);
                     details.inStock = inventory.some(t => JSON.stringify(t.size) === JSON.stringify(parsedSize));
                 }
@@ -595,201 +670,423 @@
                 renderAnalytics();
             };
             
-            const updateLogEntry = (logId, newAction, newDetails) => {
-                const logIndex = activityLog.findIndex(log => log.id === logId);
-                if (logIndex > -1) {
-                    activityLog[logIndex].action = newAction;
-                    activityLog[logIndex].details = newDetails;
-                    saveData();
-                    renderActivityLog();
-                }
-            };
-
-            const showToast = (message) => {
-                toast.innerHTML = `<p class="font-medium">${message}</p>`;
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 3000);
-            };
-
-            const addTire = (parsedSize, quantity = 1, condition = 'used') => {
-                if (!parsedSize) return;
-                const sizeString = JSON.stringify(parsedSize);
-                const existingTire = inventory.find(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
-                if (existingTire) {
-                    existingTire.quantity += quantity;
-                } else {
-                    inventory.unshift({ size: parsedSize, quantity: quantity, condition: condition });
-                }
-                showToast(`Added ${quantity}x ${formatTireSize(parsedSize)} (${condition.toUpperCase()}).`);
-                if(document.activeElement === searchInput) searchInput.value = '';
-                saveData();
-                renderAll();
-            };
-
-            const removeTire = (parsedSize, quantity, condition, logIdToUpdate = null) => {
-                const sizeString = JSON.stringify(parsedSize);
-                const tireIndex = inventory.findIndex(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
-                if (tireIndex > -1) {
-                    const tire = inventory[tireIndex];
-                    const removeQty = Math.min(tire.quantity, quantity);
-                    tire.quantity -= removeQty;
-                    
-                    if (logIdToUpdate) {
-                        updateLogEntry(logIdToUpdate, 'Sold', { quantitySold: removeQty });
-                    } else {
-                        const relevantLog = activityLog.find(log => log.term === formatTireSize(parsedSize) && log.action === 'Searched');
-                        if (relevantLog) {
-                            updateLogEntry(relevantLog.id, 'Sold', { quantitySold: removeQty });
-                        } else {
-                            addLogEntry(formatTireSize(parsedSize), 'Sold', { quantitySold: removeQty });
-                        }
-                    }
-
-                    showToast(`Sold ${removeQty}x ${formatTireSize(parsedSize)}. Stock: ${tire.quantity}`);
-                    if (tire.quantity <= 0) {
-                        inventory.splice(tireIndex, 1);
-                    }
-                    saveData();
-                    renderAll();
-                }
-            };
-
-            const toggleModal = (show) => {
-                addModal.classList.toggle('hidden', !show);
-                addModal.classList.toggle('flex', show);
+            const renderActivityLog = () => {
+                 const container = getEl('activity-log');
+                 container.innerHTML = activityLog.length ? '' : '<p class="text-gray-500 text-center w-full">No activity yet.</p>';
+                 activityLog.slice(0, 50).forEach(log => {
+                     const logEl = document.createElement('div');
+                     logEl.className = 'log-item flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-200';
+                     let detailsHTML = '';
+                     if (log.action === 'Sold') {
+                         detailsHTML = `<div class="font-semibold text-red-500">Sold ${log.details.quantitySold}</div>`;
+                     } else if (log.action === 'Added') {
+                         detailsHTML = `<div class="font-semibold text-green-600">Added ${log.details.quantityAdded}</div>`;
+                     } else if (log.action === 'Audit') {
+                         detailsHTML = `<div class="font-semibold text-blue-500">Audit Adj: ${log.details.adjustment}</div>`;
+                     } else if (log.action === 'Searched') {
+                         detailsHTML = log.details.inStock ? `<div class="font-semibold text-green-600">In Stock</div>` : `<div class="text-gray-500">Not In Stock</div>`;
+                     }
+                     logEl.innerHTML = `<div><p class="font-mono font-medium">${log.term}</p><p class="text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</p></div><div>${detailsHTML}</div>`;
+                     container.appendChild(logEl);
+                 });
             };
             
+            const renderAnalytics = () => {
+                if (analyticsChart) analyticsChart.destroy();
+                const mostSearchedList = getEl('most-searched-list');
+                if (activityLog.length === 0) {
+                    mostSearchedList.innerHTML = '<p class="text-gray-500">Not enough data yet.</p>';
+                    return;
+                }
+                const counts = activityLog.reduce((acc, log) => {
+                    const term = log.term.split(' (')[0]; // Ignore condition for analytics
+                    if (log.action === 'Searched') acc[term] = (acc[term] || 0) + 1;
+                    return acc;
+                }, {});
+                const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                if (sorted.length === 0) {
+                    mostSearchedList.innerHTML = '<p class="text-gray-500">No search data to analyze.</p>';
+                    return;
+                }
+                mostSearchedList.innerHTML = sorted.map(([term, count]) => `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-md"><span class="font-mono font-medium text-gray-700">${term}</span><span class="text-sm text-gray-500">${count} times</span></div>`).join('');
+                analyticsChart = new Chart(getEl('analytics-chart'), {
+                    type: 'pie',
+                    data: {
+                        labels: sorted.map(item => item[0]),
+                        datasets: [{ data: sorted.map(item => item[1]), backgroundColor: ['#0078D4', '#107C10', '#F7A923', '#7719AA', '#D83B01'] }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+                });
+            };
+            
+            // --- ENTRY MODAL LOGIC ---
+            const toggleEntryModal = (show) => {
+                const modal = getEl('entry-modal');
+                modal.classList.toggle('hidden', !show);
+                modal.classList.toggle('flex', show);
+                if (show) {
+                    switchEntryMode('batch');
+                    getEl('batch-grid').innerHTML = '';
+                    createBatchRow();
+                    getEl('tire-input-modal').value = '';
+                }
+            };
+            const switchEntryMode = (mode) => {
+                currentEntryMode = mode;
+                getEl('modal-tab-batch').classList.toggle('active', mode === 'batch');
+                getEl('modal-tab-multiple').classList.toggle('active', mode === 'multiple');
+                getEl('batch-entry-view').classList.toggle('hidden', mode !== 'batch');
+                getEl('add-multiple-view').classList.toggle('hidden', mode !== 'multiple');
+            };
             const createBatchRow = () => {
                 const row = document.createElement('div');
                 row.className = 'batch-grid-row';
                 row.innerHTML = `
-                    <input type="text" class="batch-input batch-size" placeholder="e.g., 2254517">
-                    <input type="number" class="batch-input batch-qty" value="1" min="1">
-                    <select class="batch-input batch-condition">
+                    <input type="text" class="data-input batch-size" placeholder="e.g., 2254517">
+                    <input type="number" class="data-input batch-qty" value="1" min="1">
+                    <select class="data-input batch-condition">
                         <option value="used" selected>Used</option>
                         <option value="new">New</option>
                     </select>
-                    <button class="text-gray-400 hover:text-red-500 remove-batch-row">&times;</button>
+                    <button class="text-gray-400 hover:text-red-500 remove-batch-row text-2xl font-bold">&times;</button>
                 `;
-                batchGrid.appendChild(row);
+                getEl('batch-grid').appendChild(row);
                 row.querySelector('.batch-size').focus();
+            };
+            const processEntries = () => {
+                let addedCount = 0, processedTires = 0;
+                if (currentEntryMode === 'batch') {
+                    getEl('batch-grid').querySelectorAll('.batch-grid-row').forEach(row => {
+                        const parsed = parseTireSize(row.querySelector('.batch-size').value);
+                        const qty = parseInt(row.querySelector('.batch-qty').value, 10);
+                        if (parsed && qty > 0) {
+                            addTire(parsed, qty, row.querySelector('.batch-condition').value, { suppressToast: true });
+                            processedTires += qty; addedCount++;
+                        }
+                    });
+                } else {
+                    const inputs = getEl('tire-input-modal').value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+                    const condition = getEl('condition-toggle-modal').checked ? 'new' : 'used';
+                    inputs.forEach(input => {
+                        const parsed = parseTireSize(input);
+                        if (parsed) {
+                            addTire(parsed, 1, condition, { suppressToast: true });
+                            processedTires++; addedCount++;
+                        }
+                    });
+                }
+                if (addedCount > 0) showToast(`Successfully added ${processedTires} tire(s) across ${addedCount} size(s).`);
+                toggleEntryModal(false);
+            };
 
-                row.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        createBatchRow();
+            // --- AUDIT & HISTORY LOGIC ---
+            const toggleAuditModal = (show) => {
+                const modal = getEl('audit-modal');
+                modal.classList.toggle('hidden', !show);
+                modal.classList.toggle('flex', show);
+                if (show) {
+                    getEl('audit-input-step').classList.remove('hidden');
+                    getEl('audit-summary-step').classList.add('hidden');
+                    getEl('process-audit-btn').classList.remove('hidden');
+                    getEl('confirm-audit-btn').classList.add('hidden');
+                    getEl('audit-paste-area').value = '';
+                    processedAuditData = null;
+                    populateAuditRimFilter();
+                }
+            };
+            const populateAuditRimFilter = () => {
+                const rimSizes = [...new Set(inventory.map(t => t.size.rim))].sort((a, b) => a - b);
+                const select = getEl('audit-rim-select');
+                select.innerHTML = '<option value="all" selected>Rim Size: ALL</option>';
+                rimSizes.forEach(rim => {
+                    select.innerHTML += `<option value="${rim}">Rim Size: ${rim}"</option>`;
+                });
+            };
+            const populateMainRimFilter = () => {
+                const rimSizes = [...new Set(inventory.map(t => t.size.rim))].sort((a, b) => a - b);
+                const select = getEl('rim-filter-select');
+                const currentValue = select.value;
+                select.innerHTML = '<option value="all" selected>Filter by Rim Size: ALL</option>';
+                rimSizes.forEach(rim => {
+                    select.innerHTML += `<option value="${rim}" ${currentValue == rim ? 'selected' : ''}>Rim Size: ${rim}"</option>`;
+                });
+            }
+            const generateDiscrepancyReportHTML = (summary) => {
+                let html = '';
+                const createRow = (d, type) => {
+                    if (type === 'new') {
+                        return `<div class="new-item-row" data-size-str="${d.sizeStr}"><span class="font-mono font-semibold">${d.sizeStr}</span><span class="text-center font-bold text-green-600">+${d.physicalQty}</span><span class="text-right"><button class="btn btn-secondary btn-sm quick-add-btn text-xs py-1 px-2" data-size-str="${d.sizeStr}">+ Add to System</button></span></div>`;
+                    }
+                    return `<div class="audit-summary-row ${d.variance > 0 ? 'surplus' : 'shortage'}" data-size-str="${d.sizeStr}"><span class="font-mono font-semibold">${d.sizeStr}</span><span class="text-center text-gray-500">${d.inventoryQty}</span><span class="text-center font-bold"><input type="number" value="${d.physicalQty}" class="audit-edit-qty" data-size-str="${d.sizeStr}" min="0"></span><span class="text-center variance-cell ${d.variance > 0 ? 'surplus' : 'shortage'}">${d.variance > 0 ? '+' : ''}${d.variance}</span></div>`;
+                };
+                if (summary.discrepancies.length > 0) html += '<div class="audit-summary-section"><h4>Discrepancies</h4>' + summary.discrepancies.map(d => createRow(d, 'discrepancy')).join('') + '</div>';
+                if (summary.uncountedItems.length > 0) html += '<div class="audit-summary-section"><h4>Uncounted Items (Shortages)</h4>' + summary.uncountedItems.map(d => createRow(d, 'uncounted')).join('') + '</div>';
+                if (summary.newItemsFound.length > 0) html += '<div class="audit-summary-section"><h4>New Items Found (Surpluses)</h4>' + summary.newItemsFound.map(d => createRow(d, 'new')).join('') + '</div>';
+                return html || `<div class="p-4 text-center">Perfect match! No discrepancies found for this scope.</div>`;
+            };
+            const processAndReviewAudit = () => {
+                const auditCondition = getEl('audit-condition-select').value;
+                const auditRim = getEl('audit-rim-select').value;
+                const entries = getEl('audit-paste-area').value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+
+                const physicalCountMap = new Map();
+                entries.forEach(entry => {
+                    const parsed = parseTireSize(entry);
+                    if (parsed) {
+                        const formatted = formatTireSize(parsed);
+                        physicalCountMap.set(formatted, (physicalCountMap.get(formatted) || 0) + 1);
                     }
                 });
+
+                let inventoryScope = inventory.filter(t => t.condition === auditCondition);
+                if (auditRim !== 'all') inventoryScope = inventoryScope.filter(t => t.size.rim == auditRim);
+                
+                const inventoryCountMap = new Map();
+                inventoryScope.forEach(tire => inventoryCountMap.set(formatTireSize(tire.size), tire.quantity));
+
+                const allSizes = new Set([...physicalCountMap.keys(), ...inventoryCountMap.keys()]);
+                const summary = { discrepancies: [], uncountedItems: [], newItemsFound: [] };
+                
+                allSizes.forEach(sizeStr => {
+                    const physicalQty = physicalCountMap.get(sizeStr) || 0;
+                    const inventoryQty = inventoryCountMap.get(sizeStr) || 0;
+                    const data = { sizeStr, physicalQty, inventoryQty, variance: physicalQty - inventoryQty };
+
+                    if (physicalQty !== inventoryQty) {
+                         if (inventoryQty > 0) {
+                            summary.discrepancies.push(data)
+                         } else {
+                            summary.newItemsFound.push(data);
+                         }
+                    }
+                });
+                
+                summary.uncountedItems = inventoryScope
+                    .filter(t => !physicalCountMap.has(formatTireSize(t.size)))
+                    .map(t => ({ sizeStr: formatTireSize(t.size), physicalQty: 0, inventoryQty: t.quantity, variance: -t.quantity }));
+                
+                summary.discrepancies = summary.discrepancies.filter(d => !summary.uncountedItems.find(u => u.sizeStr === d.sizeStr));
+
+                getEl('audit-summary-content').innerHTML = generateDiscrepancyReportHTML(summary);
+                processedAuditData = { summary, auditCondition, auditRim };
+
+                getEl('audit-input-step').classList.add('hidden');
+                getEl('audit-summary-step').classList.remove('hidden');
+                getEl('process-audit-btn').classList.add('hidden');
+                getEl('confirm-audit-btn').classList.remove('hidden');
+            };
+            const confirmAndUpdateAudit = () => {
+                if (!processedAuditData) return;
+                const { summary, auditCondition, auditRim } = processedAuditData;
+                const allDiscrepancies = [...summary.discrepancies, ...summary.uncountedItems, ...summary.newItemsFound];
+                
+                allDiscrepancies.forEach(d => {
+                    const parsedSize = parseTireSize(d.sizeStr);
+                    if (!parsedSize) return;
+                    
+                    const sizeString = JSON.stringify(parsedSize);
+                    const tireIndex = inventory.findIndex(t => JSON.stringify(t.size) === sizeString && t.condition === auditCondition);
+
+                    if (tireIndex > -1) {
+                        inventory[tireIndex].quantity = d.physicalQty;
+                    } else if (d.physicalQty > 0) {
+                        inventory.unshift({ size: parsedSize, quantity: d.physicalQty, condition: auditCondition });
+                    }
+                });
+                
+                inventory = inventory.filter(t => t.quantity > 0);
+                
+                const auditRecord = {
+                    timestamp: new Date().toISOString(),
+                    condition: auditCondition,
+                    rim: auditRim,
+                    discrepancies: allDiscrepancies.filter(d => d.variance !== 0)
+                };
+                if(auditRecord.discrepancies.length > 0) auditHistory.unshift(auditRecord);
+                
+                saveData();
+                renderAll();
+                toggleAuditModal(false);
+                showToast(`Audit confirmed. ${allDiscrepancies.length} adjustment(s) logged.`);
             };
             
-            const processBatchEntries = () => {
-                const rows = batchGrid.querySelectorAll('.batch-grid-row');
-                let addedCount = 0;
-                rows.forEach(row => {
-                    const sizeInput = row.querySelector('.batch-size').value;
-                    const qtyInput = row.querySelector('.batch-qty').value;
-                    const condition = row.querySelector('.batch-condition').value;
-                    
-                    const parsedSize = parseTireSize(sizeInput);
-                    const quantity = parseInt(qtyInput, 10);
-
-                    if (parsedSize && quantity > 0) {
-                        addTire(parsedSize, quantity, condition);
-                        addedCount++;
-                    }
-                });
-                if (addedCount > 0) {
-                    showToast(`Successfully added entries for ${addedCount} tire size(s).`);
-                }
-                toggleModal(false);
+            const toggleAuditHistoryModal = (show) => {
+                const modal = getEl('audit-history-modal');
+                modal.classList.toggle('hidden', !show);
+                modal.classList.toggle('flex', show);
+                if (show) renderAuditHistory();
             };
 
+            const renderAuditHistory = () => {
+                const list = getEl('audit-history-list');
+                const detail = getEl('audit-history-detail');
+                list.innerHTML = '';
+                detail.innerHTML = '<p class="text-center text-gray-500">Select an audit from the left to view details.</p>';
+                if (auditHistory.length === 0) {
+                    list.innerHTML = '<p class="text-center text-gray-500">No past audits found.</p>';
+                    return;
+                }
+                
+                auditHistory.forEach((record, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'audit-history-list-item';
+                    item.dataset.index = index;
+                    const date = new Date(record.timestamp);
+                    item.innerHTML = `
+                        <p class="font-semibold">Audit of ${record.condition.toUpperCase()} Tires</p>
+                        <p class="text-sm text-gray-500">${date.toLocaleString()}</p>
+                    `;
+                    item.addEventListener('click', () => {
+                        renderAuditHistoryDetail(record);
+                        document.querySelectorAll('.audit-history-list-item').forEach(el => el.classList.remove('active'));
+                        item.classList.add('active');
+                    });
+                    list.appendChild(item);
+                });
+            };
+
+            const renderAuditHistoryDetail = (record) => {
+                const summary = {discrepancies: record.discrepancies, uncountedItems: [], newItemsFound: []};
+                getEl('audit-history-detail').innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Discrepancy Report</h3>
+                    <div>${generateDiscrepancyReportHTML(summary)}</div>
+                `;
+            };
 
             // --- EVENT LISTENERS ---
-            searchInput.addEventListener('input', () => {
+            getEl('search-input').addEventListener('input', ()=>{
                 renderAll();
-                const term = formatTireSize(parseTireSize(searchInput.value));
-                if (term) addLogEntry(term, 'Searched');
+                const term = getEl('search-input').value.trim();
+                const parsed = parseTireSize(term);
+                if(parsed){
+                    addLogEntry(formatTireSize(parsed), 'Searched');
+                }
             });
-            clearSearchBtn.addEventListener('click', () => {
-                searchInput.value = '';
-                renderAll();
+            getEl('clear-search-btn').addEventListener('click', () => { getEl('search-input').value = ''; renderAll(); });
+            getEl('add-tires-btn').addEventListener('click', () => toggleEntryModal(true));
+            getEl('close-entry-modal-btn').addEventListener('click', () => toggleEntryModal(false));
+            getEl('cancel-entry-modal-btn').addEventListener('click', () => toggleEntryModal(false));
+            getEl('entry-modal').addEventListener('click', (e) => { if (e.target === getEl('entry-modal')) toggleEntryModal(false); });
+            getEl('modal-tab-batch').addEventListener('click', () => switchEntryMode('batch'));
+            getEl('modal-tab-multiple').addEventListener('click', () => switchEntryMode('multiple'));
+            getEl('confirm-add-tires-btn').addEventListener('click', processEntries);
+            getEl('batch-grid').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target.classList.contains('batch-size')) { e.preventDefault(); createBatchRow(); }
+            });
+            getEl('batch-grid').addEventListener('click', (e) => {
+                if (e.target.matches('.remove-batch-row') && getEl('batch-grid').querySelectorAll('.batch-grid-row').length > 1) {
+                    e.target.closest('.batch-grid-row').remove();
+                }
             });
 
-            document.addEventListener('click', e => {
-                if (e.target.matches('.remove-btn-group button') && !e.target.closest('.log-action-buttons')) {
-                    const group = e.target.closest('.remove-btn-group');
+            getEl('audit-btn').addEventListener('click', () => toggleAuditModal(true));
+            getEl('close-audit-modal-btn').addEventListener('click', () => toggleAuditModal(false));
+            getEl('cancel-audit-modal-btn').addEventListener('click', () => toggleAuditModal(false));
+            getEl('process-audit-btn').addEventListener('click', processAndReviewAudit);
+            getEl('confirm-audit-btn').addEventListener('click', confirmAndUpdateAudit);
+            getEl('audit-history-btn').addEventListener('click', () => toggleAuditHistoryModal(true));
+            getEl('close-audit-history-modal-btn').addEventListener('click', () => toggleAuditHistoryModal(false));
+
+            getEl('audit-summary-content').addEventListener('input', (e) => { 
+                if (e.target.classList.contains('audit-edit-qty')) {
+                    const input = e.target;
+                    const sizeStr = input.dataset.sizeStr;
+                    const newQty = parseInt(input.value, 10) || 0;
+                    
+                    const data = [...processedAuditData.summary.discrepancies, ...processedAuditData.summary.uncountedItems].find(d => d.sizeStr === sizeStr);
+                    if (data) {
+                        data.physicalQty = newQty;
+                        data.variance = newQty - data.inventoryQty;
+                        
+                        const row = input.closest('.audit-summary-row');
+                        const varianceCell = row.querySelector('.variance-cell');
+                        varianceCell.textContent = `${data.variance > 0 ? '+' : ''}${data.variance}`;
+                    }
+                }
+             });
+            getEl('audit-summary-content').addEventListener('click', (e) => {
+                if (e.target.classList.contains('quick-add-btn')) {
+                    const btn = e.target;
+                    const parsed = parseTireSize(btn.dataset.sizeStr);
+                    if (parsed) {
+                        addTire(parsed, 0, processedAuditData.auditCondition, { suppressToast: true }); // Add with 0 qty initially
+                        showToast(`Added ${btn.dataset.sizeStr} to system. Quantity will be updated upon audit confirmation.`);
+                        btn.textContent = 'Added'; btn.disabled = true;
+                    }
+                }
+            });
+
+             document.addEventListener('click', e => {
+                 if (e.target.matches('.adjust-qty-btn')) {
+                    const group = e.target.closest('[data-size]');
                     const size = JSON.parse(group.dataset.size);
                     const condition = group.dataset.condition;
-                    const qty = parseInt(e.target.dataset.qty);
-                    removeTire(size, qty, condition);
-                }
-                if (e.target.matches('.log-action-buttons .remove-btn-group button')) {
-                    const group = e.target.closest('.remove-btn-group');
-                    const logId = parseInt(group.dataset.logId);
-                    const qty = parseInt(e.target.dataset.qty);
-                    const logEntry = activityLog.find(log => log.id === logId);
-                    if (logEntry) {
-                        const parsedSize = parseTireSize(logEntry.term);
-                        const condition = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(parsedSize))?.condition || 'used';
-                        removeTire(parsedSize, qty, condition, logId);
+                    const amount = parseInt(e.target.dataset.amount);
+                    const tire = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(size) && t.condition === condition);
+                    if(tire) {
+                        const newQuantity = tire.quantity + amount;
+                        if(newQuantity >= 0) {
+                             updateTireQuantity(size, condition, newQuantity);
+                        }
                     }
                 }
-                if (e.target.closest('.distributor-card')) {
-                    const term = formatTireSize(parseTireSize(searchInput.value));
-                    const dist = e.target.closest('.distributor-card').dataset.distributor;
-                    if (term) addLogEntry(term, 'Checked Distributor', { distributor: dist });
-                }
-                if (e.target.matches('#add-multiple-btn')) toggleModal(true);
-                if (e.target.matches('#close-modal-btn') || e.target === addModal) toggleModal(false);
-                if (e.target.matches('#add-tires-modal-btn')) {
-                    const inputs = tireInputModal.value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-                    const condition = conditionToggleModal.checked ? 'new' : 'used';
-                    inputs.forEach(inputStr => addTire(parseTireSize(inputStr), 1, condition));
-                    if (inputs.length > 0) {
-                        tireInputModal.value = '';
-                        toggleModal(false);
-                    }
+                 if (e.target.closest('.distributor-btn')) {
+                    const term = formatTireSize(parseTireSize(getEl('search-input').value));
+                    if (term) addLogEntry(term, 'Checked Distributor', { distributor: e.target.closest('.distributor-btn').dataset.distributor });
                 }
                 if (e.target.closest('#analytics-toggle')) {
-                    analyticsSection.classList.toggle('open');
-                    analyticsArrow.classList.toggle('rotate-180');
+                    getEl('analytics-section').classList.toggle('open');
+                    getEl('analytics-arrow').classList.toggle('rotate-180');
                 }
-                if (e.target.dataset.action === 'delete-log') {
-                    const logId = parseInt(e.target.dataset.logId);
-                    activityLog = activityLog.filter(log => log.id !== logId);
-                    saveData();
-                    renderActivityLog();
+                if (e.target.closest('#activity-log-toggle')) {
+                    getEl('activity-log-section').classList.toggle('open');
+                    getEl('activity-log-arrow').classList.toggle('rotate-180');
                 }
-                if (e.target.dataset.action === 'mark-sold') {
-                    const actionContainer = e.target.parentElement;
-                    const logId = parseInt(actionContainer.dataset.logId);
-                    actionContainer.innerHTML = `<div class="remove-btn-group flex gap-1.5" data-log-id="${logId}">
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="1">1</button>
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="2">2</button>
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="3">3</button>
-                        <button class="btn h-7 w-7 rounded-md text-xs font-bold" data-qty="4">4</button>
-                    </div>`;
+             });
+
+             const handleQuantityUpdate = (input) => {
+                const wrapper = input.closest('.stock-quantity-wrapper');
+                if (!wrapper) return;
+                const newQuantity = parseInt(input.value, 10);
+                const size = JSON.parse(wrapper.dataset.size);
+                const condition = wrapper.dataset.condition;
+                if (!isNaN(newQuantity) && newQuantity >= 0) {
+                    updateTireQuantity(size, condition, newQuantity);
+                } else {
+                    renderAll(); // Rerender to revert invalid input
                 }
-                // Batch modal listeners
-                if (e.target.matches('#batch-entry-btn')) {
-                    batchGrid.innerHTML = ''; // Clear previous entries
-                    createBatchRow();
-                    batchModal.classList.remove('hidden');
-                    batchModal.classList.add('flex');
-                }
-                if (e.target.matches('#close-batch-modal-btn') || e.target === batchModal) {
-                    batchModal.classList.add('hidden');
-                    batchModal.classList.remove('flex');
-                }
-                if (e.target.matches('#add-batch-tires-btn')) {
-                    processBatchEntries();
-                }
-                if (e.target.matches('.remove-batch-row')) {
-                    e.target.parentElement.remove();
+            };
+
+            getEl('inventory-container').addEventListener('click', e => {
+                if (e.target.classList.contains('stock-quantity-display')) {
+                    const wrapper = e.target.closest('.stock-quantity-wrapper');
+                    const display = wrapper.querySelector('.stock-quantity-display');
+                    const input = wrapper.querySelector('.quantity-edit-input');
+                    display.classList.add('hidden');
+                    input.classList.remove('hidden');
+                    input.focus();
+                    input.select();
                 }
             });
 
+            getEl('inventory-container').addEventListener('focusout', e => {
+                if (e.target.classList.contains('quantity-edit-input')) {
+                    handleQuantityUpdate(e.target);
+                }
+            });
+
+            getEl('inventory-container').addEventListener('keydown', e => {
+                if (e.key === 'Enter' && e.target.classList.contains('quantity-edit-input')) {
+                    handleQuantityUpdate(e.target);
+                } else if (e.key === 'Escape' && e.target.classList.contains('quantity-edit-input')) {
+                    const display = e.target.previousElementSibling;
+                    display.classList.remove('hidden');
+                    e.target.classList.add('hidden');
+                }
+            });
+
+            getEl('rim-filter-select').addEventListener('change', renderInventory);
+            
             // --- INITIALIZATION ---
             loadData();
             renderAll();
@@ -797,3 +1094,4 @@
     </script>
 </body>
 </html>
+
