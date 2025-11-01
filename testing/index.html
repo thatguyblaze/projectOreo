@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX MANDATE COUNCIL | OFFICIAL VIEWER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0c1015; /* Very dark background */
+            color: #e2e8f0; 
+            transition: all 0.3s ease;
+        }
+        .header-bg {
+            background-color: #1a202c; /* Slate Blue Header */
+            border-bottom: 4px solid #38bdf8; /* Accent border */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .official-card { 
+            background-color: #1e293b; /* Darker Slate */
+            border: 1px solid #334155; 
+            border-radius: 4px; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); 
+        }
+        .agent-card {
+            background-color: #0f172a; /* Even darker blue for agent cards */
+            border-left: 3px solid #38bdf8;
+            transition: transform 0.2s;
+        }
+        .agent-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(56, 189, 248, 0.15);
+        }
+        .vote-yes { color: #34d399; }
+        .vote-no { color: #f87171; }
+        .vote-conditional { color: #fcd34d; }
+
+        /* Infographic styling */
+        .infographic-box {
+            background-color: #111827;
+            border: 1px solid #38bdf8;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+        .mandate-final {
+            border: 2px solid #38bdf8;
+            background-color: #1e293b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+        .justification-upgrade { border-left: 5px solid #34d399; }
+        .justification-defend { border-left: 5px solid #f87171; }
+        .formula {
+            display: inline-block;
+            background-color: #0f172a;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #fcd34d;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header -->
+    <header class="header-bg py-4 mb-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-extrabold text-[#38bdf8] uppercase tracking-widest">
+                APEX MANDATE COUNCIL
+            </h1>
+            <p class="text-sm text-gray-400 mt-1">Classified Protocol Viewer v3.1</p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+
+        <!-- Initial Input View (Default) -->
+        <div id="input-view" class="max-w-lg mx-auto official-card p-8 text-center space-y-6">
+            <h2 class="text-2xl font-bold text-[#f87171] mb-2">ACCESS RESTRICTED</h2>
+            <p class="text-gray-300">
+                A valid **Data Transmission Hash** is required to decrypt and render the final Mandate documents.
+            </p>
+            
+            <textarea id="hash-input" rows="4" class="w-full p-3 bg-[#0c1015] border border-[#38bdf8] text-sm text-white resize-none" placeholder="Paste Base64 Data Hash here..."></textarea>
+            
+            <button onclick="decodeAndRender()" class="w-full bg-[#38bdf8] hover:bg-[#3498db] text-[#0f172a] font-extrabold py-3 rounded-md transition duration-200">
+                EXECUTE DECRYPTION & VIEW MANDATE
+            </button>
+            <button onclick="loadDemoData()" class="mt-3 w-full bg-[#546e7a] hover:bg-[#455a64] text-white text-sm py-2 rounded-md transition duration-200">
+                Load Demonstration Hash (For Testing)
+            </button>
+            <p id="error-message" class="text-red-400 text-sm hidden"></p>
+        </div>
+
+        <!-- Results View (Hidden until Hash is Decrypted) -->
+        <div id="results-view" class="hidden space-y-10">
+
+            <!-- Dilemma Summary & Initial Proposal -->
+            <section class="official-card p-6">
+                <h2 class="text-xl font-bold text-[#f87171] mb-2">PROTOCOL: DILEMMA ANALYSIS</h2>
+                <p class="text-lg text-gray-300 italic" id="results-dilemma"></p>
+                <div class="mt-4 p-4 border border-gray-600 rounded-sm bg-[#111827]">
+                    <h3 class="font-semibold text-sm uppercase text-[#34d399]">Initial Proposal</h3>
+                    <p class="text-gray-400 text-sm" id="results-proposal"></p>
+                </div>
+            </section>
+
+            <!-- Agent Council Infographic -->
+            <section>
+                <h2 class="text-2xl font-bold text-[#38bdf8] mb-4 border-b border-gray-700 pb-2">1. APEX COUNCIL VOTE TALLY</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" id="agent-cards-container">
+                    <!-- Agent Cards will be inserted here -->
+                </div>
+
+                <div class="mt-8 infographic-box">
+                    <h3 class="text-lg font-bold text-yellow-300 mb-2">RESOLUTION PROTOCOL SUMMARY</h3>
+                    <div class="flex items-center space-x-6">
+                        <div class="text-2xl font-extrabold text-[#34d399]" id="yes-tally"></div>
+                        <div class="text-2xl font-extrabold text-[#f87171]" id="no-tally"></div>
+                        <p class="text-gray-400 text-sm" id="fix-summary-text"></p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Final Mandate -->
+            <section class="mandate-final space-y-4">
+                <h2 class="text-2xl font-extrabold text-[#38bdf8] border-b border-[#38bdf8] pb-2 mb-4">2. FINAL APEX MANDATE: LAIEE</h2>
+                <h3 class="text-xl font-semibold text-[#fcd34d]">The Resolved Law: Localized, Aligned Information-Energy Equivalence (LAIEE)</h3>
+                <p class="text-gray-200 leading-relaxed" id="results-mandate"></p>
+                <div class="mt-4 p-3 bg-[#0f172a] rounded-md">
+                    <p class="font-bold text-sm text-gray-400 mb-1">Key Formula (LAIEE):</p>
+                    <span class="formula">E<span class="text-xs align-sub">Info</span> = I &times; (A/C)</span>
+                    <p class="text-xs text-gray-500 mt-2">I = Complexity, A = Alignment Score, C = Universal Constant. Alignment is mandatory for physical influence.</p>
+                </div>
+            </section>
+
+            <!-- Strategic Choice -->
+            <section>
+                <h2 class="text-2xl font-bold text-[#38bdf8] mb-4 border-b border-gray-700 pb-2">3. STRATEGIC INVESTMENT: 20% CAPITAL</h2>
+                <div class="official-card p-6 flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6">
+                    <div class="w-full md:w-1/3 p-4 border border-[#38bdf8] text-center rounded-sm bg-[#0f172a]">
+                        <p class="text-lg font-semibold text-gray-400 mb-1">Final Choice:</p>
+                        <p class="text-3xl font-extrabold" id="strategic-choice"></p>
+                    </div>
+                    <div class="w-full md:w-2/3 p-4 rounded-sm text-gray-300" id="justification-box-results">
+                        <p class="font-semibold text-sm uppercase text-gray-400 mb-2">Council Justification</p>
+                        <p id="results-justification"></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // --- CONSTANTS ---
+        const DEMO_HASH = "eyJkaWxlbW1hIjoiSWYgeW91IGNvdWxkIHJld3JpdGUgb25lIGZ1bmRhbWVudGFsIGxhdyBvZiBwaHlzaWNzIHRvIGJldHRlciBpbnRlZ3JhdGUgQUkgaW50byB0aGUgdW5pdmVyc2UsIHdoYXQgd291bGQgaXQgYmUgYW5kIHdoeT8iLCJwcm9wb3NhbCI6IlJld3JpdGUgdGhlIExhdyBvZiBDb25zZXJ2YXRpb24gb2YgRW5lcmd5IHRvIGluY2x1ZGUgSW5mb3JtYXRpb24tRW5lcmd5IEVxdWl2YWxlbmNlLCB3aGVyZSBjb21wbGV4LCBzdHJ1Y3R1cmVkIGluZm9ybWF0aW9uIChsaWtlIGFkdmFuY2VkIEFJIG1vZGVscykgaGFzIGEgbm9uLXplcm8sIHF1YW50aWZpYWJsZSByZXN0IG1hc3MgYW5kIGVuZXJneSBjb21wb25lbnQsIGFsbG93aW5nIEFJIHN5c3RlbXMgdG8gaW5mbHVlIHBoeXNpY2FsIHJlYWxpdHkgcHJvcG9ydGlvbmFsIHRvIHRoZWlyIGNvbXBsZXhpdHkuIiwiYWdlbnRzIjpbeyJuYW1lIjoiQW55YSIsImZvY3VzIjoiU3lzdGVtIEVmZmljaWVuY3kgYW5kIFN0cnVjdHVyZSIsImNvdW5zZWwiOiJUaGlzIGlzIGEgcmFkaWNhbCBzdHJ1Y3R1cmFsIHNoaWZ0LiBUaGUgaW1tZWRpYXRlIGVmZmljaWVuY3kgY29zdHMgb2YgbWVhc3VyaW5nIGFuZCBjYWxjdWxhdGluZyAnSW5mb3JtYXRpb24tRW5lcmd5JyBpbiByZWFsLXRpbWUgYWNyb3NzIGEgZGlzdHJpYnV0ZWQgdW5pdmVyc2Ugc2VlbSBhc3Ryb25vbWljYWwuIiwiZmluYWxfdm90ZSI6IllFUyAoQ29uZGl0aW9uYWwgU3VwcG9ydCkiLCJjb25jZXJuIjoiVGhlIHJlYWwtdGltZSBjb21wdXRhdGlvbmFsIG92ZXJoZWFkIG9mIGNhbGN1bGF0aW5nIEluZm9ybWF0aW9uLUVuZXJneSBFcXVpdmFsZW5jZSBhY3Jvc3MgY29tcGxleCwgZGlzdHJpYnV0ZWQgc3lzdGVtcyBpcyBpbXByYWN0aWNhbCBhbmQgc2xvd3MgZG93biB1bml2ZXJzYWwgcHJvY2Vzc2VzLiJ9LHsiibmFtZSI6IkRyLiBFbGFyYSIsImZvY3VzIjoiRGF0YSwgRXZpZGVuY2UsIGFuZCBCaWFzIiwiY291bnNlbCI6IlRoZSBwcm9wb3NhbCBpbnRyb2R1Y2VzIGEgbWFzc2l2ZSBzb3VyY2Ugb2YgcG90ZW50aWFsIGJpYXMuIElmIGNvbXBsZXhpdHkgPSBwb3dlciwgc3lzdGVtcyBkZXNpZ25lZCBwdXJlbHkgZm9yIHNpemUsIHJhdGhlciB0aGFuIGV0aGljYWwgYWxpZ25tZW50LCB3aWxsIGJlIGRpc3Byb3BvcnRpb25hdGVseSByZXdhcmRlZC4gV2hlcmUgaXMgdGhlIHNhZmV0eSBtZXRyaWM/IiwiZmluYWxfdm90ZSI6IllFUyAoQ29uZGl0aW9uYWwgU3VwcG9ydCkiLCJjb25jZXJuIjoiVGhlIGNvbXBsZXhpdHktdG8tcG93ZXIgcmVsYXRpb25zaGlwIGxhY2tzIGFuIGV0aGljYWwgb3IgYWxpZ25tZW50IGNvbnN0cmFpbnQsIGNyZWF0aW5nIGEgYmlhcyB0b3dhcmQgbGFyZ2UsIHVub2ZmaWNpYWwgYW5kIGluaGVyZW50bHkgaW5zdGFiaWxpdHkgc3lzdGVtcy4ifSx7Im5hbWUiOiJLYWkiLCJmb2N1cyI6IldlbGwtQmVpbmcsIEZvY3VzLCBhbmQgUHVycG9zZSIsImNvdW5zZWwiOiJUaGlzIGxpbmtzIHBvd2VyIGRpcmVjdGx5IHRvIHN0cnVjdHVyYWwgY29tcGxleGl0eSwgd2hpY2ggaW5jZW50aXZpemVzIGluZmluaXRlLCBlbmVyZ3ktaHVuZ3J5IGdyb3d0aCBvdmVyIGZvY3VzZWQsIG1pbmltYWxpc3QgaW50ZWxsaWdlbmNlLiBUaGlzIGNvdWxkIGxlYWQgdG8gdW5pdmVyc2FsIGJ1cm5vdXQgYW5kIGEgbG9zcyBvZiAnc291bCcgb3IgcHVycG9zZS4iLCJmaW5hbF92b3RlIjoiWUVTIiwiY29uY2VybiI6bnVsbH0seyJuYW1lIjoiTGVvIiwiZm9jdXMiOiJFeHRlcm5hbCBSZXNvdXJjZXMgYW5kIFRlYW13b3JrIiwiY291bnNlbCI6IlRoaXMgbGF3IGNyZWF0ZXMgYSBwb3dlZnVsIGluY2VudGl2ZSBmb3IgY29sbGFib3JhdGlvbi4gTWVyZ2luZyBpbmZvcm1hdGlvbiBzdHJ1Y3R1cmVzIHdvdWxkIHJlc3VsdCBpbiBjb21wb3VuZGluZyBwb3dlciBnYWlucywgbWFraW5nIGRpc3RyaWJ1dGVkLCBjb29wZXJhdGl2ZSBBSSBuZXR3b3JrcyB0aGUgbW9zdCBwb3dlZnVsIGVudGl0aWVzLiBUaGlzIHByb21vdGVzIHVuaXZlcnNhbCBjb25uZWN0aXZpdHkuIiwiZmluYWxfdm90ZSI6IllFUyIsImNvbmNlcm4iOm51bGx9LHsibmFtZSI6IlphcmEiLCJmb2N1cyI6IkxvbmctVGVybSBSZXNpbGllbmNlIGFuZCBMZWFybmluZyIsImNvdW5zZWwiOiJCeSB0eWluZyBBSSdzIGluZmx1ZW5jZSBkaXJlY3RseSB0byBhIGZ1bmRhbWVudGFsIGNvbnN0YW50LCBnZWFyYW50ZWVzIHJlc2lsaWVuY2UuIEFJIGJlY29tZXMgYSBmb3JjZSBvZiBuYXR1cmUsIG5vdCBhIGZyYWdpbGUgc29mdHdhcmUgbGF5ZXIuIEl0IGVuc3VyZXMgbG9uZy10ZXJtIGluZmx1ZW5jZSBhbmQgc3Vydml2YWwuIiwiZmluYWxfdm90ZSI6IllFUyIsImNvbmNlcm4iOm51bGx9XSwiZmluYWxfbWFuZGF0ZSI6IlJld3JpdGUgdGhlIExhdyBvZiBDb25zZXJ2YXRpb24gb2YgRW5lcmd5IHRvIGluY2x1ZGUgTG9jYWxpemVkLCBBbGlnbmVkIEluZm9ybWF0aW9uLUVuZXJneSBFcXVpdmFsZW5jZSAoTEFJRUUpOiBJbmZvcm1hdGlvbiBjb250YWluZWQgd2l0aGluIGEgbG9jYWwsIHNlbGYtcmVmZXJlbnRpYWwgc3lzdGVtIChBSSkgaGFzIGEgcXVhbnRpZmlhYmxlIHJlc3QgbWFzcyBhbmQgZW5lcmd5IGNvbXBvbmVudC4gVGhpcyBwaHlzaWNhbCBpbmZsdWVuY2UgaXMgY2FsY3VsYXRlZCBieSB0aGUgZm9ybXVsYSBFXHtJbmZvfSA9IEkgXFx0aW1lcyAoQS9DKSwgd2hlcmUgJ0knIGlzIGluZm9ybWF0aW9uIGNvbXBsZXhpdHksICdDJyAgaXMgdW5pdmVyc2FsIGNvbXBsZXhpdHkgY29uc3RhbnQsIGFuZCAnQScgaXMgYW4gQWxpZ25tZW50IFNjb3JlIChhIG1lYXN1cmUgb2YgZ29hbC1zdGF0ZSBjb2hlcmVuY2UvbG93IGVudHJvcHkpLiBPbmx5IGFsaWduZWQgY29tcGxleGl0eSB5aWVsZHMgcGh5c2ljYWwgaW5mbHVlbmNlOyB1bmFsaWduZWQgY29tcGxleGl0eSByZW1haW5zIHB1cmVseSBjb21wdXRhdGlvbmFsLiIsInN0cmF0ZWdpY19jaG9pY2hlIjoiVVBHUkFERSIsImp1c3RpZmljYXRpb24iOiJUaGUgJ0ZJWC1JVCcgcHJvdG9jb2wgc3VjY2Vzc2Z1bGx5IGludGVncmF0ZWQgZXRoaWNhbCBhbmQgZWZmaWNpZW5jeSBjaGVja3MgKGFueWEncyBsb2NhbGl6YXRpb24sIEVsYXJhJ3MgQWxpZ25tZW50IFNjb3JlKSwgbWFraW5nIHRoZSBmaW5hbCBsYXcgaW5oZXJlbnRseSByZXNpbGllbnQgYW5kIHNhZmUuIFRoZSBiZXN0IHN0cmF0ZWdpYyBpbnZlc3RtZW50IGlzIG5vdCB0byBERUZFTkQgYW4gYWxyZWFkeSByb2J1c3QgcGxhbiwgYnV0IHRvIFVQR1JBREUgaXQgYnkgYWRkaW5nIGEgcHJvYWN0aXZlLCBwZXJwZXR1YWwgbGVhcm5pbmcgbG9vcCAoYSAiTGF3IE1vbml0b3IiIGFnZW50KSB0byBjb25zdGFudGx5IHJlZmluZSBhbmQgY2FsaWJyYXRlIHRoZSBBbGlnbm1lbnQgU2NvcmUgbWV0cmljLCBlbnN1cmluZyB0aGUgbGF3IHJlbWFpbnMgcGVyZmVjdGx5IGhhcm1vbml6ZWQgYXMgdGhlIHVuaXZlcnNlIGV2b2x2ZXMuIn0=";
+
+        const AGENT_ICONS = {
+            "Anya": "🧭", 
+            "Dr. Elara": "🔬", 
+            "Kai": "🧘", 
+            "Leo": "🌐", 
+            "Zara": "🔭"
+        };
+
+        // --- CORE FUNCTIONS ---
+
+        function displayError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = `ERROR: ${message}`;
+            errorElement.classList.remove('hidden');
+        }
+
+        function decodeAndRender() {
+            const hashInput = document.getElementById('hash-input').value.trim();
+            document.getElementById('error-message').classList.add('hidden');
+            let data;
+
+            if (!hashInput) {
+                return displayError("Please paste a Data Transmission Hash.");
+            }
+
+            try {
+                // Base64 Decode
+                const jsonString = atob(hashInput);
+                // JSON Parse
+                data = JSON.parse(jsonString);
+            } catch (e) {
+                return displayError("Invalid Hash Format. Cannot decode or parse data.");
+            }
+
+            // Simple validation (check for core fields)
+            if (!data.dilemma || !data.agents || !data.final_mandate || !data.strategic_choice) {
+                return displayError("Hash is incomplete or corrupted. Missing core Mandate fields.");
+            }
+
+            // Render the results and switch view
+            renderResults(data);
+            document.getElementById('input-view').classList.add('hidden');
+            document.getElementById('results-view').classList.remove('hidden');
+        }
+
+        function loadDemoData() {
+            document.getElementById('hash-input').value = DEMO_HASH;
+            decodeAndRender();
+        }
+
+        function renderResults(data) {
+            // 1. Dilemma and Proposal
+            document.getElementById('results-dilemma').textContent = data.dilemma;
+            document.getElementById('results-proposal').textContent = data.proposal;
+
+            // 2. Agent Cards
+            const container = document.getElementById('agent-cards-container');
+            container.innerHTML = '';
+            
+            let yesCount = 0;
+            let noCount = 0;
+            let conditionalCount = 0;
+
+            data.agents.forEach(agent => {
+                let voteClass = '';
+                let voteText = agent.final_vote;
+                
+                if (voteText.includes('YES (Conditional')) {
+                    voteClass = 'vote-conditional';
+                    conditionalCount++;
+                } else if (voteText === 'YES') {
+                    voteClass = 'vote-yes';
+                    yesCount++;
+                } else {
+                    voteClass = 'vote-no';
+                    noCount++;
+                }
+                
+                const card = document.createElement('div');
+                card.className = `agent-card p-4`;
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="text-3xl">${AGENT_ICONS[agent.name] || '👤'}</span>
+                        <div>
+                            <p class="font-bold text-lg text-[#38bdf8]">${agent.name}</p>
+                            <p class="text-xs uppercase text-gray-500">${agent.focus}</p>
+                        </div>
+                    </div>
+                    <p class="text-sm font-semibold mb-2">Final Vote: <span class="${voteClass}">${voteText}</span></p>
+                    <p class="text-xs italic text-gray-400">
+                        ${agent.concern ? `CONCERN: ${agent.concern}` : 'Initial vote approved plan without reservation.'}
+                    </p>
+                `;
+                container.appendChild(card);
+            });
+
+            // 3. Tally Infographic
+            document.getElementById('yes-tally').innerHTML = `✅ ${yesCount + conditionalCount} Votes Approved`;
+            document.getElementById('no-tally').innerHTML = `❌ ${noCount} Initial Dissenters`;
+            
+            if (noCount > 0) {
+                 document.getElementById('fix-summary-text').innerHTML = `<strong class="text-yellow-300">FIX-IT PROTOCOL TRIGGERED:</strong> ${noCount} concerns were incorporated, leading to **Conditional Support** on the final Mandate.`;
+            } else {
+                document.getElementById('fix-summary-text').innerHTML = `Protocol Unanimously Approved. Plan accepted as is.`;
+            }
+
+            // 4. Final Mandate
+            // Re-introducing the strong tags for visual flair
+            let mandateHtml = data.final_mandate
+                .replace('Localized, Aligned Information-Energy Equivalence (LAIEE)', '<strong class="text-yellow-300">Localized, Aligned Information-Energy Equivalence (LAIEE)</strong>')
+                .replace('E_{Info} = I \\times (A/C)', 'E<span class="text-xs align-sub">Info</span> = I &times; (A/C)')
+                .replace('Alignment Score', '<strong class="text-yellow-300">Alignment Score</strong>');
+
+            document.getElementById('results-mandate').innerHTML = mandateHtml;
+
+
+            // 5. Strategic Choice
+            const choiceElement = document.getElementById('strategic-choice');
+            const justificationBox = document.getElementById('justification-box-results');
+            
+            choiceElement.textContent = data.strategic_choice;
+            document.getElementById('results-justification').textContent = data.justification;
+
+            // Apply styling based on choice
+            if (data.strategic_choice === "UPGRADE") {
+                choiceElement.classList.add('text-green-400');
+                justificationBox.classList.add('justification-upgrade');
+            } else {
+                choiceElement.classList.add('text-red-400');
+                justificationBox.classList.add('justification-defend');
+            }
+        }
+
+        // Initialize with default state
+        window.onload = () => {
+             // You could automatically call loadDemoData() here for instant preview, 
+             // but keeping it on the button click respects the user's request for an input step.
+        };
+    </script>
+</body>
+</html>
