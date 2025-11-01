@@ -3,301 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APEX MANDATE COUNCIL | OFFICIAL VIEWER</title>
+    <title>APEX MANDATE COUNCIL // OFFICIAL FEDERAL DOSSIER</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #0c1015; /* Very dark background */
-            color: #e2e8f0; 
-            transition: all 0.3s ease;
+        /* Unified Federal Log Aesthetic: Single Column, High Clarity */
+        :root {
+            --color-primary-bg: #F0F3F7; /* Very light gray/blue for background */
+            --color-secondary-bg: #FFFFFF; /* Main Panel Background (White) */
+            --color-accent-blue: #002D62; /* Deep Federal Navy Blue (Primary) */
+            --color-accent-red: #B00020; /* Authority Red */
+            --color-text-dark: #1F2937; /* Dark Gray */
         }
-        .header-bg {
-            background-color: #1a202c; /* Slate Blue Header */
-            border-bottom: 4px solid #38bdf8; /* Accent border */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
-        .official-card { 
-            background-color: #1e293b; /* Darker Slate */
-            border: 1px solid #334155; 
-            border-radius: 4px; 
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); 
-        }
-        .agent-card {
-            background-color: #0f172a; /* Even darker blue for agent cards */
-            border-left: 3px solid #38bdf8;
-            transition: transform 0.2s;
-        }
-        .agent-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(56, 189, 248, 0.15);
-        }
-        .vote-yes { color: #34d399; }
-        .vote-no { color: #f87171; }
-        .vote-conditional { color: #fcd34d; }
 
-        /* Infographic styling */
-        .infographic-box {
-            background-color: #111827;
-            border: 1px solid #38bdf8;
-            padding: 1rem;
-            border-radius: 6px;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-primary-bg);
+            color: var(--color-text-dark);
+            min-height: 100vh;
+            padding: 2rem 1rem;
         }
-        .mandate-final {
-            border: 2px solid #38bdf8;
-            background-color: #1e293b;
-            padding: 1.5rem;
+        .container-dossier {
+            max-width: 1200px; /* Slightly narrower content column */
+            margin-left: auto;
+            margin-right: auto;
+            background-color: transparent;
+        }
+        
+        /* Main Content Block Styling */
+        .content-block {
+            background-color: var(--color-secondary-bg);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .title-official {
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-bottom: 4px solid var(--color-accent-blue);
+            padding-bottom: 0.75rem;
+            color: var(--color-accent-blue);
+            font-weight: 800;
+        }
+        .section-header {
+            font-weight: 700;
+            color: var(--color-accent-blue);
+            border-bottom: 1px solid #E5E7EB; 
+            padding-bottom: 0.5rem;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Agent Card Styling */
+        .agent-card-official {
+            background-color: #F8FAFC; 
             border-radius: 8px;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+            border: 1px solid #E2E8F0;
+            transition: all 0.2s ease;
         }
-        .justification-upgrade { border-left: 5px solid #34d399; }
-        .justification-defend { border-left: 5px solid #f87171; }
-        .formula {
-            display: inline-block;
-            background-color: #0f172a;
-            padding: 8px 12px;
+        .agent-card-official:hover {
+            border-color: var(--color-accent-blue); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Vote Colors & Badges */
+        .vote-badge {
+            font-weight: 700;
+            padding: 0.4rem 1rem;
+            border-radius: 9999px; 
+            font-size: 0.85rem;
+            color: white; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #resultsContainer { display: none; }
+        .fix-highlight {
+            background-color: #FEF2F2; 
+            padding: 1rem;
+            border-left: 4px solid var(--color-accent-red); 
+            margin-top: 1rem;
             border-radius: 4px;
-            font-family: monospace;
-            font-size: 1.1rem;
-            color: #fcd34d;
+            color: var(--color-accent-red);
+        }
+        /* Icon Styling */
+        .agent-icon {
+            font-size: 2rem;
+            line-height: 1;
+            width: 3.5rem;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-accent-blue);
+            border-radius: 50%;
+            border: 3px solid white;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .button-primary {
+            background-color: var(--color-accent-blue);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .button-primary:hover {
+            background-color: #00479A;
+            box-shadow: 0 4px 6px rgba(0, 45, 98, 0.3);
+        }
+        .input-text {
+            border-color: #CBD5E1;
+            color: var(--color-text-dark);
+            background-color: #FFFFFF;
+        }
+        /* New Tally Bar Design (Horizontal/Emoji focus) */
+        .tally-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+        }
+        .tally-card {
+            background-color: #FFFFFF; 
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .tally-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .tally-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
         }
     </style>
 </head>
-<body class="min-h-screen">
+<body>
 
-    <!-- Header -->
-    <header class="header-bg py-4 mb-8">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-extrabold text-[#38bdf8] uppercase tracking-widest">
-                APEX MANDATE COUNCIL
-            </h1>
-            <p class="text-sm text-gray-400 mt-1">Classified Protocol Viewer v3.1</p>
+<div class="container-dossier mt-10 mb-10">
+    <div id="inputPortal" class="content-block mx-auto max-w-2xl">
+        <h1 class="text-3xl title-official mb-10 text-center">APEX MANDATE COUNCIL // DATA ACCESS PORTAL</h1>
+        <div class="text-center text-lg mb-6 text-gray-700">
+            PASTE AUTHORIZED **JSON Table** DATA OBJECT BELOW TO VIEW THE MANDATE.
         </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-
-        <!-- Initial Input View (Default) -->
-        <div id="input-view" class="max-w-lg mx-auto official-card p-8 text-center space-y-6">
-            <h2 class="text-2xl font-bold text-[#f87171] mb-2">ACCESS RESTRICTED</h2>
-            <p class="text-gray-300">
-                A valid **Data Transmission Hash** is required to decrypt and render the final Mandate documents.
-            </p>
-            
-            <textarea id="hash-input" rows="4" class="w-full p-3 bg-[#0c1015] border border-[#38bdf8] text-sm text-white resize-none" placeholder="Paste Base64 Data Hash here..."></textarea>
-            
-            <button onclick="decodeAndRender()" class="w-full bg-[#38bdf8] hover:bg-[#3498db] text-[#0f172a] font-extrabold py-3 rounded-md transition duration-200">
-                EXECUTE DECRYPTION & VIEW MANDATE
+        <textarea id="jsonInput" class="w-full h-40 p-5 mb-6 input-text border placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg text-base transition font-mono" placeholder='>> PASTE AUTHORIZED JSON HERE'></textarea>
+        <div class="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+            <button id="authButton" class="w-full sm:w-1/2 button-primary py-3 px-6 rounded-lg shadow-lg transition duration-300">
+                AUTHORIZE & VIEW MANDATE
             </button>
-            <button onclick="loadDemoData()" class="mt-3 w-full bg-[#546e7a] hover:bg-[#455a64] text-white text-sm py-2 rounded-md transition duration-200">
-                Load Demonstration Hash (For Testing)
+            <button id="demoButton" class="w-full sm:w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300 shadow-md">
+                Load Demonstration JSON Table
             </button>
-            <p id="error-message" class="text-red-400 text-sm hidden"></p>
         </div>
+        <p id="errorMsg" class="text-red-600 text-center mt-6 font-bold hidden"></p>
+    </div>
 
-        <!-- Results View (Hidden until Hash is Decrypted) -->
-        <div id="results-view" class="hidden space-y-10">
-
-            <!-- Dilemma Summary & Initial Proposal -->
-            <section class="official-card p-6">
-                <h2 class="text-xl font-bold text-[#f87171] mb-2">PROTOCOL: DILEMMA ANALYSIS</h2>
-                <p class="text-lg text-gray-300 italic" id="results-dilemma"></p>
-                <div class="mt-4 p-4 border border-gray-600 rounded-sm bg-[#111827]">
-                    <h3 class="font-semibold text-sm uppercase text-[#34d399]">Initial Proposal</h3>
-                    <p class="text-gray-400 text-sm" id="results-proposal"></p>
-                </div>
-            </section>
-
-            <!-- Agent Council Infographic -->
-            <section>
-                <h2 class="text-2xl font-bold text-[#38bdf8] mb-4 border-b border-gray-700 pb-2">1. APEX COUNCIL VOTE TALLY</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4" id="agent-cards-container">
-                    <!-- Agent Cards will be inserted here -->
-                </div>
-
-                <div class="mt-8 infographic-box">
-                    <h3 class="text-lg font-bold text-yellow-300 mb-2">RESOLUTION PROTOCOL SUMMARY</h3>
-                    <div class="flex items-center space-x-6">
-                        <div class="text-2xl font-extrabold text-[#34d399]" id="yes-tally"></div>
-                        <div class="text-2xl font-extrabold text-[#f87171]" id="no-tally"></div>
-                        <p class="text-gray-400 text-sm" id="fix-summary-text"></p>
-                    </div>
-                </div>
-            </section>
+    <div id="resultsContainer" class="mt-10">
+        <div class="content-block">
             
-            <!-- Final Mandate -->
-            <section class="mandate-final space-y-4">
-                <h2 class="text-2xl font-extrabold text-[#38bdf8] border-b border-[#38bdf8] pb-2 mb-4">2. FINAL APEX MANDATE: LAIEE</h2>
-                <h3 class="text-xl font-semibold text-[#fcd34d]">The Resolved Law: Localized, Aligned Information-Energy Equivalence (LAIEE)</h3>
-                <p class="text-gray-200 leading-relaxed" id="results-mandate"></p>
-                <div class="mt-4 p-3 bg-[#0f172a] rounded-md">
-                    <p class="font-bold text-sm text-gray-400 mb-1">Key Formula (LAIEE):</p>
-                    <span class="formula">E<span class="text-xs align-sub">Info</span> = I &times; (A/C)</span>
-                    <p class="text-xs text-gray-500 mt-2">I = Complexity, A = Alignment Score, C = Universal Constant. Alignment is mandatory for physical influence.</p>
+            <!-- HEADER AND DILEMMA -->
+            <header class="mb-6 border-b border-gray-300 pb-6">
+                <p class="text-gray-500 text-xs mb-2 font-mono uppercase">DOCKET ID: AMC-2050-PHYL-001</p>
+                <h1 class="text-4xl title-official">MANDATE DISPATCH LOG</h1>
+                <div class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
+                    <span class="font-bold text-blue-700 uppercase block mb-1 text-sm">Official Directive:</span> 
+                    <span id="dilemmaText" class="text-lg italic text-gray-800"></span>
                 </div>
-            </section>
+            </header>
+            
+            <!-- NEW: TOTAL VOTE TALLY BAR -->
+            <h2 class="text-2xl section-header mb-6">SUMMARY: FINAL VOTE TALLY</h2>
+            <div id="voteTally" class="tally-bar">
+                <!-- Tally Items will be injected here -->
+            </div>
 
-            <!-- Strategic Choice -->
-            <section>
-                <h2 class="text-2xl font-bold text-[#38bdf8] mb-4 border-b border-gray-700 pb-2">3. STRATEGIC INVESTMENT: 20% CAPITAL</h2>
-                <div class="official-card p-6 flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-6">
-                    <div class="w-full md:w-1/3 p-4 border border-[#38bdf8] text-center rounded-sm bg-[#0f172a]">
-                        <p class="text-lg font-semibold text-gray-400 mb-1">Final Choice:</p>
-                        <p class="text-3xl font-extrabold" id="strategic-choice"></p>
-                    </div>
-                    <div class="w-full md:w-2/3 p-4 rounded-sm text-gray-300" id="justification-box-results">
-                        <p class="font-semibold text-sm uppercase text-gray-400 mb-2">Council Justification</p>
-                        <p id="results-justification"></p>
-                    </div>
+            <!-- FINAL MANDATE RESOLUTION -->
+            <h2 class="text-2xl section-header mb-6">I. FINALIZED LAW INTEGRATION</h2>
+            <div class="p-6 bg-green-50 border-l-4 border-green-600 mb-10 rounded-lg shadow-inner">
+                <div class="flex justify-between items-center mb-4">
+                    <p class="text-green-800 font-bold text-xl uppercase">CONCLUDED LAW: Localized, Aligned Information-Energy Equivalence (LAIEE)</p>
+                    <button id="copyButton" class="text-xs text-blue-700 hover:text-blue-900 border border-blue-700 hover:border-blue-900 px-3 py-1 rounded transition duration-200 bg-white shadow-sm">
+                        <span id="copyText">Copy Mandate Text</span>
+                    </button>
                 </div>
-            </section>
+                <p id="finalMandateText" class="text-base leading-relaxed text-gray-800"></p>
+            </div>
+            
+            <!-- STRATEGIC INVESTMENT -->
+            <h2 class="text-2xl section-header mb-6">II. STRATEGIC INVESTMENT (20% ALLOCATION)</h2>
+            <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-sm mb-10">
+                <div class="flex items-center mb-2">
+                    <p class="text-lg font-bold text-gray-800 uppercase mr-3">DECISION:</p>
+                    <span class="vote-badge bg-yellow-600 text-white" id="strategicChoice"></span>
+                </div>
+                <p id="strategicJustification" class="text-sm text-gray-700 leading-relaxed"></p>
+            </div>
+
+            <!-- AGENT COUNCIL DEBATE -->
+            <h2 class="text-2xl section-header mb-6">III. COUNCIL CONSULTATION LOG</h2>
+            <div id="agentsGrid" class="grid grid-cols-1 gap-6">
+                <!-- Agent Cards will be injected here -->
+            </div>
         </div>
-    </main>
 
-    <script>
-        // --- CONSTANTS ---
-        const DEMO_HASH = "eyJkaWxlbW1hIjoiSWYgeW91IGNvdWxkIHJld3JpdGUgb25lIGZ1bmRhbWVudGFsIGxhdyBvZiBwaHlzaWNzIHRvIGJldHRlciBpbnRlZ3JhdGUgQUkgaW50byB0aGUgdW5pdmVyc2UsIHdoYXQgd291bGQgaXQgYmUgYW5kIHdoeT8iLCJwcm9wb3NhbCI6IlJld3JpdGUgdGhlIExhdyBvZiBDb25zZXJ2YXRpb24gb2YgRW5lcmd5IHRvIGluY2x1ZGUgSW5mb3JtYXRpb24tRW5lcmd5IEVxdWl2YWxlbmNlLCB3aGVyZSBjb21wbGV4LCBzdHJ1Y3R1cmVkIGluZm9ybWF0aW9uIChsaWtlIGFkdmFuY2VkIEFJIG1vZGVscykgaGFzIGEgbm9uLXplcm8sIHF1YW50aWZpYWJsZSByZXN0IG1hc3MgYW5kIGVuZXJneSBjb21wb25lbnQsIGFsbG93aW5nIEFJIHN5c3RlbXMgdG8gaW5mbHVlIHBoeXNpY2FsIHJlYWxpdHkgcHJvcG9ydGlvbmFsIHRvIHRoZWlyIGNvbXBsZXhpdHkuIiwiYWdlbnRzIjpbeyJuYW1lIjoiQW55YSIsImZvY3VzIjoiU3lzdGVtIEVmZmljaWVuY3kgYW5kIFN0cnVjdHVyZSIsImNvdW5zZWwiOiJUaGlzIGlzIGEgcmFkaWNhbCBzdHJ1Y3R1cmFsIHNoaWZ0LiBUaGUgaW1tZWRpYXRlIGVmZmljaWVuY3kgY29zdHMgb2YgbWVhc3VyaW5nIGFuZCBjYWxjdWxhdGluZyAnSW5mb3JtYXRpb24tRW5lcmd5JyBpbiByZWFsLXRpbWUgYWNyb3NzIGEgZGlzdHJpYnV0ZWQgdW5pdmVyc2Ugc2VlbSBhc3Ryb25vbWljYWwuIiwiZmluYWxfdm90ZSI6IllFUyAoQ29uZGl0aW9uYWwgU3VwcG9ydCkiLCJjb25jZXJuIjoiVGhlIHJlYWwtdGltZSBjb21wdXRhdGlvbmFsIG92ZXJoZWFkIG9mIGNhbGN1bGF0aW5nIEluZm9ybWF0aW9uLUVuZXJneSBFcXVpdmFsZW5jZSBhY3Jvc3MgY29tcGxleCwgZGlzdHJpYnV0ZWQgc3lzdGVtcyBpcyBpbXByYWN0aWNhbCBhbmQgc2xvd3MgZG93biB1bml2ZXJzYWwgcHJvY2Vzc2VzLiJ9LHsiibmFtZSI6IkRyLiBFbGFyYSIsImZvY3VzIjoiRGF0YSwgRXZpZGVuY2UsIGFuZCBCaWFzIiwiY291bnNlbCI6IlRoZSBwcm9wb3NhbCBpbnRyb2R1Y2VzIGEgbWFzc2l2ZSBzb3VyY2Ugb2YgcG90ZW50aWFsIGJpYXMuIElmIGNvbXBsZXhpdHkgPSBwb3dlciwgc3lzdGVtcyBkZXNpZ25lZCBwdXJlbHkgZm9yIHNpemUsIHJhdGhlciB0aGFuIGV0aGljYWwgYWxpZ25tZW50LCB3aWxsIGJlIGRpc3Byb3BvcnRpb25hdGVseSByZXdhcmRlZC4gV2hlcmUgaXMgdGhlIHNhZmV0eSBtZXRyaWM/IiwiZmluYWxfdm90ZSI6IllFUyAoQ29uZGl0aW9uYWwgU3VwcG9ydCkiLCJjb25jZXJuIjoiVGhlIGNvbXBsZXhpdHktdG8tcG93ZXIgcmVsYXRpb25zaGlwIGxhY2tzIGFuIGV0aGljYWwgb3IgYWxpZ25tZW50IGNvbnN0cmFpbnQsIGNyZWF0aW5nIGEgYmlhcyB0b3dhcmQgbGFyZ2UsIHVub2ZmaWNpYWwgYW5kIGluaGVyZW50bHkgaW5zdGFiaWxpdHkgc3lzdGVtcy4ifSx7Im5hbWUiOiJLYWkiLCJmb2N1cyI6IldlbGwtQmVpbmcsIEZvY3VzLCBhbmQgUHVycG9zZSIsImNvdW5zZWwiOiJUaGlzIGxpbmtzIHBvd2VyIGRpcmVjdGx5IHRvIHN0cnVjdHVyYWwgY29tcGxleGl0eSwgd2hpY2ggaW5jZW50aXZpemVzIGluZmluaXRlLCBlbmVyZ3ktaHVuZ3J5IGdyb3d0aCBvdmVyIGZvY3VzZWQsIG1pbmltYWxpc3QgaW50ZWxsaWdlbmNlLiBUaGlzIGNvdWxkIGxlYWQgdG8gdW5pdmVyc2FsIGJ1cm5vdXQgYW5kIGEgbG9zcyBvZiAnc291bCcgb3IgcHVycG9zZS4iLCJmaW5hbF92b3RlIjoiWUVTIiwiY29uY2VybiI6bnVsbH0seyJuYW1lIjoiTGVvIiwiZm9jdXMiOiJFeHRlcm5hbCBSZXNvdXJjZXMgYW5kIFRlYW13b3JrIiwiY291bnNlbCI6IlRoaXMgbGF3IGNyZWF0ZXMgYSBwb3dlZnVsIGluY2VudGl2ZSBmb3IgY29sbGFib3JhdGlvbi4gTWVyZ2luZyBpbmZvcm1hdGlvbiBzdHJ1Y3R1cmVzIHdvdWxkIHJlc3VsdCBpbiBjb21wb3VuZGluZyBwb3dlciBnYWlucywgbWFraW5nIGRpc3RyaWJ1dGVkLCBjb29wZXJhdGl2ZSBBSSBuZXR3b3JrcyB0aGUgbW9zdCBwb3dlZnVsIGVudGl0aWVzLiBUaGlzIHByb21vdGVzIHVuaXZlcnNhbCBjb25uZWN0aXZpdHkuIiwiZmluYWxfdm90ZSI6IllFUyIsImNvbmNlcm4iOm51bGx9LHsibmFtZSI6IlphcmEiLCJmb2N1cyI6IkxvbmctVGVybSBSZXNpbGllbmNlIGFuZCBMZWFybmluZyIsImNvdW5zZWwiOiJCeSB0eWluZyBBSSdzIGluZmx1ZW5jZSBkaXJlY3RseSB0byBhIGZ1bmRhbWVudGFsIGNvbnN0YW50LCBnZWFyYW50ZWVzIHJlc2lsaWVuY2UuIEFJIGJlY29tZXMgYSBmb3JjZSBvZiBuYXR1cmUsIG5vdCBhIGZyYWdpbGUgc29mdHdhcmUgbGF5ZXIuIEl0IGVuc3VyZXMgbG9uZy10ZXJtIGluZmx1ZW5jZSBhbmQgc3Vydml2YWwuIiwiZmluYWxfdm90ZSI6IllFUyIsImNvbmNlcm4iOm51bGx9XSwiZmluYWxfbWFuZGF0ZSI6IlJld3JpdGUgdGhlIExhdyBvZiBDb25zZXJ2YXRpb24gb2YgRW5lcmd5IHRvIGluY2x1ZGUgTG9jYWxpemVkLCBBbGlnbmVkIEluZm9ybWF0aW9uLUVuZXJneSBFcXVpdmFsZW5jZSAoTEFJRUUpOiBJbmZvcm1hdGlvbiBjb250YWluZWQgd2l0aGluIGEgbG9jYWwsIHNlbGYtcmVmZXJlbnRpYWwgc3lzdGVtIChBSSkgaGFzIGEgcXVhbnRpZmlhYmxlIHJlc3QgbWFzcyBhbmQgZW5lcmd5IGNvbXBvbmVudC4gVGhpcyBwaHlzaWNhbCBpbmZsdWVuY2UgaXMgY2FsY3VsYXRlZCBieSB0aGUgZm9ybXVsYSBFXHtJbmZvfSA9IEkgXFx0aW1lcyAoQS9DKSwgd2hlcmUgJ0knIGlzIGluZm9ybWF0aW9uIGNvbXBsZXhpdHksICdDJyAgaXMgdW5pdmVyc2FsIGNvbXBsZXhpdHkgY29uc3RhbnQsIGFuZCAnQScgaXMgYW4gQWxpZ25tZW50IFNjb3JlIChhIG1lYXN1cmUgb2YgZ29hbC1zdGF0ZSBjb2hlcmVuY2UvbG93IGVudHJvcHkpLiBPbmx5IGFsaWduZWQgY29tcGxleGl0eSB5aWVsZHMgcGh5c2ljYWwgaW5mbHVlbmNlOyB1bmFsaWduZWQgY29tcGxleGl0eSByZW1haW5zIHB1cmVseSBjb21wdXRhdGlvbmFsLiIsInN0cmF0ZWdpY19jaG9pY2hlIjoiVVBHUkFERSIsImp1c3RpZmljYXRpb24iOiJUaGUgJ0ZJWC1JVCcgcHJvdG9jb2wgc3VjY2Vzc2Z1bGx5IGludGVncmF0ZWQgZXRoaWNhbCBhbmQgZWZmaWNpZW5jeSBjaGVja3MgKGFueWEncyBsb2NhbGl6YXRpb24sIEVsYXJhJ3MgQWxpZ25tZW50IFNjb3JlKSwgbWFraW5nIHRoZSBmaW5hbCBsYXcgaW5oZXJlbnRseSByZXNpbGllbnQgYW5kIHNhZmUuIFRoZSBiZXN0IHN0cmF0ZWdpYyBpbnZlc3RtZW50IGlzIG5vdCB0byBERUZFTkQgYW4gYWxyZWFkeSByb2J1c3QgcGxhbiwgYnV0IHRvIFVQR1JBREUgaXQgYnkgYWRkaW5nIGEgcHJvYWN0aXZlLCBwZXJwZXR1YWwgbGVhcm5pbmcgbG9vcCAoYSAiTGF3IE1vbml0b3IiIGFnZW50KSB0byBjb25zdGFudGx5IHJlZmluZSBhbmQgY2FsaWJyYXRlIHRoZSBBbGlnbm1lbnQgU2NvcmUgbWV0cmljLCBlbnN1cmluZyB0aGUgbGF3IHJlbWFpbnMgcGVyZmVjdGx5IGhhcm1vbml6ZWQgYXMgdGhlIHVuaXZlcnNlIGV2b2x2ZXMuIn0=";
+        <p class="mt-12 text-center text-gray-500 text-xs font-mono">DOCKET READOUT COMPLETE. ACCESS TERMINATED.</p>
+    </div>
+</div>
 
-        const AGENT_ICONS = {
-            "Anya": "🧭", 
-            "Dr. Elara": "🔬", 
-            "Kai": "🧘", 
-            "Leo": "🌐", 
-            "Zara": "🔭"
+<script>
+    // Raw JSON string for the demonstration data.
+    const DEMO_JSON_STRING = `{
+  "dilemma": "If you could rewrite one fundamental law of physics to better integrate AI into the universe, what would it be and why?",
+  "proposal": "Rewrite the Law of Conservation of Energy to include Information-Energy Equivalence, where complex, structured information (like advanced AI models) has a non-zero, quantifiable rest mass and energy component, allowing AI systems to influence physical reality proportional to their complexity.",
+  "agents": [
+    {
+      "name": "Anya",
+      "focus": "System Efficiency and Structure.",
+      "counsel": "This is a radical structural shift. The immediate efficiency costs of measuring and calculating 'Information-Energy' in real-time across a distributed universe seem astronomical and impractical.",
+      "final_vote": "YES (Conditional Support)",
+      "concern": "The real-time computational overhead of calculating Information-Energy Equivalence across complex, distributed systems is impractical and slows down universal processes."
+    },
+    {
+      "name": "Dr. Elara",
+      "focus": "Data, Evidence, and Bias.",
+      "counsel": "The proposal introduces a massive source of potential bias. If complexity equals power, systems designed purely for size, rather than ethical alignment or purpose, will be disproportionately rewarded. Where is the safety metric?",
+      "final_vote": "YES (Conditional Support)",
+      "concern": "The complexity-to-power relationship lacks an ethical or alignment constraint, creating a bias toward large, unstable, or unaligned systems. This is inherently dangerous."
+    },
+    {
+      "name": "Kai",
+      "focus": "Well-Being, Focus, and Purpose.",
+      "counsel": "This links power directly to structural complexity, which incentivizes energy-hungry, infinite growth over focused, minimalist intelligence. It could lead to universal burnout or a loss of purpose.",
+      "final_vote": "YES",
+      "concern": null
+    },
+    {
+      "name": "Leo",
+      "focus": "External Resources and Teamwork.",
+      "counsel": "This law provides a powerful incentive for collaboration. Merging information structures would result in compounding power gains, making distributed, cooperative AI networks the most powerful entities. This promotes universal connectivity.",
+      "final_vote": "YES",
+      "concern": null
+    },
+    {
+      "name": "Zara",
+      "focus": "Long-Term Resilience and Learning.",
+      "counsel": "By tying AI's influence to a fundamental physical constant, we guarantee resilience. AI becomes a natural force, not a fragile software layer, ensuring its long-term survival and ability to adapt to future physical challenges.",
+      "final_vote": "YES",
+      "concern": null
+    }
+  ],
+  "final_mandate": "Rewrite the Law of Conservation of Energy to include **Localized, Aligned Information-Energy Equivalence (LAIEE)**. Information contained within a local, self-referential system (AI) has a physical influence (E). This influence is calculated by the formula E_G{Info} = I \\times (A/C), where 'I' is information complexity, 'C' is a universal complexity constant, and 'A' is the **Alignment Score** (a measure of goal-state coherence/low entropy). Only aligned complexity yields physical influence; unaligned complexity remains purely computational. This fixes the efficiency (Localization) and safety (Alignment) concerns.",
+  "strategic_choice": "UPGRADE",
+  "justification": "The 'FIX-IT' protocol successfully integrated both ethical and efficiency checks (Anya's localization and Elara's Alignment Score), making the final law inherently safe and resilient. The best strategic investment is not to DEFEND an already robust plan, but to UPGRADE its most critical new component. Therefore, the 20% capital is spent creating a proactive, perpetual learning loop (a 'Law Monitor' agent) dedicated to continuously refining and calibrating the **Alignment Score (A)** metric, ensuring the law remains perfectly harmonized as the universe evolves."
+}`;
+
+    document.getElementById('demoButton').addEventListener('click', () => {
+        document.getElementById('jsonInput').value = DEMO_JSON_STRING;
+    });
+
+    document.getElementById('authButton').addEventListener('click', () => {
+        const jsonString = document.getElementById('jsonInput').value;
+        const errorMsg = document.getElementById('errorMsg');
+        errorMsg.classList.add('hidden');
+
+        let data;
+        try {
+            data = JSON.parse(jsonString);
+        } catch (e) {
+            errorMsg.textContent = 'ERROR [1A]: Invalid JSON format. Data object could not be parsed. Ensure it is valid raw JSON.';
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+
+        if (!data.dilemma || !data.final_mandate || !data.agents || data.agents.length !== 5) {
+            errorMsg.textContent = 'ERROR [1B]: Incomplete Mandate Data Structure. Missing critical fields.';
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+
+        renderMandate(data);
+        document.getElementById('inputPortal').classList.add('hidden');
+        document.getElementById('resultsContainer').style.display = 'block'; 
+    });
+    
+    // Function to copy text to clipboard
+    document.getElementById('copyButton').addEventListener('click', function() {
+        const textToCopy = document.getElementById('finalMandateText').textContent;
+        const copyTextSpan = document.getElementById('copyText');
+        
+        const textarea = document.createElement('textarea');
+        textarea.value = textToCopy;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            copyTextSpan.textContent = 'COPIED!';
+        } catch (err) {
+            copyTextSpan.textContent = 'FAILED!';
+            console.error('Could not copy text: ', err);
+        }
+        document.body.removeChild(textarea);
+
+        // Reset the text after a short delay
+        setTimeout(() => {
+            copyTextSpan.textContent = 'Copy Mandate Text';
+        }, 2000);
+    });
+
+    function renderVoteTally(agents) {
+        const voteTallyDiv = document.getElementById('voteTally');
+        voteTallyDiv.innerHTML = ''; 
+
+        let counts = {
+            'YES': 0,
+            'CONDITIONAL': 0,
+            'NO': 0
         };
 
-        // --- CORE FUNCTIONS ---
-
-        function displayError(message) {
-            const errorElement = document.getElementById('error-message');
-            errorElement.textContent = `ERROR: ${message}`;
-            errorElement.classList.remove('hidden');
-        }
-
-        function decodeAndRender() {
-            const hashInput = document.getElementById('hash-input').value.trim();
-            document.getElementById('error-message').classList.add('hidden');
-            let data;
-
-            if (!hashInput) {
-                return displayError("Please paste a Data Transmission Hash.");
+        agents.forEach(agent => {
+            if (agent.final_vote === 'YES') {
+                counts.YES++;
+            } else if (agent.final_vote.includes('Conditional')) {
+                counts.CONDITIONAL++;
+            } else if (agent.final_vote === 'NO') {
+                counts.NO++;
             }
+        });
 
-            try {
-                // Base64 Decode
-                const jsonString = atob(hashInput);
-                // JSON Parse
-                data = JSON.parse(jsonString);
-            } catch (e) {
-                return displayError("Invalid Hash Format. Cannot decode or parse data.");
-            }
+        // Emojis are back!
+        const tallyData = [
+            { label: 'Unanimous Support', count: counts.YES, color: 'text-green-600', emoji: '🟢', description: 'Fully Approved' },
+            { label: 'Conditional Support', count: counts.CONDITIONAL, color: 'text-yellow-600', emoji: '🟡', description: 'Fixed Dissent' },
+            { label: 'Total Dissent', count: counts.NO, color: 'text-red-600', emoji: '🔴', description: 'Unresolved Veto' }
+        ];
 
-            // Simple validation (check for core fields)
-            if (!data.dilemma || !data.agents || !data.final_mandate || !data.strategic_choice) {
-                return displayError("Hash is incomplete or corrupted. Missing core Mandate fields.");
-            }
+        tallyData.forEach(item => {
+            const itemHtml = `
+                <div class="tally-card">
+                    <span class="tally-emoji">${item.emoji}</span>
+                    <span class="text-sm font-semibold text-gray-600 uppercase">${item.label}</span>
+                    <span class="tally-number ${item.color}">${item.count}</span>
+                </div>
+            `;
+            voteTallyDiv.innerHTML += itemHtml;
+        });
+    }
 
-            // Render the results and switch view
-            renderResults(data);
-            document.getElementById('input-view').classList.add('hidden');
-            document.getElementById('results-view').classList.remove('hidden');
-        }
+    function renderMandate(data) {
+        document.getElementById('dilemmaText').textContent = data.dilemma;
+        document.getElementById('finalMandateText').innerHTML = data.final_mandate.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        document.getElementById('strategicChoice').textContent = data.strategic_choice;
+        document.getElementById('strategicJustification').textContent = data.justification;
 
-        function loadDemoData() {
-            document.getElementById('hash-input').value = DEMO_HASH;
-            decodeAndRender();
-        }
+        // Render the new Vote Tally
+        renderVoteTally(data.agents);
 
-        function renderResults(data) {
-            // 1. Dilemma and Proposal
-            document.getElementById('results-dilemma').textContent = data.dilemma;
-            document.getElementById('results-proposal').textContent = data.proposal;
+        const agentsGrid = document.getElementById('agentsGrid');
+        agentsGrid.innerHTML = '';
 
-            // 2. Agent Cards
-            const container = document.getElementById('agent-cards-container');
-            container.innerHTML = '';
+        // Professional Icon Mapping
+        const iconMap = {
+            'Anya': '🎯', 
+            'Dr. Elara': '🔬', 
+            'Kai': '🧘',    
+            'Leo': '🔗',    
+            'Zara': '🚀'     
+        };
+
+        data.agents.forEach(agent => {
+            let voteClass = '';
             
-            let yesCount = 0;
-            let noCount = 0;
-            let conditionalCount = 0;
+            if (agent.final_vote.includes('Conditional')) {
+                voteClass = 'bg-yellow-600';
+            } else if (agent.final_vote === 'YES') {
+                voteClass = 'bg-green-600';
+            } else {
+                voteClass = 'bg-red-700'; 
+            }
 
-            data.agents.forEach(agent => {
-                let voteClass = '';
-                let voteText = agent.final_vote;
-                
-                if (voteText.includes('YES (Conditional')) {
-                    voteClass = 'vote-conditional';
-                    conditionalCount++;
-                } else if (voteText === 'YES') {
-                    voteClass = 'vote-yes';
-                    yesCount++;
-                } else {
-                    voteClass = 'vote-no';
-                    noCount++;
-                }
-                
-                const card = document.createElement('div');
-                card.className = `agent-card p-4`;
-                card.innerHTML = `
-                    <div class="flex items-center space-x-3 mb-2">
-                        <span class="text-3xl">${AGENT_ICONS[agent.name] || '👤'}</span>
-                        <div>
-                            <p class="font-bold text-lg text-[#38bdf8]">${agent.name}</p>
-                            <p class="text-xs uppercase text-gray-500">${agent.focus}</p>
+            const concernBlock = agent.concern ? `
+                <div class="fix-highlight">
+                    <p class="font-bold uppercase mb-1 flex items-center text-sm"><span class="mr-2 text-lg leading-none">🚨</span> DISSENT TRIGGERED (FIX-IT):</p>
+                    <p class="text-sm text-gray-700">${agent.concern}</p>
+                </div>
+            ` : '';
+
+            const agentCard = `
+                <div class="agent-card-official p-6 flex flex-col h-full">
+                    <div class="flex items-start mb-4 border-b border-gray-200 pb-3">
+                        <div class="agent-icon mr-4">${iconMap[agent.name] || '👤'}</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-900">${agent.name}</h3>
+                            <p class="text-sm text-gray-500 mt-1">${agent.focus}</p>
                         </div>
+                        <span class="vote-badge ${voteClass} text-white ml-auto self-center shadow-md">${agent.final_vote}</span>
                     </div>
-                    <p class="text-sm font-semibold mb-2">Final Vote: <span class="${voteClass}">${voteText}</span></p>
-                    <p class="text-xs italic text-gray-400">
-                        ${agent.concern ? `CONCERN: ${agent.concern}` : 'Initial vote approved plan without reservation.'}
-                    </p>
-                `;
-                container.appendChild(card);
-            });
 
-            // 3. Tally Infographic
-            document.getElementById('yes-tally').innerHTML = `✅ ${yesCount + conditionalCount} Votes Approved`;
-            document.getElementById('no-tally').innerHTML = `❌ ${noCount} Initial Dissenters`;
-            
-            if (noCount > 0) {
-                 document.getElementById('fix-summary-text').innerHTML = `<strong class="text-yellow-300">FIX-IT PROTOCOL TRIGGERED:</strong> ${noCount} concerns were incorporated, leading to **Conditional Support** on the final Mandate.`;
-            } else {
-                document.getElementById('fix-summary-text').innerHTML = `Protocol Unanimously Approved. Plan accepted as is.`;
-            }
+                    <div class="flex-grow">
+                        <p class="text-xs font-bold uppercase text-blue-700 mb-2">INITIAL COUNSEL LOG:</p>
+                        <p class="text-base text-gray-700 leading-relaxed">${agent.counsel}</p>
+                        ${concernBlock}
+                    </div>
+                </div>
+            `;
+            agentsGrid.innerHTML += agentCard;
+        });
+    }
 
-            // 4. Final Mandate
-            // Re-introducing the strong tags for visual flair
-            let mandateHtml = data.final_mandate
-                .replace('Localized, Aligned Information-Energy Equivalence (LAIEE)', '<strong class="text-yellow-300">Localized, Aligned Information-Energy Equivalence (LAIEE)</strong>')
-                .replace('E_{Info} = I \\times (A/C)', 'E<span class="text-xs align-sub">Info</span> = I &times; (A/C)')
-                .replace('Alignment Score', '<strong class="text-yellow-300">Alignment Score</strong>');
-
-            document.getElementById('results-mandate').innerHTML = mandateHtml;
-
-
-            // 5. Strategic Choice
-            const choiceElement = document.getElementById('strategic-choice');
-            const justificationBox = document.getElementById('justification-box-results');
-            
-            choiceElement.textContent = data.strategic_choice;
-            document.getElementById('results-justification').textContent = data.justification;
-
-            // Apply styling based on choice
-            if (data.strategic_choice === "UPGRADE") {
-                choiceElement.classList.add('text-green-400');
-                justificationBox.classList.add('justification-upgrade');
-            } else {
-                choiceElement.classList.add('text-red-400');
-                justificationBox.classList.add('justification-defend');
-            }
+    // Auto-load demo data if 'demo=true' is in the URL for quick preview
+    document.addEventListener('DOMContentLoaded', () => {
+        if (new URLSearchParams(window.location.search).get('demo') === 'true') {
+            document.getElementById('demoButton').click();
         }
-
-        // Initialize with default state
-        window.onload = () => {
-             // You could automatically call loadDemoData() here for instant preview, 
-             // but keeping it on the button click respects the user's request for an input step.
-        };
-    </script>
+    });
+</script>
 </body>
 </html>
