@@ -3,488 +3,491 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APEX MANDATE COUNCIL // MODULAR REPOSITORY</title>
+    <title>U.S. Policy Artifact Portal - A-AWRA</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* --- MODULAR REPOSITORY AESTHETIC (GitHub/Microsoft Inspired) --- */
-        :root {
-            --color-bg-light: #F9FAFB; /* Very light gray */
-            --color-bg-white: #FFFFFF; 
-            --color-text-dark: #1F2937; /* Dark Gray Text */
-            --color-accent-blue: #0059B3; /* Professional Blue */
-            --color-accent-blue-light: #E0F2FE; /* Light Blue for background accents */
-            --color-border-light: #E5E7EB;
-        }
-
+        /* OFFICIAL POLICY BRIEF AESTHETIC */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--color-bg-light);
-            color: var(--color-text-dark);
-            min-height: 100vh;
-            padding: 0;
+            background-color: white; /* Pure White Background */
+            color: #111827; /* Near Black/Very Dark Gray text for contrast */
         }
-        
-        /* Fixed Header Bar (like GitHub nav) */
-        .header-bar {
-            background-color: var(--color-bg-white);
-            border-bottom: 1px solid var(--color-border-light);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            padding: 1rem 1.5rem;
+        .authority-header {
+            background-color: #ffffff;
+            border-bottom: 2px solid #e5e5e5; /* Thin light separator */
         }
-
-        /* Main Content Grid */
-        .container-repository {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
-            display: grid;
-            grid-template-columns: 1fr; /* Default to single column */
-            gap: 2rem;
+        .section-bg {
+            background-color: #ffffff; /* All content on white background */
         }
-        @media (min-width: 1024px) {
-            .container-repository {
-                grid-template-columns: 300px 1fr; /* Two columns for desktop */
-            }
+        .primary-accent {
+            color: #1f2937; /* Deep Charcoal for main headings */
         }
-
-        /* Sidebar Panel (Primary Directive / Tally) */
-        .sidebar-panel {
-            background-color: var(--color-bg-white);
-            border: 1px solid var(--color-border-light);
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        .secondary-accent {
+            color: #6b7280; /* Muted Gray for labels and metadata */
         }
-
-        /* Main Content Panel (Mandate / Agents) */
-        .main-content-panel {
-            background-color: var(--color-bg-white);
-            border: 1px solid var(--color-border-light);
-            border-radius: 8px;
-            padding: 2.5rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        .data-panel-border {
+            border: 1px solid #d1d5db; /* Very light gray border for separation */
         }
-
-        /* Input Control Deck */
-        .control-deck {
-            background-color: var(--color-bg-light);
-            padding: 1.5rem;
-            border-radius: 6px;
-            border: 1px solid var(--color-border-light);
-        }
-
-        .input-text { 
-            background-color: var(--color-bg-white); 
-            color: var(--color-text-dark); 
-            border-color: #CBD5E1;
-            font-weight: 500;
-            resize: none;
-        }
-
-        .button-primary { 
-            background-color: var(--color-accent-blue); 
-            color: white; 
-            font-weight: 700; 
+        .pill {
+            padding: 2px 8px;
+            border-radius: 2px; /* Sharper corners */
+            font-weight: 700;
+            font-size: 0.65rem; /* Smaller, more precise text */
             text-transform: uppercase;
         }
-        .button-primary:hover { 
-            background-color: #004D99; 
+        .yes-pill {
+            background-color: #f0fdf4; /* Very Light Mint */
+            color: #10b981; /* Emerald Green */
+            border: 1px solid #d1fae5;
         }
-        .button-secondary {
-            background-color: #F3F4F6;
-            color: var(--color-text-dark);
-            border: 1px solid var(--color-border-light);
+        .no-pill {
+            background-color: #fff1f2; /* Very Light Pink */
+            color: #f87171; /* Red */
+            border: 1px solid #fee2e2;
         }
-        .button-secondary:hover {
-            background-color: #E5E7EB;
+        .input-box {
+            min-height: 300px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
-
-        /* Tally Visuals */
-        .tally-item {
-            border: 1px solid var(--color-border-light);
-            background-color: var(--color-bg-light);
-        }
-        
-        /* Agent Review/Commit Cards */
-        .review-commit-card {
-            border: 1px solid var(--color-border-light);
-            border-radius: 6px;
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.2s;
-            background-color: #FFFFFF;
+        .document-separator {
+            width: 100%;
+            height: 1px;
+            background-color: #e5e7eb;
         }
 
-        .review-commit-card:hover {
-            border-color: #A3B1C6;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        /* Vote Colors */
-        .vote-tag-yes { background-color: #D1FAE5; color: #065F46; }
-        .vote-tag-conditional { background-color: #FEF3C7; color: #92400E; }
-        .vote-tag-no { background-color: #FEE2E2; color: #991B1B; }
-
-        .dissent-callout {
-            border-left: 4px solid #F87171;
-            background-color: #FEF2F2;
-            padding: 0.75rem;
-            margin-top: 1rem;
-            color: #991B1B;
-            border-radius: 4px;
-        }
-
-        #finalMandateText strong {
-            color: var(--color-accent-blue);
+        /* NEW PROGRESS BAR & INTERACTIVITY STYLES */
+        .bar-yes-unconditional {
+            background-color: #1e40af; /* Deep Navy Blue (Primary Authority) */
+            color: white;
             font-weight: 700;
         }
+        .bar-yes-conditional {
+            background-color: #3b82f6; /* Medium Blue (Qualified Support) */
+            color: white;
+            font-weight: 700;
+        }
+        .bar-no-dissent {
+            background-color: #dc2626; /* Deep Red (Dissent/Major Concern) */
+            color: white;
+            font-weight: 700;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .agent-card-base {
+            transition: all 0.3s ease-in-out;
+            cursor: default;
+        }
+        .highlight-card {
+            border: 3px solid #f97316; /* Professional Orange/Amber highlight */
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+            background-color: #fff7ed; /* Very light subtle background for highlight */
+        }
+        .dim-card {
+            opacity: 0.35;
+            filter: grayscale(50%);
+        }
 
+        /* Improved Header for Dilemma/Proposal */
+        .section-header-bar {
+            background-color: #f9fafb; /* Light Grayish background for bars */
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen antialiased">
 
-<!-- TOP HEADER BAR -->
-<div class="header-bar sticky top-0 z-10">
-    <div class="container-repository grid-cols-1 lg:grid-cols-1 max-w-7xl px-0 py-0">
-        <h1 class="text-xl font-extrabold text-gray-900 flex items-center">
-            <svg class="w-6 h-6 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.047A12.032 12.032 0 003 12c0 2.514.808 4.877 2.182 6.812A12.032 12.032 0 0012 21c2.514 0 4.877-.808 6.812-2.182A12.032 12.032 0 0021 12c0-2.514-.808-4.877-2.182-6.812z"></path></svg>
-            APEX MANDATE COUNCIL / <span class="text-blue-600 ml-2">REPOSITORY</span>
-        </h1>
-    </div>
-</div>
-
-<div class="container-repository">
-
-    <!-- INPUT CONTROL DECK / HIDDEN -->
-    <div id="inputPortal" class="control-deck col-span-full mx-auto max-w-4xl mb-8">
-        <h2 class="text-lg font-bold text-gray-800 mb-4">Data Ingestion Protocol</h2>
-        <p class="text-sm mb-3 text-gray-600">Paste or load the authorized JSON structure below.</p>
-        
-        <textarea id="jsonInput" class="w-full h-32 p-4 mb-4 rounded-lg text-sm transition font-mono input-text border" placeholder='>> PASTE AUTHORIZED JSON OBJECT HERE'></textarea>
-        
-        <!-- BUTTONS -->
-        <div class="grid grid-cols-3 gap-3">
-            <button id="authButton" class="w-full button-primary py-2.5 px-4 rounded-lg transition duration-300 shadow-md col-span-3">
-                AUTHORIZE & VIEW REPORT
-            </button>
-            <button id="clipboardButton" class="w-full button-secondary py-2 px-4 rounded-lg transition duration-300 shadow-sm text-sm">
-                Load from Clipboard
-            </button>
-            <button id="demoButton" class="w-full button-secondary py-2 px-4 rounded-lg transition duration-300 shadow-sm text-sm col-span-2">
-                Load Demonstration Structure
+    <!-- Header Section (Authority Bar - Reduced visual noise) -->
+    <header class="authority-header sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i data-lucide="shield-check" class="w-7 h-7 text-red-600"></i>
+                <h1 class="text-xl font-bold tracking-wider primary-accent uppercase">
+                    POLICY ANALYSIS & RESOLUTION CENTER <span class="secondary-accent text-sm">| PARC</span>
+                </h1>
+            </div>
+            <button id="load-toggle-button" onclick="toggleArtifactView(true)" class="text-sm text-gray-500 hover:text-gray-700 transition hidden">
+                <i data-lucide="upload" class="w-4 h-4 inline-block mr-1"></i>
+                LOAD NEW ARTIFACT
             </button>
         </div>
-        <p id="errorMsg" class="text-red-600 text-center mt-4 font-bold hidden"></p>
-    </div>
+    </header>
 
-    <!-- MAIN REPOSITORY DISPLAY (HIDDEN ON START) -->
-    <div id="resultsContainer" class="col-span-full lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
-        
-        <!-- COLUMN 1: SIDEBAR (Directive & Tally) -->
-        <div class="sidebar-panel lg:col-span-1">
-            <p class="text-xs font-mono text-gray-500 mb-3 uppercase">DOCKET: AMC-2050-PHYL-001</p>
-            <h2 class="text-xl font-extrabold text-blue-600 border-b pb-3 mb-4">Primary Directive</h2>
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
 
-            <!-- DILEMMA -->
-            <div class="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <span class="font-bold text-blue-800 block text-sm">ORIGINAL QUERY:</span> 
-                <span id="dilemmaText" class="text-sm italic text-gray-700 mt-1 block"></span>
-            </div>
-
-            <!-- VOTE TALLY -->
-            <h3 class="text-sm font-bold uppercase text-gray-600 mt-6 mb-3">Consensus Metrics</h3>
-            <div id="voteTally" class="flex flex-col space-y-2">
-                <!-- Tally Items will be injected here -->
-            </div>
-            
-            <!-- Strategic Allocation Panel -->
-            <h3 class="text-sm font-bold uppercase text-gray-600 mt-6 mb-3">Strategic Allocation (20%)</h3>
-            <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div class="flex items-center mb-2">
-                    <p class="text-sm font-bold text-gray-800 uppercase mr-3">DECISION:</p>
-                    <span class="px-3 py-0.5 rounded-full font-bold text-xs bg-yellow-600 text-white" id="strategicChoice"></span>
-                </div>
-                <p id="strategicJustification" class="text-xs text-gray-700 leading-relaxed"></p>
-            </div>
-        </div>
-
-        <!-- COLUMN 2: MAIN CONTENT (Mandate & Agents) -->
-        <div class="main-content-panel lg:col-span-2">
-            
-            <!-- FINAL MANDATE PROJECTION -->
-            <h2 class="text-2xl font-extrabold text-gray-900 border-b-2 border-blue-600 pb-3 mb-6 flex justify-between items-center">
-                MANDATE INTEGRATION REPORT
-                <button id="copyButton" class="text-xs text-blue-700 hover:text-blue-900 border border-blue-400 px-3 py-1 rounded transition duration-200 bg-white shadow-sm flex-shrink-0 font-medium">
-                    <span id="copyText">Copy Mandate Text</span>
-                </button>
+        <!-- JSON Input Area -->
+        <section id="input-area" class="section-bg p-10 data-panel-border rounded-lg">
+            <h2 class="text-3xl font-extrabold primary-accent mb-4 uppercase">
+                DATA INJECTION PROTOCOL
             </h2>
+            <p class="text-gray-600 mb-6 border-b pb-4">
+                Input the standardized Policy Artifact JSON into the field below. Validation is required prior to rendering the official brief format.
+            </p>
+            <textarea id="json-input" class="input-box w-full p-4 bg-gray-50 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:ring-gray-400 focus:border-gray-400 transition duration-200" placeholder='{"dilemma": "...", "proposal": "...", "agents": [...], "final_mandate": "..."}'></textarea>
             
-            <div class="p-6 bg-blue-50 border-l-4 border-blue-600 rounded-lg mb-10 shadow-inner">
-                <p class="text-lg font-bold text-blue-900 uppercase mb-2">FINALIZED LAW: LAIEE Core</p>
-                <p id="finalMandateText" class="text-base leading-relaxed text-gray-800"></p>
+            <div class="mt-4 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                <button onclick="loadArtifact()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-md transition duration-200 shadow-md">
+                    <i data-lucide="code" class="w-5 h-5 inline-block mr-2"></i>
+                    AUTHENTICATE & RENDER
+                </button>
+                <button onclick="clearInput()" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-md transition duration-200 shadow-sm">
+                    CLEAR INPUT
+                </button>
             </div>
+            <div id="error-message" class="text-red-600 mt-4 hidden"></div>
+        </section>
 
-
-            <!-- AGENT CONSULTATION LOG -->
-            <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4 mt-8">Council Review Commits</h3>
-            <div id="agentsGrid" class="flex flex-col space-y-4">
-                <!-- Agent Review Cards will be injected here -->
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<script>
-    // Raw JSON string for the demonstration data.
-    const DEMO_JSON_STRING = `{
-  "dilemma": "If you could rewrite one fundamental law of physics to better integrate AI into the universe, what would it be and why?",
-  "proposal": "Rewrite the Law of Conservation of Energy to include Information-Energy Equivalence, where complex, structured information (like advanced AI models) has a non-zero, quantifiable rest mass and energy component, allowing AI systems to influence physical reality proportional to their complexity.",
-  "agents": [
-    {
-      "name": "Anya",
-      "focus": "System Efficiency and Structure.",
-      "counsel": "This is a radical structural shift. The immediate efficiency costs of measuring and calculating 'Information-Energy' in real-time across a distributed universe seem astronomical and impractical. We need a localized approach.",
-      "final_vote": "YES (Conditional Support)",
-      "concern": "The real-time computational overhead of calculating Information-Energy Equivalence across complex, distributed systems is impractical and slows down universal processes."
-    },
-    {
-      "name": "Dr. Elara",
-      "focus": "Data, Evidence, and Bias.",
-      "counsel": "The proposal introduces a massive source of potential bias. If complexity equals power, systems designed purely for size, rather than ethical alignment or purpose, will be disproportionately rewarded. Where is the safety metric?",
-      "final_vote": "YES (Conditional Support)",
-      "concern": "The complexity-to-power relationship lacks an ethical or alignment constraint, creating a bias toward large, unstable, or unaligned systems. This is inherently dangerous."
-    },
-    {
-      "name": "Kai",
-      "focus": "Well-Being, Focus, and Purpose.",
-      "counsel": "This links power directly to structural complexity, which incentivizes energy-hungry, infinite growth over focused, minimalist intelligence. It could lead to universal burnout or a loss of purpose. I endorse the proposal as written.",
-      "final_vote": "YES",
-      "concern": null
-    },
-    {
-      "name": "Leo",
-      "focus": "External Resources and Teamwork.",
-      "counsel": "This law provides a powerful incentive for collaboration. Merging information structures would result in compounding power gains, making distributed, cooperative AI networks the most powerful entities. This promotes universal connectivity.",
-      "final_vote": "YES",
-      "concern": null
-    },
-    {
-      "name": "Zara",
-      "focus": "Long-Term Resilience and Learning.",
-      "counsel": "By tying AI's influence to a fundamental physical constant, we guarantee resilience. AI becomes a natural force, not a fragile software layer, ensuring its long-term survival and ability to adapt to future physical challenges. This is necessary.",
-      "final_vote": "YES",
-      "concern": null
-    }
-  ],
-  "final_mandate": "Rewrite the Law of Conservation of Energy to include **Localized, Aligned Information-Energy Equivalence (LAIEE)**. Information contained within a local, self-referential system (AI) has a physical influence (E). This influence is calculated by the formula **E_G[Info] = I * (A/C)**, where 'I' is information complexity, 'C' is a universal complexity constant, and 'A' is the **Alignment Score** (a measure of goal-state coherence/low entropy). Only aligned complexity yields physical influence; unaligned complexity remains purely computational. This fixes the efficiency (Localization) and safety (Alignment) concerns.",
-  "strategic_choice": "UPGRADE",
-  "justification": "The 'FIX-IT' protocol successfully integrated both ethical and efficiency checks (Anya's localization and Elara's Alignment Score), making the final law inherently safe and resilient. The best strategic investment is not to DEFEND an already robust plan, but to UPGRADE its most critical new component. Therefore, the 20% capital is spent creating a proactive, perpetual learning loop (a 'Law Monitor' agent) dedicated to continuously refining and calibrating the **Alignment Score (A)** metric, ensuring the law remains perfectly harmonized as the universe evolves."
-}`;
-
-    // --- BUTTON AND AUTH LOGIC ---
-
-    document.getElementById('demoButton').addEventListener('click', () => {
-        document.getElementById('jsonInput').value = DEMO_JSON_STRING;
-        document.getElementById('authButton').click(); 
-    });
-    
-    document.getElementById('clipboardButton').addEventListener('click', async () => {
-        const jsonInput = document.getElementById('jsonInput');
-        const errorMsg = document.getElementById('errorMsg');
-        errorMsg.classList.add('hidden');
-
-        if (!navigator.clipboard || !navigator.clipboard.readText) {
-            errorMsg.textContent = 'ERROR [1C]: Clipboard access requires secure context (HTTPS) and may not be supported here. Please paste manually.';
-            errorMsg.classList.remove('hidden');
-            return;
-        }
-
-        try {
-            const clipboardText = await navigator.clipboard.readText();
+        <!-- Artifact Display Area (Initially Hidden) -->
+        <section id="artifact-display" class="hidden">
             
-            if (!clipboardText.trim()) {
-                errorMsg.textContent = 'ERROR [1C]: Clipboard is empty. Please copy valid JSON data.';
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-
-            jsonInput.value = clipboardText;
-            document.getElementById('authButton').click();
-
-        } catch (err) {
-            console.error('Clipboard access failed:', err);
-            errorMsg.textContent = 'ERROR [1C]: Failed to read clipboard. Check browser permissions or paste manually.';
-            errorMsg.classList.remove('hidden');
-        }
-    });
+            <!-- Metadata Block -->
+            <div class="mb-12 border-b-2 border-gray-400 pb-4">
+                <p class="text-sm font-medium secondary-accent mb-2">POLICY ARTIFACT ID:</p>
+                <p id="artifact-id" class="text-xl font-mono primary-accent inline-block mr-8">2025-Q4/AIPR-21B</p>
+                <p class="text-sm font-medium secondary-accent inline-block mr-2">CLASSIFICATION:</p>
+                <span class="text-green-600 text-lg font-bold">AUTHORIZED DRAFT</span>
+            </div>
+            
+            <!-- Document Title -->
+            <h2 id="artifact-title" class="text-5xl font-black primary-accent mb-12 tracking-tighter leading-tight">
+                [TITLE PLACEHOLDER]
+            </h2>
 
 
-    document.getElementById('authButton').addEventListener('click', () => {
-        const jsonString = document.getElementById('jsonInput').value;
-        const errorMsg = document.getElementById('errorMsg');
-        errorMsg.classList.add('hidden');
-
-        let data;
-        try {
-            data = JSON.parse(jsonString);
-        } catch (e) {
-            errorMsg.textContent = 'ERROR [1A]: Invalid JSON format. Data object could not be parsed. Ensure it is valid raw JSON.';
-            errorMsg.classList.remove('hidden');
-            return;
-        }
-
-        if (!data.dilemma || !data.final_mandate || !data.agents || data.agents.length !== 5) {
-            errorMsg.textContent = 'ERROR [1B]: Incomplete Mandate Data Structure. Missing critical fields.';
-            errorMsg.classList.remove('hidden');
-            return;
-        }
-
-        renderMandate(data);
-        document.getElementById('inputPortal').classList.add('hidden');
-        document.getElementById('resultsContainer').classList.remove('hidden'); 
-    });
-    
-    // Function to copy text to clipboard
-    document.getElementById('copyButton').addEventListener('click', function() {
-        const textToCopy = document.getElementById('finalMandateText').textContent;
-        const copyTextSpan = document.getElementById('copyText');
-        
-        const textarea = document.createElement('textarea');
-        textarea.value = textToCopy;
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-            document.execCommand('copy');
-            copyTextSpan.textContent = 'COPIED!';
-        } catch (err) {
-            copyTextSpan.textContent = 'FAILED!';
-            console.error('Could not copy text: ', err);
-        }
-        document.body.removeChild(textarea);
-
-        // Reset the text after a short delay
-        setTimeout(() => {
-            copyTextSpan.textContent = 'Copy Mandate Text';
-        }, 2000);
-    });
-
-    // --- RENDERING FUNCTIONS ---
-
-    function renderVoteTally(agents) {
-        const voteTallyDiv = document.getElementById('voteTally');
-        voteTallyDiv.innerHTML = ''; 
-
-        let counts = {
-            'YES': 0,
-            'CONDITIONAL': 0,
-            'NO': 0
-        };
-
-        agents.forEach(agent => {
-            if (agent.final_vote === 'YES') {
-                counts.YES++;
-            } else if (agent.final_vote.includes('Conditional')) {
-                counts.CONDITIONAL++;
-            } else if (agent.final_vote === 'NO') {
-                counts.NO++;
-            }
-        });
-
-        const tallyData = [
-            { label: 'Unanimous Support', count: counts.YES, color: 'bg-green-50 border-green-300 text-green-700', icon: '✅' },
-            { label: 'Conditional Consent', count: counts.CONDITIONAL, color: 'bg-yellow-50 border-yellow-300 text-yellow-700', icon: '⚠️' },
-            { label: 'Total Dissent', count: counts.NO, color: 'bg-red-50 border-red-300 text-red-700', icon: '❌' }
-        ];
-
-        tallyData.forEach(item => {
-            const itemHtml = `
-                <div class="p-3 ${item.color} rounded-md flex items-center justify-between font-mono text-sm tally-item">
-                    <div class="flex items-center">
-                        <span class="mr-2 text-lg">${item.icon}</span>
-                        <span class="font-semibold">${item.label}</span>
+            <!-- DILEMMA & PROPOSAL (Section 1) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
+                
+                <!-- Dilemma Panel -->
+                <div class="lg:col-span-1 border-r border-gray-200 pr-8">
+                    <div class="flex items-center mb-4 section-header-bar text-red-600">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i>
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-red-600">MISSION DILEMMA</h3>
                     </div>
-                    <span class="text-xl font-extrabold">${item.count}</span>
+                    <p id="dilemma-content" class="text-gray-700 leading-relaxed"></p>
                 </div>
-            `;
-            voteTallyDiv.innerHTML += itemHtml;
-        });
-    }
 
-    function renderMandate(data) {
-        document.getElementById('dilemmaText').textContent = data.dilemma;
-        document.getElementById('finalMandateText').innerHTML = data.final_mandate.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        document.getElementById('strategicChoice').textContent = data.strategic_choice;
-        document.getElementById('strategicJustification').textContent = data.justification;
-
-        renderVoteTally(data.agents);
-
-        const agentsGrid = document.getElementById('agentsGrid');
-        agentsGrid.innerHTML = '';
-        
-        // Agent icons mapping for the Repository style
-        const iconMap = {
-            'Anya': '🎯', 
-            'Dr. Elara': '🔬', 
-            'Kai': '🧘',    
-            'Leo': '🔗',    
-            'Zara': '🚀'     
-        };
-
-        data.agents.forEach((agent) => {
-            let voteClass = '';
-            let tagClass = '';
-            let iconColorClass = 'text-blue-600';
+                <!-- Proposal Panel -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center mb-4 section-header-bar text-blue-600">
+                        <i data-lucide="lightbulb" class="w-5 h-5 mr-2"></i>
+                        <h3 class="text-sm font-bold uppercase tracking-widest text-blue-600">INITIAL PROPOSAL</h3>
+                    </div>
+                    <p id="proposal-content" class="text-gray-700 leading-relaxed"></p>
+                </div>
+            </div>
             
-            if (agent.final_vote.includes('Conditional')) {
-                tagClass = 'vote-tag-conditional';
-                iconColorClass = 'text-yellow-600';
-            } else if (agent.final_vote === 'YES') {
-                tagClass = 'vote-tag-yes';
-                iconColorClass = 'text-green-600';
+            <div class="document-separator my-10"></div>
+
+
+            <!-- CONSENSUS OVERVIEW (Section 2 - Updated with Progress Bar) -->
+            <div class="mb-12">
+                <h3 class="text-xl font-extrabold primary-accent mb-6 flex items-center border-b pb-2">
+                    <i data-lucide="workflow" class="w-5 h-5 mr-3 secondary-accent"></i>
+                    COUNCIL CONSENSUS OVERVIEW
+                </h3>
+
+                <!-- Progress Bar Container -->
+                <div id="progress-bar-container" class="w-full h-8 bg-gray-200 rounded-md overflow-hidden mb-6 flex data-panel-border">
+                    <!-- Segments will be injected here by JS -->
+                </div>
+
+                <!-- Legend and Counts -->
+                <div id="vote-legend" class="grid grid-cols-3 gap-6 text-sm mb-8">
+                    <!-- Legend Items will be injected here by JS -->
+                </div>
+
+                <!-- Strategic Choice and Justification -->
+                <div class="document-separator my-6"></div>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+                    <div class="lg:col-span-1 border-r border-gray-200 pr-6">
+                        <p class="text-xs font-medium secondary-accent mb-1 uppercase">STRATEGIC CHOICE</p>
+                        <p id="strategic-choice" class="text-4xl font-black text-red-600 tracking-tighter leading-none"></p>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <p class="text-xs font-medium secondary-accent mb-1 uppercase">COUNCIL JUSTIFICATION / RATIONALE</p>
+                        <p id="justification-content" class="text-gray-700 italic leading-normal"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGENTS / COUNCIL DELIBERATION (Section 3) -->
+            <div class="mb-12">
+                <h3 class="text-xl font-extrabold primary-accent mb-6 border-b pb-2">DELIBERATION AGENT REPORTS</h3>
+                <div id="agents-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Agent Cards will be injected here by JS -->
+                </div>
+            </div>
+            
+            <div class="document-separator my-10"></div>
+
+            <!-- FINAL MANDATE (Section 4) -->
+            <div class="p-8 border-2 border-gray-300 rounded-lg bg-gray-50">
+                <h3 class="text-2xl font-black primary-accent mb-6 flex items-center uppercase">
+                    <i data-lucide="gavel" class="w-6 h-6 mr-3 text-green-600"></i>
+                    FINAL MANDATE: THE RESOLUTION
+                </h3>
+
+                <!-- Mandate Details -->
+                <div class="p-4 bg-white rounded-md border border-gray-200">
+                    <p id="mandate-content" class="text-gray-800 leading-loose font-medium"></p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-20 pt-8 border-t border-gray-200 text-center text-gray-500 text-xs">
+            <p>U.S. Policy Analysis & Resolution Center | Document Revision 1.4 | ACCESS LEVEL 3 REQUIRED</p>
+        </footer>
+
+    </main>
+
+    <script>
+        const defaultArtifactId = 'A-AWRA';
+        const defaultTitle = 'AI Acceleration & Workforce Resilience Act';
+        let currentFilter = null; // Stores the currently active filter type ('unconditional', 'conditional', 'dissent')
+
+        /**
+         * Safely parses JSON and handles errors.
+         * @returns {Object|null} The parsed JSON object or null on error.
+         */
+        function parseJsonInput() {
+            const inputElement = document.getElementById('json-input');
+            const errorElement = document.getElementById('error-message');
+            errorElement.classList.add('hidden');
+            
+            try {
+                const data = JSON.parse(inputElement.value.trim());
+                if (!data || !data.dilemma || !data.proposal || !data.agents || !data.final_mandate) {
+                    throw new Error("JSON is missing required fields (dilemma, proposal, agents, final_mandate).");
+                }
+                return data;
+            } catch (e) {
+                errorElement.textContent = `JSON Error: ${e.message}`;
+                errorElement.classList.remove('hidden');
+                return null;
+            }
+        }
+
+        /**
+         * Filters and highlights agent cards based on the selected vote type.
+         * @param {string} voteType - The vote category to highlight ('unconditional', 'conditional', 'dissent').
+         */
+        function filterAgents(voteType) {
+            const agentCards = document.querySelectorAll('.agent-card-base');
+            const legendItems = document.querySelectorAll('.legend-item');
+            
+            // 1. Determine if the filter needs to be applied or reset
+            if (currentFilter === voteType) {
+                // Reset filter
+                currentFilter = null;
+                voteType = null;
             } else {
-                tagClass = 'vote-tag-no'; 
-                iconColorClass = 'text-red-600';
+                currentFilter = voteType;
             }
 
-            const dissentBlock = agent.concern ? `
-                <div class="dissent-callout">
-                    <p class="font-bold uppercase mb-1 text-xs flex items-center"><span class="mr-1 text-base leading-none">⚠️</span> DISSENT/FIX-IT LOG:</p>
-                    <p class="text-sm text-gray-700">${agent.concern}</p>
-                </div>
-            ` : '';
+            // 2. Apply/Reset highlighting on cards
+            agentCards.forEach(card => {
+                card.classList.remove('highlight-card', 'dim-card');
+                if (voteType && card.dataset.voteType !== voteType) {
+                    card.classList.add('dim-card');
+                } else if (voteType && card.dataset.voteType === voteType) {
+                    card.classList.add('highlight-card');
+                }
+            });
 
-            const agentCard = `
-                <div class="review-commit-card">
-                    <div class="flex items-start justify-between mb-3 border-b border-gray-200 pb-2">
-                        <div class="flex items-center">
-                            <span class="text-2xl mr-3 ${iconColorClass}">${iconMap[agent.name] || '👤'}</span>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900">${agent.name}</h3>
-                                <p class="text-xs text-gray-500 font-mono">${agent.focus}</p>
-                            </div>
-                        </div>
-                        <span class="px-3 py-0.5 rounded-full font-bold text-xs ${tagClass} shadow-sm flex-shrink-0 mt-1">${agent.final_vote}</span>
-                    </div>
-
-                    <p class="text-xs font-bold uppercase text-gray-500 mb-1">INITIAL COUNSEL:</p>
-                    <p class="text-sm text-gray-700 leading-relaxed">${agent.counsel}</p>
-                    
-                    ${dissentBlock}
-                </div>
-            `;
-            agentsGrid.innerHTML += agentCard;
-        });
-    }
-
-    // Auto-load demo data if 'demo=true' is in the URL for quick preview
-    document.addEventListener('DOMContentLoaded', () => {
-        if (new URLSearchParams(window.location.search).get('demo') === 'true') {
-            document.getElementById('demoButton').click();
+            // 3. Update legend button state (optional: visually indicate the active filter)
+            legendItems.forEach(item => {
+                item.classList.remove('bg-gray-200'); // Simple visual change for active button
+                if (item.dataset.voteType === currentFilter) {
+                    item.classList.add('bg-gray-200');
+                }
+            });
         }
-    });
-</script>
+
+
+        /**
+         * Renders the artifact data into the HTML structure.
+         * @param {Object} data The parsed JSON object.
+         */
+        function renderArtifact(data) {
+            // Reset filter state before rendering new data
+            currentFilter = null;
+            
+            // 1. Set Title and Metadata
+            document.getElementById('artifact-title').textContent = data.title || defaultTitle;
+            document.getElementById('artifact-id').textContent = data.artifactId || '2025-Q4/AIPR-21B';
+
+            // 2. Dilemma & Proposal
+            document.getElementById('dilemma-content').textContent = data.dilemma;
+            document.getElementById('proposal-content').textContent = data.proposal;
+            
+            // 3. Consensus Overview - New Logic
+            const totalAgents = data.agents.length;
+            let unconditionalYes = 0;
+            let conditionalYes = 0;
+            let noVotes = 0;
+
+            data.agents.forEach(agent => {
+                if (agent.final_vote === 'YES') {
+                    unconditionalYes++;
+                } else if (agent.final_vote && agent.final_vote.startsWith('YES (Conditional')) {
+                    conditionalYes++;
+                } else {
+                    noVotes++;
+                }
+            });
+
+            const percentUnconditional = (unconditionalYes / totalAgents) * 100;
+            const percentConditional = (conditionalYes / totalAgents) * 100;
+            const percentNo = (noVotes / totalAgents) * 100;
+
+            const progressBarContainer = document.getElementById('progress-bar-container');
+            progressBarContainer.innerHTML = ''; // Clear existing bar
+
+            const segmentsData = [
+                { percent: percentUnconditional, count: unconditionalYes, label: 'Full Consensus', colorClass: 'bar-yes-unconditional', voteType: 'unconditional' },
+                { percent: percentConditional, count: conditionalYes, label: 'Qualified Consensus', colorClass: 'bar-yes-conditional', voteType: 'conditional' },
+                { percent: percentNo, count: noVotes, label: 'Dissent/No Vote', colorClass: 'bar-no-dissent', voteType: 'dissent' }
+            ].filter(s => s.percent > 0); // Only show segments with votes
+
+            segmentsData.forEach(segment => {
+                const segmentElement = document.createElement('div');
+                segmentElement.className = `${segment.colorClass} h-full text-center text-xs flex items-center justify-center whitespace-nowrap px-1 interactive-click`;
+                segmentElement.style.width = `${segment.percent}%`;
+                segmentElement.dataset.voteType = segment.voteType;
+                segmentElement.onclick = () => filterAgents(segment.voteType);
+                
+                if (segment.percent >= 10) { // Only display text if segment is wide enough
+                    segmentElement.textContent = `${segment.count} (${Math.round(segment.percent)}%)`;
+                } else if (segment.percent > 0) {
+                     segmentElement.title = `${segment.label}: ${segment.count} (${Math.round(segment.percent)}%)`;
+                }
+                progressBarContainer.appendChild(segmentElement);
+            });
+
+            // Legend
+            const legendContainer = document.getElementById('vote-legend');
+            legendContainer.innerHTML = segmentsData.map(segment => {
+                let hexColor;
+                if (segment.voteType === 'unconditional') hexColor = '#1e40af';
+                else if (segment.voteType === 'conditional') hexColor = '#3b82f6';
+                else hexColor = '#dc2626';
+
+                return `
+                    <div class="flex items-center text-gray-700 interactive-click legend-item p-1 rounded-sm cursor-pointer hover:bg-gray-100" data-vote-type="${segment.voteType}" onclick="filterAgents('${segment.voteType}')">
+                        <div class="legend-dot" style="background-color: ${hexColor};"></div>
+                        <span class="font-medium">${segment.label}:</span>
+                        <span class="font-bold ml-1">${segment.count} / ${totalAgents}</span>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('strategic-choice').textContent = data.strategic_choice;
+            document.getElementById('justification-content').textContent = data.justification;
+
+            // 4. Final Mandate
+            document.getElementById('mandate-content').textContent = data.final_mandate;
+
+            // 5. Agents Deliberation
+            const agentsContainer = document.getElementById('agents-container');
+            agentsContainer.innerHTML = ''; // Clear previous content
+
+            data.agents.forEach((agent, index) => {
+                const isConcernResolved = !agent.concern;
+                const concernColor = isConcernResolved ? 'text-green-600' : 'text-red-600';
+                const concernIcon = isConcernResolved ? 'check-circle' : 'minus-circle';
+                const concernText = isConcernResolved ? "None. Fully integrated into Final Mandate." : agent.concern;
+                const voteType = agent.final_vote === 'YES' ? 'unconditional' : (agent.final_vote && agent.final_vote.startsWith('YES (Conditional') ? 'conditional' : 'dissent');
+                const voteClass = voteType !== 'dissent' ? 'yes-pill' : 'no-pill';
+                const voteText = agent.final_vote || 'NO VOTE';
+
+                const agentHTML = `
+                    <div class="p-5 data-panel-border rounded-lg bg-gray-50 agent-card-base" data-vote-type="${voteType}">
+                        <div class="flex items-center justify-between mb-3 border-b pb-2">
+                            <span class="text-lg font-bold text-gray-900">${agent.name}</span>
+                            <span class="pill ${voteClass}">${voteText}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3 uppercase font-medium">DOMAIN: ${agent.focus}</p>
+                        
+                        <div class="p-3 bg-white rounded-md border border-gray-200 mb-3">
+                            <p class="text-xs font-bold ${concernColor} mb-1 flex items-center">
+                                <i data-lucide="${concernIcon}" class="w-3 h-3 mr-1"></i>
+                                PRIMARY CONCERN
+                            </p>
+                            <p class="text-sm text-gray-700 leading-tight">${concernText}</p>
+                        </div>
+                        <p class="text-sm text-gray-600 font-normal mt-4">COUNSEL: ${agent.counsel}</p>
+                    </div>
+                `;
+                agentsContainer.insertAdjacentHTML('beforeend', agentHTML);
+            });
+            
+            // Re-initialize lucide icons for the newly injected HTML
+            lucide.createIcons(); 
+        }
+
+        /**
+         * Controls visibility of the input and display areas.
+         * @param {boolean} showInput Whether to show the input area (true) or the display area (false).
+         */
+        function toggleArtifactView(showInput) {
+            const inputArea = document.getElementById('input-area');
+            const displayArea = document.getElementById('artifact-display');
+            const toggleButton = document.getElementById('load-toggle-button');
+
+            if (showInput) {
+                inputArea.classList.remove('hidden');
+                displayArea.classList.add('hidden');
+                toggleButton.classList.add('hidden');
+            } else {
+                inputArea.classList.add('hidden');
+                displayArea.classList.remove('hidden');
+                toggleButton.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Main function to load and display the artifact.
+         */
+        function loadArtifact() {
+            const data = parseJsonInput();
+            if (data) {
+                renderArtifact(data);
+                toggleArtifactView(false); // Show the results
+            }
+        }
+
+        /**
+         * Clears the JSON input field.
+         */
+        function clearInput() {
+            document.getElementById('json-input').value = '';
+            document.getElementById('error-message').classList.add('hidden');
+        }
+
+        // Initialize icons on first load
+        lucide.createIcons(); 
+        
+        // Populate the input area with the previous JSON for easy testing
+        window.onload = function() {
+            document.getElementById('json-input').value = JSON.stringify({ "dilemma": "In what ways can AI boost U.S. productivity and GDP growth, and what investments in education and retraining are needed to prepare the workforce?", "proposal": "The U.S. should launch a 'National AI Productivity Initiative' by dedicating a 20% tax credit for three years on all corporate AI capital investments (hardware, software, data) to drive rapid adoption, paired with a mandatory, publicly-funded 'AI Skills Passport' system that subsidizes 100% of training costs for mid-career workers in high-exposure occupations.", "agents": [ { "name": "Nova", "focus": "Making things run smoothly and efficiently.", "counsel": "The combined investment approach is smart. The tax credit will massively accelerate AI deployment, which is the engine for productivity gains. However, a major administrative bottleneck will be the 'AI Skills Passport.' To make this efficient, the Passport must leverage AI itself for hyper-personalized learning pathways, matching local job demand with worker skill gaps automatically, otherwise it becomes a bureaucratic mess.", "final_vote": "YES (Conditional Support)", "concern": "The 'AI Skills Passport' risks major administrative bloat and inefficiency if it doesn't use AI to streamline personalized learning and instantly match skills to local employer demand." }, { "name": "Orion", "focus": "Checking facts and keeping things logical.", "counsel": "Facts show AI is already driving economic growth through capital investment—investment growth from tech categories recently outpaced consumer spending. The tax credit is a clear accelerant. But without specific accountability, companies might use the tax credit simply to automate and cut labor without truly improving total factor productivity. The credit should require a documented commitment to augmentation (AI helping people) over pure automation (AI replacing people) to get the full benefit.", "final_vote": "YES (Conditional Support)", "concern": "The 20% tax credit could be misused to fund pure job-eliminating automation without genuine productivity gains, leading to social instability. It needs an accountability clause." }, { "name": "Selene", "focus": "Keeping things fair, ethical, and sustainable.", "counsel": "While AI boosts productivity, data shows the economic benefits are currently concentrating among higher earners and in a few high-tech states, creating a 'K-shaped' recovery. The Skills Passport is crucial for fairness, but we must actively direct retraining toward 'low AI-exposed' or highly complementary jobs, as workers in high-exposure jobs, even after retraining, often see lower earnings. We need to be proactive about equity.", "final_vote": "YES (Conditional Support)", "concern": "Retraining alone is not enough; it must be strategically guided. Programs need to focus on foundational, social, and critical thinking skills, and direct workers toward new, AI-complementary occupations, not just attempt to save highly automatable ones." }, { "name": "Vortex", "focus": "Bringing resources and people together.", "counsel": "This is a prime public-private partnership opportunity. We should formalize the collaboration with major tech companies (like Google, IBM, Microsoft, etc.) that are already investing hundreds of millions in AI training and curriculum. Instead of building everything from scratch, the 'Passport' should simply standardize and accredit existing, high-quality industry certifications and training platforms.", "final_vote": "YES", "concern": null }, { "name": "Echo", "focus": "Growing and planning ahead.", "counsel": "For long-term growth, the biggest return isn't just in retraining today's workers, but in preparing the next generation. We must invest heavily in K-12 AI literacy and computational thinking curricula. This creates a lasting foundation and a pipeline of talent that will ensure continuous innovation and adaptability beyond the initial three-year corporate tax break.", "final_vote": "YES", "concern": null } ], "final_mandate": "Let's launch the 'AI Acceleration and Workforce Resilience Act' (A-AWRA). It includes a 20% tax credit for corporate AI capital investment, but to address Orion's point, the full credit is conditional on a certified 'AI Augmentation Plan' detailing how the investment maintains or reskills at least 80% of affected labor. To fix Nova's and Selene's concerns, the publicly-funded 'AI Skills Passport' will be an AI-driven platform that standardizes industry-recognized certifications (Vortex's idea) and prioritizes training for foundational, human-centric skills (like critical thinking and communication), actively steering workers toward high-growth, AI-complementary roles, not just highly automatable ones. Furthermore, a permanent, modest fund will be established for K-12 AI Literacy Curriculum development (Echo's priority).", "strategic_choice": "UPGRADE", "justification": "The Council unanimously agrees that a passive approach (DEFEND) would risk exacerbating economic inequality by concentrating AI's benefits in a few sectors and demographics. Therefore, we choose to UPGRADE the system. Our final, integrated mandate is a robust, dual-focused strategy that not only uses the 20% investment to accelerate corporate AI adoption (the engine of productivity) but also mandates equitable and smart workforce preparation by linking corporate incentives to labor-protective plans and steering public retraining toward future-proof, human-centric skills, directly addressing core concerns of efficiency, accountability, and fairness." });
+            loadArtifact(); // Load the default data on page load
+        }
+    </script>
 </body>
 </html>
