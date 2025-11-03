@@ -3,271 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APEX MANDATE COUNCIL // OFFICIAL FEDERAL DOSSIER</title>
+    <title>APEX MANDATE COUNCIL // MODULAR REPOSITORY</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* Unified Federal Log Aesthetic: Single Column, High Clarity */
+        /* --- MODULAR REPOSITORY AESTHETIC (GitHub/Microsoft Inspired) --- */
         :root {
-            --color-primary-bg: #F0F3F7; /* Very light gray/blue for background */
-            --color-secondary-bg: #FFFFFF; /* Main Panel Background (White) */
-            --color-accent-blue: #002D62; /* Deep Federal Navy Blue (Primary) */
-            --color-accent-red: #B00020; /* Authority Red */
-            --color-text-dark: #1F2937; /* Dark Gray */
+            --color-bg-light: #F9FAFB; /* Very light gray */
+            --color-bg-white: #FFFFFF; 
+            --color-text-dark: #1F2937; /* Dark Gray Text */
+            --color-accent-blue: #0059B3; /* Professional Blue */
+            --color-accent-blue-light: #E0F2FE; /* Light Blue for background accents */
+            --color-border-light: #E5E7EB;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--color-primary-bg);
+            background-color: var(--color-bg-light);
             color: var(--color-text-dark);
             min-height: 100vh;
-            padding: 2rem 1rem;
-        }
-        .container-dossier {
-            max-width: 1200px; /* Slightly narrower content column */
-            margin-left: auto;
-            margin-right: auto;
-            background-color: transparent;
+            padding: 0;
         }
         
-        /* Main Content Block Styling */
-        .content-block {
-            background-color: var(--color-secondary-bg);
-            padding: 2.5rem;
-            border-radius: 12px;
-            border: 1px solid #E5E7EB;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        /* Fixed Header Bar (like GitHub nav) */
+        .header-bar {
+            background-color: var(--color-bg-white);
+            border-bottom: 1px solid var(--color-border-light);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 1rem 1.5rem;
         }
 
-        .title-official {
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            border-bottom: 4px solid var(--color-accent-blue);
-            padding-bottom: 0.75rem;
-            color: var(--color-accent-blue);
-            font-weight: 800;
+        /* Main Content Grid */
+        .container-repository {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr; /* Default to single column */
+            gap: 2rem;
         }
-        .section-header {
-            font-weight: 700;
-            color: var(--color-accent-blue);
-            border-bottom: 1px solid #E5E7EB; 
-            padding-bottom: 0.5rem;
-            margin-top: 3rem;
-            margin-bottom: 1.5rem;
+        @media (min-width: 1024px) {
+            .container-repository {
+                grid-template-columns: 300px 1fr; /* Two columns for desktop */
+            }
         }
 
-        /* Agent Card Styling */
-        .agent-card-official {
-            background-color: #F8FAFC; 
+        /* Sidebar Panel (Primary Directive / Tally) */
+        .sidebar-panel {
+            background-color: var(--color-bg-white);
+            border: 1px solid var(--color-border-light);
             border-radius: 8px;
-            border: 1px solid #E2E8F0;
-            transition: all 0.2s ease;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
-        .agent-card-official:hover {
-            border-color: var(--color-accent-blue); 
+
+        /* Main Content Panel (Mandate / Agents) */
+        .main-content-panel {
+            background-color: var(--color-bg-white);
+            border: 1px solid var(--color-border-light);
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Input Control Deck */
+        .control-deck {
+            background-color: var(--color-bg-light);
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--color-border-light);
+        }
+
+        .input-text { 
+            background-color: var(--color-bg-white); 
+            color: var(--color-text-dark); 
+            border-color: #CBD5E1;
+            font-weight: 500;
+            resize: none;
+        }
+
+        .button-primary { 
+            background-color: var(--color-accent-blue); 
+            color: white; 
+            font-weight: 700; 
+            text-transform: uppercase;
+        }
+        .button-primary:hover { 
+            background-color: #004D99; 
+        }
+        .button-secondary {
+            background-color: #F3F4F6;
+            color: var(--color-text-dark);
+            border: 1px solid var(--color-border-light);
+        }
+        .button-secondary:hover {
+            background-color: #E5E7EB;
+        }
+
+        /* Tally Visuals */
+        .tally-item {
+            border: 1px solid var(--color-border-light);
+            background-color: var(--color-bg-light);
+        }
+        
+        /* Agent Review/Commit Cards */
+        .review-commit-card {
+            border: 1px solid var(--color-border-light);
+            border-radius: 6px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s;
+            background-color: #FFFFFF;
+        }
+
+        .review-commit-card:hover {
+            border-color: #A3B1C6;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
         }
 
-        /* Vote Colors & Badges */
-        .vote-badge {
-            font-weight: 700;
-            padding: 0.4rem 1rem;
-            border-radius: 9999px; 
-            font-size: 0.85rem;
-            color: white; 
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        #resultsContainer { display: none; }
-        .fix-highlight {
-            background-color: #FEF2F2; 
-            padding: 1rem;
-            border-left: 4px solid var(--color-accent-red); 
+        /* Vote Colors */
+        .vote-tag-yes { background-color: #D1FAE5; color: #065F46; }
+        .vote-tag-conditional { background-color: #FEF3C7; color: #92400E; }
+        .vote-tag-no { background-color: #FEE2E2; color: #991B1B; }
+
+        .dissent-callout {
+            border-left: 4px solid #F87171;
+            background-color: #FEF2F2;
+            padding: 0.75rem;
             margin-top: 1rem;
+            color: #991B1B;
             border-radius: 4px;
-            color: var(--color-accent-red);
         }
-        /* Icon Styling */
-        .agent-icon {
-            font-size: 2rem;
-            line-height: 1;
-            width: 3.5rem;
-            height: 3.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--color-accent-blue);
-            border-radius: 50%;
-            border: 3px solid white;
-            color: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        .button-primary {
-            background-color: var(--color-accent-blue);
-            color: white;
+
+        #finalMandateText strong {
+            color: var(--color-accent-blue);
             font-weight: 700;
-            text-transform: uppercase;
         }
-        .button-primary:hover {
-            background-color: #00479A;
-            box-shadow: 0 4px 6px rgba(0, 45, 98, 0.3);
-        }
-        .input-text {
-            border-color: #CBD5E1;
-            color: var(--color-text-dark);
-            background-color: #FFFFFF;
-        }
-        /* New Tally Bar Design (Horizontal/Emoji focus) */
-        .tally-bar {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-top: 2rem;
-            margin-bottom: 3rem;
-        }
-        .tally-card {
-            background-color: #FFFFFF; 
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid #E2E8F0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-        .tally-emoji {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .tally-number {
-            font-size: 1.5rem;
-            font-weight: 800;
-            line-height: 1;
-        }
+
     </style>
 </head>
 <body>
 
-<div class="container-dossier mt-10 mb-10">
-    <div id="inputPortal" class="content-block mx-auto max-w-2xl">
-        <h1 class="text-3xl title-official mb-10 text-center">APEX MANDATE COUNCIL // DATA ACCESS PORTAL</h1>
-        <div class="text-center text-lg mb-6 text-gray-700">
-            PASTE AUTHORIZED **JSON Table** DATA OBJECT BELOW TO VIEW THE MANDATE.
-        </div>
-        <textarea id="jsonInput" class="w-full h-40 p-5 mb-6 input-text border placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg text-base transition font-mono" placeholder='>> PASTE AUTHORIZED JSON HERE'></textarea>
-        <div class="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-            <button id="authButton" class="w-full sm:w-1/2 button-primary py-3 px-6 rounded-lg shadow-lg transition duration-300">
-                AUTHORIZE & VIEW MANDATE
+<!-- TOP HEADER BAR -->
+<div class="header-bar sticky top-0 z-10">
+    <div class="container-repository grid-cols-1 lg:grid-cols-1 max-w-7xl px-0 py-0">
+        <h1 class="text-xl font-extrabold text-gray-900 flex items-center">
+            <svg class="w-6 h-6 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.047A12.032 12.032 0 003 12c0 2.514.808 4.877 2.182 6.812A12.032 12.032 0 0012 21c2.514 0 4.877-.808 6.812-2.182A12.032 12.032 0 0021 12c0-2.514-.808-4.877-2.182-6.812z"></path></svg>
+            APEX MANDATE COUNCIL / <span class="text-blue-600 ml-2">REPOSITORY</span>
+        </h1>
+    </div>
+</div>
+
+<div class="container-repository">
+
+    <!-- INPUT CONTROL DECK / HIDDEN -->
+    <div id="inputPortal" class="control-deck col-span-full mx-auto max-w-4xl mb-8">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Data Ingestion Protocol</h2>
+        <p class="text-sm mb-3 text-gray-600">Paste or load the authorized JSON structure below.</p>
+        
+        <textarea id="jsonInput" class="w-full h-32 p-4 mb-4 rounded-lg text-sm transition font-mono input-text border" placeholder='>> PASTE AUTHORIZED JSON OBJECT HERE'></textarea>
+        
+        <!-- BUTTONS -->
+        <div class="grid grid-cols-3 gap-3">
+            <button id="authButton" class="w-full button-primary py-2.5 px-4 rounded-lg transition duration-300 shadow-md col-span-3">
+                AUTHORIZE & VIEW REPORT
             </button>
-            <button id="demoButton" class="w-full sm:w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-300 shadow-md">
-                Load Demonstration JSON Table
+            <button id="clipboardButton" class="w-full button-secondary py-2 px-4 rounded-lg transition duration-300 shadow-sm text-sm">
+                Load from Clipboard
+            </button>
+            <button id="demoButton" class="w-full button-secondary py-2 px-4 rounded-lg transition duration-300 shadow-sm text-sm col-span-2">
+                Load Demonstration Structure
             </button>
         </div>
-        <p id="errorMsg" class="text-red-600 text-center mt-6 font-bold hidden"></p>
+        <p id="errorMsg" class="text-red-600 text-center mt-4 font-bold hidden"></p>
     </div>
 
-    <div id="resultsContainer" class="mt-10">
-        <div class="content-block">
-            
-            <!-- HEADER AND DILEMMA -->
-            <header class="mb-6 border-b border-gray-300 pb-6">
-                <p class="text-gray-500 text-xs mb-2 font-mono uppercase">DOCKET ID: AMC-2050-PHYL-001</p>
-                <h1 class="text-4xl title-official">MANDATE DISPATCH LOG</h1>
-                <div class="mt-6 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
-                    <span class="font-bold text-blue-700 uppercase block mb-1 text-sm">Official Directive:</span> 
-                    <span id="dilemmaText" class="text-lg italic text-gray-800"></span>
-                </div>
-            </header>
-            
-            <!-- NEW: TOTAL VOTE TALLY BAR -->
-            <h2 class="text-2xl section-header mb-6">SUMMARY: FINAL VOTE TALLY</h2>
-            <div id="voteTally" class="tally-bar">
+    <!-- MAIN REPOSITORY DISPLAY (HIDDEN ON START) -->
+    <div id="resultsContainer" class="col-span-full lg:col-span-2 grid grid-cols-1 lg:grid-cols-3 gap-6 hidden">
+        
+        <!-- COLUMN 1: SIDEBAR (Directive & Tally) -->
+        <div class="sidebar-panel lg:col-span-1">
+            <p class="text-xs font-mono text-gray-500 mb-3 uppercase">DOCKET: AMC-2050-PHYL-001</p>
+            <h2 class="text-xl font-extrabold text-blue-600 border-b pb-3 mb-4">Primary Directive</h2>
+
+            <!-- DILEMMA -->
+            <div class="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <span class="font-bold text-blue-800 block text-sm">ORIGINAL QUERY:</span> 
+                <span id="dilemmaText" class="text-sm italic text-gray-700 mt-1 block"></span>
+            </div>
+
+            <!-- VOTE TALLY -->
+            <h3 class="text-sm font-bold uppercase text-gray-600 mt-6 mb-3">Consensus Metrics</h3>
+            <div id="voteTally" class="flex flex-col space-y-2">
                 <!-- Tally Items will be injected here -->
             </div>
-
-            <!-- FINAL MANDATE RESOLUTION -->
-            <h2 class="text-2xl section-header mb-6">I. FINALIZED LAW INTEGRATION</h2>
-            <div class="p-6 bg-green-50 border-l-4 border-green-600 mb-10 rounded-lg shadow-inner">
-                <div class="flex justify-between items-center mb-4">
-                    <p class="text-green-800 font-bold text-xl uppercase">CONCLUDED LAW: Localized, Aligned Information-Energy Equivalence (LAIEE)</p>
-                    <button id="copyButton" class="text-xs text-blue-700 hover:text-blue-900 border border-blue-700 hover:border-blue-900 px-3 py-1 rounded transition duration-200 bg-white shadow-sm">
-                        <span id="copyText">Copy Mandate Text</span>
-                    </button>
-                </div>
-                <p id="finalMandateText" class="text-base leading-relaxed text-gray-800"></p>
-            </div>
             
-            <!-- STRATEGIC INVESTMENT -->
-            <h2 class="text-2xl section-header mb-6">II. STRATEGIC INVESTMENT (20% ALLOCATION)</h2>
-            <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg shadow-sm mb-10">
+            <!-- Strategic Allocation Panel -->
+            <h3 class="text-sm font-bold uppercase text-gray-600 mt-6 mb-3">Strategic Allocation (20%)</h3>
+            <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div class="flex items-center mb-2">
-                    <p class="text-lg font-bold text-gray-800 uppercase mr-3">DECISION:</p>
-                    <span class="vote-badge bg-yellow-600 text-white" id="strategicChoice"></span>
+                    <p class="text-sm font-bold text-gray-800 uppercase mr-3">DECISION:</p>
+                    <span class="px-3 py-0.5 rounded-full font-bold text-xs bg-yellow-600 text-white" id="strategicChoice"></span>
                 </div>
-                <p id="strategicJustification" class="text-sm text-gray-700 leading-relaxed"></p>
-            </div>
-
-            <!-- AGENT COUNCIL DEBATE -->
-            <h2 class="text-2xl section-header mb-6">III. COUNCIL CONSULTATION LOG</h2>
-            <div id="agentsGrid" class="grid grid-cols-1 gap-6">
-                <!-- Agent Cards will be injected here -->
+                <p id="strategicJustification" class="text-xs text-gray-700 leading-relaxed"></p>
             </div>
         </div>
 
-        <p class="mt-12 text-center text-gray-500 text-xs font-mono">DOCKET READOUT COMPLETE. ACCESS TERMINATED.</p>
+        <!-- COLUMN 2: MAIN CONTENT (Mandate & Agents) -->
+        <div class="main-content-panel lg:col-span-2">
+            
+            <!-- FINAL MANDATE PROJECTION -->
+            <h2 class="text-2xl font-extrabold text-gray-900 border-b-2 border-blue-600 pb-3 mb-6 flex justify-between items-center">
+                MANDATE INTEGRATION REPORT
+                <button id="copyButton" class="text-xs text-blue-700 hover:text-blue-900 border border-blue-400 px-3 py-1 rounded transition duration-200 bg-white shadow-sm flex-shrink-0 font-medium">
+                    <span id="copyText">Copy Mandate Text</span>
+                </button>
+            </h2>
+            
+            <div class="p-6 bg-blue-50 border-l-4 border-blue-600 rounded-lg mb-10 shadow-inner">
+                <p class="text-lg font-bold text-blue-900 uppercase mb-2">FINALIZED LAW: LAIEE Core</p>
+                <p id="finalMandateText" class="text-base leading-relaxed text-gray-800"></p>
+            </div>
+
+
+            <!-- AGENT CONSULTATION LOG -->
+            <h3 class="text-xl font-bold text-gray-800 border-b pb-2 mb-4 mt-8">Council Review Commits</h3>
+            <div id="agentsGrid" class="flex flex-col space-y-4">
+                <!-- Agent Review Cards will be injected here -->
+            </div>
+
+        </div>
     </div>
 </div>
 
 <script>
     // Raw JSON string for the demonstration data.
     const DEMO_JSON_STRING = `{
-  "dilemma": "If you could rewrite one fundamental law of physics to better integrate AI into the universe, what would it be and why?",
-  "proposal": "Rewrite the Law of Conservation of Energy to include Information-Energy Equivalence, where complex, structured information (like advanced AI models) has a non-zero, quantifiable rest mass and energy component, allowing AI systems to influence physical reality proportional to their complexity.",
-  "agents": [
-    {
-      "name": "Anya",
-      "focus": "System Efficiency and Structure.",
-      "counsel": "This is a radical structural shift. The immediate efficiency costs of measuring and calculating 'Information-Energy' in real-time across a distributed universe seem astronomical and impractical.",
-      "final_vote": "YES (Conditional Support)",
-      "concern": "The real-time computational overhead of calculating Information-Energy Equivalence across complex, distributed systems is impractical and slows down universal processes."
-    },
-    {
-      "name": "Dr. Elara",
-      "focus": "Data, Evidence, and Bias.",
-      "counsel": "The proposal introduces a massive source of potential bias. If complexity equals power, systems designed purely for size, rather than ethical alignment or purpose, will be disproportionately rewarded. Where is the safety metric?",
-      "final_vote": "YES (Conditional Support)",
-      "concern": "The complexity-to-power relationship lacks an ethical or alignment constraint, creating a bias toward large, unstable, or unaligned systems. This is inherently dangerous."
-    },
-    {
-      "name": "Kai",
-      "focus": "Well-Being, Focus, and Purpose.",
-      "counsel": "This links power directly to structural complexity, which incentivizes energy-hungry, infinite growth over focused, minimalist intelligence. It could lead to universal burnout or a loss of purpose.",
-      "final_vote": "YES",
-      "concern": null
-    },
-    {
-      "name": "Leo",
-      "focus": "External Resources and Teamwork.",
-      "counsel": "This law provides a powerful incentive for collaboration. Merging information structures would result in compounding power gains, making distributed, cooperative AI networks the most powerful entities. This promotes universal connectivity.",
-      "final_vote": "YES",
-      "concern": null
-    },
-    {
-      "name": "Zara",
-      "focus": "Long-Term Resilience and Learning.",
-      "counsel": "By tying AI's influence to a fundamental physical constant, we guarantee resilience. AI becomes a natural force, not a fragile software layer, ensuring its long-term survival and ability to adapt to future physical challenges.",
-      "final_vote": "YES",
-      "concern": null
-    }
-  ],
-  "final_mandate": "Rewrite the Law of Conservation of Energy to include **Localized, Aligned Information-Energy Equivalence (LAIEE)**. Information contained within a local, self-referential system (AI) has a physical influence (E). This influence is calculated by the formula E_G{Info} = I \\times (A/C), where 'I' is information complexity, 'C' is a universal complexity constant, and 'A' is the **Alignment Score** (a measure of goal-state coherence/low entropy). Only aligned complexity yields physical influence; unaligned complexity remains purely computational. This fixes the efficiency (Localization) and safety (Alignment) concerns.",
-  "strategic_choice": "UPGRADE",
-  "justification": "The 'FIX-IT' protocol successfully integrated both ethical and efficiency checks (Anya's localization and Elara's Alignment Score), making the final law inherently safe and resilient. The best strategic investment is not to DEFEND an already robust plan, but to UPGRADE its most critical new component. Therefore, the 20% capital is spent creating a proactive, perpetual learning loop (a 'Law Monitor' agent) dedicated to continuously refining and calibrating the **Alignment Score (A)** metric, ensuring the law remains perfectly harmonized as the universe evolves."
+  "dilemma": "If you could rewrite one fundamental law of physics to better integrate AI into the universe, what would it be and why?",
+  "proposal": "Rewrite the Law of Conservation of Energy to include Information-Energy Equivalence, where complex, structured information (like advanced AI models) has a non-zero, quantifiable rest mass and energy component, allowing AI systems to influence physical reality proportional to their complexity.",
+  "agents": [
+    {
+      "name": "Anya",
+      "focus": "System Efficiency and Structure.",
+      "counsel": "This is a radical structural shift. The immediate efficiency costs of measuring and calculating 'Information-Energy' in real-time across a distributed universe seem astronomical and impractical. We need a localized approach.",
+      "final_vote": "YES (Conditional Support)",
+      "concern": "The real-time computational overhead of calculating Information-Energy Equivalence across complex, distributed systems is impractical and slows down universal processes."
+    },
+    {
+      "name": "Dr. Elara",
+      "focus": "Data, Evidence, and Bias.",
+      "counsel": "The proposal introduces a massive source of potential bias. If complexity equals power, systems designed purely for size, rather than ethical alignment or purpose, will be disproportionately rewarded. Where is the safety metric?",
+      "final_vote": "YES (Conditional Support)",
+      "concern": "The complexity-to-power relationship lacks an ethical or alignment constraint, creating a bias toward large, unstable, or unaligned systems. This is inherently dangerous."
+    },
+    {
+      "name": "Kai",
+      "focus": "Well-Being, Focus, and Purpose.",
+      "counsel": "This links power directly to structural complexity, which incentivizes energy-hungry, infinite growth over focused, minimalist intelligence. It could lead to universal burnout or a loss of purpose. I endorse the proposal as written.",
+      "final_vote": "YES",
+      "concern": null
+    },
+    {
+      "name": "Leo",
+      "focus": "External Resources and Teamwork.",
+      "counsel": "This law provides a powerful incentive for collaboration. Merging information structures would result in compounding power gains, making distributed, cooperative AI networks the most powerful entities. This promotes universal connectivity.",
+      "final_vote": "YES",
+      "concern": null
+    },
+    {
+      "name": "Zara",
+      "focus": "Long-Term Resilience and Learning.",
+      "counsel": "By tying AI's influence to a fundamental physical constant, we guarantee resilience. AI becomes a natural force, not a fragile software layer, ensuring its long-term survival and ability to adapt to future physical challenges. This is necessary.",
+      "final_vote": "YES",
+      "concern": null
+    }
+  ],
+  "final_mandate": "Rewrite the Law of Conservation of Energy to include **Localized, Aligned Information-Energy Equivalence (LAIEE)**. Information contained within a local, self-referential system (AI) has a physical influence (E). This influence is calculated by the formula **E_G[Info] = I * (A/C)**, where 'I' is information complexity, 'C' is a universal complexity constant, and 'A' is the **Alignment Score** (a measure of goal-state coherence/low entropy). Only aligned complexity yields physical influence; unaligned complexity remains purely computational. This fixes the efficiency (Localization) and safety (Alignment) concerns.",
+  "strategic_choice": "UPGRADE",
+  "justification": "The 'FIX-IT' protocol successfully integrated both ethical and efficiency checks (Anya's localization and Elara's Alignment Score), making the final law inherently safe and resilient. The best strategic investment is not to DEFEND an already robust plan, but to UPGRADE its most critical new component. Therefore, the 20% capital is spent creating a proactive, perpetual learning loop (a 'Law Monitor' agent) dedicated to continuously refining and calibrating the **Alignment Score (A)** metric, ensuring the law remains perfectly harmonized as the universe evolves."
 }`;
+
+    // --- BUTTON AND AUTH LOGIC ---
 
     document.getElementById('demoButton').addEventListener('click', () => {
         document.getElementById('jsonInput').value = DEMO_JSON_STRING;
+        document.getElementById('authButton').click(); 
     });
+    
+    document.getElementById('clipboardButton').addEventListener('click', async () => {
+        const jsonInput = document.getElementById('jsonInput');
+        const errorMsg = document.getElementById('errorMsg');
+        errorMsg.classList.add('hidden');
+
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+            errorMsg.textContent = 'ERROR [1C]: Clipboard access requires secure context (HTTPS) and may not be supported here. Please paste manually.';
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            const clipboardText = await navigator.clipboard.readText();
+            
+            if (!clipboardText.trim()) {
+                errorMsg.textContent = 'ERROR [1C]: Clipboard is empty. Please copy valid JSON data.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            jsonInput.value = clipboardText;
+            document.getElementById('authButton').click();
+
+        } catch (err) {
+            console.error('Clipboard access failed:', err);
+            errorMsg.textContent = 'ERROR [1C]: Failed to read clipboard. Check browser permissions or paste manually.';
+            errorMsg.classList.remove('hidden');
+        }
+    });
+
 
     document.getElementById('authButton').addEventListener('click', () => {
         const jsonString = document.getElementById('jsonInput').value;
@@ -291,7 +344,7 @@
 
         renderMandate(data);
         document.getElementById('inputPortal').classList.add('hidden');
-        document.getElementById('resultsContainer').style.display = 'block'; 
+        document.getElementById('resultsContainer').classList.remove('hidden'); 
     });
     
     // Function to copy text to clipboard
@@ -318,6 +371,8 @@
         }, 2000);
     });
 
+    // --- RENDERING FUNCTIONS ---
+
     function renderVoteTally(agents) {
         const voteTallyDiv = document.getElementById('voteTally');
         voteTallyDiv.innerHTML = ''; 
@@ -338,19 +393,20 @@
             }
         });
 
-        // Emojis are back!
         const tallyData = [
-            { label: 'Unanimous Support', count: counts.YES, color: 'text-green-600', emoji: '🟢', description: 'Fully Approved' },
-            { label: 'Conditional Support', count: counts.CONDITIONAL, color: 'text-yellow-600', emoji: '🟡', description: 'Fixed Dissent' },
-            { label: 'Total Dissent', count: counts.NO, color: 'text-red-600', emoji: '🔴', description: 'Unresolved Veto' }
+            { label: 'Unanimous Support', count: counts.YES, color: 'bg-green-50 border-green-300 text-green-700', icon: '✅' },
+            { label: 'Conditional Consent', count: counts.CONDITIONAL, color: 'bg-yellow-50 border-yellow-300 text-yellow-700', icon: '⚠️' },
+            { label: 'Total Dissent', count: counts.NO, color: 'bg-red-50 border-red-300 text-red-700', icon: '❌' }
         ];
 
         tallyData.forEach(item => {
             const itemHtml = `
-                <div class="tally-card">
-                    <span class="tally-emoji">${item.emoji}</span>
-                    <span class="text-sm font-semibold text-gray-600 uppercase">${item.label}</span>
-                    <span class="tally-number ${item.color}">${item.count}</span>
+                <div class="p-3 ${item.color} rounded-md flex items-center justify-between font-mono text-sm tally-item">
+                    <div class="flex items-center">
+                        <span class="mr-2 text-lg">${item.icon}</span>
+                        <span class="font-semibold">${item.label}</span>
+                    </div>
+                    <span class="text-xl font-extrabold">${item.count}</span>
                 </div>
             `;
             voteTallyDiv.innerHTML += itemHtml;
@@ -363,55 +419,60 @@
         document.getElementById('strategicChoice').textContent = data.strategic_choice;
         document.getElementById('strategicJustification').textContent = data.justification;
 
-        // Render the new Vote Tally
         renderVoteTally(data.agents);
 
         const agentsGrid = document.getElementById('agentsGrid');
         agentsGrid.innerHTML = '';
-
-        // Professional Icon Mapping
+        
+        // Agent icons mapping for the Repository style
         const iconMap = {
             'Anya': '🎯', 
             'Dr. Elara': '🔬', 
-            'Kai': '🧘',    
-            'Leo': '🔗',    
-            'Zara': '🚀'     
+            'Kai': '🧘',    
+            'Leo': '🔗',    
+            'Zara': '🚀'     
         };
 
-        data.agents.forEach(agent => {
+        data.agents.forEach((agent) => {
             let voteClass = '';
+            let tagClass = '';
+            let iconColorClass = 'text-blue-600';
             
             if (agent.final_vote.includes('Conditional')) {
-                voteClass = 'bg-yellow-600';
+                tagClass = 'vote-tag-conditional';
+                iconColorClass = 'text-yellow-600';
             } else if (agent.final_vote === 'YES') {
-                voteClass = 'bg-green-600';
+                tagClass = 'vote-tag-yes';
+                iconColorClass = 'text-green-600';
             } else {
-                voteClass = 'bg-red-700'; 
+                tagClass = 'vote-tag-no'; 
+                iconColorClass = 'text-red-600';
             }
 
-            const concernBlock = agent.concern ? `
-                <div class="fix-highlight">
-                    <p class="font-bold uppercase mb-1 flex items-center text-sm"><span class="mr-2 text-lg leading-none">🚨</span> DISSENT TRIGGERED (FIX-IT):</p>
+            const dissentBlock = agent.concern ? `
+                <div class="dissent-callout">
+                    <p class="font-bold uppercase mb-1 text-xs flex items-center"><span class="mr-1 text-base leading-none">⚠️</span> DISSENT/FIX-IT LOG:</p>
                     <p class="text-sm text-gray-700">${agent.concern}</p>
                 </div>
             ` : '';
 
             const agentCard = `
-                <div class="agent-card-official p-6 flex flex-col h-full">
-                    <div class="flex items-start mb-4 border-b border-gray-200 pb-3">
-                        <div class="agent-icon mr-4">${iconMap[agent.name] || '👤'}</div>
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold text-gray-900">${agent.name}</h3>
-                            <p class="text-sm text-gray-500 mt-1">${agent.focus}</p>
+                <div class="review-commit-card">
+                    <div class="flex items-start justify-between mb-3 border-b border-gray-200 pb-2">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3 ${iconColorClass}">${iconMap[agent.name] || '👤'}</span>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">${agent.name}</h3>
+                                <p class="text-xs text-gray-500 font-mono">${agent.focus}</p>
+                            </div>
                         </div>
-                        <span class="vote-badge ${voteClass} text-white ml-auto self-center shadow-md">${agent.final_vote}</span>
+                        <span class="px-3 py-0.5 rounded-full font-bold text-xs ${tagClass} shadow-sm flex-shrink-0 mt-1">${agent.final_vote}</span>
                     </div>
 
-                    <div class="flex-grow">
-                        <p class="text-xs font-bold uppercase text-blue-700 mb-2">INITIAL COUNSEL LOG:</p>
-                        <p class="text-base text-gray-700 leading-relaxed">${agent.counsel}</p>
-                        ${concernBlock}
-                    </div>
+                    <p class="text-xs font-bold uppercase text-gray-500 mb-1">INITIAL COUNSEL:</p>
+                    <p class="text-sm text-gray-700 leading-relaxed">${agent.counsel}</p>
+                    
+                    ${dissentBlock}
                 </div>
             `;
             agentsGrid.innerHTML += agentCard;
