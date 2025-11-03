@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>U.S. Policy Artifact Portal - A-AWRA</title>
+    <title>U.S. Policy Artifact Portal - Official Brief</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Lucide Icons -->
@@ -13,15 +13,12 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
-            background-color: white; /* Pure White Background */
+            background-color: #f8fafc; /* Soft Light Gray Background */
             color: #111827; /* Near Black/Very Dark Gray text for contrast */
         }
         .authority-header {
             background-color: #ffffff;
-            border-bottom: 2px solid #e5e5e5; /* Thin light separator */
-        }
-        .section-bg {
-            background-color: #ffffff; /* All content on white background */
+            border-bottom: 2px solid #e5e5e5;
         }
         .primary-accent {
             color: #1f2937; /* Deep Charcoal for main headings */
@@ -34,21 +31,13 @@
         }
         .pill {
             padding: 2px 8px;
-            border-radius: 2px; /* Sharper corners */
+            border-radius: 2px;
             font-weight: 700;
-            font-size: 0.65rem; /* Smaller, more precise text */
+            font-size: 0.65rem;
             text-transform: uppercase;
         }
-        .yes-pill {
-            background-color: #f0fdf4; /* Very Light Mint */
-            color: #10b981; /* Emerald Green */
-            border: 1px solid #d1fae5;
-        }
-        .no-pill {
-            background-color: #fff1f2; /* Very Light Pink */
-            color: #f87171; /* Red */
-            border: 1px solid #fee2e2;
-        }
+        .yes-pill { background-color: #d1fae5; color: #059669; } /* Light Green/Dark Green */
+        .no-pill { background-color: #fee2e2; color: #dc2626; } /* Light Red/Dark Red */
         .input-box {
             min-height: 300px;
             resize: vertical;
@@ -62,64 +51,82 @@
             background-color: #e5e7eb;
         }
 
-        /* NEW PROGRESS BAR & INTERACTIVITY STYLES */
-        .bar-yes-unconditional {
-            background-color: #1e40af; /* Deep Navy Blue (Primary Authority) */
-            color: white;
-            font-weight: 700;
-        }
-        .bar-yes-conditional {
-            background-color: #3b82f6; /* Medium Blue (Qualified Support) */
-            color: white;
-            font-weight: 700;
-        }
-        .bar-no-dissent {
-            background-color: #dc2626; /* Deep Red (Dissent/Major Concern) */
-            color: white;
-            font-weight: 700;
-        }
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
+        /* PROGRESS BAR & INTERACTIVITY STYLES */
+        .bar-yes-unconditional { background-color: #1e40af; } /* Deep Navy Blue */
+        .bar-yes-conditional { background-color: #3b82f6; } /* Medium Blue */
+        .bar-no-dissent { background-color: #dc2626; } /* Deep Red */
+        
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
         
         .agent-card-base {
             transition: all 0.3s ease-in-out;
-            cursor: default;
+            border-left: 4px solid #e5e7eb;
+            padding-left: 1rem;
         }
         .highlight-card {
+            /* Highlight used by the progress bar filter */
             border: 3px solid #f97316; /* Professional Orange/Amber highlight */
             box-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
             background-color: #fff7ed; /* Very light subtle background for highlight */
+            border-left-width: 4px; 
+        }
+        .filter-highlight {
+            /* Highlight used by the Executive Buttons filter */
+            border-top: 3px solid #06b6d4; /* Cyan highlight for executive filters */
+            border-bottom: 3px solid #06b6d4;
+            box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+            background-color: #ecfeff;
         }
         .dim-card {
-            opacity: 0.35;
+            opacity: 0.3;
             filter: grayscale(50%);
         }
 
-        /* Improved Header for Dilemma/Proposal */
-        .section-header-bar {
-            background-color: #f9fafb; /* Light Grayish background for bars */
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
+        /* Style for click events on legend/bar */
+        .interactive-click:hover {
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        
+        /* PRINT STYLES */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white !important;
+            }
+            .authority-header {
+                box-shadow: none !important;
+                border-bottom: 2px solid #000 !important;
+            }
+            /* Ensure cards are visible and not styled as dim */
+            .agent-card-base {
+                opacity: 1 !important;
+                filter: none !important;
+                display: block !important;
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                margin-bottom: 1rem;
+            }
+            #artifact-display {
+                margin-top: 0 !important;
+            }
         }
     </style>
 </head>
 <body class="min-h-screen antialiased">
 
-    <!-- Header Section (Authority Bar - Reduced visual noise) -->
-    <header class="authority-header sticky top-0 z-10">
+    <!-- Header Section (Authority Bar) -->
+    <header id="main-header" class="authority-header sticky top-0 z-10 shadow-sm no-print">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <i data-lucide="shield-check" class="w-7 h-7 text-red-600"></i>
+                <i data-lucide="shield-check" class="w-7 h-7 text-indigo-800"></i>
                 <h1 class="text-xl font-bold tracking-wider primary-accent uppercase">
-                    POLICY ANALYSIS & RESOLUTION CENTER <span class="secondary-accent text-sm">| PARC</span>
+                    U.S. POLICY ARTIFACT PORTAL <span class="secondary-accent text-sm">| EXECUTIVE BRIEF</span>
                 </h1>
             </div>
-            <button id="load-toggle-button" onclick="toggleArtifactView(true)" class="text-sm text-gray-500 hover:text-gray-700 transition hidden">
+            <button id="load-toggle-button" onclick="toggleArtifactView('input')" class="text-sm text-indigo-700 hover:text-indigo-900 transition hidden">
                 <i data-lucide="upload" class="w-4 h-4 inline-block mr-1"></i>
                 LOAD NEW ARTIFACT
             </button>
@@ -128,19 +135,40 @@
 
     <!-- Main Content Area -->
     <main class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+        
+        <!-- Landing Page -->
+        <section id="landing-page" class="section-bg p-10 data-panel-border rounded-lg bg-white text-center">
+            <h2 class="text-5xl font-extrabold primary-accent mb-4 uppercase tracking-tighter">
+                POLICY ARTIFACT SERVICE
+            </h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                Secure executive interface for reviewing and analyzing high-level policy proposals and agent consensus reports.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <button onclick="loadDemoArtifact()" class="bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3 px-8 rounded-md transition duration-200 shadow-lg">
+                    <i data-lucide="file-check" class="w-5 h-5 inline-block mr-2"></i>
+                    LOAD DEMO STRUCTURE
+                </button>
+                <button onclick="toggleArtifactView('input')" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-8 rounded-md transition duration-200 shadow-md">
+                    <i data-lucide="upload-cloud" class="w-5 h-5 inline-block mr-2"></i>
+                    INPUT NEW JSON ARTIFACT
+                </button>
+            </div>
+        </section>
+
 
         <!-- JSON Input Area -->
-        <section id="input-area" class="section-bg p-10 data-panel-border rounded-lg">
+        <section id="input-area" class="section-bg p-10 data-panel-border rounded-lg bg-white hidden">
             <h2 class="text-3xl font-extrabold primary-accent mb-4 uppercase">
                 DATA INJECTION PROTOCOL
             </h2>
             <p class="text-gray-600 mb-6 border-b pb-4">
-                Input the standardized Policy Artifact JSON into the field below. Validation is required prior to rendering the official brief format.
+                Input the standardized Policy Artifact JSON into the field below to render the official brief format.
             </p>
-            <textarea id="json-input" class="input-box w-full p-4 bg-gray-50 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:ring-gray-400 focus:border-gray-400 transition duration-200" placeholder='{"dilemma": "...", "proposal": "...", "agents": [...], "final_mandate": "..."}'></textarea>
+            <textarea id="json-input" class="input-box w-full p-4 bg-gray-50 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:ring-indigo-400 focus:border-indigo-400 transition duration-200" placeholder='{"dilemma": "...", "proposal": "...", "agents": [...], "final_mandate": "..."}'></textarea>
             
             <div class="mt-4 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <button onclick="loadArtifact()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-md transition duration-200 shadow-md">
+                <button onclick="loadArtifact()" class="w-full sm:w-auto bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3 px-6 rounded-md transition duration-200 shadow-md">
                     <i data-lucide="code" class="w-5 h-5 inline-block mr-2"></i>
                     AUTHENTICATE & RENDER
                 </button>
@@ -152,14 +180,26 @@
         </section>
 
         <!-- Artifact Display Area (Initially Hidden) -->
-        <section id="artifact-display" class="hidden">
+        <section id="artifact-display" class="hidden relative">
             
-            <!-- Metadata Block -->
-            <div class="mb-12 border-b-2 border-gray-400 pb-4">
-                <p class="text-sm font-medium secondary-accent mb-2">POLICY ARTIFACT ID:</p>
-                <p id="artifact-id" class="text-xl font-mono primary-accent inline-block mr-8">2025-Q4/AIPR-21B</p>
-                <p class="text-sm font-medium secondary-accent inline-block mr-2">CLASSIFICATION:</p>
-                <span class="text-green-600 text-lg font-bold">AUTHORIZED DRAFT</span>
+            <!-- Metadata Block (Dynamic Status Tracking) -->
+            <div class="mb-12 border-b-2 border-gray-400 pb-4 flex flex-wrap gap-x-8 gap-y-2 items-center">
+                <div class="flex items-center">
+                    <p class="text-sm font-medium secondary-accent mr-2 uppercase">ARTIFACT ID:</p>
+                    <p id="artifact-id" class="text-xl font-mono primary-accent">2025-Q4/AIPR-21B</p>
+                </div>
+                <div class="flex items-center">
+                    <p class="text-sm font-medium secondary-accent mr-2 uppercase">POLICY LEVEL:</p>
+                    <span id="policy-level" class="text-lg font-bold text-indigo-600">Level I - Strategic</span>
+                </div>
+                <div class="flex items-center">
+                    <p class="text-sm font-medium secondary-accent mr-2 uppercase">CLASSIFICATION:</p>
+                    <span class="text-green-600 text-lg font-bold">AUTHORIZED DRAFT</span>
+                </div>
+                <div class="flex items-center">
+                    <p class="text-sm font-medium secondary-accent mr-2 uppercase">LAST RENDERED:</p>
+                    <span id="rendered-timestamp" class="text-sm font-mono text-gray-700"></span>
+                </div>
             </div>
             
             <!-- Document Title -->
@@ -169,44 +209,66 @@
 
 
             <!-- DILEMMA & PROPOSAL (Section 1) -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-12">
-                
-                <!-- Dilemma Panel -->
-                <div class="lg:col-span-1 border-r border-gray-200 pr-8">
-                    <div class="flex items-center mb-4 section-header-bar text-red-600">
-                        <i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i>
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-red-600">MISSION DILEMMA</h3>
+            <section id="dilemma-section" class="mb-12">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    
+                    <!-- Dilemma Panel -->
+                    <div class="lg:col-span-1 border-r border-gray-200 pr-8">
+                        <div class="flex items-center mb-4 pb-2 border-b border-red-300">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 mr-2 text-red-600"></i>
+                            <h3 class="text-sm font-bold uppercase tracking-widest text-red-600">MISSION DILEMMA</h3>
+                        </div>
+                        <p id="dilemma-content" class="text-gray-700 leading-relaxed"></p>
                     </div>
-                    <p id="dilemma-content" class="text-gray-700 leading-relaxed"></p>
-                </div>
 
-                <!-- Proposal Panel -->
-                <div class="lg:col-span-2">
-                    <div class="flex items-center mb-4 section-header-bar text-blue-600">
-                        <i data-lucide="lightbulb" class="w-5 h-5 mr-2"></i>
-                        <h3 class="text-sm font-bold uppercase tracking-widest text-blue-600">INITIAL PROPOSAL</h3>
+                    <!-- Proposal Panel -->
+                    <div class="lg:col-span-2">
+                        <div class="flex items-center mb-4 pb-2 border-b border-blue-300">
+                            <i data-lucide="lightbulb" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            <h3 class="text-sm font-bold uppercase tracking-widest text-blue-600">INITIAL PROPOSAL</h3>
+                        </div>
+                        <p id="proposal-content" class="text-gray-700 leading-relaxed"></p>
                     </div>
-                    <p id="proposal-content" class="text-gray-700 leading-relaxed"></p>
                 </div>
-            </div>
+            </section>
             
             <div class="document-separator my-10"></div>
 
 
-            <!-- CONSENSUS OVERVIEW (Section 2 - Updated with Progress Bar) -->
-            <div class="mb-12">
+            <!-- CONSENSUS OVERVIEW (Section 2 - Progress Bar, Metrics & Summary) -->
+            <section id="overview-section" class="mb-12 p-6 data-panel-border rounded-lg bg-white shadow-sm">
                 <h3 class="text-xl font-extrabold primary-accent mb-6 flex items-center border-b pb-2">
-                    <i data-lucide="workflow" class="w-5 h-5 mr-3 secondary-accent"></i>
+                    <i data-lucide="workflow" class="w-5 h-5 mr-3 text-indigo-700"></i>
                     COUNCIL CONSENSUS OVERVIEW
                 </h3>
 
+                <!-- Key Data Metrics -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8 text-center border-b pb-4">
+                    <div class="p-3 bg-gray-50 rounded-md">
+                        <p id="metric-agents" class="text-3xl font-black text-indigo-700 leading-none">5</p>
+                        <p class="text-xs font-medium secondary-accent uppercase mt-1">TOTAL AGENTS</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-md">
+                        <p id="metric-resolved" class="text-3xl font-black text-green-600 leading-none">3</p>
+                        <p class="text-xs font-medium secondary-accent uppercase mt-1">CONCERNS RESOLVED</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-md">
+                        <p id="metric-unresolved" class="text-3xl font-black text-red-600 leading-none">2</p>
+                        <p class="text-xs font-medium secondary-accent uppercase mt-1">CONCERNS UNRESOLVED</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-md">
+                        <p id="metric-mandate-length" class="text-3xl font-black text-gray-700 leading-none">120</p>
+                        <p class="text-xs font-medium secondary-accent uppercase mt-1">MANDATE WORD COUNT</p>
+                    </div>
+                </div>
+
                 <!-- Progress Bar Container -->
-                <div id="progress-bar-container" class="w-full h-8 bg-gray-200 rounded-md overflow-hidden mb-6 flex data-panel-border">
+                <div id="progress-bar-container" class="w-full h-6 bg-gray-200 rounded-md overflow-hidden mb-6 flex data-panel-border">
                     <!-- Segments will be injected here by JS -->
                 </div>
 
                 <!-- Legend and Counts -->
-                <div id="vote-legend" class="grid grid-cols-3 gap-6 text-sm mb-8">
+                <div id="vote-legend" class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm mb-8">
                     <!-- Legend Items will be injected here by JS -->
                 </div>
 
@@ -222,22 +284,66 @@
                         <p id="justification-content" class="text-gray-700 italic leading-normal"></p>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- AGENTS / COUNCIL DELIBERATION (Section 3) -->
-            <div class="mb-12">
-                <h3 class="text-xl font-extrabold primary-accent mb-6 border-b pb-2">DELIBERATION AGENT REPORTS</h3>
+            <section id="agents-section" class="mb-12">
+                <h3 class="text-xl font-extrabold primary-accent mb-4 border-b pb-2">DELIBERATION AGENT REPORTS</h3>
+                
+                <!-- Agent Traceability Panel -->
+                <div id="traceability-panel" class="mb-6 p-6 data-panel-border rounded-lg bg-gray-50 hidden no-print">
+                    <h4 class="text-base font-bold text-indigo-800 mb-3 flex items-center">
+                        <i data-lucide="fingerprint" class="w-4 h-4 mr-2"></i>
+                        TRACEABILITY REPORT: <span id="trace-agent-name" class="ml-1 font-extrabold"></span>
+                    </h4>
+                    <ul id="trace-source-list" class="space-y-2 text-sm text-gray-700 list-disc pl-5">
+                        <!-- Trace sources will be injected here -->
+                    </ul>
+                    <button onclick="hideTraceability()" class="mt-4 text-sm text-gray-600 hover:text-gray-800 font-medium transition">
+                        <i data-lucide="x" class="w-4 h-4 inline-block mr-1"></i>
+                        Close Trace Panel
+                    </button>
+                </div>
+
+
+                <!-- Executive Filter Buttons & Counsel Toggle (NO-PRINT AREA) -->
+                <div class="flex flex-wrap gap-4 mb-6 items-center no-print">
+                    <button onclick="setExecutiveFilter('unresolved')" class="executive-filter-btn bg-red-100 hover:bg-red-200 text-red-800 font-semibold py-2 px-4 rounded-full text-sm transition duration-200" data-filter-type="unresolved">
+                        <i data-lucide="alert-octagon" class="w-4 h-4 inline-block mr-1"></i>
+                        Show Unresolved Concerns
+                    </button>
+                    <button onclick="setExecutiveFilter('supporting')" class="executive-filter-btn bg-green-100 hover:bg-green-200 text-green-800 font-semibold py-2 px-4 rounded-full text-sm transition duration-200" data-filter-type="supporting">
+                        <i data-lucide="check-circle" class="w-4 h-4 inline-block mr-1"></i>
+                        Show All Supporting Agents
+                    </button>
+                    <button onclick="resetAllFilters()" class="executive-filter-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full text-sm transition duration-200">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 inline-block mr-1"></i>
+                        Reset All Filters
+                    </button>
+                    <div class="ml-auto flex items-center space-x-2">
+                        <!-- Print Optimization Toggle -->
+                        <button onclick="togglePrintView()" id="print-toggle-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-md text-sm transition duration-200 shadow-md">
+                            <i data-lucide="printer" class="w-4 h-4 inline-block mr-1"></i>
+                            Toggle Print View
+                        </button>
+                        <button onclick="toggleCounselVisibility()" id="counsel-toggle-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md text-sm transition duration-200 shadow-md">
+                            <i data-lucide="eye-off" class="w-4 h-4 inline-block mr-1"></i>
+                            Hide Detailed Counsel
+                        </button>
+                    </div>
+                </div>
+                
                 <div id="agents-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Agent Cards will be injected here by JS -->
                 </div>
-            </div>
+            </section>
             
             <div class="document-separator my-10"></div>
 
             <!-- FINAL MANDATE (Section 4) -->
-            <div class="p-8 border-2 border-gray-300 rounded-lg bg-gray-50">
-                <h3 class="text-2xl font-black primary-accent mb-6 flex items-center uppercase">
-                    <i data-lucide="gavel" class="w-6 h-6 mr-3 text-green-600"></i>
+            <section id="mandate-section" class="mb-12 p-8 border-2 border-indigo-300 rounded-lg bg-indigo-50/50">
+                <h3 class="text-2xl font-black primary-accent mb-6 flex items-center uppercase text-indigo-800">
+                    <i data-lucide="gavel" class="w-6 h-6 mr-3 text-indigo-800"></i>
                     FINAL MANDATE: THE RESOLUTION
                 </h3>
 
@@ -245,36 +351,135 @@
                 <div class="p-4 bg-white rounded-md border border-gray-200">
                     <p id="mandate-content" class="text-gray-800 leading-loose font-medium"></p>
                 </div>
-            </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                    <!-- Mandate Impact Summary (Concerns Addressed) -->
+                    <div class="pt-4 border-t border-indigo-400">
+                        <h4 class="text-lg font-bold text-indigo-700 mb-3 flex items-center">
+                            <i data-lucide="award" class="w-4 h-4 mr-2"></i>
+                            ACCOUNTABILITY: CONCERNS INTEGRATED
+                        </h4>
+                        <ul id="mandate-impact-list" class="space-y-2 text-sm text-gray-700 list-disc pl-5">
+                            <!-- List of resolved concerns will be injected here -->
+                        </ul>
+                    </div>
+
+                    <!-- Mandate Keyword Extractor -->
+                    <div class="pt-4 border-t border-indigo-400">
+                        <h4 class="text-lg font-bold text-indigo-700 mb-3 flex items-center">
+                            <i data-lucide="target" class="w-4 h-4 mr-2"></i>
+                            KEY MANDATE ACTION ITEMS
+                        </h4>
+                        <ul id="keyword-list" class="space-y-2 text-sm text-gray-700 list-disc pl-5">
+                            <!-- Extracted keywords will be injected here -->
+                        </ul>
+                    </div>
+                </div>
+
+            </section>
 
         </section>
 
         <!-- Footer -->
         <footer class="mt-20 pt-8 border-t border-gray-200 text-center text-gray-500 text-xs">
-            <p>U.S. Policy Analysis & Resolution Center | Document Revision 1.4 | ACCESS LEVEL 3 REQUIRED</p>
+            <p>U.S. Policy Analysis & Resolution Center | Document Revision 10.0 | ACCESS LEVEL 3 REQUIRED</p>
         </footer>
 
     </main>
-
+    
     <script>
-        const defaultArtifactId = 'A-AWRA';
         const defaultTitle = 'AI Acceleration & Workforce Resilience Act';
-        let currentFilter = null; // Stores the currently active filter type ('unconditional', 'conditional', 'dissent')
+        const defaultArtifactId = '2025-Q4/AIPR-21B';
+        const defaultPolicyLevel = 'Level I - Strategic';
+        let artifactData = null;
+        let currentVoteFilter = null; 
+        let currentExecutiveFilter = null; 
+        let counselVisible = true; 
+        let isPrintView = false;
+        
+        // --- Updated defaultJsonData with 'sources' for traceability ---
+        const defaultJsonData = { 
+            "title": "AI Acceleration & Workforce Resilience Act",
+            "artifactId": "2025-Q4/AIPR-21B",
+            "policyLevel": "Level I - Strategic",
+            "dilemma": "In what ways can AI boost U.S. productivity and GDP growth, and what investments in education and retraining are needed to prepare the workforce?", 
+            "proposal": "The U.S. should launch a 'National AI Productivity Initiative' by dedicating a 20% tax credit for three years on all corporate AI capital investments (hardware, software, data) to drive rapid adoption, paired with a mandatory, publicly-funded 'AI Skills Passport' system that subsidizes 100% of training costs for mid-career workers in high-exposure occupations.", 
+            "agents": [ 
+                { 
+                    "name": "Nova", 
+                    "focus": "Making things run smoothly and efficiently.", 
+                    "counsel": "The combined investment approach is smart. The tax credit will massively accelerate AI deployment, which is the engine for productivity gains. However, a major administrative bottleneck will be the 'AI Skills Passport.' To make this efficient, the Passport must leverage AI itself for hyper-personalized learning pathways, matching local job demand with worker skill gaps automatically, otherwise it becomes a bureaucratic mess.", 
+                    "final_vote": "YES (Conditional Support)", 
+                    "concern": "The 'AI Skills Passport' risks major administrative bloat and inefficiency if it doesn't use AI to streamline personalized learning and instantly match skills to local employer demand.",
+                    "sources": [
+                        { "title": "GAO Report on Government IT Modernization (2024)", "uri": "https://mock-gao.gov/it-modernization-2024" },
+                        { "title": "Private Sector AI Automation Trends (Q3 2025)", "uri": "https://mock-techdata.com/ai-trends" }
+                    ]
+                }, 
+                { 
+                    "name": "Orion", 
+                    "focus": "Checking facts and keeping things logical.", 
+                    "counsel": "Facts show AI is already driving economic growth through capital investment—investment growth from tech categories recently outpaced consumer spending. The tax credit is a clear accelerant. But without specific accountability, companies might use the tax credit simply to automate and cut labor without truly improving total factor productivity. The credit should require a documented commitment to augmentation (AI helping people) over pure automation (AI replacing people) to get the full benefit.", 
+                    "final_vote": "YES (Conditional Support)", 
+                    "concern": "The 20% tax credit could be misused to fund pure job-eliminating automation without genuine productivity gains, leading to social instability. It needs an accountability clause.",
+                    "sources": [
+                        { "title": "BEA Data: US Capital Investment Index (Sept 2025)", "uri": "https://mock-bea.gov/capital-investment" },
+                        { "title": "Brookings Institute: Augmentation vs. Automation Study", "uri": "https://mock-brookings.edu/ai-labor-impact" }
+                    ]
+                }, 
+                { 
+                    "name": "Selene", 
+                    "focus": "Keeping things fair, ethical, and sustainable.", 
+                    "counsel": "While AI boosts productivity, data shows the economic benefits are currently concentrating among higher earners and in a few high-tech states, creating a 'K-shaped' recovery. The Skills Passport is crucial for fairness, but we must actively direct retraining toward 'low AI-exposed' or highly complementary jobs, as workers in high-exposure jobs, even after retraining, often see lower earnings. We need to be proactive about equity.", 
+                    "final_vote": "YES (Conditional Support)", 
+                    "concern": "Retraining alone is not enough; it must be strategically guided. Programs need to focus on foundational, social, and critical thinking skills, and direct workers toward new, AI-complementary occupations, not just attempt to save highly automatable ones.",
+                    "sources": [
+                        { "title": "Federal Reserve Bulletin: Regional Income Inequality (2025)", "uri": "https://mock-fed.gov/inequality-report" },
+                        { "title": "MIT Future of Work Initiative: Retraining Efficacy", "uri": "https://mock-mit.edu/retraining-efficacy" }
+                    ]
+                }, 
+                { 
+                    "name": "Vortex", 
+                    "focus": "Bringing resources and people together.", 
+                    "counsel": "This is a prime public-private partnership opportunity. We should formalize the collaboration with major tech companies (like Google, IBM, Microsoft, etc.) that are already investing hundreds of millions in AI training and curriculum. Instead of building everything from scratch, the 'Passport' should simply standardize and accredit existing, high-quality industry certifications and training platforms.", 
+                    "final_vote": "YES", 
+                    "concern": null,
+                    "sources": [
+                        { "title": "Industry Training Certification Market Analysis (2024)", "uri": "https://mock-certifications.org/market-report" },
+                        { "title": "White House Executive Order 14110: Tech Partnership Framework", "uri": "https://mock-gov.us/eo14110" }
+                    ]
+                }, 
+                { 
+                    "name": "Echo", 
+                    "focus": "Growing and planning ahead.", 
+                    "counsel": "For long-term growth, the biggest return isn't just in retraining today's workers, but in preparing the next generation. We must invest heavily in K-12 AI literacy and computational thinking curricula. This creates a lasting foundation and a pipeline of talent that will ensure continuous innovation and adaptability beyond the initial three-year corporate tax break.", 
+                    "final_vote": "YES", 
+                    "concern": null,
+                    "sources": [
+                        { "title": "NSF Report on K-12 Computational Literacy Gaps", "uri": "https://mock-nsf.gov/k12-curriculum" },
+                        { "title": "OECD Future of Education 2030 Report", "uri": "https://mock-oecd.org/education-2030" }
+                    ]
+                } 
+            ], 
+            "final_mandate": "Let's launch the 'AI Acceleration and Workforce Resilience Act' (A-AWRA). It includes a 20% tax credit for corporate AI capital investment, but to address Orion's point, the full credit is conditional on a certified 'AI Augmentation Plan' detailing how the investment maintains or reskills at least 80% of affected labor. To fix Nova's and Selene's concerns, the publicly-funded 'AI Skills Passport' will be an AI-driven platform that standardizes industry-recognized certifications (Vortex's idea) and prioritizes training for foundational, human-centric skills (like critical thinking and communication), actively steering workers toward high-growth, AI-complementary roles, not just highly automatable ones. Furthermore, a permanent, modest fund will be established for K-12 AI Literacy Curriculum development (Echo's priority).", 
+            "strategic_choice": "UPGRADE", 
+            "justification": "The Council unanimously agrees that a passive approach (DEFEND) would risk exacerbating economic inequality by concentrating AI's benefits in a few sectors and demographics. Therefore, we choose to UPGRADE the system. Our final, integrated mandate is a robust, dual-focused strategy that that not only uses the 20% investment to accelerate corporate AI adoption (the engine of productivity) but also mandates equitable and smart workforce preparation by linking corporate incentives to labor-protective plans and steering public retraining toward future-proof, human-centric skills, directly addressing core concerns of efficiency, accountability, and fairness." 
+        };
+        // -------------------------------------------------------------------
 
-        /**
-         * Safely parses JSON and handles errors.
-         * @returns {Object|null} The parsed JSON object or null on error.
-         */
-        function parseJsonInput() {
-            const inputElement = document.getElementById('json-input');
+
+        function parseJsonInput(value) {
             const errorElement = document.getElementById('error-message');
             errorElement.classList.add('hidden');
             
             try {
-                const data = JSON.parse(inputElement.value.trim());
+                const data = JSON.parse(value.trim());
                 if (!data || !data.dilemma || !data.proposal || !data.agents || !data.final_mandate) {
                     throw new Error("JSON is missing required fields (dilemma, proposal, agents, final_mandate).");
                 }
+                data.title = data.title || defaultTitle;
+                data.artifactId = data.artifactId || defaultArtifactId;
+                data.policyLevel = data.policyLevel || defaultPolicyLevel;
                 return data;
             } catch (e) {
                 errorElement.textContent = `JSON Error: ${e.message}`;
@@ -283,210 +488,408 @@
             }
         }
 
-        /**
-         * Filters and highlights agent cards based on the selected vote type.
-         * @param {string} voteType - The vote category to highlight ('unconditional', 'conditional', 'dissent').
-         */
-        function filterAgents(voteType) {
-            const agentCards = document.querySelectorAll('.agent-card-base');
-            const legendItems = document.querySelectorAll('.legend-item');
+        function isAgentVisible(card) {
+            const isVoteMatch = !currentVoteFilter || card.dataset.voteType === currentVoteFilter;
             
-            // 1. Determine if the filter needs to be applied or reset
-            if (currentFilter === voteType) {
-                // Reset filter
-                currentFilter = null;
-                voteType = null;
+            let isExecutiveMatch = true;
+            if (currentExecutiveFilter === 'unresolved') {
+                isExecutiveMatch = card.dataset.concernStatus === 'unresolved';
+            } else if (currentExecutiveFilter === 'supporting') {
+                isExecutiveMatch = card.dataset.voteType !== 'dissent';
+            }
+            
+            return isVoteMatch && isExecutiveMatch;
+        }
+
+        function applyFilters() {
+            const agentCards = document.querySelectorAll('.agent-card-base');
+            
+            agentCards.forEach(card => {
+                card.classList.remove('highlight-card', 'filter-highlight', 'border-4', 'border-indigo-500', 'shadow-2xl', 'dim-card');
+                
+                if (isAgentVisible(card)) {
+                    card.style.display = 'block';
+                    
+                    // Apply combined filter styles
+                    if (currentVoteFilter || currentExecutiveFilter) {
+                         // Apply distinct style for combined filters or single filter
+                        if (currentVoteFilter && currentExecutiveFilter) {
+                            card.classList.add('border-4', 'border-indigo-500', 'shadow-2xl'); 
+                        } else if (currentVoteFilter) {
+                            card.classList.add('highlight-card'); 
+                        } else if (currentExecutiveFilter) {
+                            card.classList.add('filter-highlight');
+                        }
+                    } 
+                } else {
+                    card.classList.add('dim-card');
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Highlight legend/button active state
+            document.querySelectorAll('.legend-item').forEach(item => {
+                item.classList.toggle('bg-gray-200', item.dataset.voteType === currentVoteFilter);
+            });
+
+            document.querySelectorAll('.executive-filter-btn').forEach(btn => {
+                btn.classList.toggle('ring-2', btn.dataset.filterType === currentExecutiveFilter);
+                btn.classList.toggle('ring-offset-2', btn.dataset.filterType === currentExecutiveFilter);
+                btn.classList.toggle('ring-indigo-500', btn.dataset.filterType === currentExecutiveFilter);
+            });
+            
+            // Hide traceability panel when filters are active
+            hideTraceability();
+        }
+
+        function setVoteFilter(voteType) {
+            if (currentVoteFilter === voteType) {
+                currentVoteFilter = null; 
             } else {
-                currentFilter = voteType;
+                currentVoteFilter = voteType;
+            }
+            applyFilters();
+        }
+
+        function setExecutiveFilter(filterType) {
+            if (currentExecutiveFilter === filterType) {
+                currentExecutiveFilter = null; 
+            } else {
+                currentExecutiveFilter = filterType;
+            }
+            applyFilters();
+        }
+
+        function resetAllFilters() {
+            currentVoteFilter = null; 
+            currentExecutiveFilter = null;
+            hideTraceability();
+            applyFilters();
+        }
+        
+        function toggleCounselVisibility() {
+            counselVisible = !counselVisible;
+            const counselReports = document.querySelectorAll('.counsel-report');
+            const toggleButton = document.getElementById('counsel-toggle-btn');
+            
+            if (counselVisible) {
+                counselReports.forEach(r => r.classList.remove('hidden'));
+                toggleButton.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4 inline-block mr-1"></i> Hide Detailed Counsel';
+            } else {
+                counselReports.forEach(r => r.classList.add('hidden'));
+                toggleButton.innerHTML = '<i data-lucide="eye" class="w-4 h-4 inline-block mr-1"></i> Show Detailed Counsel';
+            }
+            lucide.createIcons(); 
+        }
+        
+        // Agent Traceability Functions
+        function showTraceability(agentIndex) {
+            const panel = document.getElementById('traceability-panel');
+            const nameSpan = document.getElementById('trace-agent-name');
+            const list = document.getElementById('trace-source-list');
+            const agent = artifactData.agents[agentIndex];
+
+            const sources = agent.sources || [];
+
+            nameSpan.textContent = agent.name;
+            list.innerHTML = '';
+
+            if (sources.length > 0) {
+                sources.forEach(source => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'text-gray-800';
+                    listItem.innerHTML = `<span class="font-bold">${source.title}</span> <a href="${source.uri}" target="_blank" class="text-indigo-600 hover:text-indigo-800 italic underline">[Source URI]</a>`;
+                    list.appendChild(listItem);
+                });
+            } else {
+                list.innerHTML = '<li class="text-gray-500 italic">No specific external sources traced for this agent\'s counsel.</li>';
             }
 
-            // 2. Apply/Reset highlighting on cards
-            agentCards.forEach(card => {
-                card.classList.remove('highlight-card', 'dim-card');
-                if (voteType && card.dataset.voteType !== voteType) {
-                    card.classList.add('dim-card');
-                } else if (voteType && card.dataset.voteType === voteType) {
-                    card.classList.add('highlight-card');
-                }
-            });
+            panel.classList.remove('hidden');
+            lucide.createIcons();
+        }
 
-            // 3. Update legend button state (optional: visually indicate the active filter)
-            legendItems.forEach(item => {
-                item.classList.remove('bg-gray-200'); // Simple visual change for active button
-                if (item.dataset.voteType === currentFilter) {
-                    item.classList.add('bg-gray-200');
-                }
-            });
+        function hideTraceability() {
+            document.getElementById('traceability-panel').classList.add('hidden');
+        }
+        // End Agent Traceability Functions
+        
+        // Print Optimization Toggle
+        function togglePrintView() {
+            isPrintView = !isPrintView;
+            const printToggleBtn = document.getElementById('print-toggle-btn');
+            const nonPrintElements = document.querySelectorAll('.no-print');
+            
+            if (isPrintView) {
+                // Hide non-print elements
+                nonPrintElements.forEach(el => el.classList.add('hidden'));
+                printToggleBtn.innerHTML = '<i data-lucide="eye" class="w-4 h-4 inline-block mr-1"></i> Exit Print View';
+                // Trigger browser print dialog for convenience
+                window.print();
+            } else {
+                // Show non-print elements
+                nonPrintElements.forEach(el => el.classList.remove('hidden'));
+                printToggleBtn.innerHTML = '<i data-lucide="printer" class="w-4 h-4 inline-block mr-1"></i> Toggle Print View';
+            }
+        }
+        
+        // Keyword Extractor
+        function extractMandateKeywords(mandate) {
+            // Regex to find capitalized phrases (Action Items and Proper Nouns)
+            const keywords = mandate.match(/[A-Z][A-Z\s\-']{2,}/g) || [];
+            
+            const uniqueKeywords = [...new Set(keywords)]
+                .filter(k => k.length > 3 && !['THE', 'A', 'IT', 'ITS', 'BUT', 'TO', 'AS', 'ACT', 'AI'].includes(k.toUpperCase()))
+                .map(k => k.trim().replace(/['"]+/g, ''));
+
+            const keywordList = document.getElementById('keyword-list');
+            keywordList.innerHTML = '';
+
+            if (uniqueKeywords.length > 0) {
+                uniqueKeywords.forEach(keyword => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'text-gray-800 font-medium';
+                    listItem.textContent = keyword;
+                    keywordList.appendChild(listItem);
+                });
+            } else {
+                keywordList.innerHTML = '<li class="text-gray-500 italic">No specific action items detected in the mandate text.</li>';
+            }
         }
 
 
-        /**
-         * Renders the artifact data into the HTML structure.
-         * @param {Object} data The parsed JSON object.
-         */
-        function renderArtifact(data) {
-            // Reset filter state before rendering new data
-            currentFilter = null;
-            
-            // 1. Set Title and Metadata
-            document.getElementById('artifact-title').textContent = data.title || defaultTitle;
-            document.getElementById('artifact-id').textContent = data.artifactId || '2025-Q4/AIPR-21B';
-
-            // 2. Dilemma & Proposal
-            document.getElementById('dilemma-content').textContent = data.dilemma;
-            document.getElementById('proposal-content').textContent = data.proposal;
-            
-            // 3. Consensus Overview - New Logic
-            const totalAgents = data.agents.length;
+        function renderConsensusOverview(agents) {
+            const totalAgents = agents.length;
             let unconditionalYes = 0;
             let conditionalYes = 0;
             let noVotes = 0;
+            let resolvedConcerns = 0;
+            let unresolvedConcerns = 0;
+            let mandateWordCount = artifactData.final_mandate.split(/\s+/).filter(w => w.length > 0).length;
 
-            data.agents.forEach(agent => {
-                if (agent.final_vote === 'YES') {
-                    unconditionalYes++;
-                } else if (agent.final_vote && agent.final_vote.startsWith('YES (Conditional')) {
-                    conditionalYes++;
-                } else {
-                    noVotes++;
-                }
+
+            agents.forEach(agent => {
+                if (agent.final_vote === 'YES') { unconditionalYes++; } 
+                else if (agent.final_vote && agent.final_vote.startsWith('YES (Conditional')) { conditionalYes++; } 
+                else { noVotes++; }
+                
+                if (!agent.concern) { resolvedConcerns++; }
+                else { unresolvedConcerns++; }
             });
 
-            const percentUnconditional = (unconditionalYes / totalAgents) * 100;
-            const percentConditional = (conditionalYes / totalAgents) * 100;
-            const percentNo = (noVotes / totalAgents) * 100;
-
-            const progressBarContainer = document.getElementById('progress-bar-container');
-            progressBarContainer.innerHTML = ''; // Clear existing bar
+            // Update Metrics Panel
+            document.getElementById('metric-agents').textContent = totalAgents;
+            document.getElementById('metric-resolved').textContent = resolvedConcerns;
+            document.getElementById('metric-unresolved').textContent = unresolvedConcerns;
+            document.getElementById('metric-mandate-length').textContent = mandateWordCount;
 
             const segmentsData = [
-                { percent: percentUnconditional, count: unconditionalYes, label: 'Full Consensus', colorClass: 'bar-yes-unconditional', voteType: 'unconditional' },
-                { percent: percentConditional, count: conditionalYes, label: 'Qualified Consensus', colorClass: 'bar-yes-conditional', voteType: 'conditional' },
-                { percent: percentNo, count: noVotes, label: 'Dissent/No Vote', colorClass: 'bar-no-dissent', voteType: 'dissent' }
-            ].filter(s => s.percent > 0); // Only show segments with votes
+                { percent: (unconditionalYes / totalAgents) * 100, count: unconditionalYes, label: 'Full Consensus (YES)', colorClass: 'bar-yes-unconditional', voteType: 'unconditional' },
+                { percent: (conditionalYes / totalAgents) * 100, count: conditionalYes, label: 'Qualified Consensus', colorClass: 'bar-yes-conditional', voteType: 'conditional' },
+                { percent: (noVotes / totalAgents) * 100, count: noVotes, label: 'Dissent/No Vote', colorClass: 'bar-no-dissent', voteType: 'dissent' }
+            ].filter(s => s.percent >= 0); 
 
+            // Progress Bar
+            const progressBarContainer = document.getElementById('progress-bar-container');
+            progressBarContainer.innerHTML = ''; 
             segmentsData.forEach(segment => {
                 const segmentElement = document.createElement('div');
-                segmentElement.className = `${segment.colorClass} h-full text-center text-xs flex items-center justify-center whitespace-nowrap px-1 interactive-click`;
+                segmentElement.className = `${segment.colorClass} h-full text-center text-xs flex items-center justify-center whitespace-nowrap px-1 interactive-click cursor-pointer transition-all duration-300`;
                 segmentElement.style.width = `${segment.percent}%`;
                 segmentElement.dataset.voteType = segment.voteType;
-                segmentElement.onclick = () => filterAgents(segment.voteType);
-                
-                if (segment.percent >= 10) { // Only display text if segment is wide enough
-                    segmentElement.textContent = `${segment.count} (${Math.round(segment.percent)}%)`;
-                } else if (segment.percent > 0) {
-                     segmentElement.title = `${segment.label}: ${segment.count} (${Math.round(segment.percent)}%)`;
-                }
+                segmentElement.onclick = () => setVoteFilter(segment.voteType);
+                if (segment.percent >= 10) { segmentElement.textContent = `${segment.count} (${Math.round(segment.percent)}%)`; }
+                else if (segment.percent > 0) { segmentElement.title = `${segment.label}: ${segment.count} (${Math.round(segment.percent)}%)`; }
                 progressBarContainer.appendChild(segmentElement);
             });
 
             // Legend
             const legendContainer = document.getElementById('vote-legend');
-            legendContainer.innerHTML = segmentsData.map(segment => {
+            legendContainer.innerHTML = segmentsData.filter(s => s.count > 0).map(segment => { 
                 let hexColor;
                 if (segment.voteType === 'unconditional') hexColor = '#1e40af';
                 else if (segment.voteType === 'conditional') hexColor = '#3b82f6';
                 else hexColor = '#dc2626';
 
                 return `
-                    <div class="flex items-center text-gray-700 interactive-click legend-item p-1 rounded-sm cursor-pointer hover:bg-gray-100" data-vote-type="${segment.voteType}" onclick="filterAgents('${segment.voteType}')">
+                    <div class="flex items-center text-gray-700 interactive-click legend-item p-1 rounded-sm cursor-pointer hover:bg-gray-100" data-vote-type="${segment.voteType}" onclick="setVoteFilter('${segment.voteType}')">
                         <div class="legend-dot" style="background-color: ${hexColor};"></div>
                         <span class="font-medium">${segment.label}:</span>
                         <span class="font-bold ml-1">${segment.count} / ${totalAgents}</span>
                     </div>
                 `;
             }).join('');
-
-            document.getElementById('strategic-choice').textContent = data.strategic_choice;
-            document.getElementById('justification-content').textContent = data.justification;
-
-            // 4. Final Mandate
-            document.getElementById('mandate-content').textContent = data.final_mandate;
-
-            // 5. Agents Deliberation
+        }
+        
+        function renderAgents(agents) {
             const agentsContainer = document.getElementById('agents-container');
-            agentsContainer.innerHTML = ''; // Clear previous content
-
-            data.agents.forEach((agent, index) => {
+            agentsContainer.innerHTML = '';
+            
+            // Render Agent Cards
+            agents.forEach((agent, index) => {
                 const isConcernResolved = !agent.concern;
+                const concernStatus = isConcernResolved ? 'resolved' : 'unresolved';
                 const concernColor = isConcernResolved ? 'text-green-600' : 'text-red-600';
-                const concernIcon = isConcernResolved ? 'check-circle' : 'minus-circle';
-                const concernText = isConcernResolved ? "None. Fully integrated into Final Mandate." : agent.concern;
+                const concernBorder = isConcernResolved ? '#059669' : '#dc2626'; 
+                const concernText = isConcernResolved ? "None." : agent.concern;
                 const voteType = agent.final_vote === 'YES' ? 'unconditional' : (agent.final_vote && agent.final_vote.startsWith('YES (Conditional') ? 'conditional' : 'dissent');
                 const voteClass = voteType !== 'dissent' ? 'yes-pill' : 'no-pill';
                 const voteText = agent.final_vote || 'NO VOTE';
+                const focusIcon = getFocusIcon(agent.focus);
 
                 const agentHTML = `
-                    <div class="p-5 data-panel-border rounded-lg bg-gray-50 agent-card-base" data-vote-type="${voteType}">
-                        <div class="flex items-center justify-between mb-3 border-b pb-2">
+                    <div class="p-5 data-panel-border rounded-lg bg-white agent-card-base transition duration-200" style="border-left-color: ${concernBorder};" data-vote-type="${voteType}" data-concern-status="${concernStatus}" data-agent-index="${index}" data-agent-name="${agent.name}">
+                        <div class="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
                             <span class="text-lg font-bold text-gray-900">${agent.name}</span>
+                            <div class="flex items-center space-x-2 no-print">
+                                <button title="Trace Sources" onclick="showTraceability(${index})" class="text-gray-500 hover:text-gray-700 transition">
+                                    <i data-lucide="folder-search" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                             <span class="pill ${voteClass}">${voteText}</span>
                         </div>
-                        <p class="text-xs text-gray-500 mb-3 uppercase font-medium">DOMAIN: ${agent.focus}</p>
+                        <p class="text-xs text-gray-500 mb-3 uppercase font-medium flex items-center">
+                            <i data-lucide="${focusIcon}" class="w-3 h-3 mr-1"></i>
+                            DOMAIN: ${agent.focus}
+                        </p>
                         
-                        <div class="p-3 bg-white rounded-md border border-gray-200 mb-3">
-                            <p class="text-xs font-bold ${concernColor} mb-1 flex items-center">
-                                <i data-lucide="${concernIcon}" class="w-3 h-3 mr-1"></i>
+                        <!-- Counsel Report (Toggable) -->
+                        <div class="counsel-report p-3 mb-3 bg-gray-50 rounded-md border border-gray-200 ${counselVisible ? '' : 'hidden'}">
+                            <p class="text-xs font-bold text-gray-500 uppercase mb-1">COUNSEL REPORT</p>
+                            <p class="text-sm text-gray-700 italic leading-tight">${agent.counsel}</p>
+                        </div>
+                        
+                        <!-- Concern Status -->
+                        <div class="p-3 rounded-md border border-gray-200">
+                            <p class="text-xs font-bold ${concernColor} uppercase mb-1 flex items-center">
+                                <i data-lucide="${isConcernResolved ? 'check-circle' : 'alert-triangle'}" class="w-3 h-3 mr-1"></i>
                                 PRIMARY CONCERN
                             </p>
                             <p class="text-sm text-gray-700 leading-tight">${concernText}</p>
                         </div>
-                        <p class="text-sm text-gray-600 font-normal mt-4">COUNSEL: ${agent.counsel}</p>
                     </div>
                 `;
                 agentsContainer.insertAdjacentHTML('beforeend', agentHTML);
             });
+
+            // Render Mandate Impact List
+            const mandateText = artifactData.final_mandate.toLowerCase();
+            const impactList = document.getElementById('mandate-impact-list');
+            impactList.innerHTML = '';
+            let integratedCount = 0;
+
+            agents.forEach(agent => {
+                const isConcernAddressed = !agent.concern;
+                
+                if (isConcernAddressed) {
+                     const listItem = document.createElement('li');
+                     listItem.className = 'text-gray-800';
+                     listItem.innerHTML = `<span class="font-bold">${agent.name}'s Counsel:</span> Found proposal adequate (No concern raised).`;
+                     impactList.appendChild(listItem);
+                     integratedCount++;
+
+                } else if (agent.final_vote.startsWith('YES')) {
+                    // Check if the mandate text contains a few keywords from the concern
+                    const concernKeywords = agent.concern.toLowerCase().split(/\s+/).filter(w => w.length > 3).slice(0, 3);
+                    const isKeywordMatch = concernKeywords.every(keyword => mandateText.includes(keyword));
+
+                    if (isKeywordMatch) {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'text-gray-800';
+                        listItem.innerHTML = `<span class="font-bold">${agent.name}'s Concern:</span> "${agent.concern}"`;
+                        impactList.appendChild(listItem);
+                        integratedCount++;
+                    }
+                }
+            });
+
+            if (integratedCount === 0) {
+                 impactList.innerHTML = '<li class="text-gray-500 italic">No specific concerns were clearly integrated into the final policy text.</li>';
+            }
+        }
+        
+        function getFocusIcon(focus) {
+            if (focus.includes('efficiency') || focus.includes('smoothly')) return 'zap';
+            if (focus.includes('facts') || focus.includes('logical')) return 'bar-chart-3';
+            if (focus.includes('ethical') || focus.includes('fair')) return 'scale';
+            if (focus.includes('resources') || focus.includes('people')) return 'users-round';
+            if (focus.includes('planning') || focus.includes('ahead')) return 'trending-up';
+            return 'briefcase';
+        }
+
+
+        function renderArtifact(data) {
+            artifactData = data;
             
-            // Re-initialize lucide icons for the newly injected HTML
+            // Update Dynamic Metadata
+            document.getElementById('rendered-timestamp').textContent = new Date().toLocaleString();
+            document.getElementById('policy-level').textContent = data.policyLevel;
+
+            document.getElementById('artifact-title').textContent = data.title;
+            document.getElementById('artifact-id').textContent = data.artifactId;
+            document.getElementById('dilemma-content').textContent = data.dilemma;
+            document.getElementById('proposal-content').textContent = data.proposal;
+            
+            renderConsensusOverview(data.agents);
+            document.getElementById('strategic-choice').textContent = data.strategic_choice;
+            document.getElementById('justification-content').textContent = data.justification;
+
+            renderAgents(data.agents);
+            document.getElementById('mandate-content').textContent = data.final_mandate;
+            
+            extractMandateKeywords(data.final_mandate);
+
+            resetAllFilters(); // Reset all interactive states
+
             lucide.createIcons(); 
         }
 
-        /**
-         * Controls visibility of the input and display areas.
-         * @param {boolean} showInput Whether to show the input area (true) or the display area (false).
-         */
-        function toggleArtifactView(showInput) {
+        function toggleArtifactView(view) {
+            const landingPage = document.getElementById('landing-page');
             const inputArea = document.getElementById('input-area');
             const displayArea = document.getElementById('artifact-display');
             const toggleButton = document.getElementById('load-toggle-button');
 
-            if (showInput) {
+            landingPage.classList.add('hidden');
+            inputArea.classList.add('hidden');
+            displayArea.classList.add('hidden');
+            toggleButton.classList.add('hidden');
+
+            if (view === 'landing') {
+                landingPage.classList.remove('hidden');
+            } else if (view === 'input') {
                 inputArea.classList.remove('hidden');
-                displayArea.classList.add('hidden');
-                toggleButton.classList.add('hidden');
-            } else {
-                inputArea.classList.add('hidden');
+            } else if (view === 'display') {
                 displayArea.classList.remove('hidden');
                 toggleButton.classList.remove('hidden');
             }
         }
 
-        /**
-         * Main function to load and display the artifact.
-         */
         function loadArtifact() {
-            const data = parseJsonInput();
+            const inputElement = document.getElementById('json-input');
+            const data = parseJsonInput(inputElement.value);
             if (data) {
                 renderArtifact(data);
-                toggleArtifactView(false); // Show the results
+                toggleArtifactView('display');
             }
         }
+        
+        function loadDemoArtifact() {
+            renderArtifact(defaultJsonData);
+            toggleArtifactView('display');
+        }
 
-        /**
-         * Clears the JSON input field.
-         */
         function clearInput() {
             document.getElementById('json-input').value = '';
             document.getElementById('error-message').classList.add('hidden');
         }
 
-        // Initialize icons on first load
-        lucide.createIcons(); 
-        
-        // Populate the input area with the previous JSON for easy testing
+        // Initialize on window load to show the landing page
         window.onload = function() {
-            document.getElementById('json-input').value = JSON.stringify({ "dilemma": "In what ways can AI boost U.S. productivity and GDP growth, and what investments in education and retraining are needed to prepare the workforce?", "proposal": "The U.S. should launch a 'National AI Productivity Initiative' by dedicating a 20% tax credit for three years on all corporate AI capital investments (hardware, software, data) to drive rapid adoption, paired with a mandatory, publicly-funded 'AI Skills Passport' system that subsidizes 100% of training costs for mid-career workers in high-exposure occupations.", "agents": [ { "name": "Nova", "focus": "Making things run smoothly and efficiently.", "counsel": "The combined investment approach is smart. The tax credit will massively accelerate AI deployment, which is the engine for productivity gains. However, a major administrative bottleneck will be the 'AI Skills Passport.' To make this efficient, the Passport must leverage AI itself for hyper-personalized learning pathways, matching local job demand with worker skill gaps automatically, otherwise it becomes a bureaucratic mess.", "final_vote": "YES (Conditional Support)", "concern": "The 'AI Skills Passport' risks major administrative bloat and inefficiency if it doesn't use AI to streamline personalized learning and instantly match skills to local employer demand." }, { "name": "Orion", "focus": "Checking facts and keeping things logical.", "counsel": "Facts show AI is already driving economic growth through capital investment—investment growth from tech categories recently outpaced consumer spending. The tax credit is a clear accelerant. But without specific accountability, companies might use the tax credit simply to automate and cut labor without truly improving total factor productivity. The credit should require a documented commitment to augmentation (AI helping people) over pure automation (AI replacing people) to get the full benefit.", "final_vote": "YES (Conditional Support)", "concern": "The 20% tax credit could be misused to fund pure job-eliminating automation without genuine productivity gains, leading to social instability. It needs an accountability clause." }, { "name": "Selene", "focus": "Keeping things fair, ethical, and sustainable.", "counsel": "While AI boosts productivity, data shows the economic benefits are currently concentrating among higher earners and in a few high-tech states, creating a 'K-shaped' recovery. The Skills Passport is crucial for fairness, but we must actively direct retraining toward 'low AI-exposed' or highly complementary jobs, as workers in high-exposure jobs, even after retraining, often see lower earnings. We need to be proactive about equity.", "final_vote": "YES (Conditional Support)", "concern": "Retraining alone is not enough; it must be strategically guided. Programs need to focus on foundational, social, and critical thinking skills, and direct workers toward new, AI-complementary occupations, not just attempt to save highly automatable ones." }, { "name": "Vortex", "focus": "Bringing resources and people together.", "counsel": "This is a prime public-private partnership opportunity. We should formalize the collaboration with major tech companies (like Google, IBM, Microsoft, etc.) that are already investing hundreds of millions in AI training and curriculum. Instead of building everything from scratch, the 'Passport' should simply standardize and accredit existing, high-quality industry certifications and training platforms.", "final_vote": "YES", "concern": null }, { "name": "Echo", "focus": "Growing and planning ahead.", "counsel": "For long-term growth, the biggest return isn't just in retraining today's workers, but in preparing the next generation. We must invest heavily in K-12 AI literacy and computational thinking curricula. This creates a lasting foundation and a pipeline of talent that will ensure continuous innovation and adaptability beyond the initial three-year corporate tax break.", "final_vote": "YES", "concern": null } ], "final_mandate": "Let's launch the 'AI Acceleration and Workforce Resilience Act' (A-AWRA). It includes a 20% tax credit for corporate AI capital investment, but to address Orion's point, the full credit is conditional on a certified 'AI Augmentation Plan' detailing how the investment maintains or reskills at least 80% of affected labor. To fix Nova's and Selene's concerns, the publicly-funded 'AI Skills Passport' will be an AI-driven platform that standardizes industry-recognized certifications (Vortex's idea) and prioritizes training for foundational, human-centric skills (like critical thinking and communication), actively steering workers toward high-growth, AI-complementary roles, not just highly automatable ones. Furthermore, a permanent, modest fund will be established for K-12 AI Literacy Curriculum development (Echo's priority).", "strategic_choice": "UPGRADE", "justification": "The Council unanimously agrees that a passive approach (DEFEND) would risk exacerbating economic inequality by concentrating AI's benefits in a few sectors and demographics. Therefore, we choose to UPGRADE the system. Our final, integrated mandate is a robust, dual-focused strategy that not only uses the 20% investment to accelerate corporate AI adoption (the engine of productivity) but also mandates equitable and smart workforce preparation by linking corporate incentives to labor-protective plans and steering public retraining toward future-proof, human-centric skills, directly addressing core concerns of efficiency, accountability, and fairness." });
-            loadArtifact(); // Load the default data on page load
+            // Pre-fill input for convenience
+            document.getElementById('json-input').value = JSON.stringify(defaultJsonData, null, 2);
+            toggleArtifactView('landing'); 
+            lucide.createIcons();
         }
     </script>
 </body>
