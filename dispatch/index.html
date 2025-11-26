@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CADNEXT - Advanced Dispatch System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F17;
+            color: #cbd5e1;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+        .animate-zoom { animation: zoomIn 0.2s ease-out forwards; }
+        .animate-pulse-custom { animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden selection:bg-blue-500/30">
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="react">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ICONS ---
+        const Icon = ({ path, size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {path}
+            </svg>
+        );
+
+        const icons = {
+            Shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>,
+            Flame: <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-2.246-5.318 6-6.5 3.438 1.787 5.4 5.312 4.686 9.387A5.002 5.002 0 1 1 12 18c0 0 0-4.182-4.182-4.182a4.182 4.182 0 0 1 .682-3.318"/>,
+            HeartPulse: <><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 20.26a.92.92 0 0 0 1.06 1.08l9.4-2.81"/></>,
+            Crosshair: <><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></>,
+            Radio: <><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></>,
+            MapPin: <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></>,
+            Activity: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>,
+            DollarSign: <><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></>,
+            Clock: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+            CheckCircle: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>,
+            AlertTriangle: <><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></>,
+            User: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
+            Zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>,
+            Layers: <><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>,
+            ChevronRight: <polyline points="9 18 15 12 9 6"/>,
+            TrendingUp: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>,
+            Skull: <><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></>,
+            PauseCircle: <><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></>,
+            FastForward: <><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></>,
+            RotateCcw: <><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></>
+        };
+
+        const Lucide = ({ icon, size, className }) => {
+            if (!icons[icon]) return null;
+            return <Icon path={icons[icon]} size={size} className={className} />;
+        };
+
+        // --- AUDIO ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const playSound = (type) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const createOsc = (freq, type, duration, vol) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(vol, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            };
+            if (type === 'incoming') { createOsc(880, 'sine', 0.6, 0.1); setTimeout(() => createOsc(1100, 'sine', 0.6, 0.05), 150); }
+            else if (type === 'dispatch') { 
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(800, now + 0.3);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.connect(gain); gain.connect(audioCtx.destination); osc.start(now); osc.stop(now + 0.3);
+            }
+            else if (type === 'click') createOsc(2000, 'sine', 0.03, 0.02);
+            else if (type === 'error') createOsc(150, 'sawtooth', 0.3, 0.1);
+            else if (type === 'success') { createOsc(600, 'sine', 0.1, 0.05); setTimeout(() => createOsc(900, 'sine', 0.2, 0.05), 100); }
+            else if (type === 'ability') { createOsc(400, 'square', 0.5, 0.1); setTimeout(() => createOsc(600, 'square', 0.5, 0.1), 100); }
+            else if (type === 'gameover') { createOsc(100, 'sawtooth', 2.0, 0.2); setTimeout(() => createOsc(80, 'sawtooth', 2.0, 0.2), 200); }
+        };
+
+        // --- CONFIGURATION ---
+        const INCIDENT_TYPES = [
+            { name: 'Noise Complaint', code: '10-48', risk: 1, units: 'police', time: 15, payout: 100 },
+            { name: 'Loitering', code: '10-14', risk: 1, units: 'police', time: 10, payout: 80 },
+            { name: 'Minor Traffic Accident', code: '10-50', risk: 1, units: 'police', time: 20, payout: 150 },
+            { name: 'Medical: Chest Pain', code: '10-33', risk: 2, units: 'ems', time: 25, payout: 300 },
+            { name: 'Medical: Diabetic Issue', code: '10-33', risk: 2, units: 'ems', time: 20, payout: 250 },
+            { name: 'Structure Fire', code: '10-70', risk: 3, units: 'fire_ems', time: 40, payout: 600 },
+            { name: 'Vehicle Fire', code: '10-71', risk: 2, units: 'fire', time: 25, payout: 400 },
+            { name: 'Armed Robbery', code: '10-30', risk: 3, units: 'police_swat', time: 35, payout: 750 },
+            { name: 'Domestic Dispute', code: '10-16', risk: 2, units: 'police', time: 25, payout: 250 },
+            { name: 'Suspect Fleeing', code: '10-80', risk: 2, units: 'police', time: 20, payout: 200 },
+            { name: 'Hazmat Situation', code: '10-90', risk: 3, units: 'fire_ems', time: 50, payout: 800 },
+            { name: 'Active Shooter', code: '10-32', risk: 3, units: 'all', time: 45, payout: 1000 },
+            { name: 'Public Intoxication', code: '10-56', risk: 1, units: 'police', time: 15, payout: 120 },
+            { name: 'Chemical Spill', code: '10-92', risk: 3, units: 'fire_ems', time: 45, payout: 900 },
+            { name: 'Cyber Attack', code: '10-99', risk: 3, units: 'swat', time: 60, payout: 1200 }
+        ];
+        const ZONES = ['Downtown', 'Northside', 'West End', 'Port District', 'Highlands', 'Industrial', 'Tech Park', 'Metro Station'];
+        const UNIT_DATA = {
+            police: { label: 'Patrol', baseCost: 500, icon: 'Shield', color: 'text-blue-400', bg: 'bg-blue-500/20', border: 'border-blue-500/30' },
+            fire: { label: 'Engine', baseCost: 800, icon: 'Flame', color: 'text-orange-400', bg: 'bg-orange-500/20', border: 'border-orange-500/30' },
+            ems: { label: 'Medic', baseCost: 600, icon: 'HeartPulse', color: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30' },
+            swat: { label: 'Tac-Ops', baseCost: 1500, icon: 'Crosshair', color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/30' }
+        };
+        const ABILITIES = [
+            { id: 'rapid', name: 'Rapid Clear', cost: 2000, icon: 'FastForward', desc: 'Resolve oldest call' },
+            { id: 'jam', name: 'Comms Jammer', cost: 1500, icon: 'PauseCircle', desc: 'Pause new calls (30s)' },
+            { id: 'recall', name: 'Fleet Recall', cost: 1000, icon: 'RotateCcw', desc: 'Reset all units' }
+        ];
+
+        // --- COMPONENTS ---
+        const UnitControl = ({ type, count, available, onAdd, onRemove, req }) => {
+            const config = UNIT_DATA[type];
+            const isMet = count >= req;
+            return (
+                <div className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isMet && req > 0 ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-slate-800/40 border-white/5'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${config.bg} ${config.color}`}><Lucide icon={config.icon} size={18} /></div>
+                        <div>
+                            <div className="text-sm font-bold text-slate-200">{config.label}</div>
+                            <div className="text-xs text-slate-500">Req: <span className={req > 0 ? 'text-slate-300' : 'text-slate-600'}>{req}</span></div>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 bg-slate-900/50 rounded-lg p-1 border border-white/5">
+                        <button onClick={onRemove} className="w-7 h-7 flex items-center justify-center rounded hover:bg-white/10 text-slate-400 transition-colors">-</button>
+                        <span className={`w-4 text-center font-bold text-sm ${count >= req && req > 0 ? 'text-emerald-400' : 'text-slate-200'}`}>{count}</span>
+                        <button onClick={onAdd} disabled={count >= available} className="w-7 h-7 flex items-center justify-center rounded hover:bg-white/10 text-slate-400 disabled:opacity-30 transition-colors">+</button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const DispatchCAD = () => {
+            const [started, setStarted] = useState(false);
+            const [gameOver, setGameOver] = useState(false);
+            const [funds, setFunds] = useState(2500);
+            const [score, setScore] = useState(0);
+            const [shiftTime, setShiftTime] = useState(0);
+            const [streak, setStreak] = useState(0);
+            const [threatLevel, setThreatLevel] = useState(0);
+            const [spawnPaused, setSpawnPaused] = useState(false);
+            const [fleet, setFleet] = useState({ police: { total: 4, available: 4 }, fire: { total: 2, available: 2 }, ems: { total: 2, available: 2 }, swat: { total: 1, available: 1 } });
+            const [queue, setQueue] = useState([]);
+            const [activeCalls, setActiveCalls] = useState([]);
+            const [incoming, setIncoming] = useState(null);
+            const [selectedUnits, setSelectedUnits] = useState({ police: 0, fire: 0, ems: 0, swat: 0 });
+            const [selectedRisk, setSelectedRisk] = useState(null);
+
+            const formatTime = (s) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+            const calculateCost = (type) => { const base = UNIT_DATA[type].baseCost; return Math.floor(base + (base * (fleet[type].total * 0.2))); };
+
+            // Game Loop
+            useEffect(() => {
+                if (!started || gameOver) return;
+                const interval = setInterval(() => {
+                    setShiftTime(t => t + 1);
+                    setActiveCalls(prev => {
+                        const remaining = [];
+                        prev.forEach(c => {
+                            if (Date.now() - c.startTime > c.duration * 1000) {
+                                setFunds(f => f + c.payout);
+                                setScore(s => s + (c.risk * 10) + (streak * 5));
+                                setStreak(s => Math.min(s + 1, 10));
+                                setThreatLevel(t => Math.max(0, t - 5));
+                                playSound('success');
+                                setFleet(f => { const next = { ...f }; Object.keys(c.assigned).forEach(k => next[k].available += c.assigned[k]); return next; });
+                            } else remaining.push(c);
+                        });
+                        return remaining;
+                    });
+                    if (queue.length > 5) setThreatLevel(t => Math.min(100, t + 1));
+                    
+                    const chaosLevel = Math.floor(shiftTime / 60);
+                    if (Math.random() < (0.05 + (chaosLevel * 0.015)) && !spawnPaused) {
+                        if (threatLevel >= 100) { setGameOver(true); playSound('gameover'); }
+                        else {
+                            const tpl = INCIDENT_TYPES[Math.floor(Math.random() * INCIDENT_TYPES.length)];
+                            const req = { police: 0, fire: 0, ems: 0, swat: 0 };
+                            if (tpl.units.includes('police')) req.police = Math.ceil(tpl.risk * 0.8) + (chaosLevel > 3 ? 1 : 0);
+                            if (tpl.units.includes('fire')) req.fire = Math.ceil(tpl.risk * 0.7);
+                            if (tpl.units.includes('ems')) req.ems = 1;
+                            if (tpl.units.includes('swat')) { req.swat = 1; req.police += 1; }
+                            if (tpl.units === 'all') { req.police = 2 + (chaosLevel > 4 ? 1 : 0); req.fire = 1; req.ems = 1; }
+                            const call = {
+                                id: Math.random().toString(36).substr(2, 6).toUpperCase(),
+                                type: tpl.name, code: tpl.code, risk: tpl.risk,
+                                zone: ZONES[Math.floor(Math.random() * ZONES.length)],
+                                duration: tpl.time, payout: Math.floor(tpl.payout * (1 + streak * 0.1 + chaosLevel * 0.05)),
+                                req, timestamp: Date.now()
+                            };
+                            if (!incoming && queue.length < 5) { setIncoming(call); playSound('incoming'); }
+                            else { setQueue(q => [...q, call]); setThreatLevel(t => Math.min(100, t + 2)); }
+                        }
+                    }
+                }, 1000);
+                return () => clearInterval(interval);
+            }, [started, incoming, gameOver, streak, shiftTime, queue.length, spawnPaused, threatLevel]);
+
+            const handleOpenCall = (call) => {
+                if (incoming) setQueue(q => [...q, incoming]);
+                setIncoming(call);
+                setQueue(q => q.filter(c => c.id !== call.id));
+                setSelectedUnits({ police: 0, fire: 0, ems: 0, swat: 0 });
+                setSelectedRisk(null);
+                playSound('click');
+            };
+
+            const handleDispatch = () => {
+                if (!incoming || selectedRisk !== incoming.risk || !Object.keys(incoming.req).every(k => selectedUnits[k] >= incoming.req[k])) {
+                    playSound('error'); return;
+                }
+                playSound('dispatch');
+                setFleet(prev => { const next = { ...prev }; Object.keys(selectedUnits).forEach(k => next[k].available -= selectedUnits[k]); return next; });
+                setActiveCalls(prev => [...prev, { ...incoming, startTime: Date.now(), assigned: selectedUnits }]);
+                setIncoming(null);
+            };
+
+            const buyUnit = (type) => {
+                const cost = calculateCost(type);
+                if (funds >= cost) {
+                    setFunds(f => f - cost);
+                    setFleet(prev => ({ ...prev, [type]: { ...prev[type], total: prev[type].total + 1, available: prev[type].available + 1 } }));
+                    playSound('success');
+                } else playSound('error');
+            };
+
+            const useAbility = (id) => {
+                const ab = ABILITIES.find(a => a.id === id);
+                if (funds < ab.cost) { playSound('error'); return; }
+                setFunds(f => f - ab.cost); playSound('ability');
+                if (id === 'rapid' && activeCalls.length > 0) {
+                    const t = activeCalls[0];
+                    setActiveCalls(p => p.slice(1));
+                    setFunds(f => f + t.payout); setThreatLevel(l => Math.max(0, l - 10));
+                    setFleet(f => { const n = { ...f }; Object.keys(t.assigned).forEach(k => n[k].available += t.assigned[k]); return n; });
+                } else if (id === 'jam') {
+                    setSpawnPaused(true); setTimeout(() => setSpawnPaused(false), 30000);
+                } else if (id === 'recall') {
+                    setActiveCalls([]);
+                    setFleet(f => { const n = { ...f }; Object.keys(n).forEach(k => n[k].available = n[k].total); return n; });
+                    setThreatLevel(l => Math.min(100, l + 15));
+                }
+            };
+
+            if (!started) return (
+                <div className="h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-200 font-sans">
+                    <div className="max-w-md w-full text-center space-y-8 animate-zoom">
+                        <div className="relative inline-block">
+                            <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-20 rounded-full"></div>
+                            <Lucide icon="Radio" size={64} className="relative z-10 text-white mx-auto" />
+                        </div>
+                        <div><h1 className="text-5xl font-bold tracking-tight text-white mb-2">CAD<span className="text-blue-500">NEXT</span></h1><p className="text-slate-400 text-lg">Advanced Dispatch System</p></div>
+                        <button onClick={() => { if (audioCtx.state === 'suspended') audioCtx.resume(); setStarted(true); }} className="w-full py-4 bg-white text-black font-bold rounded-xl hover:scale-[1.02] transition-transform shadow-xl shadow-white/10">START SHIFT</button>
+                    </div>
+                </div>
+            );
+
+            if (gameOver) return (
+                <div className="h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-200 font-sans">
+                    <div className="max-w-md w-full text-center space-y-6 animate-zoom">
+                        <Lucide icon="Skull" size={80} className="mx-auto text-red-500" />
+                        <h1 className="text-4xl font-bold text-white">SYSTEM FAILURE</h1>
+                        <p className="text-slate-400">City Overwhelmed.</p>
+                        <div className="bg-slate-900 p-6 rounded-xl border border-white/10 space-y-2">
+                            <div className="flex justify-between text-sm"><span>Shift Duration:</span> <span className="font-mono text-white">{formatTime(shiftTime)}</span></div>
+                            <div className="flex justify-between text-sm"><span>Score:</span> <span className="font-mono text-emerald-400">{score}</span></div>
+                        </div>
+                        <button onClick={() => window.location.reload()} className="w-full py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-500 transition-colors">REBOOT SYSTEM</button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="h-screen bg-[#0B0F17] text-slate-300 font-sans flex overflow-hidden">
+                    <aside className="w-80 flex flex-col border-r border-white/5 bg-slate-900/50 backdrop-blur-xl z-20">
+                        <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-2"><Lucide icon="Layers" size={16} className="text-blue-500" /><span className="font-bold text-sm text-slate-200">Pending Queue</span></div>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${queue.length > 8 ? 'bg-red-500 text-white animate-pulse-custom' : 'bg-white/10 text-white'}`}>{queue.length}</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                            {queue.length === 0 && <div className="text-center py-10 text-slate-600 text-xs">Queue Clear</div>}
+                            {queue.map(call => (
+                                <div key={call.id} onClick={() => handleOpenCall(call)} className="p-3 rounded-lg bg-slate-800/40 border border-white/5 hover:bg-slate-800 hover:border-blue-500/50 transition-all cursor-pointer group">
+                                    <div className="flex justify-between items-start mb-1"><span className="font-bold text-xs text-slate-200 group-hover:text-blue-400">{call.type}</span><span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${call.risk === 3 ? 'bg-red-500/20 text-red-400' : 'bg-slate-700/50 text-slate-400'}`}>CODE {call.risk}</span></div>
+                                    <div className="flex items-center gap-2 text-[10px] text-slate-500"><Lucide icon="Clock" size={10} /> {Math.floor((Date.now() - call.timestamp)/1000)}s ago</div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-4 border-t border-white/5 bg-slate-900/80">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2"><Lucide icon="Zap" size={10} /> Tactical Support</div>
+                            <div className="space-y-2">
+                                {ABILITIES.map(a => (
+                                    <button key={a.id} onClick={() => useAbility(a.id)} disabled={funds < a.cost} className="w-full flex items-center justify-between p-2 rounded bg-slate-800 border border-white/5 hover:border-emerald-500/30 disabled:opacity-50 group">
+                                        <div className="flex items-center gap-2"><Lucide icon={a.icon} size={14} className="text-slate-400 group-hover:text-white" /><div className="text-left"><div className="text-xs font-bold text-slate-300 group-hover:text-white">{a.name}</div><div className="text-[9px] text-slate-500 hidden group-hover:block">{a.desc}</div></div></div>
+                                        <div className={`text-xs font-mono font-bold ${funds >= a.cost ? 'text-emerald-400' : 'text-slate-600'}`}>${a.cost}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="p-4 border-t border-white/5 bg-black/20">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Fleet Assets</div>
+                            <div className="grid grid-cols-2 gap-2">
+                                {Object.entries(fleet).map(([k, v]) => {
+                                    const uData = UNIT_DATA[k];
+                                    const cost = calculateCost(k);
+                                    return (
+                                        <button key={k} onClick={() => buyUnit(k)} className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all relative overflow-hidden group ${uData.bg} ${uData.border}`}>
+                                            <div className={`text-[9px] uppercase font-bold mb-1 ${uData.color}`}>{k}</div>
+                                            <div className="flex items-center gap-1"><Lucide icon={uData.icon} size={12} className={uData.color} /><span className="font-bold text-white text-sm">{v.available}/{v.total}</span></div>
+                                            <div className={`text-[9px] mt-1 font-mono ${funds >= cost ? 'text-white/70' : 'text-white/20'}`}>+${cost}</div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </aside>
+
+                    <main className="flex-1 flex flex-col relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-[#0B0F17] to-[#0B0F17]">
+                        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 bg-slate-900/40 backdrop-blur-sm z-30">
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div><span className="font-bold text-slate-200 tracking-tight text-lg">CAD<span className="text-slate-600">NEXT</span></span></div>
+                                <div className="h-8 w-px bg-white/10 mx-2"></div>
+                                <div className="flex items-center gap-6 text-sm">
+                                    <div className="flex items-center gap-2" title="Shift Time"><Lucide icon="Clock" size={14} className="text-slate-500" /><span className="font-mono text-white font-bold">{formatTime(shiftTime)}</span></div>
+                                    <div className="flex items-center gap-2" title="Available Funds"><Lucide icon="DollarSign" size={14} className="text-slate-500" /><span className="font-mono text-emerald-400 font-bold">${funds.toLocaleString()}</span></div>
+                                    <div className="flex items-center gap-2" title="Performance Score"><Lucide icon="TrendingUp" size={14} className="text-slate-500" /><span className="font-mono text-blue-400 font-bold">{score}</span></div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 w-1/3 max-w-xs">
+                                <span className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">City Threat</span>
+                                <div className="h-2 flex-1 bg-slate-800 rounded-full overflow-hidden border border-white/5"><div className={`h-full transition-all duration-500 ease-out ${threatLevel > 80 ? 'bg-red-500 animate-pulse-custom' : threatLevel > 50 ? 'bg-orange-500' : 'bg-blue-500'}`} style={{ width: `${threatLevel}%` }}></div></div>
+                                <span className={`text-xs font-mono font-bold ${threatLevel > 80 ? 'text-red-500' : 'text-slate-400'}`}>{threatLevel}%</span>
+                            </div>
+                        </header>
+
+                        <div className="flex-1 p-6 flex flex-col overflow-hidden">
+                            <div className="mb-6 flex items-center justify-between">
+                                <h2 className="text-sm font-bold text-slate-200 uppercase tracking-widest flex items-center gap-2"><Lucide icon="Activity" size={16} className="text-emerald-500" /> Active Operations</h2>
+                                <div className="flex gap-4 text-[10px] font-bold text-slate-500 uppercase"><span>Streak: <span className="text-white">{streak}x</span></span>{spawnPaused && <span className="text-red-500 animate-pulse-custom">SPAWNS PAUSED</span>}</div>
+                            </div>
+                            <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+                                {activeCalls.length === 0 && <div className="h-48 flex flex-col items-center justify-center text-slate-600 border border-dashed border-slate-800 rounded-xl bg-slate-900/20"><Lucide icon="Activity" size={32} className="mb-3 opacity-50" /><span className="text-sm font-medium">No Active Operations</span></div>}
+                                {activeCalls.map(call => {
+                                    const progress = Math.min(100, ((Date.now() - call.startTime) / (call.duration * 1000)) * 100);
+                                    return (
+                                        <div key={call.id} className="group relative bg-slate-900/40 hover:bg-slate-900/60 border border-white/5 rounded-xl p-4 transition-all animate-fade-in">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1"><span className={`w-2 h-2 rounded-full ${call.risk === 3 ? 'bg-red-500 animate-pulse-custom' : call.risk === 2 ? 'bg-orange-400' : 'bg-blue-400'}`} /> <span className="text-xs font-mono text-slate-500">#{call.id}</span></div>
+                                                    <h4 className="font-bold text-slate-200">{call.type}</h4>
+                                                    <div className="text-xs text-slate-500 flex items-center gap-1 mt-1"><Lucide icon="MapPin" size={10} /> {call.zone}</div>
+                                                </div>
+                                                <div className="text-right"><span className="text-xs font-mono font-bold text-slate-400">{Math.ceil(call.duration - (Date.now() - call.startTime)/1000)}s</span></div>
+                                            </div>
+                                            <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${progress}%` }} /></div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {incoming && (
+                            <div className="absolute inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 animate-zoom">
+                                <div className="w-full max-w-4xl bg-[#0F131C] border border-white/10 rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden">
+                                    <div className="w-full md:w-1/3 bg-slate-900/50 p-6 border-r border-white/5 flex flex-col">
+                                        <div className="mb-6">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-white/5 mb-4"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-custom"></span><span className="text-xs font-medium text-slate-300">Incoming Alert</span></div>
+                                            <h2 className="text-2xl font-bold text-white mb-2">{incoming.type}</h2>
+                                            <div className="text-sm text-slate-400 flex items-center gap-2"><Lucide icon="MapPin" size={14} /> {incoming.zone}</div>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center"><div className="text-xs text-slate-500 uppercase tracking-wider">Radio Code</div><div className="text-lg font-mono font-bold text-white">{incoming.code}</div></div>
+                                            <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center"><div className="text-xs text-slate-500 uppercase tracking-wider">Payout</div><div className="text-lg font-mono font-bold text-emerald-400">${incoming.payout}</div></div>
+                                        </div>
+                                        <div className="mt-auto pt-6"><button onClick={() => { setQueue(q => [...q, incoming]); setIncoming(null); playSound('click'); }} className="w-full py-3 rounded-lg border border-white/10 text-slate-400 text-sm font-medium hover:bg-white/5 hover:text-white transition-colors">Move to Queue</button></div>
+                                    </div>
+                                    <div className="flex-1 p-6 flex flex-col">
+                                        <div className="mb-6">
+                                            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">1. Priority Assessment</h3>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {[1, 2, 3].map(risk => (
+                                                    <button key={risk} onClick={() => { setSelectedRisk(risk); playSound('click'); }} className={`py-4 rounded-xl border flex flex-col items-center justify-center transition-all ${selectedRisk === risk ? 'bg-blue-500/20 border-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.2)]' : 'bg-slate-800/40 border-white/5 text-slate-500 hover:bg-slate-800'}`}>
+                                                        <span className={`text-lg font-bold mb-1 ${selectedRisk===risk ? 'text-blue-400' : ''}`}>CODE {risk}</span>
+                                                        <span className="text-[10px] opacity-60 uppercase">{risk === 1 ? 'Low' : risk === 2 ? 'Medium' : 'High'} Risk</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="mb-6 flex-1">
+                                            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">2. Unit Assignment</h3>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {Object.keys(incoming.req).map(key => incoming.req[key] > 0 && (
+                                                    <UnitControl key={key} type={key} req={incoming.req[key]} count={selectedUnits[key]} available={fleet[key].available} onAdd={() => { setSelectedUnits(p => ({...p, [key]: p[key]+1})); playSound('click'); }} onRemove={() => { setSelectedUnits(p => ({...p, [key]: Math.max(0, p[key]-1)})); playSound('click'); }} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <button onClick={handleDispatch} className={`w-full py-4 rounded-xl font-bold text-sm tracking-widest uppercase transition-all flex items-center justify-center gap-3 ${selectedRisk === incoming.risk && Object.keys(incoming.req).every(k => selectedUnits[k] >= incoming.req[k]) ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 scale-[1.01]' : 'bg-slate-800 text-slate-600 cursor-not-allowed'}`}>
+                                            {selectedRisk !== incoming.risk ? 'Select Correct Priority Code' : 'Authorize Dispatch'} <Lucide icon="ChevronRight" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<DispatchCAD />);
+    </script>
+</body>
+</html>
