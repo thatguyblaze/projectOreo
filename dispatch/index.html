@@ -16,7 +16,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -95,7 +95,9 @@
             CloudRain: <React.Fragment><line x1="16" y1="13" x2="16" y2="21"/><line x1="8" y1="13" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="23"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></React.Fragment>,
             Sun: <React.Fragment><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></React.Fragment>,
             CloudLightning: <React.Fragment><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/></React.Fragment>,
-            Phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            Phone: <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>,
+            Volume2: <React.Fragment><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></React.Fragment>,
+            VolumeX: <React.Fragment><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></React.Fragment>
         };
 
         const Lucide = ({ icon, size, className }) => {
@@ -136,7 +138,7 @@
             else if (type === 'gameover') { createOsc(100, 'sawtooth', 2.0, 0.2); setTimeout(() => createOsc(80, 'sawtooth', 2.0, 0.2), 200); }
         };
 
-        // --- CONSTANTS ---
+        // --- CONFIGURATION ---
         const PROTOCOLS = [
             { id: 'CIVIL', label: 'Civil', color: 'bg-blue-500' },
             { id: 'VIOLENT', label: 'Violent', color: 'bg-red-500' },
@@ -145,30 +147,102 @@
             { id: 'CRITICAL', label: 'Critical', color: 'bg-purple-500' }
         ];
 
+        const BOLO_TYPES = ["Red Hoodie", "Silver Sedan", "White Van", "Face Tattoo", "Blue Baseball Cap", "Limping Male", "Green Backpack"];
+
         const INCIDENT_TYPES = [
-            { name: 'Noise Complaint', code: '10-48', risk: 1, units: 'police', time: 15, payout: 100, cat: 'CIVIL', msgs: ["Caller reports loud music from unit 4B.", "Barking dog for 3 hours straight.", "Construction noise after ordinance hours."] },
-            { name: 'Loitering', code: '10-14', risk: 1, units: 'police', time: 10, payout: 80, cat: 'CIVIL', msgs: ["Group of teens blocking the convenience store entrance.", "Suspect sleeping in the bank ATM vestibule.", "Individuals attempting to open car doors in parking lot."] },
-            { name: 'Minor MVA', code: '10-50', risk: 1, units: 'police', time: 20, payout: 150, cat: 'CIVIL', msgs: ["Fender bender at 4th and Main. No injuries.", "Car hit a parked vehicle and fled.", "Traffic signal malfunction causing confusion."] },
-            { name: 'Chest Pain', code: '10-33', risk: 2, units: 'ems', time: 25, payout: 300, cat: 'MEDICAL', msgs: ["Male, 56, reports severe pressure in chest.", "Female having trouble breathing, history of heart issues.", "Elderly patient collapsed in the kitchen."] },
-            { name: 'Structure Fire', code: '10-70', risk: 3, units: 'fire_ems', time: 40, payout: 600, cat: 'HAZARD', msgs: ["Black smoke seen coming from the roof.", "Flames visible in second story window.", "Commercial fire alarm going off in apartment complex."] },
-            { name: 'Armed Robbery', code: '10-30', risk: 3, units: 'police_swat', time: 35, payout: 750, cat: 'VIOLENT', msgs: ["Subject entered store with a handgun. Demand money.", "Silent panic alarm from the First National Bank.", "Clerk reports being held at knifepoint."] },
-            { name: 'Domestic', code: '10-16', risk: 2, units: 'police', time: 25, payout: 250, cat: 'VIOLENT', msgs: ["Fighting audible through apartment walls.", "Neighbor reports thrown objects and screaming.", "Verbal altercation escalating in the street."] },
-            { name: 'Hazmat', code: '10-90', risk: 3, units: 'fire_ems', time: 50, payout: 800, cat: 'HAZARD', msgs: ["Overturned truck leaking unknown green fluid.", "Strong chemical smell in the subway station.", "White powder found in mailroom."] },
-            { name: 'Active Shooter', code: '10-32', risk: 3, units: 'all', time: 45, payout: 1000, cat: 'CRITICAL', msgs: ["SHOTS FIRED AT THE MALL. MULTIPLE CALLS.", "Man with a rifle spotted near the school.", "Multiple victims down in the plaza."] },
-            { name: 'Cyber Attack', code: '10-99', risk: 3, units: 'swat', time: 60, payout: 1200, cat: 'CRITICAL', msgs: ["City power grid compromised by external actor.", "Mainframe breach at City Hall.", "Traffic light control system has been hacked."] }
+            { 
+                name: 'Noise Complaint', code: '10-48', risk: 1, units: 'police', time: 15, payout: 100, cat: 'CIVIL', 
+                msgs: [
+                    "I'm at the complex on 4th. The guy in 4B is blasting music so loud my dishes are rattling. I've asked him to stop twice. He's yelling back now.",
+                    "There's a car in the lot with its bass turned up max. It's 2 AM. People are trying to sleep here. It's a silver sedan.",
+                    "Construction crew is working way past the city ordinance time. Jackhammers going off right next to the residential block."
+                ] 
+            },
+            { 
+                name: 'Loitering', code: '10-14', risk: 1, units: 'police', time: 10, payout: 80, cat: 'CIVIL', 
+                msgs: [
+                    "I'm the manager at the QuickMart. There's a group of teenagers blocking the entrance and refusing to leave. They're harassing customers.",
+                    "Someone is sleeping in the ATM vestibule of the bank. They aren't aggressive but customers are afraid to go inside.",
+                    "Suspicious individuals are walking through the parking lot looking into car windows. They're wearing hoodies and masks."
+                ] 
+            },
+            { 
+                name: 'Minor MVA', code: '10-50', risk: 1, units: 'police', time: 20, payout: 150, cat: 'CIVIL', 
+                msgs: [
+                    "Just witnessed a fender bender at the intersection of Main and Broadway. Two sedans involved. No one looks hurt, but they are blocking traffic.",
+                    "Someone just sideswiped my parked car and kept driving! I have their license plate number. My car is pretty banged up.",
+                    "Traffic lights are out at the intersection near the school. It's causing chaos, cars are almost hitting each other."
+                ] 
+            },
+            { 
+                name: 'Chest Pain', code: '10-33', risk: 2, units: 'ems', time: 25, payout: 300, cat: 'MEDICAL', 
+                msgs: [
+                    "My husband is clutching his chest and having trouble breathing. He's 56, history of hypertension. Please hurry!",
+                    "There's a woman on the park bench who looks like she's in severe distress. She says her left arm is numb and chest feels heavy.",
+                    "Elderly male collapsed in the kitchen. He's conscious but very pale and sweating profusely. Complaining of pressure."
+                ] 
+            },
+            { 
+                name: 'Structure Fire', code: '10-70', risk: 3, units: 'fire_ems', time: 40, payout: 600, cat: 'HAZARD', 
+                msgs: [
+                    "I see thick black smoke coming from the roof of the old warehouse on Dockside drive. I can see flames licking the windows.",
+                    "My kitchen is on fire! A grease fire got out of control and the cabinets are catching. Everyone is evacuating now.",
+                    "Fire alarm is going off at the apartment complex. I smell smoke in the hallway. Not sure which unit it is coming from."
+                ] 
+            },
+            { 
+                name: 'Armed Robbery', code: '10-30', risk: 3, units: 'police_swat', time: 35, payout: 750, cat: 'VIOLENT', 
+                msgs: [
+                    "A man just entered the convenience store with a handgun! He's screaming at the clerk to open the register. He's wearing a ski mask.",
+                    "Silent panic alarm triggered at First National Bank. Cameras show two subjects with shotguns in the lobby.",
+                    "I'm hiding in the back room. Someone is robbing the jewelry store. They smashed the cases and threatened the guard with a knife."
+                ] 
+            },
+            { 
+                name: 'Domestic', code: '10-16', risk: 2, units: 'police', time: 25, payout: 250, cat: 'VIOLENT', 
+                msgs: [
+                    "My neighbors are fighting again. It sounds really bad this time. I heard glass breaking and someone screaming for help.",
+                    "Caller reports a verbal altercation escalating in the street. One subject pushed the other. A crowd is gathering.",
+                    "I need police here now. My ex-boyfriend is banging on my door and threatening to kick it in. He's not supposed to be here."
+                ] 
+            },
+            { 
+                name: 'Hazmat', code: '10-90', risk: 3, units: 'fire_ems', time: 50, payout: 800, cat: 'HAZARD', 
+                msgs: [
+                    "A tanker truck overturned on the highway. It's leaking a green fluid and there's a strange vapor rising from it.",
+                    "Subway station attendant reporting a strong chemical smell. Several passengers are coughing and eyes are watering.",
+                    "Suspicious package found in the mailroom. White powder leaked out when it was moved. We've sealed the room."
+                ] 
+            },
+            { 
+                name: 'Active Shooter', code: '10-32', risk: 3, units: 'all', time: 45, payout: 1000, cat: 'CRITICAL', 
+                msgs: [
+                    "911! SHOTS FIRED AT THE SHOPPING MALL! I hear automatic fire near the food court. People are running everywhere!",
+                    "There's a man walking towards the school with a rifle. He's shooting at cars passing by. Please send everyone!",
+                    "Multiple victims down in the central plaza. Subject is reloading. Police needed immediately!"
+                ] 
+            },
+            { 
+                name: 'Cyber Attack', code: '10-99', risk: 3, units: 'swat', time: 60, payout: 1200, cat: 'CRITICAL', 
+                msgs: [
+                    "City Hall IT reporting a massive breach. Ransomware has locked the mainframe. They are threatening to delete municipal records.",
+                    "Traffic Control Center has lost control of the grid. All lights are stuck on green. It's a coordinated hack.",
+                    "Bank security reporting a digital heist in progress. Someone is bypassing the vault's electronic locks remotely."
+                ] 
+            }
         ];
 
         const ZONES = ['Downtown', 'Northside', 'West End', 'Port District', 'Highlands', 'Industrial', 'Tech Park', 'Metro Station'];
         const UNIT_DATA = {
-            police: { label: 'Patrol', baseCost: 500, icon: 'Shield', color: 'text-blue-400', bg: 'bg-blue-500/20', border: 'border-blue-500/30' },
-            fire: { label: 'Engine', baseCost: 800, icon: 'Flame', color: 'text-orange-400', bg: 'bg-orange-500/20', border: 'border-orange-500/30' },
-            ems: { label: 'Medic', baseCost: 600, icon: 'HeartPulse', color: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30' },
-            swat: { label: 'Tac-Ops', baseCost: 1500, icon: 'Crosshair', color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/30' }
+            police: { label: 'Patrol', baseCost: 500, icon: 'Shield', color: 'text-blue-400', bg: 'bg-blue-500/20', border: 'border-blue-500/30', desc: 'Basic law enforcement unit. Handle civil and violent crimes.' },
+            fire: { label: 'Engine', baseCost: 800, icon: 'Flame', color: 'text-orange-400', bg: 'bg-orange-500/20', border: 'border-orange-500/30', desc: 'Heavy fire suppression vehicle. Essential for hazards and fires.' },
+            ems: { label: 'Medic', baseCost: 600, icon: 'HeartPulse', color: 'text-emerald-400', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', desc: 'Advanced life support ambulance. Treating injuries is priority.' },
+            swat: { label: 'Tac-Ops', baseCost: 1500, icon: 'Crosshair', color: 'text-purple-400', bg: 'bg-purple-500/20', border: 'border-purple-500/30', desc: 'Special Weapons and Tactics. Required for critical threats.' }
         };
         const ABILITIES = [
-            { id: 'rapid', name: 'Rapid Clear', cost: 2000, icon: 'FastForward', desc: 'Resolve oldest call' },
-            { id: 'jam', name: 'Comms Jammer', cost: 1500, icon: 'PauseCircle', desc: 'Pause new calls (30s)' },
-            { id: 'recall', name: 'Fleet Recall', cost: 1000, icon: 'RotateCcw', desc: 'Reset all units' }
+            { id: 'rapid', name: 'Rapid Clear', cost: 2000, icon: 'FastForward', desc: 'Instantly resolves the oldest active call with full payout.' },
+            { id: 'jam', name: 'Comms Jammer', cost: 1500, icon: 'PauseCircle', desc: 'Temporarily stops new calls from coming in for 30 seconds.' },
+            { id: 'recall', name: 'Fleet Recall', cost: 1000, icon: 'RotateCcw', desc: 'Emergency Reset. Pulls all units off active calls (fails calls).' }
         ];
 
         const OBJECTIVES = [
@@ -185,18 +259,25 @@
         ];
 
         // --- HELPERS ---
-        const generateCallerInfo = () => {
+        const generateCallerInfo = (bolo) => {
             const firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara"];
             const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"];
             const streets = ["Maple", "Oak", "Cedar", "Pine", "Elm", "Washington", "Lake", "Hill"];
             const types = ["St", "Ave", "Blvd", "Rd", "Ln"];
+            const histories = ["Clean Record", "Prior Noise Complaints", "Known Medical Issues", "Multiple Traffic Violations", "Warrant (Inactive)", "Frequent Caller"];
+            const notesList = ["Sounded intoxicated", "Speaking in whispers", "Very agitated", "Background screaming", "Calm demeanor", "Crying on line", "Mentioned a weapon"];
             
+            // Chance to include BOLO
+            const includeBolo = bolo && Math.random() < 0.15; // 15% chance call matches BOLO
+            const note = includeBolo ? `Caller mentioned a ${bolo}` : notesList[Math.floor(Math.random()*notesList.length)];
+
             const name = `${firstNames[Math.floor(Math.random()*firstNames.length)]} ${lastNames[Math.floor(Math.random()*lastNames.length)]}`;
             const age = Math.floor(Math.random() * 60) + 18;
             const phone = `555-${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*9000)+1000}`;
             const address = `${Math.floor(Math.random()*9999)+1} ${streets[Math.floor(Math.random()*streets.length)]} ${types[Math.floor(Math.random()*types.length)]}`;
+            const history = histories[Math.floor(Math.random()*histories.length)];
             
-            return { name, age, phone, address };
+            return { name, age, phone, address, history, note, isBolo: includeBolo };
         };
 
         // --- COMPONENTS ---
@@ -231,10 +312,12 @@
             const [streak, setStreak] = useState(0);
             const [threatLevel, setThreatLevel] = useState(0);
             const [spawnPaused, setSpawnPaused] = useState(false);
+            const [muted, setMuted] = useState(false);
             
             // Mechanics
             const [weather, setWeather] = useState(WEATHER_TYPES[0]);
             const [zoneHeat, setZoneHeat] = useState(ZONES.reduce((acc, z) => ({...acc, [z]: 0}), {}));
+            const [activeBolo, setActiveBolo] = useState("");
             
             // Persistent Data
             const [highScore, setHighScore] = useState(0);
@@ -257,7 +340,7 @@
             const [viewingCall, setViewingCall] = useState(null); 
             
             const [selectedUnits, setSelectedUnits] = useState({ police: 0, fire: 0, ems: 0, swat: 0 });
-            const [selectedProtocol, setSelectedProtocol] = useState(null); // User's guess
+            const [selectedProtocol, setSelectedProtocol] = useState(null); 
             
             // Objectives
             const [currentObjective, setCurrentObjective] = useState(OBJECTIVES[0]);
@@ -266,6 +349,10 @@
             const formatTime = (s) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
             const calculateCost = (type) => { const base = UNIT_DATA[type].baseCost; return Math.floor(base + (base * (fleet[type].total * 0.2))); };
             const calculateUpgradeCost = (lvl) => 2000 * lvl;
+
+            const playSfx = (type) => {
+                if (!muted) playSound(type);
+            };
 
             // Load Persistence
             useEffect(() => {
@@ -294,7 +381,7 @@
                 const interval = setInterval(() => {
                     setShiftTime(t => t + 1);
                     
-                    // Weather Cycle (Every 60s chance)
+                    // Weather Cycle
                     if(Math.random() < 0.01) {
                         const nextW = WEATHER_TYPES[Math.floor(Math.random() * WEATHER_TYPES.length)];
                         setWeather(nextW);
@@ -307,7 +394,11 @@
                         const remaining = [];
                         prev.forEach(c => {
                             if (Date.now() - c.startTime > c.duration * 1000) {
-                                setFunds(f => f + c.payout);
+                                // Calculate Payout
+                                let finalPayout = c.payout;
+                                if (c.info.isBolo) finalPayout += 1000; 
+
+                                setFunds(f => f + finalPayout);
                                 const earnedScore = (c.risk * 10) + (streak * 5);
                                 setScore(s => s + earnedScore);
                                 setXp(x => {
@@ -315,7 +406,7 @@
                                     if (newXp >= xpToNext) {
                                         setLevel(l => l + 1);
                                         setFunds(f => f + 1500); 
-                                        playSound('levelup');
+                                        playSfx('levelup');
                                         return newXp - xpToNext;
                                     }
                                     return newXp;
@@ -327,7 +418,7 @@
                                         const newP = p + 1;
                                         if (newP >= currentObjective.count) {
                                             setFunds(f => f + currentObjective.reward);
-                                            playSound('success');
+                                            playSfx('success');
                                             setCurrentObjective(OBJECTIVES[Math.floor(Math.random() * OBJECTIVES.length)]);
                                             return 0;
                                         }
@@ -338,7 +429,7 @@
                                 setStreak(s => Math.min(s + 1, 10));
                                 setThreatLevel(t => Math.max(0, t - 5));
                                 setZoneHeat(zh => ({...zh, [c.zone]: Math.max(0, zh[c.zone] - 10)}));
-                                playSound('success');
+                                playSfx('success');
                                 setFleet(f => { 
                                     const next = { ...f }; 
                                     Object.keys(c.assigned).forEach(k => {
@@ -354,7 +445,7 @@
                     // Spawn Logic with Heat
                     const chaosLevel = Math.floor(shiftTime / 60);
                     if (Math.random() < (0.08 + (chaosLevel * 0.02)) && !spawnPaused) {
-                        if (threatLevel >= 100) { setGameOver(true); playSound('gameover'); }
+                        if (threatLevel >= 100) { setGameOver(true); playSfx('gameover'); }
                         else {
                             const z = ZONES[Math.floor(Math.random() * ZONES.length)];
                             const heatRisk = zoneHeat[z] > 50 ? 1 : 0;
@@ -371,7 +462,7 @@
                             if (tpl.units.includes('swat')) { req.swat = 1; req.police += 1; }
                             if (tpl.units === 'all') { req.police = 2; req.fire = 1; req.ems = 1; }
                             
-                            const info = generateCallerInfo();
+                            const info = generateCallerInfo(activeBolo);
 
                             const call = {
                                 id: Math.random().toString(36).substr(2, 6).toUpperCase(),
@@ -381,14 +472,14 @@
                                 info: info,
                                 baseDuration: tpl.time, 
                                 duration: tpl.time, 
-                                payout: Math.floor(tpl.payout * (1 + streak * 0.1 + chaosLevel * 0.05)),
+                                payout: Math.floor(tpl.payout * (0.8 + Math.random() * 0.4) * (1 + streak * 0.1 + chaosLevel * 0.05)),
                                 req, timestamp: Date.now()
                             };
                             if (!incoming && queue.length < 5) { 
                                 setIncoming(call);
                                 setSelectedUnits({ police: 0, fire: 0, ems: 0, swat: 0 });
                                 setSelectedProtocol(null);
-                                playSound('incoming'); 
+                                playSfx('incoming'); 
                             }
                             else { 
                                 setQueue(q => [...q, call]); 
@@ -399,26 +490,31 @@
                     }
                 }, 1000);
                 return () => clearInterval(interval);
-            }, [started, incoming, gameOver, streak, shiftTime, queue.length, spawnPaused, threatLevel, level, xp, currentObjective, weather, zoneHeat]);
+            }, [started, incoming, gameOver, streak, shiftTime, queue.length, spawnPaused, threatLevel, level, xp, currentObjective, weather, zoneHeat, activeBolo]);
 
             // Start
-            useEffect(() => {
-                if (started && !incoming) {
-                    const tpl = INCIDENT_TYPES[0];
-                    const info = generateCallerInfo();
-                    const call = {
-                        id: "INIT-01", type: tpl.name, code: tpl.code, risk: 1, units: 'police', cat: 'CIVIL',
-                        msg: tpl.msgs[0],
-                        info: info,
-                        zone: ZONES[0], baseDuration: 10, duration: 10, payout: 200,
-                        req: { police: 1, fire: 0, ems: 0, swat: 0 }, timestamp: Date.now()
-                    };
-                    setIncoming(call);
-                    setSelectedUnits({ police: 0, fire: 0, ems: 0, swat: 0 });
-                    setSelectedProtocol(null);
-                    playSound('incoming');
-                }
-            }, [started]);
+            const handleStart = () => {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const startBolo = BOLO_TYPES[Math.floor(Math.random() * BOLO_TYPES.length)];
+                setActiveBolo(startBolo);
+                setCurrentObjective(OBJECTIVES[Math.floor(Math.random() * OBJECTIVES.length)]);
+                setStarted(true);
+                
+                // Force First Call with BOLO context
+                const tpl = INCIDENT_TYPES[0];
+                const info = generateCallerInfo(startBolo);
+                const call = {
+                    id: "INIT-01", type: tpl.name, code: tpl.code, risk: 1, units: 'police', cat: 'CIVIL',
+                    msg: tpl.msgs[0],
+                    info: info,
+                    zone: ZONES[0], baseDuration: 10, duration: 10, payout: 200,
+                    req: { police: 1, fire: 0, ems: 0, swat: 0 }, timestamp: Date.now()
+                };
+                setIncoming(call);
+                setSelectedUnits({ police: 0, fire: 0, ems: 0, swat: 0 });
+                setSelectedProtocol(null);
+                playSfx('incoming');
+            };
 
             const handleOpenCall = (call) => {
                 if (incoming) setQueue(q => [...q, incoming]);
@@ -426,14 +522,14 @@
                 setQueue(q => q.filter(c => c.id !== call.id));
                 setSelectedUnits({ police: 0, fire: 0, ems: 0, swat: 0 });
                 setSelectedProtocol(null);
-                playSound('click');
+                playSfx('click');
             };
 
             const handleMinimizeIncoming = (e) => {
                 if (incoming) {
                     setQueue(q => [...q, incoming]);
                     setIncoming(null);
-                    playSound('click');
+                    playSfx('click');
                 }
             }
 
@@ -442,13 +538,12 @@
                 const hasReqUnits = Object.keys(incoming.req).every(k => selectedUnits[k] >= incoming.req[k]);
                 
                 if (!incoming || !selectedProtocol || !hasReqUnits || !validSelection) {
-                    playSound('error'); return;
+                    playSfx('error'); return;
                 }
                 
                 let speedBonus = 0;
                 Object.keys(selectedUnits).forEach(k => { if (selectedUnits[k] > 0) speedBonus += (fleet[k].speedLvl - 1) * 0.1; });
                 
-                // SCORING LOGIC
                 const isCorrectProtocol = selectedProtocol === incoming.cat;
                 const wMod = weather.mod;
                 const finalDuration = Math.max(5, (incoming.baseDuration * wMod) * (1 - Math.min(0.5, speedBonus)));
@@ -458,15 +553,14 @@
                     duration: finalDuration, 
                     startTime: Date.now(), 
                     assigned: selectedUnits,
-                    // Penalty if wrong
                     payout: isCorrectProtocol ? incoming.payout : Math.floor(incoming.payout * 0.5)
                 };
 
                 if (!isCorrectProtocol) {
-                    setThreatLevel(t => Math.min(100, t + 10)); // Penalty for bad triage
-                    playSound('error'); // Audible warning
+                    setThreatLevel(t => Math.min(100, t + 10));
+                    playSfx('error'); 
                 } else {
-                    playSound('dispatch');
+                    playSfx('dispatch');
                 }
 
                 setFleet(prev => { 
@@ -487,7 +581,7 @@
                 setActiveCalls(prev => prev.filter(c => c.id !== call.id));
                 setThreatLevel(t => Math.min(100, t + 10));
                 setViewingCall(null);
-                playSound('error');
+                playSfx('error');
             };
 
             const buyUnit = (type) => {
@@ -495,8 +589,8 @@
                 if (funds >= cost) {
                     setFunds(f => f - cost);
                     setFleet(prev => ({ ...prev, [type]: { ...prev[type], total: prev[type].total + 1, available: prev[type].available + 1 } }));
-                    playSound('success');
-                } else playSound('error');
+                    playSfx('success');
+                } else playSfx('error');
             };
 
             const buyUpgrade = (type) => {
@@ -505,14 +599,14 @@
                 if (funds >= cost) {
                     setFunds(f => f - cost);
                     setFleet(prev => ({ ...prev, [type]: { ...prev[type], speedLvl: prev[type].speedLvl + 1 } }));
-                    playSound('levelup');
-                } else playSound('error');
+                    playSfx('levelup');
+                } else playSfx('error');
             };
 
             const useAbility = (id) => {
                 const ab = ABILITIES.find(a => a.id === id);
-                if (funds < ab.cost) { playSound('error'); return; }
-                setFunds(f => f - ab.cost); playSound('ability');
+                if (funds < ab.cost) { playSfx('error'); return; }
+                setFunds(f => f - ab.cost); playSfx('ability');
                 if (id === 'rapid' && activeCalls.length > 0) {
                     const t = activeCalls[0];
                     setActiveCalls(p => p.slice(1));
@@ -546,7 +640,13 @@
                                 </ul>
                             }
                         </div>
-                        <button onClick={() => { if (audioCtx.state === 'suspended') audioCtx.resume(); setStarted(true); }} className="w-full py-4 bg-white text-black font-bold rounded-xl hover:scale-[1.02] transition-transform shadow-xl shadow-white/10">START SHIFT</button>
+                        {/* BRIEFING SECTION */}
+                        <div className="bg-slate-900/50 border border-white/10 p-4 rounded-xl text-left space-y-3">
+                            <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-widest"><Lucide icon="Target" size={14} /> Shift Objectives</div>
+                            <div className="text-sm text-white">1. Resolve {currentObjective.count} {currentObjective.type === 'any' ? '' : currentObjective.type} incidents.</div>
+                            <div className="text-sm text-white">2. BOLO: <span className="text-red-400 font-bold">{activeBolo || "Loading..."}</span></div>
+                        </div>
+                        <button onClick={handleStart} className="w-full py-4 bg-white text-black font-bold rounded-xl hover:scale-[1.02] transition-transform shadow-xl shadow-white/10">START SHIFT</button>
                     </div>
                 </div>
             );
@@ -595,7 +695,7 @@
                                     <button key={a.id} title={a.desc} onClick={() => useAbility(a.id)} disabled={funds < a.cost} className="group w-full flex items-center justify-between p-2 rounded bg-slate-800 border border-white/5 hover:border-emerald-500/30 disabled:opacity-50 relative">
                                         <div className="flex items-center gap-2"><Lucide icon={a.icon} size={12} className="text-slate-400 group-hover:text-white" /><span className="text-[10px] font-bold text-slate-300 group-hover:text-white">{a.name}</span></div>
                                         <div className={`text-[10px] font-mono font-bold ${funds >= a.cost ? 'text-emerald-400' : 'text-slate-600'}`}>${a.cost}</div>
-                                        <div className="hidden group-hover:block absolute left-full ml-2 w-32 bg-slate-900 border border-white/10 p-2 text-[9px] text-slate-300 rounded z-50 shadow-xl">{a.desc}</div>
+                                        <div className="hidden group-hover:block absolute left-full ml-2 w-40 bg-slate-900 border border-white/10 p-2 text-[10px] text-slate-300 rounded z-50 shadow-xl">{a.desc}</div>
                                     </button>
                                 ))}
                             </div>
@@ -617,8 +717,10 @@
                                             </div>
                                             
                                             {/* Info Tooltip on Hover */}
-                                            <div className="hidden group-hover:block absolute bottom-full mb-2 left-0 w-full bg-black border border-white/10 p-2 text-[9px] text-slate-300 rounded z-50 shadow-xl">
-                                                Level {v.speedLvl}: +{Math.floor((v.speedLvl-1)*10)}% Speed Efficiency
+                                            <div className="hidden group-hover:block absolute bottom-full mb-2 left-0 w-full bg-black border border-white/10 p-2 text-[9px] text-slate-300 rounded z-50 shadow-xl pointer-events-none">
+                                                <div className="font-bold text-white mb-1">{uData.label}</div>
+                                                <div className="mb-2">{uData.desc}</div>
+                                                <div className="text-emerald-400">Lvl {v.speedLvl}: +{Math.floor((v.speedLvl-1)*10)}% Speed</div>
                                             </div>
 
                                             <div className="flex flex-col gap-2 mt-auto">
@@ -737,30 +839,34 @@
                                             <div className="text-xs font-mono text-white">{incoming.info.name} (Age: {incoming.info.age})</div>
                                             <div className="text-[10px] font-mono text-slate-400 mt-1">{incoming.info.phone}</div>
                                             <div className="text-[10px] font-mono text-slate-400">{incoming.info.address}</div>
+                                            <div className="mt-2 pt-2 border-t border-white/5">
+                                                <div className="flex justify-between text-[9px] text-slate-500 uppercase"><span>History</span><span className="text-white">{incoming.info.history}</span></div>
+                                                <div className="flex justify-between text-[9px] text-slate-500 uppercase mt-1"><span>Notes</span><span className="text-white">{incoming.info.note}</span></div>
+                                            </div>
                                         </div>
 
                                         <div className="space-y-2">
                                             <div className="p-3 rounded bg-white/5 border border-white/5 flex justify-between items-center"><div className="text-xs text-slate-500 uppercase tracking-wider">Code</div><div className="text-sm font-mono font-bold text-white">{incoming.code}</div></div>
-                                            <div className="p-3 rounded bg-white/5 border border-white/5 flex justify-between items-center"><div className="text-xs text-slate-500 uppercase tracking-wider">Payout</div><div className="text-sm font-mono font-bold text-emerald-400">${incoming.payout}</div></div>
+                                            <div className="p-3 rounded bg-white/5 border border-white/5 flex justify-between items-center"><div className="text-xs text-slate-500 uppercase tracking-wider">Payout</div><div className="text-sm font-mono font-bold text-emerald-400">???</div></div>
                                         </div>
-                                        <div className="mt-auto pt-6"><button onClick={() => { setQueue(q => [...q, incoming]); setIncoming(null); playSound('click'); }} className="w-full py-3 rounded-lg border border-white/10 text-slate-400 text-sm font-medium hover:bg-white/5 hover:text-white transition-colors">Move to Queue</button></div>
+                                        <div className="mt-auto pt-6"><button onClick={() => { setQueue(q => [...q, incoming]); setIncoming(null); playSfx('click'); }} className="w-full py-3 rounded-lg border border-white/10 text-slate-400 text-sm font-medium hover:bg-white/5 hover:text-white transition-colors">Move to Queue</button></div>
                                     </div>
                                     
                                     {/* Right Panel */}
                                     <div className="flex-1 p-6 flex flex-col">
                                         <div className="mb-6">
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">1. Incident Triage (Identify Protocol)</h3>
-                                            <div className="bg-slate-900 p-4 rounded-xl border border-white/5 mb-4 min-h-[80px] flex items-center">
-                                                <div>
-                                                    <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">Caller Transcript</div>
-                                                    <div className="font-mono text-sm text-emerald-400 animate-type">"{incoming.msg}"</div>
+                                            <div className="bg-slate-900 p-4 rounded-xl border border-white/5 mb-4 min-h-[100px] flex items-start">
+                                                <div className="w-full">
+                                                    <div className="text-[10px] font-bold text-slate-500 uppercase mb-2">Caller Transcript</div>
+                                                    <div className="font-mono text-sm text-emerald-400 leading-relaxed animate-fade-in whitespace-pre-wrap break-words">"{incoming.msg}"</div>
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-5 gap-2">
                                                 {PROTOCOLS.map(p => (
                                                     <button 
                                                         key={p.id} 
-                                                        onClick={() => { setSelectedProtocol(p.id); playSound('click'); }} 
+                                                        onClick={() => { setSelectedProtocol(p.id); playSfx('click'); }} 
                                                         className={`py-2 rounded border text-[9px] font-bold uppercase tracking-wider transition-all ${selectedProtocol === p.id ? `${p.color} border-transparent text-white shadow-lg` : 'bg-slate-800 border-white/5 text-slate-400 hover:bg-slate-700'}`}
                                                     >
                                                         {p.label}
@@ -772,7 +878,7 @@
                                             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">2. Unit Assignment</h3>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {Object.keys(incoming.req).map(key => incoming.req[key] > 0 && (
-                                                    <UnitControl key={key} type={key} req={incoming.req[key]} count={selectedUnits[key]} available={fleet[key].available} onAdd={() => { setSelectedUnits(p => ({...p, [key]: p[key]+1})); playSound('click'); }} onRemove={() => { setSelectedUnits(p => ({...p, [key]: Math.max(0, p[key]-1)})); playSound('click'); }} />
+                                                    <UnitControl key={key} type={key} req={incoming.req[key]} count={selectedUnits[key]} available={fleet[key].available} onAdd={() => { setSelectedUnits(p => ({...p, [key]: p[key]+1})); playSfx('click'); }} onRemove={() => { setSelectedUnits(p => ({...p, [key]: Math.max(0, p[key]-1)})); playSfx('click'); }} />
                                                 ))}
                                             </div>
                                         </div>
@@ -783,6 +889,22 @@
                                 </div>
                             </div>
                         )}
+                        
+                        {/* System Footer */}
+                        <footer className="h-8 border-t border-white/5 bg-slate-900/80 flex items-center justify-between px-6 text-[10px] text-slate-500 font-mono uppercase tracking-wider">
+                            <div className="flex gap-4">
+                                <span>Sys: v4.2.0</span>
+                                <span>Conn: Secure</span>
+                                <span>Ping: 14ms</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setMuted(!muted)} className="text-slate-500 hover:text-white transition-colors flex items-center gap-1">
+                                    <Lucide icon={muted ? "VolumeX" : "Volume2"} size={12} />
+                                    {muted ? "UNMUTE" : "MUTE AUDIO"}
+                                </button>
+                                <span>| CADNEXT &copy; 2025</span>
+                            </div>
+                        </footer>
                     </main>
                 </div>
             );
