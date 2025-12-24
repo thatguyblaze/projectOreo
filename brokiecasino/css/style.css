@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;900&display=swap');
 
 /* --- Base Styles --- */
 body {
@@ -57,11 +57,83 @@ body {
 ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
+/* --- ORBIT ANIMATION (Adapted for Casino) --- */
+.vortex-scene {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    margin: 0 auto;
+}
+
+.orbit-system {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform: rotateX(60deg);
+}
+
+.orbit-ring-line {
+    position: absolute;
+    top: 50%; left: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+}
+
+.ring-inner-line { width: 200px; height: 200px; }
+.ring-outer-line { width: 300px; height: 300px; }
+
+.orbit-path {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform-style: preserve-3d;
+    animation: orbitRotate var(--duration) linear infinite;
+}
+
+.inner-orbit { width: 200px; height: 200px; margin-top: -100px; margin-left: -100px; }
+.outer-orbit { width: 300px; height: 300px; margin-top: -150px; margin-left: -150px; }
+
+.orbit-item {
+    position: absolute;
+    top: 0; left: 50%;
+    width: 40px;
+    height: 40px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid var(--color);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transform: translate(-50%, -50%) rotateX(-60deg);
+    box-shadow: 0 0 15px var(--color), inset 0 0 10px var(--color);
+    animation: itemFloat 3s ease-in-out infinite alternate;
+    z-index: 20;
+}
+
+@keyframes orbitRotate {
+    from { transform: rotateZ(0deg); }
+    to { transform: rotateZ(360deg); }
+}
+
+@keyframes itemFloat {
+    0% { transform: translate(-50%, -50%) rotateX(-60deg) translateZ(5px); }
+    100% { transform: translate(-50%, -50%) rotateX(-60deg) translateZ(-5px); }
+}
+
 /* --- Shared Components --- */
 
 /* Buttons */
 .game-button, .toggle-button, .modal-button, .coinflip-choice-btn, .horse-select-btn, .roulette-bet-btn {
-    /* Base padding handled by classes or specific overrides */
     border-radius: 0.5rem;
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
@@ -145,7 +217,6 @@ body {
 
 /* Inputs */
 input[type="number"] {
-    /* Base styles set in HTML Tailwind classes for consistency, ensuring override here if needed */
     -moz-appearance: textfield;
 }
 input[type="number"]::-webkit-outer-spin-button,
@@ -417,3 +488,29 @@ input[type="number"]::-webkit-inner-spin-button {
 .flash-loss { animation: flashRed 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 @keyframes flashGreen { 0%, 100% { color: inherit; transform: scale(1); } 50% { color: #34d399; text-shadow: 0 0 20px #34d399; transform: scale(1.1); } }
 @keyframes flashRed { 0%, 100% { color: inherit; transform: scale(1); } 50% { color: #f87171; text-shadow: 0 0 20px #f87171; transform: scale(1.1); } }
+
+/* --- Missing Logic Styles (Restored) --- */
+
+/* ROULETTE RESULT */
+#roulette-result {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #020406; border: 4px solid #1e293b;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 900; color: #fff;
+    z-index: 30; box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    transition: all 0.3s;
+}
+#roulette-result.red { background: #ef4444; border-color: #fca5a5; box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+#roulette-result.black { background: #0f172a; border-color: #64748b; box-shadow: 0 0 20px rgba(15, 23, 42, 0.6); }
+#roulette-result.green { background: #10b981; border-color: #6ee7b7; box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+
+/* CRASH MULTIPLIERS */
+.mult-color-5x { color: #818cf8 !important; text-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+.mult-color-10x { color: #34d399 !important; text-shadow: 0 0 20px rgba(52, 211, 153, 0.6); }
+.mult-color-15x { color: #facc15 !important; text-shadow: 0 0 25px rgba(250, 204, 21, 0.7); }
+.mult-color-20x { color: #f97316 !important; text-shadow: 0 0 30px rgba(249, 115, 22, 0.8); }
+.mult-color-30x { color: #f43f5e !important; text-shadow: 0 0 35px rgba(244, 63, 94, 0.9); }
+
+.shake-subtle { animation: shake-strong 0.5s infinite alternate; }
+/* .shake-strong is already defined in Animations section, but ensuring coverage */
