@@ -337,7 +337,35 @@ function formatWin(amount) {
  */
 function addWinToLeaderboard(type, winAmount) {
     if (winAmount <= 0) return;
-    leaderboard.push({ type: type, win: winAmount });
+
+    // Filter duplicates:
+    // Check if an existing entry matches the Game Type AND the Win Amount is within +/- 10,000 range.
+    // This prevents flooding the leaderboard with similar wins from the same game.
+    const isDuplicate = leaderboard.some(entry => {
+        return entry.type === type && Math.abs(entry.win - winAmount) < 10000;
+    });
+
+    if (isDuplicate) {
+        // Optional: If the new win is strictly higher, maybe replace the old one?
+        // For now, the user requested "ignore them". But updating to the higher value if close might be better?
+        // User said: "just ignore them".
+        // However, if I win 50,000 then 55,000, ignoring the 55k feels wrong if it's a "Biggest Win".
+        // Let's implement: If new win is *higher* than the similar entry, replace it. If lower, ignore.
+        const similarEntryIndex = leaderboard.findIndex(entry => entry.type === type && Math.abs(entry.win - winAmount) < 10000);
+        if (similarEntryIndex !== -1) {
+            if (winAmount > leaderboard[similarEntryIndex].win) {
+                leaderboard[similarEntryIndex].win = winAmount; // Update to the higher value
+                // Re-sort below
+            } else {
+                return; // Ignore strictly lower or equal similar win
+            }
+        } else {
+            return; // Should not happen given isDuplicate check
+        }
+    } else {
+        leaderboard.push({ type: type, win: winAmount });
+    }
+
     leaderboard.sort((a, b) => b.win - a.win); // Sort descending
     leaderboard = leaderboard.slice(0, MAX_LEADERBOARD_ENTRIES); // Keep top entries
     saveGameState();
