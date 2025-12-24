@@ -18,13 +18,16 @@ let coinElement; // Now references the div.coin element
 let coinflipBetInput, coinflipButton, coinflipCashoutButton;
 let coinflipWinningsSpan, coinflipStatus, coinflipChooseBlueBtn, coinflipChooseYellowBtn;
 let fallbackTimeoutId = null; // Stores the ID for the fallback timeout
+let LocalBrokieAPI = null; // Local reference to API
 
 /**
  * Initializes the Coin Flip game elements and event listeners.
  * Called by main.js on DOMContentLoaded.
  */
-function initCoinflip() {
+function initCoinflip(API) {
     console.log("Initializing Coin Flip...");
+    LocalBrokieAPI = API; // Store API reference
+
     // Get DOM elements
     coinElement = document.getElementById('coin');
     coinflipBetInput = document.getElementById('coinflip-bet');
@@ -166,8 +169,12 @@ const handleFlipEnd = (resultIsBlue, resultColor, resultEmoji) => {
         console.log("%cCondition evaluated TRUE (WIN)", 'color: lightgreen;');
         currentCoinFlipWinnings *= 2;
         coinflipStatus.textContent = `WIN! It was ${resultEmoji}. Current Winnings: ${formatWin(currentCoinFlipWinnings)}`;
+        
+        // Enable controls
         coinflipButton.disabled = false;
         coinflipCashoutButton.disabled = false;
+        coinflipCashoutButton.classList.remove('hidden'); // Ensure visible
+        
         coinflipWinningsSpan.textContent = formatWin(currentCoinFlipWinnings);
         playSound('win_small');
     } else { // LOSS
