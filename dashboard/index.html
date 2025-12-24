@@ -125,24 +125,55 @@
         .search-input:focus { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(167, 139, 250, 0.5); box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2); }
         .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.4); pointer-events: none; }
         
+        /* Updated Horizontal Scroll Bar Styling */
+        .sites-wrapper {
+            max-width: 800px; /* Allow bar to expand wider than the search input */
+        }
         .sites-scroll-container {
-            overflow-x: auto; overflow-y: hidden; width: 100%; padding: 0.5rem 0;
-            -ms-overflow-style: none; scrollbar-width: none;
+            overflow-x: auto;
+            overflow-y: hidden;
+            width: 100%;
+            padding: 0.5rem 0 1.25rem 0;
         }
-        .sites-scroll-container::-webkit-scrollbar { display: none; }
+        
+        /* Custom Scrollbar */
+        .sites-scroll-container::-webkit-scrollbar {
+            height: 4px;
+        }
+        .sites-scroll-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+        }
+        .sites-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(167, 139, 250, 0.3);
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .sites-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(167, 139, 250, 0.6);
+        }
+
         #pinned-sites-container {
-            display: flex; flex-wrap: nowrap;
-            justify-content: center; gap: 1.25rem;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 1.25rem;
             padding: 0 1rem;
+            width: max-content;
+            margin: 0 auto; /* Keep it centered when few items, allow scroll when many */
         }
-        .site-link-container { position: relative; transition: transform 0.2s ease; user-select: none; }
+        .site-link-container { 
+            position: relative; 
+            transition: transform 0.2s ease; 
+            user-select: none; 
+            flex-shrink: 0; /* Prevent icons from squishing */
+        }
         .site-link-container.dragging { opacity: 0.5; }
         .site-link { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; color: #ccc; transition: transform 0.2s ease, color 0.2s ease; }
         body:not(.edit-mode) .site-link:hover { transform: translateY(-3px); color: #fff; }
         .site-icon-wrapper { width: 48px; height: 48px; border-radius: 12px; background-color: rgba(255, 255, 255, 0.05); display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
         body:not(.edit-mode) .site-link:hover .site-icon-wrapper { background-color: rgba(167, 139, 250, 0.2); border-color: rgba(167, 139, 250, 0.5); }
         .site-icon { width: 24px; height: 24px; object-fit: contain; }
-        .site-name { font-size: 0.75rem; }
+        .site-name { font-size: 0.75rem; max-width: 64px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .delete-site-btn { position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 9999px; background-color: #f43f5e; color: white; display: flex; justify-content: center; align-items: center; opacity: 0; transform: scale(0.8); z-index: 10; pointer-events: none; font-size: 12px; }
         
         /* Scratchpad */
@@ -547,4 +578,3 @@
     </script>
 </body>
 </html>
-
