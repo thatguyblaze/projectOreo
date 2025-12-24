@@ -69,6 +69,7 @@ function createMemoryGrid() {
     memoryGridElement.innerHTML = ''; // Clear previous grid
     for (let i = 0; i < MEMORY_CARDS; i++) {
         const card = document.createElement('button');
+        card.type = 'button'; // Explicitly set type to button
         card.className = 'memory-card';
         card.dataset.index = i;
         card.disabled = true; // Disabled until game starts
@@ -85,7 +86,10 @@ function createMemoryGrid() {
         card.appendChild(cardFaceFront);
         card.appendChild(cardFaceBack);
         // Use anonymous function to pass index to handler
-        card.addEventListener('click', () => handleMemoryCardClick(i));
+        card.addEventListener('click', () => {
+            console.log(`Memory card clicked: ${i}`);
+            handleMemoryCardClick(i);
+        });
         memoryGridElement.appendChild(card);
     }
 }
