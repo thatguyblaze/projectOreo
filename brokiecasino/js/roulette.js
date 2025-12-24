@@ -248,7 +248,11 @@ function easeOutQuint(t) {
           if (LocalBrokieAPI && totalBetAmount > LocalBrokieAPI.getBalance()) { LocalBrokieAPI?.showMessage("Insufficient balance for total bet.", 1500); return; }
           console.log("Starting spin and ball animation sequence...");
           rouletteIsSpinning = true;
-          if (LocalBrokieAPI) { LocalBrokieAPI.updateBalance(-totalBetAmount); LocalBrokieAPI.playSound('roulette_spin'); }
+          if (LocalBrokieAPI) {
+              LocalBrokieAPI.updateBalance(-totalBetAmount);
+              LocalBrokieAPI.playSound('roulette_spin');
+              if (typeof LocalBrokieAPI.registerGameStart === 'function') LocalBrokieAPI.registerGameStart('Roulette');
+          }
           if (rouletteStatusDisplay) rouletteStatusDisplay.textContent = 'Ball rolling... No more bets!';
           if (rouletteSpinButton) rouletteSpinButton.disabled = true;
           if (clearBetsButton) clearBetsButton.disabled = true;

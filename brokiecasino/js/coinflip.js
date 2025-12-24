@@ -227,6 +227,7 @@ function handleCoinFlip() {
     coinflipCashoutButton.disabled = true;
 
     playSound('coin_flip');
+    if (typeof LocalBrokieAPI.registerGameStart === 'function') LocalBrokieAPI.registerGameStart('CoinFlip');
 
     // Determine result
     const resultIsBlue = Math.random() < 0.5;

@@ -320,6 +320,7 @@ function startBlackjackGame() {
 
     startTone(); // uses main.js
     playSound('blackjack_deal'); // uses main.js
+    if (typeof LocalBrokieAPI.registerGameStart === 'function') LocalBrokieAPI.registerGameStart('Blackjack');
     resetBlackjack(); // Reset previous game state
 
     blackjackActive = true;

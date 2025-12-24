@@ -114,6 +114,7 @@ function spinReels() {
     }
 
     startTone(); // Ensure audio context is ready (from main.js)
+    if (typeof BrokieAPI.registerGameStart === 'function') BrokieAPI.registerGameStart('Slots');
     playSound('spin_start'); // from main.js
     currency -= betAmount; // from main.js
     updateCurrencyDisplay('loss'); // from main.js

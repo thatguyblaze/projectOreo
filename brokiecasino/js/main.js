@@ -20,6 +20,8 @@ let totalLoanAmount = 0;
 let leaderboard = []; // Array to store { type: 'GameName', win: 150 }
 let totalGain = 0;
 let totalLoss = 0;
+let gameStats = {}; // { 'Slots': 5, 'Crash': 12, ... }
+let totalOperations = 0; // Total number of plays/spins/hands
 const MAX_LEADERBOARD_ENTRIES = 25;
 let animationFrameId = null; // For potential shared animations
 
@@ -198,6 +200,11 @@ const statsTotalGain = document.getElementById('stats-total-gain');
 const statsTotalLoss = document.getElementById('stats-total-loss');
 const statsNetProfit = document.getElementById('stats-net-profit');
 
+// Extended Stats Elements
+const statTotalProfit = document.getElementById('stat-total-profit');
+const statTotalPlays = document.getElementById('stat-total-plays');
+const statFavGame = document.getElementById('stat-fav-game');
+
 // --- Core Functions ---
 
 /**
@@ -225,20 +232,37 @@ function flashElement(element) {
  * Updates the session statistics display in the UI.
  */
 function updateStatsDisplay() {
-    if (!statsTotalGain || !statsTotalLoss || !statsNetProfit) return;
-    statsTotalGain.textContent = totalGain.toLocaleString();
-    statsTotalLoss.textContent = totalLoss.toLocaleString();
-    const net = totalGain - totalLoss;
-    statsNetProfit.textContent = net.toLocaleString();
+    // Standard Stats Bar (if present)
+    if (statsTotalGain && statsTotalLoss && statsNetProfit) {
+        statsTotalGain.textContent = totalGain.toLocaleString();
+        statsTotalLoss.textContent = totalLoss.toLocaleString();
+        const net = totalGain - totalLoss;
+        statsNetProfit.textContent = net.toLocaleString();
+        statsNetProfit.className = 'stats-value font-semibold';
+        if (net > 0) statsNetProfit.classList.add('text-fluent-accent');
+        else if (net < 0) statsNetProfit.classList.add('text-fluent-danger');
+        else statsNetProfit.classList.add('text-fluent-text-primary');
+    }
 
-    // Apply color based on net profit/loss
-    statsNetProfit.className = 'stats-value font-semibold'; // Reset classes first
-    if (net > 0) {
-        statsNetProfit.classList.add('text-fluent-accent');
-    } else if (net < 0) {
-        statsNetProfit.classList.add('text-fluent-danger');
-    } else {
-         statsNetProfit.classList.add('text-fluent-text-primary');
+    // Extended Stats Panel
+    if (statTotalProfit) {
+        const net = totalGain - totalLoss;
+        statTotalProfit.textContent = net > 0 ? `+${formatWin(net)}` : formatWin(net);
+        statTotalProfit.className = net > 0 ? 'text-2xl font-black text-emerald-400' : (net < 0 ? 'text-2xl font-black text-rose-400' : 'text-2xl font-black text-white');
+    }
+    if (statTotalPlays) {
+        statTotalPlays.textContent = totalOperations.toLocaleString();
+    }
+    if (statFavGame) {
+        let maxPlays = 0;
+        let fav = "None";
+        for (const [game, count] of Object.entries(gameStats)) {
+            if (count > maxPlays) {
+                maxPlays = count;
+                fav = game;
+            }
+        }
+        statFavGame.textContent = fav;
     }
 }
 
@@ -362,6 +386,8 @@ function saveGameState() {
             totalLoanAmount: totalLoanAmount,
             totalGain: totalGain,
             totalLoss: totalLoss,
+            gameStats: gameStats,
+            totalOperations: totalOperations
         }));
     } catch (e) {
         console.error("Error saving game state:", e);
@@ -382,6 +408,8 @@ function loadGameState() {
             totalLoanAmount = (state.totalLoanAmount !== undefined && !isNaN(state.totalLoanAmount)) ? state.totalLoanAmount : 0;
             totalGain = (state.totalGain !== undefined && !isNaN(state.totalGain)) ? state.totalGain : 0;
             totalLoss = (state.totalLoss !== undefined && !isNaN(state.totalLoss)) ? state.totalLoss : 0;
+            gameStats = (typeof state.gameStats === 'object') ? state.gameStats : {};
+            totalOperations = (typeof state.totalOperations === 'number') ? state.totalOperations : 0;
         } catch (e) {
             console.error("Error loading saved state:", e);
             // Reset to defaults if parsing fails
@@ -390,6 +418,8 @@ function loadGameState() {
             totalLoanAmount = 0;
             totalGain = 0;
             totalLoss = 0;
+            gameStats = {};
+            totalOperations = 0;
             localStorage.removeItem('brokieCasinoState'); // Clear corrupted state
         }
     }
@@ -741,6 +771,13 @@ const BrokieAPI = {
             addWinToLeaderboard(gameName, winAmount);
             // Balance update happens via updateBalance call where win is awarded
         }
+    },
+    registerGameStart: (gameName) => {
+        totalOperations++;
+        if (!gameStats[gameName]) gameStats[gameName] = 0;
+        gameStats[gameName]++;
+        saveGameState();
+        updateStatsDisplay(); // Update stats UI immediately
     },
     // Utilities
     showMessage: showMessage,

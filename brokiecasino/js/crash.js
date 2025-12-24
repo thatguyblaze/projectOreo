@@ -242,6 +242,7 @@ function placeBetAndStart() {
     }
 
     LocalBrokieAPI.startTone();
+    if (typeof LocalBrokieAPI.registerGameStart === 'function') LocalBrokieAPI.registerGameStart('Crash');
     crashPlayerBet = betAmount;
     playerHasBet = true;
     LocalBrokieAPI.updateBalance(-betAmount);
@@ -279,16 +280,74 @@ function crashGameLoop(timestamp) {
     // --- Base Multiplier Logic (Exponential) ---
     currentMultiplier = 1 + 0.06 * Math.pow(timeSec, 1.65);
 
-    // --- Visual Volatility (The "Fake Out") ---
-    // Add sinusoidal noise to the *displayed* multiplier
-    // Frequency and amplitude increase with time to make it scary
-    const noiseAmp = Math.min(0.5, 0.05 * currentMultiplier); // Amplitude caps at 0.5x
-    const noiseFreq = 5 + (currentMultiplier * 0.1); // Gets faster
-    const noise = Math.sin(timeSec * noiseFreq) * noiseAmp;
+    // --- Visual Volatility (Lag & Catch-Up) ---
+    // Instead of sinusoidal noise, we use a "lag" model.
+    // The visual multiplier tries to follow the true multiplier, but sometimes lags behind (dip)
+    // and then accelerates to catch up. This creates the "slow down then skyrocket" effect.
 
-    // The displayed value fluctuates but can't dip below 1.0 or the base curve too much
-    // Actually, let's make it so the *graph* fluctuates around the exponential curve
-    displayedMultiplier = Math.max(1.00, currentMultiplier + noise);
+    if (!this.volatilityState) {
+        this.volatilityState = {
+            lagging: false,
+            lagStartTime: 0,
+            catchUpSpeed: 1.0
+        };
+    }
+
+    // Chance to start a "fake out" lag event
+    // Probability increases slightly as multiplier grows, but is random
+    // Don't start if already lagging or just finished
+    if (!this.volatilityState.lagging && Math.random() < 0.005) {
+        this.volatilityState.lagging = true;
+        this.volatilityState.lagStartTime = timeSec;
+        this.volatilityState.catchUpSpeed = 1.0;
+        // console.log("Crash: Fake out started");
+    }
+
+    if (this.volatilityState.lagging) {
+        const lagDuration = timeSec - this.volatilityState.lagStartTime;
+
+        // During lag, visual grows MUCH slower than real (or stalls)
+        // We define a target "lagged" value
+        const lagFactor = Math.max(0.2, 1.0 - lagDuration * 0.5); // Slows down growth
+
+        // The visual target is bounded: it can't be higher than real, but can be lower
+        // We interpolate displayedMultiplier towards (real * lagFactor) or just let real pull away
+
+        // Simpler approach:
+        // While lagging, we cap the rate of change of displayedMultiplier
+        // Real multiplier is growing exponentially.
+        // We let displayedMultiplier grow linearly or sub-linearly.
+
+        const idealVisual = displayedMultiplier + (currentMultiplier - displayedMultiplier) * 0.05; // Slow follow
+
+        // If lag has gone on too long (e.g. 1.5 seconds), snap out of it
+        if (lagDuration > 1.5 || (currentMultiplier - displayedMultiplier) > currentMultiplier * 0.5) {
+            this.volatilityState.lagging = false;
+            // console.log("Crash: Fake out ending, catch up!");
+        } else {
+            displayedMultiplier = idealVisual;
+        }
+    } else {
+        // Normal / Catch-up State
+        // If visual is behind real, accelerate to catch up
+        if (displayedMultiplier < currentMultiplier) {
+            // Catch up speed accelerates
+            const diff = currentMultiplier - displayedMultiplier;
+            const catchUpStep = diff * 0.15; // Fast convergence
+            displayedMultiplier += catchUpStep;
+
+            // Snap if close enough
+            if (displayedMultiplier > currentMultiplier - 0.01) {
+                displayedMultiplier = currentMultiplier;
+            }
+        } else {
+            displayedMultiplier = currentMultiplier;
+        }
+    }
+
+    // Hard clamp to ensure fairness perception
+    displayedMultiplier = Math.min(displayedMultiplier, currentMultiplier);
+    displayedMultiplier = Math.max(1.00, displayedMultiplier);
 
     // --- Check Auto Cashout ---
     if (isAutoCashoutEnabled && !crashCashedOut && autoCashoutTarget >= 1.01 && currentMultiplier >= autoCashoutTarget) {
