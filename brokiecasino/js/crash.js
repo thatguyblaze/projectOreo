@@ -42,6 +42,7 @@ let crashPointsString = '';
 let crashGraph, crashMultiplierDisplay, crashSvg, crashGrid, crashPolyline;
 let crashBetInput, crashBetButton, crashCashoutButton, crashStatusDisplay;
 let crashAutoBetToggle, crashAutoCashoutInput, crashAutoCashoutToggle;
+let crashLiveStake, crashLiveProfit; // New refs
 
 // --- API Reference (Passed from main.js) ---
 let LocalBrokieAPI = null;
@@ -88,6 +89,8 @@ function assignCrashDOMElements() {
     crashAutoBetToggle = document.getElementById('crash-auto-bet-toggle');
     crashAutoCashoutInput = document.getElementById('crash-auto-cashout-input');
     crashAutoCashoutToggle = document.getElementById('crash-auto-cashout-toggle');
+    crashLiveStake = document.getElementById('crash-live-stake');
+    crashLiveProfit = document.getElementById('crash-live-profit');
 
     const elements = { crashGraph, crashMultiplierDisplay, crashSvg, crashGrid, crashPolyline, crashBetInput, crashBetButton, crashCashoutButton, crashStatusDisplay };
     for (const key in elements) {
@@ -373,8 +376,26 @@ function crashGameLoop(timestamp) {
 
     if (!crashCashedOut && playerHasBet) {
          const currentCashoutValue = Math.floor(crashPlayerBet * currentMultiplier); // Payout uses REAL multiplier
+         const currentProfit = currentCashoutValue - crashPlayerBet;
+
          const potentialWinSpan = document.getElementById('potential-win-amount');
          if (potentialWinSpan) potentialWinSpan.textContent = LocalBrokieAPI.formatWin(currentCashoutValue);
+
+         // Update Live Stats
+         if (crashLiveStake) crashLiveStake.textContent = LocalBrokieAPI.formatWin(crashPlayerBet);
+         if (crashLiveProfit) {
+             crashLiveProfit.textContent = `+${LocalBrokieAPI.formatWin(currentProfit)}`;
+             crashLiveProfit.className = 'text-emerald-400 font-mono text-sm font-bold'; // Ensure green
+         }
+    } else if (crashCashedOut) {
+        // Keep profit static if cashed out
+    } else {
+        // Reset live stats if no active bet
+        if (crashLiveStake) crashLiveStake.textContent = '0';
+        if (crashLiveProfit) {
+            crashLiveProfit.textContent = '+0';
+            crashLiveProfit.className = 'text-slate-500 font-mono text-sm font-bold'; // Grey out
+        }
     }
 
     applyMultiplierVisuals(displayedMultiplier);
@@ -470,6 +491,14 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
     if(crashBetInput) crashBetInput.disabled = false;
     if(crashAutoBetToggle) crashAutoBetToggle.disabled = false;
     if(crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
+
+    // Reset Live Stats on End
+    if (crashLiveStake) crashLiveStake.textContent = '0';
+    if (crashLiveProfit) {
+        crashLiveProfit.textContent = '+0';
+        crashLiveProfit.className = 'text-slate-500 font-mono text-sm font-bold';
+    }
+
     updateCrashAutoCashoutToggleVisuals();
 
     const formattedBet = LocalBrokieAPI.formatWin(betAtEnd);

@@ -673,6 +673,23 @@ function closeAtmModal() {
 // --- Event Listeners Setup ---
 /** Sets up all the main event listeners for shared UI elements. */
 function setupMainEventListeners() {
+    // Reset Stats Button
+    const resetStatsBtn = document.getElementById('reset-stats-button');
+    if (resetStatsBtn) {
+        resetStatsBtn.addEventListener('click', () => {
+            if (confirm("Are you sure you want to reset all your stats? This cannot be undone.")) {
+                totalGain = 0;
+                totalLoss = 0;
+                lifetimeLoans = 0;
+                gameStats = {};
+                totalOperations = 0;
+                saveGameState();
+                updateStatsDisplay();
+                showMessage("All personal statistics have been reset.", 2000);
+            }
+        });
+    }
+
     // ATM Button
     if (loanButton) loanButton.addEventListener('click', openAtmModal);
 
