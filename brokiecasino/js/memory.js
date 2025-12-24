@@ -55,6 +55,18 @@ function initMemory() {
     // Add Event Listeners
     memoryStartButton.addEventListener('click', startMemoryGame);
 
+    // Event Delegation for Grid
+    memoryGridElement.addEventListener('click', (e) => {
+        const card = e.target.closest('.memory-card');
+        if (card) {
+            const index = parseInt(card.dataset.index);
+            if (!isNaN(index)) {
+                console.log(`Delegated click on card index: ${index}`);
+                handleMemoryCardClick(index);
+            }
+        }
+    });
+
     // Add bet adjustment listeners using the factory function from main.js
     addBetAdjustmentListeners('memory', memoryBetInput); // uses main.js
 
@@ -85,11 +97,7 @@ function createMemoryGrid() {
 
         card.appendChild(cardFaceFront);
         card.appendChild(cardFaceBack);
-        // Use anonymous function to pass index to handler
-        card.addEventListener('click', () => {
-            console.log(`Memory card clicked: ${i}`);
-            handleMemoryCardClick(i);
-        });
+        // Listener handled by delegation on grid parent
         memoryGridElement.appendChild(card);
     }
 }
