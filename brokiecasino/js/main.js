@@ -20,6 +20,7 @@ let totalLoanAmount = 0;
 let leaderboard = []; // Array to store { type: 'GameName', win: 150 }
 let totalGain = 0;
 let totalLoss = 0;
+let lifetimeLoans = 0; // Total amount borrowed ever
 let gameStats = {}; // { 'Slots': 5, 'Crash': 12, ... }
 let totalOperations = 0; // Total number of plays/spins/hands
 const MAX_LEADERBOARD_ENTRIES = 25;
@@ -203,7 +204,9 @@ const statsNetProfit = document.getElementById('stats-net-profit');
 // Extended Stats Elements
 const statTotalProfit = document.getElementById('stat-total-profit');
 const statTotalPlays = document.getElementById('stat-total-plays');
-const statFavGame = document.getElementById('stat-fav-game');
+const statTotalLosses = document.getElementById('stat-total-losses'); // New
+const statTotalLoans = document.getElementById('stat-total-loans'); // New
+const statTopGamesList = document.getElementById('stat-top-games'); // New list container
 
 // --- Core Functions ---
 
@@ -253,16 +256,32 @@ function updateStatsDisplay() {
     if (statTotalPlays) {
         statTotalPlays.textContent = totalOperations.toLocaleString();
     }
-    if (statFavGame) {
-        let maxPlays = 0;
-        let fav = "None";
-        for (const [game, count] of Object.entries(gameStats)) {
-            if (count > maxPlays) {
-                maxPlays = count;
-                fav = game;
-            }
+    if (statTotalLosses) {
+        statTotalLosses.textContent = formatWin(totalLoss);
+    }
+    if (statTotalLoans) {
+        statTotalLoans.textContent = formatWin(lifetimeLoans);
+    }
+    if (statTopGamesList) {
+        // Sort games by play count descending
+        const sortedGames = Object.entries(gameStats)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 3); // Top 3
+
+        statTopGamesList.innerHTML = '';
+        if (sortedGames.length === 0) {
+            statTopGamesList.innerHTML = '<li class="text-[10px] text-slate-500 italic">No games played yet.</li>';
+        } else {
+            sortedGames.forEach(([game, count], index) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center text-xs py-1 border-b border-white/5 last:border-0';
+                li.innerHTML = `
+                    <span class="text-slate-300 font-bold"><span class="text-indigo-500 mr-2">#${index+1}</span>${game}</span>
+                    <span class="text-slate-500 font-mono">${count}</span>
+                `;
+                statTopGamesList.appendChild(li);
+            });
         }
-        statFavGame.textContent = fav;
     }
 }
 
@@ -414,6 +433,7 @@ function saveGameState() {
             totalLoanAmount: totalLoanAmount,
             totalGain: totalGain,
             totalLoss: totalLoss,
+            lifetimeLoans: lifetimeLoans,
             gameStats: gameStats,
             totalOperations: totalOperations
         }));
@@ -436,6 +456,7 @@ function loadGameState() {
             totalLoanAmount = (state.totalLoanAmount !== undefined && !isNaN(state.totalLoanAmount)) ? state.totalLoanAmount : 0;
             totalGain = (state.totalGain !== undefined && !isNaN(state.totalGain)) ? state.totalGain : 0;
             totalLoss = (state.totalLoss !== undefined && !isNaN(state.totalLoss)) ? state.totalLoss : 0;
+            lifetimeLoans = (state.lifetimeLoans !== undefined && !isNaN(state.lifetimeLoans)) ? state.lifetimeLoans : 0;
             gameStats = (typeof state.gameStats === 'object') ? state.gameStats : {};
             totalOperations = (typeof state.totalOperations === 'number') ? state.totalOperations : 0;
         } catch (e) {
@@ -446,6 +467,7 @@ function loadGameState() {
             totalLoanAmount = 0;
             totalGain = 0;
             totalLoss = 0;
+            lifetimeLoans = 0;
             gameStats = {};
             totalOperations = 0;
             localStorage.removeItem('brokieCasinoState'); // Clear corrupted state
@@ -664,6 +686,7 @@ function setupMainEventListeners() {
                 if (isNaN(amount) || amount <= 0) return;
                 currency += amount;
                 totalLoanAmount += amount;
+                lifetimeLoans += amount; // Track lifetime borrowing
                 updateCurrencyDisplay('win'); // Update UI, flash green
                 saveGameState();
                 showMessage(`Withdrew ${formatWin(amount)}! Loan balance increased.`, 2000);
