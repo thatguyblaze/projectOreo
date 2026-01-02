@@ -673,6 +673,21 @@ function closeAtmModal() {
 // --- Event Listeners Setup ---
 /** Sets up all the main event listeners for shared UI elements. */
 function setupMainEventListeners() {
+    // --- Games Navigation Scroll Logic ---
+    const gamesContainer = document.getElementById('games-tab-container');
+    const scrollLeftBtn = document.getElementById('games-scroll-left');
+    const scrollRightBtn = document.getElementById('games-scroll-right');
+
+    if (gamesContainer && scrollLeftBtn && scrollRightBtn) {
+        scrollLeftBtn.addEventListener('click', () => {
+            gamesContainer.scrollBy({ left: -200, behavior: 'smooth' });
+        });
+
+        scrollRightBtn.addEventListener('click', () => {
+            gamesContainer.scrollBy({ left: 200, behavior: 'smooth' });
+        });
+    }
+
     // Reset Stats Button
     const resetStatsBtn = document.getElementById('reset-stats-button');
     if (resetStatsBtn) {
