@@ -257,13 +257,13 @@ function checkMemoryMatch() {
             // Flip cards back after a delay
             setTimeout(() => {
                 // Check if cards still exist before modifying
-                if (currentCard1) {
-                    currentCard1.classList.remove('revealed', 'mismatched');
-                    currentCard1.textContent = '❓';
+                if (card1) {
+                    card1.classList.remove('revealed', 'mismatched');
+                    card1.textContent = '❓';
                 }
-                if (currentCard2) {
-                    currentCard2.classList.remove('revealed', 'mismatched');
-                    currentCard2.textContent = '❓';
+                if (card2) {
+                    card2.classList.remove('revealed', 'mismatched');
+                    card2.textContent = '❓';
                 }
                 memoryIsChecking = false; // Allow next pick
             }, 1000); // Delay before hiding mismatch

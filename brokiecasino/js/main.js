@@ -41,14 +41,21 @@ async function startTone() {
             console.log("AudioContext started successfully.");
             toneStarted = true;
             // Initialize synths *after* Tone.start() has successfully run
-            synth = new Tone.Synth().toDestination();
-            polySynth = new Tone.PolySynth(Tone.Synth).toDestination();
-            polySynth.volume.value = -8; // Lower volume slightly
+            // Configuring envelopes with sustain: 0 to check against stuck notes
+            synth = new Tone.Synth({
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination();
+
+            polySynth = new Tone.PolySynth(Tone.Synth, {
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination();
+            polySynth.volume.value = -8;
+
             noiseSynth = new Tone.NoiseSynth({
                 noise: { type: 'white' },
-                envelope: { attack: 0.01, decay: 0.1, sustain: 0 }
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
             }).toDestination();
-            noiseSynth.volume.value = -20; // Lower volume significantly
+            noiseSynth.volume.value = -20;
         } catch (e) {
             console.error("Failed to start AudioContext:", e);
             // Use showMessage if available, otherwise console.log
