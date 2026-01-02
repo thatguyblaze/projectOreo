@@ -177,6 +177,7 @@ function initSlots() {
 }
 
 function renderMachines() {
+    if (!slotsContainer) return; // Guard against early calls (e.g. from loadGameState before initSlots)
     slotsContainer.innerHTML = ''; // Clear
     activeMachines = []; // Reset instances
     for (let i = 0; i < machinesOwned; i++) {
