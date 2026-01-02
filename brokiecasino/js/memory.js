@@ -85,18 +85,8 @@ function createMemoryGrid() {
         card.className = 'memory-card';
         card.dataset.index = i;
         card.disabled = true; // Disabled until game starts
+        card.textContent = '❓'; // Direct text content
 
-        // Create front face (visible when hidden)
-        const cardFaceFront = document.createElement('div');
-        cardFaceFront.className = 'card-face card-front';
-        cardFaceFront.textContent = '❓'; // Question mark for hidden state
-
-        // Create back face (visible when revealed)
-        const cardFaceBack = document.createElement('div');
-        cardFaceBack.className = 'card-face card-back'; // Symbol will be added later
-
-        card.appendChild(cardFaceFront);
-        card.appendChild(cardFaceBack);
         // Listener handled by delegation on grid parent
         memoryGridElement.appendChild(card);
     }
@@ -127,9 +117,9 @@ function resetMemoryGame() {
             card.classList.remove('revealed', 'matched', 'mismatched'); // Remove state classes
             card.disabled = true; // Disable cards
             card.textContent = '❓'; // Reset symbol
+            card.textContent = '❓'; // Reset symbol
         });
-    });
-}
+    }
 }
 
 /**
