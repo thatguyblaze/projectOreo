@@ -130,6 +130,16 @@ class SlotMachine {
     }
 }
 
+// --- Global Accessors for Shop ---
+window.getSlotsMachineCount = () => machinesOwned;
+window.addSlotMachine = () => {
+    if (machinesOwned >= 8) return false; // Hard limit
+    machinesOwned++;
+    renderMachines();
+    return true;
+};
+
+
 /**
  * Initializes Slots Game
  */
@@ -140,7 +150,9 @@ function initSlots() {
     autoSpinToggle = document.getElementById('auto-spin-toggle');
     slotBetInput = document.getElementById('slot-bet');
     payoutList = document.getElementById('payout-list');
-    buyMachineBtn = document.getElementById('buy-machine-button');
+
+    // Removed inline buy button
+    // buyMachineBtn = document.getElementById('buy-machine-button'); 
 
     if (!slotsContainer || !spinButton) return;
 
@@ -154,7 +166,6 @@ function initSlots() {
     // Listeners
     spinButton.onclick = () => { if (isAutoSpinning) stopAutoSpin(); startSpinAll(); };
     autoSpinToggle.onclick = toggleAutoSpin;
-    buyMachineBtn.onclick = buyMachine;
 
     addBetAdjustmentListeners('slot', slotBetInput);
 }
@@ -164,21 +175,6 @@ function renderMachines() {
     activeMachines = []; // Reset instances
     for (let i = 0; i < machinesOwned; i++) {
         activeMachines.push(new SlotMachine(i));
-    }
-}
-
-function buyMachine() {
-    if (currency >= MACHINE_COST) {
-        currency -= MACHINE_COST;
-        updateCurrencyDisplay('loss');
-        playSound('win_medium'); // Upgrade sound
-        machinesOwned++;
-        // Render just the new one or re-render all? Re-render all is safer for layout
-        renderMachines();
-        showMessage(`Machine Added! You now own ${machinesOwned}.`);
-    } else {
-        playSound('loan'); // error sound
-        showMessage(`Need $${MACHINE_COST} to buy a machine!`);
     }
 }
 

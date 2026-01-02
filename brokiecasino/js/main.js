@@ -909,6 +909,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Call Initialization functions from game-specific files ---
     // Pass the BrokieAPI object to each init function
+    if (typeof initShop === 'function') initShop(BrokieAPI); // Init Shop first
+
     if (typeof initSlots === 'function') initSlots(BrokieAPI);
     else console.warn("initSlots not found.");
 
