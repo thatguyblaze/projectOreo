@@ -218,9 +218,10 @@ const atmCloseButton = document.getElementById('atm-close-button');
 const atmButtons = atmModal ? atmModal.querySelectorAll('.atm-button') : [];
 
 // Stats
-const statsTotalGain = document.getElementById('stats-total-gain');
-const statsTotalLoss = document.getElementById('stats-total-loss');
-const statsNetProfit = document.getElementById('stats-net-profit');
+// Stats
+// const statsTotalGain = ... (Removed dead code)
+// const statsTotalLoss = ... (Removed dead code)
+// const statsNetProfit = ... (Removed dead code)
 
 // Extended Stats Elements
 const statTotalProfit = document.getElementById('stat-total-profit');
@@ -256,18 +257,6 @@ function flashElement(element) {
  * Updates the session statistics display in the UI.
  */
 function updateStatsDisplay() {
-    // Standard Stats Bar (if present)
-    if (statsTotalGain && statsTotalLoss && statsNetProfit) {
-        statsTotalGain.textContent = totalGain.toLocaleString();
-        statsTotalLoss.textContent = totalLoss.toLocaleString();
-        const net = totalGain - totalLoss;
-        statsNetProfit.textContent = net.toLocaleString();
-        statsNetProfit.className = 'stats-value font-semibold';
-        if (net > 0) statsNetProfit.classList.add('text-fluent-accent');
-        else if (net < 0) statsNetProfit.classList.add('text-fluent-danger');
-        else statsNetProfit.classList.add('text-fluent-text-primary');
-    }
-
     // Extended Stats Panel
     if (statTotalProfit) {
         const net = totalGain - totalLoss;
@@ -456,7 +445,8 @@ function saveGameState() {
             totalLoss: totalLoss,
             lifetimeLoans: lifetimeLoans,
             gameStats: gameStats,
-            totalOperations: totalOperations
+            totalOperations: totalOperations,
+            slotsMachines: (typeof getSlotsMachineCount === 'function') ? getSlotsMachineCount() : 1
         }));
     } catch (e) {
         console.error("Error saving game state:", e);
@@ -493,6 +483,12 @@ function loadGameState() {
             totalOperations = 0;
             localStorage.removeItem('brokieCasinoState'); // Clear corrupted state
         }
+    }
+
+    // Restore Slots State
+    const machinesCount = (savedState && JSON.parse(savedState).slotsMachines) || 1;
+    if (typeof setMachinesOwned === 'function') {
+        setMachinesOwned(machinesCount);
     }
     leaderboard = leaderboard.slice(0, MAX_LEADERBOARD_ENTRIES); // Ensure limit
     updateCurrencyDisplay();

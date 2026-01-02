@@ -130,13 +130,19 @@ class SlotMachine {
     }
 }
 
-// --- Global Accessors for Shop ---
+// --- Global Accessors for Shop & State ---
 window.getSlotsMachineCount = () => machinesOwned;
 window.addSlotMachine = () => {
     if (machinesOwned >= 8) return false; // Hard limit
     machinesOwned++;
     renderMachines();
     return true;
+};
+window.setMachinesOwned = (count) => {
+    machinesOwned = parseInt(count) || 1;
+    if (machinesOwned < 1) machinesOwned = 1;
+    if (machinesOwned > 8) machinesOwned = 8;
+    renderMachines();
 };
 
 
