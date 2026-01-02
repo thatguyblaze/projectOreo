@@ -265,9 +265,9 @@ function updateStatsDisplay() {
     if (statTopGamesList) {
         // Sort games by play count descending
         const sortedGames = Object.entries(gameStats)
-            .sort(([,a], [,b]) => b - a)
+            .sort(([, a], [, b]) => b - a)
             .slice(0, 3); // Top 3
-        
+
         statTopGamesList.innerHTML = '';
         if (sortedGames.length === 0) {
             statTopGamesList.innerHTML = '<li class="text-[10px] text-slate-500 italic">No games played yet.</li>';
@@ -276,7 +276,7 @@ function updateStatsDisplay() {
                 const li = document.createElement('li');
                 li.className = 'flex justify-between items-center text-xs py-1 border-b border-white/5 last:border-0';
                 li.innerHTML = `
-                    <span class="text-slate-300 font-bold"><span class="text-indigo-500 mr-2">#${index+1}</span>${game}</span>
+                    <span class="text-slate-300 font-bold"><span class="text-indigo-500 mr-2">#${index + 1}</span>${game}</span>
                     <span class="text-slate-500 font-mono">${count}</span>
                 `;
                 statTopGamesList.appendChild(li);
@@ -529,8 +529,8 @@ function setActiveTab(selectedTab) {
         if (!tab) return; // Skip if tab element doesn't exist
         const gameArea = allGameAreas[index]; // Get corresponding game area
         if (!gameArea) {
-             console.warn(`Game area not found for tab index ${index}`, tab); // Add warning if area missing
-             return; // Skip if corresponding game area doesn't exist
+            console.warn(`Game area not found for tab index ${index}`, tab); // Add warning if area missing
+            return; // Skip if corresponding game area doesn't exist
         }
 
 
@@ -558,7 +558,7 @@ function setActiveTab(selectedTab) {
                 resetBlackjack(false);
             }
             if (tab === tabPlinko && typeof drawPlinkoBoard === 'function') { // Redraw board on switch to ensure it's visible
-                 drawPlinkoBoard();
+                drawPlinkoBoard();
             }
             if (tab === tabSlots && typeof updateSlotsPayoutDisplay === 'function') {
                 updateSlotsPayoutDisplay(); // Update payouts on tab switch
@@ -607,7 +607,7 @@ function adjustBet(inputElement, amount, operation) {
     }
 
     let newBet = currentBet; // Initialize newBet with the current (floored) bet value.
-                           // This will be overridden by 'min', 'max', and 'set' operations.
+    // This will be overridden by 'min', 'max', and 'set' operations.
 
     const minBet = 1;
     // maxBet is the maximum amount the player can possibly bet, based on their current currency.
@@ -799,7 +799,7 @@ function addBetAdjustmentListeners(gamePrefix, betInputElement) {
             adjustBet(betInputElement, valueToSet, 'set');
         });
         betInputElement.addEventListener('input', () => { // Prevent non-numeric input, allow 'e' for scientific notation
-                                                      // but rely on parseFloat for final validation.
+            // but rely on parseFloat for final validation.
             // This regex is a bit more permissive to allow typing scientific notation,
             // but parseFloat and subsequent logic will handle validation.
             // A simpler alternative if not wanting to support typing 'e':
@@ -873,38 +873,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Call Initialization functions from game-specific files ---
     // Pass the BrokieAPI object to each init function
-    if (typeof initSlots === 'function') initSlots(BrokieAPI);
-    else console.warn("initSlots not found.");
+    // Wrapped in helper to prevent one failure from stopping others
 
-    if (typeof initCrash === 'function') initCrash(BrokieAPI);
-    else console.warn("initCrash not found.");
+    const safeInit = (name, initFn) => {
+        if (typeof initFn === 'function') {
+            try {
+                initFn(BrokieAPI);
+                // console.log(`${name} initialized.`); 
+            } catch (error) {
+                console.error(`Failed to initialize ${name}:`, error);
+            }
+        } else {
+            console.warn(`${name} init function not found.`);
+        }
+    };
 
-    if (typeof initCoinflip === 'function') initCoinflip(BrokieAPI);
-    else console.warn("initCoinflip not found.");
-
-    if (typeof initMinefield === 'function') initMinefield(BrokieAPI);
-    else console.warn("initMinefield not found.");
-
-    if (typeof initMemory === 'function') initMemory(BrokieAPI);
-    else console.warn("initMemory not found.");
-
-    if (typeof initHorserace === 'function') initHorserace(BrokieAPI);
-    else console.warn("initHorserace not found.");
-
-    if (typeof initRoulette === 'function') initRoulette(BrokieAPI);
-    else console.warn("initRoulette not found.");
-
-    if (typeof initBlackjack === 'function') initBlackjack(BrokieAPI);
-    else console.warn("initBlackjack not found.");
-
-    // Check for Plinko init function (now guarded in plinko.js)
-    if (typeof initPlinko === 'function') initPlinko(BrokieAPI);
-    else console.warn("initPlinko not found.");
-
-    // ** Check for Sabacc init function (now guarded in sabacc.js) **
-    if (typeof initSabacc === 'function') initSabacc(BrokieAPI);
-    else console.warn("initSabacc not found.");
-
+    safeInit('Slots', typeof initSlots !== 'undefined' ? initSlots : undefined);
+    safeInit('Crash', typeof initCrash !== 'undefined' ? initCrash : undefined);
+    safeInit('CoinFlip', typeof initCoinflip !== 'undefined' ? initCoinflip : undefined);
+    safeInit('Minefield', typeof initMinefield !== 'undefined' ? initMinefield : undefined);
+    safeInit('Memory', typeof initMemory !== 'undefined' ? initMemory : undefined); // Explicit check
+    safeInit('Horserace', typeof initHorserace !== 'undefined' ? initHorserace : undefined);
+    safeInit('Roulette', typeof initRoulette !== 'undefined' ? initRoulette : undefined);
+    safeInit('Blackjack', typeof initBlackjack !== 'undefined' ? initBlackjack : undefined);
+    safeInit('Plinko', typeof initPlinko !== 'undefined' ? initPlinko : undefined);
+    safeInit('Sabacc', typeof initSabacc !== 'undefined' ? initSabacc : undefined);
 
     console.log("Brokie Casino Initialized.");
 });
