@@ -11,7 +11,7 @@ let memoryBet = 0;
 const MEMORY_GRID_SIZE = 4; // 4x4 grid
 const MEMORY_CARDS = MEMORY_GRID_SIZE * MEMORY_GRID_SIZE; // 16 cards
 const MEMORY_PAIRS = MEMORY_CARDS / 2; // 8 pairs
-const MEMORY_SYMBOLS = ['🍎','🍌','🍇','🍓','🥝','🍍','🍑','🥥']; // 8 symbols for pairs
+const MEMORY_SYMBOLS = ['🍎', '🍌', '🍇', '🍓', '🥝', '🍍', '🍑', '🥥']; // 8 symbols for pairs
 let memoryGridSymbols = []; // Actual symbols placed on the grid
 let memoryRevealedCards = []; // Indices of currently revealed cards (max 2)
 let memoryMatchedIndices = []; // Indices of cards that have been matched
@@ -42,7 +42,7 @@ function initMemory() {
         !memoryTriesLeftSpan || !memoryStatus) {
         console.error("Memory Game initialization failed: Could not find all required DOM elements.");
         const gameArea = document.getElementById('game-memory');
-        if(gameArea) gameArea.innerHTML = '<p class="text-red-500 text-center">Error loading Memory Game elements.</p>';
+        if (gameArea) gameArea.innerHTML = '<p class="text-red-500 text-center">Error loading Memory Game elements.</p>';
         return; // Stop initialization
     }
 
@@ -54,7 +54,7 @@ function initMemory() {
 
     // Add Event Listeners
     memoryStartButton.addEventListener('click', startMemoryGame);
-    
+
     // Event Delegation for Grid
     memoryGridElement.addEventListener('click', (e) => {
         const card = e.target.closest('.memory-card');
@@ -80,11 +80,14 @@ function createMemoryGrid() {
     if (!memoryGridElement) return;
     memoryGridElement.innerHTML = ''; // Clear previous grid
     for (let i = 0; i < MEMORY_CARDS; i++) {
-        const card = document.createElement('button');
-        card.type = 'button'; // Explicitly set type to button
+        const card = document.createElement('div');
+        // card.type = 'button'; // Not needed for div
+        card.role = 'button'; // Accessibility
+        card.tabIndex = 0; // Accessibility
         card.className = 'memory-card';
         card.dataset.index = i;
-        card.disabled = true; // Disabled until game starts
+        // card.disabled = true; // Divs don't have disabled property, handle via class/logic
+        card.classList.add('disabled'); // Use class for styling disabled state if needed
 
         // Create front face (visible when hidden)
         const cardFaceFront = document.createElement('div');
@@ -125,7 +128,8 @@ function resetMemoryGame() {
         const cards = memoryGridElement.querySelectorAll('.memory-card');
         cards.forEach(card => {
             card.classList.remove('revealed', 'matched', 'mismatched'); // Remove state classes
-            card.disabled = true; // Disable cards
+            // card.disabled = true; // Not for divs
+            card.classList.add('disabled');
             const backFace = card.querySelector('.card-back');
             if (backFace) backFace.textContent = ''; // Clear symbol from back face
             const frontFace = card.querySelector('.card-front');
@@ -193,7 +197,7 @@ function startMemoryGame() {
     memoryStatus.textContent = 'Find the pairs!';
     // Enable cards for clicking
     const cards = memoryGridElement.querySelectorAll('.memory-card');
-    cards.forEach(card => card.disabled = false);
+    cards.forEach(card => card.classList.remove('disabled'));
     saveGameState(); // Save state after starting (uses main.js)
 }
 
@@ -209,7 +213,7 @@ function handleMemoryCardClick(index) {
     if (!memoryGridElement || !memoryStatus) return; // Check elements
 
     const card = memoryGridElement.querySelector(`.memory-card[data-index="${index}"]`);
-    if (!card || card.disabled) return; // Ignore if card not found or disabled
+    if (!card || card.classList.contains('disabled')) return; // Ignore if card not found or disabled
 
     playSound('memory_flip'); // uses main.js
     card.classList.add('revealed'); // Reveal the card (CSS handles the flip)
@@ -233,7 +237,7 @@ function checkMemoryMatch() {
     if (memoryRevealedCards.length !== 2) { // Should not happen, but safety check
         memoryIsChecking = false; return;
     }
-     if (!memoryGridElement || !memoryStatus || !memoryTriesLeftSpan) return; // Check elements
+    if (!memoryGridElement || !memoryStatus || !memoryTriesLeftSpan) return; // Check elements
 
     const index1 = memoryRevealedCards[0];
     const index2 = memoryRevealedCards[1];
@@ -253,8 +257,8 @@ function checkMemoryMatch() {
         memoryStatus.textContent = `Matched ${symbol1}!`;
         card1.classList.add('matched'); // Apply matched style (optional visual cue)
         card2.classList.add('matched');
-        card1.disabled = true; // Permanently disable matched cards
-        card2.disabled = true;
+        card1.classList.add('disabled'); // Permanently disable matched cards
+        card2.classList.add('disabled');
         memoryMatchedIndices.push(index1, index2); // Add to matched array
 
         // Check for win condition (all cards matched)
@@ -304,7 +308,7 @@ function endMemoryGame(won) {
     // Disable all cards
     if (memoryGridElement) {
         const cards = memoryGridElement.querySelectorAll('.memory-card');
-        cards.forEach(card => card.disabled = true);
+        cards.forEach(card => card.classList.add('disabled'));
     }
     if (!memoryStatus) return; // Need status element
 
