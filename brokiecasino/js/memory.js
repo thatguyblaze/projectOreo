@@ -126,12 +126,10 @@ function resetMemoryGame() {
         cards.forEach(card => {
             card.classList.remove('revealed', 'matched', 'mismatched'); // Remove state classes
             card.disabled = true; // Disable cards
-            const backFace = card.querySelector('.card-back');
-            if (backFace) backFace.textContent = ''; // Clear symbol from back face
-            const frontFace = card.querySelector('.card-front');
-            if (frontFace) frontFace.textContent = '❓'; // Ensure front face shows question mark
+            card.textContent = '❓'; // Reset symbol
         });
-    }
+    });
+}
 }
 
 /**
@@ -149,17 +147,7 @@ function shuffleMemoryCards() {
         [symbolsToPlace[i], symbolsToPlace[j]] = [symbolsToPlace[j], symbolsToPlace[i]]; // Swap elements
     }
     memoryGridSymbols = symbolsToPlace; // Store the shuffled symbols
-
-    // Assign symbols to the back face of each card
-    if (memoryGridElement) {
-        const cards = memoryGridElement.querySelectorAll('.memory-card');
-        cards.forEach((card, index) => {
-            const backFace = card.querySelector('.card-back');
-            if (backFace) {
-                backFace.textContent = memoryGridSymbols[index];
-            }
-        });
-    }
+    // Symbols are revealed on click, not pre-assigned to DOM
 }
 
 /**
@@ -212,7 +200,8 @@ function handleMemoryCardClick(index) {
     if (!card || card.disabled) return; // Ignore if card not found or disabled
 
     playSound('memory_flip'); // uses main.js
-    card.classList.add('revealed'); // Reveal the card (CSS handles the flip)
+    card.classList.add('revealed');
+    card.textContent = memoryGridSymbols[index]; // Reveal symbol
     memoryRevealedCards.push(index); // Add index to revealed array
 
     if (memoryRevealedCards.length === 2) { // Two cards revealed, check for match
@@ -278,10 +267,14 @@ function checkMemoryMatch() {
             // Flip cards back after a delay
             setTimeout(() => {
                 // Check if cards still exist before modifying
-                const currentCard1 = memoryGridElement.querySelector(`.memory-card[data-index="${index1}"]`);
-                const currentCard2 = memoryGridElement.querySelector(`.memory-card[data-index="${index2}"]`);
-                if (currentCard1) currentCard1.classList.remove('revealed', 'mismatched'); // Hide cards again
-                if (currentCard2) currentCard2.classList.remove('revealed', 'mismatched');
+                if (currentCard1) {
+                    currentCard1.classList.remove('revealed', 'mismatched');
+                    currentCard1.textContent = '❓';
+                }
+                if (currentCard2) {
+                    currentCard2.classList.remove('revealed', 'mismatched');
+                    currentCard2.textContent = '❓';
+                }
                 memoryIsChecking = false; // Allow next pick
             }, 1000); // Delay before hiding mismatch
         }
