@@ -204,12 +204,12 @@ const gameSabacc = document.getElementById('game-sabacc'); // ** Added Sabacc Ga
 const allTabs = [
     tabSlots, tabCrash, tabCoinflip, tabMinefield, tabMemory, tabHorserace,
     tabRoulette, tabBlackjack, tabPlinko, tabSabacc // ** Added Sabacc Tab to Array **
-].filter(el => el !== null); // Filter out nulls if an element doesn't exist
+]; // Filter removed to ensure index alignment
 
 const allGameAreas = [
     gameSlots, gameCrash, gameCoinflip, gameMinefield, gameMemory, gameHorserace,
     gameRoulette, gameBlackjack, gamePlinko, gameSabacc // ** Added Sabacc Game Area to Array **
-].filter(el => el !== null); // Filter out nulls
+]; // Filter removed to ensure index alignment
 
 // ATM Modal
 const atmModalOverlay = document.getElementById('atm-modal-overlay');
