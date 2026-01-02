@@ -1,347 +1,284 @@
 /**
  * Brokie Casino - Slot Machine Game Logic (slots.js)
- *
- * Handles all functionality related to the Slot Machine game.
- * Depends on functions and variables defined in main.js (e.g., currency, playSound, updateCurrencyDisplay, etc.)
+ * Refactored for Multi-Machine Support ("Upgrades")
  */
 
-// --- Slot Machine Specific State & Constants ---
-const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '🔔', '💎', '💰', '7️⃣'];
-const slotPayouts = {
+// --- Constants ---
+const SLOT_SYMBOLS = ['🍒', '🍋', '🍊', '🍉', '🔔', '💎', '💰', '7️⃣'];
+// Payouts
+const SLOT_PAYOUTS = {
     '7️⃣7️⃣7️⃣': 250, '💰💰💰': 100, '💎💎💎': 90, '🔔🔔🔔': 60,
     '🍉🍉🍉': 25, '🍊🍊🍊': 20, '🍋🍋🍋': 15, '🍒🍒🍒': 10,
-    '7️⃣7️⃣': 10, '💰💰': 7, '💎💎': 5, '🍒🍒': 2, // Allow 2 symbols win only for specific ones if desired
+    '7️⃣7️⃣': 10, '💰💰': 7, '💎💎': 5, '🍒🍒': 2,
 };
-const SPIN_DURATION = 1000; // ms for reel spin animation
-const REEL_SPIN_OFFSET = 1500; // px, how far the reel strip scrolls visually
-let isAutoSpinning = false;
-let slotSpinTimeout = null; // Timeout for auto-spin delay
+const MACHINE_COST = 2000;
+const SPIN_DURATION = 1000; // ms
+const REEL_SPIN_OFFSET = 1500; // px
 
-// --- DOM Elements (Slot Machine Specific) ---
-let reelElements = []; // Populated in initSlots
-let reelContainers = []; // Populated in initSlots
-let spinButton, autoSpinToggle, slotBetInput, payoutList; // Populated in initSlots
+// --- Global State ---
+let activeMachines = []; // Array of SlotMachine instances
+let machinesOwned = 1; // Default 1
+let isAutoSpinning = false;
+let slotSpinTimeout = null;
+
+// --- DOM Elements ---
+let slotsContainer, spinButton, autoSpinToggle, slotBetInput, payoutList, buyMachineBtn;
 
 /**
- * Initializes the Slot Machine game elements and event listeners.
- * Called by main.js on DOMContentLoaded.
+ * Class representing a single Slot Machine instance.
+ * Handles its own DOM creation, animation, and result calculation.
+ */
+class SlotMachine {
+    constructor(id) {
+        this.id = id;
+        this.element = null;
+        this.reelElements = [];
+        this.reelContainers = [];
+        this.createDOM();
+    }
+
+    createDOM() {
+        const machineDiv = document.createElement('div');
+        machineDiv.className = 'slot-machine-instance glass-card p-4 rounded-2xl border border-white/5 shadow-2xl animate-reveal';
+        machineDiv.innerHTML = `
+            <div class="flex justify-center gap-2 relative">
+                 <!-- Machine Header/Status could go here -->
+                <div class="reel-container"><div class="reel" id="m${this.id}-r1"><div style="height: 80px; line-height: 80px;">❓</div></div></div>
+                <div class="reel-container"><div class="reel" id="m${this.id}-r2"><div style="height: 80px; line-height: 80px;">❓</div></div></div>
+                <div class="reel-container"><div class="reel" id="m${this.id}-r3"><div style="height: 80px; line-height: 80px;">❓</div></div></div>
+            </div>
+        `;
+
+        slotsContainer.appendChild(machineDiv);
+        this.element = machineDiv;
+        this.reelElements = [
+            machineDiv.querySelector(`#m${this.id}-r1`),
+            machineDiv.querySelector(`#m${this.id}-r2`),
+            machineDiv.querySelector(`#m${this.id}-r3`)
+        ];
+        this.reelContainers = Array.from(machineDiv.querySelectorAll('.reel-container'));
+    }
+
+    async spin(betPerMachine) {
+        // Clear previous effects
+        this.reelContainers.forEach(c => c.classList.remove('win-effect'));
+
+        const finalSymbols = [];
+        const promises = this.reelElements.map((reelEl, index) => {
+            return new Promise(resolve => {
+                const reelContainer = reelEl.parentElement;
+
+                // Visual reset
+                reelEl.style.transition = 'none';
+                reelEl.style.top = `-${REEL_SPIN_OFFSET}px`;
+
+                // Strip generation
+                let stripHTML = '';
+                for (let i = 0; i < 15; i++) stripHTML += `<div style="height: 80px; line-height: 80px;">${this.getRandomSymbol()}</div>`;
+                const finalSymbol = this.getRandomSymbol();
+                finalSymbols[index] = finalSymbol;
+                stripHTML += `<div style="height: 80px; line-height: 80px;">${finalSymbol}</div>`;
+                reelEl.innerHTML = stripHTML;
+
+                // Force Reflow
+                reelContainer.offsetHeight;
+
+                // Animate
+                requestAnimationFrame(() => {
+                    // Staggered spin duration
+                    reelEl.style.transition = `top ${SPIN_DURATION / 1000 + index * 0.15}s cubic-bezier(0.25, 1, 0.5, 1)`;
+                    const finalTop = -(reelEl.scrollHeight - reelContainer.clientHeight);
+                    reelEl.style.top = `${finalTop}px`;
+
+                    // Resolve after animation
+                    setTimeout(() => {
+                        resolve();
+                        // Play stop sound per reel
+                        playSound('reel_stop', { index: index });
+                    }, SPIN_DURATION + index * 150);
+                });
+            });
+        });
+
+        await Promise.all(promises);
+
+        // Final cleanup & Win Check (return win amount for this machine)
+        return this.checkWin(finalSymbols, betPerMachine);
+    }
+
+    checkWin(symbols, bet) {
+        const [s1, s2, s3] = symbols;
+        let winKey = '';
+        let winAmount = 0;
+        let winningReels = [];
+
+        if (s1 === s2 && s2 === s3) { winKey = s1 + s2 + s3; winningReels = [0, 1, 2]; }
+        else if (SLOT_PAYOUTS[s1 + s2]) { winKey = s1 + s2; winningReels = [0, 1]; }
+        else if (SLOT_PAYOUTS[s2 + s3]) { winKey = s2 + s3; winningReels = [1, 2]; }
+
+        if (SLOT_PAYOUTS[winKey]) {
+            winAmount = bet * SLOT_PAYOUTS[winKey];
+            // Highlight
+            winningReels.forEach(i => this.reelContainers[i].classList.add('win-effect'));
+            return { win: winAmount, key: winKey };
+        }
+        return { win: 0, key: null };
+    }
+
+    getRandomSymbol() {
+        return SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+    }
+}
+
+/**
+ * Initializes Slots Game
  */
 function initSlots() {
-    console.log("Initializing Slots...");
-    // Get DOM elements
-    reelElements = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
-    reelContainers = Array.from(reelElements).map(el => el?.closest('.reel')).filter(Boolean); // Ensure elements exist
+    console.log("Initializing Multi-Machine Slots...");
+    slotsContainer = document.getElementById('slots-machine-container');
     spinButton = document.getElementById('spin-button');
     autoSpinToggle = document.getElementById('auto-spin-toggle');
     slotBetInput = document.getElementById('slot-bet');
     payoutList = document.getElementById('payout-list');
+    buyMachineBtn = document.getElementById('buy-machine-button');
 
-    // Check if all essential elements were found
-    if (!spinButton || !autoSpinToggle || !slotBetInput || !payoutList || reelElements.includes(null) || reelContainers.length !== 3) {
-        console.error("Slots initialization failed: Could not find all required DOM elements.");
-        // Optionally disable the slots tab or show an error message within the game area
-        const gameArea = document.getElementById('game-slots');
-        if(gameArea) gameArea.innerHTML = '<p class="text-red-500 text-center">Error loading Slot Machine elements.</p>';
-        return; // Stop initialization if elements are missing
+    if (!slotsContainer || !spinButton) return;
+
+    // Load State? (Mocked for now, just default 1 or previously purchased)
+    // In a real persist scenario, we'd read 'machinesOwned' from localStorage.
+    // For now, reset to 1 on reload or keep in memory if SPA navigation.
+
+    renderMachines();
+    displayPayoutLegend();
+
+    // Listeners
+    spinButton.onclick = () => { if (isAutoSpinning) stopAutoSpin(); startSpinAll(); };
+    autoSpinToggle.onclick = toggleAutoSpin;
+    buyMachineBtn.onclick = buyMachine;
+
+    addBetAdjustmentListeners('slot', slotBetInput);
+}
+
+function renderMachines() {
+    slotsContainer.innerHTML = ''; // Clear
+    activeMachines = []; // Reset instances
+    for (let i = 0; i < machinesOwned; i++) {
+        activeMachines.push(new SlotMachine(i));
+    }
+}
+
+function buyMachine() {
+    if (currency >= MACHINE_COST) {
+        currency -= MACHINE_COST;
+        updateCurrencyDisplay('loss');
+        playSound('win_medium'); // Upgrade sound
+        machinesOwned++;
+        // Render just the new one or re-render all? Re-render all is safer for layout
+        renderMachines();
+        showMessage(`Machine Added! You now own ${machinesOwned}.`);
+    } else {
+        playSound('loan'); // error sound
+        showMessage(`Need $${MACHINE_COST} to buy a machine!`);
+    }
+}
+
+async function startSpinAll() {
+    const betPerMachine = parseInt(slotBetInput.value);
+    const totalBet = betPerMachine * activeMachines.length;
+
+    if (totalBet > currency) {
+        showMessage(`Not enough cash! Need $${totalBet} for ${activeMachines.length} machines.`);
+        stopAutoSpin();
+        return;
     }
 
-    // Set initial reel state visually
-    reelElements.forEach(reelSymbolElement => {
-        if (reelSymbolElement) {
-             reelSymbolElement.innerHTML = `<div style="height: 100px; line-height: 100px;">❓</div>`;
+    // Logic
+    startTone();
+    currency -= totalBet;
+    updateCurrencyDisplay('loss');
+    playSound('spin_start');
+
+    spinButton.disabled = true;
+    spinButton.textContent = 'Spinning...';
+
+    // Execute spins in parallel
+    const results = await Promise.all(activeMachines.map(m => m.spin(betPerMachine)));
+
+    // Aggregate Results
+    let totalWin = 0;
+    let bestWinKey = null;
+    let bestMultiplier = 0;
+
+    results.forEach(res => {
+        if (res.win > 0) {
+            totalWin += res.win;
+            const mult = res.win / betPerMachine;
+            if (mult > bestMultiplier) {
+                bestMultiplier = mult;
+                bestWinKey = res.key;
+            }
         }
     });
 
-    // Populate the payout legend
-    displayPayoutLegend();
-
-    // Add Event Listeners
-    spinButton.addEventListener('click', () => {
-        if (isAutoSpinning) stopAutoSpin(); // Stop auto-spin if manual spin is clicked
-        spinReels();
-    });
-    autoSpinToggle.addEventListener('click', toggleAutoSpin);
-
-    // Add bet adjustment listeners using the factory function from main.js
-    addBetAdjustmentListeners('slot', slotBetInput);
-
-    console.log("Slots Initialized.");
+    finalizeGlobalSpin(totalWin, bestWinKey, bestMultiplier);
 }
 
-/**
- * Displays the slot machine payout legend in the UI.
- */
+function finalizeGlobalSpin(totalWin, winKey, multiplier) {
+    if (totalWin > 0) {
+        currency += totalWin;
+        totalGain += totalWin;
+        addWinToLeaderboard('Slots', totalWin);
+
+        let winSound = 'win_small';
+        if (multiplier >= 100) winSound = 'win_big';
+        else if (multiplier >= 25) winSound = 'win_medium';
+
+        playSound(winSound);
+        showMessage(`TOTAL WIN: ${formatWin(totalWin)}!`);
+        updateCurrencyDisplay('win');
+    } else {
+        totalLoss += (parseInt(slotBetInput.value) * activeMachines.length);
+        showMessage("No wins.", 1000);
+    }
+
+    saveGameState();
+    spinButton.disabled = false;
+    spinButton.textContent = 'SPIN ALL';
+
+    if (isAutoSpinning) {
+        slotSpinTimeout = setTimeout(startSpinAll, 500);
+    }
+}
+
+// ... Auto Spin Logic (Same as before) ...
+function stopAutoSpin() {
+    isAutoSpinning = false;
+    clearTimeout(slotSpinTimeout);
+    if (autoSpinToggle) {
+        autoSpinToggle.classList.remove('active');
+        autoSpinToggle.textContent = 'Auto Off';
+    }
+}
+
+function toggleAutoSpin() {
+    if (!autoSpinToggle) return;
+    isAutoSpinning = !isAutoSpinning;
+    if (isAutoSpinning) {
+        autoSpinToggle.classList.add('active');
+        autoSpinToggle.textContent = 'Auto ON';
+        startSpinAll();
+    } else {
+        stopAutoSpin();
+    }
+}
+
 function displayPayoutLegend() {
     if (!payoutList) return;
-    payoutList.innerHTML = ''; // Clear existing list
-    // Sort payouts by value descending for better readability
-    const sortedPayouts = Object.entries(slotPayouts).sort(([, a], [, b]) => b - a);
+    payoutList.innerHTML = '';
+    const sortedPayouts = Object.entries(SLOT_PAYOUTS).sort(([, a], [, b]) => b - a);
     for (const [key, value] of sortedPayouts) {
         const li = document.createElement('li');
         li.innerHTML = `<span>${key}</span><span>${value}x</span>`;
         payoutList.appendChild(li);
     }
 }
-
-/**
- * Gets a random symbol from the available slot symbols.
- * @returns {string} A random slot symbol emoji.
- */
-function getRandomSymbol() {
-    return slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
-}
-
-/**
- * Starts the reel spinning animation and logic.
- */
-function spinReels() {
-    // Check if elements are available
-    if (!spinButton || !slotBetInput || reelContainers.length !== 3) {
-         console.error("Cannot spin reels, elements not initialized correctly.");
-         showMessage("Error starting spin. Please reload.", 2000);
-         return;
-    }
-    if (spinButton.disabled) return; // Prevent multiple spins
-
-    const betAmount = parseInt(slotBetInput.value);
-    if (isNaN(betAmount) || betAmount <= 0) {
-        showMessage("Please enter a valid positive bet amount.", 2000);
-        stopAutoSpin(); return;
-    }
-    if (betAmount > currency) {
-        showMessage("Not enough currency! Try the loan button?", 2000);
-        stopAutoSpin(); return;
-    }
-
-    startTone(); // Ensure audio context is ready (from main.js)
-    if (typeof BrokieAPI.registerGameStart === 'function') BrokieAPI.registerGameStart('Slots');
-    playSound('spin_start'); // from main.js
-    currency -= betAmount; // from main.js
-    updateCurrencyDisplay('loss'); // from main.js
-    spinButton.disabled = true;
-    spinButton.textContent = 'Spinning...';
-    reelContainers.forEach(c => c.classList.remove('win-effect')); // Clear previous win effects
-
-    let finalSymbols = [];
-    let activeReels = reelElements.length;
-
-    reelElements.forEach((reelSymbolElement, index) => {
-        // Ensure element exists before proceeding
-        if (!reelSymbolElement) {
-            console.error(`Reel element ${index + 1} not found during spin.`);
-            activeReels--;
-            if (activeReels === 0) finalizeSpin(finalSymbols, betAmount);
-            return;
-        }
-
-        const reelContainer = reelSymbolElement.parentElement;
-        if (!reelContainer) {
-            console.error(`Could not find container for reel ${index + 1}`);
-            activeReels--;
-            if (activeReels === 0) finalizeSpin(finalSymbols, betAmount); // Finalize if this was the last reel
-            return;
-        }
-
-        // Prepare the visual spin effect
-        reelSymbolElement.style.transition = 'none'; // Disable transition for instant reset
-        reelSymbolElement.style.top = `-${REEL_SPIN_OFFSET}px`; // Move instantly to top offset
-
-        // Generate the strip of symbols for visual effect + final symbol
-        let symbolStripHTML = '';
-        const stripLength = 20; // Number of symbols in the visual strip
-        for (let i = 0; i < stripLength; i++) {
-            symbolStripHTML += `<div style="height: 100px; line-height: 100px;">${getRandomSymbol()}</div>`;
-        }
-        const finalSymbol = getRandomSymbol();
-        finalSymbols[index] = finalSymbol; // Store the actual result
-        symbolStripHTML += `<div style="height: 100px; line-height: 100px;">${finalSymbol}</div>`; // Add final symbol at the end
-        reelSymbolElement.innerHTML = symbolStripHTML;
-
-        // Force reflow to apply the reset position before starting animation
-        reelContainer.offsetHeight;
-
-        // Define transition end handler for this specific reel
-        const transitionEndHandler = () => {
-            reelSymbolElement.removeEventListener('transitionend', transitionEndHandler); // Clean up listener
-            playSound('reel_stop', { index: index }); // Pass index to sound (from main.js)
-            activeReels--;
-            if (activeReels === 0) {
-                finalizeSpin(finalSymbols, betAmount); // Call finalize only when ALL reels stopped
-            }
-        };
-        reelSymbolElement.addEventListener('transitionend', transitionEndHandler);
-
-        // Start the animation using requestAnimationFrame for smoother start
-        requestAnimationFrame(() => {
-            reelSymbolElement.style.transition = `top ${SPIN_DURATION / 1000 + index * 0.1}s cubic-bezier(0.25, 1, 0.5, 1)`; // Staggered duration
-            const finalTopPosition = -(reelSymbolElement.scrollHeight - reelContainer.clientHeight); // Calculate final position
-            reelSymbolElement.style.top = `${finalTopPosition}px`;
-        });
-
-        // Fallback timeout in case transitionend doesn't fire (rare, but possible)
-        setTimeout(() => {
-            if (activeReels > 0 && reelSymbolElement.style.transition !== 'none') { // Check if still active
-                console.warn(`Transition fallback for reel ${index + 1}`);
-                reelSymbolElement.removeEventListener('transitionend', transitionEndHandler); // Clean up listener
-                playSound('reel_stop', { index: index }); // Pass index to sound
-                activeReels--;
-                if (activeReels === 0) {
-                    finalizeSpin(finalSymbols, betAmount);
-                }
-            }
-        }, SPIN_DURATION + 300 + index * 100); // Generous fallback timer
-    });
-}
-
-/**
- * Finalizes the spin, checks for wins, and updates the UI.
- * @param {string[]} finalSymbols - Array containing the final symbol for each reel.
- * @param {number} betAmount - The amount bet on this spin.
- */
-function finalizeSpin(finalSymbols, betAmount) {
-    let spinError = false;
-    try {
-        if (finalSymbols.length === reelElements.length) {
-            checkSlotWin(finalSymbols, betAmount); // Check for wins
-        } else {
-            console.error("Final symbols array length mismatch before check:", finalSymbols);
-            showMessage("Error processing spin results.", 2000); // from main.js
-            spinError = true;
-        }
-    } catch (e) {
-        console.error("Error during win check:", e);
-        showMessage("An error occurred checking the win.", 2000); // from main.js
-        spinError = true;
-    } finally {
-        // Reset UI regardless of win/error
-        if(spinButton) {
-            spinButton.disabled = false;
-            spinButton.textContent = 'Spin';
-        }
-
-
-        // Ensure final symbols are displayed correctly
-        reelElements.forEach((reelSymbolElement, index) => {
-            if (reelSymbolElement) { // Check if element exists
-                 if (finalSymbols[index]) {
-                     reelSymbolElement.style.transition = 'none'; // Remove transition
-                     reelSymbolElement.innerHTML = `<div style="height: 100px; line-height: 100px;">${finalSymbols[index]}</div>`; // Display final symbol
-                     reelSymbolElement.style.top = '0px'; // Reset position
-                 } else { // Fallback if a symbol was missing
-                     reelSymbolElement.innerHTML = `<div style="height: 100px; line-height: 100px;">❓</div>`;
-                     reelSymbolElement.style.top = '0px';
-                 }
-            }
-        });
-
-        // Handle auto-spin continuation
-        if (isAutoSpinning) {
-            clearTimeout(slotSpinTimeout); // Clear previous timeout if any
-            const currentBet = parseInt(slotBetInput.value); // Get current bet value
-            if (spinError || currency < currentBet || currentBet <= 0) {
-                stopAutoSpin(); // Stop auto-spin on error or insufficient funds or invalid bet
-            } else {
-                slotSpinTimeout = setTimeout(spinReels, 500); // Schedule next spin after a short delay
-            }
-        }
-    }
-}
-
-/**
- * Checks the final symbols against payout rules and updates game state.
- * @param {string[]} symbols - The array of final symbols [s1, s2, s3].
- * @param {number} betAmount - The amount bet on this spin.
- */
-function checkSlotWin(symbols, betAmount) {
-    // Ensure elements exist before proceeding
-    if (reelContainers.length !== 3) {
-        console.error("Cannot check win, reel containers not initialized correctly.");
-        return;
-    }
-
-    const [s1, s2, s3] = symbols;
-    let winAmount = 0;
-    let winKey = '';
-    let winSound = null;
-    let winningReels = [];
-
-    // Check for 3-symbol matches first (highest payout)
-    if (s1 === s2 && s2 === s3) {
-        winKey = `${s1}${s2}${s3}`;
-        winningReels = [0, 1, 2];
-    }
-    // Check for 2-symbol matches (only if specific payouts exist)
-    else if (slotPayouts[`${s1}${s2}`]) { // Check left-to-right pair
-        winKey = `${s1}${s2}`;
-        winningReels = [0, 1];
-    } else if (slotPayouts[`${s2}${s3}`]) { // Check middle-right pair (less common rule)
-        winKey = `${s2}${s3}`;
-        winningReels = [1, 2];
-    }
-    // Add specific checks like 'any two cherries' if needed here
-
-    // Calculate winnings if a winning combination was found
-    if (slotPayouts[winKey]) {
-        winAmount = betAmount * slotPayouts[winKey];
-        currency += winAmount; // from main.js
-        totalGain += winAmount; // Add full win amount to gain (from main.js)
-        addWinToLeaderboard('Slots', winAmount); // Add win to leaderboard (from main.js)
-
-        // Determine sound based on multiplier size
-        const multiplier = slotPayouts[winKey];
-        if (multiplier >= 100) winSound = 'win_big';
-        else if (multiplier >= 25) winSound = 'win_medium';
-        else winSound = 'win_small';
-
-        showMessage(`WIN! ${formatWin(winAmount)}! (${winKey})`, 3000); // from main.js
-        winningReels.forEach(i => reelContainers[i]?.classList.add('win-effect')); // Highlight winning reels
-        setTimeout(() => winningReels.forEach(i => reelContainers[i]?.classList.remove('win-effect')), 1000); // Remove highlight after delay
-    } else {
-        // No win, bet amount is already subtracted, just add to total loss
-        totalLoss += betAmount; // from main.js
-        showMessage("No win this time. Spin again!", 2000); // from main.js
-        winSound = 'lose'; // Play lose sound
-    }
-
-    if (winSound) playSound(winSound, winAmount); // Play appropriate sound (from main.js)
-    updateCurrencyDisplay(winAmount > 0 ? 'win' : null); // Update currency display (flash if win) (from main.js)
-    saveGameState(); // Save state after win/loss calculation (from main.js)
-}
-
-/**
- * Stops the auto-spin feature and updates the button UI.
- */
-function stopAutoSpin() {
-    isAutoSpinning = false;
-    clearTimeout(slotSpinTimeout); // Clear any scheduled spin
-    if (autoSpinToggle) {
-         autoSpinToggle.classList.remove('active');
-         autoSpinToggle.textContent = 'Auto Off';
-    }
-    // Re-enable spin button if it was disabled only by auto-spin ending
-    if (spinButton && !spinButton.disabled && !isAutoSpinning) {
-        // This condition might be tricky, ensure spinButton isn't disabled for other reasons
-        // Generally safe to just enable if auto-spin is off and no spin is in progress.
-        // spinButton.disabled = false; // Re-enabled in finalizeSpin
-    }
-}
-
-/**
- * Toggles the auto-spin feature on or off.
- */
-function toggleAutoSpin() {
-    if (!autoSpinToggle) return; // Ensure button exists
-
-    isAutoSpinning = !isAutoSpinning;
-    if (isAutoSpinning) {
-        autoSpinToggle.classList.add('active');
-        autoSpinToggle.textContent = 'Auto ON';
-        spinReels(); // Start the first auto-spin immediately
-    } else {
-        stopAutoSpin();
-    }
-}
-
-// Note: The initSlots() function will be called from main.js
-// Ensure main.js includes: if (typeof initSlots === 'function') initSlots();
-// within its DOMContentLoaded listener.

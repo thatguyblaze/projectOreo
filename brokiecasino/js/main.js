@@ -31,6 +31,20 @@ let toneStarted = false;
 let synth, polySynth, noiseSynth; // Declare synth variables globally
 
 /**
+ * Checks and resumes audio context if suspended.
+ * Should be bound to user interactions.
+ */
+async function checkAudioContext() {
+    if (Tone.context.state === 'suspended') {
+        await Tone.start();
+        console.log("AudioContext resumed by user interaction.");
+    }
+}
+// global listener to ensure audio stays alive
+document.addEventListener('click', checkAudioContext);
+document.addEventListener('keydown', checkAudioContext);
+
+/**
  * Initializes Tone.js audio context on the first user interaction.
  */
 async function startTone() {
