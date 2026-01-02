@@ -503,6 +503,8 @@ function loadGameState() {
  */
 function setActiveTab(selectedTab) {
     if (!selectedTab) return;
+    console.log("Setting active tab:", selectedTab.id);
+
 
     // --- Call reset/stop functions for the *previously* active game ---
     const currentActiveTab = allTabs.find(tab => tab && tab.getAttribute('aria-current') === 'page');
@@ -768,6 +770,8 @@ function setupMainEventListeners() {
     allTabs.forEach(tab => {
         if (tab) {
             tab.addEventListener('click', (e) => {
+                console.log("Tab clicked:", tab.id);
+                showMessage(`Clicked ${tab.textContent.trim()}`, 1000); // Debug
                 setActiveTab(e.currentTarget); // Pass the clicked button element
             });
         } else {
