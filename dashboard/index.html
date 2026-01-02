@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard - A personal new tab dashboard with widgets and utilities.">
+    <meta name="author" content="Blazinik">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:;">
     <title>New Tab</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,14 +16,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         @keyframes zoom-grid-animation {
-            0% { transform: scale(1) translate(0, 0); opacity: 0; }
-            50% { transform: scale(1.5) translate(15px, -15px); opacity: 0.1; }
-            100% { transform: scale(1) translate(0, 0); opacity: 0; }
+            0% {
+                transform: scale(1) translate(0, 0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.5) translate(15px, -15px);
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: scale(1) translate(0, 0);
+                opacity: 0;
+            }
         }
+
         @keyframes jiggle {
-            0%, 100% { transform: rotate(-1deg); }
-            50% { transform: rotate(1deg); }
+
+            0%,
+            100% {
+                transform: rotate(-1deg);
+            }
+
+            50% {
+                transform: rotate(1deg);
+            }
         }
+
         body {
             font-family: 'Inter', sans-serif;
             color: #f0f0f0;
@@ -25,130 +51,328 @@
             background-color: #0a0a0a;
             position: relative;
         }
+
         .grid-overlay {
-            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
             background-image:
                 linear-gradient(rgba(128, 0, 128, 0.15) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(128, 0, 128, 0.15) 1px, transparent 1px);
             background-size: 50px 50px;
             animation: zoom-grid-animation 15s ease-in-out infinite;
-            z-index: 0; pointer-events: none;
+            z-index: 0;
+            pointer-events: none;
         }
-        body.edit-mode .delete-site-btn { opacity: 1; transform: scale(1); }
+
+        body.edit-mode .delete-site-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
         body.edit-mode .site-link-container:not(.add-site-btn-container) {
             animation: jiggle 0.2s infinite;
         }
+
         body.edit-mode .site-link {
             cursor: grab;
         }
 
-        .page-wrapper { display: flex; height: 100vh; width: 100vw; }
-        #notes-panel {
-            width: 0; opacity: 0; padding: 0; height: 100vh;
-            background-color: #050505; border-right: 1px solid rgba(255, 255, 255, 0);
-            transition: width 0.4s ease, opacity 0.3s ease, padding 0.4s ease, border-color 0.4s ease;
-            overflow: hidden; flex-shrink: 0; display: flex; flex-direction: column; gap: 1rem;
+        .page-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
         }
+
+        #notes-panel {
+            width: 0;
+            opacity: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #050505;
+            border-right: 1px solid rgba(255, 255, 255, 0);
+            transition: width 0.4s ease, opacity 0.3s ease, padding 0.4s ease, border-color 0.4s ease;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
         #notes-panel.active {
-            width: 350px; opacity: 1; padding: 2rem;
+            width: 350px;
+            opacity: 1;
+            padding: 2rem;
             border-right-color: rgba(255, 255, 255, 0.1);
         }
 
         #main-content {
-            flex-grow: 1; position: relative;
-            display: flex; justify-content: center; align-items: center;
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
         .main-container {
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; width: 100%; padding: 2rem;
-            gap: 1rem; position: relative; z-index: 1; transition: justify-content 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 2rem;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+            transition: justify-content 0.4s ease;
         }
 
         #top-right-controls {
-            position: absolute; top: 2rem; right: 2rem;
-            display: flex; align-items: center; gap: 1rem;
-            transition: opacity 0.3s ease-in-out; z-index: 20;
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: opacity 0.3s ease-in-out;
+            z-index: 20;
         }
-        .control-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            padding: 0.5rem 1rem; border-radius: 8px; color: #ccc;
-            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;
-        }
-        .control-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
-        .control-btn.active { background: rgba(167, 139, 250, 0.2); color: #fff; }
 
-        #weather-container { 
-            display: flex; align-items: center; gap: 0.75rem; 
-            font-size: 1rem; color: #ccc;
+        .control-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .control-btn.active {
+            background: rgba(167, 139, 250, 0.2);
+            color: #fff;
+        }
+
+        #weather-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            color: #ccc;
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
-        #weather-container svg { width: 28px; height: 28px; }
 
-        .clock-wrapper { display: flex; align-items: flex-end; gap: 1.5rem; transition: transform 0.4s ease; }
-        .flip-clock { display: flex; gap: 1.5rem; }
+        #weather-container svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .clock-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 1.5rem;
+            transition: transform 0.4s ease;
+        }
+
+        .flip-clock {
+            display: flex;
+            gap: 1.5rem;
+        }
+
         .flip-unit {
-            position: relative; perspective: 600px; width: 100px;
-            height: 120px; font-size: 5rem; font-weight: 700;
+            position: relative;
+            perspective: 600px;
+            width: 100px;
+            height: 120px;
+            font-size: 5rem;
+            font-weight: 700;
         }
-        .flip-unit.ampm { width: 80px; font-size: 3.5rem; }
-        .upper-card, .lower-card, .flipper-front, .flipper-back {
+
+        .flip-unit.ampm {
+            width: 80px;
+            font-size: 3.5rem;
+        }
+
+        .upper-card,
+        .lower-card,
+        .flipper-front,
+        .flipper-back {
             background-color: rgba(30, 30, 30, 0.7);
-            backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .upper-card, .lower-card {
-            position: absolute; left: 0; width: 100%; height: 50%;
-            overflow: hidden; display: flex; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); border-radius: 8px;
-        }
-        .upper-card { top: 0; align-items: flex-end; border-bottom: 1px solid rgba(0,0,0,0.5); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-        .upper-card span { transform: translateY(50%); }
-        .lower-card { bottom: 0; align-items: flex-start; border-top-left-radius: 0; border-top-right-radius: 0; }
-        .lower-card span { transform: translateY(-50%); }
-        .flipper { position: absolute; left: 0; top: 0; width: 100%; height: 50%; transform-origin: bottom; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53); z-index: 10; }
-        .flipper.flipping { transform: rotateX(-180deg); }
-        .flipper-front, .flipper-back {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: flex-end; overflow: hidden;
-            -webkit-backface-visibility: hidden; backface-visibility: hidden;
-            border-bottom: 1px solid rgba(0,0,0,0.5); border-radius: 8px 8px 0 0;
-            box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
-        }
-        .flipper-front span, .flipper-back span { transform: translateY(50%); }
-        .flipper-back { transform: rotateX(180deg); align-items: flex-start; }
-        .flipper-back span { transform: translateY(-50%); }
 
-        #calendar-link { font-size: 1.125rem; color: #ccc; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; text-align: center; }
-        #calendar-link:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
+        .upper-card,
+        .lower-card {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
 
-        .widget { width: 100%; max-width: 500px; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease; }
-        .search-input { width: 100%; padding: 1rem 1rem 1rem 3rem; background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: #f0f0f0; font-size: 1rem; transition: all 0.2s ease-in-out; outline: none; }
-        .search-input:focus { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(167, 139, 250, 0.5); box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2); }
-        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255, 255, 255, 0.4); pointer-events: none; }
-        
+        .upper-card {
+            top: 0;
+            align-items: flex-end;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .upper-card span {
+            transform: translateY(50%);
+        }
+
+        .lower-card {
+            bottom: 0;
+            align-items: flex-start;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        .lower-card span {
+            transform: translateY(-50%);
+        }
+
+        .flipper {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 50%;
+            transform-origin: bottom;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+            z-index: 10;
+        }
+
+        .flipper.flipping {
+            transform: rotateX(-180deg);
+        }
+
+        .flipper-front,
+        .flipper-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: hidden;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .flipper-front span,
+        .flipper-back span {
+            transform: translateY(50%);
+        }
+
+        .flipper-back {
+            transform: rotateX(180deg);
+            align-items: flex-start;
+        }
+
+        .flipper-back span {
+            transform: translateY(-50%);
+        }
+
+        #calendar-link {
+            font-size: 1.125rem;
+            color: #ccc;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        #calendar-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .widget {
+            width: 100%;
+            max-width: 500px;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #f0f0f0;
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        .search-input:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(167, 139, 250, 0.5);
+            box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            pointer-events: none;
+        }
+
         /* Updated Horizontal Scroll Bar Styling */
         .sites-wrapper {
-            max-width: 800px; /* Allow bar to expand wider than the search input */
+            max-width: 800px;
+            /* Allow bar to expand wider than the search input */
         }
+
         .sites-scroll-container {
             overflow-x: auto;
             overflow-y: hidden;
             width: 100%;
             padding: 0.5rem 0 1.25rem 0;
         }
-        
+
         /* Custom Scrollbar */
         .sites-scroll-container::-webkit-scrollbar {
             height: 4px;
         }
+
         .sites-scroll-container::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 10px;
         }
+
         .sites-scroll-container::-webkit-scrollbar-thumb {
             background: rgba(167, 139, 250, 0.3);
             border-radius: 10px;
             transition: background 0.2s;
         }
+
         .sites-scroll-container::-webkit-scrollbar-thumb:hover {
             background: rgba(167, 139, 250, 0.6);
         }
@@ -159,86 +383,271 @@
             gap: 1.25rem;
             padding: 0 1rem;
             width: max-content;
-            margin: 0 auto; /* Keep it centered when few items, allow scroll when many */
+            margin: 0 auto;
+            /* Keep it centered when few items, allow scroll when many */
         }
-        .site-link-container { 
-            position: relative; 
-            transition: transform 0.2s ease; 
-            user-select: none; 
-            flex-shrink: 0; /* Prevent icons from squishing */
+
+        .site-link-container {
+            position: relative;
+            transition: transform 0.2s ease;
+            user-select: none;
+            flex-shrink: 0;
+            /* Prevent icons from squishing */
         }
-        .site-link-container.dragging { opacity: 0.5; }
-        .site-link { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-decoration: none; color: #ccc; transition: transform 0.2s ease, color 0.2s ease; }
-        body:not(.edit-mode) .site-link:hover { transform: translateY(-3px); color: #fff; }
-        .site-icon-wrapper { width: 48px; height: 48px; border-radius: 12px; background-color: rgba(255, 255, 255, 0.05); display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
-        body:not(.edit-mode) .site-link:hover .site-icon-wrapper { background-color: rgba(167, 139, 250, 0.2); border-color: rgba(167, 139, 250, 0.5); }
-        .site-icon { width: 24px; height: 24px; object-fit: contain; }
-        .site-name { font-size: 0.75rem; max-width: 64px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .delete-site-btn { position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 9999px; background-color: #f43f5e; color: white; display: flex; justify-content: center; align-items: center; opacity: 0; transform: scale(0.8); z-index: 10; pointer-events: none; font-size: 12px; }
-        
+
+        .site-link-container.dragging {
+            opacity: 0.5;
+        }
+
+        .site-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #ccc;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        body:not(.edit-mode) .site-link:hover {
+            transform: translateY(-3px);
+            color: #fff;
+        }
+
+        .site-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body:not(.edit-mode) .site-link:hover .site-icon-wrapper {
+            background-color: rgba(167, 139, 250, 0.2);
+            border-color: rgba(167, 139, 250, 0.5);
+        }
+
+        .site-icon {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .site-name {
+            font-size: 0.75rem;
+            max-width: 64px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .delete-site-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            background-color: #f43f5e;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.8);
+            z-index: 10;
+            pointer-events: none;
+            font-size: 12px;
+        }
+
         /* Scratchpad */
-        #scratchpad-toolbar { display: flex; gap: 0.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #scratchpad-toolbar {
+            display: flex;
+            gap: 0.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .toolbar-btn {
-            background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: #ccc; border-radius: 6px; padding: 0.4rem;
-            width: 32px; height: 32px; cursor: pointer; transition: all 0.2s;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            border-radius: 6px;
+            padding: 0.4rem;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .toolbar-btn:hover { background-color: rgba(255,255,255,0.15); color: #fff; }
-        .toolbar-btn.active { background-color: rgba(167, 139, 250, 0.2); color: #fff; }
+
+        .toolbar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .toolbar-btn.active {
+            background-color: rgba(167, 139, 250, 0.2);
+            color: #fff;
+        }
+
         #scratchpad-editor {
-            width: 100%; height: 100%; flex-grow: 1; margin: 0; padding: 1rem;
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
-            box-sizing: border-box; font-family: inherit; font-size: 0.9rem;
-            line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; outline: none;
-            background-color: rgba(255,255,255,0.03); overflow-y: auto;
+            width: 100%;
+            height: 100%;
+            flex-grow: 1;
+            margin: 0;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.03);
+            overflow-y: auto;
         }
+
         #scratchpad-editor:focus {
             border-color: rgba(167, 139, 250, 0.5);
             box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2);
         }
-        #scratchpad-editor ul { list-style: disc; margin-left: 1.5rem; }
-        #scratchpad-editor blockquote { border-left: 3px solid #666; padding-left: 1rem; color: #aaa; }
 
-        body.focus-mode .main-container { justify-content: center; }
-        body.focus-mode .clock-wrapper { transform: scale(1.2); }
+        #scratchpad-editor ul {
+            list-style: disc;
+            margin-left: 1.5rem;
+        }
+
+        #scratchpad-editor blockquote {
+            border-left: 3px solid #666;
+            padding-left: 1rem;
+            color: #aaa;
+        }
+
+        body.focus-mode .main-container {
+            justify-content: center;
+        }
+
+        body.focus-mode .clock-wrapper {
+            transform: scale(1.2);
+        }
+
         body.focus-mode .search-wrapper,
         body.focus-mode .sites-wrapper,
         body.focus-mode #top-right-controls,
         body.focus-mode #calendar-link,
         body.focus-mode #bottom-info-container {
-            visibility: hidden; opacity: 0; max-height: 0; margin: 0; padding: 0;
+            visibility: hidden;
+            opacity: 0;
+            max-height: 0;
+            margin: 0;
+            padding: 0;
         }
-        
-        #greeting { transition: opacity 0.3s ease-in-out; }
-        
-        #bottom-info-container {
-            position: absolute; bottom: 2rem; left: 0; right: 0;
-            display: flex; justify-content: center; align-items: flex-end;
-            padding: 0 2rem; pointer-events: none;
-        }
-        #fact-container {
-            text-align: center; color: #888; font-size: 0.875rem;
+
+        #greeting {
             transition: opacity 0.3s ease-in-out;
-            user-select: text; -webkit-user-select: text; -moz-user-select: text;
+        }
+
+        #bottom-info-container {
+            position: absolute;
+            bottom: 2rem;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 0 2rem;
+            pointer-events: none;
+        }
+
+        #fact-container {
+            text-align: center;
+            color: #888;
+            font-size: 0.875rem;
+            transition: opacity 0.3s ease-in-out;
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
             max-width: 60%;
             pointer-events: all;
         }
-       
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background-color: #1e1e1e; padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
+
 <body class="">
     <div class="page-wrapper">
         <div id="notes-panel">
-             <h2 class="text-xl font-bold text-gray-300">Notes</h2>
+            <h2 class="text-xl font-bold text-gray-300">Notes</h2>
             <div id="scratchpad-toolbar">
-                <button class="toolbar-btn" data-command="bold" title="Bold (Ctrl+B)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055a2.176 2.176 0 0 0 1.852-2.14c0-1.346-1.123-2.43-2.734-2.43H3.602V13h4.608ZM4.695 4.002h2.355c.734 0 1.294.431 1.294 1.055 0 .6-.573.984-1.33.984H4.695V4.002Zm3.405 5.09c.854 0 1.496.486 1.496 1.229 0 .733-.61 1.22-1.55 1.22H4.695V9.092h2.405Z"/></svg></button>
-                <button class="toolbar-btn" data-command="italic" title="Italic (Ctrl+I)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.71h.231V2.73L9.736 2.73c-1.355 0-1.72.709-1.527 1.693L6.764 11.8c-.12.59-.244.665-1.348.665h-.23L4 13.269h1.247c1.355 0 1.72-.709 1.527-1.693Z"/></svg></button>
-                <button class="toolbar-btn" data-command="strikeThrough" title="Strikethrough"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="transform: rotate(90deg);"><path d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.71h.231V2.73L9.736 2.73c-1.355 0-1.72.709-1.527 1.693L6.764 11.8c-.12.59-.244.665-1.348.665h-.23L4 13.269h1.247c1.355 0 1.72-.709 1.527-1.693Z" transform="scale(1, -1) translate(0, -16)"/></svg></button>
-                <button class="toolbar-btn" data-command="insertUnorderedList" title="Bulleted List"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></button>
-                <button class="toolbar-btn" data-command="formatBlock" data-value="blockquote" title="Quote"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12 12a1 1 0 0 0 1-1V5.5c0-.816-.136-1.5-.702-1.884-.57-.387-1.44-.387-2.314 0l-.089.056-.019.012a1.31 1.31 0 0 0-.332.22c-.243.262-.33.645-.33.95V11a1 1 0 0 0 1 1h2Zm-6 0a1 1 0 0 0 1-1V5.5c0-.816-.136-1.5-.702-1.884-.57-.387-1.44-.387-2.314 0l-.089.056-.019.012a1.31 1.31 0 0 0-.332.22c-.243.262-.33.645-.33.95V11a1 1 0 0 0 1 1h2Z"/></svg></button>
+                <button class="toolbar-btn" data-command="bold" title="Bold (Ctrl+B)"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055a2.176 2.176 0 0 0 1.852-2.14c0-1.346-1.123-2.43-2.734-2.43H3.602V13h4.608ZM4.695 4.002h2.355c.734 0 1.294.431 1.294 1.055 0 .6-.573.984-1.33.984H4.695V4.002Zm3.405 5.09c.854 0 1.496.486 1.496 1.229 0 .733-.61 1.22-1.55 1.22H4.695V9.092h2.405Z" />
+                    </svg></button>
+                <button class="toolbar-btn" data-command="italic" title="Italic (Ctrl+I)"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.71h.231V2.73L9.736 2.73c-1.355 0-1.72.709-1.527 1.693L6.764 11.8c-.12.59-.244.665-1.348.665h-.23L4 13.269h1.247c1.355 0 1.72-.709 1.527-1.693Z" />
+                    </svg></button>
+                <button class="toolbar-btn" data-command="strikeThrough" title="Strikethrough"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16" style="transform: rotate(90deg);">
+                        <path
+                            d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.71h.231V2.73L9.736 2.73c-1.355 0-1.72.709-1.527 1.693L6.764 11.8c-.12.59-.244.665-1.348.665h-.23L4 13.269h1.247c1.355 0 1.72-.709 1.527-1.693Z"
+                            transform="scale(1, -1) translate(0, -16)" />
+                    </svg></button>
+                <button class="toolbar-btn" data-command="insertUnorderedList" title="Bulleted List"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+                    </svg></button>
+                <button class="toolbar-btn" data-command="formatBlock" data-value="blockquote" title="Quote"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                            d="M12 12a1 1 0 0 0 1-1V5.5c0-.816-.136-1.5-.702-1.884-.57-.387-1.44-.387-2.314 0l-.089.056-.019.012a1.31 1.31 0 0 0-.332.22c-.243.262-.33.645-.33.95V11a1 1 0 0 0 1 1h2Zm-6 0a1 1 0 0 0 1-1V5.5c0-.816-.136-1.5-.702-1.884-.57-.387-1.44-.387-2.314 0l-.089.056-.019.012a1.31 1.31 0 0 0-.332.22c-.243.262-.33.645-.33.95V11a1 1 0 0 0 1 1h2Z" />
+                    </svg></button>
             </div>
             <div id="scratchpad-editor" contenteditable="true" spellcheck="false"></div>
         </div>
@@ -263,43 +672,56 @@
                 <a id="calendar-link"><span id="date-display"></span></a>
                 <div class="search-wrapper widget">
                     <form id="search-form" class="relative">
-                        <div class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
-                        <input type="text" id="search-input" class="search-input" placeholder="Search with Bing or enter URL" autofocus autocomplete="off">
+                        <div class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg></div>
+                        <input type="text" id="search-input" class="search-input"
+                            placeholder="Search with Bing or enter URL" autofocus autocomplete="off">
                     </form>
                 </div>
                 <div class="sites-wrapper widget">
-                     <div class="sites-scroll-container">
+                    <div class="sites-scroll-container">
                         <div id="pinned-sites-container"></div>
                     </div>
                 </div>
             </div>
 
             <div id="bottom-info-container">
-                 <div id="fact-container"></div>
+                <div id="fact-container"></div>
             </div>
         </div>
     </div>
-    
+
     <div id="add-site-modal" class="modal">
-         <div class="modal-content">
+        <div class="modal-content">
             <h2 class="text-xl font-bold mb-4">Add New Site</h2>
             <form id="add-site-form">
                 <div class="mb-4">
-                    <label for="site-name" class="block text-sm font-medium text-gray-300 mb-1">Site Name (Optional)</label>
-                    <input type="text" id="site-name" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <label for="site-name" class="block text-sm font-medium text-gray-300 mb-1">Site Name
+                        (Optional)</label>
+                    <input type="text" id="site-name"
+                        class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
                 <div class="mb-6">
                     <label for="site-url" class="block text-sm font-medium text-gray-300 mb-1">Site URL</label>
-                    <input type="url" id="site-url" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500" required placeholder="https://example.com">
+                    <input type="url" id="site-url"
+                        class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required placeholder="https://example.com">
                 </div>
                 <div class="flex justify-end gap-4">
-                    <button type="button" id="cancel-add-site" class="py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition-colors">Cancel</button>
-                    <button type="submit" class="py-2 px-4 rounded-lg bg-purple-600 hover:bg-purple-500 transition-colors font-semibold">Add Site</button>
+                    <button type="button" id="cancel-add-site"
+                        class="py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition-colors">Cancel</button>
+                    <button type="submit"
+                        class="py-2 px-4 rounded-lg bg-purple-600 hover:bg-purple-500 transition-colors font-semibold">Add
+                        Site</button>
                 </div>
             </form>
         </div>
     </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- Element Selectors ---
@@ -318,7 +740,7 @@
             const dateDisplay = document.getElementById('date-display');
             const greetingEl = document.getElementById('greeting');
             const factContainer = document.getElementById('fact-container');
-            
+
             let sites = [];
             let longPressTimer;
 
@@ -388,7 +810,7 @@
                 ];
             }
             function saveSites() { localStorage.setItem('pinnedSites', JSON.stringify(sites)); }
-            
+
             function renderSites() {
                 sitesContainer.innerHTML = '';
                 sites.forEach((site, index) => {
@@ -407,7 +829,7 @@
                 addButtonContainer.innerHTML = `<div class="site-link add-site-btn" style="cursor: pointer;"><div class="site-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div><span class="site-name">Add New</span></div>`;
                 sitesContainer.appendChild(addButtonContainer);
             }
-            
+
             sitesContainer.addEventListener('mousedown', (e) => {
                 if (document.body.classList.contains('edit-mode')) return;
                 const target = e.target.closest('.site-link-container:not(.add-site-btn-container)');
@@ -416,7 +838,7 @@
                 }
             });
             document.addEventListener('mouseup', () => clearTimeout(longPressTimer));
-            
+
             sitesContainer.addEventListener('click', e => {
                 if (document.body.classList.contains('edit-mode')) e.preventDefault();
                 if (e.target.closest('.add-site-btn')) addSiteModal.classList.add('active');
@@ -451,10 +873,10 @@
                 sites = newOrder;
                 saveSites();
                 renderSites();
-                exitEditMode(); 
+                exitEditMode();
                 setTimeout(enterEditMode, 10);
             });
-            
+
             function getDragAfterElement(container, x) {
                 const draggableElements = [...container.querySelectorAll('.site-link-container:not(.dragging):not(.add-site-btn-container)')];
                 return draggableElements.reduce((closest, child) => {
@@ -479,8 +901,8 @@
             // --- SEARCH FUNCTIONALITY ---
             function performSearch(query) {
                 if (!query) return;
-                try { 
-                    new URL(query); 
+                try {
+                    new URL(query);
                     window.location.href = query.startsWith('http') ? query : `https://${query}`;
                 } catch (_) {
                     window.location.href = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
@@ -513,7 +935,7 @@
                     }, 500);
                 }
             }
-            
+
             function updateClock() {
                 const now = new Date(); let hours = now.getHours();
                 const ampm = hours >= 12 ? 'PM' : 'AM'; ampmUnit.flip(ampm);
@@ -537,7 +959,7 @@
                 else if (hours < 18) greetingEl.textContent = 'Good afternoon.';
                 else greetingEl.textContent = 'Good evening.';
             }
-             async function getFactOfTheDay() {
+            async function getFactOfTheDay() {
                 try {
                     const res = await fetch('https://uselessfacts.jsph.pl/random.json?language=en');
                     if (!res.ok) throw new Error();
@@ -545,12 +967,12 @@
                     factContainer.textContent = data.text;
                 } catch (error) { factContainer.style.display = 'none'; }
             }
-            
+
             // --- GEOLOCATION & WEATHER LOGIC ---
             function getWeather() {
                 const weatherContainer = document.getElementById('weather-container');
                 if (!navigator.geolocation) { weatherContainer.style.display = 'none'; return; }
-                const weatherIcons = { 0: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>', 1: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>', 3: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"></path><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path></svg>', 61: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13.3A5.4 5.4 0 1 0 5.2 8"></path><path d="M16 13.3a3.8 3.8 0 1 0-7.6 0"></path><path d="M12 12v6"></path><path d="M16 16v6"></path><path d="M8 16v6"></path></svg>', 95: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 17H2.5"></path><path d="M16 4.4A5.4 5.4 0 1 0 5.2 8"></path><path d="M16 4.4a3.8 3.8 0 1 0-7.6 0"></path><path d="M13 12l-2 5h4l-2 5"></path></svg>',};
+                const weatherIcons = { 0: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>', 1: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>', 3: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"></path><path d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path></svg>', 61: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 13.3A5.4 5.4 0 1 0 5.2 8"></path><path d="M16 13.3a3.8 3.8 0 1 0-7.6 0"></path><path d="M12 12v6"></path><path d="M16 16v6"></path><path d="M8 16v6"></path></svg>', 95: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 17H2.5"></path><path d="M16 4.4A5.4 5.4 0 1 0 5.2 8"></path><path d="M16 4.4a3.8 3.8 0 1 0-7.6 0"></path><path d="M13 12l-2 5h4l-2 5"></path></svg>', };
                 navigator.geolocation.getCurrentPosition(
                     async (position) => {
                         const { latitude, longitude } = position.coords;
@@ -577,4 +999,5 @@
         });
     </script>
 </body>
+
 </html>

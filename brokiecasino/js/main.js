@@ -873,31 +873,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Call Initialization functions from game-specific files ---
     // Pass the BrokieAPI object to each init function
-    // Wrapped in helper to prevent one failure from stopping others
+    if (typeof initSlots === 'function') initSlots(BrokieAPI);
+    else console.warn("initSlots not found.");
 
-    const safeInit = (name, initFn) => {
-        if (typeof initFn === 'function') {
-            try {
-                initFn(BrokieAPI);
-                // console.log(`${name} initialized.`); 
-            } catch (error) {
-                console.error(`Failed to initialize ${name}:`, error);
-            }
-        } else {
-            console.warn(`${name} init function not found.`);
-        }
-    };
+    if (typeof initCrash === 'function') initCrash(BrokieAPI);
+    else console.warn("initCrash not found.");
 
-    safeInit('Slots', typeof initSlots !== 'undefined' ? initSlots : undefined);
-    safeInit('Crash', typeof initCrash !== 'undefined' ? initCrash : undefined);
-    safeInit('CoinFlip', typeof initCoinflip !== 'undefined' ? initCoinflip : undefined);
-    safeInit('Minefield', typeof initMinefield !== 'undefined' ? initMinefield : undefined);
-    safeInit('Memory', typeof initMemory !== 'undefined' ? initMemory : undefined); // Explicit check
-    safeInit('Horserace', typeof initHorserace !== 'undefined' ? initHorserace : undefined);
-    safeInit('Roulette', typeof initRoulette !== 'undefined' ? initRoulette : undefined);
-    safeInit('Blackjack', typeof initBlackjack !== 'undefined' ? initBlackjack : undefined);
-    safeInit('Plinko', typeof initPlinko !== 'undefined' ? initPlinko : undefined);
-    safeInit('Sabacc', typeof initSabacc !== 'undefined' ? initSabacc : undefined);
+    if (typeof initCoinflip === 'function') initCoinflip(BrokieAPI);
+    else console.warn("initCoinflip not found.");
+
+    if (typeof initMinefield === 'function') initMinefield(BrokieAPI);
+    else console.warn("initMinefield not found.");
+
+    if (typeof initMemory === 'function') initMemory(BrokieAPI);
+    else console.warn("initMemory not found.");
+
+    if (typeof initHorserace === 'function') initHorserace(BrokieAPI);
+    else console.warn("initHorserace not found.");
+
+    if (typeof initRoulette === 'function') initRoulette(BrokieAPI);
+    else console.warn("initRoulette not found.");
+
+    if (typeof initBlackjack === 'function') initBlackjack(BrokieAPI);
+    else console.warn("initBlackjack not found.");
+
+    // Check for Plinko init function (now guarded in plinko.js)
+    if (typeof initPlinko === 'function') initPlinko(BrokieAPI);
+    else console.warn("initPlinko not found.");
+
+    // ** Check for Sabacc init function (now guarded in sabacc.js) **
+    if (typeof initSabacc === 'function') initSabacc(BrokieAPI);
+    else console.warn("initSabacc not found.");
+
 
     console.log("Brokie Casino Initialized.");
 });
