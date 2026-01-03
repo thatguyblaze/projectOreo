@@ -22,7 +22,7 @@ let isAutoSpinning = false;
 let slotSpinTimeout = null;
 
 // --- DOM Elements ---
-let slotsContainer, spinButton, autoSpinToggle, slotBetInput, payoutList, buyMachineBtn;
+let slotsContainer, spinButton, autoSpinToggle, slotBetInput, payoutList;
 
 /**
  * Class representing a single Slot Machine instance.
@@ -162,8 +162,7 @@ function initSlots() {
     slotBetInput = document.getElementById('slot-bet');
     payoutList = document.getElementById('payout-list');
 
-    // Removed inline buy button
-    // buyMachineBtn = document.getElementById('buy-machine-button'); 
+
 
     if (!slotsContainer || !spinButton) return;
 

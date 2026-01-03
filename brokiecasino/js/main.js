@@ -544,64 +544,72 @@ function setActiveTab(selectedTab) {
     }
 
     // --- Switch Tab Visuals and Game Area Visibility ---
-    allTabs.forEach((tab, index) => {
-        if (!tab) return; // Skip if tab element doesn't exist
-        const gameArea = allGameAreas[index]; // Get corresponding game area
-        if (!gameArea) {
-            console.warn(`Game area not found for tab index ${index}`, tab); // Add warning if area missing
-            return; // Skip if corresponding game area doesn't exist
+    // --- Switch Tab Visuals and Game Area Visibility (NUCLEAR OPTION) ---
+    console.log(`--- Switching Tab --- (Total Areas: ${allGameAreas.length})`);
+
+    // 1. Force Hide ALL Game Areas first
+    allGameAreas.forEach(area => {
+        if (!area) {
+            console.warn("Found null area in allGameAreas");
+            return;
         }
-
-
-        if (tab === selectedTab) {
-            // Activate the selected tab
-            tab.setAttribute('aria-current', 'page');
-
-            // Force display: flex and remove hidden
-            gameArea.classList.remove('hidden');
-            gameArea.classList.add('flex');
-
-            requestAnimationFrame(() => { // Ensure display change before transition
-                gameArea.classList.remove('opacity-0');
-                gameArea.classList.add('opacity-100'); // Fade in
-            });
-
-            // --- Initialize/Reset Newly Active Game (if needed) ---
-            // (These checks are often for visual resets or initial setup if not done before)
-            if (tab === tabCrash && typeof resetCrashVisuals === 'function' && (typeof crashGameActive === 'undefined' || !crashGameActive)) {
-                resetCrashVisuals();
-            }
-            if (tab === tabHorserace && typeof createHorses === 'function' && !document.querySelector('#horserace-track .horse')) {
-                createHorses(); if (typeof resetHorserace === 'function') resetHorserace();
-            }
-            if (tab === tabRoulette && typeof createRouletteBettingGrid === 'function' && !document.querySelector('#roulette-inside-bets button')) {
-                createRouletteBettingGrid(); if (typeof resetRoulette === 'function') resetRoulette(false);
-            }
-            if (tab === tabBlackjack && typeof resetBlackjack === 'function' && (typeof blackjackActive === 'undefined' || !blackjackActive)) {
-                resetBlackjack(false);
-            }
-            if (tab === tabPlinko && typeof drawPlinkoBoard === 'function') { // Redraw board on switch to ensure it's visible
-                drawPlinkoBoard();
-            }
-            if (tab === tabSlots && typeof updateSlotsPayoutDisplay === 'function') {
-                // updateSlotsPayoutDisplay(); // Handled locally
-            }
-            // No specific action needed for Sabacc
-
-        } else {
-            // Deactivate other tabs
-            tab.removeAttribute('aria-current');
-            gameArea.classList.remove('opacity-100'); // Start fade out
-            gameArea.classList.add('opacity-0');
-
-            setTimeout(() => { // Hide completely after fade
-                if (tab.getAttribute('aria-current') !== 'page') {
-                    gameArea.classList.remove('flex'); // Remove flex layout
-                    gameArea.classList.add('hidden'); // Force hide
-                }
-            }, 300);
-        }
+        console.log(`Hiding: ${area.id}, Classes: ${area.className}`);
+        area.classList.remove('flex');
+        area.classList.add('hidden');
+        area.classList.remove('opacity-100');
+        area.classList.add('opacity-0');
     });
+
+    // 2. Reset All Tabs
+    allTabs.forEach(t => t && t.removeAttribute('aria-current'));
+
+    // 3. Show ONLY the selected tab/game
+    const selectedIndex = allTabs.indexOf(selectedTab);
+    if (selectedIndex === -1) {
+        console.error("Selected tab not found in allTabs array");
+        return;
+    }
+
+    selectedTab.setAttribute('aria-current', 'page');
+    const targetGameArea = allGameAreas[selectedIndex];
+
+    if (targetGameArea) {
+        console.log("Showing Game Area:", targetGameArea.id);
+        targetGameArea.classList.remove('hidden');
+        targetGameArea.classList.add('flex');
+
+        requestAnimationFrame(() => {
+            targetGameArea.classList.remove('opacity-0');
+            targetGameArea.classList.add('opacity-100');
+        });
+
+        // --- Initialize/Reset Newly Active Game (if needed) ---
+        if (selectedTab === tabCrash && typeof resetCrashVisuals === 'function' && (typeof crashGameActive === 'undefined' || !crashGameActive)) {
+            resetCrashVisuals();
+        }
+        if (selectedTab === tabHorserace && typeof createHorses === 'function' && !document.querySelector('#horserace-track .horse')) {
+            createHorses(); if (typeof resetHorserace === 'function') resetHorserace();
+        }
+        if (selectedTab === tabRoulette && typeof createRouletteBettingGrid === 'function' && !document.querySelector('#roulette-inside-bets button')) {
+            createRouletteBettingGrid(); if (typeof resetRoulette === 'function') resetRoulette(false);
+        }
+        if (selectedTab === tabBlackjack && typeof resetBlackjack === 'function' && (typeof blackjackActive === 'undefined' || !blackjackActive)) {
+            resetBlackjack(false);
+        }
+        if (selectedTab === tabPlinko && typeof drawPlinkoBoard === 'function') {
+            drawPlinkoBoard();
+        }
+
+        // Ensure Slots render if empty (fix for blank box)
+        if (selectedTab === tabSlots) {
+            if (typeof renderMachines === 'function' && (!activeMachines || activeMachines.length === 0)) {
+                console.log("Forcing Slots Render on Tab Switch");
+                renderMachines();
+            }
+        }
+    } else {
+        console.error("Target game area not found for index:", selectedIndex);
+    }
     // playSound('click'); // Optional: Play click sound for tab switch
 }
 

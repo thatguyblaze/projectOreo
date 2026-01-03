@@ -1,0 +1,430 @@
+:root {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #161616;
+    --bg-tertiary: #202020;
+    --bg-weekend: #0f0f0f;
+    /* A more subtle, neutral dark background */
+    --text-primary: #EDEDED;
+    --text-secondary: #9E9E9E;
+    /* A softer grey for secondary text */
+    --accent-primary: #3B82F6;
+    /* A standard, professional blue */
+    --accent-secondary: var(--text-secondary);
+    /* Weekends now use the subtle secondary text color */
+    --accent-danger: #EF4444;
+    --season-winter-bg: #1b232b;
+    --season-spring-bg: #293830;
+    --season-summer-bg: #313024;
+    --season-autumn-bg: #302923;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: calc(100vh - 40px);
+    /* Adjust height for footer */
+}
+
+main {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-container {
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+}
+
+#monthView {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#calendarGrid {
+    flex-grow: 1;
+    grid-template-rows: auto repeat(6, minmax(0, 1fr));
+}
+
+.view-hidden {
+    opacity: 0;
+    transform: scale(0.98);
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.view-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.7);
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(20px) scale(0.98);
+    opacity: 0;
+}
+
+.modal-visible .modal-content {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+.day-cell {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fade-in 0.4s forwards;
+    height: 100%;
+}
+
+.day-cell-wrapper {
+    position: relative;
+}
+
+.day-cell:hover {
+    background-color: var(--bg-tertiary);
+    transform: scale(1.03);
+    z-index: 10;
+}
+
+.day-cell-weekend {
+    background-color: var(--bg-weekend);
+}
+
+.day-cell-weekend .day-number {
+    color: var(--accent-secondary) !important;
+}
+
+.day-cell-other-month .day-number {
+    opacity: 0.3;
+}
+
+.month-card {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fade-in 0.5s forwards;
+}
+
+@keyframes fade-in {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.month-card-winter {
+    background-color: var(--season-winter-bg);
+}
+
+.month-card-spring {
+    background-color: var(--season-spring-bg);
+}
+
+.month-card-summer {
+    background-color: var(--season-summer-bg);
+}
+
+.month-card-autumn {
+    background-color: var(--season-autumn-bg);
+}
+
+.month-card:hover {
+    transform: scale(1.03) translateY(-2px);
+    border-color: var(--accent-primary);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.today-highlight {
+    box-shadow: 0 0 0 2px var(--accent-primary), 0 0 10px var(--accent-primary);
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.today-highlight-year {
+    background-color: var(--accent-primary) !important;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.add-day-event-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background-color: var(--accent-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+}
+
+.day-cell:hover .add-day-event-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.add-day-event-btn:hover {
+    background-color: #2563EB;
+    /* Slightly darker blue */
+    transform: scale(1.1);
+}
+
+.event-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 4px;
+    overflow-y: auto;
+    max-height: 80px;
+}
+
+#event-bars-container {
+    position: absolute;
+    top: 4rem;
+    /* Height of weekday headers */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.event-bar {
+    position: absolute;
+    height: 24px;
+    padding: 2px 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: all;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.event-bar:hover {
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.event-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.2;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background-color: var(--bg-tertiary);
+}
+
+.event-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-color-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.emoji-picker,
+.color-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background-color: var(--bg-tertiary);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.emoji-option,
+.color-option {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    border-radius: 50%;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.color-option {
+    width: 28px;
+    height: 28px;
+    border: 2px solid transparent;
+}
+
+.emoji-option:hover,
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.emoji-option.selected {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.color-option.selected {
+    border-color: var(--text-primary);
+}
+
+.form-input {
+    background-color: var(--bg-tertiary);
+    border: 1px solid #4a4a4a;
+    color: var(--text-primary);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.btn {
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.btn-accent {
+    background-color: var(--accent-primary);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+}
+
+.btn-accent:hover {
+    box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.45);
+}
+
+.btn-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid #4a4a4a;
+}
+
+.btn-danger {
+    background-color: var(--accent-danger);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 6px 20px 0 rgba(239, 68, 68, 0.45);
+}
+
+.countdown-item {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid #4a4a4a;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    animation: fade-in 0.5s forwards;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.countdown-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+footer .heart {
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
