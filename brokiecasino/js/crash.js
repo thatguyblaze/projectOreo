@@ -37,6 +37,54 @@ let isAutoCashoutEnabled = false;
 let autoCashoutTarget = 1.50;
 let playerHasBet = false;
 let crashPointsString = '';
+let crashHistory = []; // Stores last 5 multipliers -> New History Array
+
+// --- Helper for HTML Injection of History & Skip ---
+function injectCrashHistoryAndControls() {
+    const statusP = document.getElementById('crash-status');
+    if (statusP && !document.getElementById('crash-history-list')) {
+        // Create History Container above Graph (inside game-crash container) or below?
+        // Let's put it above the graph.
+        const graph = document.getElementById('crash-graph');
+        if (graph) {
+            const histContainer = document.createElement('div');
+            histContainer.className = "flex justify-between items-center mb-2 w-full max-w-2xl";
+            histContainer.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] uppercase font-bold text-slate-500">Last 5:</span>
+                    <div id="crash-history-list" class="flex gap-1"></div>
+                </div>
+                <button id="crash-skip-button" class="hidden text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-slate-300 border border-white/5 transition-colors">⏩ SKIP</button>
+            `;
+            graph.parentNode.insertBefore(histContainer, graph);
+        }
+    }
+}
+// Render Logic
+function renderCrashHistory() {
+    const container = document.getElementById('crash-history-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Show newest first (left to right? or right to left?)
+    // Standard is newest on right or left. Let's do newest on left.
+    crashHistory.forEach(mult => {
+        const item = document.createElement('div');
+        let colorClass = 'text-slate-400 border-slate-700';
+        if (mult >= 10) colorClass = 'text-amber-400 border-amber-500/50 bg-amber-500/10';
+        else if (mult >= 2) colorClass = 'text-emerald-400 border-emerald-500/50 bg-emerald-500/10';
+        else colorClass = 'text-rose-400 border-rose-500/50 bg-rose-500/10';
+
+        item.className = `px-2 py-0.5 rounded text-[10px] font-mono border ${colorClass}`;
+        item.textContent = `${mult.toFixed(2)}x`;
+        container.appendChild(item);
+    });
+}
+function addToCrashHistory(val) {
+    crashHistory.unshift(val);
+    if (crashHistory.length > 5) crashHistory.pop();
+    renderCrashHistory();
+}
 
 // --- DOM Element References ---
 let crashGraph, crashMultiplierDisplay, crashSvg, crashGrid, crashPolyline;
@@ -58,6 +106,11 @@ function initCrash(API) {
 
     resetCrashVisuals();
     updateCrashAutoCashoutToggleVisuals();
+
+    // Inject History UI
+    injectCrashHistoryAndControls();
+    renderCrashHistory();
+
     setupCrashEventListeners();
 
     if (LocalBrokieAPI && typeof LocalBrokieAPI.addBetAdjustmentListeners === 'function') {
@@ -107,23 +160,30 @@ function setupCrashEventListeners() {
     if (crashCashoutButton) crashCashoutButton.addEventListener('click', attemptCashOut);
     if (crashAutoBetToggle) crashAutoBetToggle.addEventListener('click', toggleCrashAutoBet);
     if (crashAutoCashoutToggle) crashAutoCashoutToggle.addEventListener('click', toggleCrashAutoCashout);
+
     if (crashAutoCashoutInput) {
         crashAutoCashoutInput.addEventListener('change', validateAndUpdateAutoCashoutTarget);
         crashAutoCashoutInput.addEventListener('input', () => {
-            // Allow numbers and a single decimal point.
-            // Regex: remove anything that is NOT a digit or a dot
             let val = crashAutoCashoutInput.value.replace(/[^0-9.]/g, '');
-
-            // Ensure only one decimal point
             const parts = val.split('.');
             if (parts.length > 2) {
                 val = parts[0] + '.' + parts.slice(1).join('');
             }
-
             if (crashAutoCashoutInput.value !== val) {
                 crashAutoCashoutInput.value = val;
             }
         });
+    }
+
+    // Bind Skip Button
+    const skipBtn = document.getElementById('crash-skip-button');
+    if (skipBtn) {
+        // Use onclick to avoid stacking
+        skipBtn.onclick = () => {
+            if (crashGameActive) {
+                displayedMultiplier = crashTargetMultiplier; // Instant jump
+            }
+        };
     }
 }
 
