@@ -43,7 +43,7 @@ function initCoinflip(API) {
         !coinflipWinningsSpan || !coinflipStatus || !coinflipChooseBlueBtn || !coinflipChooseYellowBtn) {
         console.error("Coin Flip initialization failed: Could not find all required DOM elements.");
         const gameArea = document.getElementById('game-coinflip');
-        if(gameArea) gameArea.innerHTML = '<p class="text-red-500 text-center">Error loading Coin Flip elements.</p>';
+        if (gameArea) gameArea.innerHTML = '<p class="text-red-500 text-center">Error loading Coin Flip elements.</p>';
         return; // Stop initialization
     }
 
@@ -169,12 +169,12 @@ const handleFlipEnd = (resultIsBlue, resultColor, resultEmoji) => {
         console.log("%cCondition evaluated TRUE (WIN)", 'color: lightgreen;');
         currentCoinFlipWinnings *= 2;
         coinflipStatus.textContent = `WIN! It was ${resultEmoji}. Current Winnings: ${formatWin(currentCoinFlipWinnings)}`;
-        
+
         // Enable controls
         coinflipButton.disabled = false;
         coinflipCashoutButton.disabled = false;
         coinflipCashoutButton.classList.remove('hidden'); // Ensure visible
-        
+
         coinflipWinningsSpan.textContent = formatWin(currentCoinFlipWinnings);
         playSound('win_small');
     } else { // LOSS
@@ -250,10 +250,10 @@ function handleCoinFlip() {
 
     // Listener function needs access to result variables
     const transitionEndListener = (event) => {
-         if (event.target === coinElement && event.propertyName === 'transform') {
-             console.log("TransitionEnd event fired.");
-             handleFlipEnd(resultIsBlue, resultColor, resultEmoji);
-         }
+        if (event.target === coinElement && event.propertyName === 'transform') {
+            console.log("TransitionEnd event fired.");
+            handleFlipEnd(resultIsBlue, resultColor, resultEmoji);
+        }
     };
     coinElement.addEventListener('transitionend', transitionEndListener, { once: true });
 
@@ -296,3 +296,4 @@ function cashOutCoinFlip() {
 }
 
 // Ensure main.js calls initCoinflip();
+window.initCoinflip = initCoinflip;
