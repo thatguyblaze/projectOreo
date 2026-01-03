@@ -366,6 +366,9 @@ function crashGameLoop(timestamp) {
 
     // --- Check Auto Cashout ---
     if (isAutoCashoutEnabled && !crashCashedOut && autoCashoutTarget >= 1.01 && currentMultiplier >= autoCashoutTarget) {
+        // Force display to match target exactly for clarity
+        displayedMultiplier = autoCashoutTarget;
+        if (crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${displayedMultiplier.toFixed(2)}x`;
         attemptCashOut();
         return;
     }
@@ -539,8 +542,11 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
     crashPlayerBet = 0;
     playerHasBet = false;
 
-    if (isCrashAutoBetting && !stoppedByTabSwitch && betBeforeReset > 0) {
+    if (isCrashAutoBetting && !stoppedByTabSwitch && betBeforeReset > 0 && LocalBrokieAPI.getBalance() >= betBeforeReset) {
         setTimeout(placeBetAndStart, 1500);
+    } else if (isCrashAutoBetting && LocalBrokieAPI.getBalance() < betBeforeReset) {
+        stopCrashAutoBet();
+        LocalBrokieAPI.showMessage("Auto Bet stop: Insufficient funds.", 2000);
     }
 }
 

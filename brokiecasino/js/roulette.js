@@ -267,6 +267,29 @@ if (typeof initRoulette === 'undefined') {
         console.log("spinWheel END - handleResult timer set.");
     }
 
+    // --- History ---
+    let lastFiveSpins = [];
+
+    function renderRouletteHistory() {
+        const historyContainer = document.getElementById('roulette-history');
+        if (!historyContainer) return;
+
+        if (lastFiveSpins.length === 0) {
+            historyContainer.innerHTML = '<span class="text-slate-600 text-xs italic">No spins yet</span>';
+            return;
+        }
+
+        historyContainer.innerHTML = '';
+        lastFiveSpins.forEach(num => {
+            const color = ROULETTE_COLORS[num] || 'green'; // 0 is green usually
+            const div = document.createElement('div');
+            div.className = `w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-xs font-bold shadow-lg ${color === 'red' ? 'bg-red-600 text-white' : color === 'black' ? 'bg-zinc-900 text-white' : 'bg-emerald-500 text-white'}`;
+            // Remove 'num-' class from history to avoid confusion or specific styling conflicts
+            div.textContent = num;
+            historyContainer.appendChild(div);
+        });
+    }
+
     function handleResult() { // No winningNumber parameter needed
         if (finalWinningNumber === null || targetWinningNumberIndex === -1) {
             console.error("handleResult called but finalWinningNumber or index not set by animation!");
@@ -275,6 +298,12 @@ if (typeof initRoulette === 'undefined') {
         }
         const winningNumber = finalWinningNumber; // Use the number determined by animation
         console.log(`Handling result for winning number: ${winningNumber} (Index: ${targetWinningNumberIndex})`);
+
+        // Add to history
+        lastFiveSpins.unshift(winningNumber);
+        if (lastFiveSpins.length > 5) lastFiveSpins.pop();
+        renderRouletteHistory();
+
         try {
             if (LocalBrokieAPI) LocalBrokieAPI.playSound('roulette_ball');
             const winningColor = ROULETTE_COLORS[winningNumber];
