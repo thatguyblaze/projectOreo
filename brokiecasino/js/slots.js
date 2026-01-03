@@ -74,10 +74,10 @@ class SlotMachine {
 
                 // Strip generation
                 let stripHTML = '';
-                for (let i = 0; i < 15; i++) stripHTML += `<div style="height: 80px; line-height: 80px;">${this.getRandomSymbol()}</div>`;
+                for (let i = 0; i < 15; i++) stripHTML += `<div style="height: 80px; line-height: 80px; font-size: 40px; text-align: center; box-sizing: border-box; margin: 0; padding: 0;">${this.getRandomSymbol()}</div>`;
                 const finalSymbol = this.getRandomSymbol();
                 finalSymbols[index] = finalSymbol;
-                stripHTML += `<div style="height: 80px; line-height: 80px;">${finalSymbol}</div>`;
+                stripHTML += `<div style="height: 80px; line-height: 80px; font-size: 40px; text-align: center; box-sizing: border-box; margin: 0; padding: 0;">${finalSymbol}</div>`;
                 reelEl.innerHTML = stripHTML;
 
                 // Force Reflow
@@ -86,8 +86,13 @@ class SlotMachine {
                 // Animate
                 requestAnimationFrame(() => {
                     // Staggered spin duration
+                    const ITEM_HEIGHT = 80;
+                    const TOTAL_ITEMS = 16; // 15 random + 1 final
+                    const targetIndex = TOTAL_ITEMS - 1; // 15
+
                     reelEl.style.transition = `top ${SPIN_DURATION / 1000 + index * 0.15}s cubic-bezier(0.25, 1, 0.5, 1)`;
-                    const finalTop = -(reelEl.scrollHeight - reelContainer.clientHeight);
+                    // Calculate exact target: Move up by 15 items * 80px
+                    const finalTop = -(targetIndex * ITEM_HEIGHT);
                     reelEl.style.top = `${finalTop}px`;
 
                     // Resolve after animation
