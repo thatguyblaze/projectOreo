@@ -232,750 +232,734 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div id="payout-legend" class="pt-6 border-t border-white/5 w-full max-w-sm mx-auto">
-                                <h4
-                                    class="text-[10px] font-black uppercase tracking-widest text-center text-slate-500 mb-4">
-                                    🏆 Paytable</h4>
-                                <ul id="payout-list" class="grid grid-cols-2 gap-3 text-xs font-mono text-slate-400">
-                                </ul>
 
-                                <!-- CRASH -->
-                                <div id="game-crash" class="game-area hidden flex flex-col items-center gap-8 w-full">
-                                    <div id="crash-graph"
-                                        class="w-full max-w-3xl border border-white/10 rounded-xl bg-black/40">
-                                        <svg id="crash-svg" viewBox="0 0 200 250" preserveAspectRatio="xMidYMid meet"
-                                            class="w-full h-full">
-                                            <g id="crash-grid"></g>
-                                            <polyline id="crash-polyline" points="0,250"></polyline>
-                                        </svg>
-                                        <span id="crash-multiplier">1.00x</span>
-                                    </div>
-
-                                    <!-- New Live Stats Bar -->
-                                    <div
-                                        class="flex items-center justify-between w-full max-w-3xl bg-black/40 border border-white/5 rounded-xl px-6 py-3 mb-2">
-                                        <div class="flex flex-col">
-                                            <span
-                                                class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Current
-                                                Stake</span>
-                                            <span id="crash-live-stake" class="text-white font-mono text-sm">0</span>
-                                        </div>
-                                        <div class="h-8 w-px bg-white/5"></div>
-                                        <div class="flex flex-col text-right">
-                                            <span
-                                                class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Live
-                                                Profit</span>
-                                            <span id="crash-live-profit"
-                                                class="text-emerald-400 font-mono text-sm font-bold">+0</span>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl p-6 bg-black/40 rounded-2xl border border-white/5 shadow-lg">
-                                        <div class="flex flex-col gap-3">
-                                            <label
-                                                class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-2">💰
-                                                Bet Amount</label>
-                                            <!-- Full control set for Crash -->
-                                            <div class="flex items-center gap-1 mb-1">
-                                                <button class="bet-adjust-btn text-[10px] px-1"
-                                                    id="crash-bet-decrease-10">-10</button>
-                                                <button class="bet-adjust-btn text-[10px] px-2"
-                                                    id="crash-bet-decrease-1">-</button>
-                                                <div class="relative flex-grow">
-                                                    <span
-                                                        class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs">$</span>
-                                                    <input type="number" id="crash-bet" value="10"
-                                                        class="w-full pl-4 py-1 bg-black/50 border border-white/10 rounded text-white font-mono focus:border-indigo-500 outline-none text-sm">
-                                                </div>
-                                                <button class="bet-adjust-btn text-[10px] px-2"
-                                                    id="crash-bet-increase-1">+</button>
-                                                <button class="bet-adjust-btn text-[10px] px-1"
-                                                    id="crash-bet-increase-10">+10</button>
-                                            </div>
-                                            <div class="flex gap-1 justify-center">
-                                                <button class="bet-adjust-btn w-10 text-[10px]"
-                                                    id="crash-bet-min">MIN</button>
-                                                <button class="bet-adjust-btn w-10 text-[10px]"
-                                                    id="crash-bet-half">1/2</button>
-                                                <button class="bet-adjust-btn w-10 text-[10px]"
-                                                    id="crash-bet-double">2x</button>
-                                                <button class="bet-adjust-btn w-10 text-[10px]"
-                                                    id="crash-bet-max">MAX</button>
-                                            </div>
-                                        </div>
-                                        <div class="flex flex-col gap-3">
-                                            <label
-                                                class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-2">🛑
-                                                Auto Cashout</label>
-                                            <div class="flex gap-2 h-full items-start pt-1">
-                                                <div class="relative flex-grow">
-                                                    <span
-                                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">x</span>
-                                                    <input type="number" id="crash-auto-cashout-input"
-                                                        placeholder="2.00"
-                                                        class="w-full pl-3 pr-6 py-2 bg-black/50 border border-white/10 rounded text-white font-mono focus:border-indigo-500 outline-none">
-                                                </div>
-                                                <button id="crash-auto-cashout-toggle"
-                                                    class="toggle-button text-[10px] py-2 w-20 h-[42px]">Enable</button>
-                                            </div>
-                                        </div>
-                                        <!-- Added Auto Bet Toggle for Crash -->
-                                        <div class="flex flex-col gap-3 justify-end pb-1">
-                                            <button id="crash-auto-bet-toggle"
-                                                class="toggle-button text-[10px] py-2 w-full h-[42px]">Auto
-                                                Bet Off</button>
-                                        </div>
-                                        <div class="md:col-span-2 flex gap-3 mt-2">
-                                            <button id="crash-bet-button"
-                                                class="game-button-action flex-1 py-3 text-sm">🚀
-                                                Place
-                                                Bet</button>
-                                            <button id="crash-cashout-button"
-                                                class="game-button danger flex-1 py-3 text-sm" disabled>💸
-                                                Cashout</button>
-                                        </div>
-                                    </div>
-                                    <p id="crash-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                                <!-- COIN FLIP -->
-                                <div id="game-coinflip" class="game-area hidden flex flex-col items-center gap-10">
-                                    <div class="coin-container my-8 scale-150">
-                                        <div id="coin" class="coin">
-                                            <div class="coin-face coin-front">🔵</div>
-                                            <div class="coin-face coin-back">🟡</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Coin Flip Winnings Display (Restored) -->
-                                    <div class="h-6">
-                                        <span id="coinflip-winnings"
-                                            class="text-emerald-400 font-bold font-mono text-lg drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]"></span>
-                                    </div>
-
-                                    <div class="flex gap-6 w-full max-w-lg">
-                                        <button id="coinflip-choose-blue"
-                                            class="coinflip-choice-btn flex-1 py-6 border-blue-500/30 hover:bg-blue-500/10 text-blue-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all">
-                                            <span class="text-3xl">🔵</span> BLUE
-                                        </button>
-                                        <button id="coinflip-choose-yellow"
-                                            class="coinflip-choice-btn flex-1 py-6 border-amber-500/30 hover:bg-amber-500/10 text-amber-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all">
-                                            <span class="text-3xl">🟡</span> YELLOW
-                                        </button>
-                                    </div>
-
-                                    <div
-                                        class="flex flex-col items-center gap-4 bg-black/40 p-6 rounded-2xl w-full max-w-md border border-white/5">
-                                        <div class="flex items-center gap-2 w-full justify-center">
-                                            <button class="bet-adjust-btn" id="coinflip-bet-decrease-10">-10</button>
-                                            <button class="bet-adjust-btn" id="coinflip-bet-decrease-1">-</button>
-                                            <input type="number" id="coinflip-bet" value="10"
-                                                class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                            <button class="bet-adjust-btn" id="coinflip-bet-increase-1">+</button>
-                                            <button class="bet-adjust-btn" id="coinflip-bet-increase-10">+10</button>
-                                        </div>
-                                        <div class="flex gap-2 w-full justify-center">
-                                            <button class="bet-adjust-btn w-12" id="coinflip-bet-min">MIN</button>
-                                            <button class="bet-adjust-btn w-12" id="coinflip-bet-half">1/2</button>
-                                            <button class="bet-adjust-btn w-12" id="coinflip-bet-double">2x</button>
-                                            <button class="bet-adjust-btn w-12" id="coinflip-bet-max">MAX</button>
-                                        </div>
-                                        <div class="flex gap-3 w-full">
-                                            <button id="coinflip-button"
-                                                class="game-button-action flex-1 py-4 text-sm tracking-widest shadow-lg shadow-indigo-500/20"
-                                                disabled>🪙 FLIP COIN</button>
-                                            <!-- Restored Cashout Button for Coin Flip (needed for JS logic/streak modes if any) -->
-                                            <button id="coinflip-cashout-button" class="game-button success w-32"
-                                                disabled>💰
-                                                Cashout</button>
-                                        </div>
-                                    </div>
-                                    <p id="coinflip-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                                <!-- MINEFIELD -->
-                                <div id="game-minefield" class="game-area hidden flex flex-col items-center gap-8">
-                                    <div id="minefield-grid"></div>
-
-                                    <div
-                                        class="flex flex-col items-center gap-4 bg-black/40 p-6 rounded-2xl w-full max-w-sm border border-white/5">
-                                        <div class="flex items-center gap-2 w-full justify-center">
-                                            <button class="bet-adjust-btn" id="minefield-bet-decrease-10">-10</button>
-                                            <button class="bet-adjust-btn" id="minefield-bet-decrease-1">-</button>
-                                            <input type="number" id="minefield-bet" value="10"
-                                                class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                            <button class="bet-adjust-btn" id="minefield-bet-increase-1">+</button>
-                                            <button class="bet-adjust-btn" id="minefield-bet-increase-10">+10</button>
-                                        </div>
-                                        <div class="flex gap-2 w-full justify-center">
-                                            <button class="bet-adjust-btn w-10" id="minefield-bet-min">MIN</button>
-                                            <button class="bet-adjust-btn w-10" id="minefield-bet-half">1/2</button>
-                                            <button class="bet-adjust-btn w-10" id="minefield-bet-double">2x</button>
-                                            <button class="bet-adjust-btn w-10" id="minefield-bet-max">MAX</button>
-                                        </div>
-                                        <div class="flex gap-3 w-full">
-                                            <button id="minefield-start-button" class="game-button-action flex-1">▶
-                                                Start</button>
-                                            <button id="minefield-cashout-button" class="game-button success flex-1"
-                                                disabled>💰
-                                                Cashout</button>
-                                        </div>
-                                        <div class="w-full text-center bg-black/30 py-2 rounded border border-white/5">
-                                            <p class="text-xs font-mono text-slate-400">Current Multiplier: <span
-                                                    id="minefield-current-multiplier"
-                                                    class="text-emerald-400 font-bold text-base">1.00</span>x</p>
-                                        </div>
-                                    </div>
-                                    <p id="minefield-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                                <!-- MEMORY -->
-                                <div id="game-memory" class="game-area hidden flex flex-col items-center gap-8">
-                                    <div id="memory-grid"></div>
-                                    <div
-                                        class="flex flex-col items-center gap-4 bg-black/40 p-6 rounded-2xl w-full max-w-sm border border-white/5">
-                                        <div class="flex items-center gap-2 w-full justify-center">
-                                            <button class="bet-adjust-btn" id="memory-bet-decrease-10">-10</button>
-                                            <button class="bet-adjust-btn" id="memory-bet-decrease-1">-</button>
-                                            <input type="number" id="memory-bet" value="10"
-                                                class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                            <button class="bet-adjust-btn" id="memory-bet-increase-1">+</button>
-                                            <button class="bet-adjust-btn" id="memory-bet-increase-10">+10</button>
-                                        </div>
-                                        <div class="flex gap-2 w-full justify-center">
-                                            <button class="bet-adjust-btn w-10" id="memory-bet-min">MIN</button>
-                                            <button class="bet-adjust-btn w-10" id="memory-bet-half">1/2</button>
-                                            <button class="bet-adjust-btn w-10" id="memory-bet-double">2x</button>
-                                            <button class="bet-adjust-btn w-10" id="memory-bet-max">MAX</button>
-                                        </div>
-                                        <button id="memory-start-button" class="game-button-action w-full py-3">🧠 Start
-                                            Game</button>
-                                        <p class="text-xs font-mono">Tries Left: <span id="memory-tries-left"
-                                                class="text-white font-bold text-lg mx-2">--</span></p>
-                                    </div>
-                                    <p id="memory-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                                <!-- HORSE RACE -->
-                                <div id="game-horserace"
-                                    class="game-area hidden flex flex-col items-center gap-8 w-full">
-                                    <div id="horserace-track"
-                                        class="w-full max-w-3xl bg-black/60 border border-white/10 rounded-xl p-2 shadow-inner">
-                                        <div id="horserace-finish-line"></div>
-                                    </div>
-
-                                    <div
-                                        class="w-full max-w-2xl flex flex-col gap-6 items-center bg-black/40 p-6 rounded-2xl border border-white/5">
-                                        <label class="text-xs font-bold uppercase tracking-widest text-slate-500">Pick
-                                            Your
-                                            Winner</label>
-                                        <div id="horserace-selection" class="flex justify-center gap-3 flex-wrap"></div>
-
-                                        <div class="w-full h-px bg-white/5"></div>
-
-                                        <div class="flex flex-col items-center gap-3 w-full justify-center">
-                                            <div class="flex items-center gap-2">
-                                                <button class="bet-adjust-btn"
-                                                    id="horserace-bet-decrease-10">-10</button>
-                                                <button class="bet-adjust-btn" id="horserace-bet-decrease-1">-</button>
-                                                <input type="number" id="horserace-bet" value="10"
-                                                    class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                                <button class="bet-adjust-btn" id="horserace-bet-increase-1">+</button>
-                                                <button class="bet-adjust-btn"
-                                                    id="horserace-bet-increase-10">+10</button>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button class="bet-adjust-btn w-12" id="horserace-bet-min">MIN</button>
-                                                <button class="bet-adjust-btn w-12" id="horserace-bet-half">1/2</button>
-                                                <button class="bet-adjust-btn w-12"
-                                                    id="horserace-bet-double">2x</button>
-                                                <button class="bet-adjust-btn w-12" id="horserace-bet-max">MAX</button>
-                                            </div>
-                                            <button id="horserace-start-button"
-                                                class="game-button-action px-8 py-3 w-full md:w-auto mt-2">🐎 Start
-                                                Race</button>
-                                        </div>
-                                    </div>
-                                    <p id="horserace-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                                <!-- ROULETTE -->
-                                <div id="game-roulette" class="game-area hidden flex flex-col items-center gap-10">
-                                    <div id="roulette-wheel-container">
-                                        <div id="roulette-wheel"></div>
-                                        <div id="roulette-ball"></div>
-                                        <div id="roulette-pointer"
-                                            class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-amber-400 z-30 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
-                                        </div>
-                                        <div id="roulette-result">?</div>
-                                    </div>
-
-                                    <div
-                                        class="w-full max-w-3xl flex flex-col gap-6 bg-black/40 p-6 rounded-2xl border border-white/5">
-                                        <div id="roulette-betting-area" class="flex flex-col items-center w-full">
-                                            <p
-                                                class="text-[10px] font-mono uppercase text-slate-500 mb-4 tracking-widest">
-                                                Current
-                                                Selection: <span id="roulette-current-bet-type"
-                                                    class="text-white font-bold bg-white/10 px-2 py-1 rounded ml-2">None</span>
-                                            </p>
-
-                                            <div class="roulette-bet-grid w-full max-w-md" id="roulette-inside-bets">
-                                            </div>
-
-                                            <div class="w-full h-px bg-white/5 my-4"></div>
-
-                                            <div class="roulette-outside-bets grid grid-cols-6 gap-2 w-full max-w-2xl"
-                                                id="roulette-outside-bets">
-                                                <button class="roulette-bet-btn red col-span-2" data-bet-type="red"
-                                                    data-bet-value="red">🔴
-                                                    RED</button>
-                                                <button class="roulette-bet-btn black col-span-2" data-bet-type="black"
-                                                    data-bet-value="black">⚫ BLACK</button>
-                                                <button class="roulette-bet-btn outside" data-bet-type="odd"
-                                                    data-bet-value="odd">ODD</button>
-                                                <button class="roulette-bet-btn outside" data-bet-type="even"
-                                                    data-bet-value="even">EVEN</button>
-
-                                                <button class="roulette-bet-btn outside col-span-3" data-bet-type="low"
-                                                    data-bet-value="low">1-18</button>
-                                                <button class="roulette-bet-btn outside col-span-3" data-bet-type="high"
-                                                    data-bet-value="high">19-36</button>
-                                            </div>
-                                        </div>
-
-                                        <div class="flex flex-col items-center gap-4 border-t border-white/5 pt-6 mt-2">
-                                            <div class="flex items-center gap-2">
-                                                <button class="bet-adjust-btn"
-                                                    id="roulette-bet-decrease-10">-10</button>
-                                                <button class="bet-adjust-btn" id="roulette-bet-decrease-1">-</button>
-                                                <input type="number" id="roulette-bet" value="10"
-                                                    class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                                <button class="bet-adjust-btn" id="roulette-bet-increase-1">+</button>
-                                                <button class="bet-adjust-btn"
-                                                    id="roulette-bet-increase-10">+10</button>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button class="bet-adjust-btn w-12" id="roulette-bet-min">MIN</button>
-                                                <button class="bet-adjust-btn w-12" id="roulette-bet-half">1/2</button>
-                                                <button class="bet-adjust-btn w-12" id="roulette-bet-double">2x</button>
-                                                <button class="bet-adjust-btn w-12" id="roulette-bet-max">MAX</button>
-                                            </div>
-                                            <div class="flex gap-4">
-                                                <button id="roulette-spin-button"
-                                                    class="game-button-action px-8 py-3 tracking-widest"
-                                                    disabled>SPIN</button>
-                                                <button id="roulette-clear-bets-button"
-                                                    class="game-button secondary px-4" disabled>✕
-                                                    Clear</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p id="roulette-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                                <!-- BLACKJACK -->
-                                <div id="game-blackjack"
-                                    class="game-area hidden flex flex-col items-center gap-10 w-full">
-                                    <div class="w-full flex justify-around items-start gap-4">
-                                        <div
-                                            class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                            <p
-                                                class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                                🎩
-                                                Dealer
-                                                (<span id="blackjack-dealer-score" class="text-white">0</span>)</p>
-                                            <div id="blackjack-dealer-hand" class="blackjack-hand min-h-[120px]"></div>
-                                        </div>
-                                        <div
-                                            class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                            <p
-                                                class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                                👤
-                                                Player
-                                                (<span id="blackjack-player-score" class="text-white">0</span>)</p>
-                                            <div id="blackjack-player-hand" class="blackjack-hand min-h-[120px]"></div>
-                                        </div>
-                                    </div>
-
-                                    <div
-                                        class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
-                                        <div class="flex items-center gap-2">
-                                            <button class="bet-adjust-btn" id="blackjack-bet-decrease-10">-10</button>
-                                            <button class="bet-adjust-btn" id="blackjack-bet-decrease-1">-</button>
-                                            <input type="number" id="blackjack-bet" value="10"
-                                                class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                            <button class="bet-adjust-btn" id="blackjack-bet-increase-1">+</button>
-                                            <button class="bet-adjust-btn" id="blackjack-bet-increase-10">+10</button>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <button class="bet-adjust-btn w-12" id="blackjack-bet-min">MIN</button>
-                                            <button class="bet-adjust-btn w-12" id="blackjack-bet-half">1/2</button>
-                                            <button class="bet-adjust-btn w-12" id="blackjack-bet-double">2x</button>
-                                            <button class="bet-adjust-btn w-12" id="blackjack-bet-max">MAX</button>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-4 w-full">
-                                            <button id="blackjack-deal-button" class="game-button-action py-4">🃏
-                                                DEAL</button>
-                                            <button id="blackjack-hit-button" class="game-button primary" disabled>➕
-                                                HIT</button>
-                                            <button id="blackjack-stand-button" class="game-button warning" disabled>✋
-                                                STAND</button>
-                                        </div>
-                                    </div>
-                                    <p id="blackjack-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                                <!-- PLINKO -->
-                                <div id="game-plinko" class="game-area hidden flex flex-col items-center gap-8">
-                                    <div class="p-2 bg-black/40 rounded-xl border border-white/5">
-                                        <canvas id="plinko-canvas" width="400" height="500" class="rounded-lg"></canvas>
-                                    </div>
-                                    <div
-                                        class="flex flex-col items-center gap-6 bg-black/40 p-6 rounded-2xl border border-white/5 w-full max-w-sm">
-                                        <div class="flex items-center gap-2">
-                                            <button class="bet-adjust-btn" id="plinko-bet-decrease-10">-10</button>
-                                            <button class="bet-adjust-btn" id="plinko-bet-decrease-1">-</button>
-                                            <input type="number" id="plinko-bet" value="10"
-                                                class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                            <button class="bet-adjust-btn" id="plinko-bet-increase-1">+</button>
-                                            <button class="bet-adjust-btn" id="plinko-bet-increase-10">+10</button>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <button class="bet-adjust-btn w-12" id="plinko-bet-min">MIN</button>
-                                            <button class="bet-adjust-btn w-12" id="plinko-bet-half">1/2</button>
-                                            <button class="bet-adjust-btn w-12" id="plinko-bet-double">2x</button>
-                                            <button class="bet-adjust-btn w-12" id="plinko-bet-max">MAX</button>
-                                        </div>
-                                        <button id="plinko-drop-button" class="game-button-action px-8 py-3 w-full">⚪
-                                            DROP
-                                            BALL</button>
-                                    </div>
-                                    <p id="plinko-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]">Drop to
-                                        win!
-                                    </p>
-                                </div>
-
-                                <!-- SABACC -->
-                                <div id="game-sabacc" class="game-area hidden flex flex-col items-center gap-10 w-full">
-                                    <div class="w-full flex justify-around items-start gap-4">
-                                        <div
-                                            class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                            <p
-                                                class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                                🤖
-                                                Dealer
-                                                (<span id="sabacc-dealer-score" class="text-white">?</span>)</p>
-                                            <div id="sabacc-dealer-hand" class="sabacc-hand min-h-[120px]"></div>
-                                        </div>
-                                        <div
-                                            class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                            <p
-                                                class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                                🤠
-                                                Player
-                                                (<span id="sabacc-player-score" class="text-white">0</span>)</p>
-                                            <div id="sabacc-player-hand" class="sabacc-hand min-h-[120px]"></div>
-                                        </div>
-                                    </div>
-
-                                    <p
-                                        class="font-mono text-base text-amber-400 bg-amber-500/10 px-4 py-2 rounded-lg border border-amber-500/20">
-                                        🏆 Pot: <span id="sabacc-pot-display" class="font-bold">0</span></p>
-
-                                    <div
-                                        class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
-                                        <div class="flex items-center gap-2">
-                                            <button class="bet-adjust-btn" id="sabacc-bet-decrease-10">-10</button>
-                                            <button class="bet-adjust-btn" id="sabacc-bet-decrease-1">-</button>
-                                            <input type="number" id="sabacc-bet" value="10"
-                                                class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                            <button class="bet-adjust-btn" id="sabacc-bet-increase-1">+</button>
-                                            <button class="bet-adjust-btn" id="sabacc-bet-increase-10">+10</button>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <button class="bet-adjust-btn w-12" id="sabacc-bet-min">MIN</button>
-                                            <button class="bet-adjust-btn w-12" id="sabacc-bet-half">1/2</button>
-                                            <button class="bet-adjust-btn w-12" id="sabacc-bet-double">2x</button>
-                                            <button class="bet-adjust-btn w-12" id="sabacc-bet-max">MAX</button>
-                                        </div>
-                                        <div class="grid grid-cols-3 gap-4 w-full">
-                                            <button id="sabacc-deal-button" class="game-button-action py-4">✨
-                                                DEAL</button>
-                                            <button id="sabacc-hit-button" class="game-button primary" disabled>➕
-                                                HIT</button>
-                                            <button id="sabacc-stand-button" class="game-button warning" disabled>✋
-                                                STAND</button>
-                                        </div>
-                                    </div>
-                                    <p id="sabacc-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bento Box: Stats, Leaderboard & Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-6 gap-6 animate-reveal" style="animation-delay: 0.3s;">
-
-                        <!-- Recent Wins (Leaderboard) - Spans 3 cols -->
-                        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-500/50 md:col-span-3">
-                            <h3
-                                class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
-                                <span class="text-xl">🏆</span> Recent Big Wins
-                            </h3>
-                            <ul id="leaderboard-list" class="space-y-3"></ul>
-                        </div>
-
-                        <!-- Personal Stats - Spans 3 cols -->
-                        <div
-                            class="glass-card p-6 rounded-2xl border-l-4 border-indigo-500/50 flex flex-col h-full md:col-span-3">
-                            <h3
-                                class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
-                                <span class="text-xl">📊</span> Personal Statistics
-                            </h3>
-
-                            <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
-                                <!-- Metric 1 -->
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Net
-                                        Profit</span>
-                                    <span id="stat-total-profit" class="text-xl font-black text-white">0</span>
-                                </div>
-                                <!-- Metric 2 -->
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
-                                        Plays</span>
-                                    <span id="stat-total-plays" class="text-xl font-black text-white">0</span>
-                                </div>
-                                <!-- Metric 3 -->
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
-                                        Losses</span>
-                                    <span class="text-xl font-black text-rose-400">
-                                        -<span id="stat-total-losses">0</span>
-                                    </span>
-                                </div>
-                                <!-- Metric 4 -->
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
-                                        Borrowed</span>
-                                    <span class="text-xl font-black text-amber-400">
-                                        $<span id="stat-total-loans">0</span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="mt-auto pt-4 border-t border-white/5 flex flex-col gap-4">
-                                <div>
-                                    <span
-                                        class="text-[9px] font-mono text-slate-500 uppercase tracking-widest block mb-3">Favorite
-                                        Games</span>
-                                    <ul id="stat-top-games" class="flex flex-col gap-1">
-                                        <li class="text-[10px] text-slate-500 italic">Play games to see stats...
-                                        </li>
+                                <div id="payout-legend" class="pt-6 border-t border-white/5 w-full max-w-sm mx-auto">
+                                    <h4
+                                        class="text-[10px] font-black uppercase tracking-widest text-center text-slate-500 mb-4">
+                                        🏆 Paytable</h4>
+                                    <ul id="payout-list"
+                                        class="grid grid-cols-2 gap-3 text-xs font-mono text-slate-400">
                                     </ul>
                                 </div>
-                                <button id="reset-stats-button"
-                                    class="w-full py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-widest rounded hover:bg-red-500 hover:text-white transition-all">
-                                    Reset All Stats
-                                </button>
                             </div>
-                        </div>
 
-                        <!-- Info Hub - Project Philosophy - Spans 2 cols -->
-                        <div
-                            class="glass-card p-8 rounded-2xl border-t border-indigo-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
-                            <div
-                                class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 mb-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-black uppercase tracking-tight text-white">Project Philosophy
-                            </h3>
-                            <p class="text-xs text-slate-400 leading-relaxed font-light">
-                                Brokie Casino was architected to demonstrate complex state management and game logic
-                                simulation
-                                without the financial risk of real gambling. It serves as a technical showcase of
-                                high-fidelity
-                                UI/UX, mathematical fairness algorithms, and interactive frontend development.
-                            </p>
-                            <div class="mt-auto pt-4 border-t border-white/5 flex gap-2">
-                                <span
-                                    class="text-[9px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded">Educational</span>
-                                <span
-                                    class="text-[9px] font-bold uppercase tracking-wider text-sky-500 bg-sky-500/10 px-2 py-1 rounded">Portfolio</span>
-                            </div>
-                        </div>
+                            <!-- CRASH -->
+                            <div id="game-crash" class="game-area hidden flex flex-col items-center gap-8 w-full">
+                                <div id="crash-graph"
+                                    class="w-full max-w-3xl border border-white/10 rounded-xl bg-black/40">
+                                    <svg id="crash-svg" viewBox="0 0 200 250" preserveAspectRatio="xMidYMid meet"
+                                        class="w-full h-full">
+                                        <g id="crash-grid"></g>
+                                        <polyline id="crash-polyline" points="0,250"></polyline>
+                                    </svg>
+                                    <span id="crash-multiplier">1.00x</span>
+                                </div>
 
-                        <!-- Info Hub - Responsible Gaming - Spans 2 cols -->
-                        <div
-                            class="glass-card p-8 rounded-2xl border-t border-emerald-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
-                            <div
-                                class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 mb-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-                                    </path>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-black uppercase tracking-tight text-white">Responsible Gaming
-                            </h3>
-                            <p class="text-xs text-slate-400 leading-relaxed font-light">
-                                Gambling can be addictive. Even in a simulated environment, it's important to
-                                recognize the
-                                patterns of risk. If you or someone you know is struggling with gambling addiction
-                                in the real
-                                world, help is available.
-                            </p>
-                            <div class="mt-auto">
-                                <a href="https://www.ncpgambling.org/" target="_blank"
-                                    class="block w-full py-3 bg-emerald-500/10 border border-emerald-500/20 rounded text-center text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all">
-                                    Get Help Now ↗
-                                </a>
-                            </div>
-                        </div>
+                                <!-- New Live Stats Bar -->
+                                <div
+                                    class="flex items-center justify-between w-full max-w-3xl bg-black/40 border border-white/5 rounded-xl px-6 py-3 mb-2">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Current
+                                            Stake</span>
+                                        <span id="crash-live-stake" class="text-white font-mono text-sm">0</span>
+                                    </div>
+                                    <div class="h-8 w-px bg-white/5"></div>
+                                    <div class="flex flex-col text-right">
+                                        <span class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Live
+                                            Profit</span>
+                                        <span id="crash-live-profit"
+                                            class="text-emerald-400 font-mono text-sm font-bold">+0</span>
+                                    </div>
+                                </div>
 
-                        <!-- Info Hub - Disclaimer - Spans 2 cols -->
-                        <div
-                            class="glass-card p-8 rounded-2xl border-t border-rose-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
-                            <div
-                                class="w-10 h-10 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-400 mb-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                    </path>
-                                </svg>
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl p-6 bg-black/40 rounded-2xl border border-white/5 shadow-lg">
+                                    <div class="flex flex-col gap-3">
+                                        <label
+                                            class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-2">💰
+                                            Bet Amount</label>
+                                        <!-- Full control set for Crash -->
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <button class="bet-adjust-btn text-[10px] px-1"
+                                                id="crash-bet-decrease-10">-10</button>
+                                            <button class="bet-adjust-btn text-[10px] px-2"
+                                                id="crash-bet-decrease-1">-</button>
+                                            <div class="relative flex-grow">
+                                                <span
+                                                    class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs">$</span>
+                                                <input type="number" id="crash-bet" value="10"
+                                                    class="w-full pl-4 py-1 bg-black/50 border border-white/10 rounded text-white font-mono focus:border-indigo-500 outline-none text-sm">
+                                            </div>
+                                            <button class="bet-adjust-btn text-[10px] px-2"
+                                                id="crash-bet-increase-1">+</button>
+                                            <button class="bet-adjust-btn text-[10px] px-1"
+                                                id="crash-bet-increase-10">+10</button>
+                                        </div>
+                                        <div class="flex gap-1 justify-center">
+                                            <button class="bet-adjust-btn w-10 text-[10px]"
+                                                id="crash-bet-min">MIN</button>
+                                            <button class="bet-adjust-btn w-10 text-[10px]"
+                                                id="crash-bet-half">1/2</button>
+                                            <button class="bet-adjust-btn w-10 text-[10px]"
+                                                id="crash-bet-double">2x</button>
+                                            <button class="bet-adjust-btn w-10 text-[10px]"
+                                                id="crash-bet-max">MAX</button>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col gap-3">
+                                        <label
+                                            class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-2">🛑
+                                            Auto Cashout</label>
+                                        <div class="flex gap-2 h-full items-start pt-1">
+                                            <div class="relative flex-grow">
+                                                <span
+                                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">x</span>
+                                                <input type="number" id="crash-auto-cashout-input" placeholder="2.00"
+                                                    class="w-full pl-3 pr-6 py-2 bg-black/50 border border-white/10 rounded text-white font-mono focus:border-indigo-500 outline-none">
+                                            </div>
+                                            <button id="crash-auto-cashout-toggle"
+                                                class="toggle-button text-[10px] py-2 w-20 h-[42px]">Enable</button>
+                                        </div>
+                                    </div>
+                                    <!-- Added Auto Bet Toggle for Crash -->
+                                    <div class="flex flex-col gap-3 justify-end pb-1">
+                                        <button id="crash-auto-bet-toggle"
+                                            class="toggle-button text-[10px] py-2 w-full h-[42px]">Auto
+                                            Bet Off</button>
+                                    </div>
+                                    <div class="md:col-span-2 flex gap-3 mt-2">
+                                        <button id="crash-bet-button" class="game-button-action flex-1 py-3 text-sm">🚀
+                                            Place
+                                            Bet</button>
+                                        <button id="crash-cashout-button" class="game-button danger flex-1 py-3 text-sm"
+                                            disabled>💸
+                                            Cashout</button>
+                                    </div>
+                                </div>
+                                <p id="crash-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
                             </div>
-                            <h3 class="text-lg font-black uppercase tracking-tight text-white">Disclaimer</h3>
-                            <p class="text-xs text-slate-400 leading-relaxed font-light">
-                                This application is a <strong>simulation only</strong>. No real money is involved,
-                                deposited, or
-                                withdrawn. All currency is virtual and holds no real-world value.
-                            </p>
-                            <p class="text-xs text-slate-500 leading-relaxed font-light">
-                                By using this site, you acknowledge that it is for entertainment and demonstration
-                                purposes
-                                only.
-                            </p>
+
+                            <!-- COIN FLIP -->
+                            <div id="game-coinflip" class="game-area hidden flex flex-col items-center gap-10">
+                                <div class="coin-container my-8 scale-150">
+                                    <div id="coin" class="coin">
+                                        <div class="coin-face coin-front">🔵</div>
+                                        <div class="coin-face coin-back">🟡</div>
+                                    </div>
+                                </div>
+
+                                <!-- Coin Flip Winnings Display (Restored) -->
+                                <div class="h-6">
+                                    <span id="coinflip-winnings"
+                                        class="text-emerald-400 font-bold font-mono text-lg drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]"></span>
+                                </div>
+
+                                <div class="flex gap-6 w-full max-w-lg">
+                                    <button id="coinflip-choose-blue"
+                                        class="coinflip-choice-btn flex-1 py-6 border-blue-500/30 hover:bg-blue-500/10 text-blue-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all">
+                                        <span class="text-3xl">🔵</span> BLUE
+                                    </button>
+                                    <button id="coinflip-choose-yellow"
+                                        class="coinflip-choice-btn flex-1 py-6 border-amber-500/30 hover:bg-amber-500/10 text-amber-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all">
+                                        <span class="text-3xl">🟡</span> YELLOW
+                                    </button>
+                                </div>
+
+                                <div
+                                    class="flex flex-col items-center gap-4 bg-black/40 p-6 rounded-2xl w-full max-w-md border border-white/5">
+                                    <div class="flex items-center gap-2 w-full justify-center">
+                                        <button class="bet-adjust-btn" id="coinflip-bet-decrease-10">-10</button>
+                                        <button class="bet-adjust-btn" id="coinflip-bet-decrease-1">-</button>
+                                        <input type="number" id="coinflip-bet" value="10"
+                                            class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                        <button class="bet-adjust-btn" id="coinflip-bet-increase-1">+</button>
+                                        <button class="bet-adjust-btn" id="coinflip-bet-increase-10">+10</button>
+                                    </div>
+                                    <div class="flex gap-2 w-full justify-center">
+                                        <button class="bet-adjust-btn w-12" id="coinflip-bet-min">MIN</button>
+                                        <button class="bet-adjust-btn w-12" id="coinflip-bet-half">1/2</button>
+                                        <button class="bet-adjust-btn w-12" id="coinflip-bet-double">2x</button>
+                                        <button class="bet-adjust-btn w-12" id="coinflip-bet-max">MAX</button>
+                                    </div>
+                                    <div class="flex gap-3 w-full">
+                                        <button id="coinflip-button"
+                                            class="game-button-action flex-1 py-4 text-sm tracking-widest shadow-lg shadow-indigo-500/20"
+                                            disabled>🪙 FLIP COIN</button>
+                                        <!-- Restored Cashout Button for Coin Flip (needed for JS logic/streak modes if any) -->
+                                        <button id="coinflip-cashout-button" class="game-button success w-32"
+                                            disabled>💰
+                                            Cashout</button>
+                                    </div>
+                                </div>
+                                <p id="coinflip-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                            </div>
+
+                            <!-- MINEFIELD -->
+                            <div id="game-minefield" class="game-area hidden flex flex-col items-center gap-8">
+                                <div id="minefield-grid"></div>
+
+                                <div
+                                    class="flex flex-col items-center gap-4 bg-black/40 p-6 rounded-2xl w-full max-w-sm border border-white/5">
+                                    <div class="flex items-center gap-2 w-full justify-center">
+                                        <button class="bet-adjust-btn" id="minefield-bet-decrease-10">-10</button>
+                                        <button class="bet-adjust-btn" id="minefield-bet-decrease-1">-</button>
+                                        <input type="number" id="minefield-bet" value="10"
+                                            class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                        <button class="bet-adjust-btn" id="minefield-bet-increase-1">+</button>
+                                        <button class="bet-adjust-btn" id="minefield-bet-increase-10">+10</button>
+                                    </div>
+                                    <div class="flex gap-2 w-full justify-center">
+                                        <button class="bet-adjust-btn w-10" id="minefield-bet-min">MIN</button>
+                                        <button class="bet-adjust-btn w-10" id="minefield-bet-half">1/2</button>
+                                        <button class="bet-adjust-btn w-10" id="minefield-bet-double">2x</button>
+                                        <button class="bet-adjust-btn w-10" id="minefield-bet-max">MAX</button>
+                                    </div>
+                                    <div class="flex gap-3 w-full">
+                                        <button id="minefield-start-button" class="game-button-action flex-1">▶
+                                            Start</button>
+                                        <button id="minefield-cashout-button" class="game-button success flex-1"
+                                            disabled>💰
+                                            Cashout</button>
+                                    </div>
+                                    <div class="w-full text-center bg-black/30 py-2 rounded border border-white/5">
+                                        <p class="text-xs font-mono text-slate-400">Current Multiplier: <span
+                                                id="minefield-current-multiplier"
+                                                class="text-emerald-400 font-bold text-base">1.00</span>x</p>
+                                    </div>
+                                </div>
+                                <p id="minefield-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                            </div>
+
+                            <!-- MEMORY -->
+                            <div id="game-memory" class="game-area hidden flex flex-col items-center gap-8">
+                                <div id="memory-grid"></div>
+                                <div
+                                    class="flex flex-col items-center gap-4 bg-black/40 p-6 rounded-2xl w-full max-w-sm border border-white/5">
+                                    <div class="flex items-center gap-2 w-full justify-center">
+                                        <button class="bet-adjust-btn" id="memory-bet-decrease-10">-10</button>
+                                        <button class="bet-adjust-btn" id="memory-bet-decrease-1">-</button>
+                                        <input type="number" id="memory-bet" value="10"
+                                            class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                        <button class="bet-adjust-btn" id="memory-bet-increase-1">+</button>
+                                        <button class="bet-adjust-btn" id="memory-bet-increase-10">+10</button>
+                                    </div>
+                                    <div class="flex gap-2 w-full justify-center">
+                                        <button class="bet-adjust-btn w-10" id="memory-bet-min">MIN</button>
+                                        <button class="bet-adjust-btn w-10" id="memory-bet-half">1/2</button>
+                                        <button class="bet-adjust-btn w-10" id="memory-bet-double">2x</button>
+                                        <button class="bet-adjust-btn w-10" id="memory-bet-max">MAX</button>
+                                    </div>
+                                    <button id="memory-start-button" class="game-button-action w-full py-3">🧠 Start
+                                        Game</button>
+                                    <p class="text-xs font-mono">Tries Left: <span id="memory-tries-left"
+                                            class="text-white font-bold text-lg mx-2">--</span></p>
+                                </div>
+                                <p id="memory-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                            </div>
+
+                            <!-- HORSE RACE -->
+                            <div id="game-horserace" class="game-area hidden flex flex-col items-center gap-8 w-full">
+                                <div id="horserace-track"
+                                    class="w-full max-w-3xl bg-black/60 border border-white/10 rounded-xl p-2 shadow-inner">
+                                    <div id="horserace-finish-line"></div>
+                                </div>
+
+                                <div
+                                    class="w-full max-w-2xl flex flex-col gap-6 items-center bg-black/40 p-6 rounded-2xl border border-white/5">
+                                    <label class="text-xs font-bold uppercase tracking-widest text-slate-500">Pick
+                                        Your
+                                        Winner</label>
+                                    <div id="horserace-selection" class="flex justify-center gap-3 flex-wrap"></div>
+
+                                    <div class="w-full h-px bg-white/5"></div>
+
+                                    <div class="flex flex-col items-center gap-3 w-full justify-center">
+                                        <div class="flex items-center gap-2">
+                                            <button class="bet-adjust-btn" id="horserace-bet-decrease-10">-10</button>
+                                            <button class="bet-adjust-btn" id="horserace-bet-decrease-1">-</button>
+                                            <input type="number" id="horserace-bet" value="10"
+                                                class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                            <button class="bet-adjust-btn" id="horserace-bet-increase-1">+</button>
+                                            <button class="bet-adjust-btn" id="horserace-bet-increase-10">+10</button>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button class="bet-adjust-btn w-12" id="horserace-bet-min">MIN</button>
+                                            <button class="bet-adjust-btn w-12" id="horserace-bet-half">1/2</button>
+                                            <button class="bet-adjust-btn w-12" id="horserace-bet-double">2x</button>
+                                            <button class="bet-adjust-btn w-12" id="horserace-bet-max">MAX</button>
+                                        </div>
+                                        <button id="horserace-start-button"
+                                            class="game-button-action px-8 py-3 w-full md:w-auto mt-2">🐎 Start
+                                            Race</button>
+                                    </div>
+                                </div>
+                                <p id="horserace-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                            </div>
+
+                            <!-- ROULETTE -->
+                            <div id="game-roulette" class="game-area hidden flex flex-col items-center gap-10">
+                                <div id="roulette-wheel-container">
+                                    <div id="roulette-wheel"></div>
+                                    <div id="roulette-ball"></div>
+                                    <div id="roulette-pointer"
+                                        class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[20px] border-t-amber-400 z-30 filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+                                    </div>
+                                    <div id="roulette-result">?</div>
+                                </div>
+
+                                <div
+                                    class="w-full max-w-3xl flex flex-col gap-6 bg-black/40 p-6 rounded-2xl border border-white/5">
+                                    <div id="roulette-betting-area" class="flex flex-col items-center w-full">
+                                        <p class="text-[10px] font-mono uppercase text-slate-500 mb-4 tracking-widest">
+                                            Current
+                                            Selection: <span id="roulette-current-bet-type"
+                                                class="text-white font-bold bg-white/10 px-2 py-1 rounded ml-2">None</span>
+                                        </p>
+
+                                        <div class="roulette-bet-grid w-full max-w-md" id="roulette-inside-bets">
+                                        </div>
+
+                                        <div class="w-full h-px bg-white/5 my-4"></div>
+
+                                        <div class="roulette-outside-bets grid grid-cols-6 gap-2 w-full max-w-2xl"
+                                            id="roulette-outside-bets">
+                                            <button class="roulette-bet-btn red col-span-2" data-bet-type="red"
+                                                data-bet-value="red">🔴
+                                                RED</button>
+                                            <button class="roulette-bet-btn black col-span-2" data-bet-type="black"
+                                                data-bet-value="black">⚫ BLACK</button>
+                                            <button class="roulette-bet-btn outside" data-bet-type="odd"
+                                                data-bet-value="odd">ODD</button>
+                                            <button class="roulette-bet-btn outside" data-bet-type="even"
+                                                data-bet-value="even">EVEN</button>
+
+                                            <button class="roulette-bet-btn outside col-span-3" data-bet-type="low"
+                                                data-bet-value="low">1-18</button>
+                                            <button class="roulette-bet-btn outside col-span-3" data-bet-type="high"
+                                                data-bet-value="high">19-36</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col items-center gap-4 border-t border-white/5 pt-6 mt-2">
+                                        <div class="flex items-center gap-2">
+                                            <button class="bet-adjust-btn" id="roulette-bet-decrease-10">-10</button>
+                                            <button class="bet-adjust-btn" id="roulette-bet-decrease-1">-</button>
+                                            <input type="number" id="roulette-bet" value="10"
+                                                class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                            <button class="bet-adjust-btn" id="roulette-bet-increase-1">+</button>
+                                            <button class="bet-adjust-btn" id="roulette-bet-increase-10">+10</button>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button class="bet-adjust-btn w-12" id="roulette-bet-min">MIN</button>
+                                            <button class="bet-adjust-btn w-12" id="roulette-bet-half">1/2</button>
+                                            <button class="bet-adjust-btn w-12" id="roulette-bet-double">2x</button>
+                                            <button class="bet-adjust-btn w-12" id="roulette-bet-max">MAX</button>
+                                        </div>
+                                        <div class="flex gap-4">
+                                            <button id="roulette-spin-button"
+                                                class="game-button-action px-8 py-3 tracking-widest"
+                                                disabled>SPIN</button>
+                                            <button id="roulette-clear-bets-button" class="game-button secondary px-4"
+                                                disabled>✕
+                                                Clear</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p id="roulette-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                            </div>
+
+                            <!-- BLACKJACK -->
+                            <div id="game-blackjack" class="game-area hidden flex flex-col items-center gap-10 w-full">
+                                <div class="w-full flex justify-around items-start gap-4">
+                                    <div
+                                        class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                        <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                            🎩
+                                            Dealer
+                                            (<span id="blackjack-dealer-score" class="text-white">0</span>)</p>
+                                        <div id="blackjack-dealer-hand" class="blackjack-hand min-h-[120px]"></div>
+                                    </div>
+                                    <div
+                                        class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                        <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                            👤
+                                            Player
+                                            (<span id="blackjack-player-score" class="text-white">0</span>)</p>
+                                        <div id="blackjack-player-hand" class="blackjack-hand min-h-[120px]"></div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
+                                    <div class="flex items-center gap-2">
+                                        <button class="bet-adjust-btn" id="blackjack-bet-decrease-10">-10</button>
+                                        <button class="bet-adjust-btn" id="blackjack-bet-decrease-1">-</button>
+                                        <input type="number" id="blackjack-bet" value="10"
+                                            class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                        <button class="bet-adjust-btn" id="blackjack-bet-increase-1">+</button>
+                                        <button class="bet-adjust-btn" id="blackjack-bet-increase-10">+10</button>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="bet-adjust-btn w-12" id="blackjack-bet-min">MIN</button>
+                                        <button class="bet-adjust-btn w-12" id="blackjack-bet-half">1/2</button>
+                                        <button class="bet-adjust-btn w-12" id="blackjack-bet-double">2x</button>
+                                        <button class="bet-adjust-btn w-12" id="blackjack-bet-max">MAX</button>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-4 w-full">
+                                        <button id="blackjack-deal-button" class="game-button-action py-4">🃏
+                                            DEAL</button>
+                                        <button id="blackjack-hit-button" class="game-button primary" disabled>➕
+                                            HIT</button>
+                                        <button id="blackjack-stand-button" class="game-button warning" disabled>✋
+                                            STAND</button>
+                                    </div>
+                                </div>
+                                <p id="blackjack-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                            </div>
+
+                            <!-- PLINKO -->
+                            <div id="game-plinko" class="game-area hidden flex flex-col items-center gap-8">
+                                <div class="p-2 bg-black/40 rounded-xl border border-white/5">
+                                    <canvas id="plinko-canvas" width="400" height="500" class="rounded-lg"></canvas>
+                                </div>
+                                <div
+                                    class="flex flex-col items-center gap-6 bg-black/40 p-6 rounded-2xl border border-white/5 w-full max-w-sm">
+                                    <div class="flex items-center gap-2">
+                                        <button class="bet-adjust-btn" id="plinko-bet-decrease-10">-10</button>
+                                        <button class="bet-adjust-btn" id="plinko-bet-decrease-1">-</button>
+                                        <input type="number" id="plinko-bet" value="10"
+                                            class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                        <button class="bet-adjust-btn" id="plinko-bet-increase-1">+</button>
+                                        <button class="bet-adjust-btn" id="plinko-bet-increase-10">+10</button>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="bet-adjust-btn w-12" id="plinko-bet-min">MIN</button>
+                                        <button class="bet-adjust-btn w-12" id="plinko-bet-half">1/2</button>
+                                        <button class="bet-adjust-btn w-12" id="plinko-bet-double">2x</button>
+                                        <button class="bet-adjust-btn w-12" id="plinko-bet-max">MAX</button>
+                                    </div>
+                                    <button id="plinko-drop-button" class="game-button-action px-8 py-3 w-full">⚪
+                                        DROP
+                                        BALL</button>
+                                </div>
+                                <p id="plinko-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]">Drop to
+                                    win!
+                                </p>
+                            </div>
+
+                            <!-- SABACC -->
+                            <div id="game-sabacc" class="game-area hidden flex flex-col items-center gap-10 w-full">
+                                <div class="w-full flex justify-around items-start gap-4">
+                                    <div
+                                        class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                        <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                            🤖
+                                            Dealer
+                                            (<span id="sabacc-dealer-score" class="text-white">?</span>)</p>
+                                        <div id="sabacc-dealer-hand" class="sabacc-hand min-h-[120px]"></div>
+                                    </div>
+                                    <div
+                                        class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                        <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                            🤠
+                                            Player
+                                            (<span id="sabacc-player-score" class="text-white">0</span>)</p>
+                                        <div id="sabacc-player-hand" class="sabacc-hand min-h-[120px]"></div>
+                                    </div>
+                                </div>
+
+                                <p
+                                    class="font-mono text-base text-amber-400 bg-amber-500/10 px-4 py-2 rounded-lg border border-amber-500/20">
+                                    🏆 Pot: <span id="sabacc-pot-display" class="font-bold">0</span></p>
+
+                                <div
+                                    class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
+                                    <div class="flex items-center gap-2">
+                                        <button class="bet-adjust-btn" id="sabacc-bet-decrease-10">-10</button>
+                                        <button class="bet-adjust-btn" id="sabacc-bet-decrease-1">-</button>
+                                        <input type="number" id="sabacc-bet" value="10"
+                                            class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                        <button class="bet-adjust-btn" id="sabacc-bet-increase-1">+</button>
+                                        <button class="bet-adjust-btn" id="sabacc-bet-increase-10">+10</button>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="bet-adjust-btn w-12" id="sabacc-bet-min">MIN</button>
+                                        <button class="bet-adjust-btn w-12" id="sabacc-bet-half">1/2</button>
+                                        <button class="bet-adjust-btn w-12" id="sabacc-bet-double">2x</button>
+                                        <button class="bet-adjust-btn w-12" id="sabacc-bet-max">MAX</button>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-4 w-full">
+                                        <button id="sabacc-deal-button" class="game-button-action py-4">✨
+                                            DEAL</button>
+                                        <button id="sabacc-hit-button" class="game-button primary" disabled>➕
+                                            HIT</button>
+                                        <button id="sabacc-stand-button" class="game-button warning" disabled>✋
+                                            STAND</button>
+                                    </div>
+                                </div>
+                                <p id="sabacc-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                            </div>
+
                         </div>
                     </div>
-                </main>
-
-                <!-- Discord Community Section -->
-                <section
-                    class="py-20 border-t border-white/5 bg-gradient-to-b from-dark-base to-[#0a0c10] animate-reveal relative overflow-hidden"
-                    style="animation-delay: 0.4s;">
-                    <div
-                        class="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png')] bg-no-repeat bg-center opacity-[0.03] bg-[length:80%] pointer-events-none blur-xl">
-                    </div>
-                    <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
-                        <div
-                            class="w-16 h-16 bg-[#5865F2] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(88,101,242,0.4)]">
-                            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 127 96">
-                                <path
-                                    d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-3xl md:text-5xl font-black text-white mb-6 uppercase tracking-tighter">Join the
-                            Brokie
-                            Community</h2>
-                        <p
-                            class="text-slate-400 max-w-lg mx-auto mb-10 text-sm md:text-base font-light leading-relaxed">
-                            Connect with other developers, share your high scores (fake ones), and get updates on the
-                            Brokie
-                            ecosystem.
-                        </p>
-                        <a href="https://discord.gg/hv4KdGvfUq" target="_blank"
-                            class="inline-flex items-center gap-3 px-8 py-4 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-xl font-bold uppercase tracking-widest transition-all hover:scale-105 shadow-[0_10px_30px_-10px_rgba(88,101,242,0.5)]">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127 96">
-                                <path
-                                    d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
-                            </svg>
-                            Enter Discord
-                        </a>
-                    </div>
-                </section>
-
-                <footer class="text-center py-10 border-t border-white/5 animate-reveal">
-                    <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-600">
-                        Engineered by <span class="text-slate-400">Blazinik</span>
-                    </p>
-                    <div class="flex justify-center gap-6 mt-6">
-                        <a href="../index.html"
-                            class="text-[10px] uppercase font-bold text-slate-500 hover:text-white transition-colors flex items-center gap-1"><span>🏠</span>
-                            Portfolio</a>
-                    </div>
-                </footer>
             </div>
 
-            <!-- Modals -->
-            <div id="message-box"></div>
+            <!-- Bento Box: Stats, Leaderboard & Info -->
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-6 animate-reveal" style="animation-delay: 0.3s;">
 
-            <div id="atm-modal-overlay"
-                class="fixed inset-0 bg-black/80 backdrop-blur-md z-40 hidden opacity-0 transition-opacity duration-300">
-            </div>
-            <div id="atm-modal"
-                class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 hidden opacity-0 transition-all duration-300 scale-95 origin-center">
-                <div class="glass-card p-10 rounded-3xl w-[90vw] max-w-sm relative shadow-2xl border border-white/10">
-                    <button id="atm-close-button"
-                        class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">✕</button>
-                    <div class="text-center mb-8">
-                        <div
-                            class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20 text-3xl">
-                            🏧</div>
-                        <h3 class="text-xl font-black uppercase text-white mb-2 tracking-tight">Quick Withdraw</h3>
-                        <p class="text-xs text-slate-400">Instant funds added to your loan balance.</p>
+                <!-- Recent Wins (Leaderboard) - Spans 3 cols -->
+                <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-500/50 md:col-span-3">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
+                        <span class="text-xl">🏆</span> Recent Big Wins
+                    </h3>
+                    <ul id="leaderboard-list" class="space-y-3"></ul>
+                </div>
+
+                <!-- Personal Stats - Spans 3 cols -->
+                <div
+                    class="glass-card p-6 rounded-2xl border-l-4 border-indigo-500/50 flex flex-col h-full md:col-span-3">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
+                        <span class="text-xl">📊</span> Personal Statistics
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
+                        <!-- Metric 1 -->
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Net
+                                Profit</span>
+                            <span id="stat-total-profit" class="text-xl font-black text-white">0</span>
+                        </div>
+                        <!-- Metric 2 -->
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
+                                Plays</span>
+                            <span id="stat-total-plays" class="text-xl font-black text-white">0</span>
+                        </div>
+                        <!-- Metric 3 -->
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
+                                Losses</span>
+                            <span class="text-xl font-black text-rose-400">
+                                -<span id="stat-total-losses">0</span>
+                            </span>
+                        </div>
+                        <!-- Metric 4 -->
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
+                                Borrowed</span>
+                            <span class="text-xl font-black text-amber-400">
+                                $<span id="stat-total-loans">0</span>
+                            </span>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <button
-                            class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
-                            data-amount="250">$250</button>
-                        <button
-                            class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
-                            data-amount="500">$500</button>
-                        <button
-                            class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
-                            data-amount="750">$750</button>
-                        <button
-                            class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
-                            data-amount="1500">$1500</button>
+
+                    <div class="mt-auto pt-4 border-t border-white/5 flex flex-col gap-4">
+                        <div>
+                            <span
+                                class="text-[9px] font-mono text-slate-500 uppercase tracking-widest block mb-3">Favorite
+                                Games</span>
+                            <ul id="stat-top-games" class="flex flex-col gap-1">
+                                <li class="text-[10px] text-slate-500 italic">Play games to see stats...
+                                </li>
+                            </ul>
+                        </div>
+                        <button id="reset-stats-button"
+                            class="w-full py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-widest rounded hover:bg-red-500 hover:text-white transition-all">
+                            Reset All Stats
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <script src="js/ui.js" defer></script>
-
-            <!-- SHOP MODAL (Restored) -->
-            <div id="shop-modal-overlay"
-                class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center animate-fade-in">
-                <div id="shop-modal"
-                    class="bg-[#0f172a] border border-white/10 rounded-2xl w-full max-w-2xl p-8 transform scale-95 opacity-0 transition-all duration-300 shadow-2xl relative">
-                    <button id="shop-close-button"
-                        class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Info Hub - Project Philosophy - Spans 2 cols -->
+                <div
+                    class="glass-card p-8 rounded-2xl border-t border-indigo-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
+                    <div
+                        class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 mb-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12">
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-black uppercase tracking-tight text-white">Project Philosophy
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed font-light">
+                        Brokie Casino was architected to demonstrate complex state management and game logic
+                        simulation
+                        without the financial risk of real gambling. It serves as a technical showcase of
+                        high-fidelity
+                        UI/UX, mathematical fairness algorithms, and interactive frontend development.
+                    </p>
+                    <div class="mt-auto pt-4 border-t border-white/5 flex gap-2">
+                        <span
+                            class="text-[9px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded">Educational</span>
+                        <span
+                            class="text-[9px] font-bold uppercase tracking-wider text-sky-500 bg-sky-500/10 px-2 py-1 rounded">Portfolio</span>
+                    </div>
+                </div>
+
+                <!-- Info Hub - Responsible Gaming - Spans 2 cols -->
+                <div
+                    class="glass-card p-8 rounded-2xl border-t border-emerald-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
+                    <div
+                        class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 mb-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
                             </path>
                         </svg>
-                    </button>
-
-                    <h2 class="text-3xl font-bold mb-2 text-white flex items-center gap-3">
-                        <span class="text-4xl">🛒</span> The Upgrade Shop
-                    </h2>
-                    <p class="text-slate-400 mb-8 border-b border-white/5 pb-4">Spend your winnings to maximize your
-                        potential.
+                    </div>
+                    <h3 class="text-lg font-black uppercase tracking-tight text-white">Responsible Gaming
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed font-light">
+                        Gambling can be addictive. Even in a simulated environment, it's important to
+                        recognize the
+                        patterns of risk. If you or someone you know is struggling with gambling addiction
+                        in the real
+                        world, help is available.
                     </p>
-
-                    <div id="shop-items-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Items injected by JS -->
+                    <div class="mt-auto">
+                        <a href="https://www.ncpgambling.org/" target="_blank"
+                            class="block w-full py-3 bg-emerald-500/10 border border-emerald-500/20 rounded text-center text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all">
+                            Get Help Now ↗
+                        </a>
                     </div>
                 </div>
+
+                <!-- Info Hub - Disclaimer - Spans 2 cols -->
+                <div
+                    class="glass-card p-8 rounded-2xl border-t border-rose-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
+                    <div
+                        class="w-10 h-10 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-400 mb-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-black uppercase tracking-tight text-white">Disclaimer</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed font-light">
+                        This application is a <strong>simulation only</strong>. No real money is involved,
+                        deposited, or
+                        withdrawn. All currency is virtual and holds no real-world value.
+                    </p>
+                    <p class="text-xs text-slate-500 leading-relaxed font-light">
+                        By using this site, you acknowledge that it is for entertainment and demonstration
+                        purposes
+                        only.
+                    </p>
+                </div>
             </div>
+            </main>
+
+            <!-- Discord Community Section -->
+            <section
+                class="py-20 border-t border-white/5 bg-gradient-to-b from-dark-base to-[#0a0c10] animate-reveal relative overflow-hidden"
+                style="animation-delay: 0.4s;">
+                <div
+                    class="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png')] bg-no-repeat bg-center opacity-[0.03] bg-[length:80%] pointer-events-none blur-xl">
+                </div>
+                <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+                    <div
+                        class="w-16 h-16 bg-[#5865F2] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(88,101,242,0.4)]">
+                        <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 127 96">
+                            <path
+                                d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-black text-white mb-6 uppercase tracking-tighter">Join the
+                        Brokie
+                        Community</h2>
+                    <p class="text-slate-400 max-w-lg mx-auto mb-10 text-sm md:text-base font-light leading-relaxed">
+                        Connect with other developers, share your high scores (fake ones), and get updates on the
+                        Brokie
+                        ecosystem.
+                    </p>
+                    <a href="https://discord.gg/hv4KdGvfUq" target="_blank"
+                        class="inline-flex items-center gap-3 px-8 py-4 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-xl font-bold uppercase tracking-widest transition-all hover:scale-105 shadow-[0_10px_30px_-10px_rgba(88,101,242,0.5)]">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127 96">
+                            <path
+                                d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                        </svg>
+                        Enter Discord
+                    </a>
+                </div>
+            </section>
+
+            <footer class="text-center py-10 border-t border-white/5 animate-reveal">
+                <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-600">
+                    Engineered by <span class="text-slate-400">Blazinik</span>
+                </p>
+                <div class="flex justify-center gap-6 mt-6">
+                    <a href="../index.html"
+                        class="text-[10px] uppercase font-bold text-slate-500 hover:text-white transition-colors flex items-center gap-1"><span>🏠</span>
+                        Portfolio</a>
+                </div>
+            </footer>
+        </div>
+
+        <!-- Modals -->
+        <div id="message-box"></div>
+
+        <div id="atm-modal-overlay"
+            class="fixed inset-0 bg-black/80 backdrop-blur-md z-40 hidden opacity-0 transition-opacity duration-300">
+        </div>
+        <div id="atm-modal"
+            class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 hidden opacity-0 transition-all duration-300 scale-95 origin-center">
+            <div class="glass-card p-10 rounded-3xl w-[90vw] max-w-sm relative shadow-2xl border border-white/10">
+                <button id="atm-close-button"
+                    class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">✕</button>
+                <div class="text-center mb-8">
+                    <div
+                        class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20 text-3xl">
+                        🏧</div>
+                    <h3 class="text-xl font-black uppercase text-white mb-2 tracking-tight">Quick Withdraw</h3>
+                    <p class="text-xs text-slate-400">Instant funds added to your loan balance.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button
+                        class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+                        data-amount="250">$250</button>
+                    <button
+                        class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+                        data-amount="500">$500</button>
+                    <button
+                        class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+                        data-amount="750">$750</button>
+                    <button
+                        class="atm-button modal-button h-16 text-lg font-mono border-white/5 bg-white/5 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white transition-all"
+                        data-amount="1500">$1500</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="js/ui.js" defer></script>
+
+        <!-- SHOP MODAL (Restored) -->
+        <div id="shop-modal-overlay"
+            class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center animate-fade-in">
+            <div id="shop-modal"
+                class="bg-[#0f172a] border border-white/10 rounded-2xl w-full max-w-2xl p-8 transform scale-95 opacity-0 transition-all duration-300 shadow-2xl relative">
+                <button id="shop-close-button"
+                    class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+
+                <h2 class="text-3xl font-bold mb-2 text-white flex items-center gap-3">
+                    <span class="text-4xl">🛒</span> The Upgrade Shop
+                </h2>
+                <p class="text-slate-400 mb-8 border-b border-white/5 pb-4">Spend your winnings to maximize your
+                    potential.
+                </p>
+
+                <div id="shop-items-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Items injected by JS -->
+                </div>
+            </div>
+        </div>
 </body>
 
 </html>
