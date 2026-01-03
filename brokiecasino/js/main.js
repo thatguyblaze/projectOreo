@@ -732,14 +732,22 @@ function setupMainEventListeners() {
                 gameStats = {};
                 totalOperations = 0;
 
+                // Feedback Round 2: Reset Currency, Loans, and Leaderboard
+                currency = 100;
+                totalLoanAmount = 0;
+                recentBigWins = [];
+                const leaderboardList = document.getElementById('leaderboard-list');
+                if (leaderboardList) leaderboardList.innerHTML = '';
+
                 // Reset Upgrades
                 if (typeof setMachinesOwned === 'function') {
                     setMachinesOwned(1);
                 }
 
                 saveGameState();
+                updateCurrencyDisplay(); // Updates all balance/loan UI
                 updateStatsDisplay();
-                showMessage("All personal statistics and upgrades have been reset.", 2000);
+                showMessage("All personal statistics, upgrades, and balances have been reset.", 2000);
             }
         });
     }
