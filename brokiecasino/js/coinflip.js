@@ -114,28 +114,30 @@ function resetCoinFlip() {
  * @param {'blue' | 'yellow'} choice - The chosen side.
  */
 function setCoinFlipChoice(choice) {
-    if (isCoinFlipping || coinFlipActive) return; // Don't allow changing choice mid-round
+    if (isCoinFlipping || coinFlipActive) {
+        console.warn("Cannot choose side while flipping or active round.");
+        return;
+    }
     if (!coinflipChooseBlueBtn || !coinflipChooseYellowBtn || !coinflipButton || !coinflipStatus) return;
 
     if (LocalBrokieAPI) LocalBrokieAPI.playSound('click');
     coinFlipChoice = choice;
 
     // Update button visuals
-    // ensure we remove 'ring-*' or 'selected' classes properly
-    coinflipChooseBlueBtn.classList.remove('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
-    coinflipChooseYellowBtn.classList.remove('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
+    // Remove all potential active classes first
+    coinflipChooseBlueBtn.classList.remove('ring-4', 'ring-blue-500', 'scale-110', 'ring-amber-500', 'bg-amber-500/20');
+    coinflipChooseYellowBtn.classList.remove('ring-4', 'ring-yellow-500', 'scale-110', 'ring-amber-500', 'bg-amber-500/20');
 
-    // Use Amber (Gold) styling for both as they are both gold coins now
     if (choice === 'blue') {
-        coinflipChooseBlueBtn.classList.add('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
+        coinflipChooseBlueBtn.classList.add('ring-4', 'ring-blue-500', 'scale-110');
     } else {
-        coinflipChooseYellowBtn.classList.add('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
+        coinflipChooseYellowBtn.classList.add('ring-4', 'ring-yellow-500', 'scale-110');
     }
 
     // Enable flip button
     coinflipButton.disabled = false;
     coinflipButton.textContent = "FLIP!";
-    coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'HEADS 🦁' : 'TAILS 🦅'}. Place your bet & Flip!`;
+    coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'Blue 🔵' : 'Yellow 🟡'}. Place your bet & Flip!`;
 }
 
 // --- Animation End Handler ---
