@@ -59,7 +59,10 @@ class SlotMachine {
         this.reelContainers = Array.from(machineDiv.querySelectorAll('.reel-container'));
     }
 
-    async spin(betPerMachine) {
+    async spin(betPerMachine, delay = 0) {
+        // Stagger start
+        if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
+
         // Clear previous effects
         this.reelContainers.forEach(c => c.classList.remove('win-effect'));
 
@@ -85,7 +88,7 @@ class SlotMachine {
 
                 // Animate
                 requestAnimationFrame(() => {
-                    // Staggered spin duration
+                    // Staggered spin duration per reel
                     const ITEM_HEIGHT = 80;
                     const TOTAL_ITEMS = 16; // 15 random + 1 final
                     const targetIndex = TOTAL_ITEMS - 1; // 15
@@ -99,7 +102,7 @@ class SlotMachine {
                     setTimeout(() => {
                         resolve();
                         // Play stop sound per reel
-                        playSound('reel_stop', { index: index });
+                        playSound('reel_stop');
                     }, SPIN_DURATION + index * 150);
                 });
             });
@@ -208,8 +211,9 @@ async function startSpinAll() {
     spinButton.disabled = true;
     spinButton.textContent = 'Spinning...';
 
-    // Execute spins in parallel
-    const results = await Promise.all(activeMachines.map(m => m.spin(betPerMachine)));
+    // Execute spins in parallel with stagger
+    // machinesOwned usually small (1-4). Stagger 300ms.
+    const results = await Promise.all(activeMachines.map((m, i) => m.spin(betPerMachine, i * 300)));
 
     // Aggregate Results
     let totalWin = 0;

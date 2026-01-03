@@ -63,13 +63,13 @@ async function startTone() {
             polySynth = new Tone.PolySynth(Tone.Synth, {
                 envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
             }).toDestination();
-            polySynth.volume.value = -8;
+            polySynth.volume.value = -20; // Quieter
 
             noiseSynth = new Tone.NoiseSynth({
                 noise: { type: 'white' },
                 envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
             }).toDestination();
-            noiseSynth.volume.value = -20;
+            noiseSynth.volume.value = -35; // Quieter
         } catch (e) {
             console.error("Failed to start AudioContext:", e);
             // Use showMessage if available, otherwise console.log
@@ -108,7 +108,7 @@ function playSound(type, value = 0) {
 
             // Slots
             case 'spin_start': noiseSynth.triggerAttackRelease("8n", now); break;
-            case 'reel_stop': synth.triggerAttackRelease("A3", "16n", now + index * 0.05); break;
+            case 'reel_stop': polySynth.triggerAttackRelease("A3", "16n", now); break;
 
             // Crash
             case 'crash_tick':
