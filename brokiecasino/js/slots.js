@@ -39,7 +39,7 @@ class SlotMachine {
 
     createDOM() {
         const machineDiv = document.createElement('div');
-        machineDiv.className = 'slot-machine-instance glass-card p-4 rounded-2xl border border-white/5 shadow-2xl';
+        machineDiv.className = 'slot-machine-instance glass-card p-4 rounded-2xl border border-white/5 shadow-2xl w-full max-w-[320px]';
         machineDiv.innerHTML = `
             <div class="flex justify-center gap-2 relative">
                  <!-- Machine Header/Status could go here -->
