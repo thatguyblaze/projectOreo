@@ -767,17 +767,20 @@ function setupMainEventListeners() {
     }
 
     // Tab Switching Logic
-    allTabs.forEach(tab => {
-        if (tab) {
-            tab.addEventListener('click', (e) => {
-                console.log("Tab clicked:", tab.id);
-                showMessage(`Clicked ${tab.textContent.trim()}`, 1000); // Debug
-                setActiveTab(e.currentTarget); // Pass the clicked button element
-            });
-        } else {
-            // This might happen if an ID is wrong or element missing in HTML
-            console.warn("A tab element was null during event listener setup.");
-        }
+    // Tab Switching Logic (Robust Re-selection)
+    const freshTabs = document.querySelectorAll('.tab-button');
+    console.log("Found tabs for listener setup:", freshTabs.length);
+
+    freshTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const clickedTab = e.currentTarget;
+            console.log("Tab clicked (Fresh):", clickedTab.id);
+            // debug toast
+            if (typeof showMessage === 'function') {
+                showMessage(`Navigating to ${clickedTab.querySelector('span:last-child').textContent.trim()}...`, 800);
+            }
+            setActiveTab(clickedTab);
+        });
     });
 
     // Listener to start Tone.js on first interaction anywhere

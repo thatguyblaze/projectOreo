@@ -70,7 +70,7 @@ class SlotMachine {
 
                 // Visual reset
                 reelEl.style.transition = 'none';
-                reelEl.style.top = `-${REEL_SPIN_OFFSET}px`;
+                reelEl.style.top = '0px'; // Start visible at top of strip
 
                 // Strip generation
                 let stripHTML = '';
