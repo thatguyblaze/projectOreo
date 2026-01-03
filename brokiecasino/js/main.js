@@ -37,7 +37,7 @@ let synth, polySynth, noiseSynth; // Declare synth variables globally
 async function checkAudioContext() {
     if (Tone.context.state === 'suspended') {
         await Tone.start();
-        console.log("AudioContext resumed by user interaction.");
+        // console.log("AudioContext resumed by user interaction.");
     }
 }
 // global listener to ensure audio stays alive
@@ -52,7 +52,7 @@ async function startTone() {
     if (!toneStarted && typeof Tone !== 'undefined') {
         try {
             await Tone.start(); // Request audio context start
-            console.log("AudioContext started successfully.");
+            // console.log("AudioContext started successfully.");
             toneStarted = true;
             // Initialize synths *after* Tone.start() has successfully run
             // Configuring envelopes with sustain: 0 to check against stuck notes
@@ -503,7 +503,7 @@ function loadGameState() {
  */
 function setActiveTab(selectedTab) {
     if (!selectedTab) return;
-    console.log("Setting active tab:", selectedTab.id);
+    // console.log("Setting active tab:", selectedTab.id);
 
 
     // --- Call reset/stop functions for the *previously* active game ---
@@ -545,7 +545,7 @@ function setActiveTab(selectedTab) {
 
     // --- Switch Tab Visuals and Game Area Visibility ---
     // --- Switch Tab Visuals and Game Area Visibility (NUCLEAR OPTION) ---
-    console.log(`--- Switching Tab --- (Total Areas: ${allGameAreas.length})`);
+    // console.log(`--- Switching Tab --- (Total Areas: ${allGameAreas.length})`);
 
     // 1. Force Hide ALL Game Areas first
     allGameAreas.forEach(area => {
@@ -553,7 +553,7 @@ function setActiveTab(selectedTab) {
             console.warn("Found null area in allGameAreas");
             return;
         }
-        console.log(`Hiding: ${area.id}, Classes: ${area.className}`);
+        // console.log(`Hiding: ${area.id}, Classes: ${area.className}`);
         area.classList.remove('flex');
         area.classList.add('hidden');
         area.classList.remove('opacity-100');
@@ -574,7 +574,7 @@ function setActiveTab(selectedTab) {
     const targetGameArea = allGameAreas[selectedIndex];
 
     if (targetGameArea) {
-        console.log("Showing Game Area:", targetGameArea.id);
+        // console.log("Showing Game Area:", targetGameArea.id);
         targetGameArea.classList.remove('hidden');
         targetGameArea.classList.add('flex');
 
@@ -735,7 +735,7 @@ function setupMainEventListeners() {
                 // Feedback Round 2: Reset Currency, Loans, and Leaderboard
                 currency = 100;
                 totalLoanAmount = 0;
-                recentBigWins = [];
+                leaderboard = [];
                 const leaderboardList = document.getElementById('leaderboard-list');
                 if (leaderboardList) leaderboardList.innerHTML = '';
 
@@ -802,7 +802,7 @@ function setupMainEventListeners() {
     freshTabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
             const clickedTab = e.currentTarget;
-            console.log("Tab clicked (Fresh):", clickedTab.id);
+            // console.log("Tab clicked (Fresh):", clickedTab.id);
             // debug toast
             if (typeof showMessage === 'function') {
                 showMessage(`Navigating to ${clickedTab.querySelector('span:last-child').textContent.trim()}...`, 800);
@@ -924,7 +924,7 @@ const BrokieAPI = {
 
 // --- Initialization on DOMContentLoaded ---
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Loaded. Initializing Brokie Casino...");
+    // console.log("DOM Loaded. Initializing Brokie Casino...");
     loadGameState(); // Load saved state first
     setupMainEventListeners(); // Setup listeners for main UI elements (including tabs)
 
@@ -962,5 +962,5 @@ document.addEventListener('DOMContentLoaded', () => {
     safeInit('Sabacc', typeof initSabacc !== 'undefined' ? initSabacc : undefined);
 
 
-    console.log("Brokie Casino Initialized.");
+    // console.log("Brokie Casino Initialized.");
 });

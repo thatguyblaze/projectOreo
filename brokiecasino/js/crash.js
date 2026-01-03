@@ -48,7 +48,7 @@ let crashLiveStake, crashLiveProfit; // New refs
 let LocalBrokieAPI = null;
 
 function initCrash(API) {
-    console.log("Initializing Crash Game (v7.0)...");
+    // console.log("Initializing Crash Game (v7.0)...");
     LocalBrokieAPI = API;
     if (!LocalBrokieAPI) {
         console.error("Crash Game initialization failed: BrokieAPI object not provided.");
@@ -63,7 +63,7 @@ function initCrash(API) {
     if (LocalBrokieAPI && typeof LocalBrokieAPI.addBetAdjustmentListeners === 'function') {
         LocalBrokieAPI.addBetAdjustmentListeners('crash', crashBetInput);
     }
-    console.log("Crash Initialized");
+    // console.log("Crash Initialized");
 }
 
 function assignCrashDOMElements() {
@@ -223,7 +223,9 @@ function resetCrashVisuals() {
     updateCrashGrid(0);
 
     crashBetButton.disabled = false;
+    crashBetButton.classList.remove('hidden');
     crashCashoutButton.disabled = true;
+    crashCashoutButton.classList.add('hidden');
     crashBetInput.disabled = false;
     if (crashAutoBetToggle) crashAutoBetToggle.disabled = false;
     if (crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
@@ -267,7 +269,8 @@ function placeBetAndStart() {
     crashTargetMultiplier = calculateCrashTarget();
     crashStatusDisplay.innerHTML = `Bet Placed! Value: <span id="potential-win-amount" class="font-bold text-white">${LocalBrokieAPI.formatWin(crashPlayerBet)}</span>`;
 
-    crashBetButton.disabled = true;
+    crashBetButton.classList.add('hidden');
+    crashCashoutButton.classList.remove('hidden');
     crashCashoutButton.disabled = false;
     crashBetInput.disabled = true;
     if (crashAutoBetToggle) crashAutoBetToggle.disabled = true;
@@ -501,8 +504,14 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
         crashAnimationId = null;
     }
 
-    if (crashBetButton) crashBetButton.disabled = false;
-    if (crashCashoutButton) crashCashoutButton.disabled = true;
+    if (crashBetButton) {
+        crashBetButton.disabled = false;
+        crashBetButton.classList.remove('hidden');
+    }
+    if (crashCashoutButton) {
+        crashCashoutButton.disabled = true;
+        crashCashoutButton.classList.add('hidden');
+    }
     if (crashBetInput) crashBetInput.disabled = false;
     if (crashAutoBetToggle) crashAutoBetToggle.disabled = false;
     if (crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
