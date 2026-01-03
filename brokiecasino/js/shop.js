@@ -10,7 +10,7 @@ const SHOP_ITEMS = [
         name: 'Extra Slot Machine',
         icon: '🎰',
         description: 'Add another machine to your grid. Spin more, win more!',
-        cost: 2000,
+        cost: 1000000, // EXTREME COST
         maxLevel: 8, // Max 8 machines total
         get currentLevel() { return typeof getSlotsMachineCount === 'function' ? getSlotsMachineCount() : 1; },
         action: () => {

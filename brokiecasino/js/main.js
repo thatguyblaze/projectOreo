@@ -723,9 +723,15 @@ function setupMainEventListeners() {
                 lifetimeLoans = 0;
                 gameStats = {};
                 totalOperations = 0;
+
+                // Reset Upgrades
+                if (typeof setMachinesOwned === 'function') {
+                    setMachinesOwned(1);
+                }
+
                 saveGameState();
                 updateStatsDisplay();
-                showMessage("All personal statistics have been reset.", 2000);
+                showMessage("All personal statistics and upgrades have been reset.", 2000);
             }
         });
     }

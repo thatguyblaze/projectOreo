@@ -11,7 +11,7 @@ const SLOT_PAYOUTS = {
     '🍉🍉🍉': 25, '🍊🍊🍊': 20, '🍋🍋🍋': 15, '🍒🍒🍒': 10,
     '7️⃣7️⃣': 10, '💰💰': 7, '💎💎': 5, '🍒🍒': 2,
 };
-const MACHINE_COST = 2000;
+const MACHINE_COST = 1000000;
 const SPIN_DURATION = 1000; // ms
 const REEL_SPIN_OFFSET = 1500; // px
 
