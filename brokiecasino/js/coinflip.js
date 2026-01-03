@@ -1,6 +1,6 @@
 /**
  * Brokie Casino - Coin Flip Game Logic (coinflip.js)
- * Completely Remade v2.0 for Robustness
+ * Completely Remade v2.1 - Visual Fixes & Robust Logic
  */
 
 (function () {
@@ -45,10 +45,7 @@
             }
         }
 
-        // --- Event Binding ---
-        // Clean old listeners by cloning or just overwriting onclicks (safer for reset)
-        // Using onclick for simplicity and to prevent duplicate listener accumulation
-
+        // --- Event Binding --- 
         els.flipBtn.onclick = handleFlipClick;
         els.cashoutBtn.onclick = handleCashoutClick;
         els.btnBlue.onclick = () => selectSide('blue');
@@ -77,12 +74,20 @@
 
         // Visual Reset
         if (els.coin) {
+            // Remove legacy classes if any
+            els.coin.classList.remove('show-front', 'show-back');
+
+            // Hard reset transform
             els.coin.style.transition = 'none';
-            els.coin.style.transform = 'rotateY(0deg)';
-            // Force reset to Blue/Front
-            setTimeout(() => {
+            els.coin.style.transform = 'rotateY(0deg)'; // Always default to Blue/Front
+
+            // Force Reflow
+            void els.coin.offsetWidth;
+
+            // Restore transitions (after a tick to ensure it took)
+            requestAnimationFrame(() => {
                 els.coin.style.transition = '';
-            }, 50);
+            });
         }
 
         if (els.status) els.status.textContent = "Choose Blue or Yellow to start!";
@@ -105,7 +110,6 @@
 
         if (els.btnBlue) {
             els.btnBlue.className = `${baseClass} ${blueBase} ${userChoice === 'blue' ? activeClass + ' ring-blue-500 bg-blue-500/20 border-blue-500' : ''}`;
-            // Allow changing selection only if not flipping.
             els.btnBlue.disabled = isFlipping;
         }
         if (els.btnYellow) {
@@ -174,33 +178,42 @@
         if (API.registerGameStart) API.registerGameStart('CoinFlip');
 
         // Logic
-        const isWin = Math.random() < 0.50; // 50/50 chance to match user choice
-        // If isWin, result must match userChoice.
-        // If !isWin, result must be opposite.
+        const isWin = Math.random() < 0.50;
         const resultColor = isWin ? userChoice : (userChoice === 'blue' ? 'yellow' : 'blue');
 
         // Animation Param
         // If result is Blue(0deg), rotate to 360*5 + 0.
         // If result is Yellow(180deg), rotate to 360*5 + 180.
+        // spins must be INTEGER to ensure clean multiples of 360
         const spins = 5;
         const targetDeg = (spins * 360) + (resultColor === 'blue' ? 0 : 180);
 
+        // Debug Log
+        console.log(`Flip Target: ${resultColor.toUpperCase()} (${targetDeg}deg) -> Win: ${isWin}`);
+
         // Apply Transform
-        els.coin.style.transition = 'transform 1s cubic-bezier(0.1, 0.7, 0.1, 1)';
+        // Note: We use a ease-out back or cubic-bezier for a nice effect
+        els.coin.style.transition = 'transform 1.2s cubic-bezier(0.1, 0.7, 0.1, 1)';
         els.coin.style.transform = `rotateY(${targetDeg}deg)`;
 
         // 3. Resolve
         setTimeout(() => {
             finishFlip(isWin, resultColor);
-        }, 1100);
+        }, 1300); // Wait slightly longer than transition
     }
 
     function finishFlip(isWin, resultColor) {
         isFlipping = false;
 
-        // Reset Coin visual rotation to clean value (0 or 180) without spinning back
+        // Fix Visuals
+        // We strip the transition to prevent "spinning back"
         els.coin.style.transition = 'none';
+        // Normalize the degree to 0 or 180 (within one rotation)
+        // This is visually identical because we landed on a multiple
         els.coin.style.transform = `rotateY(${resultColor === 'blue' ? 0 : 180}deg)`;
+
+        // Force reflow to ensure the 'none' transition is applied before any future change
+        void els.coin.offsetWidth;
 
         const emoji = resultColor === 'blue' ? '🔵' : '🟡';
 
@@ -218,7 +231,7 @@
             setTimeout(() => {
                 resetGame();
             }, 1500);
-            return; // Exit early, no updateButtons needed they are reset above
+            return; // Exit early
         }
 
         updateButtons();
