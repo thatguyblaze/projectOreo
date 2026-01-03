@@ -81,7 +81,7 @@ function assignCrashDOMElements() {
         crashGrid = gridGroup;
     }
     crashPolyline = document.getElementById('crash-polyline');
-    
+
     crashBetInput = document.getElementById('crash-bet');
     crashBetButton = document.getElementById('crash-bet-button');
     crashCashoutButton = document.getElementById('crash-cashout-button');
@@ -95,22 +95,34 @@ function assignCrashDOMElements() {
     const elements = { crashGraph, crashMultiplierDisplay, crashSvg, crashGrid, crashPolyline, crashBetInput, crashBetButton, crashCashoutButton, crashStatusDisplay };
     for (const key in elements) {
         if (!elements[key]) {
-             console.error(`Crash Game initialization failed: Missing ${key}.`);
-             return false;
+            console.error(`Crash Game initialization failed: Missing ${key}.`);
+            return false;
         }
     }
     return true;
 }
 
 function setupCrashEventListeners() {
-    if(crashBetButton) crashBetButton.addEventListener('click', placeBetAndStart);
-    if(crashCashoutButton) crashCashoutButton.addEventListener('click', attemptCashOut);
-    if(crashAutoBetToggle) crashAutoBetToggle.addEventListener('click', toggleCrashAutoBet);
-    if(crashAutoCashoutToggle) crashAutoCashoutToggle.addEventListener('click', toggleCrashAutoCashout);
-    if(crashAutoCashoutInput) {
+    if (crashBetButton) crashBetButton.addEventListener('click', placeBetAndStart);
+    if (crashCashoutButton) crashCashoutButton.addEventListener('click', attemptCashOut);
+    if (crashAutoBetToggle) crashAutoBetToggle.addEventListener('click', toggleCrashAutoBet);
+    if (crashAutoCashoutToggle) crashAutoCashoutToggle.addEventListener('click', toggleCrashAutoCashout);
+    if (crashAutoCashoutInput) {
         crashAutoCashoutInput.addEventListener('change', validateAndUpdateAutoCashoutTarget);
         crashAutoCashoutInput.addEventListener('input', () => {
-            crashAutoCashoutInput.value = crashAutoCashoutInput.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+            // Allow numbers and a single decimal point.
+            // Regex: remove anything that is NOT a digit or a dot
+            let val = crashAutoCashoutInput.value.replace(/[^0-9.]/g, '');
+
+            // Ensure only one decimal point
+            const parts = val.split('.');
+            if (parts.length > 2) {
+                val = parts[0] + '.' + parts.slice(1).join('');
+            }
+
+            if (crashAutoCashoutInput.value !== val) {
+                crashAutoCashoutInput.value = val;
+            }
         });
     }
 }
@@ -127,12 +139,12 @@ function updateCrashGrid(timeOffset) {
     const height = SVG_VIEWBOX_HEIGHT;
 
     // Fixed spacing in pixels for grid lines
-    const GRID_SPACING_X = 100; 
-    
+    const GRID_SPACING_X = 100;
+
     // Calculate the offset for the moving grid
     // The "world" moves left, so lines move left. 
     // We compute the effective X based on timeOffset.
-    
+
     // Time scale: How many pixels per second?
     // Let's say 100 pixels per second.
     const PX_PER_SEC = 100;
@@ -142,12 +154,12 @@ function updateCrashGrid(timeOffset) {
     // It should be: (some_multiple * GRID_SPACING) - (currentWorldX % GRID_SPACING)
     // No, simpler: Grid lines are at fixed world X coordinates. We subtract currentWorldX to get screen X.
     // But we want lines to appear from the right.
-    
+
     const startWorldX = Math.floor(currentWorldX / GRID_SPACING_X) * GRID_SPACING_X;
-    
+
     for (let wx = startWorldX; wx < currentWorldX + width + GRID_SPACING_X; wx += GRID_SPACING_X) {
         const screenX = wx - currentWorldX + (width * CENTER_X_RATIO);
-        
+
         // Only draw if within view (with some buffer)
         if (screenX >= -50 && screenX <= width + 50) {
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -196,25 +208,25 @@ function resetCrashVisuals() {
     displayedMultiplier = 1.00;
     crashRawPointsData = [[0, 1.00]];
     currentMaxYMultiplier = CRASH_STARTING_MAX_Y;
-    
+
     crashSvg.setAttribute('viewBox', `0 0 ${SVG_VIEWBOX_WIDTH} ${SVG_VIEWBOX_HEIGHT}`);
     crashMultiplierDisplay.textContent = '1.00x';
     crashMultiplierDisplay.className = 'text-fluent-text-primary';
-    
+
     // Initial line: Flat at start
     const startY = SVG_VIEWBOX_HEIGHT;
     const startX = SVG_VIEWBOX_WIDTH * CENTER_X_RATIO;
     crashPolyline.setAttribute('points', `0,${startY} ${startX},${startY}`);
     crashPolyline.style.stroke = '#0078d4';
-    
+
     crashStatusDisplay.textContent = 'Place your bet for the next round!';
     updateCrashGrid(0);
 
     crashBetButton.disabled = false;
     crashCashoutButton.disabled = true;
     crashBetInput.disabled = false;
-    if(crashAutoBetToggle) crashAutoBetToggle.disabled = false;
-    if(crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
+    if (crashAutoBetToggle) crashAutoBetToggle.disabled = false;
+    if (crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
     updateCrashAutoCashoutToggleVisuals();
 }
 
@@ -258,14 +270,14 @@ function placeBetAndStart() {
     crashBetButton.disabled = true;
     crashCashoutButton.disabled = false;
     crashBetInput.disabled = true;
-    if(crashAutoBetToggle) crashAutoBetToggle.disabled = true;
-    if(crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = true;
-    if(crashAutoCashoutInput) crashAutoCashoutInput.disabled = true;
+    if (crashAutoBetToggle) crashAutoBetToggle.disabled = true;
+    if (crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = true;
+    if (crashAutoCashoutInput) crashAutoCashoutInput.disabled = true;
     if (isAutoCashoutEnabled) validateAndUpdateAutoCashoutTarget();
 
     crashStartTime = performance.now();
     crashRawPointsData = [[0, 1.00]];
-    
+
     console.log(`Crash started. Target: ${crashTargetMultiplier.toFixed(2)}x`);
     crashAnimationId = requestAnimationFrame(crashGameLoop);
 }
@@ -282,12 +294,12 @@ function crashGameLoop(timestamp) {
 
     // --- Base Multiplier Logic (Exponential) ---
     currentMultiplier = 1 + 0.06 * Math.pow(timeSec, 1.65);
-    
+
     // --- Visual Volatility (Lag & Catch-Up) ---
     // Instead of sinusoidal noise, we use a "lag" model.
     // The visual multiplier tries to follow the true multiplier, but sometimes lags behind (dip)
     // and then accelerates to catch up. This creates the "slow down then skyrocket" effect.
-    
+
     if (!this.volatilityState) {
         this.volatilityState = {
             lagging: false,
@@ -299,7 +311,7 @@ function crashGameLoop(timestamp) {
     // Chance to start a "fake out" lag event
     // Probability increases slightly as multiplier grows, but is random
     // Don't start if already lagging or just finished
-    if (!this.volatilityState.lagging && Math.random() < 0.005) { 
+    if (!this.volatilityState.lagging && Math.random() < 0.005) {
         this.volatilityState.lagging = true;
         this.volatilityState.lagStartTime = timeSec;
         this.volatilityState.catchUpSpeed = 1.0;
@@ -308,21 +320,21 @@ function crashGameLoop(timestamp) {
 
     if (this.volatilityState.lagging) {
         const lagDuration = timeSec - this.volatilityState.lagStartTime;
-        
+
         // During lag, visual grows MUCH slower than real (or stalls)
         // We define a target "lagged" value
         const lagFactor = Math.max(0.2, 1.0 - lagDuration * 0.5); // Slows down growth
-        
+
         // The visual target is bounded: it can't be higher than real, but can be lower
         // We interpolate displayedMultiplier towards (real * lagFactor) or just let real pull away
-        
+
         // Simpler approach:
         // While lagging, we cap the rate of change of displayedMultiplier
         // Real multiplier is growing exponentially.
         // We let displayedMultiplier grow linearly or sub-linearly.
-        
+
         const idealVisual = displayedMultiplier + (currentMultiplier - displayedMultiplier) * 0.05; // Slow follow
-        
+
         // If lag has gone on too long (e.g. 1.5 seconds), snap out of it
         if (lagDuration > 1.5 || (currentMultiplier - displayedMultiplier) > currentMultiplier * 0.5) {
             this.volatilityState.lagging = false;
@@ -338,7 +350,7 @@ function crashGameLoop(timestamp) {
             const diff = currentMultiplier - displayedMultiplier;
             const catchUpStep = diff * 0.15; // Fast convergence
             displayedMultiplier += catchUpStep;
-            
+
             // Snap if close enough
             if (displayedMultiplier > currentMultiplier - 0.01) {
                 displayedMultiplier = currentMultiplier;
@@ -347,7 +359,7 @@ function crashGameLoop(timestamp) {
             displayedMultiplier = currentMultiplier;
         }
     }
-    
+
     // Hard clamp to ensure fairness perception
     displayedMultiplier = Math.min(displayedMultiplier, currentMultiplier);
     displayedMultiplier = Math.max(1.00, displayedMultiplier);
@@ -365,28 +377,28 @@ function crashGameLoop(timestamp) {
 
     if (hasCrashed) {
         displayedMultiplier = crashTargetMultiplier; // Snap to final
-        if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${displayedMultiplier.toFixed(2)}x`;
-        if(crashPolyline) crashPolyline.style.stroke = '#e81123';
+        if (crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${displayedMultiplier.toFixed(2)}x`;
+        if (crashPolyline) crashPolyline.style.stroke = '#e81123';
         endCrashGame(true, crashPlayerBet, false);
         return;
     }
 
     // --- Update UI ---
-    if(crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${displayedMultiplier.toFixed(2)}x`;
-    
-    if (!crashCashedOut && playerHasBet) {
-         const currentCashoutValue = Math.floor(crashPlayerBet * currentMultiplier); // Payout uses REAL multiplier
-         const currentProfit = currentCashoutValue - crashPlayerBet;
-         
-         const potentialWinSpan = document.getElementById('potential-win-amount');
-         if (potentialWinSpan) potentialWinSpan.textContent = LocalBrokieAPI.formatWin(currentCashoutValue);
+    if (crashMultiplierDisplay) crashMultiplierDisplay.textContent = `${displayedMultiplier.toFixed(2)}x`;
 
-         // Update Live Stats
-         if (crashLiveStake) crashLiveStake.textContent = LocalBrokieAPI.formatWin(crashPlayerBet);
-         if (crashLiveProfit) {
-             crashLiveProfit.textContent = `+${LocalBrokieAPI.formatWin(currentProfit)}`;
-             crashLiveProfit.className = 'text-emerald-400 font-mono text-sm font-bold'; // Ensure green
-         }
+    if (!crashCashedOut && playerHasBet) {
+        const currentCashoutValue = Math.floor(crashPlayerBet * currentMultiplier); // Payout uses REAL multiplier
+        const currentProfit = currentCashoutValue - crashPlayerBet;
+
+        const potentialWinSpan = document.getElementById('potential-win-amount');
+        if (potentialWinSpan) potentialWinSpan.textContent = LocalBrokieAPI.formatWin(currentCashoutValue);
+
+        // Update Live Stats
+        if (crashLiveStake) crashLiveStake.textContent = LocalBrokieAPI.formatWin(crashPlayerBet);
+        if (crashLiveProfit) {
+            crashLiveProfit.textContent = `+${LocalBrokieAPI.formatWin(currentProfit)}`;
+            crashLiveProfit.className = 'text-emerald-400 font-mono text-sm font-bold'; // Ensure green
+        }
     } else if (crashCashedOut) {
         // Keep profit static if cashed out
     } else {
@@ -406,21 +418,21 @@ function crashGameLoop(timestamp) {
         currentMaxYMultiplier *= CRASH_Y_AXIS_PADDING_FACTOR;
         rescaleNeeded = true;
     }
-    
+
     // --- Render Scrolling Graph ---
     // We update the grid to shift lines left
     updateCrashGrid(elapsedTime);
-    
+
     // Update points data
     crashRawPointsData.push([elapsedTime, displayedMultiplier]);
-    
+
     // Calculate Polyline Points relative to the scrolling view
     // center X = SVG_WIDTH * CENTER_X_RATIO
     // Current head point is always at Center X
     // Previous points are shifted left by (currentTime - pointTime) * pixels_per_sec
     const pointsString = calculateScrollingPointsString(crashRawPointsData, elapsedTime, currentMaxYMultiplier);
-    
-    if(crashPolyline) crashPolyline.setAttribute('points', pointsString);
+
+    if (crashPolyline) crashPolyline.setAttribute('points', pointsString);
 
     if (crashGameActive) {
         crashAnimationId = requestAnimationFrame(crashGameLoop);
@@ -435,48 +447,48 @@ function calculateScrollingPointsString(dataPoints, currentElapsedTime, maxYMult
     const points = dataPoints.map(point => {
         const pTime = point[0]; // ms
         const pMult = point[1];
-        
+
         // Time difference from 'now' in seconds
         const timeDiffSec = (currentElapsedTime - pTime) / 1000;
-        
+
         // X coordinate: Center minus distance traveled
         const x = centerX - (timeDiffSec * PX_PER_SEC);
-        
+
         // Y coordinate
         const y = SVG_VIEWBOX_HEIGHT - ((pMult - 1) / yMultiplierRange) * SVG_VIEWBOX_HEIGHT;
 
         // Optimization: Filter out points that are way off screen to the left
         if (x < -100) return null;
-        
+
         return `${x.toFixed(1)},${y.toFixed(1)}`;
     });
-    
+
     return points.filter(p => p !== null).join(' ');
 }
 
 function applyMultiplierVisuals(val) {
-     if (!crashMultiplierDisplay) return;
-     const displaySpan = document.getElementById('potential-win-amount');
-     const effectClasses = ['shake-subtle', 'shake-strong', 'mult-color-5x', 'mult-color-10x', 'mult-color-15x', 'mult-color-20x', 'mult-color-30x', 'win-effect'];
-     
-     crashMultiplierDisplay.classList.remove(...effectClasses);
-     crashMultiplierDisplay.classList.add('text-fluent-text-primary');
+    if (!crashMultiplierDisplay) return;
+    const displaySpan = document.getElementById('potential-win-amount');
+    const effectClasses = ['shake-subtle', 'shake-strong', 'mult-color-5x', 'mult-color-10x', 'mult-color-15x', 'mult-color-20x', 'mult-color-30x', 'win-effect'];
 
-     let appliedColorClass = null;
-     if (val >= 30) appliedColorClass = 'mult-color-30x';
-     else if (val >= 20) appliedColorClass = 'mult-color-20x';
-     else if (val >= 15) appliedColorClass = 'mult-color-15x';
-     else if (val >= 10) appliedColorClass = 'mult-color-10x';
-     else if (val >= 5) appliedColorClass = 'mult-color-5x';
+    crashMultiplierDisplay.classList.remove(...effectClasses);
+    crashMultiplierDisplay.classList.add('text-fluent-text-primary');
 
-     if (appliedColorClass) {
-         crashMultiplierDisplay.classList.add(appliedColorClass, 'shake-strong');
-         if (displaySpan) {
-             displaySpan.className = `font-bold ${appliedColorClass}`;
-         }
-     } else if (val >= 2) {
-         crashMultiplierDisplay.classList.add('shake-subtle');
-     }
+    let appliedColorClass = null;
+    if (val >= 30) appliedColorClass = 'mult-color-30x';
+    else if (val >= 20) appliedColorClass = 'mult-color-20x';
+    else if (val >= 15) appliedColorClass = 'mult-color-15x';
+    else if (val >= 10) appliedColorClass = 'mult-color-10x';
+    else if (val >= 5) appliedColorClass = 'mult-color-5x';
+
+    if (appliedColorClass) {
+        crashMultiplierDisplay.classList.add(appliedColorClass, 'shake-strong');
+        if (displaySpan) {
+            displaySpan.className = `font-bold ${appliedColorClass}`;
+        }
+    } else if (val >= 2) {
+        crashMultiplierDisplay.classList.add('shake-subtle');
+    }
 }
 
 function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
@@ -486,12 +498,12 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
         crashAnimationId = null;
     }
 
-    if(crashBetButton) crashBetButton.disabled = false;
-    if(crashCashoutButton) crashCashoutButton.disabled = true;
-    if(crashBetInput) crashBetInput.disabled = false;
-    if(crashAutoBetToggle) crashAutoBetToggle.disabled = false;
-    if(crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
-    
+    if (crashBetButton) crashBetButton.disabled = false;
+    if (crashCashoutButton) crashCashoutButton.disabled = true;
+    if (crashBetInput) crashBetInput.disabled = false;
+    if (crashAutoBetToggle) crashAutoBetToggle.disabled = false;
+    if (crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
+
     // Reset Live Stats on End
     if (crashLiveStake) crashLiveStake.textContent = '0';
     if (crashLiveProfit) {
@@ -506,7 +518,7 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
 
     if (stoppedByTabSwitch) {
         if (!crashCashedOut && playerHasBet) crashStatusDisplay.textContent = "Game stopped (inactive tab). Bet lost.";
-        else if(crashStatusDisplay) crashStatusDisplay.textContent = "Game stopped.";
+        else if (crashStatusDisplay) crashStatusDisplay.textContent = "Game stopped.";
     } else if (crashed) {
         if (!crashCashedOut && playerHasBet) {
             crashMultiplierDisplay.textContent = `CRASH! ${finalMultiplier.toFixed(2)}x`;
@@ -515,10 +527,10 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
             crashStatusDisplay.textContent = `Crashed! You lost ${formattedBet}.`;
             LocalBrokieAPI.playSound('crash_explode');
         } else {
-             crashStatusDisplay.textContent = `Round Crashed @ ${finalMultiplier.toFixed(2)}x`;
+            crashStatusDisplay.textContent = `Round Crashed @ ${finalMultiplier.toFixed(2)}x`;
         }
     } else if (crashCashedOut) {
-         // Already handled in cashout
+        // Already handled in cashout
     }
 
     if (LocalBrokieAPI) LocalBrokieAPI.saveGameState();
@@ -543,8 +555,8 @@ function attemptCashOut() {
     // Let's use displayedMultiplier to match what the user sees, but clamp it to currentMultiplier +/- reasonable bounds
     // Actually, sticking to the base curve is "safer" for logic, but "displayed" is what they clicked on.
     // Let's use the base `currentMultiplier` for the actual math to prevent exploiting the jitter.
-    const cashoutMultiplier = currentMultiplier; 
-    
+    const cashoutMultiplier = currentMultiplier;
+
     const totalReturn = Math.floor(crashPlayerBet * cashoutMultiplier);
     const profit = totalReturn - crashPlayerBet;
 

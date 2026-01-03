@@ -143,10 +143,12 @@ class SlotMachine {
     }
 }
 
+const MAX_MACHINES = 12; // Updated to 12
+
 // --- Global Accessors for Shop & State ---
 window.getSlotsMachineCount = () => machinesOwned;
 window.addSlotMachine = () => {
-    if (machinesOwned >= 8) return false; // Hard limit
+    if (machinesOwned >= MAX_MACHINES) return false;
     machinesOwned++;
     renderMachines();
     return true;
@@ -154,7 +156,7 @@ window.addSlotMachine = () => {
 window.setMachinesOwned = (count) => {
     machinesOwned = parseInt(count) || 1;
     if (machinesOwned < 1) machinesOwned = 1;
-    if (machinesOwned > 8) machinesOwned = 8;
+    if (machinesOwned > MAX_MACHINES) machinesOwned = MAX_MACHINES;
     renderMachines();
 };
 
@@ -211,6 +213,11 @@ async function startSpinAll() {
     startTone();
     currency -= totalBet;
     updateCurrencyDisplay('loss');
+
+    // Update Stats UI
+    const lastCostEl = document.getElementById('slot-last-cost');
+    if (lastCostEl) lastCostEl.textContent = formatWin(totalBet); // use formatWin for consistency or just $
+
     playSound('spin_start');
 
     spinButton.disabled = true;
@@ -222,21 +229,32 @@ async function startSpinAll() {
 
     // Aggregate Results
     let totalWin = 0;
-    let bestWinKey = null;
-    let bestMultiplier = 0;
+    results.forEach(r => totalWin += r.win);
 
-    results.forEach(res => {
-        if (res.win > 0) {
-            totalWin += res.win;
-            const mult = res.win / betPerMachine;
-            if (mult > bestMultiplier) {
-                bestMultiplier = mult;
-                bestWinKey = res.key;
-            }
-        }
-    });
+    // Update Stats UI (Last Win)
+    const lastWinEl = document.getElementById('slot-last-win');
+    if (lastWinEl) lastWinEl.textContent = formatWin(totalWin);
 
-    finalizeGlobalSpin(totalWin, bestWinKey, bestMultiplier);
+    if (totalWin > 0) {
+        currency += totalWin;
+        totalGain += Math.max(0, totalWin - totalBet); // Net gain calculation if needed
+        updateCurrencyDisplay('win');
+        showMessage(`Won ${formatWin(totalWin)}!`, 2000);
+        playSound(totalWin > totalBet * 5 ? 'win_big' : 'win_medium');
+        addWinToLeaderboard('Slots', totalWin);
+    } else {
+        totalLoss += totalBet;
+        playSound('lose');
+    }
+
+    spinButton.disabled = false;
+    spinButton.textContent = 'SPIN ALL';
+
+    // Auto Spin Logic?
+    if (isAutoSpinning) {
+        // Simple delay before next auto spin
+        setTimeout(startSpinAll, 1000);
+    }
 }
 
 function finalizeGlobalSpin(totalWin, winKey, multiplier) {

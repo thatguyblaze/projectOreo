@@ -117,18 +117,23 @@ function setCoinFlipChoice(choice) {
     if (isCoinFlipping || coinFlipActive) return; // Don't allow changing choice mid-round
     if (!coinflipChooseBlueBtn || !coinflipChooseYellowBtn || !coinflipButton || !coinflipStatus) return;
 
-    playSound('click'); // uses main.js
+    if (LocalBrokieAPI) LocalBrokieAPI.playSound('click');
     coinFlipChoice = choice;
 
     // Update button visuals
+    // ensure we remove 'ring-*' or 'selected' classes properly
+    coinflipChooseBlueBtn.classList.remove('ring-4', 'ring-blue-500', 'scale-110');
+    coinflipChooseYellowBtn.classList.remove('ring-4', 'ring-yellow-500', 'scale-110');
+
     if (choice === 'blue') {
-        coinflipChooseBlueBtn.classList.add('selected');
-        coinflipChooseYellowBtn.classList.remove('selected');
+        coinflipChooseBlueBtn.classList.add('ring-4', 'ring-blue-500', 'scale-110');
     } else {
-        coinflipChooseYellowBtn.classList.add('selected');
-        coinflipChooseBlueBtn.classList.remove('selected');
+        coinflipChooseYellowBtn.classList.add('ring-4', 'ring-yellow-500', 'scale-110');
     }
-    coinflipButton.disabled = false; // Enable flip button now that side is chosen
+
+    // Enable flip button
+    coinflipButton.disabled = false;
+    coinflipButton.textContent = "FLIP!";
     coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'Blue 🔵' : 'Yellow 🟡'}. Place your bet & Flip!`;
 }
 

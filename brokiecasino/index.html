@@ -220,15 +220,34 @@
                                     </div>
 
                                     <!-- Bet Controls -->
-                                    <div class="glass-card p-4 rounded-xl flex items-center gap-4">
-                                        <label class="text-slate-400 font-bold">Bet Per Machine:</label>
-                                        <div class="flex items-center gap-2">
-                                            <button class="bet-adjust p-2 rounded-lg bg-white/5 hover:bg-white/10"
-                                                data-action="halve">½</button>
-                                            <input type="number" id="slot-bet" value="10" min="1"
-                                                class="w-24 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center font-mono font-bold focus:border-indigo-500 outline-none">
-                                            <button class="bet-adjust p-2 rounded-lg bg-white/5 hover:bg-white/10"
-                                                data-action="double">2x</button>
+                                    <div class="glass-card p-4 rounded-xl flex flex-col gap-4">
+                                        <div class="flex items-center justify-between gap-4">
+                                            <div class="flex items-center gap-2">
+                                                <label
+                                                    class="text-slate-400 font-bold text-xs uppercase tracking-wider">Bet
+                                                    Per Machine:</label>
+                                                <div class="flex items-center gap-1">
+                                                    <button
+                                                        class="bet-adjust p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs"
+                                                        data-action="halve">½</button>
+                                                    <input type="number" id="slot-bet" value="10" min="1"
+                                                        class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-center font-mono font-bold focus:border-indigo-500 outline-none text-sm">
+                                                    <button
+                                                        class="bet-adjust p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs"
+                                                        data-action="double">2x</button>
+                                                </div>
+                                            </div>
+                                            <!-- New Stats -->
+                                            <div class="flex gap-4 text-xs font-mono">
+                                                <div class="flex flex-col items-end">
+                                                    <span class="text-slate-500 uppercase text-[10px]">Last Cost</span>
+                                                    <span id="slot-last-cost" class="text-slate-300">$0</span>
+                                                </div>
+                                                <div class="flex flex-col items-end">
+                                                    <span class="text-slate-500 uppercase text-[10px]">Last Win</span>
+                                                    <span id="slot-last-win" class="text-emerald-400">$0</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -307,49 +326,61 @@
                                                 id="crash-bet-max">MAX</button>
                                         </div>
                                     </div>
-                                    <div class="flex flex-col gap-3">
-                                        <label
-                                            class="text-[10px] uppercase font-bold text-slate-500 flex items-center gap-2">🛑
-                                            Auto Cashout</label>
-                                        <div class="flex gap-2 h-full items-start pt-1">
-                                            <div class="relative flex-grow">
-                                                <span
-                                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">x</span>
-                                                <input type="number" id="crash-auto-cashout-input" placeholder="2.00"
-                                                    class="w-full pl-3 pr-6 py-2 bg-black/50 border border-white/10 rounded text-white font-mono focus:border-indigo-500 outline-none">
+                                    <div class="flex flex-col gap-4">
+                                        <div class="flex gap-4">
+                                            <div class="flex-1">
+                                                <div
+                                                    class="flex items-center justify-between pointer-events-none opacity-50 mb-1">
+                                                    <label
+                                                        class="text-[9px] uppercase font-bold text-slate-500">Auto-Bet</label>
+                                                    <button id="crash-auto-bet-toggle"
+                                                        class="text-[9px] px-2 py-0.5 rounded bg-white/5 border border-white/10 pointer-events-auto hover:bg-white/10 transition-colors">OFF</button>
+                                                </div>
                                             </div>
-                                            <button id="crash-auto-cashout-toggle"
-                                                class="toggle-button text-[10px] py-2 w-20 h-[42px]">Enable</button>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <label
+                                                        class="text-[9px] uppercase font-bold text-slate-500">Auto-Cashout</label>
+                                                    <button id="crash-auto-cashout-toggle"
+                                                        class="text-[9px] px-2 py-0.5 rounded bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">OFF</button>
+                                                </div>
+                                                <div class="relative">
+                                                    <span
+                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]">x</span>
+                                                    <input type="text" id="crash-auto-cashout-input" value="2.00"
+                                                        disabled
+                                                        class="w-full pr-4 py-1.5 bg-black/50 border border-white/10 rounded text-white font-mono text-xs focus:border-indigo-500 outline-none">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 h-full items-end">
+                                            <button id="crash-bet-button"
+                                                class="game-button-action h-10 text-sm tracking-wider w-full col-span-2">🔥
+                                                PLACE BET</button>
+                                            <button id="crash-cashout-button"
+                                                class="game-button-action bg-emerald-500 hover:bg-emerald-600 border-emerald-400 h-10 text-sm tracking-wider w-full col-span-2 hidden">💰
+                                                CASHOUT</button>
                                         </div>
                                     </div>
-                                    <!-- Added Auto Bet Toggle for Crash -->
-                                    <div class="flex flex-col gap-3 justify-end pb-1">
-                                        <button id="crash-auto-bet-toggle"
-                                            class="toggle-button text-[10px] py-2 w-full h-[42px]">Auto
-                                            Bet Off</button>
-                                    </div>
-                                    <div class="md:col-span-2 flex gap-3 mt-2">
-                                        <button id="crash-bet-button" class="game-button-action flex-1 py-3 text-sm">🚀
-                                            Place
-                                            Bet</button>
-                                        <button id="crash-cashout-button" class="game-button danger flex-1 py-3 text-sm"
-                                            disabled>💸
-                                            Cashout</button>
-                                    </div>
                                 </div>
-                                <p id="crash-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                                <p id="crash-status" class="text-xs font-mono text-slate-500 min-h-[1.5em] mt-2"></p>
                             </div>
 
                             <!-- COIN FLIP -->
                             <div id="game-coinflip" class="game-area hidden flex flex-col items-center gap-10">
-                                <div class="coin-container my-8 scale-150">
-                                    <div id="coin" class="coin">
-                                        <div class="coin-face coin-front">🔵</div>
-                                        <div class="coin-face coin-back">🟡</div>
+                                <div class="coin-container perspective-1000 w-48 h-48 relative">
+                                    <div id="coin"
+                                        class="w-full h-full relative transform-style-3d transition-transform duration-700 pointer-events-none">
+                                        <div
+                                            class="coin-face front absolute w-full h-full rounded-full backface-hidden bg-gradient-to-br from-blue-400 to-blue-600 border-4 border-blue-300 shadow-[0_0_30px_rgba(59,130,246,0.5)] flex items-center justify-center">
+                                            <span class="text-6xl filter drop-shadow-lg">🔵</span>
+                                        </div>
+                                        <div class="coin-face back absolute w-full h-full rounded-full backface-hidden bg-gradient-to-br from-amber-400 to-yellow-500 border-4 border-yellow-300 shadow-[0_0_30px_rgba(245,158,11,0.5)] flex items-center justify-center"
+                                            style="transform: rotateY(180deg);">
+                                            <span class="text-6xl filter drop-shadow-lg">🟡</span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <!-- Coin Flip Winnings Display (Restored) -->
                                 <div class="h-6">
                                     <span id="coinflip-winnings"
                                         class="text-emerald-400 font-bold font-mono text-lg drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]"></span>
