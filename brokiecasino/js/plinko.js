@@ -48,7 +48,8 @@ if (typeof initPlinko === 'undefined') {
     const STUCK_FRAMES_THRESHOLD = 60;
 
     // Bucket definitions (multipliers and colors)
-    const BUCKET_MULTIPLIERS = [5, 2, 0.5, 0.1, 0.5, 2, 5]; // Central buckets have lower multipliers
+    // "100% Harder" - Payouts halved or significantly reduced
+    const BUCKET_MULTIPLIERS = [2.5, 1.2, 0.3, 0, 0.3, 1.2, 2.5];
     const BUCKET_COLORS = ['#ef4444', '#fb923c', '#a3a3a3', '#6b7280', '#a3a3a3', '#fb923c', '#ef4444'];
 
     // --- DOM Elements (Plinko Specific) ---
@@ -94,9 +95,9 @@ if (typeof initPlinko === 'undefined') {
         }
 
         if (LocalBrokieAPI && typeof LocalBrokieAPI.addBetAdjustmentListeners === 'function') {
-             LocalBrokieAPI.addBetAdjustmentListeners('plinko', plinkoBetInput);
+            LocalBrokieAPI.addBetAdjustmentListeners('plinko', plinkoBetInput);
         } else {
-             console.error("BrokieAPI.addBetAdjustmentListeners not found in plinko.js init");
+            console.error("BrokieAPI.addBetAdjustmentListeners not found in plinko.js init");
         }
 
         console.log("Plinko Initialized (v2.5.1 Guarded - House Edge Mod).");
@@ -417,8 +418,8 @@ if (typeof initPlinko === 'undefined') {
                     // --- END RIGGED HORIZONTAL DRIFT ---
 
                     if (Math.abs(ball.vy) < 0.15 && ball.y < canvasHeight - plinkoBuckets[0].height - 20) {
-                       ball.vy += 0.35;
-                       ball.vx += (Math.random() - 0.5) * 0.3;
+                        ball.vy += 0.35;
+                        ball.vx += (Math.random() - 0.5) * 0.3;
                     }
                     break;
                 }
@@ -443,19 +444,19 @@ if (typeof initPlinko === 'undefined') {
                         break;
                     }
                 }
-                 if (!landedInBucket && ball.y > bucketTopY + ball.radius + 5) {
-                     console.warn("Ball missed buckets, assigning to closest.");
-                     let closestBucket = plinkoBuckets[0];
-                     let minDist = Math.abs(ball.x - (closestBucket.x + closestBucket.width / 2));
-                     for(let j = 1; j < plinkoBuckets.length; j++) {
-                         let dist = Math.abs(ball.x - (plinkoBuckets[j].x + plinkoBuckets[j].width / 2));
-                         if (dist < minDist) {
-                             minDist = dist; closestBucket = plinkoBuckets[j];
-                         }
-                     }
-                     handlePlinkoWin(closestBucket, ball.betAmount);
-                     plinkoBalls.splice(i, 1);
-                 }
+                if (!landedInBucket && ball.y > bucketTopY + ball.radius + 5) {
+                    console.warn("Ball missed buckets, assigning to closest.");
+                    let closestBucket = plinkoBuckets[0];
+                    let minDist = Math.abs(ball.x - (closestBucket.x + closestBucket.width / 2));
+                    for (let j = 1; j < plinkoBuckets.length; j++) {
+                        let dist = Math.abs(ball.x - (plinkoBuckets[j].x + plinkoBuckets[j].width / 2));
+                        if (dist < minDist) {
+                            minDist = dist; closestBucket = plinkoBuckets[j];
+                        }
+                    }
+                    handlePlinkoWin(closestBucket, ball.betAmount);
+                    plinkoBalls.splice(i, 1);
+                }
             }
 
             // Anti-Stuck Jiggle Logic
@@ -503,11 +504,11 @@ if (typeof initPlinko === 'undefined') {
             LocalBrokieAPI.addWin('Plinko', profit);
             LocalBrokieAPI.playSound('plinko_win_high');
         } else if (profit < 0) {
-             statusText += `Lost ${LocalBrokieAPI.formatWin(Math.abs(profit))}.`;
-             LocalBrokieAPI.playSound('plinko_win_low');
+            statusText += `Lost ${LocalBrokieAPI.formatWin(Math.abs(profit))}.`;
+            LocalBrokieAPI.playSound('plinko_win_low');
         } else {
-             statusText += `Almost nothing back.`;
-             LocalBrokieAPI.playSound('plinko_peg_hit');
+            statusText += `Almost nothing back.`;
+            LocalBrokieAPI.playSound('plinko_peg_hit');
         }
         LocalBrokieAPI.showMessage(statusText, 2500);
         highlightBucket(bucket);
@@ -517,43 +518,43 @@ if (typeof initPlinko === 'undefined') {
      * Briefly highlights a specific bucket.
      */
     function highlightBucket(bucket) {
-       if (!plinkoCtx || !plinkoCanvas) return;
-       const ctx = plinkoCtx;
-       const originalColor = bucket.color;
-       const highlightFill = 'rgba(255, 255, 255, 0.9)';
-       const highlightBorder = '#FFFFFF';
-       const highlightTextColor = '#000000';
+        if (!plinkoCtx || !plinkoCanvas) return;
+        const ctx = plinkoCtx;
+        const originalColor = bucket.color;
+        const highlightFill = 'rgba(255, 255, 255, 0.9)';
+        const highlightBorder = '#FFFFFF';
+        const highlightTextColor = '#000000';
 
-       ctx.fillStyle = highlightFill;
-       ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
-       ctx.strokeStyle = highlightBorder;
-       ctx.lineWidth = 2;
-       ctx.strokeRect(bucket.x + 1, bucket.y + 1, bucket.width - 2, bucket.height - 2);
+        ctx.fillStyle = highlightFill;
+        ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
+        ctx.strokeStyle = highlightBorder;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(bucket.x + 1, bucket.y + 1, bucket.width - 2, bucket.height - 2);
 
-       ctx.fillStyle = highlightTextColor;
-       ctx.font = 'bold 13px Inter, sans-serif';
-       ctx.textAlign = 'center';
-       ctx.textBaseline = 'middle';
-       ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
-       ctx.lineWidth = 1;
+        ctx.fillStyle = highlightTextColor;
+        ctx.font = 'bold 13px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
+        ctx.lineWidth = 1;
 
-       setTimeout(() => {
-           if (plinkoCtx) {
-               ctx.fillStyle = originalColor;
-               ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
-               ctx.fillStyle = '#FFFFFF';
-               ctx.font = 'bold 12px Inter, sans-serif';
-               ctx.textAlign = 'center';
-               ctx.textBaseline = 'middle';
-               ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
-           }
-       }, 350);
+        setTimeout(() => {
+            if (plinkoCtx) {
+                ctx.fillStyle = originalColor;
+                ctx.fillRect(bucket.x, bucket.y, bucket.width, bucket.height);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 12px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${bucket.multiplier}x`, bucket.x + bucket.width / 2, bucket.y + bucket.height / 2);
+            }
+        }, 350);
     }
 
     // Expose initPlinko to be called from main.js or HTML
     window.initPlinko = initPlinko;
 
-// End of the guard block
+    // End of the guard block
 } else {
     console.warn("Plinko script (v2.5.1 - House Edge Mod) already loaded. Skipping re-initialization.");
 }
