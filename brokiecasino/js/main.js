@@ -952,7 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
     safeInit('Shop', typeof initShop !== 'undefined' ? initShop : undefined);
     safeInit('Slots', typeof initSlots !== 'undefined' ? initSlots : undefined);
     safeInit('Crash', typeof initCrash !== 'undefined' ? initCrash : undefined);
-    safeInit('CoinFlip', typeof initCoinflip !== 'undefined' ? initCoinflip : undefined);
+    safeInit('CoinFlip', typeof initCoinflip !== 'undefined' ? initCoinflip : (window.initCoinflip || undefined));
     safeInit('Minefield', typeof initMinefield !== 'undefined' ? initMinefield : undefined);
     safeInit('Memory', typeof initMemory !== 'undefined' ? initMemory : undefined);
     safeInit('Horserace', typeof initHorserace !== 'undefined' ? initHorserace : undefined);
