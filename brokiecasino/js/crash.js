@@ -286,6 +286,10 @@ function resetCrashVisuals() {
     crashBetButton.classList.remove('hidden');
     crashCashoutButton.disabled = true;
     crashCashoutButton.classList.add('hidden');
+
+    const skipBtn = document.getElementById('crash-skip-button');
+    if (skipBtn) skipBtn.classList.add('hidden');
+
     crashBetInput.disabled = false;
     if (crashAutoBetToggle) crashAutoBetToggle.disabled = false;
     if (crashAutoCashoutToggle) crashAutoCashoutToggle.disabled = false;
@@ -583,6 +587,9 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
         crashLiveProfit.className = 'text-slate-500 font-mono text-sm font-bold';
     }
 
+    const skipBtn = document.getElementById('crash-skip-button');
+    if (skipBtn) skipBtn.classList.add('hidden');
+
     updateCrashAutoCashoutToggleVisuals();
 
     const formattedBet = LocalBrokieAPI.formatWin(betAtEnd);
@@ -648,7 +655,10 @@ function attemptCashOut() {
         crashStatusDisplay.textContent = `Cashed Out. No profit.`;
     }
 
-    endCrashGame(false, crashPlayerBet);
+    // Do NOT end game here. Let it ride until crash.
+    // Show Skip Button
+    const skipBtn = document.getElementById('crash-skip-button');
+    if (skipBtn) skipBtn.classList.remove('hidden');
 }
 
 function stopCrashAutoBet() {
