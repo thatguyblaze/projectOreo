@@ -122,19 +122,20 @@ function setCoinFlipChoice(choice) {
 
     // Update button visuals
     // ensure we remove 'ring-*' or 'selected' classes properly
-    coinflipChooseBlueBtn.classList.remove('ring-4', 'ring-blue-500', 'scale-110');
-    coinflipChooseYellowBtn.classList.remove('ring-4', 'ring-yellow-500', 'scale-110');
+    coinflipChooseBlueBtn.classList.remove('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
+    coinflipChooseYellowBtn.classList.remove('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
 
+    // Use Amber (Gold) styling for both as they are both gold coins now
     if (choice === 'blue') {
-        coinflipChooseBlueBtn.classList.add('ring-4', 'ring-blue-500', 'scale-110');
+        coinflipChooseBlueBtn.classList.add('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
     } else {
-        coinflipChooseYellowBtn.classList.add('ring-4', 'ring-yellow-500', 'scale-110');
+        coinflipChooseYellowBtn.classList.add('ring-4', 'ring-amber-500', 'scale-110', 'bg-amber-500/20');
     }
 
     // Enable flip button
     coinflipButton.disabled = false;
     coinflipButton.textContent = "FLIP!";
-    coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'Blue 🔵' : 'Yellow 🟡'}. Place your bet & Flip!`;
+    coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'HEADS 🦁' : 'TAILS 🦅'}. Place your bet & Flip!`;
 }
 
 // --- Animation End Handler ---
