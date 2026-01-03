@@ -580,7 +580,7 @@ function setActiveTab(selectedTab) {
                 drawPlinkoBoard();
             }
             if (tab === tabSlots && typeof updateSlotsPayoutDisplay === 'function') {
-                updateSlotsPayoutDisplay(); // Update payouts on tab switch
+                // updateSlotsPayoutDisplay(); // Function is local to slots.js, not global. Logic handled in init/render.
             }
             // No specific action needed for Sabacc on switch *to* it, deal button handles reset.
 
