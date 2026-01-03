@@ -556,7 +556,11 @@ function setActiveTab(selectedTab) {
         if (tab === selectedTab) {
             // Activate the selected tab
             tab.setAttribute('aria-current', 'page');
-            gameArea.classList.remove('hidden'); // Make area potentially visible
+
+            // Force display: flex and remove hidden
+            gameArea.classList.remove('hidden');
+            gameArea.classList.add('flex');
+
             requestAnimationFrame(() => { // Ensure display change before transition
                 gameArea.classList.remove('opacity-0');
                 gameArea.classList.add('opacity-100'); // Fade in
@@ -580,20 +584,22 @@ function setActiveTab(selectedTab) {
                 drawPlinkoBoard();
             }
             if (tab === tabSlots && typeof updateSlotsPayoutDisplay === 'function') {
-                // updateSlotsPayoutDisplay(); // Function is local to slots.js, not global. Logic handled in init/render.
+                // updateSlotsPayoutDisplay(); // Handled locally
             }
-            // No specific action needed for Sabacc on switch *to* it, deal button handles reset.
+            // No specific action needed for Sabacc
 
         } else {
             // Deactivate other tabs
             tab.removeAttribute('aria-current');
             gameArea.classList.remove('opacity-100'); // Start fade out
             gameArea.classList.add('opacity-0');
+
             setTimeout(() => { // Hide completely after fade
-                if (tab.getAttribute('aria-current') !== 'page') { // Double check it wasn't re-selected
-                    gameArea.classList.add('hidden');
+                if (tab.getAttribute('aria-current') !== 'page') {
+                    gameArea.classList.remove('flex'); // Remove flex layout
+                    gameArea.classList.add('hidden'); // Force hide
                 }
-            }, 300); // Match CSS transition duration
+            }, 300);
         }
     });
     // playSound('click'); // Optional: Play click sound for tab switch

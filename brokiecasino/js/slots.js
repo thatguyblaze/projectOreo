@@ -281,7 +281,15 @@ function displayPayoutLegend() {
     const sortedPayouts = Object.entries(SLOT_PAYOUTS).sort(([, a], [, b]) => b - a);
     for (const [key, value] of sortedPayouts) {
         const li = document.createElement('li');
-        li.innerHTML = `<span>${key}</span><span>${value}x</span>`;
+        // Inline styles to ensure visibility regardless of CSS issues
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.padding = '8px 12px';
+        li.style.background = 'rgba(255,255,255,0.05)';
+        li.style.borderRadius = '6px';
+        li.style.marginBottom = '4px';
+
+        li.innerHTML = `<span style="font-size: 1.25rem;">${key}</span><span style="color: #ffd700; font-weight: bold;">${value}x</span>`;
         payoutList.appendChild(li);
     }
 }
