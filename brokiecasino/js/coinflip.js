@@ -50,11 +50,17 @@ function initCoinflip(API) {
     // Set initial state
     resetCoinFlip();
 
-    // Add Event Listeners
+    // Add Event Listeners with duplicate protection
+    coinflipButton.removeEventListener('click', handleCoinFlip);
     coinflipButton.addEventListener('click', handleCoinFlip);
+
+    coinflipCashoutButton.removeEventListener('click', cashOutCoinFlip);
     coinflipCashoutButton.addEventListener('click', cashOutCoinFlip);
-    coinflipChooseBlueBtn.addEventListener('click', () => setCoinFlipChoice('blue'));
-    coinflipChooseYellowBtn.addEventListener('click', () => setCoinFlipChoice('yellow'));
+
+    // Use named functions for choice buttons to avoid closure duplication issues, or just clear old clones
+    // For simplicity, we'll assume fresh elements or use onclick for critical path if listeners fail
+    coinflipChooseBlueBtn.onclick = () => setCoinFlipChoice('blue');
+    coinflipChooseYellowBtn.onclick = () => setCoinFlipChoice('yellow');
 
     // Add bet adjustment listeners using the factory function from main.js
     addBetAdjustmentListeners('coinflip', coinflipBetInput); // uses main.js
@@ -100,11 +106,11 @@ function resetCoinFlip() {
     }
     // Reset button selections
     if (coinflipChooseBlueBtn) {
-        coinflipChooseBlueBtn.classList.remove('selected');
+        coinflipChooseBlueBtn.className = "coinflip-choice-btn flex-1 py-6 border-blue-500/30 hover:bg-blue-500/10 text-blue-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all";
         coinflipChooseBlueBtn.disabled = false;
     }
     if (coinflipChooseYellowBtn) {
-        coinflipChooseYellowBtn.classList.remove('selected');
+        coinflipChooseYellowBtn.className = "coinflip-choice-btn flex-1 py-6 border-amber-500/30 hover:bg-amber-500/10 text-amber-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all";
         coinflipChooseYellowBtn.disabled = false;
     }
 }
@@ -114,29 +120,40 @@ function resetCoinFlip() {
  * @param {'blue' | 'yellow'} choice - The chosen side.
  */
 function setCoinFlipChoice(choice) {
+    console.log(`setCoinFlipChoice called with choice: ${choice}, Active: ${coinFlipActive}, Flipping: ${isCoinFlipping}`);
+
     if (isCoinFlipping || coinFlipActive) {
         console.warn("Cannot choose side while flipping or active round.");
         return;
     }
-    if (!coinflipChooseBlueBtn || !coinflipChooseYellowBtn || !coinflipButton || !coinflipStatus) return;
+
+    // Safety check for elements
+    if (!coinflipChooseBlueBtn || !coinflipChooseYellowBtn || !coinflipButton || !coinflipStatus) {
+        console.error("Coin Flip elements missing in setChoice");
+        return;
+    }
 
     if (LocalBrokieAPI) LocalBrokieAPI.playSound('click');
     coinFlipChoice = choice;
 
-    // Update button visuals
-    // Remove all potential active classes first
-    coinflipChooseBlueBtn.classList.remove('ring-4', 'ring-blue-500', 'scale-110', 'ring-amber-500', 'bg-amber-500/20');
-    coinflipChooseYellowBtn.classList.remove('ring-4', 'ring-yellow-500', 'scale-110', 'ring-amber-500', 'bg-amber-500/20');
+    // Reset all styling first for a clean state
+    coinflipChooseBlueBtn.className = "coinflip-choice-btn flex-1 py-6 border-blue-500/30 hover:bg-blue-500/10 text-blue-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all";
+    coinflipChooseYellowBtn.className = "coinflip-choice-btn flex-1 py-6 border-amber-500/30 hover:bg-amber-500/10 text-amber-400 text-lg flex flex-col gap-2 items-center rounded-xl transition-all";
 
+    // Apply Active Styling
     if (choice === 'blue') {
-        coinflipChooseBlueBtn.classList.add('ring-4', 'ring-blue-500', 'scale-110');
+        coinflipChooseBlueBtn.classList.remove('border-blue-500/30', 'hover:bg-blue-500/10');
+        coinflipChooseBlueBtn.classList.add('ring-4', 'ring-blue-500', 'scale-105', 'bg-blue-500/20', 'border-blue-500');
     } else {
-        coinflipChooseYellowBtn.classList.add('ring-4', 'ring-yellow-500', 'scale-110');
+        coinflipChooseYellowBtn.classList.remove('border-amber-500/30', 'hover:bg-amber-500/10');
+        coinflipChooseYellowBtn.classList.add('ring-4', 'ring-yellow-500', 'scale-105', 'bg-yellow-500/20', 'border-yellow-500');
     }
 
-    // Enable flip button
+    // Enable flip button explicitly
     coinflipButton.disabled = false;
     coinflipButton.textContent = "FLIP!";
+    coinflipButton.classList.remove('opacity-50', 'cursor-not-allowed');
+
     coinflipStatus.textContent = `Selected ${choice === 'blue' ? 'Blue 🔵' : 'Yellow 🟡'}. Place your bet & Flip!`;
 }
 
