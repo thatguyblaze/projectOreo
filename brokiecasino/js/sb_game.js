@@ -281,30 +281,40 @@ function renderMatches(matches, catId) {
 
     matches.slice(0, 50).forEach((m, idx) => {
         try {
-            // Robust Parsing: Check multiple possible API fields for names
+            // ADVANCED PARSING LAYER v2
+            // 1. Direct Field Access
             let homeName = m.home_team || m.home || m.player_1 || m.fighter_1 || (m.teams && m.teams.home ? m.teams.home.name : null) || (m.competitors && m.competitors[0] ? m.competitors[0].name : null);
             let awayName = m.away_team || m.away || m.player_2 || m.fighter_2 || (m.teams && m.teams.away ? m.teams.away.name : null) || (m.competitors && m.competitors[1] ? m.competitors[1].name : null);
 
-            // Fallback: Parse from Title string (common in Fight/Tennis feeds)
+            // 2. Title/Name Parsing (Deep Scan)
             if (!homeName || !awayName) {
-                const title = m.name || m.title || m.match_name || "";
-                if (title) {
-                    const splitters = [" vs ", " v ", " - "];
-                    for (let s of splitters) {
-                        if (title.toLowerCase().includes(s)) {
-                            const parts = title.split(new RegExp(s, 'i'));
-                            if (parts.length >= 2) {
-                                homeName = parts[0].trim();
-                                awayName = parts[1].trim();
-                                break;
-                            }
-                        }
+                // Check all possible title fields
+                const titleCandidates = [m.name, m.title, m.match_name, m.event, m.summary];
+                const validTitle = titleCandidates.find(t => t && typeof t === 'string' && (t.includes(' vs ') || t.includes(' v ') || t.includes(' - ')));
+
+                if (validTitle) {
+                    // Normalize separators
+                    let clean = validTitle.replace(/ v /i, ' vs ').replace(/ - /g, ' vs ');
+
+                    // Remove prefixes like "UFC 300: ", "Week 14: "
+                    clean = clean.replace(/^(UFC\s?\d*|NFL|NBA|Week\s?\d+)[:\s]+/, '');
+
+                    const parts = clean.split(' vs ');
+                    if (parts.length >= 2) {
+                        homeName = parts[0].trim();
+                        awayName = parts[1].trim();
                     }
                 }
             }
 
-            if (!homeName) homeName = "Competitor 1";
-            if (!awayName) awayName = "Competitor 2";
+            // 3. Last Resort Fallback (Generic vs Generic)
+            if (!homeName) homeName = "TBD Home";
+            if (!awayName) awayName = "TBD Away";
+
+            // Clean up names if they contain ":" (e.g. "UFC 300: Gaethje")
+            if (homeName.includes(":")) homeName = homeName.split(":").pop().trim();
+            if (awayName.includes(":")) awayName = awayName.split(":").pop().trim();
+
 
             // Logo Parsing: distinct logic for API provided vs generated
             let homeLogo = m.home_team_logo || m.home_logo || (m.teams?.home?.logo) || (m.teams?.home?.badge) || getTeamLogo(homeName, catId);
