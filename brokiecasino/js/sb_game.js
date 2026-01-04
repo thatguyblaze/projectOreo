@@ -259,10 +259,19 @@ function renderMatches(matches, catId) {
 
     matches.slice(0, 50).forEach((m, idx) => {
         try {
-            // ADVANCED PARSING LAYER v2
-            // 1. Direct Field Access
-            let homeName = m.home_team || m.home || m.player_1 || m.fighter_1 || (m.teams && m.teams.home ? m.teams.home.name : null) || (m.competitors && m.competitors[0] ? m.competitors[0].name : null);
-            let awayName = m.away_team || m.away || m.player_2 || m.fighter_2 || (m.teams && m.teams.away ? m.teams.away.name : null) || (m.competitors && m.competitors[1] ? m.competitors[1].name : null);
+            // ADVANCED PARSING LAYER v3 (Object Safety)
+            // Helper to extract string name from potential string OR object
+            const getName = (val) => {
+                if (!val) return null;
+                if (typeof val === 'string') return val;
+                if (typeof val === 'object' && val.name) return val.name;
+                if (typeof val === 'object' && val.team_name) return val.team_name;
+                return null;
+            };
+
+            // 1. Direct Field Access with Object Unwrapping
+            let homeName = getName(m.home_team) || getName(m.home) || getName(m.team1) || getName(m.player_1) || getName(m.fighter_1) || (m.teams && getName(m.teams.home)) || (m.competitors && getName(m.competitors[0]));
+            let awayName = getName(m.away_team) || getName(m.away) || getName(m.team2) || getName(m.player_2) || getName(m.fighter_2) || (m.teams && getName(m.teams.away)) || (m.competitors && getName(m.competitors[1]));
 
             // 2. Title/Name Parsing (Deep Scan)
             if (!homeName || !awayName) {
