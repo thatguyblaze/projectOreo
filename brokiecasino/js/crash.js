@@ -178,13 +178,41 @@ function setupCrashEventListeners() {
     // Bind Skip Button
     const skipBtn = document.getElementById('crash-skip-button');
     if (skipBtn) {
-        // Use onclick to avoid stacking
         skipBtn.onclick = () => {
             if (crashGameActive) {
-                displayedMultiplier = crashTargetMultiplier; // Instant jump
+                // Force the game loop to see a crash on next tick
+                // We do this by artificially setting the start time way back
+                crashStartTime = performance.now() - (CRASH_MAX_TIME_MS + 1000);
+                // Also snap visual
+                displayedMultiplier = crashTargetMultiplier;
             }
         };
     }
+}
+
+// Render Logic
+function renderCrashHistory() {
+    const container = document.getElementById('crash-history-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Check if empty
+    if (crashHistory.length === 0) {
+        container.innerHTML = '<span class="text-[10px] text-slate-500 italic">No history</span>';
+        return;
+    }
+
+    crashHistory.forEach(mult => {
+        const item = document.createElement('div');
+        let colorClass = 'text-slate-400 border-slate-700 bg-slate-800/50';
+        if (mult >= 10) colorClass = 'text-amber-400 border-amber-500/50 bg-amber-500/10';
+        else if (mult >= 2) colorClass = 'text-emerald-400 border-emerald-500/50 bg-emerald-500/10';
+        else colorClass = 'text-rose-400 border-rose-500/50 bg-rose-500/10';
+
+        item.className = `px-2 py-0.5 rounded text-[10px] font-mono border min-w-[30px] text-center ${colorClass}`;
+        item.textContent = `${mult.toFixed(2)}x`;
+        container.appendChild(item);
+    });
 }
 
 /**
