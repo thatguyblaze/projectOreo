@@ -259,49 +259,68 @@ function renderMatches(matches, catId) {
 
     matches.slice(0, 50).forEach((m, idx) => {
         try {
-            // ADVANCED PARSING LAYER v3 (Object Safety)
-            // Helper to extract string name from potential string OR object
+            // ADVANCED PARSING LAYER v4
+            // Helper to extract string name
             const getName = (val) => {
                 if (!val) return null;
-                if (typeof val === 'string') return val;
+                if (typeof val === 'string' && val.trim().length > 1) return val;
                 if (typeof val === 'object' && val.name) return val.name;
                 if (typeof val === 'object' && val.team_name) return val.team_name;
+                if (typeof val === 'object' && val.player_name) return val.player_name;
                 return null;
             };
 
-            // 1. Direct Field Access with Object Unwrapping
-            let homeName = getName(m.home_team) || getName(m.home) || getName(m.team1) || getName(m.player_1) || getName(m.fighter_1) || (m.teams && getName(m.teams.home)) || (m.competitors && getName(m.competitors[0]));
-            let awayName = getName(m.away_team) || getName(m.away) || getName(m.team2) || getName(m.player_2) || getName(m.fighter_2) || (m.teams && getName(m.teams.away)) || (m.competitors && getName(m.competitors[1]));
+            // 1. Array/Object Checks (participants, teams, competitors)
+            let homeName = getName(m.home_team) || getName(m.home) || getName(m.team1) || getName(m.player_1) || getName(m.fighter_1);
+            let awayName = getName(m.away_team) || getName(m.away) || getName(m.team2) || getName(m.player_2) || getName(m.fighter_2);
 
-            // 2. Title/Name Parsing (Deep Scan)
+            // Deep Nested Checks
+            if (!homeName) homeName = (m.teams && getName(m.teams.home)) || (m.competitors && getName(m.competitors[0])) || (m.participants && getName(m.participants[0]));
+            if (!awayName) awayName = (m.teams && getName(m.teams.away)) || (m.competitors && getName(m.competitors[1])) || (m.participants && getName(m.participants[1]));
+
+            // 2. Title Parsing (Fallback)
             if (!homeName || !awayName) {
-                // Check all possible title fields
                 const titleCandidates = [m.name, m.title, m.match_name, m.event, m.summary];
-                const validTitle = titleCandidates.find(t => t && typeof t === 'string' && (t.includes(' vs ') || t.includes(' v ') || t.includes(' - ')));
+                const validTitle = titleCandidates.find(t => t && typeof t === 'string' && (t.includes(' vs ') || t.includes(' v ') || t.includes(' - ') || t.includes(' @ ')));
 
                 if (validTitle) {
-                    // Normalize separators
-                    let clean = validTitle.replace(/ v /i, ' vs ').replace(/ - /g, ' vs ');
-
-                    // Remove prefixes like "UFC 300: ", "Week 14: "
-                    clean = clean.replace(/^(UFC\s?\d*|NFL|NBA|Week\s?\d+)[:\s]+/, '');
+                    let clean = validTitle.replace(/ v /i, ' vs ').replace(/ - /g, ' vs ').replace(/ @ /g, ' vs ');
+                    clean = clean.replace(/^(UFC\s?\d*\s*:?|NFL\s*:?|NBA\s*:?|Week\s?\d+\s*:?)/i, '').trim();
 
                     const parts = clean.split(' vs ');
                     if (parts.length >= 2) {
                         homeName = parts[0].trim();
                         awayName = parts[1].trim();
+                    } else {
+                        // If split fails but we have a title, use title as Home and "Field" as Away temporarily?
+                        // Or just show title as Home and "-" as Away to avoid TBD.
+                        homeName = clean;
+                        awayName = "";
                     }
                 }
             }
 
-            // 3. Last Resort Fallback (Generic vs Generic)
-            if (!homeName) homeName = "TBD Home";
-            if (!awayName) awayName = "TBD Away";
+            // 3. Last Resort: Show Object Keys for Debugging only if TBD
+            if (!homeName || homeName === 'TBD Home') {
+                // Debug: Show keys to identify where data is hiding
+                homeName = m.name || m.title || "Unknown (" + Object.keys(m).join(',').substring(0, 20) + "...)";
+            }
+            if (!awayName || awayName === 'TBD Away') awayName = "Field";
 
-            // Clean up names if they contain ":" (e.g. "UFC 300: Gaethje")
-            if (homeName.includes(":")) homeName = homeName.split(":").pop().trim();
-            if (awayName.includes(":")) awayName = awayName.split(":").pop().trim();
+            // Cleanup
+            if (homeName && homeName.includes(":")) homeName = homeName.split(":").pop().trim();
+            if (awayName && awayName.includes(":")) awayName = awayName.split(":").pop().trim();
 
+            // 4. STRICT LIVE CHECK
+            // statusStr.includes('live') is DANGEROUS because "Live Coverage Starting Soon" matches.
+            const statusRaw = (m.status || m.time || "").toString().toLowerCase();
+            const isLive = (
+                statusRaw === 'live' ||
+                statusRaw === 'in progress' ||
+                statusRaw.includes('q1') || statusRaw.includes('q2') || statusRaw.includes('q3') || statusRaw.includes('q4') ||
+                (statusRaw.includes('half') && !statusRaw.includes('final')) ||
+                (m.is_live === true)
+            ) && !statusRaw.includes('not') && !statusRaw.includes('final') && !statusRaw.includes('finished');
 
             // Logo Parsing: distinct logic for API provided vs generated
             let homeLogo = m.home_team_logo || m.home_logo || (m.teams?.home?.logo) || (m.teams?.home?.badge) || getTeamLogo(homeName, catId);
@@ -325,9 +344,6 @@ function renderMatches(matches, catId) {
 
             // Status & Time
             const league = m.league || m.category || catId.toUpperCase();
-            const statusStr = (m.status || m.time || "").toLowerCase();
-            const isLive = statusStr.includes("live") || statusStr.includes("in progress") || statusStr.includes("q1") || statusStr.includes("q2") || statusStr.includes("q3") || statusStr.includes("q4");
-
             // Generate Readable Date
             let dateDisplay = "UPCOMING";
             if (!isLive) {
