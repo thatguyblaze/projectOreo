@@ -1,4 +1,4 @@
-console.log("Loading sb_game.js (Professional Live v1)...");
+console.log("Loading sb_game.js (Professional Live v2 - Fixed status/UFC logos)...");
 
 /* ==========================================================================
    GLOBAL STATE & INIT
@@ -16,7 +16,7 @@ window.initSports = function (API) {
     // Render Main Layout
     container.innerHTML = `
         <div class="flex flex-col gap-4 w-full h-full text-slate-200 font-sans">
-            <!-- HEADER: Balance & Controls -->
+            <!-- HEADER -->
             <div class="flex flex-col md:flex-row justify-between items-center bg-slate-900 border border-white/5 p-3 rounded-xl shadow-lg gap-4">
                 <div class="flex gap-3 items-center">
                     <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-xl border border-white/10 shadow-lg">
@@ -32,7 +32,7 @@ window.initSports = function (API) {
                     </div>
                 </div>
                 
-                <!-- WAGER CONTROL (Standardized) -->
+                <!-- WAGER CONTROL -->
                 <div class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/5 shadow-inner">
                     <div class="flex items-center gap-1">
                         <button onclick="adjustSbWager(-10)" class="w-8 h-8 rounded bg-white/5 hover:bg-white/10 text-[10px] font-bold text-slate-400 border border-white/5 transition-colors">-10</button>
@@ -63,12 +63,11 @@ window.initSports = function (API) {
             
             <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 flex-grow overflow-hidden min-h-[600px]">
                 
-                <!-- LEFT COLUMN: Categories & Matches -->
+                <!-- LEFT: Stream & Matches -->
                 <div class="xl:col-span-3 flex flex-col gap-4 h-full overflow-hidden">
                     
-                    <!-- EMBEDDED PLAYER CONTAINER -->
+                    <!-- VIDEO PLAYER -->
                     <div id="sb-player-container" class="w-full aspect-video bg-black rounded-xl relative overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 group">
-                        <!-- Header Overlay -->
                         <div class="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/80 to-transparent z-20 flex justify-between items-start pointer-events-none">
                             <div class="flex gap-4 items-center">
                                 <span class="bg-rose-600/90 backdrop-blur text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
@@ -78,11 +77,8 @@ window.initSports = function (API) {
                             </div>
                         </div>
 
-                        <!-- IFRAME / VIDEO -->
                         <div class="w-full h-full bg-slate-900 relative">
                             <iframe id="sb-video-frame" class="w-full h-full object-cover" src="about:blank" frameborder="0" allowfullscreen></iframe>
-                            
-                            <!-- Placeholder State -->
                             <div id="sb-video-placeholder" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center pointer-events-none">
                                 <img src="https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=1000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-20">
                                 <div class="z-10 bg-black/50 p-6 rounded-2xl border border-white/10 backdrop-blur-sm text-center">
@@ -94,31 +90,22 @@ window.initSports = function (API) {
                         </div>
                     </div>
 
-                    <!-- TABS & GRID -->
+                    <!-- TABS & MATCHES -->
                     <div class="flex flex-col flex-grow overflow-hidden gap-3">
-                        <div class="flex gap-2 pb-1 overflow-x-auto hide-scrollbar flex-shrink-0" id="sb-tabs">
-                             <!-- Tabs injected via JS -->
-                        </div>
-
-                        <div id="sb-matches" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar pb-10">
-                             <div class="flex flex-col items-center justify-center p-20 gap-4 opacity-50">
-                                <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                                <span class="text-xs text-slate-400 font-mono">Connecting to Live Feed...</span>
-                             </div>
-                        </div>
+                        <div class="flex gap-2 pb-1 overflow-x-auto hide-scrollbar flex-shrink-0" id="sb-tabs"></div>
+                        <div id="sb-matches" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar pb-10"></div>
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: Betting Slip -->
+                <!-- RIGHT: Slip -->
                 <div class="xl:col-span-1 bg-slate-900/50 border border-white/5 rounded-xl flex flex-col h-full overflow-hidden shadow-xl">
                     <div class="p-3 border-b border-white/5 bg-black/20 flex justify-between items-center">
                         <h3 class="font-bold text-sm uppercase tracking-widest text-white">Ticket</h3>
                         <span class="text-[9px] text-slate-500 bg-white/5 px-2 py-0.5 rounded">My Bets</span>
                     </div>
-                    
                     <div id="sb-bets" class="flex-grow overflow-y-auto p-3 space-y-3 custom-scrollbar">
                         <div class="flex flex-col items-center justify-center h-40 text-slate-700 gap-3">
-                            <span class="text-4xl opacity-20">�</span>
+                            <span class="text-4xl opacity-20">📝</span>
                             <span class="text-xs font-bold text-slate-500">Slip is empty</span>
                         </div>
                     </div>
@@ -129,7 +116,7 @@ window.initSports = function (API) {
 
     updateSbBalance();
 
-    // Initial Load
+    // START
     renderCategoryTabs();
     loadSportSRC('american-football');
 };
@@ -186,7 +173,7 @@ const SPORTS_CATS = [
     { id: 'basketball', label: 'NBA', icon: '🏀' },
     { id: 'baseball', label: 'MLB', icon: '⚾' },
     { id: 'hockey', label: 'NHL', icon: '🏒' },
-    { id: 'fight', label: 'UFC', icon: '🥊' },
+    { id: 'fight', label: 'UFC', icon: '🥊' }, // API ID 'fight' for UFC
     { id: 'football', label: 'Soccer', icon: '⚽' }
 ];
 
@@ -202,8 +189,8 @@ function renderCategoryTabs() {
         const isActive = cat.id === activeCatId;
 
         btn.className = `px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap border flex items-center gap-2 ${isActive
-                ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
-                : 'bg-black/40 text-slate-500 border-white/5 hover:bg-white/5 hover:text-white'
+            ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
+            : 'bg-black/40 text-slate-500 border-white/5 hover:bg-white/5 hover:text-white'
             }`;
 
         btn.innerHTML = `<span>${cat.icon}</span> ${cat.label}`;
@@ -216,6 +203,38 @@ function renderCategoryTabs() {
     });
 }
 
+// LOGO & BADGE HELPER
+function getTeamLogo(teamName, category) {
+    // Basic heuristics to fetch logos from ESPN's CDN or public sources
+    const lower = teamName.toLowerCase();
+
+    // NFL
+    if (category === 'american-football' || category === 'nfl') {
+        // Map abbreviations if possible, or try search
+        const nflTeams = {
+            'chiefs': 'kc', 'ravens': 'bal', 'bills': 'bf', '49ers': 'sf', 'cowboys': 'dal', 'eagles': 'phi', 'packers': 'gb', 'steelers': 'pit'
+        };
+        // Try finding a key match
+        for (let k in nflTeams) { if (lower.includes(k)) return `https://a.espncdn.com/i/teamlogos/nfl/500/${nflTeams[k]}.png`; }
+        return "https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png"; // Fallback NFL
+    }
+
+    // NBA
+    if (category === 'basketball' || category === 'nba') {
+        const nbaTeams = { 'lakers': 'lal', 'warriors': 'gs', 'celtics': 'bos', 'heat': 'mia', 'bulls': 'chi', 'knicks': 'ny' };
+        for (let k in nbaTeams) { if (lower.includes(k)) return `https://a.espncdn.com/i/teamlogos/nba/500/${nbaTeams[k]}.png`; }
+        return "https://a.espncdn.com/i/teamlogos/leagues/500/nba.png";
+    }
+
+    // UFC / Fight
+    if (category === 'fight' || category === 'ufc') {
+        return "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UFC_Logo.svg/2560px-UFC_Logo.svg.png"; // Generic UFC logo for fighters usually
+    }
+
+    return null; // Default SVG fallback will allow rendering placeholder
+}
+
+
 async function loadSportSRC(categoryId) {
     const matchesEl = document.getElementById('sb-matches');
     if (matchesEl) matchesEl.innerHTML = `
@@ -225,28 +244,19 @@ async function loadSportSRC(categoryId) {
         </div>`;
 
     try {
-        const url = `https://api.sportsrc.org/?data=matches&category=${categoryId}`;
-        console.log("Fetching SportSRC:", url);
+        // Special mapping for UFC if needed
+        let apiCat = categoryId;
+        if (categoryId === 'ufc') apiCat = 'fight';
 
+        const url = `https://api.sportsrc.org/?data=matches&category=${apiCat}`;
         const response = await fetch(url);
-        // Sometimes API might return 404 for empty cats, so handle gracefully
-        if (!response.ok) {
-            console.warn("API 404/Error, showing mock data for demo.");
-            // Fallback to mock if API down so user sees "Real Website" experience
-            renderMatches(generateMockLiveGames(categoryId), categoryId);
-            return;
-        }
 
-        const jsonData = await response.json();
         let matches = [];
-
-        // Handle various API return shapes
-        if (jsonData && jsonData.success && Array.isArray(jsonData.data)) {
-            matches = jsonData.data;
-        } else if (jsonData && Array.isArray(jsonData)) {
-            matches = jsonData;
-        } else if (jsonData && Array.isArray(jsonData.data)) {
-            matches = jsonData.data;
+        if (response.ok) {
+            const jsonData = await response.json();
+            if (jsonData && jsonData.success && Array.isArray(jsonData.data)) { matches = jsonData.data; }
+            else if (jsonData && Array.isArray(jsonData)) { matches = jsonData; }
+            else if (jsonData && Array.isArray(jsonData.data)) { matches = jsonData.data; }
         }
 
         if (!matches) matches = [];
@@ -254,13 +264,12 @@ async function loadSportSRC(categoryId) {
         if (matches.length > 0) {
             renderMatches(matches, categoryId);
         } else {
-            // Fallback Mock so UI is never empty (User Requirement: "Show video of live game")
+            console.log("Empty API, showing mock.");
             renderMatches(generateMockLiveGames(categoryId), categoryId);
         }
 
     } catch (err) {
         console.error("SportSRC Error:", err);
-        // Fallback Mock
         renderMatches(generateMockLiveGames(categoryId), categoryId);
     }
 }
@@ -276,10 +285,16 @@ function renderMatches(matches, catId) {
             let homeName = m.home_team || m.home || (m.teams && m.teams.home ? m.teams.home.name : "Home Team");
             let awayName = m.away_team || m.away || (m.teams && m.teams.away ? m.teams.away.name : "Away Team");
 
-            if (!homeName) { homeName = "Home Team"; }
-            if (!awayName) { awayName = "Away Team"; }
+            if (!homeName) { homeName = "Player A"; }
+            if (!awayName) { awayName = "Player B"; }
 
-            // Extract or Generate Odds
+            // UFC / Fighting Fix: Usually parsing might differ "Fighter A vs Fighter B" string
+            // If category is fight, default names if generic
+
+            const homeLogo = getTeamLogo(homeName, catId) || `https://ui-avatars.com/api/?name=${encodeURIComponent(homeName)}&background=333&color=fff&rounded=true`;
+            const awayLogo = getTeamLogo(awayName, catId) || `https://ui-avatars.com/api/?name=${encodeURIComponent(awayName)}&background=333&color=fff&rounded=true`;
+
+            // Extract Odds
             let o1 = 1.90, oX = 3.50, o2 = 1.90;
             if (m.odds) {
                 o1 = parseFloat(m.odds.home || m.odds['1']) || 1.90;
@@ -293,20 +308,57 @@ function renderMatches(matches, catId) {
 
             const league = m.league || m.category || catId.toUpperCase();
 
-            // "Embed Their Player" - We look for m.video_url or similar. 
-            // If API doesn't have it, we construct a fallback that matches user request "embed their api video player".
-            // We assume they might support /embed/id. Even if it 404s, it's what was asked. 
-            // But to make it USER FRIENDLY, we will use a generic visually pleasing YouTube embed if the ID is missing.
+            // "LIVE" CHECK
+            // Use real time data if available, otherwise check "status" or assume UPCOMING if no time provided.
+            // ONLY explicitly mark LIVE if status says so or time is 'now'.
+            const statusStr = (m.status || m.time || "").toLowerCase();
+            const isLive = statusStr.includes("live") || statusStr.includes("in progress") || statusStr.includes("q1") || statusStr.includes("q2") || statusStr.includes("q3") || statusStr.includes("q4");
+
+            // Stream URL
             const streamUrl = m.video_url || m.embed_url || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(homeName + " vs " + awayName + " live")}`;
+
+            // Date Parsing
+            let dateDisplay = "UPCOMING";
+            if (!isLive) {
+                // Try Parse m.time (often string like "2023-10-10 20:00" or unix)
+                const rawTime = m.time || m.start || m.date || m.timestamp;
+                if (rawTime) {
+                    // If rawTime is strictly numeric digits, treat strings as numbers (unix timestamp)
+                    const d = new Date((typeof rawTime === 'string' && /^\d+$/.test(rawTime)) ? parseInt(rawTime) * 1000 : rawTime);
+
+                    if (!isNaN(d.getTime())) {
+                        const now = new Date();
+                        const isToday = now.toDateString() === d.toDateString();
+                        // Check if it's tomorrow
+                        const tomorrow = new Date(now);
+                        tomorrow.setDate(now.getDate() + 1);
+                        const isTomorrow = tomorrow.toDateString() === d.toDateString();
+
+                        const timeStr = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+                        if (isToday) dateDisplay = `Today • ${timeStr}`;
+                        else if (isTomorrow) dateDisplay = `Tomorrow • ${timeStr}`;
+                        else dateDisplay = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + " • " + timeStr;
+                    } else {
+                        // Fallback if string is specific text/format we cant parse automatically
+                        dateDisplay = String(rawTime).replace("T", " ");
+                    }
+                }
+            }
 
             const card = document.createElement('div');
             card.className = "bg-slate-800/40 border border-white/5 hover:border-indigo-500/30 p-4 rounded-xl transition-all group relative overflow-hidden flex flex-col gap-3";
 
             card.innerHTML = `
                 <div class="flex justify-between items-start">
-                    <div class="flex gap-2 items-center">
-                        <span class="text-[9px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded uppercase">${league}</span>
-                         ${(Math.random() > 0.5) ? '<span class="text-[9px] font-bold text-white bg-rose-600 px-2 py-0.5 rounded animate-pulse">LIVE</span>' : '<span class="text-[9px] font-bold text-slate-500">UPCOMING</span>'}
+                    <div class="flex flex-col gap-1">
+                        <div class="flex gap-2 items-center">
+                            <span class="text-[9px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded uppercase">${league}</span>
+                             ${isLive
+                    ? '<span class="text-[9px] font-bold text-white bg-rose-600 px-2 py-0.5 rounded animate-pulse">● LIVE</span>'
+                    : `<span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 tracking-tight">📅 ${dateDisplay}</span>`
+                }
+                        </div>
                     </div>
                     <button onclick="watchSportsStream('${streamUrl}', '${homeName} vs ${awayName}')" class="text-[10px] font-bold text-indigo-400 hover:text-white flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500 px-2 py-1 rounded transition-colors border border-indigo-500/20">
                         📺 Watch Stream
@@ -314,12 +366,14 @@ function renderMatches(matches, catId) {
                 </div>
                 
                 <div class="flex items-center justify-between gap-4">
-                    <div class="w-[40%]">
-                        <span class="font-bold text-sm text-white leading-tight block truncate" title="${homeName}">${homeName}</span>
+                    <div class="w-[40%] flex flex-col items-center gap-2">
+                        <img src="${homeLogo}" class="w-10 h-10 object-contain drop-shadow-md">
+                        <span class="font-bold text-sm text-white leading-tight block truncate text-center w-full" title="${homeName}">${homeName}</span>
                     </div>
                     <div class="text-[10px] font-mono text-slate-600 font-bold">VS</div>
-                    <div class="w-[40%] text-right">
-                        <span class="font-bold text-sm text-white leading-tight block truncate" title="${awayName}">${awayName}</span>
+                    <div class="w-[40%] flex flex-col items-center gap-2">
+                        <img src="${awayLogo}" class="w-10 h-10 object-contain drop-shadow-md">
+                        <span class="font-bold text-sm text-white leading-tight block truncate text-center w-full" title="${awayName}">${awayName}</span>
                     </div>
                 </div>
 
@@ -328,10 +382,12 @@ function renderMatches(matches, catId) {
                         <span class="text-[10px] text-slate-500">Home</span>
                         <span class="text-xs font-bold text-indigo-400">${o1}</span>
                     </button>
+                    ${catId === 'fight' ? '' : `
                     <button onclick="placeLiveBet('Draw', ${oX}, 'X')" class="bg-black/40 hover:bg-white/5 border border-white/5 rounded py-2 flex flex-col items-center">
                         <span class="text-[10px] text-slate-500">Draw</span>
                         <span class="text-xs font-bold text-slate-400">${oX}</span>
                     </button>
+                    `}
                     <button onclick="placeLiveBet('${awayName.replace(/'/g, "\\'")}', ${o2}, '2')" class="bg-black/40 hover:bg-white/5 border border-white/5 rounded py-2 flex flex-col items-center">
                         <span class="text-[10px] text-slate-500">Away</span>
                         <span class="text-xs font-bold text-indigo-400">${o2}</span>
@@ -346,13 +402,19 @@ function renderMatches(matches, catId) {
 }
 
 function generateMockLiveGames(catId) {
-    // Fallback data if API is empty/down to ensure "Live" feel
+    if (catId === 'fight') {
+        // UFC Mock
+        return [
+            { home: "Jon Jones", away: "Stipe Miocic", league: "UFC 300", odds: { home: 1.5, away: 2.6 }, status: "LIVE" },
+            { home: "Sean O'Malley", away: "Chito Vera", league: "UFC Main", odds: { home: 1.7, away: 2.1 }, status: "Upcoming" },
+            { home: "Dustin Poirier", away: "Benoit Saint-Denis", league: "UFC Fight Night", odds: { home: 1.9, away: 1.9 }, status: "Upcoming" }
+        ];
+    }
+    // Generic
     return [
-        { home: "Kansas City Chiefs", away: "Buffalo Bills", league: "NFL", odds: { home: 1.80, draw: 15.0, away: 2.10 } },
-        { home: "Golden State Warriors", away: "LA Lakers", league: "NBA", odds: { home: 1.50, draw: 12.0, away: 2.80 } },
-        { home: "Boston Celtics", away: "Miami Heat", league: "NBA", odds: { home: 1.30, draw: 14.0, away: 3.50 } },
-        { home: "Real Madrid", away: "Barcelona", league: "La Liga", odds: { home: 2.10, draw: 3.20, away: 2.50 } },
-        { home: "NY Yankees", away: "Boston Red Sox", league: "MLB", odds: { home: 1.70, draw: 20.0, away: 2.30 } }
+        { home: "Kansas City Chiefs", away: "Buffalo Bills", league: "NFL", odds: { home: 1.80, draw: 15.0, away: 2.10 }, status: "Upcoming" },
+        { home: "Golden State Warriors", away: "LA Lakers", league: "NBA", odds: { home: 1.50, draw: 12.0, away: 2.80 }, status: "LIVE Q4" },
+        { home: "NY Yankees", away: "Boston Red Sox", league: "MLB", odds: { home: 1.70, draw: 20.0, away: 2.30 }, status: "Upcoming" }
     ];
 }
 
@@ -394,7 +456,7 @@ window.placeLiveBet = function (selection, odds, pick) {
     const betId = Date.now();
     const slip = document.getElementById('sb-bets');
     if (slip) {
-        if (slip.querySelector('.text-slate-700')) slip.innerHTML = ''; // Clear empty state
+        if (slip.querySelector('.text-slate-700')) slip.innerHTML = '';
 
         const ticket = document.createElement('div');
         ticket.id = `ticket-${betId}`;
@@ -409,7 +471,6 @@ window.placeLiveBet = function (selection, odds, pick) {
                 <span class="text-emerald-500">Win: $${Math.floor(wager * odds)}</span>
             </div>
             
-            <!-- Live Ticker -->
             <div class="bg-black/30 rounded p-1.5 flex items-center justify-between border border-white/5">
                 <div class="flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
@@ -418,13 +479,10 @@ window.placeLiveBet = function (selection, odds, pick) {
                 <div class="text-[9px] font-mono text-slate-500" id="timer-${betId}">00:00</div>
             </div>
 
-            <!-- Auto-Resolve Indicator (Hidden) -->
             <div id="result-${betId}" class="mt-2 hidden"></div>
         `;
         slip.prepend(ticket);
 
-        // Simulate "Live Game" progress for this specific bet
-        // (Since we can't wait 3 hours, we fast-forward the result after 10-15 seconds)
         runLiveGameSimulation(betId, selection, odds, wager);
     }
 };
@@ -433,14 +491,13 @@ function runLiveGameSimulation(id, sel, odds, wager) {
     const timer = document.getElementById(`timer-${id}`);
     let seconds = 0;
     const interval = setInterval(() => {
-        seconds += 5; // Fast forward time
+        seconds += 5; // Fast forward
         if (timer) {
             const m = Math.floor(seconds / 60);
             const s = seconds % 60;
             timer.innerText = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
         }
 
-        // End Game mechanism (Random duration 10-20s)
         if (seconds > 15 + Math.random() * 15) {
             clearInterval(interval);
             resolveLiveBet(id, sel, odds, wager);
@@ -452,7 +509,6 @@ function resolveLiveBet(id, sel, odds, wager) {
     const ticket = document.getElementById(`ticket-${id}`);
     if (!ticket) return;
 
-    // Calculate Win/Loss based on Probability
     const winProb = (1 / odds) - 0.05;
     const isWin = Math.random() < winProb;
 
