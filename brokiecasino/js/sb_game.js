@@ -281,18 +281,38 @@ function renderMatches(matches, catId) {
 
     matches.slice(0, 50).forEach((m, idx) => {
         try {
-            // Robust Parsing
-            let homeName = m.home_team || m.home || (m.teams && m.teams.home ? m.teams.home.name : "Home Team");
-            let awayName = m.away_team || m.away || (m.teams && m.teams.away ? m.teams.away.name : "Away Team");
+            // Robust Parsing: Check multiple possible API fields for names
+            let homeName = m.home_team || m.home || m.player_1 || m.fighter_1 || (m.teams && m.teams.home ? m.teams.home.name : null) || (m.competitors && m.competitors[0] ? m.competitors[0].name : null);
+            let awayName = m.away_team || m.away || m.player_2 || m.fighter_2 || (m.teams && m.teams.away ? m.teams.away.name : null) || (m.competitors && m.competitors[1] ? m.competitors[1].name : null);
 
-            if (!homeName) { homeName = "Player A"; }
-            if (!awayName) { awayName = "Player B"; }
+            // Fallback: Parse from Title string (common in Fight/Tennis feeds)
+            if (!homeName || !awayName) {
+                const title = m.name || m.title || m.match_name || "";
+                if (title) {
+                    const splitters = [" vs ", " v ", " - "];
+                    for (let s of splitters) {
+                        if (title.toLowerCase().includes(s)) {
+                            const parts = title.split(new RegExp(s, 'i'));
+                            if (parts.length >= 2) {
+                                homeName = parts[0].trim();
+                                awayName = parts[1].trim();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
 
-            // UFC / Fighting Fix: Usually parsing might differ "Fighter A vs Fighter B" string
-            // If category is fight, default names if generic
+            if (!homeName) homeName = "Competitor 1";
+            if (!awayName) awayName = "Competitor 2";
 
-            const homeLogo = getTeamLogo(homeName, catId) || `https://ui-avatars.com/api/?name=${encodeURIComponent(homeName)}&background=333&color=fff&rounded=true`;
-            const awayLogo = getTeamLogo(awayName, catId) || `https://ui-avatars.com/api/?name=${encodeURIComponent(awayName)}&background=333&color=fff&rounded=true`;
+            // Logo Parsing: distinct logic for API provided vs generated
+            let homeLogo = m.home_team_logo || m.home_logo || (m.teams?.home?.logo) || (m.teams?.home?.badge) || getTeamLogo(homeName, catId);
+            let awayLogo = m.away_team_logo || m.away_logo || (m.teams?.away?.logo) || (m.teams?.away?.badge) || getTeamLogo(awayName, catId);
+
+            // Final Fallback for logos
+            if (!homeLogo) homeLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(homeName)}&background=333&color=fff&rounded=true`;
+            if (!awayLogo) awayLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(awayName)}&background=333&color=fff&rounded=true`;
 
             // Extract Odds
             let o1 = 1.90, oX = 3.50, o2 = 1.90;
