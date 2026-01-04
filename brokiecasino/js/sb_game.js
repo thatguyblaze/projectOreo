@@ -328,7 +328,10 @@ function renderMatches(matches, catId) {
             </div>
         `;
             el.appendChild(card);
-        });
+        } catch (err) {
+            console.warn("Skipping bad match:", err);
+        }
+    });
 }
 
 
