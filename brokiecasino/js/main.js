@@ -966,7 +966,9 @@ document.addEventListener('DOMContentLoaded', () => {
     safeInit('Blackjack', typeof initBlackjack !== 'undefined' ? initBlackjack : undefined);
     safeInit('Plinko', typeof initPlinko !== 'undefined' ? initPlinko : undefined);
     safeInit('Sabacc', typeof initSabacc !== 'undefined' ? initSabacc : undefined);
-    // Directly pass window property to avoid potential scoping issues
+
+    // Debug Sports Init
+    console.log("Checking Sports Init in main.js. window.initSports is:", typeof window.initSports, window.initSports);
     safeInit('Sports', window.initSports);
 
 
