@@ -1,34 +1,7 @@
-console.log("Sports.js (Full) loading...");
+console.log("Sports.js (Full v2) loading...");
 
-// Fail-fast assignment
-if (typeof window !== 'undefined') {
-    window.initSports = initSports;
-}
-
-/**
- * ==========================================================================
- * Brokie Casino - Live Sports Betting (v1.1 - Robust)
- * Uses SportSRC API (https://api.sportsrc.org/)
- * ==========================================================================
- */
-
-let sportsGameActive = false;
-let sportsCategories = [];
-let activeSportsTab = 'football';
-let availableMatches = []; // Stores current match objects
-let pendingBets = []; // Array of { matchId, selection, amount, price, status }
-
-// --- DOM References ---
-let sportsContainer;
-let sportsTabsContainer;
-let sportsMatchesGrid;
-let sportsPendingBetsContainer;
-
-// --- API Cache ---
-const SPORTS_API_BASE = 'https://api.sportsrc.org/';
-let LocalBrokieAPI = null;
-
-function initSports(API) {
+// Define initSports globally immediately
+window.initSports = function (API) {
     console.log("initSports called!");
     LocalBrokieAPI = API;
     if (!LocalBrokieAPI) {
@@ -39,7 +12,30 @@ function initSports(API) {
     if (!assignSportsElements()) return;
 
     fetchSportsCategories();
-}
+};
+
+/**
+ * ==========================================================================
+ * Brokie Casino - Live Sports Betting (v1.2 - Safe Declarations)
+ * Uses SportSRC API (https://api.sportsrc.org/)
+ * ==========================================================================
+ */
+
+let sportsGameActive = false;
+let sportsCategories = [];
+let activeSportsTab = 'football';
+let availableMatches = []; // Stores current match objects
+let pendingBets = [];
+
+// --- DOM References ---
+let sportsContainer;
+let sportsTabsContainer;
+let sportsMatchesGrid;
+let sportsPendingBetsContainer;
+
+// --- API Cache ---
+const SPORTS_API_BASE = 'https://api.sportsrc.org/';
+let LocalBrokieAPI = null;
 
 function assignSportsElements() {
     sportsContainer = document.getElementById('game-sports');
@@ -52,7 +48,6 @@ function assignSportsElements() {
                 <!-- Header / Tabs -->
                 <div class="flex items-center justify-between">
                     <div id="sports-tabs" class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-                        <!-- Categories injected here -->
                         <div class="text-slate-500 text-sm animate-pulse">Loading Sports...</div>
                     </div>
                     <button class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition-colors" onclick="refreshSportsData()">
@@ -66,7 +61,6 @@ function assignSportsElements() {
                     <!-- Matches List -->
                     <div class="lg:col-span-2 flex flex-col gap-4">
                         <div id="sports-matches-grid" class="flex flex-col gap-3 w-full max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                            <!-- Matches injected here -->
                             <div class="text-center text-slate-500 py-10">Select a sport to load matches...</div>
                         </div>
                     </div>
@@ -108,14 +102,12 @@ async function fetchSportsCategories() {
         const response = await fetch(`${SPORTS_API_BASE}?data=sports`);
         const data = await response.json();
 
-        // Fallback hardcoded list if API is strict or slow
         sportsCategories = ['football', 'basketball', 'tennis', 'baseball', 'mma', 'esports'];
 
         renderSportsTabs();
-        loadMatchesForCategory('football'); // Default
+        loadMatchesForCategory('football');
     } catch (e) {
         console.error("Sports API Error:", e);
-        // Fallback
         sportsCategories = ['football', 'basketball', 'tennis'];
         renderSportsTabs();
         loadMatchesForCategory('football');
@@ -159,7 +151,7 @@ async function loadMatchesForCategory(category) {
             return;
         }
 
-        availableMatches = data.slice(0, 50); // Limit to 50
+        availableMatches = data.slice(0, 50);
         renderMatches(availableMatches);
 
     } catch (e) {
@@ -279,13 +271,13 @@ window.placeSportsBet = function (matchIndex, type) {
         selection,
         odds: parseFloat(odds),
         amount,
-        status: 'pending' // pending, won, lost
+        status: 'pending'
     };
 
     pendingBets.unshift(bet);
     renderPendingBets();
 
-    // Simulate Result (Instant for Casino Gratification)
+    // Simulate Result
     setTimeout(() => {
         resolveBet(bet.id);
     }, 3000);
@@ -304,7 +296,6 @@ function renderPendingBets() {
         const item = document.createElement('div');
         item.className = "bg-black/30 p-3 rounded border border-white/5 flex flex-col gap-1 text-xs relative overflow-hidden";
 
-        // Status Color
         let statusColor = 'bg-slate-500';
         if (bet.status === 'won') statusColor = 'bg-emerald-500';
         if (bet.status === 'lost') statusColor = 'bg-rose-500';
@@ -332,8 +323,7 @@ function resolveBet(betId) {
     const bet = pendingBets[betIndex];
     if (bet.status !== 'pending') return;
 
-    // Simulate Outcome
-    const isWin = Math.random() > 0.6; // 40% chance to win for House Edge
+    const isWin = Math.random() > 0.6;
 
     bet.status = isWin ? 'won' : 'lost';
 
@@ -344,7 +334,7 @@ function resolveBet(betId) {
         LocalBrokieAPI.playSound('win_small');
         LocalBrokieAPI.showMessage(`Sports Bet WON! +${winAmount}`);
     } else {
-        // LocalBrokieAPI.playSound('lose'); // Optional
+        // LocalBrokieAPI.playSound('lose');
     }
 
     renderPendingBets();
@@ -354,4 +344,4 @@ window.refreshSportsData = function () {
     if (activeSportsTab) loadMatchesForCategory(activeSportsTab);
 };
 
-console.log("Sports.js (Full) loaded successfully.");
+console.log("Sports.js (Full v2) loaded successfully.");
