@@ -187,6 +187,7 @@ const tabRoulette = document.getElementById('tab-roulette');
 const tabBlackjack = document.getElementById('tab-blackjack');
 const tabPlinko = document.getElementById('tab-plinko');
 const tabSabacc = document.getElementById('tab-sabacc'); // ** Added Sabacc Tab **
+const tabSports = document.getElementById('tab-sports');
 
 const gameSlots = document.getElementById('game-slots');
 const gameCrash = document.getElementById('game-crash');
@@ -198,17 +199,18 @@ const gameRoulette = document.getElementById('game-roulette');
 const gameBlackjack = document.getElementById('game-blackjack');
 const gamePlinko = document.getElementById('game-plinko');
 const gameSabacc = document.getElementById('game-sabacc'); // ** Added Sabacc Game Area **
+const gameSports = document.getElementById('game-sports');
 
 // Collect tabs and areas into arrays for easier iteration
 // ** Ensure Sabacc elements are added here in the correct order relative to HTML **
 const allTabs = [
     tabSlots, tabCrash, tabCoinflip, tabMinefield, tabMemory, tabHorserace,
-    tabRoulette, tabBlackjack, tabPlinko, tabSabacc // ** Added Sabacc Tab to Array **
+    tabRoulette, tabBlackjack, tabPlinko, tabSabacc, tabSports // ** Added Sports Tab **
 ]; // Filter removed to ensure index alignment
 
 const allGameAreas = [
     gameSlots, gameCrash, gameCoinflip, gameMinefield, gameMemory, gameHorserace,
-    gameRoulette, gameBlackjack, gamePlinko, gameSabacc // ** Added Sabacc Game Area to Array **
+    gameRoulette, gameBlackjack, gamePlinko, gameSabacc, gameSports // ** Added Sports Game Area **
 ]; // Filter removed to ensure index alignment
 
 // ATM Modal
