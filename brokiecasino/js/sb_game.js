@@ -30,18 +30,35 @@ window.initSports = function (API) {
                     </div>
                 </div>
                 
-                <!-- WAGER CONTROL -->
-                <div class="flex items-center gap-3 bg-black/40 p-1.5 rounded-lg border border-white/5">
-                    <div class="flex flex-col px-2 border-r border-white/5">
-                        <label class="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Wager</label>
-                        <div class="flex items-center gap-1">
-                            <span class="text-slate-500 text-xs">$</span>
-                            <input type="number" id="sb-wager-input" value="100" min="1" class="bg-transparent text-white font-mono font-bold text-sm w-16 outline-none hover:text-indigo-400 transition-colors">
-                        </div>
+                <!-- WAGER CONTROL (Standardized) -->
+                <div class="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/5 shadow-inner">
+                    <!-- Row 1: Incrementers -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="adjustSbWager(-10)" class="w-8 h-8 rounded bg-white/5 hover:bg-white/10 text-[10px] font-bold text-slate-400 border border-white/5 transition-colors">-10</button>
+                        <button onclick="adjustSbWager(-1)" class="w-8 h-8 rounded bg-white/5 hover:bg-white/10 text-sm font-bold text-slate-400 border border-white/5 transition-colors">-</button>
                     </div>
-                    <div class="flex gap-1">
-                        <button onclick="adjustSbWager(100)" class="px-2 py-1 bg-white/5 hover:bg-white/10 rounded text-[10px] font-bold text-slate-400 transition-colors">+100</button>
-                        <button onclick="setSbWagerMax()" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-500 rounded text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 transition-colors">MAX</button>
+
+                    <!-- Input -->
+                    <div class="relative group">
+                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs">$</span>
+                        <input type="number" id="sb-wager-input" value="10" min="1" class="w-20 h-8 bg-black/50 border border-white/10 rounded text-center text-white font-bold text-sm pl-3 focus:border-indigo-500 outline-none transition-colors">
+                    </div>
+
+                    <!-- Row 1: Incrementers Right -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="adjustSbWager(1)" class="w-8 h-8 rounded bg-white/5 hover:bg-white/10 text-sm font-bold text-slate-400 border border-white/5 transition-colors">+</button>
+                        <button onclick="adjustSbWager(10)" class="w-8 h-8 rounded bg-white/5 hover:bg-white/10 text-[10px] font-bold text-slate-400 border border-white/5 transition-colors">+10</button>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="w-px h-6 bg-white/10 mx-1"></div>
+
+                    <!-- Row 2: Multipliers -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="setSbWagerMin()" class="px-2 h-8 rounded bg-white/5 hover:bg-white/10 text-[10px] font-bold text-slate-400 border border-white/5 transition-colors">MIN</button>
+                        <button onclick="multiplySbWager(0.5)" class="px-2 h-8 rounded bg-white/5 hover:bg-white/10 text-[10px] font-bold text-slate-400 border border-white/5 transition-colors">1/2</button>
+                        <button onclick="multiplySbWager(2)" class="px-2 h-8 rounded bg-white/5 hover:bg-white/10 text-[10px] font-bold text-slate-400 border border-white/5 transition-colors">2x</button>
+                        <button onclick="setSbWagerMax()" class="px-2 h-8 rounded bg-indigo-600 hover:bg-indigo-500 text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 border border-white/10 transition-colors">MAX</button>
                     </div>
                 </div>
 
@@ -121,8 +138,25 @@ window.adjustSbWager = function (amount) {
     const input = document.getElementById('sb-wager-input');
     if (input) {
         let current = parseInt(input.value) || 0;
-        input.value = current + amount;
+        let next = current + amount;
+        if (next < 1) next = 1;
+        input.value = next;
     }
+};
+
+window.multiplySbWager = function (multiplier) {
+    const input = document.getElementById('sb-wager-input');
+    if (input) {
+        let current = parseInt(input.value) || 0;
+        let next = Math.floor(current * multiplier);
+        if (next < 1) next = 1;
+        input.value = next;
+    }
+};
+
+window.setSbWagerMin = function () {
+    const input = document.getElementById('sb-wager-input');
+    if (input) input.value = 10; // Min bet
 };
 
 window.setSbWagerMax = function () {
@@ -163,8 +197,8 @@ function renderCategoryTabs() {
         const isActive = cat.id === activeCatId;
 
         btn.className = `px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap border flex items-center gap-2 ${isActive
-                ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
-                : 'bg-black/40 text-slate-500 border-white/5 hover:bg-white/5 hover:text-white'
+            ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
+            : 'bg-black/40 text-slate-500 border-white/5 hover:bg-white/5 hover:text-white'
             }`;
 
         btn.innerHTML = `<span>${cat.icon}</span> ${cat.label}`;
@@ -197,11 +231,16 @@ async function loadSportSRC(categoryId) {
 
         // Parse Structure: { success: true, data: [...] }
         let matches = [];
-        if (jsonData.success && Array.isArray(jsonData.data)) {
+        if (jsonData && jsonData.success && Array.isArray(jsonData.data)) {
             matches = jsonData.data;
-        } else if (Array.isArray(jsonData)) {
+        } else if (jsonData && Array.isArray(jsonData)) {
             matches = jsonData; // Fallback if direct array
+        } else if (jsonData && Array.isArray(jsonData.data)) {
+            matches = jsonData.data; // Safe fallback for weird nesting
         }
+
+        // FIX: Ensure matches is not null before checking length
+        if (!matches) matches = [];
 
         if (matches.length > 0) {
             renderMatches(matches, categoryId);
