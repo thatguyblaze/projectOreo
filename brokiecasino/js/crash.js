@@ -640,6 +640,8 @@ function endCrashGame(crashed, betAtEnd, stoppedByTabSwitch = false) {
         // Already handled in cashout
     }
 
+    addToCrashHistory(finalMultiplier);
+
     if (LocalBrokieAPI) LocalBrokieAPI.saveGameState();
 
     const betBeforeReset = crashPlayerBet;
