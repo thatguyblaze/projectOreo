@@ -1,4 +1,4 @@
-console.log("Loading sb_game.js (Real Sports Betting v1)...");
+console.log("Loading sb_game.js (Real Sports Betting v1.2 RemoteStreams)...");
 
 /* ==========================================================================
    GLOBAL STATE & INIT
@@ -259,33 +259,50 @@ function renderMatches(matches, catId) {
 
     matches.slice(0, 50).forEach((m, idx) => {
         try {
-            // 1. Parsing Names
+            // ADVANCED PARSING LAYER v2
+            // 1. Direct Field Access
             let homeName = m.home_team || m.home || m.player_1 || m.fighter_1 || (m.teams && m.teams.home ? m.teams.home.name : null) || (m.competitors && m.competitors[0] ? m.competitors[0].name : null);
             let awayName = m.away_team || m.away || m.player_2 || m.fighter_2 || (m.teams && m.teams.away ? m.teams.away.name : null) || (m.competitors && m.competitors[1] ? m.competitors[1].name : null);
 
-            // Title Deep Scan
+            // 2. Title/Name Parsing (Deep Scan)
             if (!homeName || !awayName) {
+                // Check all possible title fields
                 const titleCandidates = [m.name, m.title, m.match_name, m.event, m.summary];
                 const validTitle = titleCandidates.find(t => t && typeof t === 'string' && (t.includes(' vs ') || t.includes(' v ') || t.includes(' - ')));
 
                 if (validTitle) {
-                    let clean = validTitle.replace(/ v /i, ' vs ').replace(/ - /g, ' vs ').replace(/^(UFC\s?\d*|NFL|NBA|Week\s?\d+)[:\s]+/, '');
+                    // Normalize separators
+                    let clean = validTitle.replace(/ v /i, ' vs ').replace(/ - /g, ' vs ');
+
+                    // Remove prefixes like "UFC 300: ", "Week 14: "
+                    clean = clean.replace(/^(UFC\s?\d*|NFL|NBA|Week\s?\d+)[:\s]+/, '');
+
                     const parts = clean.split(' vs ');
-                    if (parts.length >= 2) { homeName = parts[0].trim(); awayName = parts[1].trim(); }
+                    if (parts.length >= 2) {
+                        homeName = parts[0].trim();
+                        awayName = parts[1].trim();
+                    }
                 }
             }
+
+            // 3. Last Resort Fallback (Generic vs Generic)
             if (!homeName) homeName = "TBD Home";
             if (!awayName) awayName = "TBD Away";
+
+            // Clean up names if they contain ":" (e.g. "UFC 300: Gaethje")
             if (homeName.includes(":")) homeName = homeName.split(":").pop().trim();
             if (awayName.includes(":")) awayName = awayName.split(":").pop().trim();
 
-            // 2. Parsing Extras
+
+            // Logo Parsing: distinct logic for API provided vs generated
             let homeLogo = m.home_team_logo || m.home_logo || (m.teams?.home?.logo) || (m.teams?.home?.badge) || getTeamLogo(homeName, catId);
             let awayLogo = m.away_team_logo || m.away_logo || (m.teams?.away?.logo) || (m.teams?.away?.badge) || getTeamLogo(awayName, catId);
+
+            // Final Fallback for logos
             if (!homeLogo) homeLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(homeName)}&background=333&color=fff&rounded=true`;
             if (!awayLogo) awayLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(awayName)}&background=333&color=fff&rounded=true`;
 
-            // Odds
+            // Extract Odds
             let o1 = 1.90, oX = 3.50, o2 = 1.90;
             if (m.odds) {
                 o1 = parseFloat(m.odds.home || m.odds['1']) || 1.90;
@@ -305,15 +322,27 @@ function renderMatches(matches, catId) {
             // Generate Readable Date
             let dateDisplay = "UPCOMING";
             if (!isLive) {
+                // Try Parse m.time (often string like "2023-10-10 20:00" or unix)
                 const rawTime = m.time || m.start || m.date || m.timestamp;
                 if (rawTime) {
+                    // If rawTime is strictly numeric digits, treat strings as numbers (unix timestamp)
                     const d = new Date((typeof rawTime === 'string' && /^\d+$/.test(rawTime)) ? parseInt(rawTime) * 1000 : rawTime);
+
                     if (!isNaN(d.getTime())) {
                         const now = new Date();
                         const isToday = now.toDateString() === d.toDateString();
+                        // Check if it's tomorrow
+                        const tomorrow = new Date(now);
+                        tomorrow.setDate(now.getDate() + 1);
+                        const isTomorrow = tomorrow.toDateString() === d.toDateString();
+
                         const timeStr = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                        dateDisplay = isToday ? `Today • ${timeStr}` : d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + " • " + timeStr;
+
+                        if (isToday) dateDisplay = `Today • ${timeStr}`;
+                        else if (isTomorrow) dateDisplay = `Tomorrow • ${timeStr}`;
+                        else dateDisplay = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + " • " + timeStr;
                     } else {
+                        // Fallback if string is specific text/format we cant parse automatically
                         dateDisplay = String(rawTime).replace("T", " ");
                     }
                 }
@@ -329,10 +358,11 @@ function renderMatches(matches, catId) {
                 league: league
             };
             const matchJson = JSON.stringify(matchData).replace(/"/g, '&quot;');
+
             // STREAM PARSING (Official / Fallback)
-            const apiStream = m.stream_url || m.embed_url || m.video_url || m.stream || m.server1;
-            const isOfficialStream = !!apiStream;
-            const streamUrl = apiStream || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(homeName + " vs " + awayName + " live")}`;
+            // Just check existence of known fields to show green icon, but real fetch happens on click
+            const possibleStream = m.stream_url || m.embed_url || m.video_url || m.stream || m.server1;
+            const isOfficialStream = !!possibleStream;
 
             // Render
             const card = document.createElement('div');
@@ -349,7 +379,7 @@ function renderMatches(matches, catId) {
                 }
                         </div>
                     </div>
-                    <button onclick="watchSportsStream('${streamUrl}', '${homeName} vs ${awayName}')" class="text-[10px] font-bold ${isOfficialStream ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'} hover:text-white flex items-center gap-1 px-2 py-1 rounded transition-colors border">
+                    <button onclick="watchSportsStream('${m.id}', '${catId}', '${homeName} vs ${awayName}')" class="text-[10px] font-bold ${isOfficialStream ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'} hover:text-white flex items-center gap-1 px-2 py-1 rounded transition-colors border">
                         ${isOfficialStream ? '📡 API Stream' : '📺 Watch Stream'}
                     </button>
                 </div>
@@ -389,12 +419,12 @@ function renderMatches(matches, catId) {
 
 function generateMockLiveGames(catId) {
     if (catId === 'fight') return [
-        { home: "Jon Jones", away: "Stipe Miocic", league: "UFC 300", odds: { home: 1.5, away: 2.6 }, status: "LIVE" },
-        { home: "Sean O'Malley", away: "Chito Vera", league: "UFC Main", odds: { home: 1.7, away: 2.1 }, status: "Upcoming" }
+        { id: 'mock1', home: "Jon Jones", away: "Stipe Miocic", league: "UFC 300", odds: { home: 1.5, away: 2.6 }, status: "LIVE" },
+        { id: 'mock2', home: "Sean O'Malley", away: "Chito Vera", league: "UFC Main", odds: { home: 1.7, away: 2.1 }, status: "Upcoming" }
     ];
     return [
-        { home: "Kansas City Chiefs", away: "Buffalo Bills", league: "NFL", odds: { home: 1.80, draw: 15.0, away: 2.10 }, status: "Upcoming", time: Date.now() + 86400000 },
-        { home: "Golden State Warriors", away: "LA Lakers", league: "NBA", odds: { home: 1.50, draw: 12.0, away: 2.80 }, status: "LIVE Q4" }
+        { id: 'mock3', home: "Kansas City Chiefs", away: "Buffalo Bills", league: "NFL", odds: { home: 1.80, draw: 15.0, away: 2.10 }, status: "Upcoming", time: Date.now() + 86400000 },
+        { id: 'mock4', home: "Golden State Warriors", away: "LA Lakers", league: "NBA", odds: { home: 1.50, draw: 12.0, away: 2.80 }, status: "LIVE Q4" }
     ];
 }
 
@@ -578,16 +608,68 @@ function resolveBet(id) {
 
 
 /* ==========================================================================
-   VIDEO & WAGER UTILS (Kept same)
+   VIDEO & WAGER UTILS
    ========================================================================== */
-window.watchSportsStream = function (url, title) {
+window.watchSportsStream = async function (matchId, category, title) {
     const iframe = document.getElementById('sb-video-frame');
     const placeholder = document.getElementById('sb-video-placeholder');
     const titleEl = document.getElementById('sb-stream-title');
     const container = document.getElementById('sb-player-container');
+
     if (container) container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    if (titleEl) titleEl.innerText = "Live: " + title;
-    if (iframe && url) { iframe.src = url; if (placeholder) placeholder.style.display = 'none'; }
+    if (titleEl) titleEl.innerText = "Loading Stream: " + title + "...";
+
+    // Show placeholder/loading state
+    if (placeholder) {
+        placeholder.style.display = 'flex';
+        placeholder.innerHTML = `<div class="animate-spin text-4xl mb-2">⏳</div><div class="text-white font-bold">Fetching official stream...</div>`;
+    }
+
+    try {
+        // Fetch Detail Endpoint
+        const apiCat = category === 'ufc' ? 'fight' : category;
+        const res = await fetch(`https://api.sportsrc.org/?data=detail&category=${apiCat}&id=${matchId}`);
+        const data = await res.json();
+
+        let streamUrl = "";
+
+        // Check for specific stream fields in detail response
+        if (data) {
+            // Some APIs return the embed code directly as a string <iframe...>
+            // Others return a URL. We need to handle both.
+            const rawEmbed = data.embed || data.embed_code || data.stream_url || data.url;
+
+            if (rawEmbed && rawEmbed.includes("<iframe")) {
+                // It's raw HTML, we need to inject it into a container, not sv-video-frame src
+                // But our layout expects an iframe. Let's write into the iframe document?
+                // Or easier: replace the iframe outerHTML or innerHTML of container.
+                // For safety/simplicity, let's extract the src if possible, or fallback to Youtube.
+                const srcMatch = rawEmbed.match(/src=["'](.*?)["']/);
+                if (srcMatch && srcMatch[1]) streamUrl = srcMatch[1];
+            } else if (rawEmbed && rawEmbed.startsWith("http")) {
+                streamUrl = rawEmbed;
+            }
+        }
+
+        if (!streamUrl) {
+            // Fallback
+            streamUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(title + " live")}`;
+        }
+
+        if (iframe && streamUrl) {
+            iframe.src = streamUrl;
+            if (placeholder) placeholder.style.display = 'none';
+        }
+        if (titleEl) titleEl.innerText = "Live: " + title;
+
+    } catch (e) {
+        console.error("Stream Fetch Error", e);
+        // Fallback on error
+        const fallback = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(title + " live")}`;
+        if (iframe) iframe.src = fallback;
+        if (placeholder) placeholder.style.display = 'none';
+        if (titleEl) titleEl.innerText = "Live (Fallback): " + title;
+    }
 };
 window.adjustSbWager = function (amount) { const input = document.getElementById('sb-wager-input'); if (input) { let current = parseInt(input.value) || 0; let next = current + amount; if (next < 1) next = 1; input.value = next; } };
 window.multiplySbWager = function (multiplier) { const input = document.getElementById('sb-wager-input'); if (input) { let current = parseInt(input.value) || 0; let next = Math.floor(current * multiplier); if (next < 1) next = 1; input.value = next; } };
