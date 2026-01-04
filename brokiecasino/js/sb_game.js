@@ -92,14 +92,16 @@ function updateSbBalance() {
 
 // 2. State & Parsing Logic
 const SB_API_URL = 'https://api.sportsrc.org/';
-let sbActiveTab = 'football';
+let sbActiveTab = 'american-football';
 
 async function loadSportsData() {
     // Categories based on API docs + fallback
-    const categories = ['football', 'basketball', 'tennis', 'baseball', 'mma', 'esports'];
+    // Changed 'football' (soccer) to 'american-football' for US focus
+    const categories = ['american-football', 'basketball', 'baseball', 'mma', 'ice-hockey'];
     renderTabs(categories);
 
     try {
+        // ... rest of function
         const url = `${SB_API_URL}?data=matches&category=${sbActiveTab}`;
         // console.log(`Fetching ${url}...`);
 
@@ -152,8 +154,15 @@ function renderTabs(cats) {
         btn.className = baseClass;
 
         // Icon Mapping
-        const icons = { football: '⚽', basketball: '🏀', tennis: '🎾', baseball: '⚾', mma: '🥊', esports: '🎮' };
-        btn.innerHTML = `<span>${icons[cat] || '🏆'}</span> ${cat}`;
+        const icons = {
+            'american-football': '🏈',
+            basketball: '🏀',
+            baseball: '⚾',
+            mma: '🥊',
+            'ice-hockey': '🏒',
+            football: '⚽'
+        };
+        btn.innerHTML = `<span>${icons[cat] || '🏆'}</span> ${cat.replace('-', ' ')}`;
 
         btn.onclick = () => {
             if (sbActiveTab === cat) return;
@@ -365,10 +374,11 @@ function resolveSbBet(sel, odds, amt) {
 // 4. Mock Data for Fallback
 function getMockMatches() {
     return [
-        { home: "Real Madrid", away: "Barcelona", league: "La Liga", time: "LIVE 88'", odds: { home: 2.1, draw: 3.2, away: 2.8 } },
-        { home: "Man City", away: "Liverpool", league: "Premier League", time: "LIVE 12'", odds: { home: 1.8, draw: 3.5, away: 3.8 } },
-        { home: "Lakers", away: "Celtics", league: "NBA", time: "Q3 04:20", odds: { home: 1.5, draw: 12.0, away: 2.5 } },
-        { home: "Chiefs", away: "49ers", league: "NFL", time: "Sun 18:30", odds: { home: 1.7, draw: 14.0, away: 2.2 } },
-        { home: "Djokovic", away: "Alcaraz", league: "Wimbledon", time: "Set 2", odds: { home: 1.4, draw: 22.0, away: 2.8 } }
+        { home: "Kansas City Chiefs", away: "San Francisco 49ers", league: "NFL", time: "Sun 18:30", odds: { home: 1.7, draw: 14.0, away: 2.2 } },
+        { home: "Los Angeles Lakers", away: "Boston Celtics", league: "NBA", time: "LIVE Q4", odds: { home: 1.9, draw: 12.0, away: 1.9 } },
+        { home: "New York Yankees", away: "Boston Red Sox", league: "MLB", time: "19:05", odds: { home: 1.6, draw: 22.0, away: 2.4 } },
+        { home: "Dallas Cowboys", away: "Philadelphia Eagles", league: "NFL", time: "Mon 20:15", odds: { home: 2.1, draw: 14.0, away: 1.8 } },
+        { home: "Miami Heat", away: "Denver Nuggets", league: "NBA", time: "LIVE Q2", odds: { home: 2.5, draw: 12.0, away: 1.5 } }
     ];
 }
+
