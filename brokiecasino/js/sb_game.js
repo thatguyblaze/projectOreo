@@ -74,23 +74,33 @@ window.initSports = function (API) {
                     
                     <!-- VIDEO PLAYER -->
                     <div id="sb-player-container" class="w-full aspect-video bg-black rounded-xl relative overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 group">
-                        <div class="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/80 to-transparent z-20 flex justify-between items-start pointer-events-none">
+                        <!-- Header Overlay -->
+                        <div class="absolute inset-x-0 top-0 p-3 bg-gradient-to-b from-black/90 to-transparent z-20 flex justify-between items-start pointer-events-none transition-opacity opacity-0 group-hover:opacity-100">
                             <div class="flex gap-4 items-center">
                                 <span class="bg-rose-600/90 backdrop-blur text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
                                     <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> LIVE
                                 </span>
-                                <h3 id="sb-stream-title" class="text-sm font-bold text-white shadow-black drop-shadow-md">Select a match to watch</h3>
+                                <h3 id="sb-stream-title" class="text-sm font-bold text-white shadow-black drop-shadow-md">Select a match</h3>
+                            </div>
+                            
+                            <!-- Custom Link Input (Pointer Events Enabled) -->
+                            <div class="pointer-events-auto flex items-center gap-2 bg-black/60 rounded p-1 backdrop-blur border border-white/10">
+                                <input type="text" id="sb-custom-url" placeholder="Paste stream link..." class="bg-transparent border-none outline-none text-[10px] text-white w-32 placeholder-slate-500">
+                                <button onclick="loadCustomStream()" class="text-[10px] bg-white/10 hover:bg-white/20 text-white px-2 py-0.5 rounded transition-colors">Load</button>
                             </div>
                         </div>
 
                         <div class="w-full h-full bg-slate-900 relative">
-                            <iframe id="sb-video-frame" class="w-full h-full object-cover" src="about:blank" frameborder="0" allowfullscreen></iframe>
-                            <div id="sb-video-placeholder" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center pointer-events-none">
+                            <iframe id="sb-video-frame" class="w-full h-full object-cover" src="about:blank" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                            
+                            <!-- Standby/Placeholder -->
+                            <div id="sb-video-placeholder" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center pointer-events-none z-10">
                                 <img src="https://images.unsplash.com/photo-1570498839593-e565b39455fc?q=80&w=1000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-20">
                                 <div class="z-10 bg-black/50 p-6 rounded-2xl border border-white/10 backdrop-blur-sm text-center">
                                     <div class="text-4xl mb-2">📡</div>
                                     <div class="font-bold text-white">Stream Standby</div>
-                                    <div class="text-xs text-slate-400">Click "Watch" on any live match</div>
+                                    <div class="text-xs text-slate-400 mt-1">Select a Live Game below</div>
+                                    <div class="text-[9px] text-slate-500 mt-2">or paste a custom link above</div>
                                 </div>
                             </div>
                         </div>
@@ -700,4 +710,21 @@ window.adjustSbWager = function (amount) { const input = document.getElementById
 window.multiplySbWager = function (multiplier) { const input = document.getElementById('sb-wager-input'); if (input) { let current = parseInt(input.value) || 0; let next = Math.floor(current * multiplier); if (next < 1) next = 1; input.value = next; } };
 window.setSbWagerMin = function () { const input = document.getElementById('sb-wager-input'); if (input) input.value = 10; };
 window.setSbWagerMax = function () { const input = document.getElementById('sb-wager-input'); if (input && window.LocalBrokieAPI) { input.value = Math.floor(window.LocalBrokieAPI.getBalance()); } };
+window.loadCustomStream = function () {
+    const input = document.getElementById('sb-custom-url');
+    const iframe = document.getElementById('sb-video-frame');
+    const placeholder = document.getElementById('sb-video-placeholder');
+    const titleEl = document.getElementById('sb-stream-title');
+
+    if (input && input.value && iframe) {
+        let url = input.value.trim();
+        // Basic check to ensure protocol
+        if (!url.startsWith('http')) url = 'https://' + url;
+
+        iframe.src = url;
+        if (placeholder) placeholder.style.display = 'none';
+        if (titleEl) titleEl.innerText = "Custom Stream Loaded";
+        input.value = ''; // clear
+    }
+};
 window.updateSbBalance = function () { const el = document.getElementById('sb-balance-display'); if (el && window.LocalBrokieAPI) { el.innerText = `$${window.LocalBrokieAPI.getBalance().toLocaleString()}`; } }
