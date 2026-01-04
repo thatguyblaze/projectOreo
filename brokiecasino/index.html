@@ -548,16 +548,29 @@
                                 <p id="horserace-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
                             </div>
 
-                            <!-- ROULETTE -->
-                            <div id="game-roulette" class="game-area hidden flex flex-col items-center gap-10">
-                                <!-- ... roulette content ... -->
-                            </div>
 
-                            <!-- SPORTS BETTING -->
-                            <div id="game-sports" class="game-area hidden flex flex-col w-full h-full min-h-[600px]">
-                                <!-- Content injected by js/sports.js -->
-                            </div>
-                            <div id="roulette-wheel-container">
+                            [
+                            {
+                            "AllowMultiple": false,
+                            "StartLine": 551,
+                            "EndLine": 551,
+                            "TargetContent": "<div id=\"roulette-wheel-container\">",
+                                "ReplacementContent": "<!-- ROULETTE -->\n <div id=\"game-roulette\" class=\"game-area
+                                    hidden flex flex-col items-center gap-10\">\n <div id=\"roulette-wheel-container\">"
+                                        },
+                                        {
+                                        "AllowMultiple": false,
+                                        "StartLine": 615,
+                                        "EndLine": 620,
+                                        "TargetContent": " <p id=\"roulette-status\" class=\"text-xs font-mono
+                                            text-slate-500 min-h-[1.5em]\"></p>\n </div>\n\n <!-- BLACKJACK -->",
+                                    "ReplacementContent": " <p id=\"roulette-status\" class=\"text-xs font-mono
+                                        text-slate-500 min-h-[1.5em]\"></p>\n </div>\n\n <!-- SPORTS BETTING -->\n <div
+                                    id=\"game-sports\" class=\"game-area hidden flex flex-col w-full h-full
+                                    min-h-[600px]\">\n <!-- Content injected by js/sports.js -->\n </div>\n\n
+                                <!-- BLACKJACK -->"
+                                }
+                                ]
                                 <div id="roulette-wheel"></div>
                                 <div id="roulette-ball"></div>
                                 <div id="roulette-pointer"
@@ -633,331 +646,331 @@
                             </div>
                             <p id="roulette-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
                         </div>
+                    </div> <!-- Close game-roulette -->
 
-                        <!-- BLACKJACK -->
-                        <div id="game-blackjack" class="game-area hidden flex flex-col items-center gap-10 w-full">
-                            <div class="w-full flex justify-around items-start gap-4">
-                                <div
-                                    class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                    <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                        🎩
-                                        Dealer
-                                        (<span id="blackjack-dealer-score" class="text-white">0</span>)</p>
-                                    <div id="blackjack-dealer-hand" class="blackjack-hand min-h-[120px]"></div>
-                                </div>
-                                <div
-                                    class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                    <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                        👤
-                                        Player
-                                        (<span id="blackjack-player-score" class="text-white">0</span>)</p>
-                                    <div id="blackjack-player-hand" class="blackjack-hand min-h-[120px]"></div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
-                                <div class="flex items-center gap-2">
-                                    <button class="bet-adjust-btn" id="blackjack-bet-decrease-10">-10</button>
-                                    <button class="bet-adjust-btn" id="blackjack-bet-decrease-1">-</button>
-                                    <input type="number" id="blackjack-bet" value="10"
-                                        class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                    <button class="bet-adjust-btn" id="blackjack-bet-increase-1">+</button>
-                                    <button class="bet-adjust-btn" id="blackjack-bet-increase-10">+10</button>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bet-adjust-btn w-12" id="blackjack-bet-min">MIN</button>
-                                    <button class="bet-adjust-btn w-12" id="blackjack-bet-half">1/2</button>
-                                    <button class="bet-adjust-btn w-12" id="blackjack-bet-double">2x</button>
-                                    <button class="bet-adjust-btn w-12" id="blackjack-bet-max">MAX</button>
-                                </div>
-                                <div class="grid grid-cols-3 gap-4 w-full">
-                                    <button id="blackjack-deal-button" class="game-button-action py-4">🃏
-                                        DEAL</button>
-                                    <button id="blackjack-hit-button" class="game-button primary" disabled>➕
-                                        HIT</button>
-                                    <button id="blackjack-stand-button" class="game-button warning" disabled>✋
-                                        STAND</button>
-                                </div>
-                            </div>
-                            <p id="blackjack-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                        </div>
-
-                        <!-- PLINKO -->
-                        <div id="game-plinko" class="game-area hidden flex flex-col items-center gap-8">
-                            <div class="p-2 bg-black/40 rounded-xl border border-white/5">
-                                <canvas id="plinko-canvas" width="400" height="500" class="rounded-lg"></canvas>
-                            </div>
-                            <div
-                                class="flex flex-col items-center gap-6 bg-black/40 p-6 rounded-2xl border border-white/5 w-full max-w-sm">
-                                <div class="flex items-center gap-2">
-                                    <button class="bet-adjust-btn" id="plinko-bet-decrease-10">-10</button>
-                                    <button class="bet-adjust-btn" id="plinko-bet-decrease-1">-</button>
-                                    <input type="number" id="plinko-bet" value="10"
-                                        class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                    <button class="bet-adjust-btn" id="plinko-bet-increase-1">+</button>
-                                    <button class="bet-adjust-btn" id="plinko-bet-increase-10">+10</button>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bet-adjust-btn w-12" id="plinko-bet-min">MIN</button>
-                                    <button class="bet-adjust-btn w-12" id="plinko-bet-half">1/2</button>
-                                    <button class="bet-adjust-btn w-12" id="plinko-bet-double">2x</button>
-                                    <button class="bet-adjust-btn w-12" id="plinko-bet-max">MAX</button>
-                                </div>
-                                <button id="plinko-drop-button" class="game-button-action px-8 py-3 w-full">⚪
-                                    DROP
-                                    BALL</button>
-                            </div>
-                            <p id="plinko-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]">Drop to
-                                win!
-                            </p>
-                        </div>
-
-                        <!-- SABACC -->
-                        <div id="game-sabacc" class="game-area hidden flex flex-col items-center gap-10 w-full">
-                            <div class="w-full flex justify-around items-start gap-4">
-                                <div
-                                    class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                    <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                        🤖
-                                        Dealer
-                                        (<span id="sabacc-dealer-score" class="text-white">?</span>)</p>
-                                    <div id="sabacc-dealer-hand" class="sabacc-hand min-h-[120px]"></div>
-                                </div>
-                                <div
-                                    class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
-                                    <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
-                                        🤠
-                                        Player
-                                        (<span id="sabacc-player-score" class="text-white">0</span>)</p>
-                                    <div id="sabacc-player-hand" class="sabacc-hand min-h-[120px]"></div>
-                                </div>
-                            </div>
-
-                            <p
-                                class="font-mono text-base text-amber-400 bg-amber-500/10 px-4 py-2 rounded-lg border border-amber-500/20">
-                                🏆 Pot: <span id="sabacc-pot-display" class="font-bold">0</span></p>
-
-                            <div
-                                class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
-                                <div class="flex items-center gap-2">
-                                    <button class="bet-adjust-btn" id="sabacc-bet-decrease-10">-10</button>
-                                    <button class="bet-adjust-btn" id="sabacc-bet-decrease-1">-</button>
-                                    <input type="number" id="sabacc-bet" value="10"
-                                        class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
-                                    <button class="bet-adjust-btn" id="sabacc-bet-increase-1">+</button>
-                                    <button class="bet-adjust-btn" id="sabacc-bet-increase-10">+10</button>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bet-adjust-btn w-12" id="sabacc-bet-min">MIN</button>
-                                    <button class="bet-adjust-btn w-12" id="sabacc-bet-half">1/2</button>
-                                    <button class="bet-adjust-btn w-12" id="sabacc-bet-double">2x</button>
-                                    <button class="bet-adjust-btn w-12" id="sabacc-bet-max">MAX</button>
-                                </div>
-                                <div class="grid grid-cols-3 gap-4 w-full">
-                                    <button id="sabacc-deal-button" class="game-button-action py-4">✨
-                                        DEAL</button>
-                                    <button id="sabacc-hit-button" class="game-button primary" disabled>➕
-                                        HIT</button>
-                                    <button id="sabacc-stand-button" class="game-button warning" disabled>✋
-                                        STAND</button>
-                                </div>
-                            </div>
-                            <p id="sabacc-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
-                        </div>
-
+                    <!-- SPORTS BETTING -->
+                    <div id="game-sports" class="game-area hidden flex flex-col w-full h-full min-h-[600px]">
+                        <!-- Content injected by js/sports.js -->
                     </div>
+
+                    <!-- BLACKJACK -->
+                    <div id="game-blackjack" class="game-area hidden flex flex-col items-center gap-10 w-full">
+                        <div class="w-full flex justify-around items-start gap-4">
+                            <div class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                    🎩
+                                    Dealer
+                                    (<span id="blackjack-dealer-score" class="text-white">0</span>)</p>
+                                <div id="blackjack-dealer-hand" class="blackjack-hand min-h-[120px]"></div>
+                            </div>
+                            <div class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                    👤
+                                    Player
+                                    (<span id="blackjack-player-score" class="text-white">0</span>)</p>
+                                <div id="blackjack-player-hand" class="blackjack-hand min-h-[120px]"></div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
+                            <div class="flex items-center gap-2">
+                                <button class="bet-adjust-btn" id="blackjack-bet-decrease-10">-10</button>
+                                <button class="bet-adjust-btn" id="blackjack-bet-decrease-1">-</button>
+                                <input type="number" id="blackjack-bet" value="10"
+                                    class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                <button class="bet-adjust-btn" id="blackjack-bet-increase-1">+</button>
+                                <button class="bet-adjust-btn" id="blackjack-bet-increase-10">+10</button>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="bet-adjust-btn w-12" id="blackjack-bet-min">MIN</button>
+                                <button class="bet-adjust-btn w-12" id="blackjack-bet-half">1/2</button>
+                                <button class="bet-adjust-btn w-12" id="blackjack-bet-double">2x</button>
+                                <button class="bet-adjust-btn w-12" id="blackjack-bet-max">MAX</button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 w-full">
+                                <button id="blackjack-deal-button" class="game-button-action py-4">🃏
+                                    DEAL</button>
+                                <button id="blackjack-hit-button" class="game-button primary" disabled>➕
+                                    HIT</button>
+                                <button id="blackjack-stand-button" class="game-button warning" disabled>✋
+                                    STAND</button>
+                            </div>
+                        </div>
+                        <p id="blackjack-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                    </div>
+
+                    <!-- PLINKO -->
+                    <div id="game-plinko" class="game-area hidden flex flex-col items-center gap-8">
+                        <div class="p-2 bg-black/40 rounded-xl border border-white/5">
+                            <canvas id="plinko-canvas" width="400" height="500" class="rounded-lg"></canvas>
+                        </div>
+                        <div
+                            class="flex flex-col items-center gap-6 bg-black/40 p-6 rounded-2xl border border-white/5 w-full max-w-sm">
+                            <div class="flex items-center gap-2">
+                                <button class="bet-adjust-btn" id="plinko-bet-decrease-10">-10</button>
+                                <button class="bet-adjust-btn" id="plinko-bet-decrease-1">-</button>
+                                <input type="number" id="plinko-bet" value="10"
+                                    class="w-20 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                <button class="bet-adjust-btn" id="plinko-bet-increase-1">+</button>
+                                <button class="bet-adjust-btn" id="plinko-bet-increase-10">+10</button>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="bet-adjust-btn w-12" id="plinko-bet-min">MIN</button>
+                                <button class="bet-adjust-btn w-12" id="plinko-bet-half">1/2</button>
+                                <button class="bet-adjust-btn w-12" id="plinko-bet-double">2x</button>
+                                <button class="bet-adjust-btn w-12" id="plinko-bet-max">MAX</button>
+                            </div>
+                            <button id="plinko-drop-button" class="game-button-action px-8 py-3 w-full">⚪
+                                DROP
+                                BALL</button>
+                        </div>
+                        <p id="plinko-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]">Drop to
+                            win!
+                        </p>
+                    </div>
+
+                    <!-- SABACC -->
+                    <div id="game-sabacc" class="game-area hidden flex flex-col items-center gap-10 w-full">
+                        <div class="w-full flex justify-around items-start gap-4">
+                            <div class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                    🤖
+                                    Dealer
+                                    (<span id="sabacc-dealer-score" class="text-white">?</span>)</p>
+                                <div id="sabacc-dealer-hand" class="sabacc-hand min-h-[120px]"></div>
+                            </div>
+                            <div class="flex-1 max-w-xs text-center bg-black/40 p-4 rounded-xl border border-white/5">
+                                <p class="text-[10px] font-bold uppercase text-slate-500 mb-4 tracking-widest">
+                                    🤠
+                                    Player
+                                    (<span id="sabacc-player-score" class="text-white">0</span>)</p>
+                                <div id="sabacc-player-hand" class="sabacc-hand min-h-[120px]"></div>
+                            </div>
+                        </div>
+
+                        <p
+                            class="font-mono text-base text-amber-400 bg-amber-500/10 px-4 py-2 rounded-lg border border-amber-500/20">
+                            🏆 Pot: <span id="sabacc-pot-display" class="font-bold">0</span></p>
+
+                        <div
+                            class="flex flex-col items-center gap-6 bg-black/40 p-8 rounded-2xl w-full max-w-lg border border-white/5 shadow-lg">
+                            <div class="flex items-center gap-2">
+                                <button class="bet-adjust-btn" id="sabacc-bet-decrease-10">-10</button>
+                                <button class="bet-adjust-btn" id="sabacc-bet-decrease-1">-</button>
+                                <input type="number" id="sabacc-bet" value="10"
+                                    class="w-24 py-2 bg-black/50 border border-white/10 rounded text-center text-white font-mono">
+                                <button class="bet-adjust-btn" id="sabacc-bet-increase-1">+</button>
+                                <button class="bet-adjust-btn" id="sabacc-bet-increase-10">+10</button>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="bet-adjust-btn w-12" id="sabacc-bet-min">MIN</button>
+                                <button class="bet-adjust-btn w-12" id="sabacc-bet-half">1/2</button>
+                                <button class="bet-adjust-btn w-12" id="sabacc-bet-double">2x</button>
+                                <button class="bet-adjust-btn w-12" id="sabacc-bet-max">MAX</button>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 w-full">
+                                <button id="sabacc-deal-button" class="game-button-action py-4">✨
+                                    DEAL</button>
+                                <button id="sabacc-hit-button" class="game-button primary" disabled>➕
+                                    HIT</button>
+                                <button id="sabacc-stand-button" class="game-button warning" disabled>✋
+                                    STAND</button>
+                            </div>
+                        </div>
+                        <p id="sabacc-status" class="text-xs font-mono text-slate-500 min-h-[1.5em]"></p>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bento Box: Stats, Leaderboard & Info -->
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-6 animate-reveal" style="animation-delay: 0.3s;">
+
+        <!-- Recent Wins (Leaderboard) - Spans 3 cols -->
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-500/50 md:col-span-3">
+            <h3 class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
+                <span class="text-xl">🏆</span> Recent Big Wins
+            </h3>
+            <ul id="leaderboard-list" class="space-y-3"></ul>
+        </div>
+
+        <!-- Personal Stats - Spans 3 cols -->
+        <div class="glass-card p-6 rounded-2xl border-l-4 border-indigo-500/50 flex flex-col h-full md:col-span-3">
+            <h3 class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
+                <span class="text-xl">📊</span> Personal Statistics
+            </h3>
+
+            <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
+                <!-- Metric 1 -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Net
+                        Profit</span>
+                    <span id="stat-total-profit" class="text-xl font-black text-white">0</span>
+                </div>
+                <!-- Metric 2 -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
+                        Plays</span>
+                    <span id="stat-total-plays" class="text-xl font-black text-white">0</span>
+                </div>
+                <!-- Metric 3 -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
+                        Losses</span>
+                    <span class="text-xl font-black text-rose-400">
+                        -<span id="stat-total-losses">0</span>
+                    </span>
+                </div>
+                <!-- Metric 4 -->
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
+                        Borrowed</span>
+                    <span class="text-xl font-black text-amber-400">
+                        $<span id="stat-total-loans">0</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="mt-auto pt-4 border-t border-white/5 flex flex-col gap-4">
+                <div>
+                    <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest block mb-3">Favorite
+                        Games</span>
+                    <ul id="stat-top-games" class="flex flex-col gap-1">
+                        <li class="text-[10px] text-slate-500 italic">Play games to see stats...
+                        </li>
+                    </ul>
+                </div>
+                <button id="reset-stats-button"
+                    class="w-full py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-widest rounded hover:bg-red-500 hover:text-white transition-all">
+                    Reset All Stats
+                </button>
             </div>
         </div>
 
-        <!-- Bento Box: Stats, Leaderboard & Info -->
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-6 animate-reveal" style="animation-delay: 0.3s;">
-
-            <!-- Recent Wins (Leaderboard) - Spans 3 cols -->
-            <div class="glass-card p-6 rounded-2xl border-l-4 border-yellow-500/50 md:col-span-3">
-                <h3 class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
-                    <span class="text-xl">🏆</span> Recent Big Wins
-                </h3>
-                <ul id="leaderboard-list" class="space-y-3"></ul>
+        <!-- Info Hub - Project Philosophy - Spans 2 cols -->
+        <div
+            class="glass-card p-8 rounded-2xl border-t border-indigo-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
+            <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 mb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
             </div>
-
-            <!-- Personal Stats - Spans 3 cols -->
-            <div class="glass-card p-6 rounded-2xl border-l-4 border-indigo-500/50 flex flex-col h-full md:col-span-3">
-                <h3 class="text-xs font-black uppercase tracking-widest text-white mb-6 flex items-center gap-2">
-                    <span class="text-xl">📊</span> Personal Statistics
-                </h3>
-
-                <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
-                    <!-- Metric 1 -->
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Net
-                            Profit</span>
-                        <span id="stat-total-profit" class="text-xl font-black text-white">0</span>
-                    </div>
-                    <!-- Metric 2 -->
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
-                            Plays</span>
-                        <span id="stat-total-plays" class="text-xl font-black text-white">0</span>
-                    </div>
-                    <!-- Metric 3 -->
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
-                            Losses</span>
-                        <span class="text-xl font-black text-rose-400">
-                            -<span id="stat-total-losses">0</span>
-                        </span>
-                    </div>
-                    <!-- Metric 4 -->
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Total
-                            Borrowed</span>
-                        <span class="text-xl font-black text-amber-400">
-                            $<span id="stat-total-loans">0</span>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="mt-auto pt-4 border-t border-white/5 flex flex-col gap-4">
-                    <div>
-                        <span class="text-[9px] font-mono text-slate-500 uppercase tracking-widest block mb-3">Favorite
-                            Games</span>
-                        <ul id="stat-top-games" class="flex flex-col gap-1">
-                            <li class="text-[10px] text-slate-500 italic">Play games to see stats...
-                            </li>
-                        </ul>
-                    </div>
-                    <button id="reset-stats-button"
-                        class="w-full py-2 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-bold uppercase tracking-widest rounded hover:bg-red-500 hover:text-white transition-all">
-                        Reset All Stats
-                    </button>
-                </div>
-            </div>
-
-            <!-- Info Hub - Project Philosophy - Spans 2 cols -->
-            <div
-                class="glass-card p-8 rounded-2xl border-t border-indigo-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
-                <div
-                    class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 mb-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-black uppercase tracking-tight text-white">Project Philosophy
-                </h3>
-                <p class="text-xs text-slate-400 leading-relaxed font-light">
-                    Brokie Casino was architected to demonstrate complex state management and game logic
-                    simulation
-                    without the financial risk of real gambling. It serves as a technical showcase of
-                    high-fidelity
-                    UI/UX, mathematical fairness algorithms, and interactive frontend development.
-                </p>
-                <div class="mt-auto pt-4 border-t border-white/5 flex gap-2">
-                    <span
-                        class="text-[9px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded">Educational</span>
-                    <span
-                        class="text-[9px] font-bold uppercase tracking-wider text-sky-500 bg-sky-500/10 px-2 py-1 rounded">Portfolio</span>
-                </div>
-            </div>
-
-            <!-- Info Hub - Responsible Gaming - Spans 2 cols -->
-            <div
-                class="glass-card p-8 rounded-2xl border-t border-emerald-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
-                <div
-                    class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 mb-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-                        </path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-black uppercase tracking-tight text-white">Responsible Gaming
-                </h3>
-                <p class="text-xs text-slate-400 leading-relaxed font-light">
-                    Gambling can be addictive. Even in a simulated environment, it's important to
-                    recognize the
-                    patterns of risk. If you or someone you know is struggling with gambling addiction
-                    in the real
-                    world, help is available.
-                </p>
-                <div class="mt-auto">
-                    <a href="https://www.ncpgambling.org/" target="_blank"
-                        class="block w-full py-3 bg-emerald-500/10 border border-emerald-500/20 rounded text-center text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all">
-                        Get Help Now ↗
-                    </a>
-                </div>
-            </div>
-
-            <!-- Info Hub - Disclaimer - Spans 2 cols -->
-            <div
-                class="glass-card p-8 rounded-2xl border-t border-rose-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
-                <div class="w-10 h-10 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-400 mb-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                        </path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-black uppercase tracking-tight text-white">Disclaimer</h3>
-                <p class="text-xs text-slate-400 leading-relaxed font-light">
-                    This application is a <strong>simulation only</strong>. No real money is involved,
-                    deposited, or
-                    withdrawn. All currency is virtual and holds no real-world value.
-                </p>
-                <p class="text-xs text-slate-500 leading-relaxed font-light">
-                    By using this site, you acknowledge that it is for entertainment and demonstration
-                    purposes
-                    only.
-                </p>
+            <h3 class="text-lg font-black uppercase tracking-tight text-white">Project Philosophy
+            </h3>
+            <p class="text-xs text-slate-400 leading-relaxed font-light">
+                Brokie Casino was architected to demonstrate complex state management and game logic
+                simulation
+                without the financial risk of real gambling. It serves as a technical showcase of
+                high-fidelity
+                UI/UX, mathematical fairness algorithms, and interactive frontend development.
+            </p>
+            <div class="mt-auto pt-4 border-t border-white/5 flex gap-2">
+                <span
+                    class="text-[9px] font-bold uppercase tracking-wider text-indigo-500 bg-indigo-500/10 px-2 py-1 rounded">Educational</span>
+                <span
+                    class="text-[9px] font-bold uppercase tracking-wider text-sky-500 bg-sky-500/10 px-2 py-1 rounded">Portfolio</span>
             </div>
         </div>
-        </main>
 
-        <!-- Discord Community Section -->
-        <section
-            class="py-20 border-t border-white/5 bg-gradient-to-b from-dark-base to-[#0a0c10] animate-reveal relative overflow-hidden"
-            style="animation-delay: 0.4s;">
-            <div
-                class="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png')] bg-no-repeat bg-center opacity-[0.03] bg-[length:80%] pointer-events-none blur-xl">
+        <!-- Info Hub - Responsible Gaming - Spans 2 cols -->
+        <div
+            class="glass-card p-8 rounded-2xl border-t border-emerald-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
+            <div class="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 mb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                    </path>
+                </svg>
             </div>
-            <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
-                <div
-                    class="w-16 h-16 bg-[#5865F2] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(88,101,242,0.4)]">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 127 96">
-                        <path
-                            d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
-                    </svg>
-                </div>
-                <h2 class="text-3xl md:text-5xl font-black text-white mb-6 uppercase tracking-tighter">Join the
-                    Brokie
-                    Community</h2>
-                <p class="text-slate-400 max-w-lg mx-auto mb-10 text-sm md:text-base font-light leading-relaxed">
-                    Connect with other developers, share your high scores (fake ones), and get updates on the
-                    Brokie
-                    ecosystem.
-                </p>
-                <a href="https://discord.gg/hv4KdGvfUq" target="_blank"
-                    class="inline-flex items-center gap-3 px-8 py-4 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-xl font-bold uppercase tracking-widest transition-all hover:scale-105 shadow-[0_10px_30px_-10px_rgba(88,101,242,0.5)]">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127 96">
-                        <path
-                            d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
-                    </svg>
-                    Enter Discord
+            <h3 class="text-lg font-black uppercase tracking-tight text-white">Responsible Gaming
+            </h3>
+            <p class="text-xs text-slate-400 leading-relaxed font-light">
+                Gambling can be addictive. Even in a simulated environment, it's important to
+                recognize the
+                patterns of risk. If you or someone you know is struggling with gambling addiction
+                in the real
+                world, help is available.
+            </p>
+            <div class="mt-auto">
+                <a href="https://www.ncpgambling.org/" target="_blank"
+                    class="block w-full py-3 bg-emerald-500/10 border border-emerald-500/20 rounded text-center text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all">
+                    Get Help Now ↗
                 </a>
             </div>
-        </section>
+        </div>
 
-        <footer class="text-center py-10 border-t border-white/5 animate-reveal">
-            <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-600">
-                Engineered by <span class="text-slate-400">Blazinik</span>
-            </p>
-            <div class="flex justify-center gap-6 mt-6">
-                <a href="../index.html"
-                    class="text-[10px] uppercase font-bold text-slate-500 hover:text-white transition-colors flex items-center gap-1"><span>🏠</span>
-                    Portfolio</a>
+        <!-- Info Hub - Disclaimer - Spans 2 cols -->
+        <div
+            class="glass-card p-8 rounded-2xl border-t border-rose-500/20 relative overflow-hidden flex flex-col gap-4 md:col-span-2">
+            <div class="w-10 h-10 bg-rose-500/10 rounded-lg flex items-center justify-center text-rose-400 mb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
             </div>
-        </footer>
+            <h3 class="text-lg font-black uppercase tracking-tight text-white">Disclaimer</h3>
+            <p class="text-xs text-slate-400 leading-relaxed font-light">
+                This application is a <strong>simulation only</strong>. No real money is involved,
+                deposited, or
+                withdrawn. All currency is virtual and holds no real-world value.
+            </p>
+            <p class="text-xs text-slate-500 leading-relaxed font-light">
+                By using this site, you acknowledge that it is for entertainment and demonstration
+                purposes
+                only.
+            </p>
+        </div>
+    </div>
+    </main>
+
+    <!-- Discord Community Section -->
+    <section
+        class="py-20 border-t border-white/5 bg-gradient-to-b from-dark-base to-[#0a0c10] animate-reveal relative overflow-hidden"
+        style="animation-delay: 0.4s;">
+        <div
+            class="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3092/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png')] bg-no-repeat bg-center opacity-[0.03] bg-[length:80%] pointer-events-none blur-xl">
+        </div>
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <div
+                class="w-16 h-16 bg-[#5865F2] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(88,101,242,0.4)]">
+                <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 127 96">
+                    <path
+                        d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                </svg>
+            </div>
+            <h2 class="text-3xl md:text-5xl font-black text-white mb-6 uppercase tracking-tighter">Join the
+                Brokie
+                Community</h2>
+            <p class="text-slate-400 max-w-lg mx-auto mb-10 text-sm md:text-base font-light leading-relaxed">
+                Connect with other developers, share your high scores (fake ones), and get updates on the
+                Brokie
+                ecosystem.
+            </p>
+            <a href="https://discord.gg/hv4KdGvfUq" target="_blank"
+                class="inline-flex items-center gap-3 px-8 py-4 bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-xl font-bold uppercase tracking-widest transition-all hover:scale-105 shadow-[0_10px_30px_-10px_rgba(88,101,242,0.5)]">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 127 96">
+                    <path
+                        d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.09,105.09,0,0,0,19.36,8.07C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.11,77.11,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.89,105.89,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
+                </svg>
+                Enter Discord
+            </a>
+        </div>
+    </section>
+
+    <footer class="text-center py-10 border-t border-white/5 animate-reveal">
+        <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-600">
+            Engineered by <span class="text-slate-400">Blazinik</span>
+        </p>
+        <div class="flex justify-center gap-6 mt-6">
+            <a href="../index.html"
+                class="text-[10px] uppercase font-bold text-slate-500 hover:text-white transition-colors flex items-center gap-1"><span>🏠</span>
+                Portfolio</a>
+        </div>
+    </footer>
     </div>
 
     <!-- Modals -->
