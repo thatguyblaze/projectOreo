@@ -687,6 +687,16 @@ window.watchSportsStream = async function (matchId, category, title) {
         }
 
         if (!streamUrl) {
+            // Try Loker.life Scrape (The "Hijack" Method)
+            if (titleEl) titleEl.innerText = "Searching external streams (Loker)...";
+            const lokerLink = await searchLokerStream(category, title.split(" vs ")[0], title.split(" vs ")[1]);
+            if (lokerLink) {
+                streamUrl = lokerLink;
+                console.log("Found Loker Link:", lokerLink);
+            }
+        }
+
+        if (!streamUrl) {
             // Fallback
             streamUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(title + " live")}`;
         }
@@ -706,6 +716,62 @@ window.watchSportsStream = async function (matchId, category, title) {
         if (titleEl) titleEl.innerText = "Live (Fallback): " + title;
     }
 };
+
+// Scrapes loker.life category pages to find the "hidden" ID for a match
+async function searchLokerStream(category, team1, team2) {
+    // Map our categories to loker slugs
+    const catMap = {
+        'american-football': 'american-football',
+        'nfl': 'american-football',
+        'basketball': 'basketball',
+        'nba': 'basketball',
+        'football': 'football',
+        'fight': 'fight',
+        'ufc': 'fight',
+        'baseball': 'baseball',
+        'hockey': 'hockey'
+    };
+
+    const slug = catMap[category] || category;
+    const targetUrl = `https://loker.life/${slug}/`;
+
+    console.log(`Searching Loker for ${team1} vs ${team2} in ${slug}...`);
+
+    try {
+        // Use AllOrigins proxy to bypass CORS for scraping (common trick for frontend scraping)
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+        const res = await fetch(proxyUrl);
+        const data = await res.json();
+
+        if (!data || !data.contents) return null;
+
+        const html = data.contents;
+
+        // Simple regex to find links containing team names
+        // Pattern: href=".../team1-vs-team2-12345/"
+        // We normalize names to lower case and remove spaces
+        const t1 = team1.toLowerCase().split(' ').pop(); // e.g. "Rams"
+        const t2 = team2.toLowerCase().split(' ').pop(); // e.g. "Cardinals"
+
+        // Regex that looks for href="...t1...t2..." OR href="...t2...t1..."
+        // We look for the specific loker link structure
+        const linkRegex = new RegExp(`href=["']([^"']*${t1}[^"']*${t2}[^"']*)["']`, 'i');
+        const reverseRegex = new RegExp(`href=["']([^"']*${t2}[^"']*${t1}[^"']*)["']`, 'i');
+
+        let match = html.match(linkRegex) || html.match(reverseRegex);
+
+        if (match && match[1]) {
+            let foundLink = match[1];
+            if (!foundLink.startsWith('http')) foundLink = "https://loker.life" + foundLink;
+            return foundLink;
+        }
+
+    } catch (e) {
+        console.warn("Loker Scraping Error:", e);
+    }
+    return null;
+}
+
 window.adjustSbWager = function (amount) { const input = document.getElementById('sb-wager-input'); if (input) { let current = parseInt(input.value) || 0; let next = current + amount; if (next < 1) next = 1; input.value = next; } };
 window.multiplySbWager = function (multiplier) { const input = document.getElementById('sb-wager-input'); if (input) { let current = parseInt(input.value) || 0; let next = Math.floor(current * multiplier); if (next < 1) next = 1; input.value = next; } };
 window.setSbWagerMin = function () { const input = document.getElementById('sb-wager-input'); if (input) input.value = 10; };
