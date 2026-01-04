@@ -48,13 +48,13 @@ function injectCrashHistoryAndControls() {
         const graph = document.getElementById('crash-graph');
         if (graph) {
             const histContainer = document.createElement('div');
-            histContainer.className = "flex justify-between items-center mb-2 w-full max-w-2xl";
+            histContainer.className = "flex justify-between items-center mb-2 w-full max-w-2xl text-[10px]";
             histContainer.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] uppercase font-bold text-slate-500">Last 5:</span>
+                <div class="flex items-center gap-2 overflow-x-auto max-w-[80%] hide-scrollbar">
+                    <span class="uppercase font-bold text-slate-500 whitespace-nowrap">Last 10:</span>
                     <div id="crash-history-list" class="flex gap-1"></div>
                 </div>
-                <button id="crash-skip-button" class="hidden text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-slate-300 border border-white/5 transition-colors">⏩ SKIP</button>
+                <button id="crash-skip-button" class="hidden text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-slate-300 border border-white/5 transition-colors whitespace-nowrap">⏩ SKIP</button>
             `;
             graph.parentNode.insertBefore(histContainer, graph);
         }
@@ -66,23 +66,29 @@ function renderCrashHistory() {
     if (!container) return;
     container.innerHTML = '';
 
+    // Check if empty
+    if (crashHistory.length === 0) {
+        container.innerHTML = '<span class="text-slate-500 italic">No history</span>';
+        return;
+    }
+
     // Show newest first (left to right? or right to left?)
     // Standard is newest on right or left. Let's do newest on left.
     crashHistory.forEach(mult => {
         const item = document.createElement('div');
-        let colorClass = 'text-slate-400 border-slate-700';
+        let colorClass = 'text-slate-400 border-slate-700 bg-slate-800/50';
         if (mult >= 10) colorClass = 'text-amber-400 border-amber-500/50 bg-amber-500/10';
         else if (mult >= 2) colorClass = 'text-emerald-400 border-emerald-500/50 bg-emerald-500/10';
         else colorClass = 'text-rose-400 border-rose-500/50 bg-rose-500/10';
 
-        item.className = `px-2 py-0.5 rounded text-[10px] font-mono border ${colorClass}`;
+        item.className = `px-2 py-0.5 rounded font-mono border min-w-[35px] text-center ${colorClass}`;
         item.textContent = `${mult.toFixed(2)}x`;
         container.appendChild(item);
     });
 }
 function addToCrashHistory(val) {
     crashHistory.unshift(val);
-    if (crashHistory.length > 5) crashHistory.pop();
+    if (crashHistory.length > 10) crashHistory.pop();
     renderCrashHistory();
 }
 
