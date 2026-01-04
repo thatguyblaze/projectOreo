@@ -1,3 +1,5 @@
+console.log("Sports.js loading...");
+
 /**
  * ==========================================================================
  * Brokie Casino - Live Sports Betting (v1.0)
@@ -22,6 +24,7 @@ const SPORTS_API_BASE = 'https://api.sportsrc.org/';
 let LocalBrokieAPI = null;
 
 function initSports(API) {
+    console.log("initSports called!"); // Debug
     LocalBrokieAPI = API;
     if (!LocalBrokieAPI) {
         console.error("Sports Init Failed: API Missing");
@@ -123,8 +126,8 @@ function renderSportsTabs() {
         const btn = document.createElement('button');
         const isActive = cat === activeSportsTab;
         btn.className = `px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border ${isActive
-                ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
-                : 'bg-black/30 text-slate-500 border-white/5 hover:bg-white/5 hover:text-slate-300'
+            ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
+            : 'bg-black/30 text-slate-500 border-white/5 hover:bg-white/5 hover:text-slate-300'
             }`;
         btn.textContent = cat;
         btn.onclick = () => {
@@ -336,4 +339,9 @@ window.refreshSportsData = function () {
 };
 
 // Export init
-window.initSports = initSports;
+if (typeof window !== 'undefined') {
+    window.initSports = initSports;
+    // window.refreshSportsData assigned above in code
+    // window.placeSportsBet assigned above in code
+}
+console.log("Sports.js loaded. window.initSports:", typeof window.initSports);

@@ -161,6 +161,10 @@ function playSound(type, value = 0) {
             // case 'plinko_win_low': polySynth.triggerAttackRelease(["C4", "E4"], "16n", now); break;
             // case 'plinko_win_high': polySynth.triggerAttackRelease(["C5", "G5"], "8n", now); break;
 
+            // Roulette / General
+            case 'chip_place': synth.triggerAttackRelease("C6", "32n", now); break;
+            case 'clear_bets': noiseSynth.triggerAttackRelease("16n", now); break;
+
             default: console.warn("Unknown sound type:", type); break;
         }
     } catch (error) {
@@ -962,7 +966,8 @@ document.addEventListener('DOMContentLoaded', () => {
     safeInit('Blackjack', typeof initBlackjack !== 'undefined' ? initBlackjack : undefined);
     safeInit('Plinko', typeof initPlinko !== 'undefined' ? initPlinko : undefined);
     safeInit('Sabacc', typeof initSabacc !== 'undefined' ? initSabacc : undefined);
-    safeInit('Sports', typeof window.initSports === 'function' ? window.initSports : undefined);
+    // Directly pass window property to avoid potential scoping issues
+    safeInit('Sports', window.initSports);
 
 
     // console.log("Brokie Casino Initialized.");
