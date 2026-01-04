@@ -1,5 +1,10 @@
 console.log("Sports.js loading...");
 
+// Fail-fast assignment
+if (typeof window !== 'undefined') {
+    window.initSports = initSports;
+}
+
 /**
  * ==========================================================================
  * Brokie Casino - Live Sports Betting (v1.0)
