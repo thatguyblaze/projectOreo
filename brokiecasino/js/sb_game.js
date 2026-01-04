@@ -1,4 +1,4 @@
-console.log("Loading sb_game.js (Premium v5 - Live Stream)...");
+console.log("Loading sb_game.js (Premium v7 - SportSRC Integrated)...");
 
 // 1. Define Initialization Function
 window.initSports = function (API) {
@@ -11,19 +11,21 @@ window.initSports = function (API) {
     const container = document.getElementById('game-sports');
     if (!container) return;
 
-    // Premium UI Structure with Embedded Player
+    // Premium UI Structure
     container.innerHTML = `
         <div class="flex flex-col gap-4 w-full h-full text-slate-200 font-sans">
             <!-- Header -->
             <div class="flex flex-col md:flex-row justify-between items-center bg-slate-900 border border-white/5 p-3 rounded-xl shadow-lg gap-4">
                 <div class="flex gap-3 items-center">
-                    <div class="w-10 h-10 rounded-lg bg-orange-600/20 flex items-center justify-center text-xl border border-orange-500/30">🏈</div>
+                    <div class="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-xl border border-white/10 shadow-lg">
+                        🏆
+                    </div>
                     <div>
-                        <h2 class="text-lg font-bold text-white tracking-wide">Sportsbook</h2>
+                        <h2 class="text-lg font-bold text-white tracking-wide">Live Sportsbook</h2>
                         <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono uppercase">
-                            <span class="text-rose-500 font-bold animate-pulse">● Live Stream</span>
+                            <span class="text-emerald-500 font-bold animate-pulse">● API Connected</span>
                             <span class="text-slate-700">|</span>
-                            <span>Simulated Results</span>
+                            <span>Simulated Outcomes</span>
                         </div>
                     </div>
                 </div>
@@ -54,29 +56,20 @@ window.initSports = function (API) {
                 <!-- CENTER COLUMN: Player & Matches -->
                 <div class="lg:col-span-2 flex flex-col gap-4 h-full overflow-hidden">
                     
-                    <!-- EMBEDDED PLAYER CONTAINER -->
-                    <div id="sb-player-container" class="w-full aspect-video bg-black rounded-xl relative overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 group">
-                        <!-- Screen Overlay / Info -->
+                    <!-- EMBEDDED PLAYER (Simulation Visualizer) -->
+                    <div id="sb-player-container" class="w-full aspect-[21/9] bg-black rounded-xl relative overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 group hidden">
                         <div class="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/80 to-transparent z-20 flex justify-between items-start pointer-events-none">
                             <div class="flex gap-2 items-center">
-                                <span class="bg-rose-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded animate-pulse">LIVE</span>
-                                <h3 id="sb-stream-title" class="text-sm font-bold text-white shadow-black drop-shadow-md">Select a match to watch</h3>
-                            </div>
-                            <div class="flex gap-1">
-                                <span class="bg-black/50 text-slate-400 text-[10px] font-mono px-1.5 rounded border border-white/10">HD</span>
+                                <span class="bg-indigo-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded animate-pulse">SIMULATION ACTIVE</span>
+                                <h3 id="sb-stream-title" class="text-sm font-bold text-white shadow-black drop-shadow-md">Match Center</h3>
                             </div>
                         </div>
-
-                        <!-- Video Placeholder / Iframe -->
-                        <div id="sb-video-embed" class="w-full h-full bg-slate-900 flex flex-col items-center justify-center relative">
-                            <!-- Background Image Mock -->
-                             <img id="sb-stream-poster" src="https://images.unsplash.com/photo-1517466787929-bc90951d0974?q=80&w=1000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-1000">
-                             
+                        <div class="w-full h-full bg-slate-900 flex flex-col items-center justify-center relative">
+                             <!-- Dynamic Poster based on sport -->
+                             <img id="sb-stream-poster" src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-30">
                              <div class="z-10 flex flex-col items-center gap-2">
-                                <div class="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm border-2 border-white/20 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform hover:bg-white/20 hover:border-white/50" onclick="alert('Stream connection simulations active.')">
-                                    <span class="text-2xl ml-1">▶</span>
-                                </div>
-                                <span class="text-xs text-slate-400 font-mono">Stream Feed Standby</span>
+                                <div class="w-12 h-12 rounded-full border-2 border-white/20 border-t-indigo-500 animate-spin"></div>
+                                <span class="text-xs text-indigo-300 font-bold px-4 py-1 bg-black/60 rounded-full border border-indigo-500/30 backdrop-blur">Calculating Result...</span>
                              </div>
                         </div>
                     </div>
@@ -84,11 +77,14 @@ window.initSports = function (API) {
                     <!-- TABS & GRID -->
                     <div class="flex flex-col flex-grow overflow-hidden gap-3">
                         <div class="flex gap-2 pb-1 overflow-x-auto hide-scrollbar flex-shrink-0" id="sb-tabs">
-                            <button class="px-4 py-2 bg-slate-800 text-slate-400 rounded-lg text-xs font-bold">Loading Markets...</button>
+                             <!-- Tabs injected via JS -->
                         </div>
 
                         <div id="sb-matches" class="flex-grow overflow-y-auto space-y-3 pr-2 custom-scrollbar pb-10">
-                            <!-- Matches Injected Here -->
+                             <div class="flex flex-col items-center justify-center p-20 gap-4 opacity-50">
+                                <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                                <span class="text-xs text-slate-400 font-mono">Fetching Live Data from SportSRC...</span>
+                             </div>
                         </div>
                     </div>
                 </div>
@@ -96,13 +92,17 @@ window.initSports = function (API) {
                 <!-- RIGHT COLUMN: Bets -->
                 <div class="lg:col-span-1 bg-slate-900/50 border border-white/5 rounded-xl flex flex-col h-full overflow-hidden shadow-2xl">
                     <div class="p-4 border-b border-white/5 bg-black/20 flex justify-between items-center">
-                        <h3 class="font-bold text-sm uppercase tracking-widest text-white">🎫 Bet Slip</h3>
-                        <span class="text-[10px] text-indigo-400">Simulation Mode</span>
+                        <h3 class="font-bold text-sm uppercase tracking-widest text-white">🎫 Active Bets</h3>
                     </div>
+                    
+                    <div class="px-4 py-2 bg-indigo-900/10 border-b border-indigo-500/5 text-[10px] text-slate-400 leading-relaxed italic">
+                        Select a match to predict. Results are simulated instantly based on implied odds probability.
+                    </div>
+
                     <div id="sb-bets" class="flex-grow overflow-y-auto p-3 space-y-2 custom-scrollbar">
                         <div class="flex flex-col items-center justify-center h-40 text-slate-700 gap-3">
-                            <span class="text-4xl opacity-20">📉</span>
-                            <span class="text-xs font-bold">Select Valid Odds</span>
+                            <span class="text-4xl opacity-20">📊</span>
+                            <span class="text-xs font-bold text-slate-500">No active wagers</span>
                         </div>
                     </div>
                 </div>
@@ -110,11 +110,11 @@ window.initSports = function (API) {
         </div>
     `;
 
-    // Hook into balance updates
     updateSbBalance();
 
-    // Start Logic
-    loadSportsData();
+    // Initial Load with corrected default
+    renderCategoryTabs();
+    loadSportSRC('american-football');
 };
 
 window.adjustSbWager = function (amount) {
@@ -132,34 +132,7 @@ window.setSbWagerMax = function () {
     }
 };
 
-window.watchSportsMatch = function (home, away, league) {
-    const titleEl = document.getElementById('sb-stream-title');
-    const container = document.getElementById('sb-player-container');
-    const poster = document.getElementById('sb-stream-poster');
-
-    if (titleEl) titleEl.innerText = `${home} vs ${away}`;
-
-    // Scroll to top smoothly
-    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    // Visual feedback
-    container.classList.remove('border-white/10');
-    container.classList.add('border-indigo-500/50');
-    setTimeout(() => {
-        container.classList.remove('border-indigo-500/50');
-        container.classList.add('border-white/10');
-    }, 1000);
-
-    // Change poster based on league randomly for variety
-    if (poster) {
-        poster.classList.add('opacity-0');
-        setTimeout(() => {
-            poster.classList.remove('opacity-0');
-        }, 500);
-    }
-};
-
-function updateSbBalance() {
+window.updateSbBalance = function () {
     const el = document.getElementById('sb-balance-display');
     if (el && window.LocalBrokieAPI) {
         el.innerText = `$${window.LocalBrokieAPI.getBalance().toLocaleString()}`;
@@ -167,145 +140,149 @@ function updateSbBalance() {
 }
 
 
-// 2. State & Parsing Logic
-const SB_API_URL = 'https://api.sportsrc.org/';
-let sbActiveTab = 'american-football';
+// 2. Data & Logic
+// Corrected Categories from User
+const SPORTS_CATS = [
+    { id: 'american-football', label: 'Football', icon: '🏈' }, // User prefers "Football" for NFL usually? Or American Football. Keeping clear.
+    { id: 'basketball', label: 'Basketball', icon: '🏀' },
+    { id: 'baseball', label: 'Baseball', icon: '⚾' },
+    { id: 'hockey', label: 'Hockey', icon: '🏒' },
+    { id: 'fight', label: 'Fighting', icon: '🥊' },
+    { id: 'football', label: 'Soccer', icon: '⚽' }
+];
 
-async function loadSportsData() {
-    const categories = ['american-football', 'basketball', 'baseball', 'ice-hockey', 'mma', 'football'];
-    renderTabs(categories);
+let activeCatId = 'american-football';
 
-    try {
-        const url = `${SB_API_URL}?data=matches&category=${sbActiveTab}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const jsonData = await response.json();
-
-        let matchesArray = [];
-        if (jsonData.success && Array.isArray(jsonData.data)) {
-            matchesArray = jsonData.data;
-        } else if (Array.isArray(jsonData)) {
-            matchesArray = jsonData;
-        }
-
-        if (matchesArray.length > 0) {
-            renderMatches(matchesArray);
-            // Auto-watch first match
-            const first = matchesArray[0];
-            const h = first.home_team || first.home || first.teams?.home?.name || "Home";
-            const a = first.away_team || first.away || first.teams?.away?.name || "Away";
-            window.watchSportsMatch(h, a, "Highlight");
-        } else {
-            console.warn("API empty, using mock.");
-            renderMatches(getMockMatches());
-        }
-
-    } catch (err) {
-        console.error("Sports Fetch Error:", err);
-        renderMatches(getMockMatches());
-    }
-}
-
-function renderTabs(cats) {
+function renderCategoryTabs() {
     const el = document.getElementById('sb-tabs');
     if (!el) return;
     el.innerHTML = '';
 
-    const labels = {
-        'american-football': 'NFL',
-        'basketball': 'NBA',
-        'baseball': 'MLB',
-        'ice-hockey': 'NHL',
-        'football': 'Soccer'
-    };
-
-    cats.forEach(cat => {
+    SPORTS_CATS.forEach(cat => {
         const btn = document.createElement('button');
-        const active = cat === sbActiveTab;
+        const isActive = cat.id === activeCatId;
 
-        let baseClass = "px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all duration-200 border flex items-center gap-2 whitespace-nowrap ";
-        if (active) {
-            baseClass += "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-500/20";
-        } else {
-            baseClass += "bg-black/40 text-slate-500 border-white/5 hover:bg-white/5 hover:text-slate-300";
-        }
+        btn.className = `px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all whitespace-nowrap border flex items-center gap-2 ${isActive
+                ? 'bg-indigo-600 text-white border-indigo-500 shadow-lg shadow-indigo-500/20'
+                : 'bg-black/40 text-slate-500 border-white/5 hover:bg-white/5 hover:text-white'
+            }`;
 
-        btn.className = baseClass;
-        const icons = { 'american-football': '🏈', basketball: '🏀', tennis: '🎾', baseball: '⚾', mma: '🥊', 'ice-hockey': '🏒', football: '⚽' };
-        btn.innerHTML = `<span>${icons[cat] || '🏆'}</span> ${labels[cat] || cat.replace('-', ' ')}`;
-
+        btn.innerHTML = `<span>${cat.icon}</span> ${cat.label}`;
         btn.onclick = () => {
-            if (sbActiveTab === cat) return;
-            sbActiveTab = cat;
-            document.getElementById('sb-matches').innerHTML = '<div class="p-10 flex justify-center"><div class="w-6 h-6 border-2 border-indigo-500 rounded-full animate-spin border-t-transparent"></div></div>';
-            renderTabs(cats);
-            loadSportsData();
+            activeCatId = cat.id;
+            renderCategoryTabs();
+            loadSportSRC(cat.id);
         };
         el.appendChild(btn);
     });
 }
 
-function renderMatches(matches) {
+async function loadSportSRC(categoryId) {
+    const matchesEl = document.getElementById('sb-matches');
+    if (matchesEl) matchesEl.innerHTML = `
+        <div class="flex flex-col items-center justify-center p-20 gap-4 opacity-50">
+            <div class="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-xs text-slate-400 font-mono">Loading ${categoryId}...</span>
+        </div>`;
+
+    try {
+        // Using the confirmed ID structure
+        const url = `https://api.sportsrc.org/?data=matches&category=${categoryId}`;
+        console.log("Fetching SportSRC:", url);
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("API Error");
+
+        const jsonData = await response.json();
+
+        // Parse Structure: { success: true, data: [...] }
+        let matches = [];
+        if (jsonData.success && Array.isArray(jsonData.data)) {
+            matches = jsonData.data;
+        } else if (Array.isArray(jsonData)) {
+            matches = jsonData; // Fallback if direct array
+        }
+
+        if (matches.length > 0) {
+            renderMatches(matches, categoryId);
+        } else {
+            matchesEl.innerHTML = `<div class="p-10 text-center text-slate-500">No live matches found for ${categoryId}. <br> <span class="text-[10px] opacity-50">Try another category.</span></div>`;
+        }
+
+    } catch (err) {
+        console.error("SportSRC Error:", err);
+        matchesEl.innerHTML = `<div class="p-10 text-center text-rose-500">Connection Error. <br> <span class="text-[10px] text-slate-500">${err.message}</span></div>`;
+    }
+}
+
+function renderMatches(matches, catId) {
     const el = document.getElementById('sb-matches');
     if (!el) return;
     el.innerHTML = '';
 
-    const limit = 50;
-    matches.slice(0, limit).forEach((m, idx) => {
-        let homeName = m.home_team || m.home || (m.teams?.home?.name) || "Home Team";
-        let awayName = m.away_team || m.away || (m.teams?.away?.name) || "Away Team";
-        let homeBadge = m.teams?.home?.badge || "";
-        let awayBadge = m.teams?.away?.badge || "";
+    matches.slice(0, 50).forEach((m, idx) => {
+        // Robust Parsing for SportSRC structure
+        // Usually: home_team, away_team, odds: {home, draw, away}
 
-        const safeHome = homeName.replace(/'/g, "\\'");
-        const safeAway = awayName.replace(/'/g, "\\'");
+        let homeName = m.home_team || m.home || (m.teams && m.teams.home ? m.teams.home.name : "Home Team");
+        let awayName = m.away_team || m.away || (m.teams && m.teams.away ? m.teams.away.name : "Away Team");
 
-        const timeStr = m.time || (m.date ? new Date(m.date).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : "LIVE");
-        const league = m.league || m.category || "League";
+        // Odds Parsing
+        // If API provides odds, use them. Else, generate synthetic based on randomness seeded by names (for consistency)
+        let o1 = 1.90, oX = 3.50, o2 = 1.90;
 
-        const seed = (homeName.length + awayName.length);
-        const o1 = (m.odds && m.odds.home) || (1.1 + (seed % 20) / 10).toFixed(2);
-        const oX = (m.odds && m.odds.draw) || (2.5 + (seed % 10) / 10).toFixed(2);
-        const o2 = (m.odds && m.odds.away) || (1.1 + (awayName.length % 20) / 10).toFixed(2);
+        if (m.odds) {
+            o1 = parseFloat(m.odds.home) || parseFloat(m.odds['1']) || 1.90;
+            oX = parseFloat(m.odds.draw) || parseFloat(m.odds['x']) || 3.50;
+            o2 = parseFloat(m.odds.away) || parseFloat(m.odds['2']) || 1.90;
+        } else {
+            // Synthetic fallback if this specific match object lacks odds
+            const seed = (homeName.length + awayName.length + idx);
+            o1 = (1.5 + (seed % 10) / 10).toFixed(2);
+            o2 = (1.5 + (seed % 8) / 10).toFixed(2);
+        }
+
+        const league = m.league || m.category || catId.toUpperCase();
+        const timeStr = m.time || "Upcoming";
 
         const card = document.createElement('div');
-        card.className = "bg-slate-800/40 border border-white/5 hover:border-white/10 p-3 rounded-xl transition-all group relative overflow-hidden flex flex-col gap-3";
+        card.className = "bg-slate-800/60 border border-white/5 hover:border-indigo-500/30 p-4 rounded-xl transition-all group relative overflow-hidden";
 
-        // Compact Match Card
         card.innerHTML = `
-            <div class="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                <span>${league}</span>
-                <button onclick="watchSportsMatch('${safeHome}','${safeAway}', '${league}')" class="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white px-2 py-0.5 rounded transition-colors flex items-center gap-1">
-                    <span>📺</span> Watch
-                </button>
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-black/30 px-2 py-0.5 rounded">${league}</span>
+                <span class="text-[10px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded flex items-center gap-1">
+                    ${timeStr.toLowerCase().includes('live') ? '<span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>' : ''}
+                    ${timeStr}
+                </span>
             </div>
             
-            <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2 w-[40%] overflow-hidden">
-                    ${homeBadge ? `<img src="${homeBadge}" class="w-6 h-6 object-contain">` : '<div class="w-6 h-6 rounded-full bg-slate-700 flex-shrink-0"></div>'}
-                    <span class="font-bold text-xs text-white truncate" title="${homeName}">${homeName}</span>
+            <div class="flex items-center justify-between mb-5 gap-4">
+                <div class="flex flex-col w-[40%]">
+                    <span class="font-bold text-sm text-white leading-tight truncate" title="${homeName}">${homeName}</span>
+                    <span class="text-[10px] text-slate-600">Home</span>
                 </div>
                 
-                <div class="text-[9px] font-mono text-slate-600">vs</div>
+                <div class="text-[10px] font-mono text-slate-600">VS</div>
                 
-                <div class="flex items-center justify-end gap-2 w-[40%] overflow-hidden">
-                    <span class="font-bold text-xs text-white truncate text-right" title="${awayName}">${awayName}</span>
-                    ${awayBadge ? `<img src="${awayBadge}" class="w-6 h-6 object-contain">` : '<div class="w-6 h-6 rounded-full bg-slate-700 flex-shrink-0"></div>'}
+                <div class="flex flex-col w-[40%] text-right">
+                    <span class="font-bold text-sm text-white leading-tight truncate" title="${awayName}">${awayName}</span>
+                    <span class="text-[10px] text-slate-600">Away</span>
                 </div>
             </div>
 
+            <!-- ODDS BUTTONS -->
             <div class="grid grid-cols-3 gap-2">
-                <button onclick="placeSbBet('${safeHome}', ${o1})" class="bg-black/40 hover:bg-indigo-600/20 border border-white/5 rounded py-1.5 transition-colors flex flex-col items-center group/btn">
-                    <span class="text-[10px] text-slate-500 group-hover/btn:text-indigo-200">Home</span>
+                <button onclick="placeSRCBet('${homeName.replace(/'/g, "\\'")}', ${o1}, 'home')" class="bg-black/40 hover:bg-indigo-600/20 border border-white/5 hover:border-indigo-500/50 rounded py-2 transition-all group/btn flex flex-col items-center">
+                    <span class="text-[10px] text-slate-500 group-hover/btn:text-indigo-200">1</span>
                     <span class="text-xs font-bold text-indigo-400 group-hover/btn:text-white">${o1}</span>
                 </button>
-                <button onclick="placeSbBet('Draw', ${oX})" class="bg-black/40 hover:bg-white/5 border border-white/5 rounded py-1.5 transition-colors flex flex-col items-center group/btn">
-                    <span class="text-[10px] text-slate-500">Draw</span>
-                    <span class="text-xs font-bold text-slate-300 group-hover/btn:text-white">${oX}</span>
+                <button onclick="placeSRCBet('Draw', ${oX}, 'draw')" class="bg-black/40 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded py-2 transition-all group/btn flex flex-col items-center">
+                    <span class="text-[10px] text-slate-500">X</span>
+                    <span class="text-xs font-bold text-slate-400 group-hover/btn:text-white">${oX}</span>
                 </button>
-                <button onclick="placeSbBet('${safeAway}', ${o2})" class="bg-black/40 hover:bg-indigo-600/20 border border-white/5 rounded py-1.5 transition-colors flex flex-col items-center group/btn">
-                    <span class="text-[10px] text-slate-500 group-hover/btn:text-indigo-200">Away</span>
+                <button onclick="placeSRCBet('${awayName.replace(/'/g, "\\'")}', ${o2}, 'away')" class="bg-black/40 hover:bg-indigo-600/20 border border-white/5 hover:border-indigo-500/50 rounded py-2 transition-all group/btn flex flex-col items-center">
+                    <span class="text-[10px] text-slate-500 group-hover/btn:text-indigo-200">2</span>
                     <span class="text-xs font-bold text-indigo-400 group-hover/btn:text-white">${o2}</span>
                 </button>
             </div>
@@ -315,84 +292,113 @@ function renderMatches(matches) {
 }
 
 
-// 3. Betting Logic
-window.placeSbBet = function (selection, odds) {
-    if (!window.LocalBrokieAPI) { alert("API Reload Required"); return; }
-
+// 3. Betting & Simulation
+window.placeSRCBet = function (teamName, odds, type) {
+    if (!window.LocalBrokieAPI) { alert("API Error"); return; }
     const input = document.getElementById('sb-wager-input');
     const val = parseInt(input ? input.value : 0);
 
-    if (isNaN(val) || val <= 0) return alert("Please enter a valid wager amount.");
+    if (isNaN(val) || val <= 0) return alert("Invalid wager");
     if (val > window.LocalBrokieAPI.getBalance()) return alert("Insufficient Balance");
 
     window.LocalBrokieAPI.updateBalance(-val);
     window.LocalBrokieAPI.playSound('chip_place');
-    updateSbBalance();
+    window.updateSbBalance();
 
+    // Show Simulation Overlay
+    const player = document.getElementById('sb-player-container');
+    const title = document.getElementById('sb-stream-title');
+    const poster = document.getElementById('sb-stream-poster');
+
+    if (player) {
+        player.classList.remove('hidden');
+        player.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (title) title.innerText = `Prediction Simulation: ${teamName}`;
+
+        // Update poster based on active category if possible (simple random fallback)
+        const posters = [
+            "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1000&auto=format&fit=crop", // stadium
+            "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=1000&auto=format&fit=crop"  // basketball
+        ];
+        if (poster) poster.src = posters[Math.floor(Math.random() * posters.length)];
+    }
+
+    // Add Slip
     const betId = Date.now();
-    addBetToSlip(betId, selection, odds, val);
+    addBetToSlip(betId, teamName, odds, val);
 
-    simulateGameOutcome(betId, selection, odds, val);
-};
+    // Calc Result
+    simulateSRCResult(betId, odds, val);
+}
 
 function addBetToSlip(id, sel, odds, amt) {
     const slip = document.getElementById('sb-bets');
-    if (slip.querySelector('.text-center')) slip.innerHTML = '';
+    if (slip.querySelector('.flex-col')) slip.innerHTML = ''; // clear placeholder
 
     const div = document.createElement('div');
     div.id = `bet-${id}`;
-    div.className = "bg-slate-800 p-2 rounded border border-white/5 mb-2 relative overflow-hidden";
+    div.className = "bg-slate-800 p-3 rounded-lg border border-white/5 mb-3 relative overflow-hidden shadow-lg slide-in-bottom";
     div.innerHTML = `
-        <div class="flex justify-between items-center mb-1">
-            <span class="font-bold text-[10px] text-white truncate max-w-[100px]">${sel}</span>
-            <span class="text-indigo-400 text-[10px] font-bold">${odds}x</span>
+        <div class="flex justify-between items-start mb-2">
+            <span class="font-bold text-xs text-white truncate w-2/3">${sel}</span>
+            <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-1.5 rounded text-[10px] font-bold">x${odds}</span>
         </div>
-        <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono mb-1">
+        <div class="flex justify-between text-[10px] text-slate-400 font-mono mb-2">
             <span>$${amt}</span>
-            <span class="text-emerald-500/80">Est: $${(amt * odds).toFixed(0)}</span>
+            <span>Pot: $${(amt * odds).toFixed(0)}</span>
         </div>
-        <div class="h-0.5 bg-black/50 rounded-full overflow-hidden w-full">
-            <div class="h-full bg-indigo-500 w-0 transition-all duration-[5000ms] ease-linear" id="progress-${id}"></div>
+        <div class="relative h-1 bg-black/50 rounded-full overflow-hidden">
+            <div id="prog-${id}" class="absolute left-0 top-0 bottom-0 bg-indigo-500 w-0 transition-all duration-[5000ms] ease-linear"></div>
         </div>
+        <div class="text-[9px] text-center text-indigo-400 mt-1 uppercase font-bold tracking-wider animate-pulse">Running Simulation...</div>
     `;
     slip.prepend(div);
 
     setTimeout(() => {
-        const bar = document.getElementById(`progress-${id}`);
+        const bar = document.getElementById(`prog-${id}`);
         if (bar) bar.style.width = '100%';
     }, 50);
 }
 
-function simulateGameOutcome(id, sel, odds, amt) {
+function simulateSRCResult(id, odds, amt) {
     setTimeout(() => {
         const div = document.getElementById(`bet-${id}`);
         if (!div) return;
 
-        const win = Math.random() < 0.45;
+        const impliedProb = (1 / odds) - 0.05; // 5% House Edge
+        const win = Math.random() < impliedProb;
 
         if (win) {
             const profit = Math.floor(amt * odds);
             window.LocalBrokieAPI.updateBalance(profit);
             window.LocalBrokieAPI.addWin('Sports', profit - amt);
             window.LocalBrokieAPI.playSound('win_small');
-            updateSbBalance();
+            window.updateSbBalance();
 
-            div.className = "bg-emerald-900/30 p-2 rounded border border-emerald-500/50 mb-2 relative";
-            div.innerHTML = `<div class="text-center text-[10px] text-emerald-400 font-bold">WON +$${profit}</div>`;
+            div.className = "bg-emerald-900/40 p-3 rounded-lg border border-emerald-500/50 mb-3 relative overflow-hidden";
+            div.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-white">${div.querySelector('span').innerText}</span>
+                    <span class="text-[10px] font-bold bg-emerald-500 text-black px-1.5 rounded">WIN</span>
+                </div>
+                <div class="mt-1 text-center text-emerald-400 font-mono text-sm font-bold">+$${profit}</div>
+            `;
         } else {
-            div.className = "bg-rose-900/20 p-2 rounded border border-rose-500/20 mb-2 opacity-60";
-            div.innerHTML = `<div class="text-center text-[10px] text-rose-500 font-bold">LOST -$${amt}</div>`;
+            div.className = "bg-rose-900/30 p-3 rounded-lg border border-rose-500/30 mb-3 relative overflow-hidden opacity-50";
+            div.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-300">${div.querySelector('span').innerText}</span>
+                    <span class="text-[10px] font-bold bg-rose-500/20 text-rose-400 px-1.5 rounded">LOSS</span>
+                </div>
+                <div class="mt-1 text-center text-rose-500 font-mono text-xs font-bold">-$${amt}</div>
+            `;
         }
-    }, 5000);
-}
 
-// 4. Mock Data
-function getMockMatches() {
-    return [
-        { home: "Kansas City Chiefs", away: "San Francisco 49ers", league: "NFL", time: "Sun 18:30", odds: { home: 1.7, draw: 14.0, away: 2.2 } },
-        { home: "Los Angeles Lakers", away: "Boston Celtics", league: "NBA", time: "LIVE Q4", odds: { home: 1.9, draw: 12.0, away: 1.9 } },
-        { home: "New York Yankees", away: "Boston Red Sox", league: "MLB", time: "19:05", odds: { home: 1.6, draw: 22.0, away: 2.4 } },
-        { home: "Dallas Cowboys", away: "Hamilton Tiger-Cats", league: "NFL", time: "Mon 20:15", odds: { home: 2.1, draw: 14.0, away: 1.8 } },
-        { home: "Miami Heat", away: "Denver Nuggets", league: "NBA", time: "LIVE Q2", odds: { home: 2.5, draw: 12.0, away: 1.5 } }
-    ];
+        // Hide player
+        setTimeout(() => {
+            const player = document.getElementById('sb-player-container');
+            if (player) player.classList.add('hidden');
+        }, 2000);
+
+    }, 5000); // 5s match sim duration
 }
