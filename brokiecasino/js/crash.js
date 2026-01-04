@@ -50,9 +50,9 @@ function injectCrashHistoryAndControls() {
             const histContainer = document.createElement('div');
             histContainer.className = "flex justify-between items-center mb-2 w-full max-w-2xl text-[10px]";
             histContainer.innerHTML = `
-                <div class="flex items-center gap-2 overflow-x-auto max-w-[80%] hide-scrollbar">
+                <div class="flex items-center gap-2 flex-wrap">
                     <span class="uppercase font-bold text-slate-500 whitespace-nowrap">Last 10:</span>
-                    <div id="crash-history-list" class="flex gap-1"></div>
+                    <div id="crash-history-list" class="flex gap-1 flex-wrap"></div>
                 </div>
                 <button id="crash-skip-button" class="hidden text-[10px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded text-slate-300 border border-white/5 transition-colors whitespace-nowrap">⏩ SKIP</button>
             `;

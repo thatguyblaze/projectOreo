@@ -960,6 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
     safeInit('Blackjack', typeof initBlackjack !== 'undefined' ? initBlackjack : undefined);
     safeInit('Plinko', typeof initPlinko !== 'undefined' ? initPlinko : undefined);
     safeInit('Sabacc', typeof initSabacc !== 'undefined' ? initSabacc : undefined);
+    safeInit('Sports', typeof window.initSports === 'function' ? window.initSports : undefined);
 
 
     // console.log("Brokie Casino Initialized.");
