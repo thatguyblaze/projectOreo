@@ -329,7 +329,10 @@ function renderMatches(matches, catId) {
                 league: league
             };
             const matchJson = JSON.stringify(matchData).replace(/"/g, '&quot;');
-            const streamUrl = m.video_url || m.embed_url || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(homeName + " vs " + awayName + " live")}`;
+            // STREAM PARSING (Official / Fallback)
+            const apiStream = m.stream_url || m.embed_url || m.video_url || m.stream || m.server1;
+            const isOfficialStream = !!apiStream;
+            const streamUrl = apiStream || `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(homeName + " vs " + awayName + " live")}`;
 
             // Render
             const card = document.createElement('div');
@@ -346,8 +349,8 @@ function renderMatches(matches, catId) {
                 }
                         </div>
                     </div>
-                    <button onclick="watchSportsStream('${streamUrl}', '${homeName} vs ${awayName}')" class="text-[10px] font-bold text-indigo-400 hover:text-white flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500 px-2 py-1 rounded transition-colors border border-indigo-500/20">
-                        📺 Watch Stream
+                    <button onclick="watchSportsStream('${streamUrl}', '${homeName} vs ${awayName}')" class="text-[10px] font-bold ${isOfficialStream ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'} hover:text-white flex items-center gap-1 px-2 py-1 rounded transition-colors border">
+                        ${isOfficialStream ? '📡 API Stream' : '📺 Watch Stream'}
                     </button>
                 </div>
                 
