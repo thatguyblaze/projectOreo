@@ -321,16 +321,33 @@ function renderMatches(matches, catId) {
             if (homeName && homeName.includes(":")) homeName = homeName.split(":").pop().trim();
             if (awayName && awayName.includes(":")) awayName = awayName.split(":").pop().trim();
 
-            // 4. STRICT LIVE CHECK
-            // statusStr.includes('live') is DANGEROUS because "Live Coverage Starting Soon" matches.
+            // 4. STRICT LIVE CHECK & TIME WINDOW FAILSAFE
             const statusRaw = (m.status || m.time || "").toString().toLowerCase();
-            const isLive = (
+            let isLive = (
                 statusRaw === 'live' ||
                 statusRaw === 'in progress' ||
                 statusRaw.includes('q1') || statusRaw.includes('q2') || statusRaw.includes('q3') || statusRaw.includes('q4') ||
                 (statusRaw.includes('half') && !statusRaw.includes('final')) ||
                 (m.is_live === true)
             ) && !statusRaw.includes('not') && !statusRaw.includes('final') && !statusRaw.includes('finished');
+
+            // TIME WINDOW OVERRIDE: If the game started < 3 hours ago and isn't marked finished, assume LIVE.
+            // This fixes APIs that are slow to update the "status" text field.
+            if (!isLive) {
+                const rawTime = m.time || m.start || m.date || m.timestamp;
+                if (rawTime) {
+                    // Parse timestamp (seconds or string)
+                    const d = new Date((typeof rawTime === 'string' && /^\d+$/.test(rawTime)) ? parseInt(rawTime) * 1000 : rawTime);
+                    if (!isNaN(d.getTime())) {
+                        const now = new Date();
+                        const diffMinutes = (now - d) / 1000 / 60;
+                        // If started between 0 and 180 minutes ago (3 hours)
+                        if (diffMinutes > 0 && diffMinutes < 180) {
+                            isLive = true;
+                        }
+                    }
+                }
+            }
 
             // Logo Parsing: distinct logic for API provided vs generated
             let homeLogo = m.home_team_logo || m.home_logo || (m.teams?.home?.logo) || (m.teams?.home?.badge) || getTeamLogo(homeName, catId);
