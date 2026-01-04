@@ -260,34 +260,35 @@ function renderMatches(matches, catId) {
     el.innerHTML = '';
 
     matches.slice(0, 50).forEach((m, idx) => {
-        // Robust Parsing for SportSRC structure
-        // Usually: home_team, away_team, odds: {home, draw, away}
+        try {
+            // Robust Parsing for SportSRC structure
+            let homeName = m.home_team || m.home || (m.teams && m.teams.home ? m.teams.home.name : "Home Team");
+            let awayName = m.away_team || m.away || (m.teams && m.teams.away ? m.teams.away.name : "Away Team");
 
-        let homeName = m.home_team || m.home || (m.teams && m.teams.home ? m.teams.home.name : "Home Team");
-        let awayName = m.away_team || m.away || (m.teams && m.teams.away ? m.teams.away.name : "Away Team");
+            if (!homeName) homeName = "Home Team";
+            if (!awayName) awayName = "Away Team";
 
-        // Odds Parsing
-        // If API provides odds, use them. Else, generate synthetic based on randomness seeded by names (for consistency)
-        let o1 = 1.90, oX = 3.50, o2 = 1.90;
+            // Odds Parsing
+            let o1 = 1.90, oX = 3.50, o2 = 1.90;
 
-        if (m.odds) {
-            o1 = parseFloat(m.odds.home) || parseFloat(m.odds['1']) || 1.90;
-            oX = parseFloat(m.odds.draw) || parseFloat(m.odds['x']) || 3.50;
-            o2 = parseFloat(m.odds.away) || parseFloat(m.odds['2']) || 1.90;
-        } else {
-            // Synthetic fallback if this specific match object lacks odds
-            const seed = (homeName.length + awayName.length + idx);
-            o1 = (1.5 + (seed % 10) / 10).toFixed(2);
-            o2 = (1.5 + (seed % 8) / 10).toFixed(2);
-        }
+            if (m.odds) {
+                o1 = parseFloat(m.odds.home) || parseFloat(m.odds['1']) || 1.90;
+                oX = parseFloat(m.odds.draw) || parseFloat(m.odds['x']) || 3.50;
+                o2 = parseFloat(m.odds.away) || parseFloat(m.odds['2']) || 1.90;
+            } else {
+                // Synthetic fallback
+                const seed = (String(homeName).length + String(awayName).length + idx);
+                o1 = (1.5 + (seed % 10) / 10).toFixed(2);
+                o2 = (1.5 + (seed % 8) / 10).toFixed(2);
+            }
 
-        const league = m.league || m.category || catId.toUpperCase();
-        const timeStr = m.time || "Upcoming";
+            const league = m.league || m.category || catId.toUpperCase();
+            const timeStr = m.time || "Upcoming";
 
-        const card = document.createElement('div');
-        card.className = "bg-slate-800/60 border border-white/5 hover:border-indigo-500/30 p-4 rounded-xl transition-all group relative overflow-hidden";
+            const card = document.createElement('div');
+            card.className = "bg-slate-800/60 border border-white/5 hover:border-indigo-500/30 p-4 rounded-xl transition-all group relative overflow-hidden";
 
-        card.innerHTML = `
+            card.innerHTML = `
             <div class="flex justify-between items-start mb-4">
                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-black/30 px-2 py-0.5 rounded">${league}</span>
                 <span class="text-[10px] font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded flex items-center gap-1">
@@ -326,8 +327,8 @@ function renderMatches(matches, catId) {
                 </button>
             </div>
         `;
-        el.appendChild(card);
-    });
+            el.appendChild(card);
+        });
 }
 
 
