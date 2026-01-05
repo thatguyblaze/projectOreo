@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDNqUe3m9s7J2z8kk78dPNeeWdwjcrbo0M",
@@ -16,47 +15,50 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const analytics = getAnalytics(app);
+// Analytics removed to prevent ad-blocker issues
 
-// AUTH LOGIC
-const loginOverlay = document.getElementById('login-overlay');
-const appContainer = document.getElementById('app');
-const loginBtn = document.getElementById('google-login-btn');
+// AUTH LOGIC moved inside DOMContentLoaded to ensure elements exist
 
-loginBtn.addEventListener('click', () => {
-    console.log("Login button clicked, attempting sign in...");
-    const provider = new GoogleAuthProvider();
-    // Force prompt to ensure the popup appears
-    provider.setCustomParameters({
-        prompt: 'select_account'
-    });
-
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            console.log("Sign in successful!", result.user);
-        })
-        .catch((error) => {
-            console.error("Login failed FULL ERROR:", error);
-            console.error("Error Code:", error.code);
-            console.error("Error Message:", error.message);
-
-            // Standard user-friendly errors
-            if (error.code === 'auth/popup-blocked') {
-                alert("The login popup was blocked by your browser. Please allow popups for this site.");
-            } else if (error.code === 'auth/cancelled-popup-request') {
-                // User closed it, ignore
-            } else if (error.code === 'auth/unauthorized-domain') {
-                alert("This domain is not authorized for OAuth. Please add it in Firebase Console -> Authentication -> Settings -> Authorized Domains.");
-            } else {
-                alert("Login Error: " + error.message);
-            }
-        });
-});
 
 document.addEventListener('DOMContentLoaded', () => {
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth();
     let events = [];
+    // AUTH LOGIC
+    const loginOverlay = document.getElementById('login-overlay');
+    const appContainer = document.getElementById('app');
+    const loginBtn = document.getElementById('google-login-btn');
+
+    loginBtn.addEventListener('click', () => {
+        console.log("Login button clicked, attempting sign in...");
+        const provider = new GoogleAuthProvider();
+        // Force prompt to ensure the popup appears
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        });
+
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                console.log("Sign in successful!", result.user);
+            })
+            .catch((error) => {
+                console.error("Login failed FULL ERROR:", error);
+                console.error("Error Code:", error.code);
+                console.error("Error Message:", error.message);
+
+                // Standard user-friendly errors
+                if (error.code === 'auth/popup-blocked') {
+                    alert("The login popup was blocked by your browser. Please allow popups for this site.");
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    // User closed it, ignore
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    alert("This domain is not authorized for OAuth. Please add it in Firebase Console -> Authentication -> Settings -> Authorized Domains.");
+                } else {
+                    alert("Login Error: " + error.message);
+                }
+            });
+    });
+
     let unsubscribe = null; // Store listener to detach on logout
 
     // Auth Listener
