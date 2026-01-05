@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -14,18 +15,49 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 const analytics = getAnalytics(app);
+
+// AUTH LOGIC
+const loginOverlay = document.getElementById('login-overlay');
+const appContainer = document.getElementById('app');
+const loginBtn = document.getElementById('google-login-btn');
+
+loginBtn.addEventListener('click', () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch((error) => {
+        console.error("Login failed:", error);
+        alert("Login failed: " + error.message);
+    });
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth();
     let events = [];
+    let unsubscribe = null; // Store listener to detach on logout
 
-    // Real-time listener for events
-    const unsubscribe = onSnapshot(collection(db, "events"), (snapshot) => {
-        events = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        updateView();
-        console.log("Events synced:", events.length);
+    // Auth Listener
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Logged In
+            console.log("Welcome,", user.email);
+            loginOverlay.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+
+            // Start Real-time listener ONLY when logged in
+            // Security: We basically assume anyone logging in is YOU for now as requested.
+            unsubscribe = onSnapshot(collection(db, "events"), (snapshot) => {
+                events = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+                updateView();
+                console.log("Events synced:", events.length);
+            });
+        } else {
+            // Logged Out
+            loginOverlay.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+            if (unsubscribe) unsubscribe();
+        }
     });
 
     // One-time Migration for existing local data
