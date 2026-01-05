@@ -1,7 +1,56 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { getAnalytics } from "firebase/analytics";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDNqUe3m9s7J2z8kk78dPNeeWdwjcrbo0M",
+    authDomain: "blazinikportfolio.firebaseapp.com",
+    projectId: "blazinikportfolio",
+    storageBucket: "blazinikportfolio.firebasestorage.app",
+    messagingSenderId: "208992861186",
+    appId: "1:208992861186:web:f7fc7452f4b01291c63b1b",
+    measurementId: "G-3VWF7W6G3S"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const analytics = getAnalytics(app);
+
 document.addEventListener('DOMContentLoaded', () => {
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth();
-    let events = JSON.parse(localStorage.getItem('calendarEvents-v2')) || [];
+    let events = [];
+
+    // Real-time listener for events
+    const unsubscribe = onSnapshot(collection(db, "events"), (snapshot) => {
+        events = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        updateView();
+        console.log("Events synced:", events.length);
+    });
+
+    // One-time Migration for existing local data
+    const localEvents = JSON.parse(localStorage.getItem('calendarEvents-v2'));
+    if (localEvents && localEvents.length > 0) {
+        console.log("Found local events to migrate:", localEvents.length);
+        // Ask user (or just do it? Let's do it automatically to be helpful, but using a flag would be safer)
+        // Since we can't easily ask via UI without blocking, we'll log it and do it if not already done.
+        // Actually, simplest is to just check a flag.
+        if (!localStorage.getItem('firebase_migrated')) {
+            if (confirm(`Connect to Cloud: Found ${localEvents.length} existing events. Upload them to your new online calendar?`)) {
+                localEvents.forEach(async (evt) => {
+                    const { id, ...data } = evt; // discard old ID
+                    try {
+                        await addDoc(collection(db, "events"), data);
+                    } catch (e) {
+                        console.error("Failed to migrate event:", evt, e);
+                    }
+                });
+                localStorage.setItem('firebase_migrated', 'true');
+                alert("Events are being uploaded to the cloud! They will appear shortly.");
+            }
+        }
+    }
+
     let currentView = 'year';
     let isWheeling = false; // Throttling flag for scroll navigation
 
@@ -403,7 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const switchToMonthView = () => switchToView('month');
     const switchToYearView = () => switchToView('year');
 
-    function saveEvents() { localStorage.setItem('calendarEvents-v2', JSON.stringify(events)); }
+    // Local storage save removed in favor of Firestore
+
 
     function initPickers() {
         emojiPicker.innerHTML = emojis.map(emoji => `<div class="emoji-option" data-emoji="${emoji}">${emoji}</div>`).join('');
@@ -529,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { isWheeling = false; }, 200); // Throttle to prevent rapid scrolling
     });
 
-    eventForm.addEventListener('submit', (e) => {
+    eventForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const startDate = eventStartDateInput.value;
         const endDate = eventEndDateInput.value;
@@ -539,12 +589,40 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const eventData = { title: eventTitleInput.value, type: eventTypeInput.value, date: startDate, endDate: endDate || null, description: eventDescriptionInput.value, recurring: eventRecurringSelect.value, isCountdown: eventCountdownCheckbox.checked, emoji: eventEmojiInput.value, color: eventColorInput.value, id: eventIdInput.value || Date.now().toString() };
-        if (eventIdInput.value) { events = events.map(event => event.id === eventData.id ? { ...event, ...eventData } : event); } else { events.push(eventData); }
-        saveEvents(); closeModal(eventModal); updateView();
+        const eventData = {
+            title: eventTitleInput.value,
+            type: eventTypeInput.value,
+            date: startDate,
+            endDate: endDate || null,
+            description: eventDescriptionInput.value,
+            recurring: eventRecurringSelect.value,
+            isCountdown: eventCountdownCheckbox.checked,
+            emoji: eventEmojiInput.value,
+            color: eventColorInput.value
+        };
+
+        try {
+            if (eventIdInput.value) {
+                await updateDoc(doc(db, "events", eventIdInput.value), eventData);
+            } else {
+                await addDoc(collection(db, "events"), eventData);
+            }
+            closeModal(eventModal);
+        } catch (error) {
+            console.error("Error saving event:", error);
+            alert("Error saving event (see console)");
+        }
     });
     cancelBtn.addEventListener('click', () => closeModal(eventModal));
-    deleteEventBtn.addEventListener('click', () => { events = events.filter(event => event.id !== eventIdInput.value); saveEvents(); closeModal(eventModal); updateView(); });
+    deleteEventBtn.addEventListener('click', async () => {
+        if (!eventIdInput.value) return;
+        try {
+            await deleteDoc(doc(db, "events", eventIdInput.value));
+            closeModal(eventModal);
+        } catch (error) {
+            console.error("Error deleting event:", error);
+        }
+    });
 
     detailsCloseBtn.addEventListener('click', () => closeModal(detailsModal));
     eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal(eventModal));
