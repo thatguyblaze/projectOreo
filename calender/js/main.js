@@ -24,11 +24,33 @@ const appContainer = document.getElementById('app');
 const loginBtn = document.getElementById('google-login-btn');
 
 loginBtn.addEventListener('click', () => {
+    console.log("Login button clicked, attempting sign in...");
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider).catch((error) => {
-        console.error("Login failed:", error);
-        alert("Login failed: " + error.message);
+    // Force prompt to ensure the popup appears
+    provider.setCustomParameters({
+        prompt: 'select_account'
     });
+
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            console.log("Sign in successful!", result.user);
+        })
+        .catch((error) => {
+            console.error("Login failed FULL ERROR:", error);
+            console.error("Error Code:", error.code);
+            console.error("Error Message:", error.message);
+
+            // Standard user-friendly errors
+            if (error.code === 'auth/popup-blocked') {
+                alert("The login popup was blocked by your browser. Please allow popups for this site.");
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                // User closed it, ignore
+            } else if (error.code === 'auth/unauthorized-domain') {
+                alert("This domain is not authorized for OAuth. Please add it in Firebase Console -> Authentication -> Settings -> Authorized Domains.");
+            } else {
+                alert("Login Error: " + error.message);
+            }
+        });
 });
 
 document.addEventListener('DOMContentLoaded', () => {
