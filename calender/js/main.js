@@ -527,7 +527,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchToView(view) {
         currentView = view;
         yearView.classList.toggle('view-hidden', view !== 'year');
-        monthView.classList.toggle('view-hidden', view === 'year');
+        monthView.classList.toggle('view-hidden', view === 'year'); // view === 'month' basically
+        // Reset Quarter View visibility
+        quarterView.classList.add('view-hidden');
 
         prevYearBtn.classList.toggle('hidden', view !== 'year');
         nextYearBtn.classList.toggle('hidden', view !== 'year');
@@ -698,6 +700,8 @@ document.addEventListener('DOMContentLoaded', () => {
         quarterGrid.innerHTML = '';
         const startMonth = currentMonth;
         const year = currentYear;
+        const seasons = { winter: [11, 0, 1], spring: [2, 3, 4], summer: [5, 6, 7], autumn: [8, 9, 10] };
+        const seasonInfo = { winter: '❄️ Winter', spring: '🌸 Spring', summer: '☀️ Summer', autumn: '🍂 Autumn' };
 
         // Render Current Month + Next 2
         for (let i = 0; i < 3; i++) {
@@ -709,14 +713,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 y++;
             }
 
-            // Create mini month card - Match Main Calendar Aesthetic
+            // Determine Season
+            let seasonKey = Object.keys(seasons).find(key => seasons[key].includes(m));
+            let seasonDisplay = seasonInfo[seasonKey];
+            let seasonClass = `month-card-${seasonKey}`;
+
+            // Create month card
             const monthCard = document.createElement('div');
-            monthCard.className = `month-card flex flex-col h-full`;
+            monthCard.className = `month-card p-4 rounded-xl border border-transparent ${seasonClass} flex flex-col h-full`;
 
             // Header
-            const header = document.createElement('h3');
-            header.className = 'text-xl font-bold mb-4 pl-1 text-text-primary border-b border-gray-800 pb-2';
-            header.textContent = `${monthNames[m]} ${y}`;
+            const header = document.createElement('div');
+            header.className = 'flex justify-between items-center mb-4 pb-2 border-b border-white/10';
+            header.innerHTML = `
+                <h3 class="font-bold text-xl text-accent-primary">${monthNames[m]} ${y}</h3>
+                <span class="text-sm font-medium text-text-secondary">${seasonDisplay}</span>
+            `;
             monthCard.appendChild(header);
 
             // Grid Container (mimics the main calendar grid structure)
@@ -724,12 +736,12 @@ document.addEventListener('DOMContentLoaded', () => {
             gridWrapper.className = 'flex-grow bg-bg-secondary rounded-lg p-1'; /* darker container for borders */
 
             const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-7 gap-px bg-bg-tertiary border border-bg-tertiary'; /* Gap creates the grid lines */
+            grid.className = 'grid grid-cols-7 gap-1 flex-grow content-start';
 
             // Weekday headers (mini)
             dayNamesShort.forEach(d => {
                 const dEl = document.createElement('div');
-                dEl.className = 'text-center text-xs text-text-secondary font-semibold py-2 bg-bg-secondary uppercase tracking-wider';
+                dEl.className = 'text-center text-xs text-text-secondary font-medium uppercase tracking-wider mb-2';
                 dEl.textContent = d;
                 grid.appendChild(dEl);
             });
@@ -740,9 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Empty slots
             for (let j = 0; j < firstDay; j++) {
-                const empty = document.createElement('div');
-                empty.className = 'bg-bg-primary min-h-[3rem]'; // Match cell height
-                grid.appendChild(empty);
+                grid.appendChild(document.createElement('div'));
             }
 
             // Day cells
@@ -750,12 +760,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dayDate = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const cell = document.createElement('div');
                 // Use bg-bg-primary for the cell, so the gap showing bg-tertiary looks like a border
-                cell.className = 'bg-bg-primary min-h-[3rem] p-1 text-sm text-text-secondary cursor-pointer hover:bg-bg-tertiary transition-colors relative';
+                cell.className = 'text-center p-2 rounded-lg text-sm cursor-pointer hover:bg-white/10 transition-colors relative flex flex-col items-center justify-start min-h-[40px]';
 
                 // Highlight today
                 const today = new Date();
                 if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) {
-                    cell.classList.add('bg-accent-primary/20', 'text-accent-primary', 'font-bold');
+                    cell.classList.add('bg-accent-primary', 'text-white', 'font-bold');
+                } else {
+                    cell.classList.add('text-text-primary');
                 }
 
                 // Dot indicators for events
@@ -789,8 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 grid.appendChild(cell);
             }
 
-            gridWrapper.appendChild(grid);
-            monthCard.appendChild(gridWrapper);
+            monthCard.appendChild(grid);
             quarterGrid.appendChild(monthCard);
         }
     }
