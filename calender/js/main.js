@@ -148,6 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsContent = document.getElementById('detailsContent');
     const detailsCloseBtn = document.getElementById('detailsCloseBtn');
     const addEventFromDetailsBtn = document.getElementById('addEventFromDetailsBtn');
+    const quarterViewBtn = document.getElementById('quarterViewBtn');
+    const quarterView = document.getElementById('quarterView');
+    const quarterGrid = document.getElementById('quarterGrid');
 
     // Focus Elements
     const focusOverlay = document.getElementById('focusOverlay');
@@ -795,11 +798,155 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => focusOverlay.classList.add('hidden'), 500);
     }
 
+    // Quarter View Logic
+    function switchToQuarterView() {
+        currentView = 'quarter';
+        monthView.classList.remove('view-visible');
+        setTimeout(() => monthView.classList.add('view-hidden'), 100);
+        yearView.classList.remove('view-visible');
+        setTimeout(() => yearView.classList.add('view-hidden'), 100);
+
+        quarterView.classList.remove('view-hidden');
+        quarterViewBtn.classList.remove('hidden');
+
+        generateQuarterView();
+        updateViewTitle();
+    }
+
+    function generateQuarterView() {
+        quarterGrid.innerHTML = '';
+        const startMonth = currentMonth;
+        const year = currentYear;
+
+        // Render Current Month + Next 2
+        for (let i = 0; i < 3; i++) {
+            // Calculate actual month/year for this slice
+            let m = startMonth + i;
+            let y = year;
+            if (m > 11) {
+                m -= 12;
+                y++;
+            }
+
+            // Create mini month card
+            const monthCard = document.createElement('div');
+            monthCard.className = `month-card p-4 rounded-xl bg-bg-secondary border border-bg-tertiary flex flex-col`;
+
+            // Header
+            const header = document.createElement('h3');
+            header.className = 'text-lg font-bold mb-3 text-center';
+            header.textContent = `${monthNames[m]} ${y}`;
+            monthCard.appendChild(header);
+
+            // Grid
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-7 gap-1 flex-grow';
+            // Weekday headers (mini)
+            dayNamesShort.forEach(d => {
+                const dEl = document.createElement('div');
+                dEl.className = 'text-center text-xs text-text-secondary font-medium';
+                dEl.textContent = d;
+                grid.appendChild(dEl);
+            });
+
+            // Days
+            const firstDay = new Date(y, m, 1).getDay();
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+            // Empty slots
+            for (let j = 0; j < firstDay; j++) {
+                const empty = document.createElement('div');
+                grid.appendChild(empty);
+            }
+
+            // Day cells
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDate = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const cell = document.createElement('div');
+                cell.className = 'text-center p-1 rounded-md text-sm cursor-pointer hover:bg-bg-tertiary transition-colors relative';
+
+                // Highlight today
+                const today = new Date();
+                if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) {
+                    cell.classList.add('bg-accent-primary', 'text-white');
+                }
+
+                // Dot indicators for events
+                const dayEvents = getEventsForDate(dayDate);
+                if (dayEvents.length > 0) {
+                    const dot = document.createElement('div');
+                    dot.className = 'w-1.5 h-1.5 rounded-full bg-accent-primary absolute bottom-0.5 left-1/2 transform -translate-x-1/2';
+                    // Logic to change color if bills vs events?
+                    if (dayEvents.some(e => e.type === 'bill')) dot.style.backgroundColor = '#EF4444';
+                    else if (dayEvents.some(e => e.type === 'payday')) dot.style.backgroundColor = '#10B981';
+
+                    cell.appendChild(dot);
+                }
+
+                cell.textContent = d;
+                cell.onclick = () => {
+                    // Clicking a day in quarter view opens Details for that day
+                    openDetailsModal(dayDate);
+                };
+
+                grid.appendChild(cell);
+            }
+
+            monthCard.appendChild(grid);
+            quarterGrid.appendChild(monthCard);
+        }
+    }
+
+    // Update existing nav logic
+    // We'll replace the event listeners for buttons below
+
     // Event Listeners
-    viewToggleBtn.addEventListener('click', () => currentView === 'year' ? switchToMonthView() : switchToYearView());
-    prevMonthBtn.addEventListener('click', () => { currentMonth = (currentMonth - 1 + 12) % 12; if (currentMonth === 11) currentYear--; updateViewTitle(); generateMonthView(); });
-    nextMonthBtn.addEventListener('click', () => { currentMonth = (currentMonth + 1) % 12; if (currentMonth === 0) currentYear++; updateViewTitle(); generateMonthView(); });
-    todayBtn.addEventListener('click', () => { currentYear = new Date().getFullYear(); currentMonth = new Date().getMonth(); switchToMonthView(); });
+    viewToggleBtn.addEventListener('click', () => {
+        if (currentView !== 'year') switchToYearView();
+        else switchToMonthView();
+    });
+
+    quarterViewBtn.addEventListener('click', switchToQuarterView);
+
+    prevMonthBtn.addEventListener('click', () => {
+        if (currentView === 'quarter') {
+            currentMonth -= 3;
+            if (currentMonth < 0) {
+                currentMonth += 12;
+                currentYear--;
+            }
+            generateQuarterView();
+        } else {
+            currentMonth = (currentMonth - 1 + 12) % 12;
+            if (currentMonth === 11) currentYear--;
+            generateMonthView();
+        }
+        updateViewTitle();
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        if (currentView === 'quarter') {
+            currentMonth += 3;
+            if (currentMonth > 11) {
+                currentMonth -= 12;
+                currentYear++;
+            }
+            generateQuarterView();
+        } else {
+            currentMonth = (currentMonth + 1) % 12;
+            if (currentMonth === 0) currentYear++;
+            generateMonthView();
+        }
+        updateViewTitle();
+    });
+
+    todayBtn.addEventListener('click', () => {
+        currentYear = new Date().getFullYear();
+        currentMonth = new Date().getMonth();
+        if (currentView === 'quarter') generateQuarterView();
+        else switchToMonthView();
+        updateViewTitle();
+    });
 
     prevYearBtn.addEventListener('click', () => { currentYear--; updateViewTitle(); generateYearView(); });
     nextYearBtn.addEventListener('click', () => { currentYear++; updateViewTitle(); generateYearView(); });
