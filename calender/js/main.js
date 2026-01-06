@@ -245,8 +245,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const isoDate = getISODate(date);
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
+            let cellStyle = '';
+            const activePaydays = events.filter(e => e.type === 'payday' && (
+                (e.date === isoDate) || (e.recurring && e.recurring !== 'none' && isoDate > e.date && checkRecurring(e, date))
+            ));
+            if (activePaydays.length > 0) {
+                const color = activePaydays[0].color || '#3B82F6';
+                cellStyle = `background-color: ${color}26;`; // ~15% opacity hex
+            }
+
             const dayCellHTML = `<div class="day-cell-wrapper">
-                <div class="day-cell flex flex-col p-1 sm:p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''} ${isOtherMonth ? 'day-cell-other-month' : ''}" data-date="${isoDate}" style="animation-delay:${dayCounter++ * 0.01}s">
+                <div class="day-cell flex flex-col p-1 sm:p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''} ${isOtherMonth ? 'day-cell-other-month' : ''}" data-date="${isoDate}" style="animation-delay:${dayCounter++ * 0.01}s; ${cellStyle}">
                     <div class="add-day-event-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
                     <span class="self-start day-number">${day}</span>
                 </div>
@@ -275,6 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const startOfGridView = new Date(`${getISODate(gridViewStartDate)}T12:00:00`);
 
         monthEvents.forEach(event => {
+            if (event.type === 'payday') return; // Paydays are handled by background color
+
             const eventStartDate = new Date(`${event.date}T12:00:00`);
             const eventEndDate = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStartDate;
 
@@ -592,7 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? '<p class="text-text-secondary">No items for this day.</p>'
             : dayEvents.map(event => {
                 const isEditable = event.type !== 'holiday' && !event.isRecurringInstance;
-                const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
+                const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : (event.type === 'payday' ? '💸' : '🎉')));
                 return `<div class="flex items-start justify-between p-3 rounded-lg bg-bg-tertiary ${isEditable ? 'cursor-pointer hover:bg-gray-700' : ''}" ${isEditable ? `data-event-id="${event.id}"` : ''}>
                     <div class="flex items-start gap-3">
                          <div class="event-color-dot mt-2" style="background-color:${event.color || '#3B82F6'}"></div>
