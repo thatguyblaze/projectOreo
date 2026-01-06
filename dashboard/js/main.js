@@ -106,6 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     sitesContainer.addEventListener('mousedown', (e) => {
+        // Prevent drag initiation on delete button which causes issues in some browsers (Edge)
+        if (e.target.closest('.delete-site-btn')) {
+            e.stopPropagation();
+            return;
+        }
+
         if (document.body.classList.contains('edit-mode')) return;
         const target = e.target.closest('.site-link-container:not(.add-site-btn-container)');
         if (target) {
@@ -115,11 +121,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mouseup', () => clearTimeout(longPressTimer));
 
     sitesContainer.addEventListener('click', e => {
-        if (document.body.classList.contains('edit-mode')) e.preventDefault();
-        if (e.target.closest('.add-site-btn')) addSiteModal.classList.add('active');
-        if (e.target.matches('.delete-site-btn')) {
-            sites.splice(parseInt(e.target.dataset.index, 10), 1);
+        // 1. Add Button Check
+        if (e.target.closest('.add-site-btn')) {
+            addSiteModal.classList.add('active');
+            return;
+        }
+
+        // 2. Delete Button Check
+        const deleteBtn = e.target.closest('.delete-site-btn');
+        if (deleteBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            sites.splice(parseInt(deleteBtn.dataset.index, 10), 1);
             saveSites(); renderSites(); exitEditMode(); setTimeout(enterEditMode, 10);
+            return;
+        }
+
+        // 3. Edit Mode Guard (Prevent Links)
+        if (document.body.classList.contains('edit-mode')) {
+            e.preventDefault();
+            return;
         }
     }, true);
 
