@@ -145,24 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsModal = document.getElementById('detailsModal');
     const detailsDate = document.getElementById('detailsDate');
     const detailsDay = document.getElementById('detailsDay');
-    const detailsContent = document.getElementById('detailsContent');
     const detailsCloseBtn = document.getElementById('detailsCloseBtn');
     const addEventFromDetailsBtn = document.getElementById('addEventFromDetailsBtn');
     const quarterViewBtn = document.getElementById('quarterViewBtn');
     const quarterView = document.getElementById('quarterView');
     const quarterGrid = document.getElementById('quarterGrid');
-
-    // Focus Elements
-    const focusOverlay = document.getElementById('focusOverlay');
-    const closeFocusBtn = document.getElementById('closeFocusBtn');
-    const focusTitle = document.getElementById('focusTitle');
-    const daysUnit = document.getElementById('daysUnit');
-    const hoursUnit = document.getElementById('hoursUnit');
-    const minutesUnit = document.getElementById('minutesUnit');
-    const secondsUnit = document.getElementById('secondsUnit');
-    const focusDate = document.getElementById('focusDate');
-    const focusIcon = document.getElementById('focusIcon');
-    let focusInterval = null;
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -520,9 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const countdownEl = document.createElement('div');
                 countdownEl.textContent = countdownText;
-                countdownEl.className = 'countdown-item cursor-pointer hover:bg-bg-tertiary'; // Add cursor pointer
-                countdownEl.title = "Open Focus View";
-                countdownEl.addEventListener('click', () => openFocusMode(countdown, countdown.date));
+                countdownEl.className = 'countdown-item';
                 countdownContainer.appendChild(countdownEl);
             });
         }
@@ -671,13 +656,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
                 const originalId = event.id.toString().split('-')[0];
 
-                let focusButtonHTML = '';
-                if (event.isCountdown) {
-                    focusButtonHTML = `<button class="p-2 text-gray-500 hover:text-white transition-colors focus-target-btn" data-event-index="${events.indexOf(event)}" title="Focus Mode">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    </button>`;
-                }
-
                 return `<div class="flex items-start justify-between p-3 rounded-lg bg-bg-tertiary ${isEditable ? 'cursor-pointer hover:bg-gray-700' : ''}" ${isEditable ? `data-event-id="${originalId}"` : ''}>
                     <div class="flex items-start gap-3">
                          <div class="event-color-dot mt-2" style="background-color:${event.color || '#3B82F6'}"></div>
@@ -687,13 +665,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${event.description ? `<p class="text-sm text-text-secondary mt-1">${event.description}</p>` : ''}
                         </div>
                     </div>
-                    ${focusButtonHTML}
                 </div>`;
             }).join('');
 
         detailsContent.querySelectorAll('[data-event-id]').forEach(item => {
             item.addEventListener('click', (e) => {
-                if (e.target.closest('.focus-target-btn')) return; // Ignore if clicked on focus button
                 const event = events.find(e => e.id === item.dataset.eventId);
                 if (event) {
                     closeModal(detailsModal);
@@ -701,101 +677,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-
-        detailsContent.querySelectorAll('.focus-target-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // We need the event object. We can get it via the parent data-id
-                const parent = btn.closest('[data-event-id]');
-                const event = events.find(evt => evt.id === parent.dataset.eventId);
-                if (event) {
-                    closeModal(detailsModal);
-                    openFocusMode(event, isoDate); // Pass the date of the specific instance
-                }
-            });
-        });
-    }
-
-    function updateFlipUnit(unitElement, newValue) {
-        if (!unitElement) return;
-        const valueString = newValue.toString().padStart(2, '0');
-
-        // Initialize if empty
-        if (!unitElement.querySelector('.upper-card')) {
-            unitElement.innerHTML = `
-                <div class="upper-card"><span>${valueString}</span></div>
-                <div class="lower-card"><span>${valueString}</span></div>
-                <div class="flipper">
-                    <div class="flipper-front"><span>${valueString}</span></div>
-                    <div class="flipper-back"><span>${valueString}</span></div>
-                </div>
-            `;
-            return;
-        }
-
-        const upper = unitElement.querySelector('.upper-card span');
-        const lower = unitElement.querySelector('.lower-card span');
-        const front = unitElement.querySelector('.flipper-front span');
-        const back = unitElement.querySelector('.flipper-back span');
-        const flipper = unitElement.querySelector('.flipper');
-
-        const currentValue = upper.textContent; // Visual current
-        if (currentValue === valueString) return;
-
-        upper.textContent = valueString;
-        back.textContent = valueString;
-        front.textContent = currentValue;
-        lower.textContent = currentValue;
-
-        flipper.classList.remove('flipping');
-        void flipper.offsetWidth; // trigger reflow
-        flipper.classList.add('flipping');
-
-        setTimeout(() => {
-            lower.textContent = valueString;
-            flipper.classList.remove('flipping');
-        }, 500);
-    }
-
-    function openFocusMode(event, dateStr) {
-        focusOverlay.classList.remove('hidden');
-        setTimeout(() => focusOverlay.classList.remove('opacity-0'), 10);
-
-        const targetDate = new Date(`${dateStr}T12:00:00`); // Use the instance date
-        const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
-
-        focusTitle.textContent = event.title;
-        focusIcon.textContent = icon;
-        focusDate.textContent = dateStr;
-
-        if (focusInterval) clearInterval(focusInterval);
-
-        const updateTimer = () => {
-            const now = new Date();
-            const diff = targetDate - now;
-
-            // Allow negative (past) for "since" tracking or just show 00
-            const absDiff = Math.abs(diff);
-
-            const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((absDiff % (1000 * 60)) / 1000);
-
-            updateFlipUnit(daysUnit, days);
-            updateFlipUnit(hoursUnit, hours);
-            updateFlipUnit(minutesUnit, minutes);
-            updateFlipUnit(secondsUnit, seconds);
-        };
-
-        updateTimer();
-        focusInterval = setInterval(updateTimer, 1000);
-    }
-
-    function closeFocusMode() {
-        if (focusInterval) clearInterval(focusInterval);
-        focusOverlay.classList.add('opacity-0');
-        setTimeout(() => focusOverlay.classList.add('hidden'), 500);
     }
 
     // Quarter View Logic
@@ -1020,7 +901,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal(eventModal));
     detailsModal.addEventListener('click', (e) => e.target === detailsModal && closeModal(detailsModal));
-    closeFocusBtn.addEventListener('click', closeFocusMode);
     // Initial Load
     initPickers();
     currentYear = new Date().getFullYear();
