@@ -1020,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal(eventModal));
     detailsModal.addEventListener('click', (e) => e.target === detailsModal && closeModal(detailsModal));
+    closeFocusBtn.addEventListener('click', closeFocusMode);
     // Initial Load
     initPickers();
     currentYear = new Date().getFullYear();
