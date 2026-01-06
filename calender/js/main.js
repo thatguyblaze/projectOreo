@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsDay = document.getElementById('detailsDay');
     const detailsContent = document.getElementById('detailsContent');
     const detailsCloseBtn = document.getElementById('detailsCloseBtn');
+    const addEventFromDetailsBtn = document.getElementById('addEventFromDetailsBtn');
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -245,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
             const dayCellHTML = `<div class="day-cell-wrapper">
-                <div class="day-cell flex flex-col p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''} ${isOtherMonth ? 'day-cell-other-month' : ''}" data-date="${isoDate}" style="animation-delay:${dayCounter++ * 0.01}s">
+                <div class="day-cell flex flex-col p-1 sm:p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''} ${isOtherMonth ? 'day-cell-other-month' : ''}" data-date="${isoDate}" style="animation-delay:${dayCounter++ * 0.01}s">
                     <div class="add-day-event-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
                     <span class="self-start day-number">${day}</span>
                 </div>
@@ -581,6 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function openDetailsModal(isoDate) {
+        detailsModal.dataset.date = isoDate;
         openModal(detailsModal);
         const date = new Date(`${isoDate}T12:00:00`);
         detailsDate.textContent = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
@@ -681,6 +683,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     detailsCloseBtn.addEventListener('click', () => closeModal(detailsModal));
+    addEventFromDetailsBtn.addEventListener('click', () => {
+        const isoDate = detailsModal.dataset.date;
+        if (isoDate) {
+            closeModal(detailsModal);
+            openEventModal(isoDate);
+        }
+    });
     eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal(eventModal));
     detailsModal.addEventListener('click', (e) => e.target === detailsModal && closeModal(detailsModal));
 
