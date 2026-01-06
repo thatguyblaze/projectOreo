@@ -709,23 +709,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 y++;
             }
 
-            // Create mini month card
+            // Create mini month card - Match Main Calendar Aesthetic
             const monthCard = document.createElement('div');
-            monthCard.className = `month-card p-4 rounded-xl bg-bg-secondary border border-bg-tertiary flex flex-col`;
+            monthCard.className = `month-card flex flex-col h-full`;
 
             // Header
             const header = document.createElement('h3');
-            header.className = 'text-lg font-bold mb-3 text-center';
+            header.className = 'text-xl font-bold mb-4 pl-1 text-text-primary border-b border-gray-800 pb-2';
             header.textContent = `${monthNames[m]} ${y}`;
             monthCard.appendChild(header);
 
-            // Grid
+            // Grid Container (mimics the main calendar grid structure)
+            const gridWrapper = document.createElement('div');
+            gridWrapper.className = 'flex-grow bg-bg-secondary rounded-lg p-1'; /* darker container for borders */
+
             const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-7 gap-1 flex-grow';
+            grid.className = 'grid grid-cols-7 gap-px bg-bg-tertiary border border-bg-tertiary'; /* Gap creates the grid lines */
+
             // Weekday headers (mini)
             dayNamesShort.forEach(d => {
                 const dEl = document.createElement('div');
-                dEl.className = 'text-center text-xs text-text-secondary font-medium';
+                dEl.className = 'text-center text-xs text-text-secondary font-semibold py-2 bg-bg-secondary uppercase tracking-wider';
                 dEl.textContent = d;
                 grid.appendChild(dEl);
             });
@@ -737,6 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Empty slots
             for (let j = 0; j < firstDay; j++) {
                 const empty = document.createElement('div');
+                empty.className = 'bg-bg-primary min-h-[3rem]'; // Match cell height
                 grid.appendChild(empty);
             }
 
@@ -744,36 +749,48 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let d = 1; d <= daysInMonth; d++) {
                 const dayDate = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const cell = document.createElement('div');
-                cell.className = 'text-center p-1 rounded-md text-sm cursor-pointer hover:bg-bg-tertiary transition-colors relative';
+                // Use bg-bg-primary for the cell, so the gap showing bg-tertiary looks like a border
+                cell.className = 'bg-bg-primary min-h-[3rem] p-1 text-sm text-text-secondary cursor-pointer hover:bg-bg-tertiary transition-colors relative';
 
                 // Highlight today
                 const today = new Date();
                 if (d === today.getDate() && m === today.getMonth() && y === today.getFullYear()) {
-                    cell.classList.add('bg-accent-primary', 'text-white');
+                    cell.classList.add('bg-accent-primary/20', 'text-accent-primary', 'font-bold');
                 }
 
                 // Dot indicators for events
                 const dayEvents = getEventsForDate(dayDate);
                 if (dayEvents.length > 0) {
-                    const dot = document.createElement('div');
-                    dot.className = 'w-1.5 h-1.5 rounded-full bg-accent-primary absolute bottom-0.5 left-1/2 transform -translate-x-1/2';
-                    // Logic to change color if bills vs events?
-                    if (dayEvents.some(e => e.type === 'bill')) dot.style.backgroundColor = '#EF4444';
-                    else if (dayEvents.some(e => e.type === 'payday')) dot.style.backgroundColor = '#10B981';
+                    const dotContainer = document.createElement('div');
+                    dotContainer.className = 'absolute bottom-1 right-1 flex gap-0.5';
 
-                    cell.appendChild(dot);
+                    // Show up to 3 dots
+                    dayEvents.slice(0, 3).forEach(evt => {
+                        const dot = document.createElement('div');
+                        dot.className = 'w-1.5 h-1.5 rounded-full';
+                        dot.style.backgroundColor = evt.color || '#3B82F6';
+
+                        if (evt.type === 'bill') dot.style.backgroundColor = '#EF4444';
+                        else if (evt.type === 'payday') dot.style.backgroundColor = '#10B981';
+
+                        dotContainer.appendChild(dot);
+                    });
+                    cell.appendChild(dotContainer);
                 }
 
-                cell.textContent = d;
+                const dayNum = document.createElement('span');
+                dayNum.textContent = d;
+                cell.appendChild(dayNum);
+
                 cell.onclick = () => {
-                    // Clicking a day in quarter view opens Details for that day
                     openDetailsModal(dayDate);
                 };
 
                 grid.appendChild(cell);
             }
 
-            monthCard.appendChild(grid);
+            gridWrapper.appendChild(grid);
+            monthCard.appendChild(gridWrapper);
             quarterGrid.appendChild(monthCard);
         }
     }
@@ -824,8 +841,8 @@ document.addEventListener('DOMContentLoaded', () => {
     todayBtn.addEventListener('click', () => {
         currentYear = new Date().getFullYear();
         currentMonth = new Date().getMonth();
-        if (currentView === 'quarter') generateQuarterView();
-        else switchToMonthView();
+        // Force switch to Month View
+        switchToMonthView();
         updateViewTitle();
     });
 
