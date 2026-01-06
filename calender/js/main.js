@@ -149,6 +149,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailsCloseBtn = document.getElementById('detailsCloseBtn');
     const addEventFromDetailsBtn = document.getElementById('addEventFromDetailsBtn');
 
+    // Focus Elements
+    const focusOverlay = document.getElementById('focusOverlay');
+    const closeFocusBtn = document.getElementById('closeFocusBtn');
+    const focusTitle = document.getElementById('focusTitle');
+    const focusTimer = document.getElementById('focusTimer');
+    const focusDate = document.getElementById('focusDate');
+    const focusIcon = document.getElementById('focusIcon');
+    let focusInterval = null;
+
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const dayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -663,12 +672,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${event.description ? `<p class="text-sm text-text-secondary mt-1">${event.description}</p>` : ''}
                         </div>
                     </div>
+                     <button class="p-2 text-gray-500 hover:text-white transition-colors focus-target-btn" data-event-index="${events.indexOf(event)}" title="Focus Mode">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </button>
                 </div>`;
             }).join('');
 
         detailsContent.querySelectorAll('[data-event-id]').forEach(item => {
-            item.addEventListener('click', () => {
-                // Find the original event object from the main events array
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.focus-target-btn')) return; // Ignore if clicked on focus button
                 const event = events.find(e => e.id === item.dataset.eventId);
                 if (event) {
                     closeModal(detailsModal);
@@ -676,6 +688,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        detailsContent.querySelectorAll('.focus-target-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // We need the event object. We can get it via the parent data-id
+                const parent = btn.closest('[data-event-id]');
+                const event = events.find(evt => evt.id === parent.dataset.eventId);
+                if (event) {
+                    closeModal(detailsModal);
+                    openFocusMode(event, isoDate); // Pass the date of the specific instance
+                }
+            });
+        });
+    }
+
+    function openFocusMode(event, dateStr) {
+        focusOverlay.classList.remove('hidden');
+        setTimeout(() => focusOverlay.classList.remove('opacity-0'), 10);
+
+        const targetDate = new Date(`${dateStr}T12:00:00`); // Use the instance date
+        const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
+
+        focusTitle.textContent = event.title;
+        focusIcon.textContent = icon;
+        focusDate.textContent = dateStr;
+
+        if (focusInterval) clearInterval(focusInterval);
+
+        const updateTimer = () => {
+            const now = new Date();
+            const diff = targetDate - now;
+
+            if (Math.abs(diff) < 1000) {
+                focusTimer.textContent = "NOW";
+                return;
+            }
+
+            const isPast = diff < 0;
+            const absDiff = Math.abs(diff);
+
+            const days = Math.floor(absDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((absDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((absDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((absDiff % (1000 * 60)) / 1000);
+
+            const prefix = isPast ? "+" : "-";
+            focusTimer.textContent = `${prefix} ${days}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+        };
+
+        updateTimer();
+        focusInterval = setInterval(updateTimer, 1000);
+    }
+
+    function closeFocusMode() {
+        if (focusInterval) clearInterval(focusInterval);
+        focusOverlay.classList.add('opacity-0');
+        setTimeout(() => focusOverlay.classList.add('hidden'), 500);
     }
 
     // Event Listeners
@@ -756,64 +825,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal(eventModal));
     detailsModal.addEventListener('click', (e) => e.target === detailsModal && closeModal(detailsModal));
-
-    // Encryption Effect variables
-    let encryptionInterval = null;
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
-
-    function scrambleText(text) {
-        return text.split('').map(char => {
-            if (char === ' ') return ' ';
-            return chars[Math.floor(Math.random() * chars.length)];
-        }).join('');
-    }
-
-    function startEncryption() {
-        if (encryptionInterval) return;
-
-        // Target specifically text elements that contain sensitive data
-        // Event bars in month view, Titles in modals
-
-        encryptionInterval = setInterval(() => {
-            // 1. Month View Event Bars
-            document.querySelectorAll('.event-bar .truncate').forEach(el => {
-                if (!el.dataset.original) el.dataset.original = el.textContent;
-                el.textContent = scrambleText(el.dataset.original);
-            });
-
-            // 2. Details Modal Titles & Descriptions
-            // We need to be careful not to scramble the static headers, only user content
-            // The details modal uses specific structure.
-
-            // List items in details modal
-            document.querySelectorAll('#detailsContent p').forEach(el => {
-                // Check if it's a title or description (they are ps)
-                if (!el.dataset.original) el.dataset.original = el.textContent;
-                el.textContent = scrambleText(el.dataset.original);
-            });
-
-        }, 50); // Updates every 50ms for that "active" hacker look
-    }
-
-    function stopEncryption() {
-        if (encryptionInterval) {
-            clearInterval(encryptionInterval);
-            encryptionInterval = null;
-        }
-
-        // Restore original text
-        document.querySelectorAll('[data-original]').forEach(el => {
-            el.textContent = el.dataset.original;
-            delete el.dataset.original;
-        });
-
-        // Force a re-render just to be safe and clean up any potential glitches
-        // (Optional, but restoring data attributes is usually smoother than full re-render)
-    }
-
-    window.addEventListener('blur', startEncryption);
-    window.addEventListener('focus', stopEncryption);
-
     // Initial Load
     initPickers();
     currentYear = new Date().getFullYear();
