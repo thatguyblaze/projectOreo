@@ -152,8 +152,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const dayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const emojis = ['📱', '💼', '🎂', '✈️', '❤️', '💰', '💳', '🏡', '💪', '🍽️', '🎓', '🩺', '🚗', '🛜'];
-    const eventColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+    const emojis = ['📱', '💼', '🎂', '✈️', '❤️', '💰', '💳', '🏡', '💪', '🍽️', '🎓', '🩺', '🚗', '🛜', '🎮', '🏀', '🎵', '🎨', '🏖️', '🐾'];
+    // Expanded color palette
+    const eventColors = [
+        '#3B82F6', // Blue
+        '#10B981', // Green
+        '#F59E0B', // Amber
+        '#EF4444', // Red
+        '#8B5CF6', // Violet
+        '#EC4899', // Pink
+        '#06b6d4', // Cyan
+        '#84cc16', // Lime
+        '#14b8a6', // Teal
+        '#f43f5e', // Rose
+        '#d946ef', // Fuchsia
+        '#6366f1', // Indigo
+        '#eab308', // Yellow
+        '#f97316', // Orange
+        '#64748b'  // Slate
+    ];
 
     const holidayIcons = { "new year": '🥳', "valentine": '❤️', "patrick": '🍀', "easter": '🐰', "mother": '👩‍👧‍👦', "father": '👨‍👧‍👦', "juneteenth": '✊🏿', "independence": '🎆', "halloween": '🎃', "thanksgiving": '🦃', "christmas": '🎄', "king": '🕊️' };
     const holidays = { '01-01': "New Year's Day", '01-20': "Martin Luther King, Jr. Day", '02-14': "Valentine's Day", '02-17': "Presidents' Day", '03-17': "St. Patrick's Day", '04-18': "Good Friday", '04-20': "Easter Sunday", '05-11': "Mother's Day", '05-26': "Memorial Day", '06-15': "Father's Day", '06-19': "Juneteenth", '07-04': "Independence Day", '09-01': "Labor Day", '10-13': "Columbus Day", '10-31': "Halloween", '11-11': "Veterans Day", '11-27': "Thanksgiving Day", '12-25': "Christmas Day" };
@@ -598,13 +615,46 @@ document.addEventListener('DOMContentLoaded', () => {
         const date = new Date(`${isoDate}T12:00:00`);
         detailsDate.textContent = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
         detailsDay.textContent = dayNames[date.getDay()];
-        const dayEvents = getEventsForDate(isoDate);
+
+        let dayEvents = getEventsForDate(isoDate);
+
+        // Check for Payday
+        const paydayEvent = dayEvents.find(e => e.type === 'payday');
+
+        // Filter out payday from the visible list "Don't show payday in the list of options"
+        dayEvents = dayEvents.filter(e => e.type !== 'payday');
+
+        // Manage Payday Header Button
+        const existingPaydayBtn = document.getElementById('paydayHeaderBtn');
+        if (existingPaydayBtn) existingPaydayBtn.remove();
+
+        const btnContainer = document.querySelector('#detailsModal .flex.items-center.gap-2.-mt-2.-mr-2');
+        if (paydayEvent) {
+            const paydayBtn = document.createElement('button');
+            paydayBtn.id = 'paydayHeaderBtn';
+            paydayBtn.className = 'p-2 rounded-full hover:bg-gray-700 transition-colors text-green-400';
+            paydayBtn.innerHTML = '💸';
+            paydayBtn.title = 'Edit Payday';
+            paydayBtn.onclick = () => {
+                const originalId = paydayEvent.id.toString().split('-')[0];
+                const originalEvent = events.find(e => e.id === originalId);
+                closeModal(detailsModal);
+                openEventModal(isoDate, originalEvent || paydayEvent);
+            };
+            btnContainer.prepend(paydayBtn);
+        }
+
         detailsContent.innerHTML = dayEvents.length === 0
             ? '<p class="text-text-secondary">No items for this day.</p>'
             : dayEvents.map(event => {
-                const isEditable = event.type !== 'holiday' && !event.isRecurringInstance;
-                const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : (event.type === 'payday' ? '💸' : '🎉')));
-                return `<div class="flex items-start justify-between p-3 rounded-lg bg-bg-tertiary ${isEditable ? 'cursor-pointer hover:bg-gray-700' : ''}" ${isEditable ? `data-event-id="${event.id}"` : ''}>
+                const isEditable = event.type !== 'holiday';
+                // Note: We remove the '&& !event.isRecurringInstance' check to allow clicking them.
+                // We will handle the "editing series" logic in the click handler.
+
+                const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
+                const originalId = event.id.toString().split('-')[0];
+
+                return `<div class="flex items-start justify-between p-3 rounded-lg bg-bg-tertiary ${isEditable ? 'cursor-pointer hover:bg-gray-700' : ''}" ${isEditable ? `data-event-id="${originalId}"` : ''}>
                     <div class="flex items-start gap-3">
                          <div class="event-color-dot mt-2" style="background-color:${event.color || '#3B82F6'}"></div>
                         <span class="text-lg mt-1">${icon}</span>
@@ -618,9 +668,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         detailsContent.querySelectorAll('[data-event-id]').forEach(item => {
             item.addEventListener('click', () => {
+                // Find the original event object from the main events array
                 const event = events.find(e => e.id === item.dataset.eventId);
-                closeModal(detailsModal);
-                openEventModal(isoDate, event);
+                if (event) {
+                    closeModal(detailsModal);
+                    openEventModal(isoDate, event);
+                }
             });
         });
     }
@@ -703,6 +756,63 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal(eventModal));
     detailsModal.addEventListener('click', (e) => e.target === detailsModal && closeModal(detailsModal));
+
+    // Encryption Effect variables
+    let encryptionInterval = null;
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+
+    function scrambleText(text) {
+        return text.split('').map(char => {
+            if (char === ' ') return ' ';
+            return chars[Math.floor(Math.random() * chars.length)];
+        }).join('');
+    }
+
+    function startEncryption() {
+        if (encryptionInterval) return;
+
+        // Target specifically text elements that contain sensitive data
+        // Event bars in month view, Titles in modals
+
+        encryptionInterval = setInterval(() => {
+            // 1. Month View Event Bars
+            document.querySelectorAll('.event-bar .truncate').forEach(el => {
+                if (!el.dataset.original) el.dataset.original = el.textContent;
+                el.textContent = scrambleText(el.dataset.original);
+            });
+
+            // 2. Details Modal Titles & Descriptions
+            // We need to be careful not to scramble the static headers, only user content
+            // The details modal uses specific structure.
+
+            // List items in details modal
+            document.querySelectorAll('#detailsContent p').forEach(el => {
+                // Check if it's a title or description (they are ps)
+                if (!el.dataset.original) el.dataset.original = el.textContent;
+                el.textContent = scrambleText(el.dataset.original);
+            });
+
+        }, 50); // Updates every 50ms for that "active" hacker look
+    }
+
+    function stopEncryption() {
+        if (encryptionInterval) {
+            clearInterval(encryptionInterval);
+            encryptionInterval = null;
+        }
+
+        // Restore original text
+        document.querySelectorAll('[data-original]').forEach(el => {
+            el.textContent = el.dataset.original;
+            delete el.dataset.original;
+        });
+
+        // Force a re-render just to be safe and clean up any potential glitches
+        // (Optional, but restoring data attributes is usually smoother than full re-render)
+    }
+
+    window.addEventListener('blur', startEncryption);
+    window.addEventListener('focus', stopEncryption);
 
     // Initial Load
     initPickers();
