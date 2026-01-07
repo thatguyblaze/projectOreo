@@ -444,18 +444,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!eventBarsContainer) return;
         eventBarsContainer.innerHTML = '';
 
-        // Remove any existing "more-events" indicators from the grid cells to clean up
+        // Clean up any artifacts from previous render methods
         document.querySelectorAll('.more-events-indicator').forEach(el => el.remove());
 
-        // Reset grid rows to auto (reverting previous dynamic height attempt if applied)
-        calendarGrid.style.gridTemplateRows = '';
-
         const monthEvents = getEventsForMonth(currentYear, currentMonth);
+
         const layout = [];
         const gridViewStartDate = new Date(currentYear, currentMonth, 1 - firstDayOfMonth);
         const startOfGridView = new Date(`${getISODate(gridViewStartDate)}T12:00:00`);
 
-        // 1. Calculate Layout Tracks
+        // 1. Packing Algorithm: Determine tracks for all events
         monthEvents.forEach(event => {
             if (event.type === 'payday') return;
 
@@ -493,56 +491,89 @@ document.addEventListener('DOMContentLoaded', () => {
             event._isRenderable = true;
         });
 
-        // 2. Determine Max Visible Tracks based on current cell height
-        // We get the height of a representative cell (e.g., the 8th child, which is the first Monday usually)
-        // If grid isn't rendered yet, fallback to a safe default.
-        const referenceCell = calendarGrid.children[7]; // Skip 7 headers
-        const cellHeight = referenceCell ? referenceCell.offsetHeight : 100;
-        const headerHeight = 30; // Approx height of date number area
-        const barHeight = 28;
-        const maxTracks = Math.max(1, Math.floor((cellHeight - headerHeight - 10) / barHeight));
+        // 2. Measure Grid Metrics
+        // We need robust measurements of the container and header
+        const gridComputedStyle = window.getComputedStyle(calendarGrid);
+        const gridPaddingTop = parseFloat(gridComputedStyle.paddingTop) || 0;
+        const gridGap = parseFloat(gridComputedStyle.rowGap) || 4; // default to gap-1 (4px)
 
-        const hiddenCounts = {}; // Key: dayIndex, Value: count
+        // Measure header height (first child of grid)
+        const headerEl = calendarGrid.firstElementChild;
+        const headerHeight = headerEl ? headerEl.offsetHeight : 30; // Fallback
 
-        // 3. Render Visible Events
+        // 3. Calculate Dynamic Heights for each week row
+        const rowHeights = [100, 100, 100, 100, 100, 100]; // Default min height
+        const dayNumberHeight = 24; // Space for the number in the corner
+        const trackHeight = 28; // Height per event bar
+        const bottomPadding = 8;
+        const topPadding = 26; // Space from top of cell to first event
+
+        for (let row = 0; row < 6; row++) {
+            let maxTrackInRow = -1;
+            for (let d = 0; d < 7; d++) {
+                const dayIndex = row * 7 + d;
+                if (layout[dayIndex]) {
+                    for (let t = 0; t < layout[dayIndex].length; t++) {
+                        if (layout[dayIndex][t]) maxTrackInRow = Math.max(maxTrackInRow, t);
+                    }
+                }
+            }
+
+            if (maxTrackInRow >= 0) {
+                const requiredHeight = topPadding + (maxTrackInRow + 1) * trackHeight + bottomPadding;
+                rowHeights[row] = Math.max(rowHeights[row], requiredHeight);
+            }
+        }
+
+        // 4. Apply Grid Template Rows
+        // The first 'auto' is for the header (day names), then 6 rows for weeks
+        calendarGrid.style.gridTemplateRows = `auto ${rowHeights.map(h => `${h}px`).join(' ')}`;
+
+        // 5. Render the bars using the calculated geometry
         monthEvents.forEach(event => {
             if (!event._isRenderable) return;
-
-            // If the event track is completely out of bounds for the WHOLE event, we count it as hidden for all its days
-            // However, it's better to show it if it fits in SOME weeks? 
-            // The logic: if track >= maxTracks, we hide it and show "more" on those days.
-
-            if (event._renderTrack >= maxTracks) {
-                for (let i = event._renderStart; i <= event._renderEnd; i++) {
-                    hiddenCounts[i] = (hiddenCounts[i] || 0) + 1;
-                }
-                return;
-            }
 
             let currentRenderIndex = event._renderStart;
             while (currentRenderIndex <= event._renderEnd) {
                 const weekRow = Math.floor(currentRenderIndex / 7);
                 const startColumn = currentRenderIndex % 7;
+
                 let segmentEndIndex = currentRenderIndex;
                 while (segmentEndIndex + 1 <= event._renderEnd && Math.floor((segmentEndIndex + 1) / 7) === weekRow) {
                     segmentEndIndex++;
                 }
                 const durationInDays = segmentEndIndex - currentRenderIndex + 1;
 
-                // Position Calculation
-                const top = weekRow * cellHeight + headerHeight + (event._renderTrack * barHeight);
-                // Note: This relies on fixed-height rows CSS. If rows are flexible (1fr), cellHeight is correct.
+                // Calculate vertical position (Y)
+                // Start with Container Padding
+                let topPos = gridPaddingTop;
+
+                // Add Header Height + Gap
+                topPos += headerHeight + gridGap;
+
+                // Add Heights of previous rows + gaps
+                for (let r = 0; r < weekRow; r++) {
+                    topPos += rowHeights[r] + gridGap;
+                }
+
+                // Add offset within the cell (e.g. below day number)
+                topPos += topPadding + (event._renderTrack * trackHeight);
+
+                // Calculate Horizontal position (X)
+                // We leave a small gap on left/right for aesthetics (4px)
+                // Grid columns are 1fr each.
 
                 const bar = document.createElement('div');
                 bar.className = 'event-bar';
-                bar.style.top = `${top}px`;
+                bar.style.top = `${topPos}px`;
+                // Start X: (Column * 100/7)% + margin
                 bar.style.left = `calc(${startColumn / 7 * 100}% + 4px)`;
                 bar.style.width = `calc(${durationInDays / 7 * 100}% - 8px)`;
                 bar.style.backgroundColor = event.color || '#3B82F6';
                 bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
                 bar.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    openDetailsModal(event.date); // This opens the start date details
+                    openDetailsModal(event.date);
                 });
 
                 const icon = (event.type === 'holiday' || event.type === 'history') ? getHolidayIcon(event.title, event.type) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
@@ -550,42 +581,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 eventBarsContainer.appendChild(bar);
 
                 currentRenderIndex = segmentEndIndex + 1;
-            }
-        });
-
-        // 4. Render "+ N more" badges
-        Object.keys(hiddenCounts).forEach(dayIndex => {
-            const count = hiddenCounts[dayIndex];
-            if (count > 0) {
-                const rowIndex = Math.floor(dayIndex / 7);
-                const colIndex = dayIndex % 7;
-
-                // We create a small badge at the bottom of the visible cell area
-                const badge = document.createElement('div');
-                badge.className = 'absolute text-xs font-medium text-text-secondary cursor-pointer hover:text-white px-2 py-1 rounded hover:bg-white/10 transition-colors z-20 hidden-count-badge';
-                badge.style.bottom = '2px';
-                badge.style.right = '4px'; // Align right for cleaner look
-                // Or absolute positioning in the overlay:
-                const badgeTop = rowIndex * cellHeight + headerHeight + (maxTracks * barHeight);
-                // Actually, let's put it in the eventBarsContainer so it floats correctly
-
-                const moreLabel = document.createElement('div');
-                moreLabel.className = 'event-bar bg-transparent hover:bg-white/5 text-text-secondary text-xs flex items-center justify-center cursor-pointer';
-                moreLabel.style.top = `${badgeTop}px`;
-                moreLabel.style.left = `calc(${colIndex / 7 * 100}% + 4px)`;
-                moreLabel.style.width = `calc(${1 / 7 * 100}% - 8px)`;
-                moreLabel.style.height = `${barHeight}px`; // Match bar height
-                moreLabel.innerHTML = `+${count} more`;
-
-                moreLabel.onclick = (e) => {
-                    e.stopPropagation();
-                    // Determine date from dayIndex
-                    const date = new Date(startOfGridView);
-                    date.setDate(date.getDate() + parseInt(dayIndex));
-                    openDetailsModal(getISODate(date));
-                };
-
-                eventBarsContainer.appendChild(moreLabel);
             }
         });
     }
