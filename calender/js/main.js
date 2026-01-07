@@ -784,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function openDetailsModal(isoDate) {
+    function openDetailsModal_Deprecated(isoDate) {
         detailsModal.dataset.date = isoDate;
         openModal(detailsModal);
         const date = new Date(`${isoDate}T12:00:00`);
@@ -841,15 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             }).join('');
 
-        detailsContent.querySelectorAll('[data-event-id]').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const event = events.find(e => e.id === item.dataset.eventId);
-                if (event) {
-                    closeModal(detailsModal);
-                    openEventModal(isoDate, event);
-                }
-            });
-        });
+        // Listeners handled in element creation
     }
 
     // Quarter View Logic
@@ -1107,6 +1099,129 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     eventModal.addEventListener('click', (e) => e.target === eventModal && closeModal(eventModal));
     detailsModal.addEventListener('click', (e) => e.target === detailsModal && closeModal(detailsModal));
+    function openDetailsModal(isoDate) {
+        detailsModal.dataset.date = isoDate;
+        openModal(detailsModal);
+        const date = new Date(`${isoDate}T12:00:00`);
+        detailsDate.textContent = `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+        detailsDay.textContent = dayNames[date.getDay()];
+
+        let dayEvents = getEventsForDate(isoDate);
+
+        // Check for Payday
+        const paydayEvent = dayEvents.find(e => e.type === 'payday');
+
+        // Filter out payday from the visible list "Don't show payday in the list of options"
+        dayEvents = dayEvents.filter(e => e.type !== 'payday');
+
+        // Manage Payday Header Button
+        const existingPaydayBtn = document.getElementById('paydayHeaderBtn');
+        if (existingPaydayBtn) existingPaydayBtn.remove();
+
+        const btnContainer = document.querySelector('#detailsModal .flex.items-center.gap-2.-mt-2.-mr-2');
+        if (paydayEvent) {
+            const paydayBtn = document.createElement('button');
+            paydayBtn.id = 'paydayHeaderBtn';
+            paydayBtn.className = 'p-2 rounded-full hover:bg-gray-700 transition-colors text-green-400';
+            paydayBtn.innerHTML = '💸';
+            paydayBtn.title = 'Edit Payday';
+            paydayBtn.onclick = () => {
+                const originalId = paydayEvent.id.toString().split('-')[0];
+                const originalEvent = events.find(e => e.id === originalId);
+                closeModal(detailsModal);
+                openEventModal(isoDate, originalEvent || paydayEvent);
+            };
+            btnContainer.prepend(paydayBtn);
+        }
+
+        detailsContent.innerHTML = '';
+        if (dayEvents.length === 0) {
+            detailsContent.innerHTML = '<p class="text-text-secondary">No items for this day.</p>';
+        } else {
+            dayEvents.forEach(event => {
+                const isEditable = event.type !== 'holiday' && event.type !== 'history';
+                const isHistory = event.type === 'history';
+                const icon = (event.type === 'holiday' || event.type === 'history') ? getHolidayIcon(event.title, event.type) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
+                const originalId = event.id.toString().split('-')[0];
+
+                // Item Container
+                const itemEl = document.createElement('div');
+                itemEl.className = 'rounded-lg bg-bg-tertiary overflow-hidden transition-colors hover:bg-white/5 mb-2';
+
+                // Header
+                const headerEl = document.createElement('div');
+                headerEl.className = 'flex items-center justify-between p-3 cursor-pointer select-none';
+                headerEl.innerHTML = `
+                    <div class="flex items-center gap-3 pointer-events-none">
+                         <div class="event-color-dot" style="background-color:${event.color || '#3B82F6'}"></div>
+                         <span class="text-lg leading-none">${icon}</span>
+                         <p class="font-medium leading-none mt-0.5">${event.title} ${event.isRecurringInstance ? '<span class="text-xs text-accent-secondary ml-1">(Recurring)</span>' : ''}</p>
+                    </div>
+                    <div class="transform transition-transform duration-200 text-text-secondary">▼</div>
+                `;
+
+                // Content Body
+                const bodyEl = document.createElement('div');
+                bodyEl.className = 'px-3 pb-3 pt-0 hidden text-sm text-text-secondary border-t border-white/5 mt-2';
+
+                // Construct Body Content
+                let bodyHTML = '';
+
+                // Years Ago Logic
+                if (isHistory) {
+                    const descText = event.description || '';
+                    const eventYear = parseInt(descText.substring(0, 4)); // Get first 4 chars as year
+                    if (!isNaN(eventYear)) {
+                        const diff = date.getFullYear() - eventYear;
+                        if (diff > 0) {
+                            bodyHTML += `<p class="text-accent-primary font-bold mb-2 pt-2">${diff} years ago on this day</p>`;
+                        }
+                    }
+                } else {
+                    bodyHTML += `<div class="pt-2"></div>`;
+                }
+
+                if (event.description) {
+                    bodyHTML += `<p class="leading-relaxed">${event.description}</p>`;
+                } else {
+                    bodyHTML += `<p class="italic opacity-50">No description</p>`;
+                }
+
+                bodyEl.innerHTML = bodyHTML;
+
+                if (isEditable) {
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'mt-3 text-xs bg-bg-primary px-3 py-1.5 rounded border border-gray-600 hover:bg-gray-700 hover:border-accent-primary transition-colors text-white';
+                    editBtn.textContent = 'Edit Event';
+                    editBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        // Find original event object
+                        const originalEventObj = events.find(e => e.id === originalId);
+                        closeModal(detailsModal);
+                        openEventModal(isoDate, originalEventObj || event);
+                    };
+                    bodyEl.appendChild(editBtn);
+                }
+
+                // Toggle Logic
+                headerEl.onclick = () => {
+                    const isHidden = bodyEl.classList.contains('hidden');
+                    if (isHidden) {
+                        bodyEl.classList.remove('hidden');
+                        headerEl.querySelector('div:last-child').style.transform = 'rotate(180deg)';
+                    } else {
+                        bodyEl.classList.add('hidden');
+                        headerEl.querySelector('div:last-child').style.transform = 'rotate(0deg)';
+                    }
+                };
+
+                itemEl.appendChild(headerEl);
+                itemEl.appendChild(bodyEl);
+                detailsContent.appendChild(itemEl);
+            });
+        }
+    }
+
     // Initial Load
     initPickers();
     currentYear = new Date().getFullYear();
