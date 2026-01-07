@@ -443,32 +443,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventBarsContainer = document.getElementById('event-bars-container');
         if (!eventBarsContainer) return;
         eventBarsContainer.innerHTML = '';
+
+        // Remove any existing "more-events" indicators from the grid cells to clean up
+        document.querySelectorAll('.more-events-indicator').forEach(el => el.remove());
+
+        // Reset grid rows to auto (reverting previous dynamic height attempt if applied)
+        calendarGrid.style.gridTemplateRows = '';
+
         const monthEvents = getEventsForMonth(currentYear, currentMonth);
-
-        const layout = []; // This will be indexed 0-41
-
-        // Define the start date of the 42-day grid view
+        const layout = [];
         const gridViewStartDate = new Date(currentYear, currentMonth, 1 - firstDayOfMonth);
         const startOfGridView = new Date(`${getISODate(gridViewStartDate)}T12:00:00`);
 
-        // Packing Algorithm: Determine tracks for all events
+        // 1. Calculate Layout Tracks
         monthEvents.forEach(event => {
-            if (event.type === 'payday') return; // Paydays are handled by background color
+            if (event.type === 'payday') return;
 
             const eventStartDate = new Date(`${event.date}T12:00:00`);
             const eventEndDate = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStartDate;
-
-            // Calculate day index relative to the start of the grid (0-41)
             const startIndex = (eventStartDate - startOfGridView) / (1000 * 60 * 60 * 24);
             const endIndex = (eventEndDate - startOfGridView) / (1000 * 60 * 60 * 24);
 
-            // Only render events that are at all visible in the 42-day grid
             if (endIndex < 0 || startIndex > 41) return;
 
             const effectiveStartIndex = Math.max(0, startIndex);
             const effectiveEndIndex = Math.min(41, endIndex);
 
-            // Find the first available vertical track for this event
             let track = 0;
             while (true) {
                 let collision = false;
@@ -482,95 +482,67 @@ document.addEventListener('DOMContentLoaded', () => {
                 track++;
             }
 
-            // Mark the track as occupied for the duration of the event
             for (let i = effectiveStartIndex; i <= effectiveEndIndex; i++) {
                 if (!layout[i]) layout[i] = [];
                 layout[i][track] = true;
             }
 
-            // Store the assigned track on the event object temporarily for rendering
             event._renderTrack = track;
             event._renderStart = effectiveStartIndex;
             event._renderEnd = effectiveEndIndex;
             event._isRenderable = true;
         });
 
-        // 2. Calculate Dynamic Heights for each week row
-        const rowHeights = [100, 100, 100, 100, 100, 100]; // Default min height
-        const baseHeight = 35; // Height for date header
-        const trackHeight = 28; // Height per event bar
-        const bottomPadding = 10;
+        // 2. Determine Max Visible Tracks based on current cell height
+        // We get the height of a representative cell (e.g., the 8th child, which is the first Monday usually)
+        // If grid isn't rendered yet, fallback to a safe default.
+        const referenceCell = calendarGrid.children[7]; // Skip 7 headers
+        const cellHeight = referenceCell ? referenceCell.offsetHeight : 100;
+        const headerHeight = 30; // Approx height of date number area
+        const barHeight = 28;
+        const maxTracks = Math.max(1, Math.floor((cellHeight - headerHeight - 10) / barHeight));
 
-        for (let row = 0; row < 6; row++) {
-            let maxTrackInRow = -1;
-            for (let d = 0; d < 7; d++) {
-                const dayIndex = row * 7 + d;
-                if (layout[dayIndex]) {
-                    // Find max track used in this day
-                    const occupiedTracks = layout[dayIndex].length;
-                    // Note: array length is just logical size, we need highest index actually used.
-                    // But our packer fills 0..N, so length is a good proxy for "max index + 1" roughly,
-                    // except sparse arrays. Let's iterate.
-                    for (let t = 0; t < layout[dayIndex].length; t++) {
-                        if (layout[dayIndex][t]) maxTrackInRow = Math.max(maxTrackInRow, t);
-                    }
-                }
-            }
+        const hiddenCounts = {}; // Key: dayIndex, Value: count
 
-            if (maxTrackInRow >= 0) {
-                const requiredHeight = baseHeight + (maxTrackInRow + 1) * trackHeight + bottomPadding;
-                rowHeights[row] = Math.max(rowHeights[row], requiredHeight);
-            }
-        }
-
-        // 3. Apply Grid Template Rows
-        // The first 'auto' is for the header (day names), then 6 rows for weeks
-        calendarGrid.style.gridTemplateRows = `auto ${rowHeights.map(h => `${h}px`).join(' ')}`;
-
-        // 4. Render the bars using the calculated geometry
+        // 3. Render Visible Events
         monthEvents.forEach(event => {
             if (!event._isRenderable) return;
 
+            // If the event track is completely out of bounds for the WHOLE event, we count it as hidden for all its days
+            // However, it's better to show it if it fits in SOME weeks? 
+            // The logic: if track >= maxTracks, we hide it and show "more" on those days.
+
+            if (event._renderTrack >= maxTracks) {
+                for (let i = event._renderStart; i <= event._renderEnd; i++) {
+                    hiddenCounts[i] = (hiddenCounts[i] || 0) + 1;
+                }
+                return;
+            }
+
             let currentRenderIndex = event._renderStart;
-            // Iterate through the segments (if event spans across weeks)
             while (currentRenderIndex <= event._renderEnd) {
                 const weekRow = Math.floor(currentRenderIndex / 7);
                 const startColumn = currentRenderIndex % 7;
-
-                // Find end of this segment (end of week or end of event)
                 let segmentEndIndex = currentRenderIndex;
                 while (segmentEndIndex + 1 <= event._renderEnd && Math.floor((segmentEndIndex + 1) / 7) === weekRow) {
                     segmentEndIndex++;
                 }
-
                 const durationInDays = segmentEndIndex - currentRenderIndex + 1;
 
-                // Calculate vertical position
-                // Sum heights of previous rows
-                let topOffset = 0;
-                for (let r = 0; r < weekRow; r++) {
-                    topOffset += rowHeights[r];
-                }
-
-                // Add internal offset
-                // We must account for the gap (gap-1 = 4px usually, but let's assume 0 for calc to be safe, or read gap)
-                // Actually grid gap is handled by the browser between rows. 
-                // Since our container overlay is absolute over the whole grid, we need to account for gaps.
-                // Tailwind gap-1 is 0.25rem = 4px.
-                topOffset += weekRow * 4;
-
-                const barTop = topOffset + 30 + (event._renderTrack * 28);
+                // Position Calculation
+                const top = weekRow * cellHeight + headerHeight + (event._renderTrack * barHeight);
+                // Note: This relies on fixed-height rows CSS. If rows are flexible (1fr), cellHeight is correct.
 
                 const bar = document.createElement('div');
                 bar.className = 'event-bar';
-                bar.style.top = `${barTop}px`;
+                bar.style.top = `${top}px`;
                 bar.style.left = `calc(${startColumn / 7 * 100}% + 4px)`;
                 bar.style.width = `calc(${durationInDays / 7 * 100}% - 8px)`;
                 bar.style.backgroundColor = event.color || '#3B82F6';
                 bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
                 bar.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    openDetailsModal(event.date);
+                    openDetailsModal(event.date); // This opens the start date details
                 });
 
                 const icon = (event.type === 'holiday' || event.type === 'history') ? getHolidayIcon(event.title, event.type) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
@@ -578,6 +550,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 eventBarsContainer.appendChild(bar);
 
                 currentRenderIndex = segmentEndIndex + 1;
+            }
+        });
+
+        // 4. Render "+ N more" badges
+        Object.keys(hiddenCounts).forEach(dayIndex => {
+            const count = hiddenCounts[dayIndex];
+            if (count > 0) {
+                const rowIndex = Math.floor(dayIndex / 7);
+                const colIndex = dayIndex % 7;
+
+                // We create a small badge at the bottom of the visible cell area
+                const badge = document.createElement('div');
+                badge.className = 'absolute text-xs font-medium text-text-secondary cursor-pointer hover:text-white px-2 py-1 rounded hover:bg-white/10 transition-colors z-20 hidden-count-badge';
+                badge.style.bottom = '2px';
+                badge.style.right = '4px'; // Align right for cleaner look
+                // Or absolute positioning in the overlay:
+                const badgeTop = rowIndex * cellHeight + headerHeight + (maxTracks * barHeight);
+                // Actually, let's put it in the eventBarsContainer so it floats correctly
+
+                const moreLabel = document.createElement('div');
+                moreLabel.className = 'event-bar bg-transparent hover:bg-white/5 text-text-secondary text-xs flex items-center justify-center cursor-pointer';
+                moreLabel.style.top = `${badgeTop}px`;
+                moreLabel.style.left = `calc(${colIndex / 7 * 100}% + 4px)`;
+                moreLabel.style.width = `calc(${1 / 7 * 100}% - 8px)`;
+                moreLabel.style.height = `${barHeight}px`; // Match bar height
+                moreLabel.innerHTML = `+${count} more`;
+
+                moreLabel.onclick = (e) => {
+                    e.stopPropagation();
+                    // Determine date from dayIndex
+                    const date = new Date(startOfGridView);
+                    date.setDate(date.getDate() + parseInt(dayIndex));
+                    openDetailsModal(getISODate(date));
+                };
+
+                eventBarsContainer.appendChild(moreLabel);
             }
         });
     }
