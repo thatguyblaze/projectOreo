@@ -1163,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', () => {
                              ${event.description ? `<p class="text-xs text-text-secondary mt-1 truncate opacity-70">${event.description}</p>` : ''}
                          </div>
                     </div>
-                    <div class="transform transition-transform duration-200 text-text-secondary shrink-0">▼</div>
+                    <div class="arrow-icon transform transition-transform duration-200 text-text-secondary shrink-0">▼</div>
                 `;
 
                 // Content Body
@@ -1212,12 +1212,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Toggle Logic
                 headerEl.onclick = () => {
                     const isHidden = bodyEl.classList.contains('hidden');
+                    const arrow = headerEl.querySelector('.arrow-icon');
                     if (isHidden) {
                         bodyEl.classList.remove('hidden');
-                        headerEl.querySelector('div:last-child').style.transform = 'rotate(180deg)';
+                        if (arrow) arrow.style.transform = 'rotate(180deg)';
                     } else {
                         bodyEl.classList.add('hidden');
-                        headerEl.querySelector('div:last-child').style.transform = 'rotate(0deg)';
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
                     }
                 };
 
