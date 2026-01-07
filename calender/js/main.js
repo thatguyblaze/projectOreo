@@ -210,33 +210,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateHolidays(year) {
         const holidays = [
-            { date: `${year}-01-01`, title: "New Year's Day" },
-            { date: getNthWeekdayOfMonth(year, 0, 1, 3), title: "Martin Luther King, Jr. Day" }, // 3rd Mon Jan
-            { date: `${year}-02-02`, title: "Groundhog Day" },
-            { date: `${year}-02-14`, title: "Valentine's Day" },
-            { date: getNthWeekdayOfMonth(year, 1, 1, 3), title: "Presidents' Day" }, // 3rd Mon Feb
-            { date: `${year}-03-17`, title: "St. Patrick's Day" },
-            { date: getEaster(year), title: "Easter Sunday" },
-            { date: getNthWeekdayOfMonth(year, 4, 0, 2), title: "Mother's Day" }, // 2nd Sun May
-            { date: getNthWeekdayOfMonth(year, 4, 1, 5), title: "Memorial Day" }, // Last Mon May
-            { date: getNthWeekdayOfMonth(year, 5, 0, 3), title: "Father's Day" }, // 3rd Sun Jun
-            { date: `${year}-06-19`, title: "Juneteenth" },
-            { date: `${year}-07-04`, title: "Independence Day" },
-            { date: getNthWeekdayOfMonth(year, 8, 1, 1), title: "Labor Day" }, // 1st Mon Sep
-            { date: getNthWeekdayOfMonth(year, 9, 1, 2), title: "Columbus Day" }, // 2nd Mon Oct
-            { date: `${year}-10-31`, title: "Halloween" },
-            { date: `${year}-11-11`, title: "Veterans Day" },
-            { date: getNthWeekdayOfMonth(year, 10, 4, 4), title: "Thanksgiving Day" }, // 4th Thu Nov
-            { date: `${year}-12-25`, title: "Christmas Day" },
-            { date: `${year}-12-31`, title: "New Year's Eve" }
+            { date: `${year}-01-01`, title: "New Year's Day", desc: "Celebrates the start of a new Gregorian year. A time for resolutions and fresh starts." },
+            { date: getNthWeekdayOfMonth(year, 0, 1, 3), title: "Martin Luther King, Jr. Day", desc: "Honors the civil rights leader Dr. Martin Luther King Jr., focusing on equality and service." },
+            { date: `${year}-02-02`, title: "Groundhog Day", desc: "Folklore states if a groundhog sees its shadow, there will be six more weeks of winter." },
+            { date: `${year}-02-14`, title: "Valentine's Day", desc: "A day celebrating love and affection between intimate companions." },
+            { date: getNthWeekdayOfMonth(year, 1, 1, 3), title: "Presidents' Day", desc: "Commemorates the birthdays of George Washington and Abraham Lincoln." },
+            { date: `${year}-03-17`, title: "St. Patrick's Day", desc: "Cultural and religious celebration of the death date of Saint Patrick, the patron saint of Ireland." },
+            { date: getEaster(year), title: "Easter Sunday", desc: "Christian festival celebrating the resurrection of Jesus from the dead." },
+            { date: getNthWeekdayOfMonth(year, 4, 0, 2), title: "Mother's Day", desc: "Honoring the mother of the family, as well as motherhood, maternal bonds, and the influence of mothers in society." },
+            { date: getNthWeekdayOfMonth(year, 4, 1, 5), title: "Memorial Day", desc: "A federal holiday for honoring and mourning the U.S. military personnel who have died in the discharge of their duties." },
+            { date: getNthWeekdayOfMonth(year, 5, 0, 3), title: "Father's Day", desc: "Honoring fathers and celebrating fatherhood, paternal bonds, and the influence of fathers in society." },
+            { date: `${year}-06-19`, title: "Juneteenth", desc: "Commemorating the emancipation of enslaved African Americans." },
+            { date: `${year}-07-04`, title: "Independence Day", desc: "Commemorates the Declaration of Independence, which was ratified by the Second Continental Congress on July 4, 1776." },
+            { date: getNthWeekdayOfMonth(year, 8, 1, 1), title: "Labor Day", desc: "Honors the American labor movement and the contributions that workers have made to the development of the country." },
+            { date: getNthWeekdayOfMonth(year, 9, 1, 2), title: "Columbus Day", desc: "Anniversary of Christopher Columbus's arrival in the Americas." },
+            { date: `${year}-10-31`, title: "Halloween", desc: "A celebration known for trick-or-treating, costume parties, and carving pumpkins into jack-o'-lanterns." },
+            { date: `${year}-11-11`, title: "Veterans Day", desc: "A federal holiday for honoring military veterans of the United States Armed Forces." },
+            { date: getNthWeekdayOfMonth(year, 10, 4, 4), title: "Thanksgiving Day", desc: "A harvest festival. It is a time for family gatherings and giving thanks." },
+            { date: `${year}-12-25`, title: "Christmas Day", desc: "An annual festival commemorating the birth of Jesus Christ, observed primarily on December 25." },
+            { date: `${year}-12-31`, title: "New Year's Eve", desc: "The last day of the year, celebrated with parties and social gatherings spanning the transition of the year." }
         ];
         const easter = new Date(getEaster(year));
         const goodFriday = new Date(easter);
         goodFriday.setDate(easter.getDate() - 2);
-        holidays.push({ date: getISODate(goodFriday), title: "Good Friday" });
+        holidays.push({ date: getISODate(goodFriday), title: "Good Friday", desc: "Commemorates the crucifixion of Jesus and his death at Calvary." });
 
         return holidays.reduce((acc, h) => {
-            if (h.date) acc[h.date.substring(5)] = h.title;
+            if (h.date) acc[h.date.substring(5)] = { title: h.title, desc: h.desc };
             return acc;
         }, {});
     }
@@ -590,11 +590,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const monthDay = isoDate.substring(5);
             if (currentYearHolidays[monthDay]) {
                 const holidayId = `holiday-${isoDate}`;
+                const holidayData = currentYearHolidays[monthDay];
                 if (!uniqueEvents.has(holidayId)) {
                     uniqueEvents.set(holidayId, {
                         id: holidayId,
                         date: isoDate,
-                        title: currentYearHolidays[monthDay],
+                        title: holidayData.title,
+                        description: holidayData.desc,
                         type: 'holiday',
                         color: '#10B981'
                     });
@@ -636,8 +638,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const currentYearHolidays = calculateHolidays(currentDate.getFullYear());
         const monthDay = isoDate.substring(5);
-        if (currentYearHolidays[monthDay]) {
-            dayEvents.unshift({ id: `holiday-${isoDate}`, date: isoDate, title: currentYearHolidays[monthDay], type: 'holiday', color: '#10B981' });
+        const holidayData = currentYearHolidays[monthDay];
+        if (holidayData) {
+            dayEvents.unshift({ id: `holiday-${isoDate}`, date: isoDate, title: holidayData.title, description: holidayData.desc, type: 'holiday', color: '#10B981' });
         }
 
         const histEvents = getHistoricalEventsList(currentDate.getFullYear());
@@ -1152,12 +1155,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const headerEl = document.createElement('div');
                 headerEl.className = 'flex items-center justify-between p-3 cursor-pointer select-none';
                 headerEl.innerHTML = `
-                    <div class="flex items-center gap-3 pointer-events-none">
-                         <div class="event-color-dot" style="background-color:${event.color || '#3B82F6'}"></div>
-                         <span class="text-lg leading-none">${icon}</span>
-                         <p class="font-medium leading-none mt-0.5">${event.title} ${event.isRecurringInstance ? '<span class="text-xs text-accent-secondary ml-1">(Recurring)</span>' : ''}</p>
+                    <div class="flex items-center gap-3 pointer-events-none overflow-hidden pr-2">
+                         <div class="event-color-dot shrink-0" style="background-color:${event.color || '#3B82F6'}"></div>
+                         <span class="text-lg leading-none shrink-0">${icon}</span>
+                         <div class="min-w-0 flex-1">
+                             <p class="font-medium leading-none mt-0.5 truncate">${event.title} ${event.isRecurringInstance ? '<span class="text-xs text-accent-secondary ml-1">(Recurring)</span>' : ''}</p>
+                             ${event.description ? `<p class="text-xs text-text-secondary mt-1 truncate opacity-70">${event.description}</p>` : ''}
+                         </div>
                     </div>
-                    <div class="transform transition-transform duration-200 text-text-secondary">▼</div>
+                    <div class="transform transition-transform duration-200 text-text-secondary shrink-0">▼</div>
                 `;
 
                 // Content Body
