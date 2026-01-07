@@ -174,10 +174,159 @@ document.addEventListener('DOMContentLoaded', () => {
         '#64748b'  // Slate
     ];
 
-    const holidayIcons = { "new year": '🥳', "valentine": '❤️', "patrick": '🍀', "easter": '🐰', "mother": '👩‍👧‍👦', "father": '👨‍👧‍👦', "juneteenth": '✊🏿', "independence": '🎆', "halloween": '🎃', "thanksgiving": '🦃', "christmas": '🎄', "king": '🕊️' };
-    const holidays = { '01-01': "New Year's Day", '01-20': "Martin Luther King, Jr. Day", '02-14': "Valentine's Day", '02-17': "Presidents' Day", '03-17': "St. Patrick's Day", '04-18': "Good Friday", '04-20': "Easter Sunday", '05-11': "Mother's Day", '05-26': "Memorial Day", '06-15': "Father's Day", '06-19': "Juneteenth", '07-04': "Independence Day", '09-01': "Labor Day", '10-13': "Columbus Day", '10-31': "Halloween", '11-11': "Veterans Day", '11-27': "Thanksgiving Day", '12-25': "Christmas Day" };
+    const holidayIcons = { "new year": '🥳', "valentine": '❤️', "patrick": '🍀', "easter": '🐰', "mother": '👩‍👧‍👦', "father": '👨‍👧‍👦', "juneteenth": '✊🏿', "independence": '🎆', "halloween": '🎃', "thanksgiving": '🦃', "christmas": '🎄', "king": '🕊️', "history": '📖' };
 
-    function getHolidayIcon(title) {
+    function getEaster(year) {
+        const f = Math.floor,
+            G = year % 19,
+            C = f(year / 100),
+            H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30,
+            I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11)),
+            J = (year + f(year / 4) + I + 2 - C + f(C / 4)) % 7,
+            L = I - J,
+            month = 3 + f((L + 40) / 44),
+            day = L + 28 - 31 * f(month / 4);
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function getNthWeekdayOfMonth(year, month, weekday, n) {
+        const firstDay = new Date(year, month, 1);
+        let count = 0;
+        for (let day = 1; day <= 31; day++) {
+            const date = new Date(year, month, day);
+            if (date.getMonth() !== month) break;
+            if (date.getDay() === weekday) {
+                count++;
+                if (n === 5) {
+                    const nextWeek = new Date(year, month, day + 7);
+                    if (nextWeek.getMonth() !== month) return getISODate(date);
+                } else {
+                    if (count === n) return getISODate(date);
+                }
+            }
+        }
+        return null;
+    }
+
+    function calculateHolidays(year) {
+        const holidays = [
+            { date: `${year}-01-01`, title: "New Year's Day" },
+            { date: getNthWeekdayOfMonth(year, 0, 1, 3), title: "Martin Luther King, Jr. Day" }, // 3rd Mon Jan
+            { date: `${year}-02-02`, title: "Groundhog Day" },
+            { date: `${year}-02-14`, title: "Valentine's Day" },
+            { date: getNthWeekdayOfMonth(year, 1, 1, 3), title: "Presidents' Day" }, // 3rd Mon Feb
+            { date: `${year}-03-17`, title: "St. Patrick's Day" },
+            { date: getEaster(year), title: "Easter Sunday" },
+            { date: getNthWeekdayOfMonth(year, 4, 0, 2), title: "Mother's Day" }, // 2nd Sun May
+            { date: getNthWeekdayOfMonth(year, 4, 1, 5), title: "Memorial Day" }, // Last Mon May
+            { date: getNthWeekdayOfMonth(year, 5, 0, 3), title: "Father's Day" }, // 3rd Sun Jun
+            { date: `${year}-06-19`, title: "Juneteenth" },
+            { date: `${year}-07-04`, title: "Independence Day" },
+            { date: getNthWeekdayOfMonth(year, 8, 1, 1), title: "Labor Day" }, // 1st Mon Sep
+            { date: getNthWeekdayOfMonth(year, 9, 1, 2), title: "Columbus Day" }, // 2nd Mon Oct
+            { date: `${year}-10-31`, title: "Halloween" },
+            { date: `${year}-11-11`, title: "Veterans Day" },
+            { date: getNthWeekdayOfMonth(year, 10, 4, 4), title: "Thanksgiving Day" }, // 4th Thu Nov
+            { date: `${year}-12-25`, title: "Christmas Day" },
+            { date: `${year}-12-31`, title: "New Year's Eve" }
+        ];
+        const easter = new Date(getEaster(year));
+        const goodFriday = new Date(easter);
+        goodFriday.setDate(easter.getDate() - 2);
+        holidays.push({ date: getISODate(goodFriday), title: "Good Friday" });
+
+        return holidays.reduce((acc, h) => {
+            if (h.date) acc[h.date.substring(5)] = h.title;
+            return acc;
+        }, {});
+    }
+
+    const historicalEvents = [
+        // January
+        { month: 0, day: 1, title: "Emancipation Proclamation", desc: "1863: President Lincoln's order declaring slaves in Confederate territory free." },
+        { month: 0, day: 22, title: "Roe v. Wade", desc: "1973: Supreme Court landmark decision legalizing abortion in the United States." },
+        { month: 0, day: 27, title: "Liberation of Auschwitz", desc: "1945: Soviet troops liberated the Auschwitz concentration camp." },
+
+        // February
+        { month: 1, day: 11, title: "Nelson Mandela Released", desc: "1990: Nelson Mandela walked free after 27 years of imprisonment." },
+        { month: 1, day: 14, title: "History of Valentine's", desc: "Origins in the Roman festival of Lupercalia to honor St. Valentine." },
+        { month: 1, day: 21, title: "Malcolm X Assassination", desc: "1965: Civil rights activist Malcolm X was assassinated in New York City." },
+
+        // March
+        { month: 2, day: 8, title: "International Women's Day", desc: "A global day celebrating the social, economic, cultural, and political achievements of women." },
+        { month: 2, day: 15, title: "Ides of March", desc: "44 BC: Assassination of Julius Caesar effectively ending the Roman Republic." },
+        { month: 2, day: 31, title: "Eiffel Tower Opens", desc: "1889: The Eiffel Tower was officially opened to the public." },
+
+        // April
+        { month: 3, day: 4, title: "MLK Assassination", desc: "1968: Civil rights leader Dr. Martin Luther King Jr. was assassinated in Memphis." },
+        { month: 3, day: 12, title: "First Man in Space", desc: "1961: Yuri Gagarin became the first human to journey into outer space." },
+        { month: 3, day: 15, title: "Sinking of the Titanic", desc: "1912: RMS Titanic sank in the North Atlantic after hitting an iceberg." },
+        { month: 3, day: 22, title: "Earth Day", desc: "1970: First Earth Day celebrated to demonstrate support for environmental protection." },
+
+        // May
+        { month: 4, day: 8, title: "V-E Day", desc: "1945: Victory in Europe Day marking the end of WWII in Europe." },
+        { month: 4, day: 17, title: "Global Warming Alert", desc: "1956: Scientists first warned that CO2 emissions were warming the planet." },
+        { month: 4, day: 29, title: "Summit of Everest", desc: "1953: Edmund Hillary and Tenzing Norgay became the first to reach the summit of Mt. Everest." },
+
+        // June
+        { month: 5, day: 5, title: "First Awareness of HIV", desc: "1981: The CDC reported the first cases of a rare pneumonia, marking the start of the AIDS epidemic." },
+        { month: 5, day: 6, title: "D-Day", desc: "1944: Allied forces invaded Normandy, the largest seaborne invasion in history." },
+        { month: 5, day: 19, title: "History of Juneteenth", desc: "1865: Union soldiers arrived in Texas with news that the war had ended and the enslaved were free." },
+        { month: 5, day: 28, title: "Stonewall Riots", desc: "1969: Demonstrations by the LGBT community at the Stonewall Inn in NYC, sparking the gay rights movement." },
+
+        // July
+        { month: 6, day: 4, title: "Declaration of Independence", desc: "1776: Adoption of the Declaration of Independence severing ties with Britain." },
+        { month: 6, day: 14, title: "Storming of the Bastille", desc: "1789: Revolutionaries stormed the Bastille prison in Paris, igniting the French Revolution." },
+        { month: 6, day: 16, title: "First Atomic Test", desc: "1945: The 'Trinity' test was conducted in New Mexico, the first detonation of a nuclear weapon." },
+        { month: 6, day: 20, title: "Moon Landing", desc: "1969: Apollo 11 landed on the moon. 'One small step for man, one giant leap for mankind'." },
+
+        // August
+        { month: 7, day: 6, title: "Hiroshima Bombing", desc: "1945: First use of an atomic bomb in warfare on the city of Hiroshima." },
+        { month: 7, day: 15, title: "Woodstock Festival", desc: "1969: Half a million people gathered for '3 Days of Peace & Music'." },
+        { month: 7, day: 26, title: "Women's Equality Day", desc: "1920: The 19th Amendment guaranteed women the constitutional right to vote." },
+        { month: 7, day: 28, title: "I Have a Dream", desc: "1963: MLK delivered his famous speech during the March on Washington." },
+
+        // September
+        { month: 8, day: 11, title: "September 11 Attacks", desc: "2001: Terrorist attacks on the WTC and Pentagon changed global security." },
+        { month: 8, day: 17, title: "Constitution Signed", desc: "1787: The US Constitution was signed in Philadelphia." },
+        { month: 8, day: 22, title: "Emancipation Proclamation Prelim", desc: "1862: Lincoln issued the preliminary proclamation warning he would free slaves." },
+
+        // October
+        { month: 9, day: 9, title: "Fall of Berlin Wall", desc: "1989: The wall dividing East and West Berlin fell, symbolizing the end of the Cold War." },
+        { month: 9, day: 12, title: "Columbus Arrives", desc: "1492: Christopher Columbus arrived in the Americas." },
+        { month: 9, day: 24, title: "United Nations Day", desc: "1945: The UN Charter entered into force." },
+        { month: 9, day: 29, title: "Stock Market Crash", desc: "1929: Black Tuesday, the most devastating stock market crash in US history." },
+
+        // November
+        { month: 10, day: 7, title: "Bolshevik Revolution", desc: "1917: Lenin led the revolution that launched the Soviet era." },
+        { month: 10, day: 11, title: "Armistice Day", desc: "1918: WWI ended on the 11th hour of the 11th day of the 11th month." },
+        { month: 10, day: 22, title: "JFK Assassination", desc: "1963: President John F. Kennedy was assassinated in Dallas, Texas." },
+
+        // December
+        { month: 11, day: 1, title: "Rosa Parks", desc: "1955: Rosa Parks was arrested for refusing to give up her bus seat, sparking the Montgomery Bus Boycott." },
+        { month: 11, day: 7, title: "Pearl Harbor", desc: "1941: Surprise military strike by Japan on the US naval base in Hawaii." },
+        { month: 11, day: 10, title: "Human Rights Day", desc: "1948: The UN adopted the Universal Declaration of Human Rights." },
+        { month: 11, day: 25, title: "History of Christmas", desc: "Commemorating the birth of Jesus, evolving from winter solstice traditions." },
+        { month: 11, day: 26, title: "Dissolution of USSR", desc: "1991: The Soviet Union was officially dissolved." }
+    ];
+
+    function getHistoricalEventsList(year) {
+        return historicalEvents.map(h => {
+            const date = new Date(year, h.month, h.day);
+            return {
+                id: `history-${year}-${h.month}-${h.day}`,
+                date: getISODate(date),
+                title: h.title,
+                description: h.desc,
+                type: 'history',
+                color: '#8B5CF6',
+                emoji: '📖'
+            };
+        });
+    }
+
+    function getHolidayIcon(title, type = 'holiday') {
+        if (type === 'history') return '📖';
         const lowerTitle = title.toLowerCase();
         for (const key in holidayIcons) if (lowerTitle.includes(key)) return holidayIcons[key];
         return '⭐';
@@ -365,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     openDetailsModal(event.date);
                 });
 
-                const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
+                const icon = (event.type === 'holiday' || event.type === 'history') ? getHolidayIcon(event.title, event.type) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
                 bar.innerHTML = `<span>${icon}</span><span class="truncate">${event.title}</span>`;
                 eventBarsContainer.appendChild(bar);
 
@@ -437,17 +586,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Handle holidays
+            const currentYearHolidays = calculateHolidays(currentDate.getFullYear());
             const monthDay = isoDate.substring(5);
-            if (holidays[monthDay]) {
+            if (currentYearHolidays[monthDay]) {
                 const holidayId = `holiday-${isoDate}`;
                 if (!uniqueEvents.has(holidayId)) {
                     uniqueEvents.set(holidayId, {
                         id: holidayId,
                         date: isoDate,
-                        title: holidays[monthDay],
+                        title: currentYearHolidays[monthDay],
                         type: 'holiday',
                         color: '#10B981'
                     });
+                }
+            }
+
+            // Handle Historical Events
+            const histEvents = getHistoricalEventsList(currentDate.getFullYear());
+            const histEvent = histEvents.find(h => h.date === isoDate);
+            if (histEvent) {
+                if (!uniqueEvents.has(histEvent.id)) {
+                    uniqueEvents.set(histEvent.id, histEvent);
                 }
             }
         }
@@ -475,9 +634,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        const currentYearHolidays = calculateHolidays(currentDate.getFullYear());
         const monthDay = isoDate.substring(5);
-        if (holidays[monthDay]) dayEvents.unshift({ id: `holiday-${isoDate}`, date: isoDate, title: holidays[monthDay], type: 'holiday', color: '#10B981' });
-        return [...new Set(dayEvents)].sort((a, b) => a.type === 'holiday' ? -1 : 1);
+        if (currentYearHolidays[monthDay]) {
+            dayEvents.unshift({ id: `holiday-${isoDate}`, date: isoDate, title: currentYearHolidays[monthDay], type: 'holiday', color: '#10B981' });
+        }
+
+        const histEvents = getHistoricalEventsList(currentDate.getFullYear());
+        const histEvent = histEvents.find(h => h.date === isoDate);
+        if (histEvent) dayEvents.push(histEvent);
+
+        return [...new Set(dayEvents)].sort((a, b) => {
+            if (a.type === 'holiday') return -1;
+            if (b.type === 'holiday') return 1;
+            return 0;
+        });
     }
 
     function updateCountdownBanner() {
@@ -651,11 +822,11 @@ document.addEventListener('DOMContentLoaded', () => {
         detailsContent.innerHTML = dayEvents.length === 0
             ? '<p class="text-text-secondary">No items for this day.</p>'
             : dayEvents.map(event => {
-                const isEditable = event.type !== 'holiday';
+                const isEditable = event.type !== 'holiday' && event.type !== 'history';
                 // Note: We remove the '&& !event.isRecurringInstance' check to allow clicking them.
                 // We will handle the "editing series" logic in the click handler.
 
-                const icon = (event.type === 'holiday') ? getHolidayIcon(event.title) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
+                const icon = (event.type === 'holiday' || event.type === 'history') ? getHolidayIcon(event.title, event.type) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
                 const originalId = event.id.toString().split('-')[0];
 
                 return `<div class="flex items-start justify-between p-3 rounded-lg bg-bg-tertiary ${isEditable ? 'cursor-pointer hover:bg-gray-700' : ''}" ${isEditable ? `data-event-id="${originalId}"` : ''}>
@@ -733,10 +904,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Grid Container (mimics the main calendar grid structure)
             const gridWrapper = document.createElement('div');
-            gridWrapper.className = 'flex-grow bg-bg-secondary rounded-lg p-1'; /* darker container for borders */
+            gridWrapper.className = 'flex-grow bg-bg-secondary rounded-lg p-1';
 
             const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-7 gap-1 flex-grow content-start';
+            // Removed content-start, added style for stretching rows
+            grid.className = 'grid grid-cols-7 gap-1 flex-grow h-full';
+            grid.style.gridAutoRows = '1fr';
 
             // Weekday headers (mini)
             dayNamesShort.forEach(d => {
@@ -759,7 +932,6 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let d = 1; d <= daysInMonth; d++) {
                 const dayDate = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const cell = document.createElement('div');
-                // Use bg-bg-primary for the cell, so the gap showing bg-tertiary looks like a border
                 cell.className = 'text-center p-2 rounded-lg text-sm cursor-pointer hover:bg-white/10 transition-colors relative flex flex-col items-center justify-start min-h-[40px]';
 
                 // Highlight today
@@ -780,7 +952,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     dayEvents.slice(0, 3).forEach(evt => {
                         const dot = document.createElement('div');
                         dot.className = 'w-1.5 h-1.5 rounded-full';
-                        dot.style.backgroundColor = evt.color || '#3B82F6';
+                        // Handle history color
+                        if (evt.type === 'history') dot.style.backgroundColor = '#8B5CF6';
+                        else dot.style.backgroundColor = evt.color || '#3B82F6';
 
                         if (evt.type === 'bill') dot.style.backgroundColor = '#EF4444';
                         else if (evt.type === 'payday') dot.style.backgroundColor = '#10B981';
@@ -801,7 +975,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 grid.appendChild(cell);
             }
 
-            monthCard.appendChild(grid);
+            // Fill remaining grid slots to ensure consistent height if needed?
+            // Actually gridAutoRows 1fr with the natural grid items should work fine.
+
+            gridWrapper.appendChild(grid); // Wrapped
+            monthCard.appendChild(gridWrapper);
             quarterGrid.appendChild(monthCard);
         }
     }
@@ -934,4 +1112,18 @@ document.addEventListener('DOMContentLoaded', () => {
     currentYear = new Date().getFullYear();
     currentMonth = new Date().getMonth();
     switchToMonthView();
+
+    // Resize Handler
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (currentView === 'month') {
+                const text = monthYearHeader.textContent;
+                if (text) generateMonthView();
+            } else {
+                updateView();
+            }
+        }, 200);
+    });
 });
