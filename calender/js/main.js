@@ -438,22 +438,23 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.querySelector('.add-day-event-btn').addEventListener('click', (e) => { e.stopPropagation(); openEventModal(cell.dataset.date); });
         });
     }
-
     function renderEventBars(firstDayOfMonth, daysInMonth) {
         const eventBarsContainer = document.getElementById('event-bars-container');
         if (!eventBarsContainer) return;
         eventBarsContainer.innerHTML = '';
 
-        // Clean up any artifacts from previous render methods
+        // Cleanup artifacts
         document.querySelectorAll('.more-events-indicator').forEach(el => el.remove());
 
-        const monthEvents = getEventsForMonth(currentYear, currentMonth);
+        // Revert to CSS-defined grid rows (equal height)
+        calendarGrid.style.gridTemplateRows = '';
 
+        const monthEvents = getEventsForMonth(currentYear, currentMonth);
         const layout = [];
         const gridViewStartDate = new Date(currentYear, currentMonth, 1 - firstDayOfMonth);
         const startOfGridView = new Date(`${getISODate(gridViewStartDate)}T12:00:00`);
 
-        // 1. Packing Algorithm: Determine tracks for all events
+        // 1. Packing Algorithm
         monthEvents.forEach(event => {
             if (event.type === 'payday') return;
 
@@ -491,48 +492,54 @@ document.addEventListener('DOMContentLoaded', () => {
             event._isRenderable = true;
         });
 
-        // 2. Measure Grid Metrics
-        // We need robust measurements of the container and header
-        const gridComputedStyle = window.getComputedStyle(calendarGrid);
-        const gridPaddingTop = parseFloat(gridComputedStyle.paddingTop) || 0;
-        const gridGap = parseFloat(gridComputedStyle.rowGap) || 4; // default to gap-1 (4px)
-
-        // Measure header height (first child of grid)
+        // 2. Measure for Positioning
+        // We use the first day cell to gauge dimensions
+        const referenceCell = calendarGrid.children[7]; // First actual day cell
+        const cellHeight = referenceCell ? referenceCell.offsetHeight : 100;
         const headerEl = calendarGrid.firstElementChild;
-        const headerHeight = headerEl ? headerEl.offsetHeight : 30; // Fallback
+        const headerHeight = headerEl ? headerEl.offsetHeight : 30;
+        // In the CSS, the grid-template-rows is "auto repeat(6, ...)"
+        // Note: We might need to fetch the actual computed height of the header row if measurement is tricky,
+        // but measuring the element itself is usually safe.
 
-        // 3. Calculate Dynamic Heights for each week row
-        const rowHeights = [100, 100, 100, 100, 100, 100]; // Default min height
-        const dayNumberHeight = 24; // Space for the number in the corner
-        const trackHeight = 28; // Height per event bar
-        const bottomPadding = 8;
-        const topPadding = 26; // Space from top of cell to first event
+        const dotsMap = {}; // Map of dayIndex -> count of dots
 
-        for (let row = 0; row < 6; row++) {
-            let maxTrackInRow = -1;
-            for (let d = 0; d < 7; d++) {
-                const dayIndex = row * 7 + d;
-                if (layout[dayIndex]) {
-                    for (let t = 0; t < layout[dayIndex].length; t++) {
-                        if (layout[dayIndex][t]) maxTrackInRow = Math.max(maxTrackInRow, t);
-                    }
-                }
-            }
-
-            if (maxTrackInRow >= 0) {
-                const requiredHeight = topPadding + (maxTrackInRow + 1) * trackHeight + bottomPadding;
-                rowHeights[row] = Math.max(rowHeights[row], requiredHeight);
-            }
-        }
-
-        // 4. Apply Grid Template Rows
-        // The first 'auto' is for the header (day names), then 6 rows for weeks
-        calendarGrid.style.gridTemplateRows = `auto ${rowHeights.map(h => `${h}px`).join(' ')}`;
-
-        // 5. Render the bars using the calculated geometry
+        // 3. Render Events
         monthEvents.forEach(event => {
             if (!event._isRenderable) return;
 
+            // Logic: Show bars for tracks 0 and 1. Show dots for track >= 2.
+            const isDotMode = event._renderTrack >= 2;
+
+            if (isDotMode) {
+                // Render Dots Logic
+                for (let i = event._renderStart; i <= event._renderEnd; i++) {
+                    const dotsInCell = dotsMap[i] || 0;
+                    dotsMap[i] = dotsInCell + 1;
+
+                    const weekRow = Math.floor(i / 7);
+                    const col = i % 7;
+
+                    const dot = document.createElement('div');
+                    dot.className = 'absolute w-1.5 h-1.5 rounded-full z-10';
+                    dot.style.backgroundColor = event.color || '#3B82F6';
+
+                    // Position: Bottom Left
+                    // Top relative to container: (Week Row + 1) * CellHeight + HeaderHeight - BottomMargin
+                    // Actually clearer: Top of row + Height of row - Offset
+                    const topPos = (weekRow * cellHeight) + headerHeight + cellHeight - 12; // 12px from bottom
+                    const leftPosStr = `calc(${col / 7 * 100}% + 8px + ${dotsInCell * 8}px)`; // 8px padding + 8px gap per dot
+
+                    dot.style.top = `${topPos}px`;
+                    dot.style.left = leftPosStr;
+                    dot.title = event.title; // Tooltip
+
+                    eventBarsContainer.appendChild(dot);
+                }
+                return; // Done for this event
+            }
+
+            // Normal Bar Rendering (Tracks 0 and 1)
             let currentRenderIndex = event._renderStart;
             while (currentRenderIndex <= event._renderEnd) {
                 const weekRow = Math.floor(currentRenderIndex / 7);
@@ -544,29 +551,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const durationInDays = segmentEndIndex - currentRenderIndex + 1;
 
-                // Calculate vertical position (Y)
-                // Start with Container Padding
-                let topPos = gridPaddingTop;
-
-                // Add Header Height + Gap
-                topPos += headerHeight + gridGap;
-
-                // Add Heights of previous rows + gaps
-                for (let r = 0; r < weekRow; r++) {
-                    topPos += rowHeights[r] + gridGap;
-                }
-
-                // Add offset within the cell (e.g. below day number)
-                topPos += topPadding + (event._renderTrack * trackHeight);
-
-                // Calculate Horizontal position (X)
-                // We leave a small gap on left/right for aesthetics (4px)
-                // Grid columns are 1fr each.
+                const topPos = (weekRow * cellHeight) + headerHeight + 30 + (event._renderTrack * 28);
 
                 const bar = document.createElement('div');
                 bar.className = 'event-bar';
                 bar.style.top = `${topPos}px`;
-                // Start X: (Column * 100/7)% + margin
                 bar.style.left = `calc(${startColumn / 7 * 100}% + 4px)`;
                 bar.style.width = `calc(${durationInDays / 7 * 100}% - 8px)`;
                 bar.style.backgroundColor = event.color || '#3B82F6';
