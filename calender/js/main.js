@@ -451,6 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const gridViewStartDate = new Date(currentYear, currentMonth, 1 - firstDayOfMonth);
         const startOfGridView = new Date(`${getISODate(gridViewStartDate)}T12:00:00`);
 
+        // Packing Algorithm: Determine tracks for all events
         monthEvents.forEach(event => {
             if (event.type === 'payday') return; // Paydays are handled by background color
 
@@ -487,24 +488,82 @@ document.addEventListener('DOMContentLoaded', () => {
                 layout[i][track] = true;
             }
 
-            const dayCellHeight = calendarGrid.querySelector('.day-cell-wrapper')?.offsetHeight || 110;
+            // Store the assigned track on the event object temporarily for rendering
+            event._renderTrack = track;
+            event._renderStart = effectiveStartIndex;
+            event._renderEnd = effectiveEndIndex;
+            event._isRenderable = true;
+        });
 
-            // Render the event bar, splitting it by week if it spans multiple weeks
-            let currentRenderIndex = effectiveStartIndex;
-            while (currentRenderIndex <= effectiveEndIndex) {
+        // 2. Calculate Dynamic Heights for each week row
+        const rowHeights = [100, 100, 100, 100, 100, 100]; // Default min height
+        const baseHeight = 35; // Height for date header
+        const trackHeight = 28; // Height per event bar
+        const bottomPadding = 10;
+
+        for (let row = 0; row < 6; row++) {
+            let maxTrackInRow = -1;
+            for (let d = 0; d < 7; d++) {
+                const dayIndex = row * 7 + d;
+                if (layout[dayIndex]) {
+                    // Find max track used in this day
+                    const occupiedTracks = layout[dayIndex].length;
+                    // Note: array length is just logical size, we need highest index actually used.
+                    // But our packer fills 0..N, so length is a good proxy for "max index + 1" roughly,
+                    // except sparse arrays. Let's iterate.
+                    for (let t = 0; t < layout[dayIndex].length; t++) {
+                        if (layout[dayIndex][t]) maxTrackInRow = Math.max(maxTrackInRow, t);
+                    }
+                }
+            }
+
+            if (maxTrackInRow >= 0) {
+                const requiredHeight = baseHeight + (maxTrackInRow + 1) * trackHeight + bottomPadding;
+                rowHeights[row] = Math.max(rowHeights[row], requiredHeight);
+            }
+        }
+
+        // 3. Apply Grid Template Rows
+        // The first 'auto' is for the header (day names), then 6 rows for weeks
+        calendarGrid.style.gridTemplateRows = `auto ${rowHeights.map(h => `${h}px`).join(' ')}`;
+
+        // 4. Render the bars using the calculated geometry
+        monthEvents.forEach(event => {
+            if (!event._isRenderable) return;
+
+            let currentRenderIndex = event._renderStart;
+            // Iterate through the segments (if event spans across weeks)
+            while (currentRenderIndex <= event._renderEnd) {
                 const weekRow = Math.floor(currentRenderIndex / 7);
                 const startColumn = currentRenderIndex % 7;
 
+                // Find end of this segment (end of week or end of event)
                 let segmentEndIndex = currentRenderIndex;
-                while (segmentEndIndex + 1 <= effectiveEndIndex && Math.floor((segmentEndIndex + 1) / 7) === weekRow) {
+                while (segmentEndIndex + 1 <= event._renderEnd && Math.floor((segmentEndIndex + 1) / 7) === weekRow) {
                     segmentEndIndex++;
                 }
 
                 const durationInDays = segmentEndIndex - currentRenderIndex + 1;
 
+                // Calculate vertical position
+                // Sum heights of previous rows
+                let topOffset = 0;
+                for (let r = 0; r < weekRow; r++) {
+                    topOffset += rowHeights[r];
+                }
+
+                // Add internal offset
+                // We must account for the gap (gap-1 = 4px usually, but let's assume 0 for calc to be safe, or read gap)
+                // Actually grid gap is handled by the browser between rows. 
+                // Since our container overlay is absolute over the whole grid, we need to account for gaps.
+                // Tailwind gap-1 is 0.25rem = 4px.
+                topOffset += weekRow * 4;
+
+                const barTop = topOffset + 30 + (event._renderTrack * 28);
+
                 const bar = document.createElement('div');
                 bar.className = 'event-bar';
-                bar.style.top = `${weekRow * dayCellHeight + 30 + track * 28}px`;
+                bar.style.top = `${barTop}px`;
                 bar.style.left = `calc(${startColumn / 7 * 100}% + 4px)`;
                 bar.style.width = `calc(${durationInDays / 7 * 100}% - 8px)`;
                 bar.style.backgroundColor = event.color || '#3B82F6';
