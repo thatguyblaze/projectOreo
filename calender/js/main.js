@@ -437,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         requestAnimationFrame(() => {
+            void calendarGrid.offsetWidth; // Force Reflow
             requestAnimationFrame(() => {
                 renderEventBars(firstDayOfMonth, daysInMonth);
             });
@@ -595,10 +596,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentDate < eventDate) return false;
 
         let recurrence = event.recurring;
-        // Implicitly treat bills as monthly recurrence if not specified
+        // Treat 'bill' as monthly if no recurrence is set
         if (event.type === 'bill' && (!recurrence || recurrence === 'none')) {
             recurrence = 'monthly';
         }
+
+        // Safety check: if no recurrence is set after bill logic, it's not recurring
+        if (!recurrence || recurrence === 'none') return false;
 
         switch (recurrence) {
             case 'weekly':
@@ -608,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 return currentDate.getDay() === eventDate.getDay() && Math.floor(diffDays / 7) % 2 === 0;
             case 'monthly':
-            case true:
+            case true: // Backward compatibility for old boolean 'recurring' field
                 return currentDate.getDate() === eventDate.getDate();
             case 'yearly':
                 return currentDate.getMonth() === eventDate.getMonth() && currentDate.getDate() === eventDate.getDate();
@@ -628,6 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
         events.forEach(event => {
             const eventStart = new Date(`${event.date}T12:00:00`);
             const eventEnd = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStart;
+            // Basic overlap check
             if (eventStart <= gridEndDate && eventEnd >= gridStartDate) {
                 uniqueEvents.set(event.id, event);
             }
@@ -641,10 +646,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Handle recurring events & Implicit Bills
             events.forEach(event => {
-                const isBill = event.type === 'bill';
-                const hasRecurrence = event.recurring && event.recurring !== 'none';
+                // Determine if we should check recurrence for this event
+                // It's checked if it HAS recurrence, OR if it IS a bill (implicit recurrence)
+                const shouldCheck = (event.recurring && event.recurring !== 'none') || (event.type === 'bill');
 
-                if (hasRecurrence || isBill) {
+                if (shouldCheck) {
                     if (isoDate > event.date && checkRecurring(event, currentDate)) {
                         const instanceId = `${event.id}-${isoDate}`;
                         if (!uniqueEvents.has(instanceId)) {
