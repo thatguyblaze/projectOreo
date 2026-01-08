@@ -443,10 +443,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!eventBarsContainer) return;
         eventBarsContainer.innerHTML = '';
 
-        // Cleanup artifacts
         document.querySelectorAll('.more-events-indicator').forEach(el => el.remove());
 
-        // Revert to CSS-defined grid rows (equal height)
+        // Reset grid rows to ensure natural layout
         calendarGrid.style.gridTemplateRows = '';
 
         const monthEvents = getEventsForMonth(currentYear, currentMonth);
@@ -492,82 +491,87 @@ document.addEventListener('DOMContentLoaded', () => {
             event._isRenderable = true;
         });
 
-        // 2. Measure for Positioning
-        // We use the first day cell to gauge dimensions
-        const referenceCell = calendarGrid.children[7]; // First actual day cell
-        const cellHeight = referenceCell ? referenceCell.offsetHeight : 100;
-        const headerEl = calendarGrid.firstElementChild;
-        const headerHeight = headerEl ? headerEl.offsetHeight : 30;
-        // In the CSS, the grid-template-rows is "auto repeat(6, ...)"
-        // Note: We might need to fetch the actual computed height of the header row if measurement is tricky,
-        // but measuring the element itself is usually safe.
-
+        // 2. Render Events using DOM Geometry
+        // Index Offset: 7 headers + 1 container = 8. So cell 0 is child 8.
+        const CHILD_OFFSET = 8;
         const dotsMap = {}; // Map of dayIndex -> count of dots
 
-        // 3. Render Events
         monthEvents.forEach(event => {
             if (!event._isRenderable) return;
 
-            // Logic: Show bars for tracks 0 and 1. Show dots for track >= 2.
-            const isDotMode = event._renderTrack >= 2;
-
-            if (isDotMode) {
-                // Render Dots Logic
+            // IS DOT MODE? (Track >= 2)
+            if (event._renderTrack >= 2) {
+                // Render Dots
                 for (let i = event._renderStart; i <= event._renderEnd; i++) {
+                    const cell = calendarGrid.children[i + CHILD_OFFSET];
+                    if (!cell) continue;
+
                     const dotsInCell = dotsMap[i] || 0;
+                    if (dotsInCell >= 5) continue; // Max 5 dots to prevent overflow
                     dotsMap[i] = dotsInCell + 1;
 
-                    const weekRow = Math.floor(i / 7);
-                    const col = i % 7;
-
                     const dot = document.createElement('div');
-                    dot.className = 'absolute w-1.5 h-1.5 rounded-full z-10';
+                    dot.className = 'absolute w-1.5 h-1.5 rounded-full z-10 hover:scale-150 transition-transform cursor-pointer';
                     dot.style.backgroundColor = event.color || '#3B82F6';
 
-                    // Position: Bottom Left
-                    // Top relative to container: (Week Row + 1) * CellHeight + HeaderHeight - BottomMargin
-                    // Actually clearer: Top of row + Height of row - Offset
-                    const topPos = (weekRow * cellHeight) + headerHeight + cellHeight - 12; // 12px from bottom
-                    const leftPosStr = `calc(${col / 7 * 100}% + 8px + ${dotsInCell * 8}px)`; // 8px padding + 8px gap per dot
+                    // Position relative to the CELL limits
+                    const cellTop = cell.offsetTop;
+                    const cellLeft = cell.offsetLeft;
+                    const cellHeight = cell.offsetHeight;
+
+                    // Bottom Left Corner
+                    const topPos = cellTop + cellHeight - 10;
+                    const leftPos = cellLeft + 8 + (dotsInCell * 10);
 
                     dot.style.top = `${topPos}px`;
-                    dot.style.left = leftPosStr;
-                    dot.title = event.title; // Tooltip
+                    dot.style.left = `${leftPos}px`;
+                    dot.title = event.title;
+
+                    dot.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openDetailsModal(event.date);
+                    });
 
                     eventBarsContainer.appendChild(dot);
                 }
-                return; // Done for this event
+                return;
             }
 
-            // Normal Bar Rendering (Tracks 0 and 1)
+            // BAR MODE (Track 0 or 1)
             let currentRenderIndex = event._renderStart;
             while (currentRenderIndex <= event._renderEnd) {
                 const weekRow = Math.floor(currentRenderIndex / 7);
-                const startColumn = currentRenderIndex % 7;
-
                 let segmentEndIndex = currentRenderIndex;
                 while (segmentEndIndex + 1 <= event._renderEnd && Math.floor((segmentEndIndex + 1) / 7) === weekRow) {
                     segmentEndIndex++;
                 }
-                const durationInDays = segmentEndIndex - currentRenderIndex + 1;
 
-                const topPos = (weekRow * cellHeight) + headerHeight + 30 + (event._renderTrack * 28);
+                // Get DOM Elements for geometry
+                const startCell = calendarGrid.children[currentRenderIndex + CHILD_OFFSET];
+                const endCell = calendarGrid.children[segmentEndIndex + CHILD_OFFSET];
 
-                const bar = document.createElement('div');
-                bar.className = 'event-bar';
-                bar.style.top = `${topPos}px`;
-                bar.style.left = `calc(${startColumn / 7 * 100}% + 4px)`;
-                bar.style.width = `calc(${durationInDays / 7 * 100}% - 8px)`;
-                bar.style.backgroundColor = event.color || '#3B82F6';
-                bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
-                bar.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openDetailsModal(event.date);
-                });
+                if (startCell && endCell) {
+                    const topPos = startCell.offsetTop + 32 + (event._renderTrack * 28);
+                    const leftPos = startCell.offsetLeft + 4;
+                    // Width spans from start of startCell to end of endCell (minus margins)
+                    const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 8;
 
-                const icon = (event.type === 'holiday' || event.type === 'history') ? getHolidayIcon(event.title, event.type) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
-                bar.innerHTML = `<span>${icon}</span><span class="truncate">${event.title}</span>`;
-                eventBarsContainer.appendChild(bar);
+                    const bar = document.createElement('div');
+                    bar.className = 'event-bar';
+                    bar.style.top = `${topPos}px`;
+                    bar.style.left = `${leftPos}px`;
+                    bar.style.width = `${width}px`;
+                    bar.style.backgroundColor = event.color || '#3B82F6';
+                    bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
+                    bar.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openDetailsModal(event.date);
+                    });
+
+                    const icon = (event.type === 'holiday' || event.type === 'history') ? getHolidayIcon(event.title, event.type) : (event.emoji || (event.type === 'bill' ? '💰' : '🎉'));
+                    bar.innerHTML = `<span>${icon}</span><span class="truncate">${event.title}</span>`;
+                    eventBarsContainer.appendChild(bar);
+                }
 
                 currentRenderIndex = segmentEndIndex + 1;
             }
