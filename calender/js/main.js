@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
         eventBarsContainer.style.position = 'absolute';
         eventBarsContainer.style.inset = '0';
         eventBarsContainer.style.pointerEvents = 'none'; // Allow clicks to pass through to cells
-        eventBarsContainer.style.zIndex = '5'; // Above cells, below modals
+        eventBarsContainer.style.zIndex = '20'; // Above cells (z-10 on hover), below modals
 
         calendarGrid.style.position = 'relative';
         calendarGrid.appendChild(eventBarsContainer);
