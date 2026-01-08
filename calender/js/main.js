@@ -382,6 +382,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (oldBarsContainer) oldBarsContainer.remove();
         const eventBarsContainer = document.createElement('div');
         eventBarsContainer.id = 'event-bars-container';
+        eventBarsContainer.style.position = 'absolute';
+        eventBarsContainer.style.inset = '0';
+        eventBarsContainer.style.pointerEvents = 'none'; // Allow clicks to pass through to cells
+        eventBarsContainer.style.zIndex = '5'; // Above cells, below modals
+
         calendarGrid.style.position = 'relative';
         calendarGrid.appendChild(eventBarsContainer);
 
@@ -513,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const dot = document.createElement('div');
                     dot.className = 'absolute w-1.5 h-1.5 rounded-full z-10 hover:scale-150 transition-transform cursor-pointer';
                     dot.style.backgroundColor = event.color || '#3B82F6';
+                    dot.style.pointerEvents = 'auto'; // Re-enable clicks
 
                     // Position relative to the CELL limits
                     const cellTop = cell.offsetTop;
@@ -563,6 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     bar.style.left = `${leftPos}px`;
                     bar.style.width = `${width}px`;
                     bar.style.backgroundColor = event.color || '#3B82F6';
+                    bar.style.pointerEvents = 'auto'; // Re-enable clicks
                     bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
                     bar.addEventListener('click', (e) => {
                         e.stopPropagation();
