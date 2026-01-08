@@ -551,7 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const endCell = calendarGrid.children[segmentEndIndex + CHILD_OFFSET];
 
                 if (startCell && endCell) {
-                    const topPos = startCell.offsetTop + 32 + (event._renderTrack * 28);
+                    // Increased offset to 48px to clear the day number and add button
+                    const topPos = startCell.offsetTop + 48 + (event._renderTrack * 28);
                     const leftPos = startCell.offsetLeft + 4;
                     // Width spans from start of startCell to end of endCell (minus margins)
                     const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 8;
