@@ -651,11 +651,29 @@ document.addEventListener('DOMContentLoaded', () => {
             // Handle recurring events & Implicit Bills
             events.forEach(event => {
                 try {
-                    const isBill = event.type && event.type.toLowerCase() === 'bill';
+                    // Robust Bill Detection: Check type OR title
+                    const typeIsBill = event.type && event.type.toLowerCase() === 'bill';
+                    const titleIsBill = event.title && event.title.toLowerCase().includes('bill');
+                    const isBill = typeIsBill || titleIsBill;
+
+                    // pass 'isBill' to checkRecurring via a temporary property or handle it in the check?
+                    // actually, checkRecurring checks 'event.type'. We should temporarily force it if title matches.
+
+                    // Let's rely on the fact that if we pass the check, we create an instance.
+                    // But checkRecurring internally checks for 'bill' type to force monthly.
+                    // We need to make sure checkRecurring knows it's a bill even if type is wrong.
+
                     const hasRecurrence = event.recurring && event.recurring !== 'none';
 
                     if (hasRecurrence || isBill) {
-                        if (isoDate > event.date && checkRecurring(event, currentDate)) {
+                        // We need a version of the event that DEFINITELY has type='bill' for the check to work
+                        // if we are relying on the title fallback.
+                        let eventToCheck = event;
+                        if (titleIsBill && !typeIsBill) {
+                            eventToCheck = { ...event, type: 'bill' };
+                        }
+
+                        if (isoDate > event.date && checkRecurring(eventToCheck, currentDate)) {
                             const instanceId = `${event.id}-${isoDate}`;
                             if (!uniqueEvents.has(instanceId)) {
                                 const newEndDate = event.endDate ? getISODate(new Date(currentDate.getTime() + (new Date(event.endDate) - new Date(event.date)))) : null;
