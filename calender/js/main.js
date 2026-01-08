@@ -592,12 +592,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkRecurring(event, currentDate) {
+        if (!event.date) return false;
         const eventDate = new Date(`${event.date}T12:00:00`);
+        if (isNaN(eventDate.getTime())) return false; // Invalid date check
+
         if (currentDate < eventDate) return false;
 
         let recurrence = event.recurring;
-        // Treat 'bill' as monthly if no recurrence is set
-        if (event.type === 'bill' && (!recurrence || recurrence === 'none')) {
+        // Treat 'bill' as monthly if no recurrence is set (case-insensitive check for robustness)
+        if (event.type && event.type.toLowerCase() === 'bill' && (!recurrence || recurrence === 'none')) {
             recurrence = 'monthly';
         }
 
@@ -630,6 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Add all base events (recurring or not) that overlap with the grid view
         events.forEach(event => {
+            if (!event.date) return;
             const eventStart = new Date(`${event.date}T12:00:00`);
             const eventEnd = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStart;
             // Basic overlap check
@@ -646,24 +650,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Handle recurring events & Implicit Bills
             events.forEach(event => {
-                // Determine if we should check recurrence for this event
-                // It's checked if it HAS recurrence, OR if it IS a bill (implicit recurrence)
-                const shouldCheck = (event.recurring && event.recurring !== 'none') || (event.type === 'bill');
+                try {
+                    const isBill = event.type && event.type.toLowerCase() === 'bill';
+                    const hasRecurrence = event.recurring && event.recurring !== 'none';
 
-                if (shouldCheck) {
-                    if (isoDate > event.date && checkRecurring(event, currentDate)) {
-                        const instanceId = `${event.id}-${isoDate}`;
-                        if (!uniqueEvents.has(instanceId)) {
-                            const newEndDate = event.endDate ? getISODate(new Date(currentDate.getTime() + (new Date(event.endDate) - new Date(event.date)))) : null;
-                            uniqueEvents.set(instanceId, {
-                                ...event,
-                                id: instanceId,
-                                date: isoDate,
-                                endDate: newEndDate,
-                                isRecurringInstance: true
-                            });
+                    if (hasRecurrence || isBill) {
+                        if (isoDate > event.date && checkRecurring(event, currentDate)) {
+                            const instanceId = `${event.id}-${isoDate}`;
+                            if (!uniqueEvents.has(instanceId)) {
+                                const newEndDate = event.endDate ? getISODate(new Date(currentDate.getTime() + (new Date(event.endDate) - new Date(event.date)))) : null;
+                                uniqueEvents.set(instanceId, {
+                                    ...event,
+                                    id: instanceId,
+                                    date: isoDate,
+                                    endDate: newEndDate,
+                                    isRecurringInstance: true
+                                });
+                            }
                         }
                     }
+                } catch (err) {
+                    console.error("Error processing event recurrence:", event, err);
                 }
             });
 
