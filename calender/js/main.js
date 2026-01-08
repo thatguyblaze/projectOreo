@@ -332,7 +332,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return '⭐';
     }
 
-    const getISODate = (date) => date.toISOString().split('T')[0];
+    const getISODate = (date) => {
+        const offset = date.getTimezoneOffset();
+        const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+        return localDate.toISOString().split('T')[0];
+    };
 
     function generateYearView() {
         yearView.innerHTML = '';
@@ -469,13 +473,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const eventStartDate = new Date(`${event.date}T12:00:00`);
             const eventEndDate = event.endDate ? new Date(`${event.endDate}T12:00:00`) : eventStartDate;
-            const startIndex = (eventStartDate - startOfGridView) / (1000 * 60 * 60 * 24);
-            const endIndex = (eventEndDate - startOfGridView) / (1000 * 60 * 60 * 24);
+            const startIndex = Math.round((eventStartDate - startOfGridView) / (1000 * 60 * 60 * 24));
+            const endIndex = Math.round((eventEndDate - startOfGridView) / (1000 * 60 * 60 * 24));
 
             if (endIndex < 0 || startIndex > 41) return;
 
             const effectiveStartIndex = Math.max(0, startIndex);
-            const effectiveEndIndex = Math.min(41, endIndex);
+            const effectiveEndIndex = Math.min(41, Math.max(endIndex, startIndex));
 
             let track = 0;
             while (true) {
