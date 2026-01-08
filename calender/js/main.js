@@ -436,7 +436,11 @@ document.addEventListener('DOMContentLoaded', () => {
             calendarGrid.insertAdjacentHTML('beforeend', dayCellHTML);
         });
 
-        setTimeout(() => renderEventBars(firstDayOfMonth, daysInMonth), 50);
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                renderEventBars(firstDayOfMonth, daysInMonth);
+            });
+        });
 
         calendarGrid.querySelectorAll('.day-cell').forEach(cell => {
             cell.addEventListener('click', () => openDetailsModal(cell.dataset.date));
@@ -590,7 +594,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventDate = new Date(`${event.date}T12:00:00`);
         if (currentDate < eventDate) return false;
 
-        switch (event.recurring) {
+        let recurrence = event.recurring;
+        // Implicitly treat bills as monthly recurrence if not specified
+        if (event.type === 'bill' && (!recurrence || recurrence === 'none')) {
+            recurrence = 'monthly';
+        }
+
+        switch (recurrence) {
             case 'weekly':
                 return currentDate.getDay() === eventDate.getDay();
             case 'biweekly':
@@ -629,9 +639,12 @@ document.addEventListener('DOMContentLoaded', () => {
             currentDate.setDate(gridStartDate.getDate() + i);
             const isoDate = getISODate(currentDate);
 
-            // Handle recurring events
+            // Handle recurring events & Implicit Bills
             events.forEach(event => {
-                if (event.recurring && event.recurring !== 'none') {
+                const isBill = event.type === 'bill';
+                const hasRecurrence = event.recurring && event.recurring !== 'none';
+
+                if (hasRecurrence || isBill) {
                     if (isoDate > event.date && checkRecurring(event, currentDate)) {
                         const instanceId = `${event.id}-${isoDate}`;
                         if (!uniqueEvents.has(instanceId)) {
