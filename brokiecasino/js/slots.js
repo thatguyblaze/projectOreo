@@ -116,7 +116,19 @@ class SlotMachine {
         await Promise.all(promises);
 
         // Final cleanup & Win Check (return win amount for this machine)
-        return this.checkWin(finalSymbols, betPerMachine);
+        const result = this.checkWin(finalSymbols, betPerMachine);
+
+        // Play sound for this specific machine if it won
+        if (result.win > 0) {
+            // Determine sound based on multiplier relative to bet
+            const multiplier = result.win / betPerMachine;
+            let winSound = 'win_small';
+            if (multiplier >= 25) winSound = 'win_medium';
+            if (multiplier >= 100) winSound = 'win_big';
+            playSound(winSound);
+        }
+
+        return result;
     }
 
     checkWin(symbols, bet) {
@@ -125,11 +137,24 @@ class SlotMachine {
         let winAmount = 0;
         let winningReels = [];
 
-        if (s1 === s2 && s2 === s3) { winKey = s1 + s2 + s3; winningReels = [0, 1, 2]; }
-        else if (SLOT_PAYOUTS[s1 + s2]) { winKey = s1 + s2; winningReels = [0, 1]; }
-        else if (SLOT_PAYOUTS[s2 + s3]) { winKey = s2 + s3; winningReels = [1, 2]; }
+        // STRICT MATCHING: Only allow wins if symbols are identical.
+        if (s1 === s2 && s2 === s3 && SLOT_PAYOUTS[s1 + s2 + s3]) {
+            // 3 matching symbols
+            winKey = s1 + s2 + s3;
+            winningReels = [0, 1, 2];
+        }
+        else if (s1 === s2 && SLOT_PAYOUTS[s1 + s2]) {
+            // First 2 match
+            winKey = s1 + s2;
+            winningReels = [0, 1];
+        }
+        else if (s2 === s3 && SLOT_PAYOUTS[s2 + s3]) {
+            // Last 2 match
+            winKey = s2 + s3;
+            winningReels = [1, 2];
+        }
 
-        if (SLOT_PAYOUTS[winKey]) {
+        if (winKey && SLOT_PAYOUTS[winKey]) {
             winAmount = bet * SLOT_PAYOUTS[winKey];
             // Highlight
             winningReels.forEach(i => this.reelContainers[i].classList.add('win-effect'));
@@ -240,11 +265,11 @@ async function startSpinAll() {
         totalGain += Math.max(0, totalWin - totalBet); // Net gain calculation if needed
         updateCurrencyDisplay('win');
         showMessage(`Won ${formatWin(totalWin)}!`, 2000);
-        playSound(totalWin > totalBet * 5 ? 'win_big' : 'win_medium');
+        // playSound(totalWin > totalBet * 5 ? 'win_big' : 'win_medium'); // REMOVED: Managed per machine
         addWinToLeaderboard('Slots', totalWin);
     } else {
         totalLoss += totalBet;
-        playSound('lose');
+        // playSound('lose'); // REMOVED: Silence on loss per machine preference
     }
 
     spinButton.disabled = false;
