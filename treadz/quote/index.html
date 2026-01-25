@@ -141,10 +141,30 @@
                                 <span id="tax-display" class="font-medium">$0.00</span>
                             </div>
                             <div class="h-px bg-gray-200 my-4"></div>
-                            <div class="flex justify-between items-end">
-                                <span class="text-lg font-bold text-gray-800">Total Estimate</span>
-                                <span id="total-display"
-                                    class="text-4xl font-bold text-blue-600 leading-none">$0.00</span>
+                            <div class="h-px bg-gray-200 my-4"></div>
+
+                            <!-- Split Totals -->
+                            <div class="grid grid-cols-2 gap-4 pt-2">
+                                <div
+                                    class="bg-green-50 rounded-lg p-3 border border-green-100 flex flex-col items-center justify-center text-center">
+                                    <span class="text-xs font-bold text-green-700 uppercase tracking-widest mb-1">Cash
+                                        Price</span>
+                                    <span id="total-cash-display"
+                                        class="text-2xl font-black text-green-700 leading-none">$0.00</span>
+                                </div>
+
+                                <div
+                                    class="bg-blue-50 rounded-lg p-3 border border-blue-100 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                                    <div
+                                        class="absolute top-0 right-0 bg-blue-200 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">
+                                        +3% Fee
+                                    </div>
+                                    <span class="text-xs font-bold text-blue-700 uppercase tracking-widest mb-1">Card
+                                        Price</span>
+                                    <span id="total-card-display"
+                                        class="text-2xl font-black text-blue-700 leading-none">$0.00</span>
+                                    <span id="card-fee-display" class="text-[10px] text-blue-400 mt-1">Fee: $0.00</span>
+                                </div>
                             </div>
                         </div>
 
@@ -195,24 +215,37 @@
             const totalStateFee = STATE_FEE_PER_TIRE * qty;
             const totalDisposalFee = DISPOSAL_FEE_PER_TIRE * qty;
 
-            // Tax on the Tire Price (Subtotal)
-            // Assuming fees are non-taxable as per common automotive shop practices in many jurisdictions unless specified.
-            const tax = tiresSubtotal * TAX_RATE;
+            const CARD_FEE_RATE = 0.03;
 
-            const total = tiresSubtotal + tax + totalStateFee + totalDisposalFee;
+            // Tax on the Sale (Tires + Fees)
+            const taxableAmount = tiresSubtotal + totalStateFee + totalDisposalFee;
+            const tax = taxableAmount * TAX_RATE;
 
-            // Render
+            const cashTotal = taxableAmount + tax;
+
+            // Card calculations (Total + 3% of that total)
+            const cardFee = cashTotal * CARD_FEE_RATE;
+            const cardTotal = cashTotal + cardFee;
+
+            // Render Breakdown
             updateDisplay('subtotal-display', tiresSubtotal);
             updateDisplay('state-fee-display', totalStateFee);
             updateDisplay('disposal-fee-display', totalDisposalFee);
             updateDisplay('tax-display', tax);
-            updateDisplay('total-display', total);
+
+            // Render Totals
+            updateDisplay('total-cash-display', cashTotal);
+            updateDisplay('total-card-display', cardTotal);
+            updateDisplay('card-fee-display', cardFee, true); // true for "Fee: $X.XX" format handled differently or just formatMoney
         }
 
-        function updateDisplay(id, amount) {
+        function updateDisplay(id, amount, isFeeLabel = false) {
             const el = document.getElementById(id);
-            // Animation effect on value change could be added here, keeping it simple for now
-            el.textContent = formatMoney(amount);
+            if (isFeeLabel) {
+                el.textContent = 'Fee: ' + formatMoney(amount);
+            } else {
+                el.textContent = formatMoney(amount);
+            }
         }
 
         function formatMoney(amount) {
