@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treadz - Quick Quote</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Additional glassmorphism and animation styles for the calculator */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .calc-input {
+            transition: all 0.3s ease;
+        }
+
+        .calc-input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.15);
+        }
+
+        .summary-row {
+            transition: all 0.3s ease;
+        }
+
+        .summary-row:hover {
+            background-color: rgba(243, 244, 246, 0.8);
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            border-radius: 0.5rem;
+            margin-left: -0.5rem;
+            margin-right: -0.5rem;
+        }
+    </style>
+</head>
+
+<body class="antialiased bg-gray-50 min-h-screen flex flex-col">
+    <div id="app" class="flex-grow flex flex-col">
+        <!-- Navigation -->
+        <nav class="main-nav sticky top-0 z-40 p-4 w-full">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="../index.html" class="flex items-center gap-4 group">
+                        <svg role="img" width="28" height="28" viewBox="0 0 24 24" fill="var(--primary-color)"
+                            xmlns="http://www.w3.org/2000/svg" class="group-hover:scale-110 transition-transform">
+                            <title>Treadz</title>
+                            <path
+                                d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 22c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10zm0-15c-2.761 0-5 2.239-5 5s2.239 5 5 5 5-2.239 5-5-2.239-5-5-5zm0 8c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z" />
+                        </svg>
+                        <h1 class="text-xl font-semibold text-gray-800 hidden sm:block">Treadz Inventory</h1>
+                    </a>
+                </div>
+                <div>
+                    <a href="../index.html"
+                        class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2 hover:bg-gray-100 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                        Back to Inventory
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow flex items-center justify-center p-4 sm:p-6 lg:p-8">
+            <div class="w-full max-w-2xl">
+
+                <div class="glass-panel rounded-2xl p-6 md:p-10 animate-[fadeIn_0.5s_ease-out]">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Quote Calculator</h2>
+                        <p class="text-gray-500">Quickly estimate total costs including fees and tax.</p>
+                    </div>
+
+                    <div class="grid gap-8">
+                        <!-- Inputs -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label
+                                    class="block text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Price
+                                    Per Tire</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">$</span>
+                                    <input type="number" id="tire-price" placeholder="0.00" min="0" step="0.01"
+                                        class="calc-input w-full pl-8 pr-4 py-4 text-2xl font-semibold bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Quantity</label>
+                                <div class="flex items-center gap-2 h-[66px]"> <!-- Matching height approx -->
+                                    <button onclick="adjustQuantity(-1)"
+                                        class="h-full px-5 rounded-xl bg-gray-100 hover:bg-gray-200 text-2xl font-bold text-gray-600 transition-colors active:scale-95">-</button>
+                                    <input type="number" id="quantity" value="4" min="1"
+                                        class="calc-input h-full w-full text-center text-2xl font-semibold bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                                    <button onclick="adjustQuantity(1)"
+                                        class="h-full px-5 rounded-xl bg-gray-100 hover:bg-gray-200 text-2xl font-bold text-gray-600 transition-colors active:scale-95">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Breakdown -->
+                        <div class="bg-gray-50/80 rounded-xl p-6 space-y-3 border border-gray-100">
+                            <div class="summary-row flex justify-between items-center text-gray-600 p-1">
+                                <span>Tires Subtotal</span>
+                                <span id="subtotal-display" class="font-medium">$0.00</span>
+                            </div>
+                            <div class="summary-row flex justify-between items-center text-gray-600 p-1">
+                                <span class="flex items-center gap-2">
+                                    State Tire Fee
+                                    <span
+                                        class="text-xs bg-gray-200 px-2 py-0.5 rounded-full text-gray-500">$1.35/ea</span>
+                                </span>
+                                <span id="state-fee-display" class="font-medium">$0.00</span>
+                            </div>
+                            <div class="summary-row flex justify-between items-center text-gray-600 p-1">
+                                <span class="flex items-center gap-2">
+                                    Disposal Fee
+                                    <span
+                                        class="text-xs bg-gray-200 px-2 py-0.5 rounded-full text-gray-500">$4.00/ea</span>
+                                </span>
+                                <span id="disposal-fee-display" class="font-medium">$0.00</span>
+                            </div>
+                            <div class="summary-row flex justify-between items-center text-gray-600 p-1">
+                                <span class="flex items-center gap-2">
+                                    Sales Tax
+                                    <span
+                                        class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">9.75%</span>
+                                </span>
+                                <span id="tax-display" class="font-medium">$0.00</span>
+                            </div>
+                            <div class="h-px bg-gray-200 my-4"></div>
+                            <div class="flex justify-between items-end">
+                                <span class="text-lg font-bold text-gray-800">Total Estimate</span>
+                                <span id="total-display"
+                                    class="text-4xl font-bold text-blue-600 leading-none">$0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button onclick="reset()"
+                                class="w-1/3 btn bg-white border border-gray-300 text-gray-700 font-semibold py-4 rounded-xl hover:bg-gray-50 active:scale-95 transition-all">
+                                Reset
+                            </button>
+                            <!-- Main Print/Copy Button could go here later if needed -->
+                            <button onclick="window.print()"
+                                class="w-2/3 btn btn-primary font-bold py-4 rounded-xl shadow-lg hover:shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline points="6 9 6 2 18 2 18 9" />
+                                    <path
+                                        d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                                    <rect width="12" height="8" x="6" y="14" />
+                                </svg>
+                                Print Quote
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center text-gray-400 text-sm mt-8">
+                    &copy; Treadz Inventory System. Prices are estimates.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const STATE_FEE_PER_TIRE = 1.35;
+        const DISPOSAL_FEE_PER_TIRE = 4.00;
+        const TAX_RATE = 0.0975;
+
+        const priceInput = document.getElementById('tire-price');
+        const qtyInput = document.getElementById('quantity');
+
+        function calculate() {
+            const priceVal = priceInput.value;
+            const pricePerTire = priceVal === '' ? 0 : parseFloat(priceVal);
+            const qty = parseInt(qtyInput.value) || 0;
+
+            // Core calculations
+            const tiresSubtotal = pricePerTire * qty;
+            const totalStateFee = STATE_FEE_PER_TIRE * qty;
+            const totalDisposalFee = DISPOSAL_FEE_PER_TIRE * qty;
+
+            // Tax on the Tire Price (Subtotal)
+            // Assuming fees are non-taxable as per common automotive shop practices in many jurisdictions unless specified.
+            const tax = tiresSubtotal * TAX_RATE;
+
+            const total = tiresSubtotal + tax + totalStateFee + totalDisposalFee;
+
+            // Render
+            updateDisplay('subtotal-display', tiresSubtotal);
+            updateDisplay('state-fee-display', totalStateFee);
+            updateDisplay('disposal-fee-display', totalDisposalFee);
+            updateDisplay('tax-display', tax);
+            updateDisplay('total-display', total);
+        }
+
+        function updateDisplay(id, amount) {
+            const el = document.getElementById(id);
+            // Animation effect on value change could be added here, keeping it simple for now
+            el.textContent = formatMoney(amount);
+        }
+
+        function formatMoney(amount) {
+            return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function adjustQuantity(delta) {
+            let val = parseInt(qtyInput.value) || 0;
+            val += delta;
+            if (val < 1) val = 1;
+            qtyInput.value = val;
+            calculate();
+        }
+
+        function reset() {
+            priceInput.value = '';
+            qtyInput.value = 4; // Default to 4 tires as it's most common
+            calculate();
+            priceInput.focus();
+        }
+
+        // Event Listeners
+        priceInput.addEventListener('input', calculate);
+        qtyInput.addEventListener('input', calculate);
+
+        // Initial state
+        reset();
+    </script>
+</body>
+
+</html>
