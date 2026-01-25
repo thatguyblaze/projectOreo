@@ -113,31 +113,44 @@
                         <!-- Breakdown -->
                         <div class="bg-gray-50/80 rounded-xl p-6 space-y-3 border border-gray-100">
                             <div class="summary-row flex justify-between items-center text-gray-600 p-1">
-                                <span>Tires Subtotal</span>
+                                <div>
+                                    <div class="text-sm font-medium">Tires Subtotal</div>
+                                    <div id="subtotal-math" class="text-[10px] text-gray-400 font-mono mt-0.5"></div>
+                                </div>
                                 <span id="subtotal-display" class="font-medium">$0.00</span>
                             </div>
                             <div class="summary-row flex justify-between items-center text-gray-600 p-1">
-                                <span class="flex items-center gap-2">
-                                    State Tire Fee
-                                    <span
-                                        class="text-xs bg-gray-200 px-2 py-0.5 rounded-full text-gray-500">$1.35/ea</span>
-                                </span>
+                                <div>
+                                    <div class="flex items-center gap-2 text-sm font-medium">
+                                        State Tire Fee
+                                        <span
+                                            class="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded text-gray-500">$1.35/ea</span>
+                                    </div>
+                                    <div id="state-fee-math" class="text-[10px] text-gray-400 font-mono mt-0.5"></div>
+                                </div>
                                 <span id="state-fee-display" class="font-medium">$0.00</span>
                             </div>
                             <div class="summary-row flex justify-between items-center text-gray-600 p-1">
-                                <span class="flex items-center gap-2">
-                                    Disposal Fee
-                                    <span
-                                        class="text-xs bg-gray-200 px-2 py-0.5 rounded-full text-gray-500">$4.00/ea</span>
-                                </span>
+                                <div>
+                                    <div class="flex items-center gap-2 text-sm font-medium">
+                                        Disposal Fee
+                                        <span
+                                            class="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded text-gray-500">$4.00/ea</span>
+                                    </div>
+                                    <div id="disposal-fee-math" class="text-[10px] text-gray-400 font-mono mt-0.5">
+                                    </div>
+                                </div>
                                 <span id="disposal-fee-display" class="font-medium">$0.00</span>
                             </div>
                             <div class="summary-row flex justify-between items-center text-gray-600 p-1">
-                                <span class="flex items-center gap-2">
-                                    Sales Tax
-                                    <span
-                                        class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">9.75%</span>
-                                </span>
+                                <div>
+                                    <div class="flex items-center gap-2 text-sm font-medium">
+                                        Sales Tax
+                                        <span
+                                            class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">9.75%</span>
+                                    </div>
+                                    <div id="tax-math" class="text-[10px] text-gray-400 font-mono mt-0.5"></div>
+                                </div>
                                 <span id="tax-display" class="font-medium">$0.00</span>
                             </div>
                             <div class="h-px bg-gray-200 my-4"></div>
@@ -229,9 +242,20 @@
 
             // Render Breakdown
             updateDisplay('subtotal-display', tiresSubtotal);
+            const subtotalMathEl = document.getElementById('subtotal-math');
+            if (subtotalMathEl) subtotalMathEl.textContent = `${qty} x ` + formatMoney(pricePerTire);
+
             updateDisplay('state-fee-display', totalStateFee);
+            const stateFeeMathEl = document.getElementById('state-fee-math');
+            if (stateFeeMathEl) stateFeeMathEl.textContent = `${qty} x ` + formatMoney(STATE_FEE_PER_TIRE);
+
             updateDisplay('disposal-fee-display', totalDisposalFee);
+            const disposalFeeMathEl = document.getElementById('disposal-fee-math');
+            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${qty} x ` + formatMoney(DISPOSAL_FEE_PER_TIRE);
+
             updateDisplay('tax-display', tax);
+            const taxMathEl = document.getElementById('tax-math');
+            if (taxMathEl) taxMathEl.textContent = `9.75% of ` + formatMoney(taxableAmount);
 
             // Render Totals
             updateDisplay('total-cash-display', cashTotal);
