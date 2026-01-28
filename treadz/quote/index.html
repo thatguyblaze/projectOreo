@@ -24,10 +24,16 @@
                 print-color-adjust: exact !important;
             }
 
-            #app,
+            #app {
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 90vh !important;
+            }
+
             main {
-                display: block !important;
-                height: auto !important;
+                flex-grow: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
                 padding: 0 !important;
                 margin: 0 !important;
             }
@@ -40,6 +46,9 @@
             .w-full.max-w-2xl {
                 max-width: 100% !important;
                 width: 100% !important;
+                flex-grow: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
 
             .glass-panel {
@@ -47,6 +56,9 @@
                 border: none !important;
                 background: white !important;
                 padding: 0 !important;
+                flex-grow: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
             }
 
             /* Header Styling */
@@ -138,7 +150,10 @@
                 align-items: flex-end;
                 border-top: 2px solid #000 !important;
                 padding-top: 1rem !important;
-                margin-top: 0 !important;
+                margin-top: 2rem !important;
+                /* Give it space from items */
+                margin-bottom: 2rem !important;
+                /* Give it space from footer */
             }
 
             .totals-row {
@@ -178,9 +193,10 @@
             /* Footer */
             .print-footer {
                 display: block !important;
-                position: fixed;
-                bottom: 0;
-                left: 0;
+                position: static !important;
+                /* Prevent overlap by removing fixed */
+                margin-top: auto !important;
+                /* Push to bottom of flex container */
                 width: 100%;
                 padding-top: 1rem;
                 border-top: 1px solid #eee;
@@ -194,6 +210,12 @@
             .print-hidden,
             button {
                 display: none !important;
+            }
+
+            /* Remove container styling for print */
+            .bg-gray-50\/80 {
+                background: none !important;
+                border: none !important;
             }
 
             .totals-section .bg-green-50,
@@ -248,8 +270,7 @@
                 <div class="flex items-center gap-4">
                     <a href="../index.html" class="flex items-center gap-4 group">
                         <img src="../treadztntLogo.png" alt="Treadz Logo"
-                            class="h-10 w-auto group-hover:scale-110 transition-transform">
-                        <h1 class="text-xl font-semibold text-gray-800 hidden sm:block">Treadz Inventory</h1>
+                            class="h-12 w-auto group-hover:scale-110 transition-transform">
                     </a>
                 </div>
                 <div>
@@ -277,7 +298,7 @@
                             <div class="print-header">
                                 <div>
                                     <div class="flex items-center gap-2 mb-2">
-                                        <img src="../treadztntLogo.png" alt="Treadz" class="h-16 w-auto">
+                                        <img src="../treadztntLogo.png" alt="Treadz" class="h-20 w-auto">
                                     </div>
                                     <div class="text-xs text-gray-500 uppercase tracking-widest">Tire & Towing Services
                                     </div>
