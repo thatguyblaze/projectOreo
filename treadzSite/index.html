@@ -63,6 +63,58 @@
                     style="padding: 1rem 0; display: flex; align-items: center; justify-content: center;">
                     <script src="https://elfsightcdn.com/platform.js" async></script>
                     <div class="elfsight-app-3d6058a8-b132-46da-8543-61061fc3d5a6" data-elfsight-app-lazy></div>
+
+                    <!-- Advanced Styling & Auto-Scroll for Widget (Re-added) -->
+                    <style>
+                        /* 1. HIDE THE WATERMARK (Aggressive) */
+                        /* Target specific Elfsight branding links */
+                        a[href*="elfsight.com"],
+                        a[href^="https://elfsight.com"] {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            pointer-events: none !important;
+                            width: 0 !important;
+                            height: 0 !important;
+                            position: absolute !important;
+                            z-index: -9999 !important;
+                            font-size: 0 !important;
+                        }
+
+                        /* Hide containers that MIGHT be wrapper for the badge, be careful not to hide main widget */
+                        /* This targets the specific small container often used for the badge at the bottom */
+                        .eapps-widget-toolbar,
+                        .es-badge-container,
+                        [class*="eapps-google-reviews-badge"] {
+                            display: none !important;
+                        }
+
+                        /* 2. REMOVE BACKGROUND / GRADIENT */
+                        /* Forces the widget background to be transparent */
+                        .eapps-widget,
+                        .eapps-google-reviews-container,
+                        .eapps-google-reviews-inner {
+                            background: transparent !important;
+                            box-shadow: none !important;
+                        }
+                    </style>
+
+                    <!-- Auto-Scroll Script -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            // Wait for widget to load
+                            const scrollInterval = setInterval(() => {
+                                // Try to find the "Next" arrow button in the widget
+                                const nextBtn = document.querySelector('.eapps-google-reviews-arrow-next') ||
+                                    document.querySelector('[aria-label="Next"]') ||
+                                    document.querySelector('.es-arrow-next');
+
+                                if (nextBtn) {
+                                    nextBtn.click();
+                                }
+                            }, 5000); // Scroll every 5 seconds
+                        });
+                    </script>
                 </div>
             </div>
         </section>
