@@ -90,29 +90,49 @@
                         <h3>Jump Starts</h3>
                         <p>Dead battery? We'll get your vehicle started and check your charging system on the spot.</p>
                     </div>
-                    <!-- Advanced Hack to hide Elfsight "Free Widget" Badge -->
+                    <!-- Advanced Styling & Auto-Scroll for Widget -->
                     <style>
-                        /* Target the specific anchor tag Elfsight uses for the badge */
-                        .marquee-container a[href*="elfsight.com"],
-                        .marquee-container a[href*="elfsight.com"]>div,
-                        .elfsight-app-3d6058a8-b132-46da-8543-61061fc3d5a6>div:last-child {
+                        /* 1. HIDE THE WATERMARK (Aggressive) */
+                        a[href*="elfsight.com"] {
                             display: none !important;
                             visibility: hidden !important;
                             opacity: 0 !important;
                             pointer-events: none !important;
-                            height: 0 !important;
-                            width: 0 !important;
                             position: absolute !important;
-                            z-index: -9999 !important;
+                            bottom: -9999px !important;
                         }
 
-                        /* Container mask just in case */
-                        .marquee-container {
-                            position: relative;
-                            z-index: 1;
-                            /* Ensure any absolute positioned badges fall behind if we can't delete them */
+                        /* Hide the annoying 'Free Google Reviews Widget' text container if it remains */
+                        div:has(> a[href*="elfsight.com"]) {
+                            display: none !important;
+                        }
+
+                        /* 2. REMOVE BACKGROUND / GRADIENT */
+                        /* Forces the widget to be transparent so it blends with our site */
+                        .eapps-widget,
+                        .eapps-google-reviews-container,
+                        .eapps-google-reviews-inner {
+                            background: transparent !important;
+                            box-shadow: none !important;
                         }
                     </style>
+
+                    <!-- Auto-Scroll Script -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            // Wait for widget to load
+                            const scrollInterval = setInterval(() => {
+                                // Try to find the "Next" arrow button in the widget
+                                const nextBtn = document.querySelector('.eapps-google-reviews-arrow-next') ||
+                                    document.querySelector('[aria-label="Next"]') ||
+                                    document.querySelector('.es-arrow-next');
+
+                                if (nextBtn) {
+                                    nextBtn.click();
+                                }
+                            }, 5000); // Scroll every 5 seconds
+                        });
+                    </script>
                     <div class="service-card">
                         <div class="icon-box">
                             <i class="fa-solid fa-lock"></i>
