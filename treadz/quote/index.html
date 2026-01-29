@@ -233,13 +233,15 @@
                 display: none;
             }
 
-            .print-fee-label {
-                display: inline !important;
-                font-weight: normal !important;
+            /* Using pseudo-element to guarantee visibility in print */
+            .print-add-fee::after {
+                content: " (+3.5% Fee)";
                 text-transform: none !important;
+                font-weight: normal !important;
                 font-size: 11px !important;
                 margin-left: 4px;
                 color: #444 !important;
+                display: inline-block !important;
             }
         }
 
@@ -457,8 +459,7 @@
                                         +3.5% Fee
                                     </div>
                                     <span
-                                        class="text-xs font-bold text-blue-700 uppercase tracking-widest mb-1 print:text-black">Card
-                                        <span class="hidden print-fee-label">(+3.5% Fee)</span>
+                                        class="text-xs font-bold text-blue-700 uppercase tracking-widest mb-1 print:text-black print-add-fee">Card
                                     </span>
                                     <span id="total-card-display"
                                         class="text-2xl font-black text-blue-700 leading-none print:text-black print:text-lg">$0.00</span>
