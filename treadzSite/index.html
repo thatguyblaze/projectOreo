@@ -152,30 +152,38 @@
                         box-shadow: none !important;
                     }
 
-                    /* 3. REMOVE FADED EDGES */
+                    /* 3. REMOVE FADED EDGES - NUCLEAR OPTION */
                     /* Removes the mask often applied to carousels */
                     [class*="eapps-google-reviews-inner"],
                     [class*="Carousel__Container"],
-                    .eapps-widget-carousel-fade {
+                    [class*="Carousel__Viewport"],
+                    [class*="Carousel__Mask"],
+                    .eapps-widget-carousel-fade,
+                    .eapps-widget div,
+                    .eapps-widget span {
                         -webkit-mask-image: none !important;
                         mask-image: none !important;
-                        background-image: none !important;
-                        /* In case they use a gradient image overlay */
+                        -webkit-mask: none !important;
+                        mask: none !important;
                     }
 
-                    /* Target specific Elfsight shadow/shade elements */
+                    /* 3b. Prevent specific gradient backgrounds that look like fades */
                     div[class*="Carousel__Shadow"],
-                    div[class*="Carousel__Shade"] {
+                    div[class*="Carousel__Shade"],
+                    [class*="Carousel__Overlay"] {
                         display: none !important;
                         opacity: 0 !important;
                         background: none !important;
+                        width: 0 !important;
                     }
 
                     /* Target pseudo-elements that might be creating gradients */
                     [class*="Carousel__Container"]::before,
                     [class*="Carousel__Container"]::after,
                     [class*="eapps-google-reviews-inner"]::before,
-                    [class*="eapps-google-reviews-inner"]::after {
+                    [class*="eapps-google-reviews-inner"]::after,
+                    [class*="eapps-widget"]::before,
+                    [class*="eapps-widget"]::after {
                         display: none !important;
                         opacity: 0 !important;
                         content: none !important;
