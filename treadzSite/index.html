@@ -93,93 +93,89 @@
                     <script src="https://elfsightcdn.com/platform.js" async></script>
                     <div class="elfsight-app-3d6058a8-b132-46da-8543-61061fc3d5a6" data-elfsight-app-lazy></div>
 
-                    <!-- Hard Cover Mask for persistent watermark (Centered & Wide) -->
+                    <!-- Watermark Cover: Full width bar at bottom to cover any branding/badges -->
                     <div class="watermark-cover"
-                        style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 300px; height: 50px; background-color: #0B1121; z-index: 999999999; pointer-events: none;">
+                        style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; background-color: #0B1121; z-index: 2147483647; pointer-events: none;">
                     </div>
 
-                    <!-- Force-Inject Styles into Shadow DOM for Gradients & Watermark -->
-                    <script>
-                        (function () {
-                            const widgetId = 'elfsight-app-3d6058a8-b132-46da-8543-61061fc3d5a6';
+                    <style>
+                        /* CSS Override for Elfsight */
 
-                            const injectCustomStyles = () => {
-                                const widget = document.querySelector('.' + widgetId);
-                                if (!widget) return;
+                        /* 1. HIDE BACKLINK / BADGE */
+                        a[href*="elfsight.com"] {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            pointer-events: none !important;
+                        }
 
-                                // The killer CSS to inject
-                                const customCSS = `
-                                    /* KILL GRADIENTS & MASKS */
-                                    div[class*="Carousel__Shadow"],
-                                    div[class*="Carousel__Mask"],
-                                    [class*="eapps-widget-carousel-fade"],
-                                    div[class*="Carousel__Container"]::before,
-                                    div[class*="Carousel__Container"]::after {
-                                        display: none !important;
-                                        opacity: 0 !important;
-                                        visibility: hidden !important;
-                                        mask-image: none !important;
-                                        -webkit-mask-image: none !important;
-                                        background: none !important;
-                                        width: 0 !important;
-                                    }
-                                    
-                                    /* Force container to have no mask */
-                                    [class*="eapps-google-reviews-inner"] {
-                                        mask-image: none !important;
-                                        -webkit-mask-image: none !important;
-                                    }
+                        /* 2. REMOVE MASKS / GRADIENTS */
+                        /* We use partial attribute selectors to catch dynamic classes */
+                        [class*="eapps-widget"] {
+                            mask-image: none !important;
+                            -webkit-mask-image: none !important;
+                            background: transparent !important;
+                            box-shadow: none !important;
+                        }
 
-                                    /* HIDE ELFSIGHT BADGE LINKS */
-                                    a[href*="elfsight.com"],
-                                    a[title*="Free Google Reviews Widget"] {
-                                        display: none !important;
-                                        visibility: hidden !important;
-                                        pointer-events: none !important;
-                                        opacity: 0 !important;
-                                    }
-                                `;
+                        /* Specifically target the container that usually has the fade */
+                        div[class*="Carousel__Container"],
+                        div[class*="Carousel__Mask"],
+                        div[class*="Carousel__Shadow"] {
+                            mask-image: none !important;
+                            -webkit-mask-image: none !important;
+                        }
 
-                                // Function to append style to a root
-                                const appendStyle = (root) => {
-                                    if (root.querySelector('#custom-widget-styles')) return; // Already injected
-                                    const style = document.createElement('style');
-                                    style.id = 'custom-widget-styles';
-                                    style.textContent = customCSS;
-                                    root.appendChild(style);
-                                };
+                        /* Hide the specific gradient pseudo-elements */
+                        div[class*="Carousel__Container"]::before,
+                        div[class*="Carousel__Container"]::after {
+                            display: none !important;
+                            width: 0 !important;
+                            height: 0 !important;
+                            opacity: 0 !important;
+                        }
+                    </style>
 
-                                // 1. Try Light DOM (Standard way)
-                                appendStyle(document.head);
-
-                                // 2. Try Shadow DOM (If widget uses it)
-                                if (widget.shadowRoot) {
-                                    appendStyle(widget.shadowRoot);
-                                }
-                            };
-
-                            // Run immediately and observe for changes/loading
-                            const observer = new MutationObserver(() => {
-                                injectCustomStyles();
-                            });
-
-                            observer.observe(document.body, { childList: true, subtree: true });
-                            // Initial try
-                            setTimeout(injectCustomStyles, 500);
-                            setTimeout(injectCustomStyles, 1500);
-                            setTimeout(injectCustomStyles, 3000);
-                        })();
-                    </script>
-
-                    <!-- Auto-Scroll Script -->
+                    <!-- Aggressive JS to Remove Gradients & Scroll -->
                     <script>
                         document.addEventListener('DOMContentLoaded', () => {
-                            const scrollInterval = setInterval(() => {
+                            // 1. SCROLL SCRIPT
+                            setInterval(() => {
                                 const nextBtn = document.querySelector('.eapps-google-reviews-arrow-next') ||
                                     document.querySelector('[aria-label="Next"]') ||
                                     document.querySelector('.es-arrow-next');
                                 if (nextBtn) nextBtn.click();
                             }, 5000);
+
+                            // 2. GRADIENT KILLER SCRIPT
+                            // Runs frequently to catch the widget as it renders
+                            const removeGradients = () => {
+                                // Select ALL elements inside the widget
+                                const allElements = document.querySelectorAll('.marquee-container *');
+
+                                allElements.forEach(el => {
+                                    // Check computed style for mask-image
+                                    const style = window.getComputedStyle(el);
+                                    if (style.maskImage !== 'none' || style.webkitMaskImage !== 'none') {
+                                        el.style.setProperty('mask-image', 'none', 'important');
+                                        el.style.setProperty('-webkit-mask-image', 'none', 'important');
+                                    }
+
+                                    // Also kill background images on pseudo-elements if we could (not possible via JS)
+                                    // So we just rely on the CSS ::before/::after rules above.
+
+                                    // Hide specific classes we know cause issues if CSS missed them
+                                    if (el.className.includes && (el.className.includes('Mask') || el.className.includes('Shadow') || el.className.includes('fade'))) {
+                                        el.style.display = 'none';
+                                    }
+                                });
+                            };
+
+                            // Run intensely for the first few seconds
+                            const intervalId = setInterval(removeGradients, 100);
+
+                            // Stop after 20 seconds to save performance
+                            setTimeout(() => clearInterval(intervalId), 20000);
                         });
                     </script>
                 </div>
