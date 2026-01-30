@@ -1,35 +1,57 @@
-// Google Maps & Reviews Logic
-
-// NOTE: We have switched to using a 3rd Party Widget (Elfsight) for handling reviews
-// to allow for Free, Live updates without complex API management.
-// See index.html lines 85+ for where to paste the widget code.
+// Treadz Site Logic
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Treadz Site Loaded");
-    // visual effects or other logic can go here
+    initLocationHighlight();
 });
 
-
-// --- LIVE API FETCH IMPLEMENTATION (Ready for Key) ---
-/*
-async function fetchLiveReviews(apiKey, placeId) {
-    // Note: Calling Google Places API directly from client-side often has CORS restrictions.
-    // The best practice is to use the Google Maps JavaScript API "Places Service".
-    // Or a small server-side proxy.
-    
-    // Example using Places Service (requires loading the library in HTML head):
-    // const service = new google.maps.places.PlacesService(document.createElement('div'));
-    // service.getDetails({
-    //    placeId: placeId,
-    //    fields: ['reviews']
-    // }, (place, status) => {
-    //    if (status === google.maps.places.PlacesServiceStatus.OK) {
-    //        const liveReviews = filterAndSortReviews(place.reviews);
-    //        renderReviews(liveReviews);
-    //    }
-    // });
+// --- Geolocation & Service Area Highlighting ---
+// --- Geolocation & Service Area Highlighting ---
+function initLocationHighlight() {
+    // USE IP GEOLOCATION (No permission popup required)
+    // We use a free IP API to estimate location
+    fetch('https://ipwho.is/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const userCity = data.city;
+                // console.log("User IP City:", userCity);
+                if (userCity) {
+                    highlightServiceArea(userCity);
+                }
+            } else {
+                console.log("IP Geolocation failed:", data.message);
+            }
+        })
+        .catch(error => {
+            console.error("IP Geolocation error:", error);
+        });
 }
-*/
 
-// Initialize on Load
-document.addEventListener('DOMContentLoaded', initReviews);
+function highlightServiceArea(city) {
+    // Find all tags in the area-tags section
+    const tags = document.querySelectorAll('.area-tags .tag');
+    let matched = false;
+
+    tags.forEach(tag => {
+        // Clean text: "Kingsport, TN" -> "Kingsport"
+        const tagText = tag.textContent.split(',')[0].trim().toLowerCase();
+        const userCityClean = city.trim().toLowerCase();
+
+        if (tagText === userCityClean) {
+            tag.classList.add('active-location');
+            tag.innerHTML = `<i class="fa-solid fa-location-arrow" style="margin-right:0.5rem"></i> ${tag.textContent}`;
+            matched = true;
+        }
+    });
+
+    if (matched) {
+        // console.log("Matched service area!");
+        const areaSection = document.querySelector('.area-tags');
+        if (areaSection) {
+            const msg = document.createElement('div');
+            msg.innerHTML = `<p style="color: var(--accent-color); font-weight: bold; margin-top: 1rem;"><i class="fa-solid fa-check-circle"></i> We serve your area: ${city}!</p>`;
+            areaSection.appendChild(msg);
+        }
+    }
+}
