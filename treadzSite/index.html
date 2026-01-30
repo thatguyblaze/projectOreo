@@ -53,46 +53,35 @@
                     <a href="#areas" class="btn btn-secondary btn-lg">View Service Area</a>
                 </div>
             </div>
-        </section>
 
-        <!-- Trust Bar / Features Strip -->
-        <section class="trust-bar">
-            <div class="container">
-                <div class="trust-grid">
-                    <!-- Item 1 -->
-                    <div class="trust-item">
-                        <div class="trust-icon">
-                            <i class="fa-solid fa-star"></i>
+            <!-- Trust Bar / Features Strip (Moved Inside Hero) -->
+            <section class="trust-bar hero-trust-bar">
+                <div class="container">
+                    <div class="trust-grid">
+                        <div class="trust-item">
+                            <div class="trust-icon"><i class="fa-solid fa-star"></i></div>
+                            <div class="trust-text">
+                                <h3>TRUSTED PARTNER</h3>
+                                <p>Locally owned hometown provider.</p>
+                            </div>
                         </div>
-                        <div class="trust-text">
-                            <h3>TRUSTED PARTNER</h3>
-                            <p>Locally owned hometown provider.</p>
+                        <div class="trust-item">
+                            <div class="trust-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                            <div class="trust-text">
+                                <h3>FAST RESPONSE</h3>
+                                <p>We arrive quickly to get you moving.</p>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Item 2 -->
-                    <div class="trust-item">
-                        <div class="trust-icon">
-                            <i class="fa-solid fa-gauge-high"></i>
-                        </div>
-                        <div class="trust-text">
-                            <h3>FAST RESPONSE</h3>
-                            <p>We arrive quickly to get you moving.</p>
-                        </div>
-                    </div>
-
-                    <!-- Item 3 -->
-                    <div class="trust-item">
-                        <div class="trust-icon">
-                            <i class="fa-solid fa-clock"></i>
-                        </div>
-                        <div class="trust-text">
-                            <h3>24/7 AVAILABLE</h3>
-                            <p>Day or night, we are here for you.</p>
+                        <div class="trust-item">
+                            <div class="trust-icon"><i class="fa-solid fa-clock"></i></div>
+                            <div class="trust-text">
+                                <h3>24/7 AVAILABLE</h3>
+                                <p>Day or night, we are here for you.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </section>
 
         <!-- Reviews Section (Moved to top) -->
@@ -100,122 +89,80 @@
             <div class="container">
                 <!-- Elfsight Google Reviews Widget -->
                 <div class="marquee-container"
-                    style="padding: 1rem 0; display: flex; align-items: center; justify-content: center;">
+                    style="position: relative; padding: 1rem 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                     <script src="https://elfsightcdn.com/platform.js" async></script>
                     <div class="elfsight-app-3d6058a8-b132-46da-8543-61061fc3d5a6" data-elfsight-app-lazy></div>
 
                     <!-- Hard Cover Mask for persistent watermark -->
                     <div class="watermark-mask"
-                        style="position: absolute; bottom: 0; left: 0; width: 100%; height: 75px; background-color: #0B1121; z-index: 2147483647; pointer-events: none; margin-bottom: -2px;">
+                        style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background-color: #0B1121; z-index: 99999; pointer-events: none; margin-bottom: -1px;">
                     </div>
+
+                    <!-- Advanced Styling & Auto-Scroll for Widget (Re-added) -->
+                    <style>
+                        /* 1. HIDE THE WATERMARK (Aggressive) */
+                        /* Target specific Elfsight branding links */
+                        a[href*="elfsight.com"],
+                        a[href^="https://elfsight.com"],
+                        a[title*="Free Google Reviews Widget"] {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            pointer-events: none !important;
+                            width: 0 !important;
+                            height: 0 !important;
+                            position: absolute !important;
+                            z-index: -9999 !important;
+                            font-size: 0 !important;
+                            color: transparent !important;
+                        }
+
+                        /* Hide containers that MIGHT be wrapper for the badge */
+                        .eapps-widget-toolbar,
+                        div[class*="eapps-widget-toolbar"],
+                        .es-badge-container,
+                        div[class*="BadgeContainer"],
+                        [class*="eapps-google-reviews-badge"],
+                        [class*="es-widget-title"] {
+                            display: none !important;
+                        }
+
+                        /* 2. REMOVE BACKGROUND / GRADIENT */
+                        /* Forces the widget background to be transparent */
+                        .eapps-widget,
+                        .eapps-google-reviews-container,
+                        .eapps-google-reviews-inner {
+                            background: transparent !important;
+                            box-shadow: none !important;
+                        }
+
+                        /* 3. KILL GRADIENT FADE ON SIDES */
+                        /* The fade is often applied via mask-image on these classes */
+                        [class*="Carousel__Mask"],
+                        [class*="eapps-widget-carousel-fade"],
+                        .eapps-widget-carousel-fade {
+                            -webkit-mask-image: none !important;
+                            mask-image: none !important;
+                        }
+                    </style>
+
+                    <!-- Auto-Scroll Script -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            // Wait for widget to load
+                            const scrollInterval = setInterval(() => {
+                                // Try to find the "Next" arrow button in the widget
+                                const nextBtn = document.querySelector('.eapps-google-reviews-arrow-next') ||
+                                    document.querySelector('[aria-label="Next"]') ||
+                                    document.querySelector('.es-arrow-next');
+
+                                if (nextBtn) {
+                                    nextBtn.click();
+                                }
+                            }, 5000); // Scroll every 5 seconds
+                        });
+                    </script>
                 </div>
-
-
-                <!-- Advanced Styling & Auto-Scroll for Widget (Re-added) -->
-                <style>
-                    /* 1. HIDE THE WATERMARK (Aggressive) */
-                    /* Target specific Elfsight branding links */
-                    a[href*="elfsight.com"],
-                    a[href^="https://elfsight.com"] {
-                        display: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                        pointer-events: none !important;
-                        width: 0 !important;
-                        height: 0 !important;
-                        position: absolute !important;
-                        z-index: -9999 !important;
-                        font-size: 0 !important;
-                    }
-
-                    /* Hide containers that MIGHT be wrapper for the badge, be careful not to hide main widget */
-                    /* This targets the specific small container often used for the badge at the bottom */
-                    .eapps-widget-toolbar,
-                    div[class*="eapps-widget-toolbar"],
-                    .es-badge-container,
-                    div[class*="BadgeContainer"],
-                    [class*="eapps-google-reviews-badge"] {
-                        display: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                        height: 0 !important;
-                        width: 0 !important;
-                        pointer-events: none !important;
-                    }
-
-                    /* 2. REMOVE BACKGROUND / GRADIENT */
-                    /* Forces the widget background to be transparent */
-                    .eapps-widget,
-                    .eapps-google-reviews-container,
-                    .eapps-google-reviews-inner {
-                        background: transparent !important;
-                        box-shadow: none !important;
-                    }
-
-                    /* 3. REMOVE FADED EDGES - NUCLEAR OPTION */
-                    /* Removes the mask often applied to carousels */
-                    [class*="eapps-google-reviews-inner"],
-                    [class*="Carousel__Container"],
-                    [class*="Carousel__Viewport"],
-                    [class*="Carousel__Mask"],
-                    .eapps-widget-carousel-fade,
-                    .eapps-widget div,
-                    .eapps-widget span {
-                        -webkit-mask-image: none !important;
-                        mask-image: none !important;
-                        -webkit-mask: none !important;
-                        mask: none !important;
-                    }
-
-                    /* 3b. Prevent specific gradient backgrounds that look like fades */
-                    div[class*="Carousel__Shadow"],
-                    div[class*="Carousel__Shade"],
-                    [class*="Carousel__Overlay"] {
-                        display: none !important;
-                        opacity: 0 !important;
-                        background: none !important;
-                        width: 0 !important;
-                    }
-
-                    /* Target pseudo-elements that might be creating gradients */
-                    [class*="Carousel__Container"]::before,
-                    [class*="Carousel__Container"]::after,
-                    [class*="eapps-google-reviews-inner"]::before,
-                    [class*="eapps-google-reviews-inner"]::after,
-                    [class*="eapps-widget"]::before,
-                    [class*="eapps-widget"]::after {
-                        display: none !important;
-                        opacity: 0 !important;
-                        content: none !important;
-                        background: none !important;
-                        mask-image: none !important;
-                        -webkit-mask-image: none !important;
-                    }
-
-                    /* Ensure arrows don't have weird gradients */
-                    [class*="Carousel__Arrow"] {
-                        background: transparent !important;
-                        box-shadow: none !important;
-                    }
-                </style>
-
-                <!-- Auto-Scroll Script -->
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        // Wait for widget to load
-                        const scrollInterval = setInterval(() => {
-                            // Try to find the "Next" arrow button in the widget
-                            const nextBtn = document.querySelector('.eapps-google-reviews-arrow-next') ||
-                                document.querySelector('[aria-label="Next"]') ||
-                                document.querySelector('.es-arrow-next');
-
-                            if (nextBtn) {
-                                nextBtn.click();
-                            }
-                        }, 5000); // Scroll every 5 seconds
-                    });
-                </script>
-            </div>
             </div>
 
 

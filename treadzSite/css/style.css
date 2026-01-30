@@ -388,14 +388,26 @@ ul {
 }
 
 /* --- TRUST BAR / FEATURES STRIP --- */
+/* --- TRUST BAR / FEATURES STRIP --- */
 .trust-bar {
     background-color: #0d1424;
-    /* Distinct dark blue, slightly lighter than main bg */
     padding: 3rem 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
     position: relative;
     z-index: 10;
+}
+
+/* Specific styling when inside hero */
+.trust-bar.hero-trust-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(13, 20, 36, 0.9);
+    /* Semi-transparent dark blue */
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem 0;
+    z-index: 20;
 }
 
 .trust-grid {
@@ -413,19 +425,16 @@ ul {
     flex: 1;
     min-width: 250px;
     justify-content: center;
-    /* Center content in item */
 }
 
 .trust-icon {
     font-size: 2.5rem;
     color: var(--accent-color);
-    /* Orange Star/Clock */
 }
 
 .trust-text h3 {
     font-size: 1.1rem;
     font-weight: 800;
-    /* Extra bold uppercase */
     color: var(--text-white);
     margin-bottom: 0.25rem;
     text-transform: uppercase;
@@ -438,23 +447,55 @@ ul {
     margin: 0;
 }
 
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
+
+    /* Trust Bar Mobile: Reset to normal flow below hero content */
+    .trust-bar.hero-trust-bar {
+        position: relative;
+        background: #0d1424;
+        border-bottom: 1px solid var(--border-color);
+        padding: 2rem 1rem;
+    }
+
     .trust-grid {
         flex-direction: column;
         align-items: flex-start;
-        padding-left: 1rem;
+        gap: 1.5rem;
     }
 
     .trust-item {
         justify-content: flex-start;
         width: 100%;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        /* Softer border */
         padding-bottom: 1.5rem;
     }
 
     .trust-item:last-child {
         border-bottom: none;
         padding-bottom: 0;
+    }
+
+    /* Gallery Mobile: Swipeable Carousel */
+    .gallery-strip {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x mandatory;
+    }
+
+    .gallery-row {
+        width: max-content !important;
+        /* Force items to lay out horizontally */
+    }
+
+    .gallery-item {
+        width: 85vw !important;
+        /* Almost full width item */
+        flex: none !important;
+        /* Disable flex resize */
+        scroll-snap-align: center;
+        margin-right: 0.5rem;
     }
 }
 
