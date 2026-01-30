@@ -89,13 +89,13 @@
             <div class="container">
                 <!-- Elfsight Google Reviews Widget -->
                 <div class="marquee-container"
-                    style="position: relative; padding: 1rem 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    style="position: relative; padding: 1rem 0; display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: #0B1121;">
                     <script src="https://elfsightcdn.com/platform.js" async></script>
                     <div class="elfsight-app-3d6058a8-b132-46da-8543-61061fc3d5a6" data-elfsight-app-lazy></div>
 
-                    <!-- Hard Cover Mask for persistent watermark -->
-                    <div class="watermark-mask"
-                        style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background-color: #0B1121; z-index: 99999; pointer-events: none; margin-bottom: -1px;">
+                    <!-- Box to hide watermark (Centered) -->
+                    <div class="watermark-cover"
+                        style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 60px; background-color: #0B1121; z-index: 2147483647; pointer-events: none;">
                     </div>
 
                     <!-- Advanced Styling & Auto-Scroll for Widget (Re-added) -->
@@ -113,8 +113,6 @@
                             height: 0 !important;
                             position: absolute !important;
                             z-index: -9999 !important;
-                            font-size: 0 !important;
-                            color: transparent !important;
                         }
 
                         /* Hide containers that MIGHT be wrapper for the badge */
@@ -136,17 +134,20 @@
                             box-shadow: none !important;
                         }
 
-                        /* 3. KILL GRADIENT FADE ON SIDES (USER REQUESTED FIX) */
-                        /* The fade is often applied via mask-image on these classes */
-                        [class*="Carousel__Mask"],
-                        [class*="eapps-widget-carousel-fade"],
-                        .eapps-widget-carousel-fade,
-                        div[class*="Carousel__Container"]::before,
-                        div[class*="Carousel__Container"]::after {
+                        /* 3. KILL GRADIENT FADE ON SIDES (NUCLEAR OPTION) */
+                        /* Remove mask-image from EVERYTHING inside the widget to ensure no gradients */
+                        div[class*="eapps-widget"] * {
                             -webkit-mask-image: none !important;
                             mask-image: none !important;
+                        }
+
+                        /* Hide pseudo elements causing fade (often these have background-image gradients) */
+                        div[class*="eapps-widget"] [class*="Carousel__Container"]::before,
+                        div[class*="eapps-widget"] [class*="Carousel__Container"]::after,
+                        div[class*="eapps-widget"] [class*="Carousel__Shadow"] {
                             display: none !important;
-                            /* Hide pseudo elements causing fade */
+                            background: none !important;
+                            width: 0 !important;
                         }
                     </style>
 
