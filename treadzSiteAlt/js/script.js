@@ -110,3 +110,37 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+/**
+ * Generates and downloads a vCard (.vcf) file for Treadz Tire & Towing
+ */
+function downloadvCard() {
+    // VCF Format 3.0
+    const vCardData = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        'N:;Treadz Tire & Towing;;;',
+        'FN:Treadz Tire & Towing',
+        'ORG:Treadz Tire & Towing',
+        'TEL;TYPE=WORK,VOICE:423-357-4551',
+        'EMAIL;TYPE=WORK:treadztnt@gmail.com',
+        'ADR;TYPE=WORK:;;409 Main Street;Mount Carmel;TN;37645;USA',
+        'URL:https://treadztires.com',
+        'NOTE:24/7 Emergency Towing & Tire Repair',
+        'END:VCARD'
+    ].join('\n');
+
+    const blob = new Blob([vCardData], { type: 'text/vcard' });
+    const url = window.URL.createObjectURL(blob);
+
+    // Create temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'Treadz_Towing.vcf');
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+}
