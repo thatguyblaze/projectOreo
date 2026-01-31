@@ -1,9 +1,9 @@
-document.addEventListener('DOMContentLoaded', function() {
-    
+document.addEventListener('DOMContentLoaded', function () {
+
     // Navbar scroll effect
     const navbar = document.querySelector('.navbar');
-    
-    window.addEventListener('scroll', function() {
+
+    window.addEventListener('scroll', function () {
         if (window.scrollY > 50) {
             navbar.style.padding = '10px 0';
             navbar.style.boxShadow = '0 5px 20px rgba(0,0,0,0.1)';
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const targetId = this.getAttribute('href');
             if (targetId === '#' || targetId === '') return;
-            
+
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 // Adjust for sticky header
@@ -51,11 +51,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 reveal.classList.add("active");
             }
         });
-        
+
         // Add Floating animation to intro icons randomly
         const icons = document.querySelectorAll('.intro-item i');
         icons.forEach(icon => {
-             icon.classList.add('floating-icon');
+            icon.classList.add('floating-icon');
         });
     };
 
@@ -84,15 +84,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const y = e.clientY - rect.top - rect.height / 2;
 
             // Rotation strength
-            const multiplier = 15; // Max degrees
-            
+            const multiplier = 5; // Max degrees
+
             // X position affects Y rotation (left/right tilts card around Y axis)
             const rotateY = (x / (rect.width / 2)) * multiplier;
             // Y position affects X rotation (up/down tilts card around X axis - inverted)
             const rotateX = -(y / (rect.height / 2)) * multiplier;
 
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
-            
+
             // Glare positioning
             if (glare) {
                 // Adjust glare position opposite to mouse to simulate light source reflection
