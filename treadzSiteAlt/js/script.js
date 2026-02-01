@@ -144,3 +144,27 @@ function downloadvCard() {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 }
+
+// Scroll Spy for Navigation Active State
+window.addEventListener('scroll', () => {
+    const sections = document.querySelectorAll('section, footer'); // Include footer if linked
+    const navLinks = document.querySelectorAll('.nav-links a');
+
+    let currentSectionId = '';
+
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        // -150 to trigger the change slightly before the top of the section hits the top of the viewport
+        if (pageYOffset >= (sectionTop - 150)) {
+            currentSectionId = section.getAttribute('id');
+        }
+    });
+
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').includes(currentSectionId) && currentSectionId !== '') {
+            link.classList.add('active');
+        }
+    });
+});
