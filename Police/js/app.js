@@ -10,14 +10,15 @@ import * as ficards from './modules/ficards.js';
 // DOM Elements
 const app = document.getElementById('app');
 const loginRoot = document.getElementById('login-root');
-const userAvatar = document.getElementById('user-avatar');
-const userName = document.getElementById('user-name');
-const userRank = document.getElementById('user-rank');
+// Sidebar User Pod
+const userAvatar = document.querySelector('.user-avatar'); // Class selector in new theme
+const userName = document.querySelector('.user-name');
+const userRank = document.querySelector('.user-rank');
 const sidebar = document.getElementById('sidebar');
-const adminLabel = document.getElementById('admin-label');
+const adminLabel = document.getElementById('admin-label'); // Might need adjustment if ID changed
 const navAdmin = document.getElementById('nav-admin');
 const mainContent = document.getElementById('main-content');
-const logoutBtn = document.getElementById('logout-btn');
+const logoutBtn = document.getElementById('logout-btn'); // Will need to re-add to HTML or find by class
 
 // State
 let currentUser = null;
@@ -39,13 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Route
         const route = item.dataset.route;
         loadRoute(route);
-    });
-
-    // Logout Logic
-    logoutBtn.addEventListener('click', () => {
-        currentUser = null;
-        app.classList.add('hidden');
-        showLogin();
     });
 });
 
@@ -70,13 +64,15 @@ function initializeApp() {
     userRank.innerText = currentUser.rank;
     userAvatar.innerText = currentUser.initials;
 
-    // Handle Admin Visibility
-    if (currentUser.badge === '001') {
-        adminLabel.classList.remove('hidden');
-        navAdmin.classList.remove('hidden');
-    } else {
-        adminLabel.classList.add('hidden');
-        navAdmin.classList.add('hidden');
+    // Handle Admin Visibility (If element exists)
+    if (adminLabel && navAdmin) {
+        if (currentUser.badge === '001') {
+            adminLabel.classList.remove('hidden');
+            navAdmin.classList.remove('hidden');
+        } else {
+            adminLabel.classList.add('hidden');
+            navAdmin.classList.add('hidden');
+        }
     }
 
     // Default Route
@@ -88,53 +84,70 @@ function loadRoute(route) {
 
     switch (route) {
         case 'dashboard':
-            // "Command Center" Dashboard - A mix of widgets
+            // "Command Center" Dashboard - CommandOS Theme
             mainContent.innerHTML = `
-                <div class="fade-in">
-                    <div class="page-header">
+                <div class="fade-in" style="height: 100%; display: flex; flex-direction: column;">
+                    <div class="workspace-header">
                         <div>
-                            <div class="page-title">Command Center</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Overview for ${new Date().toLocaleDateString()}</div>
+                            <div class="ws-title">COMMAND CENTER</div>
+                            <div class="mono text-dim" style="font-size: 0.8rem;">${new Date().toLocaleDateString().toUpperCase()}</div>
                         </div>
                     </div>
 
-                    <div class="widget-grid">
-                         <div class="stat-card">
-                            <div class="stat-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
-                            <div class="stat-value" style="color: var(--brand-primary);">5</div>
-                            <div class="stat-label">Active CAD Calls</div>
-                        </div>
-                         <div class="stat-card">
-                            <div class="stat-icon"><i class="fa-solid fa-file-invoice"></i></div>
-                            <div class="stat-value">12</div>
-                            <div class="stat-label">Citations Issued (Shift)</div>
-                        </div>
-                         <div class="stat-card">
-                            <div class="stat-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
-                            <div class="stat-value" style="color: var(--warning);">3</div>
-                            <div class="stat-label">BOLO Alerts</div>
-                        </div>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="card">
-                             <div class="card-header"><div class="card-title">Pending Reports</div></div>
-                             <div class="card-body">
-                                <div style="color: var(--text-secondary); text-align: center; padding: 1rem;">All reports up to date.</div>
-                             </div>
-                        </div>
-                        <div class="card">
-                             <div class="card-header"><div class="card-title">Department Notices</div></div>
-                             <div class="card-body">
-                                <div style="padding: 0.5rem; background: #fff7ed; border-left: 4px solid #f97316; font-size: 0.9rem;">
-                                    <strong>Range Training:</strong> Mandatory requalification next Tuesday at 0800.
+                    <div class="scroller">
+                        <div class="grid-3" style="margin-bottom: 2rem;">
+                             <div class="panel" style="margin:0;">
+                                <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="font-size: 2rem; color: var(--accent-cyan);"><i class="fa-solid fa-tower-broadcast"></i></div>
+                                    <div>
+                                        <div class="mono text-bright" style="font-size: 1.5rem; font-weight: bold;">5</div>
+                                        <div class="text-dim" style="font-size: 0.7rem;">ACTIVE CALLS</div>
+                                    </div>
                                 </div>
-                             </div>
+                            </div>
+                             <div class="panel" style="margin:0;">
+                                <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="font-size: 2rem; color: var(--text-bright);"><i class="fa-solid fa-file-invoice"></i></div>
+                                    <div>
+                                        <div class="mono text-bright" style="font-size: 1.5rem; font-weight: bold;">12</div>
+                                        <div class="text-dim" style="font-size: 0.7rem;">CITATIONS (SHIFT)</div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="panel" style="margin:0;">
+                                <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="font-size: 2rem; color: var(--accent-amber);"><i class="fa-solid fa-users-viewfinder"></i></div>
+                                    <div>
+                                        <div class="mono text-bright" style="font-size: 1.5rem; font-weight: bold;">3</div>
+                                        <div class="text-dim" style="font-size: 0.7rem;">BOLOS / WARRANTS</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="panel">
+                                 <div class="panel-head">PENDING REPORTS</div>
+                                 <div class="panel-body">
+                                    <div class="text-dim mono" style="text-align: center; padding: 1rem;">
+                                        <i class="fa-solid fa-check-circle text-green" style="margin-bottom: 10px; display: block; font-size: 1.5rem;"></i>
+                                        ALL REPORTS FILED
+                                    </div>
+                                 </div>
+                            </div>
+                            <div class="panel">
+                                 <div class="panel-head">DEPARTMENT NOTICES</div>
+                                 <div class="panel-body">
+                                    <div style="padding: 10px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--accent-amber); font-size: 0.85rem;">
+                                        <strong class="text-amber">RANGE TRAINING</strong><br>
+                                        Mandatory requalification Tuesday 0800.
+                                    </div>
+                                 </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
-            // Dashboard doesn't need a module init for now
             break;
 
         case 'dispatch':

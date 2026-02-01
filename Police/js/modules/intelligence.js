@@ -1,245 +1,205 @@
+/* INTELLIGENCE & NCIC MODULE v2 - COMMAND OS */
+import { generateProfile } from './ncicGen.js';
+
 export function getTemplate() {
     return `
-        <div class="fade-in">
-             <div class="grid-2" style="grid-template-columns: 2fr 1fr;">
+        <div class="fade-in" style="height: 100%; display: flex; flex-direction: column;">
+            
+            <div class="scan-overlay hidden" id="intel-scan"></div>
+
+            <div class="workspace-header">
+                <div>
+                    <div class="ws-title"><i class="fa-solid fa-database text-cyan"></i> NCIC / INTEL DATABASE</div>
+                </div>
+            </div>
+
+            <div class="scroller" style="padding: 0;">
                 
-                <!-- LEFT COLUMN: BRIEFING & NCIC -->
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- SEARCH INTERFACE -->
+                <div style="background: var(--bg-panel); padding: 2rem; border-bottom: 1px solid var(--border); text-align: center;">
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <div style="margin-bottom: 1rem; font-family: var(--font-data); color: var(--accent-cyan);">SECURE CONNECTION ESTABLISHED // TBI_GATEWAY_04</div>
+                        <div style="display: flex; gap: 0;">
+                            <div style="background: var(--bg-deep); border: 1px solid var(--border); padding: 0 1rem; display: flex; align-items: center; border-right: none; color: var(--text-mono);">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
+                            <input type="text" id="ncic-query" class="input-field" style="border-left: none; border-radius: 0; font-size: 1.2rem; padding: 1rem;" placeholder="ENTER NAME, PLATE OR VIN...">
+                            <button class="btn btn-cyan" id="btn-run-ncic" style="border-radius: 0 4px 4px 0; padding: 0 2rem; font-size: 1rem;">SEARCH RECORDS</button>
+                        </div>
+                        <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-dim); cursor: pointer;">
+                                <input type="checkbox" checked> PERSON
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-dim); cursor: pointer;">
+                                <input type="checkbox" checked> VEHICLE
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-dim); cursor: pointer;">
+                                <input type="checkbox"> FIREARM
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESULTS CONTAINER -->
+                <div id="ncic-results" class="hidden" style="padding: 2rem; max-width: 900px; margin: 0 auto;">
                     
-                    <!-- 1. SHIFT BRIEFING -->
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title"><i class="fa-solid fa-bullhorn"></i> Shift Briefing Notes</div>
-                            <div class="badge badge-warning">DO NOT REDISSEMINATE</div>
-                        </div>
-                        <div class="card-body">
-                            <div style="background: #fffbeb; border: 1px solid #fcd34d; padding: 1rem; margin-bottom: 1rem; font-size: 0.9rem;">
-                                <strong>Watch Commander (Sgt. Miller):</strong> 
-                                Focus patrols on Main St corridor between 2200-0200 due to recent break-ins. Be advised: 
-                                Silver Ford F-150 reported fleeing scene of reckless driving incident near Hwy 11.
-                            </div>
-                            <table class="data-table">
-                                <thead><tr><th>BOLO Type</th><th>Description</th><th>Case Ref</th></tr></thead>
-                                <tbody>
-                                    <tr>
-                                        <td><span class="badge badge-danger">STOLEN VEH</span></td>
-                                        <td>2018 Honda Accord, Grey. Plate: 4B2-99L. Rear bumper damage.</td>
-                                        <td>26-0034</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge badge-warning">MISSING</span></td>
-                                        <td>J. Smith (14yo M). Last seen wearing Blue Hoodie near High School.</td>
-                                        <td>26-0041</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <!-- IDENTITY CARD -->
+                    <div class="panel" style="border-top: 4px solid var(--accent-cyan);">
+                        <div class="panel-body">
+                            <div style="display: flex; gap: 2rem;">
+                                <!-- MUGSHOT PLACEHOLDER -->
+                                <div style="width: 150px; height: 180px; background: #0f172a; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                                    <i class="fa-solid fa-user-secret" style="font-size: 4rem; color: var(--text-mono); margin-bottom: 10px;"></i>
+                                    <div class="mono text-dim" style="font-size: 0.7rem;">NO PHOTO</div>
+                                </div>
 
-                    <!-- 2. NCIC SIMULATOR -->
-                    <div class="card">
-                         <div class="card-header">
-                            <div class="card-title"><i class="fa-solid fa-database"></i> NCIC / TIES Lookup</div>
-                        </div>
-                        <div class="card-body">
-                            <form id="ncic-form" style="display: flex; gap: 10px; align-items: flex-end;">
+                                <!-- DATA GRID -->
                                 <div style="flex: 1;">
-                                    <label style="font-size: 0.7rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">Search Query (Name, VIN, Plate)</label>
-                                    <input type="text" id="ncic-query" class="form-input" placeholder="ENTER QUERY..." style="font-family: monospace; text-transform: uppercase;">
-                                </div>
-                                <div style="width: 150px;">
-                                     <label style="font-size: 0.7rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">Database</label>
-                                    <select class="form-input">
-                                        <option>PERSONS</option>
-                                        <option>VEHICLES</option>
-                                        <option>GUNS</option>
-                                        <option>ARTICLES</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary" id="ncic-btn">RUN QUERY</button>
-                            </form>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                                        <div>
+                                            <div class="mono text-cyan" style="font-size: 0.9rem;">IDENTITY VERIFIED</div>
+                                            <div style="font-size: 2rem; font-weight: 700; line-height: 1;" id="res-name">DOE, JOHN</div>
+                                        </div>
+                                        <div id="status-badge" style="padding: 6px 12px; background: var(--accent-green); color: #000; font-weight: bold; border-radius: 4px; font-family: var(--font-data);">VALID</div>
+                                    </div>
 
-                            <div id="ncic-result" class="hidden" style="margin-top: 1rem; border: 1px solid var(--border); background: #f1f5f9; padding: 1rem; font-family: monospace; font-size: 0.85rem;">
-                                <!-- Dynamic result -->
+                                    <div class="grid-3" style="margin-bottom: 1.5rem;">
+                                        <div><div class="input-label">DOB</div><div class="mono text-bright" id="res-dob">1990-01-01</div></div>
+                                        <div><div class="input-label">SEX/RACE</div><div class="mono text-bright" id="res-race">M / W</div></div>
+                                        <div><div class="input-label">HGT/WGT</div><div class="mono text-bright" id="res-phys">6'0" / 180</div></div>
+                                    </div>
+
+                                    <div class="grid-2">
+                                        <div><div class="input-label">OLN (DRIVER LIC)</div><div class="mono text-dim">#99583210 (TN)</div></div>
+                                        <div><div class="input-label">SSN</div><div class="mono text-dim">***-**-9912</div></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FLAGS -->
+                            <div id="flags-container" style="margin-top: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <!-- Injected Flags -->
                             </div>
                         </div>
                     </div>
 
-                </div>
-
-                <!-- RIGHT COLUMN: WARRANTS -->
-                <div class="card" style="height: fit-content;">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fa-solid fa-gavel"></i> Active Warrants</div>
-                    </div>
-                    <div class="card-body" style="padding: 0;">
-                         <table class="data-table" style="font-size: 0.8rem;">
-                            <thead>
-                                <tr>
-                                    <th>Subject</th>
-                                    <th>Charge</th>
-                                    <th>Bond</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>WILSON, Greg</strong><br>DOB: 11/02/1985</td>
-                                    <td>FTA: Driving Suspended</td>
-                                    <td>$500</td>
-                                </tr>
-                                 <tr>
-                                    <td><strong>DAVIS, Sarah</strong><br>DOB: 05/14/1992</td>
-                                    <td>VOP: Theft U/$1000</td>
-                                    <td>NO BOND</td>
-                                </tr>
-                                 <tr>
-                                    <td><strong>JONES, Mike</strong><br>DOB: 01/22/2001</td>
-                                    <td>Domestic Assault</td>
-                                    <td>$2500</td>
-                                </tr>
-                                <tr style="background: #fee2e2;">
-                                    <td><strong>UNKNOWN</strong><br>Alias: "Slim"</td>
-                                    <td>Agg. Robbery</td>
-                                    <td>$50,000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 0.7rem;">
-                            CONFIRM ALL WARRANTS WITH DISPATCH PRIOR TO ARREST
+                    <div class="grid-2">
+                        
+                        <!-- CRIMINAL HISTORY -->
+                        <div class="panel">
+                            <div class="panel-head"><i class="fa-solid fa-gavel"></i> CRIMINAL HISTORY (CCH)</div>
+                            <div class="panel-body" style="padding: 0;">
+                                <table class="cyber-table">
+                                    <thead><tr><th>DATE</th><th>CHARGE</th><th>DISPO</th></tr></thead>
+                                    <tbody id="cch-table">
+                                        <!-- Injected -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
+                        <!-- VEHICLES -->
+                        <div class="panel">
+                             <div class="panel-head"><i class="fa-solid fa-car"></i> REGISTERED VEHICLES</div>
+                             <div class="panel-body" style="padding: 0;">
+                                 <table class="cyber-table">
+                                    <thead><tr><th>PLATE</th><th>VEHICLE</th><th>COLOR</th></tr></thead>
+                                    <tbody id="veh-table">
+                                        <!-- Injected -->
+                                    </tbody>
+                                </table>
+                             </div>
+                        </div>
+
                     </div>
+
                 </div>
 
-             </div>
+            </div>
         </div>
     `;
 }
 
 export function init() {
-    const form = document.getElementById('ncic-form');
-    const resultBox = document.getElementById('ncic-result');
-    const btn = document.getElementById('ncic-btn');
+    const btn = document.getElementById('btn-run-ncic');
+    const input = document.getElementById('ncic-query');
+    const results = document.getElementById('ncic-results');
+    const scan = document.getElementById('intel-scan');
 
-    // Data Generators
-    const firstNames = ['JAMES', 'JOHN', 'ROBERT', 'MICHAEL', 'WILLIAM', 'DAVID', 'RICHARD', 'JOSEPH', 'THOMAS', 'CHARLES', 'MARY', 'PATRICIA', 'JENNIFER', 'LINDA', 'ELIZABETH'];
-    const lastNames = ['SMITH', 'JOHNSON', 'WILLIAMS', 'BROWN', 'JONES', 'GARCIA', 'MILLER', 'DAVIS', 'RODRIGUEZ', 'MARTINEZ'];
-    const charges = ['AGG ASSAULT', 'THEFT OF PROPERTY', 'FAIL TO APPEAR', 'VIOLATION OF PROBATION', 'DRUGS: MFG/DEL/SELL', 'DUI 2ND OFFENSE'];
+    btn.addEventListener('click', () => {
+        const q = input.value;
+        if (!q) return;
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const query = document.getElementById('ncic-query').value.trim().toUpperCase();
-
-        if (!query) return;
-
-        // Simulate Loading
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> RUNNING...';
-        resultBox.classList.remove('hidden');
-        resultBox.innerHTML = 'Creating TIES Data Link... <span style="color:green">CONNECTED</span><br>Querying NCIC...';
+        // Effect
+        scan.classList.remove('hidden');
+        results.classList.add('hidden');
 
         setTimeout(() => {
-            btn.disabled = false;
-            btn.innerText = 'RUN QUERY';
+            scan.classList.add('hidden');
+            results.classList.remove('hidden');
 
-            // Generate Random Result
-            const rFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-            const rLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-            const rCharge = charges[Math.floor(Math.random() * charges.length)];
-            const rDOB = `${Math.floor(Math.random() * 12) + 1}/${Math.floor(Math.random() * 28) + 1}/${1960 + Math.floor(Math.random() * 40)}`;
+            const profile = generateProfile(q);
+            renderProfile(profile);
 
-            // Heuristic: If query has numbers and is short, assume Plate/VIN. If just letters, assume Name.
-            const isPlate = /\d/.test(query);
-
-            // Random Probability
-            const rand = Math.random();
-            // 0.0 - 0.2: WARRANT HIT (Red)
-            // 0.2 - 0.3: STOLEN (Red)
-            // 0.3 - 0.6: WARNING / SUSPENDED (Yellow)
-            // 0.6 - 1.0: CLEAR (Green/Plain)
-
-            if (query === 'TEST') {
-                // Hardcoded Test
-                resultBox.innerHTML += `
-                    <br>----------------------------------------
-                    <br><strong>MKE/WANTED PERSON</strong>
-                    <br>NAM/TEST, SUBJECT  SEX/M RAC/W
-                    <br>HIT CONFIRMATION REQUIRED
-                    <br>ORI/TN0370100
-                    <br>OFF/AGGRAVATED ASSAULT
-                    <br>WRN/24-1102A
-                    <br>----------------------------------------
-                    <br><strong style="color:red">** SUBJECT IS ARMED AND DANGEROUS **</strong>
-                `;
-            } else if (rand < 0.2 && !isPlate) {
-                // WANTED PERSON HIT
-                resultBox.innerHTML += `
-                    <br>----------------------------------------
-                    <br><strong style="color:red; background:yellow;">** WANTED PERSON **</strong>
-                    <br>NAM/${rLastName}, ${rFirstName}
-                    <br>SEX/M RAC/W DOB/${rDOB}
-                    <br>
-                    <br>OFFENSE: ${rCharge}
-                    <br>WARRANT #: ${Math.floor(Math.random() * 90000) + 10000}
-                    <br>AGENCY: ROGERSVILLE PD
-                    <br>----------------------------------------
-                    <br>CONFIRM WITH DISPATCH BEFORE ARREST
-                `;
-            } else if (rand < 0.2 && isPlate) {
-                // STOLEN VEHICLE HIT
-                resultBox.innerHTML += `
-                    <br>----------------------------------------
-                    <br><strong style="color:red; background:yellow;">** STOLEN VEHICLE **</strong>
-                    <br>LIC/${query}  ST/TN  AYR/2021
-                    <br>VMA/TOYT  VMO/CAMRY  COL/SIL
-                    <br>VIN/4T1B...${Math.floor(Math.random() * 10000)}
-                    <br>
-                    <br>DATE OF THEFT: ${new Date().toLocaleDateString()}
-                    <br>WANTED BY: HAWKINS COUNTY SO
-                    <br>----------------------------------------
-                    <br>USE CAUTION - OCCUPANTS MAY BE ARMED
-                `;
-            } else if (rand < 0.4 && !isPlate) {
-                // DRIVER SUSPENDED
-                resultBox.innerHTML += `
-                    <br>----------------------------------------
-                    <br><strong>DRIVER LICENSE QUERY</strong>
-                    <br>NAM/${rLastName}, ${rFirstName}
-                    <br>DOB/${rDOB}  SEX/M
-                    <br>
-                    <br>STATUS: <strong style="color:orange">SUSPENDED</strong>
-                    <br>REASON: FAIL TO PAY FINES
-                    <br>REINSTATEMENT FEE: $155.00
-                    <br>----------------------------------------
-                `;
-            } else {
-                // NO RECORD / VALID
-                if (!isPlate) {
-                    resultBox.innerHTML += `
-                        <br>----------------------------------------
-                        <br><strong>DRIVER LICENSE QUERY</strong>
-                        <br>NAM/${rLastName}, ${rFirstName}
-                        <br>DOB/${rDOB}  SEX/M
-                        <br>
-                        <br>STATUS: <strong>VALID</strong>
-                        <br>CLASS: D
-                        <br>POINTS: 0
-                        <br>----------------------------------------
-                    `;
-                } else {
-                    resultBox.innerHTML += `
-                        <br>----------------------------------------
-                        <br><strong>VEHICLE REGISTRATION</strong>
-                        <br>LIC/${query}  ST/TN  AYR/2023
-                        <br>VMA/PONT  VMO/G6  COL/BLK
-                        <br>VIN/1G2...${Math.floor(Math.random() * 10000)}
-                        <br>
-                        <br>STATUS: <strong>VALID</strong>
-                        <br>OWNER: ${rLastName}, ${rFirstName}
-                        <br>----------------------------------------
-                    `;
-                }
-            }
-
-        }, 800 + Math.random() * 1000); // Random delay 0.8s - 1.8s
+        }, 800);
     });
+
+    function renderProfile(p) {
+        document.getElementById('res-name').innerText = p.name;
+        document.getElementById('res-dob').innerText = p.dob;
+        document.getElementById('res-race').innerText = `${p.sex} / ${p.race}`;
+        document.getElementById('res-phys').innerText = `${p.height} / ${p.weight}`;
+
+        // Status Badge
+        const badge = document.getElementById('status-badge');
+        badge.innerText = p.status;
+        if (p.status === 'WANTED') {
+            badge.style.background = 'var(--accent-red)';
+            badge.style.color = 'white';
+            // Alert Sound?
+        } else {
+            badge.style.background = 'var(--accent-green)';
+            badge.style.color = '#000';
+        }
+
+        // Flags
+        const flagsDiv = document.getElementById('flags-container');
+        if (p.flags.length > 0) {
+            flagsDiv.innerHTML = p.flags.map(f => `
+                <span style="padding: 4px 8px; font-size: 0.75rem; font-weight: bold; background: ${f.type === 'DANGER' ? 'var(--accent-red)' : 'var(--accent-amber)'}; color: #000; font-family: var(--font-data);">
+                    <i class="fa-solid fa-triangle-exclamation"></i> ${f.label}
+                </span>
+            `).join('');
+        } else {
+            flagsDiv.innerHTML = `<span class="mono text-dim" style="font-size: 0.8rem;">NO ACTIVE CAUTION CODES</span>`;
+        }
+
+        // CCH
+        const cchTable = document.getElementById('cch-table');
+        if (p.history.length === 0) {
+            cchTable.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-dim); padding: 1rem;">NO CRIMINAL RECORD FOUND</td></tr>`;
+        } else {
+            cchTable.innerHTML = p.history.map(h => `
+                <tr>
+                    <td class="mono">${h.date}</td>
+                    <td>${h.charge}</td>
+                    <td class="text-dim">${h.disposition}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Vehicles
+        const vehTable = document.getElementById('veh-table');
+        if (p.vehicles.length === 0) {
+            vehTable.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-dim); padding: 1rem;">NO VEHICLES REGISTERED</td></tr>`;
+        } else {
+            vehTable.innerHTML = p.vehicles.map(v => `
+                <tr>
+                    <td class="mono text-cyan">${v.plate}</td>
+                    <td>${v.make} ${v.model}</td>
+                    <td>${v.color}</td>
+                </tr>
+            `).join('');
+        }
+    }
 }

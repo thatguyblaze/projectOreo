@@ -1,73 +1,151 @@
+/* DISPATCH MODULE v2 - COMMAND OS */
 import { db } from '../store.js';
-
-// Local State for random call generation interval
-let callInterval = null;
+import { generateProfile } from './ncicGen.js';
 
 export function getTemplate() {
     return `
-        <div class="fade-in">
-            <div class="page-header">
+        <div class="fade-in" style="height: 100%; display: flex; flex-direction: column;">
+            
+            <!-- TOP BAR: STATUS -->
+            <div class="workspace-header">
                 <div>
-                    <div class="page-title">CAD Dispatch</div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Computer Aided Dispatch System</div>
+                    <div class="ws-title"><i class="fa-solid fa-tower-broadcast text-cyan"></i> DISPATCH & OPERATIONS</div>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <div style="font-weight: 600; font-size: 0.9rem;">UNIT STATUS:</div>
-                    <select id="unit-status-select" class="form-input" style="width: 150px; background: white;">
-                        <option value="AVAILABLE">AVAILABLE 🟢</option>
-                        <option value="ENROUTE">ENROUTE 🟡</option>
-                        <option value="ON SCENE">ON SCENE 🔴</option>
-                        <option value="BUSY">BUSY ⚪</option>
-                    </select>
+                <div class="ws-controls">
+                     <button class="btn btn-ghost" id="refresh-units"><i class="fa-solid fa-arrows-rotate"></i> REFRESH</button>
+                     <div style="border-left: 1px solid var(--border); padding-left: 1rem; display: flex; gap: 10px; align-items: center;">
+                        <span class="mono text-dim" style="font-size: 0.7rem;">MY STATUS</span>
+                        <select id="my-status" class="input-field" style="width: 140px; padding: 4px;">
+                            <option value="AVAIL">AVAILABLE</option>
+                            <option value="BUSY">BUSY / PAPER</option>
+                            <option value="ENRT">EN ROUTE</option>
+                            <option value="SCENE">ON SCENE</option>
+                        </select>
+                     </div>
                 </div>
             </div>
 
-            <div class="grid-2" style="grid-template-columns: 2fr 1fr;">
+            <div style="flex: 1; display: grid; grid-template-columns: 350px 1fr; overflow: hidden;">
                 
-                <!-- ACTIVE CALLS LIST -->
-                <div class="card" style="height: calc(100vh - 200px); display: flex; flex-direction: column;">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fa-solid fa-tower-broadcast"></i> Active Calls for Service</div>
-                         <button class="btn btn-outline" id="force-call-btn" style="font-size: 0.7rem;">+ SIMULATE CALL</button>
+                <!-- LEFT: ACTIVE CALLS LIST -->
+                <div style="border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--bg-panel);">
+                    <div class="panel-head">
+                        <span>PENDING CALLS</span>
+                        <span class="text-cyan mono" id="call-count">0</span>
                     </div>
-                    <div class="card-body" style="flex: 1; padding: 0; overflow-y: auto; background: #f8fafc;">
-                        <div id="cad-call-list" style="display: flex; flex-direction: column; gap: 1px;">
-                            <!-- Injected Calls -->
-                            <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
-                                Waiting for dispatch...
-                            </div>
-                        </div>
+                    <div style="flex: 1; overflow-y: auto; padding: 10px;" id="call-list">
+                        <!-- Content Injected -->
+                    </div>
+                    <div style="padding: 10px; border-top: 1px solid var(--border);">
+                        <button class="btn btn-cyan" style="width: 100%; justify-content: center;" id="sim-call-btn">
+                            <i class="fa-solid fa-plus"></i> SIMULATE 911 CALL
+                        </button>
                     </div>
                 </div>
 
-                <!-- CALL DETAILS & UNIT LOG -->
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- RIGHT: MDT WORKSPACE (INCIDENT VIEW) -->
+                <div id="mdt-workspace" style="background: var(--bg-deep); display: flex; flex-direction: column;">
                     
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Selected Call Details</div>
-                        </div>
-                        <div class="card-body" id="call-detail-panel">
-                            <div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
-                                Select a call to view details
-                            </div>
-                        </div>
+                    <!-- EMPTY STATE -->
+                    <div id="mdt-empty" style="flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-mono); flex-direction: column;">
+                        <i class="fa-solid fa-satellite-dish" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.2;"></i>
+                        <div>SYSTEM IDLE</div>
+                        <div style="font-size: 0.8rem;">SELECT A CALL TO INITIALIZE MDT</div>
                     </div>
 
-                    <div class="card">
-                         <div class="card-header">
-                            <div class="card-title">Nearby Units</div>
+                    <!-- ACTIVE CALL UI (Hidden initially) -->
+                    <div id="mdt-active" class="hidden" style="flex: 1; display: flex; flex-direction: column;">
+                        
+                        <!-- INCIDENT HEADER -->
+                        <div style="padding: 1rem 2rem; background: rgba(6,182,212,0.05); border-bottom: 1px solid var(--border-glow); display: flex; justify-content: space-between;">
+                            <div>
+                                <div class="mono text-cyan" style="font-size: 0.9rem;" id="active-id">INC-24-000</div>
+                                <div style="font-size: 1.5rem; font-weight: 300; color: white;" id="active-type">Type</div>
+                                <div class="text-dim" style="font-size: 0.9rem;"><i class="fa-solid fa-location-dot"></i> <span id="active-loc">Location</span></div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="mono text-amber" style="font-size: 1.2rem;" id="active-timer">00:00</div>
+                                <div style="font-size: 0.7rem; color: var(--text-mono);">TIME ON CALL</div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <table class="data-table">
-                                <thead><tr><th>Unit</th><th>Status</th></tr></thead>
-                                <tbody>
-                                    <tr><td>101 (Sgt. Miller)</td><td><span class="badge badge-success">AVAIL</span></td></tr>
-                                    <tr><td>104 (Ofc. Jones)</td><td><span class="badge badge-danger">SCENE</span></td></tr>
-                                    <tr><td>108 (Ofc. Smith)</td><td><span class="badge badge-warning">ENRT</span></td></tr>
-                                    <tr><td>K9-1</td><td><span class="badge badge-success">AVAIL</span></td></tr>
-                                </tbody>
-                            </table>
+
+                        <!-- TABS -->
+                        <div style="display: flex; border-bottom: 1px solid var(--border); padding: 0 1rem; background: var(--bg-panel);">
+                            <div class="nav-item active" onclick="switchTab('narrative')">NARRATIVE</div>
+                            <div class="nav-item" onclick="switchTab('subjects')">SUBJECTS</div>
+                            <div class="nav-item" onclick="switchTab('reports')">REPORTS</div>
+                        </div>
+
+                        <!-- CONTENT PANES -->
+                        <div style="flex: 1; overflow-y: auto; padding: 1rem; position: relative;">
+                            
+                            <!-- TAB: NARRATIVE -->
+                            <div id="tab-narrative">
+                                <div class="input-group" style="display: flex; gap: 10px;">
+                                    <input type="text" id="narrative-input" class="input-field" placeholder="Add update...">
+                                    <button class="btn btn-ghost" id="send-narrative"><i class="fa-solid fa-paper-plane"></i></button>
+                                </div>
+                                <div id="narrative-log" style="display: flex; flex-direction: column; gap: 10px; margin-top: 1rem;">
+                                    <!-- Log Items -->
+                                </div>
+                            </div>
+
+                            <!-- TAB: SUBJECTS -->
+                            <div id="tab-subjects" class="hidden">
+                                <div class="grid-2">
+                                    <div class="panel">
+                                        <div class="panel-head">ADD INVOLVED PERSON</div>
+                                        <div class="panel-body">
+                                            <div class="input-group">
+                                                <label class="input-label">NCIC SEARCH (NAME)</label>
+                                                <div style="display: flex; gap: 5px;">
+                                                    <input type="text" id="sub-search" class="input-field" placeholder="Last, First">
+                                                    <button class="btn btn-cyan" id="run-sub-search">RUN</button>
+                                                </div>
+                                            </div>
+                                            <div id="quick-result" class="hidden" style="margin-top: 10px; padding: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.3);">
+                                                <div id="qr-name" class="text-bright font-bold">Name</div>
+                                                <div id="qr-status" class="mono text-dim" style="font-size: 0.8rem;">Status</div>
+                                                <div style="margin-top: 10px; display: flex; gap: 5px;">
+                                                    <button class="btn btn-ghost" style="font-size: 0.7rem;" onclick="linkSubject('Suspect')">LINK SUSPECT</button>
+                                                    <button class="btn btn-ghost" style="font-size: 0.7rem;" onclick="linkSubject('Victim')">LINK VICTIM</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="panel">
+                                        <div class="panel-head">LINKED SUBJECTS</div>
+                                        <div class="panel-body" id="linked-subs-list">
+                                            <div class="text-dim mono" style="text-align: center;">No subjects linked.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB: REPORTS -->
+                            <div id="tab-reports" class="hidden">
+                                <div class="grid-3">
+                                    <button class="btn btn-amber" style="justify-content: center; height: 100px; flex-direction: column;" onclick="openReport('TRAFFIC')">
+                                        <i class="fa-solid fa-ticket" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                                        WRITE CITATION
+                                    </button>
+                                    <button class="btn btn-red" style="justify-content: center; height: 100px; flex-direction: column;" onclick="openReport('ARREST')">
+                                        <i class="fa-solid fa-handcuffs" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                                        ARREST REPORT
+                                    </button>
+                                    <button class="btn btn-cyan" style="justify-content: center; height: 100px; flex-direction: column;" onclick="openReport('EVIDENCE')">
+                                        <i class="fa-solid fa-box-open" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                                        LOG EVIDENCE
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- FOOTER -->
+                        <div style="padding: 10px; border-top: 1px solid var(--border); text-align: right;">
+                             <button class="btn btn-ghost" onclick="closeIncident()">CLOSE INCIDENT</button>
                         </div>
                     </div>
 
@@ -77,164 +155,167 @@ export function getTemplate() {
     `;
 }
 
+// Global scope for HTML onclicks (Module pattern workaround for demo)
+window.switchTab = (tabName) => {
+    ['narrative', 'subjects', 'reports'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+    });
+    document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+};
+
+let currentIncident = null;
+let stagedSubject = null; // Result of search
+
 export function init() {
-    const listContainer = document.getElementById('cad-call-list');
-    const detailPanel = document.getElementById('call-detail-panel');
-    const unitSelect = document.getElementById('unit-status-select');
-    const forceBtn = document.getElementById('force-call-btn');
+    const list = document.getElementById('call-list');
+    const simBtn = document.getElementById('sim-call-btn');
 
-    // 1. Initial Load of Calls
-    renderCalls();
+    // MDT Elements
+    const mdtEmpty = document.getElementById('mdt-empty');
+    const mdtActive = document.getElementById('mdt-active');
 
-    // 2. Simulate Random Incoming Calls
-    if (!callInterval) {
-        callInterval = setInterval(() => {
-            if (settings.activeCalls.length < 5 && Math.random() > 0.7) {
-                generateRandomCall();
-                renderCalls();
-            }
-        }, 5000); // Check every 5s
+    // Bind Search
+    document.getElementById('run-sub-search').addEventListener('click', () => {
+        const query = document.getElementById('sub-search').value;
+        if (!query) return;
+
+        stagedSubject = generateProfile(query); // Use the Generator
+
+        // Show Quick Result
+        const qr = document.getElementById('quick-result');
+        qr.classList.remove('hidden');
+        document.getElementById('qr-name').innerText = stagedSubject.name;
+        document.getElementById('qr-status').innerText = `${stagedSubject.sex}/${stagedSubject.race} | DOB: ${stagedSubject.dob} | ${stagedSubject.status}`;
+
+        if (stagedSubject.status === 'WANTED') {
+            document.getElementById('qr-status').style.color = 'var(--accent-red)';
+        } else {
+            document.getElementById('qr-status').style.color = 'var(--text-mono)';
+        }
+    });
+
+    // Link Helper
+    window.linkSubject = (role) => {
+        if (!currentIncident || !stagedSubject) return;
+
+        // Save Subject to DB first
+        const savedSub = db.createSubject(stagedSubject);
+
+        // Link to Incident
+        db.linkSubjectToIncident(currentIncident.id, savedSub.id, role);
+
+        // Log it
+        db.addNarrative(currentIncident.id, `Linked Subject: ${savedSub.name} as ${role}`);
+
+        // Refresh UI
+        loadIncident(currentIncident.id); // Reloads data
+        document.getElementById('quick-result').classList.add('hidden');
+        document.getElementById('sub-search').value = '';
+    };
+
+    // Close Helper
+    window.closeIncident = () => {
+        currentIncident = null;
+        mdtActive.classList.add('hidden');
+        mdtEmpty.classList.remove('hidden');
+        renderList();
+    };
+
+    // Open Report Helper
+    window.openReport = (type) => {
+        alert("This would open the " + type + " module pre-filled with Incident ID " + currentIncident.id + " and linked subjects.");
+        // In full implementation, this routes to traffic.js with query params
+    };
+
+    // Render Logic
+    function renderList() {
+        const incidents = db.getIncidents(); // Now real objects
+        document.getElementById('call-count').innerText = incidents.length;
+
+        list.innerHTML = incidents.map(inc => `
+            <div onclick="window.selectCall('${inc.id}')" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 10px; margin-bottom: 8px; cursor: pointer; border-left: 3px solid ${inc.status === 'ACTIVE' ? 'var(--accent-green)' : 'var(--text-mono)'};">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span class="mono text-cyan" style="font-size: 0.7rem;">${inc.id}</span>
+                    <span class="text-dim" style="font-size: 0.7rem;">${new Date(inc.timestamp).toLocaleTimeString()}</span>
+                </div>
+                <div style="font-weight: 600; font-size: 0.9rem;">${inc.type}</div>
+                <div class="text-dim" style="font-size: 0.8rem;">${inc.location}</div>
+            </div>
+        `).join('');
     }
 
-    // 3. Events
-    forceBtn.addEventListener('click', () => {
-        generateRandomCall();
-        renderCalls();
-    });
+    // Select Call Logic
+    window.selectCall = (id) => {
+        loadIncident(id);
+    };
 
-    unitSelect.addEventListener('change', (e) => {
-        // Just visual for now, could save to store
-        const val = e.target.value;
-        e.target.style.borderColor =
-            val === 'AVAILABLE' ? 'var(--success)' :
-                val === 'ON SCENE' ? 'var(--danger)' :
-                    val === 'ENROUTE' ? 'var(--warning)' : '#ccc';
-    });
+    function loadIncident(id) {
+        currentIncident = db.getIncident(id); // Refresh
+        if (!currentIncident) return;
 
-    // --- LOGIC ---
+        mdtEmpty.classList.add('hidden');
+        mdtActive.classList.remove('hidden');
 
-    function renderCalls() {
-        if (settings.activeCalls.length === 0) {
-            listContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">No Active Calls</div>`;
-            return;
-        }
+        // Header
+        document.getElementById('active-id').innerText = currentIncident.id;
+        document.getElementById('active-type').innerText = currentIncident.type;
+        document.getElementById('active-loc').innerText = currentIncident.location;
 
-        listContainer.innerHTML = settings.activeCalls.map(call => `
-            <div class="cad-item" data-id="${call.id}" style="
-                padding: 1rem; 
-                background: white; 
-                cursor: pointer; 
-                border-left: 4px solid ${getPriorityColor(call.priority)};
-                transition: background 0.2s;
-            ">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <div style="font-weight: 700; color: #0f172a;">${call.type}</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">${getTimeSince(call.timestamp)}</div>
+        // Narrative
+        const log = document.getElementById('narrative-log');
+        log.innerHTML = currentIncident.narrative_log.map(n => `
+            <div style="background: rgba(0,0,0,0.2); padding: 8px; border-left: 2px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span class="text-cyan" style="font-size: 0.75rem; font-weight: bold;">${n.author}</span>
+                    <span class="mono text-dim" style="font-size: 0.65rem;">${new Date(n.time).toLocaleTimeString()}</span>
                 </div>
-                <div style="font-size: 0.9rem; color: #334155;">${call.location}</div>
-                <div style="margin-top: 6px; display: flex; gap: 6px;">
-                    <span class="badge" style="background: #f1f5f9; color: #475569;">#${call.id.substring(0, 4)}</span>
-                    <span class="badge" style="background: ${getPriorityColor(call.priority)}20; color: ${getPriorityColor(call.priority)};">PRIORITY ${call.priority}</span>
-                </div>
+                <div style="font-size: 0.85rem;">${n.text}</div>
             </div>
         `).join('');
 
-        // Attach Clicks
-        document.querySelectorAll('.cad-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const call = settings.activeCalls.find(c => c.id === item.dataset.id);
-                showCallDetails(call);
-            });
-            // Hover effect logic handled by CSS if we added a class, but inline suffices for demo
-            item.addEventListener('mouseenter', () => item.style.background = '#f8fafc');
-            item.addEventListener('mouseleave', () => item.style.background = 'white');
-        });
+        // Linked Subjects
+        const subList = document.getElementById('linked-subs-list');
+        if (currentIncident.linked_subjects.length === 0) {
+            subList.innerHTML = `<div class="text-dim mono" style="text-align: center;">No subjects linked.</div>`;
+        } else {
+            subList.innerHTML = currentIncident.linked_subjects.map(link => {
+                // In a real app we'd fetch the subject details again, but we assume we have them or simple display for now.
+                // Since store doesn't easily resolve IDs to names without a method, we will cheat for this demo render:
+                return `
+                    <div style="display: flex; justify-content: space-between; padding: 8px; background: rgba(255,255,255,0.05); margin-bottom: 4px;">
+                        <div>
+                            <span class="badge" style="background: ${link.role === 'Suspect' ? 'var(--accent-red)' : 'var(--accent-cyan)'}; color: black; font-size: 0.6rem; padding: 2px 4px;">${link.role}</span>
+                            <span class="mono text-bright">ID: ${link.id}</span> 
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
     }
 
-    function showCallDetails(call) {
-        detailPanel.innerHTML = `
-            <div style="margin-bottom: 1rem;">
-                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: bold;">Incident Type</div>
-                <div style="font-size: 1.2rem; font-weight: 700;">${call.type}</div>
-            </div>
-             <div style="margin-bottom: 1rem;">
-                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: bold;">Location</div>
-                <div style="font-size: 1rem;">${call.location}</div>
-            </div>
-            <div style="margin-bottom: 1.5rem;">
-                <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: bold;">Narrative</div>
-                <div style="background: #fffbeb; padding: 10px; border: 1px solid #e2e8f0; font-size: 0.9rem; line-height: 1.4;">
-                    ${call.narrative}
-                </div>
-            </div>
-            
-            <div class="grid-2">
-                <button class="btn btn-primary" id="accept-call-btn">
-                    <i class="fa-solid fa-check"></i> DISPATCH ME
-                </button>
-                 <button class="btn btn-outline" id="clear-call-btn">
-                    <i class="fa-solid fa-xmark"></i> CLEAR
-                </button>
-            </div>
-        `;
+    // New Narrative
+    document.getElementById('send-narrative').addEventListener('click', () => {
+        const val = document.getElementById('narrative-input').value;
+        if (val && currentIncident) {
+            db.addNarrative(currentIncident.id, val);
+            document.getElementById('narrative-input').value = '';
+            loadIncident(currentIncident.id);
+        }
+    });
 
-        document.getElementById('accept-call-btn').addEventListener('click', () => {
-            unitSelect.value = 'ENROUTE';
-            unitSelect.dispatchEvent(new Event('change'));
-            alert(`Dispatched to Call #${call.id.substring(0, 4)}`);
-        });
+    // Sim Call Logic
+    simBtn.addEventListener('click', () => {
+        const types = ['Domestic Disturbance', 'Traffic Stop', 'Suspicious Activity', 'Alarm', 'Theft in Progress'];
+        const locs = ['101 Main St', 'Hwy 66 @ MM 12', 'Walmart', 'Rogersville High', 'Super 8 Motel'];
 
-        document.getElementById('clear-call-btn').addEventListener('click', () => {
-            // Remove locally
-            settings.activeCalls = settings.activeCalls.filter(c => c.id !== call.id);
-            renderCalls();
-            detailPanel.innerHTML = 'Select a call...';
-            unitSelect.value = 'AVAILABLE';
-        });
-    }
+        db.createIncident(
+            types[Math.floor(Math.random() * types.length)],
+            locs[Math.floor(Math.random() * locs.length)],
+            "Caller reports incident nearby. Requesting units."
+        );
+        renderList();
+    });
 
-    // --- HELPERS ---
-
-    // Temp Local Store Mock (Should be in store.js ideally, but keeping isolated for module speed)
-    const settings = {
-        activeCalls: []
-    };
-
-    function generateRandomCall() {
-        const types = [
-            { t: 'Domestic Disturbance', p: 1 },
-            { t: 'Traffic Accident', p: 2 },
-            { t: 'Alarm Activation', p: 3 },
-            { t: 'Suspicious Person', p: 2 },
-            { t: 'Shoplifting', p: 3 },
-            { t: 'Noise Complaint', p: 4 }
-        ];
-        const streets = ['Main St', 'Highway 11', 'Colonial Rd', 'McKinney Ave', 'Park Blvd', 'Church St'];
-
-        const typeObj = types[Math.floor(Math.random() * types.length)];
-        const street = streets[Math.floor(Math.random() * streets.length)];
-        const houseNum = Math.floor(Math.random() * 900) + 100;
-
-        settings.activeCalls.unshift({
-            id: crypto.randomUUID(),
-            type: typeObj.t,
-            priority: typeObj.p,
-            location: `${houseNum} ${street}`,
-            timestamp: Date.now(),
-            narrative: `Caller reports ${typeObj.t.toLowerCase()} at location. Dispatch requested.`
-        });
-    }
-
-    function getPriorityColor(p) {
-        if (p === 1) return '#ef4444'; // Red
-        if (p === 2) return '#f59e0b'; // Orange
-        if (p === 3) return '#3b82f6'; // Blue
-        return '#64748b'; // Gray
-    }
-
-    function getTimeSince(ts) {
-        const sec = Math.floor((Date.now() - ts) / 1000);
-        if (sec < 60) return 'Just now';
-        return `${Math.floor(sec / 60)}m ago`;
-    }
+    // Initial Render
+    renderList();
 }

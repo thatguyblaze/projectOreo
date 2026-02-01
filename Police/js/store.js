@@ -1,7 +1,9 @@
+/* RELATIONAL DATA STORE v2 */
 const STORE_KEYS = {
-    TICKETS: 'rpd_tickets_v1',
-    CASES: 'rpd_cases_v1',
-    OFFICER: 'rpd_officer_v1' // Current user session
+    INCIDENTS: 'cmd_incidents_v1',
+    SUBJECTS: 'cmd_subjects_v1',
+    EVIDENCE: 'cmd_evidence_v1',
+    OFFICER: 'cmd_officer_v1'
 };
 
 class DataStore {
@@ -10,181 +12,127 @@ class DataStore {
     }
 
     init() {
-        // Seed initial data if empty
-        if (!localStorage.getItem(STORE_KEYS.TICKETS)) {
-            localStorage.setItem(STORE_KEYS.TICKETS, JSON.stringify([]));
-        }
-        if (!localStorage.getItem(STORE_KEYS.CASES)) {
-            localStorage.setItem(STORE_KEYS.CASES, JSON.stringify([]));
-        }
+        if (!localStorage.getItem(STORE_KEYS.INCIDENTS)) localStorage.setItem(STORE_KEYS.INCIDENTS, JSON.stringify([]));
+        if (!localStorage.getItem(STORE_KEYS.SUBJECTS)) localStorage.setItem(STORE_KEYS.SUBJECTS, JSON.stringify([]));
+        if (!localStorage.getItem(STORE_KEYS.EVIDENCE)) localStorage.setItem(STORE_KEYS.EVIDENCE, JSON.stringify([]));
         if (!localStorage.getItem(STORE_KEYS.OFFICER)) {
-            localStorage.setItem(STORE_KEYS.OFFICER, JSON.stringify({
-                name: 'Miller, James',
-                badge: '8921',
-                rank: 'Sergeant'
-            }));
+            // Seed Default User
+            this.setCurrentOfficer({
+                badge: '4921',
+                name: 'Ofc. Miller',
+                rank: 'Officer',
+                initials: 'JM'
+            });
         }
     }
 
-    // --- GENERIC CRUD ---
-    getAll(key) {
-        return JSON.parse(localStorage.getItem(key) || '[]');
-    }
-
-    add(key, item) {
-        const data = this.getAll(key);
-        item.id = crypto.randomUUID(); // Unique ID
-        item.timestamp = new Date().toISOString();
-        item.officer = this.getCurrentOfficer();
-        data.unshift(item); // Add to top
-        localStorage.setItem(key, JSON.stringify(data));
+    // --- GENERIC ---
+    _get(key) { return JSON.parse(localStorage.getItem(key) || '[]'); }
+    _save(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+    _add(key, item) {
+        const data = this._get(key);
+        item.id = item.id || crypto.randomUUID();
+        item.created_at = new Date().toISOString();
+        data.unshift(item); // Newest first
+        this._save(key, data);
         return item;
     }
 
-    // --- TICKETS ---
-    getTickets() {
-        return this.getAll(STORE_KEYS.TICKETS);
-    }
-
-    addTicket(ticketData) {
-        // Calculate Points if Speeding
-        if (ticketData.type === 'Speeding') {
-            ticketData.points = this.calculateSpeedPoints(ticketData.speed, ticketData.limit, ticketData.isConstruction);
-        }
-        return this.add(STORE_KEYS.TICKETS, ticketData);
-    }
-
-    calculateSpeedPoints(speed, limit, isConstruction) {
-        const diff = speed - limit;
-        if (diff <= 0) return 0;
-
-        let points = 0;
-        if (diff >= 1 && diff <= 5) points = 1;
-        else if (diff >= 6 && diff <= 15) points = 3;
-        else if (diff >= 16 && diff <= 25) points = 4;
-        else if (diff >= 26 && diff <= 35) points = 5;
-        else if (diff >= 36 && diff <= 45) points = 6;
-        else if (diff >= 46) points = 8;
-
-        // Construction zones often add fines, points usually stay same but context matters.
-        // For this system we will flag it.
-        return points;
-    }
-
-    // --- CASES ---
-    getCases() {
-        return this.getAll(STORE_KEYS.CASES);
-    }
-
-    getCaseById(id) {
-        const cases = this.getCases();
-        return cases.find(c => c.id === id);
-    }
-
-    addCase(caseData) {
-        // Initialize arrays
-        caseData.evidence = [];
-        caseData.chain = [];
-        return this.add(STORE_KEYS.CASES, caseData);
-    }
-
-    addEvidence(caseId, fileData) {
-        const cases = this.getCases();
-        const caseIndex = cases.findIndex(c => c.id === caseId);
-
-        if (caseIndex === -1) return null;
-
-        // Create Evidence Object
-        const evidenceItem = {
-            id: 'EV-' + Math.floor(Math.random() * 10000),
-            fileName: fileData.name,
-            fileType: fileData.type,
-            size: fileData.size,
-            timestamp: new Date().toISOString(),
-            status: 'SECURE',
-            uploader: this.getCurrentOfficer().name
+    // --- INCIDENTS (THE CORE) ---
+    createIncident(type, location, narrative) {
+        const id = 'INC-' + new Date().getFullYear().toString().substr(-2) + '-' + Math.floor(Math.random() * 100000);
+        const incident = {
+            id: id,
+            type: type,
+            location: location,
+            status: 'ACTIVE', // ACTIVE, CLOSED
+            units: [], // Assigned unit IDs
+            narrative_log: [
+                { time: new Date().toISOString(), text: `Call Generated: ${type} at ${location}`, author: 'DISPATCH' },
+                { time: new Date().toISOString(), text: narrative, author: 'CALLER' }
+            ],
+            linked_subjects: [], // IDs of Person Objects
+            linked_evidence: [], // IDs of Evidence Objects
+            timestamp: new Date().toISOString()
         };
+        return this._add(STORE_KEYS.INCIDENTS, incident);
+    }
 
-        // Add to Case
-        cases[caseIndex].evidence.unshift(evidenceItem);
+    getIncidents() { return this._get(STORE_KEYS.INCIDENTS); }
 
-        // Auto-Log to Chain of Custody
-        const logEntry = {
-            timestamp: new Date().toISOString(),
-            user: this.getCurrentOfficer().name,
-            badge: this.getCurrentOfficer().badge,
-            action: `EVIDENCE CHECK-IN: ${evidenceItem.fileName}`,
-            hash: crypto.randomUUID().split('-')[0] // Simulating a hash
+    getIncident(id) { return this._get(STORE_KEYS.INCIDENTS).find(i => i.id === id); }
+
+    updateIncident(id, updates) {
+        const data = this._get(STORE_KEYS.INCIDENTS);
+        const idx = data.findIndex(i => i.id === id);
+        if (idx === -1) return;
+
+        data[idx] = { ...data[idx], ...updates };
+        this._save(STORE_KEYS.INCIDENTS, data);
+    }
+
+    addNarrative(incidentId, text, author) {
+        const inc = this.getIncident(incidentId);
+        if (!inc) return;
+        inc.narrative_log.push({
+            time: new Date().toISOString(),
+            text: text,
+            author: author || this.getCurrentOfficer().name
+        });
+        this.updateIncident(incidentId, { narrative_log: inc.narrative_log });
+    }
+
+    // --- SUBJECTS (People) ---
+    // Subjects are global. They can be linked to multiple incidents.
+    createSubject(personData) {
+        // Person Data: { first, last, dob, race, sex, history: [], flags: [] }
+        return this._add(STORE_KEYS.SUBJECTS, personData);
+    }
+
+    getMethods() { return { createSubject: this.createSubject.bind(this) }; } // Helper for console use
+
+    linkSubjectToIncident(incidentId, subjectId, role) {
+        // Role: Suspect, Victim, Witness
+        const inc = this.getIncident(incidentId);
+        if (!inc) return;
+
+        // Check if already linked
+        if (inc.linked_subjects.some(s => s.id === subjectId)) return;
+
+        inc.linked_subjects.push({ id: subjectId, role: role });
+        this.updateIncident(incidentId, { linked_subjects: inc.linked_subjects });
+    }
+
+    // --- EVIDENCE ---
+    logEvidence(incidentId, itemDescription, type) {
+        // e.g. "Bloody Knife", "Weapon"
+        const item = {
+            id: 'EV-' + Math.floor(Math.random() * 100000),
+            incident_id: incidentId,
+            description: itemDescription,
+            type: type,
+            chain_of_custody: [
+                { time: new Date().toISOString(), action: 'COLLECTED', user: this.getCurrentOfficer().name }
+            ]
         };
+        this._add(STORE_KEYS.EVIDENCE, item);
 
-        if (!cases[caseIndex].chain) cases[caseIndex].chain = [];
-        cases[caseIndex].chain.unshift(logEntry);
+        // Link to Incident
+        const inc = this.getIncident(incidentId);
+        inc.linked_evidence.push(item.id);
+        this.updateIncident(incidentId, { linked_evidence: inc.linked_evidence });
 
-        // Save
-        localStorage.setItem(STORE_KEYS.CASES, JSON.stringify(cases));
-        return evidenceItem;
+        return item;
     }
 
-    // --- OFFICER & USERS ---
-    getCurrentOfficer() {
-        return JSON.parse(localStorage.getItem(STORE_KEYS.OFFICER));
+    getEvidenceForIncident(incidentId) {
+        const all = this._get(STORE_KEYS.EVIDENCE);
+        return all.filter(e => e.incident_id === incidentId);
     }
 
-    setCurrentOfficer(data) {
-        localStorage.setItem(STORE_KEYS.OFFICER, JSON.stringify(data));
-    }
-
-    getAllOfficers() {
-        const officers = JSON.parse(localStorage.getItem('rpd_all_officers_v1'));
-        if (!officers) {
-            // Seed defaults
-            const defaults = [
-                { id: '1', name: 'Miller, James', badge: '8921', rank: 'Sergeant', status: 'Active', clearance: 'L5' },
-                { id: '2', name: 'Vance, Sarah', badge: '9921', rank: 'Detective', status: 'Active', clearance: 'L4' },
-                { id: '3', name: 'Johnson, Mike', badge: '1102', rank: 'Officer', status: 'Suspended', clearance: 'L3' }
-            ];
-            localStorage.setItem('rpd_all_officers_v1', JSON.stringify(defaults));
-            return defaults;
-        }
-        return officers;
-    }
-
-    addOfficer(data) {
-        const officers = this.getAllOfficers();
-        data.id = crypto.randomUUID();
-        officers.push(data);
-        localStorage.setItem('rpd_all_officers_v1', JSON.stringify(officers));
-    }
-
-    updateOfficerStatus(id, newStatus) {
-        const officers = this.getAllOfficers();
-        const idx = officers.findIndex(o => o.id === id);
-        if (idx !== -1) {
-            officers[idx].status = newStatus;
-            localStorage.setItem('rpd_all_officers_v1', JSON.stringify(officers));
-        }
-    }
-
-    // --- LOGS (Mocking centralized logs) ---
-    getRecentLogs() {
-        // Collects recent actions from tickets and cases for the Admin Audit
-        const tickets = this.getTickets().map(t => ({
-            timestamp: t.timestamp,
-            user: t.officer.name,
-            action: `ISSUED CITATION ${t.id.substring(0, 8)}`,
-            type: 'TRAFFIC'
-        }));
-
-        const cases = this.getCases().flatMap(c => c.chain ? c.chain.map(ch => ({
-            timestamp: ch.timestamp,
-            user: ch.user,
-            action: `CASE UPDATE: ${ch.action}`,
-            type: 'EVIDENCE'
-        })) : []);
-
-        // Combine and Sort
-        return [...tickets, ...cases].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 20);
-    }
+    // --- OFFICER SESSION ---
+    getCurrentOfficer() { return JSON.parse(localStorage.getItem(STORE_KEYS.OFFICER)); }
+    setCurrentOfficer(data) { localStorage.setItem(STORE_KEYS.OFFICER, JSON.stringify(data)); }
 }
 
 export const db = new DataStore();
