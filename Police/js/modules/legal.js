@@ -1,92 +1,119 @@
+/* LAW LIBRARY & STATUTES MODULE v3 - OFFICIAL */
 export function getTemplate() {
     return `
-        <div class="fade-in">
-            <h2 style="border-bottom: 2px solid var(--brand-navy); padding-bottom: 10px; margin-bottom: 20px;">
-                <i class="fa-solid fa-scale-balanced"></i> Legal Resources & Reference
-            </h2>
-            
-            <div class="grid-2">
-                <!-- EXTERNAL LINKS -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Official Databases</div>
-                    </div>
-                    <div class="card-body">
-                        <ul style="list-style: none; padding: 0; margin: 0;">
-                            <li style="margin-bottom: 1rem;">
-                                <a href="https://www.tncourts.gov/Tennessee%20Code" target="_blank" style="text-decoration: none; color: var(--brand-cobalt); font-weight: bold; display: block;">
-                                    <i class="fa-solid fa-book-open"></i> Tennessee Code Annotated (TCA)
-                                </a>
-                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Access the full digital version of TN State Laws via LexisNexis.</div>
-                            </li>
-                             <li style="margin-bottom: 1rem;">
-                                <a href="https://library.municode.com/tn/rogersville/codes/code_of_ordinances" target="_blank" style="text-decoration: none; color: var(--brand-cobalt); font-weight: bold; display: block;">
-                                    <i class="fa-solid fa-city"></i> Rogersville Municipal Code
-                                </a>
-                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Local ordinances, zoning, and noise regulations (Municode).</div>
-                            </li>
-                             <li>
-                                <a href="https://www.tn.gov/safety/driver-services/mvr.html" target="_blank" style="text-decoration: none; color: var(--brand-cobalt); font-weight: bold; display: block;">
-                                    <i class="fa-solid fa-id-card"></i> TN Dept. of Safety (Driver Services)
-                                </a>
-                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">License status checks and crash reporting portals.</div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- DEPARTMENT DIRECTORY -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Internal Directory</div>
-                    </div>
-                    <div class="card-body">
-                        <table class="data-table">
-                            <thead><tr><th>Unit</th><th>Extension</th></tr></thead>
-                            <tbody>
-                                <tr><td>Dispatch / Comm Center</td><td>x1000</td></tr>
-                                <tr><td>Watch Commander</td><td>x1050</td></tr>
-                                <tr><td>Records Division</td><td>x1200</td></tr>
-                                <tr><td>Criminal Invest. (CID)</td><td>x1300</td></tr>
-                                <tr><td>Evidence Room</td><td>x1350</td></tr>
-                                <tr><td>Magistrate (On-Call)</td><td>(423) 555-0199</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <div class="fade-in" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="workspace-header">
+                <div>
+                    <div class="ws-title"><i class="fa-solid fa-scale-balanced text-secondary"></i> Law Library</div>
                 </div>
             </div>
 
-            <!-- CHEAT SHEET -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Common TCA Code Reference</div>
+            <div class="scroller" style="background: var(--bg-app);">
+                
+                <!-- SEARCH BAR -->
+                <div style="background: white; padding: 2rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; text-align: center;">
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <div class="input-group">
+                            <input type="text" id="legal-search" class="input-field" placeholder="Search Statutes, Codes, or Case Law..." style="padding: 1rem; font-size: 1.1rem; border-radius: 50px; text-align: center; box-shadow: var(--shadow-sm);">
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1rem;">
+                            <button class="btn btn-ghost active-pill">All Codes</button>
+                            <button class="btn btn-ghost">Traffic (Title 55)</button>
+                            <button class="btn btn-ghost">Criminal (Title 39)</button>
+                            <button class="btn btn-ghost">Procedure</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Offense</th>
-                                <th>TCA Code</th>
-                                <th>Class</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Speeding</td><td>55-8-152</td><td>C Misd</td><td>Check school zone multiplier</td></tr>
-                            <tr><td>DUI (1st Offense)</td><td>55-10-401</td><td>A Misd</td><td>Mandatory 48hr hold</td></tr>
-                            <tr><td>Driving on Suspended</td><td>55-50-504</td><td>B Misd</td><td>Seize license if in possession</td></tr>
-                            <tr><td>Simple Possession (Sch VI)</td><td>39-17-418</td><td>A Misd</td><td>Under 0.5oz marijuana</td></tr>
-                            <tr><td>Theft of Property (<$1k)</td><td>39-14-103</td><td>A Misd</td><td>"Petty Theft"</td></tr>
-                            <tr><td>Theft of Property (>$1k)</td><td>39-14-103</td><td>E Felony</td><td>"Grand Theft"</td></tr>
-                            <tr><td>Domestic Assault</td><td>39-13-111</td><td>A Misd</td><td>Requires 12hr hold (Cooling off)</td></tr>
-                        </tbody>
-                    </table>
+
+                <!-- CONTENT GRID -->
+                <div class="grid-2" style="max-width: 1000px; margin: 0 auto;">
+                    
+                    <!-- BOOKMARKS / QUICK REF -->
+                    <div>
+                        <h3 style="color: var(--gov-navy); margin-bottom: 1rem;">Quick Reference (Common)</h3>
+                        <div id="quick-ref-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+
+                    <!-- SEARCH RESULTS / BROWSE -->
+                    <div>
+                        <h3 style="color: var(--gov-navy); margin-bottom: 1rem;">Browse Categories</h3>
+                        <div class="panel">
+                             <div class="panel-body" style="padding: 0;">
+                                 <div class="list-item" onclick="alert('Opening Title 39...')">
+                                    <div style="font-weight: 600;">Title 39 - Criminal Offenses</div>
+                                    <div class="text-secondary" style="font-size: 0.8rem;">Assault, Homicide, Theft, Burglary...</div>
+                                 </div>
+                                 <div class="list-item" onclick="alert('Opening Title 55...')">
+                                    <div style="font-weight: 600;">Title 55 - Motor and Other Vehicles</div>
+                                    <div class="text-secondary" style="font-size: 0.8rem;">Rules of the Road, Registration, Licensing...</div>
+                                 </div>
+                                 <div class="list-item" onclick="alert('Opening Title 40...')">
+                                    <div style="font-weight: 600;">Title 40 - Criminal Procedure</div>
+                                    <div class="text-secondary" style="font-size: 0.8rem;">Arrest, Bail, Warrants, Extradition...</div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
                 </div>
+
             </div>
         </div>
+
+        <style>
+            .list-item { padding: 1rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+            .list-item:hover { background: #f9fafb; }
+            .list-item:last-child { border-bottom: none; }
+            .active-pill { background: var(--gov-blue); color: white; border-radius: 20px; }
+            .active-pill:hover { background: var(--gov-blue-dark); color: white; }
+        </style>
     `;
 }
 
+const COMMON_CODES = [
+    { code: '39-13-102', title: 'Aggravated Assault', desc: 'Intentionally or knowingly commits an assault that results in serious bodily injury...' },
+    { code: '39-13-111', title: 'Domestic Assault', desc: 'Commits an assault against a domestic abuse victim...' },
+    { code: '55-10-401', title: 'DUI First Offense', desc: 'Driving under the influence of any intoxicant...' },
+    { code: '39-17-418', title: 'Simple Possession', desc: 'Knowingly possess or casually exchange a controlled substance...' }
+];
+
 export function init() {
-    // Static links, no logic needed yet
+    const list = document.getElementById('quick-ref-list');
+
+    list.innerHTML = COMMON_CODES.map(c => `
+        <div class="panel" style="margin: 0; cursor: pointer; border-left: 4px solid var(--gov-blue);">
+            <div class="panel-body" style="padding: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 700; color: var(--text-primary);">${c.title}</span>
+                    <span class="text-secondary" style="font-family: monospace;">TCA ${c.code}</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">${c.desc}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Search Filter
+    document.getElementById('legal-search').addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase();
+        // Simple filter logic for demo
+        const filtered = COMMON_CODES.filter(c => c.title.toLowerCase().includes(val) || c.code.includes(val));
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 1rem;">No matching common codes found.</div>`;
+        } else {
+            list.innerHTML = filtered.map(c => `
+                <div class="panel" style="margin: 0; cursor: pointer; border-left: 4px solid var(--gov-blue);">
+                    <div class="panel-body" style="padding: 1rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-weight: 700; color: var(--text-primary);">${c.title}</span>
+                            <span class="text-secondary" style="font-family: monospace;">TCA ${c.code}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">${c.desc}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    });
 }
