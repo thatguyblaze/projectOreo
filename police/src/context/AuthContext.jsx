@@ -8,9 +8,14 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         // Check local storage for persistent session
-        const storedUser = localStorage.getItem('mpd_user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        try {
+            const storedUser = localStorage.getItem('mpd_user');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            }
+        } catch (error) {
+            console.error("Failed to parse user session", error);
+            localStorage.removeItem('mpd_user');
         }
         setLoading(false);
     }, []);
@@ -46,4 +51,10 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
+};
