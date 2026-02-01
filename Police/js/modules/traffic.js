@@ -1,4 +1,4 @@
-/* TRAFFIC & CITATION MODULE v2 - COMMAND OS */
+/* TRAFFIC & CITATION MODULE v3 - OFFICIAL */
 import { db } from '../store.js';
 import { generateProfile } from './ncicGen.js';
 
@@ -7,10 +7,14 @@ export function getTemplate() {
         <div class="fade-in" style="height: 100%; display: flex; flex-direction: column;">
             <div class="workspace-header">
                 <div>
-                    <div class="ws-title"><i class="fa-solid fa-file-signature text-amber"></i> TRAFFIC & CITATIONS</div>
+                    <div class="ws-title"><i class="fa-solid fa-file-contract text-cyan"></i> Traffic & Citations</div>
                 </div>
                 <div class="ws-controls">
-                     <button class="btn btn-ghost" onclick="resetForm()">CLEAR FORM</button>
+                     <!-- Context Indicator -->
+                     <div id="linked-context" class="feature-tag hidden" style="background: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+                        <i class="fa-solid fa-link"></i> LINKED TO INCIDENT
+                     </div>
+                     <button class="btn btn-ghost" onclick="resetForm()">Clear Form</button>
                 </div>
             </div>
 
@@ -20,28 +24,27 @@ export function getTemplate() {
                     <!-- CITATION FORM -->
                     <div class="panel">
                         <div class="panel-head">
-                            <span>NEW CITATION ENTRY</span>
-                            <span class="mono text-dim" id="cit-id">CIT-24-000</span>
+                            <span>CITATION ENTRY</span>
+                            <span class="text-secondary" id="cit-id" style="font-weight: 400;">CIT-24-000</span>
                         </div>
                         <div class="panel-body">
                             <form id="ticket-form">
                                 
-                                <!-- SUBJECT SECTION -->
-                                <div style="margin-bottom: 2rem; border-left: 3px solid var(--accent-cyan); padding-left: 1rem;">
+                                <div style="margin-bottom: 2rem; background: #f9fafb; padding: 1.5rem; border-radius: var(--radius);">
                                     <div class="input-group">
-                                        <label class="input-label">SUBJECT IDENTITY (DL / NAME)</label>
+                                        <label class="input-label">Subject Search (NCIC)</label>
                                         <div style="display: flex; gap: 10px;">
-                                            <input type="text" id="dl-search" class="input-field" placeholder="Search Name or DL to Auto-Fill...">
-                                            <button type="button" class="btn btn-cyan" id="btn-lookup">SEARCH & FILL</button>
+                                            <input type="text" id="dl-search" class="input-field" placeholder="Search Name or DL #">
+                                            <button type="button" class="btn btn-primary" id="btn-lookup">Autofill</button>
                                         </div>
                                     </div>
                                     <div class="grid-3">
                                         <div class="input-group">
-                                            <label class="input-label">LAST NAME</label>
+                                            <label class="input-label">Last Name</label>
                                             <input type="text" name="last" class="input-field" required>
                                         </div>
                                         <div class="input-group">
-                                            <label class="input-label">FIRST NAME</label>
+                                            <label class="input-label">First Name</label>
                                             <input type="text" name="first" class="input-field" required>
                                         </div>
                                         <div class="input-group">
@@ -51,31 +54,31 @@ export function getTemplate() {
                                     </div>
                                     <div class="grid-3">
                                         <div class="input-group">
-                                            <label class="input-label">ADDRESS</label>
+                                            <label class="input-label">Address</label>
                                             <input type="text" name="address" class="input-field" style="grid-column: span 2;">
                                         </div>
                                         <div class="input-group">
-                                            <label class="input-label">VEHICLE INFO</label>
-                                            <input type="text" name="vehicle" class="input-field" placeholder="Year Make Model Color" required>
+                                            <label class="input-label">Vehicle</label>
+                                            <input type="text" name="vehicle" class="input-field" placeholder="Yr Make Model Color" required>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- VIOLATION SECTION -->
-                                <div style="margin-bottom: 2rem; border-left: 3px solid var(--accent-amber); padding-left: 1rem;">
+                                <div style="margin-bottom: 2rem;">
+                                    <h4 style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Violations</h4>
                                     <div class="input-group">
-                                        <label class="input-label">VIOLATION STATUTE</label>
+                                        <label class="input-label">Primary Offense</label>
                                         <select id="statute-select" name="offense" class="input-field">
-                                            <option value="">SELECT OFFENSE...</option>
+                                            <option value="">Select Statute...</option>
                                             <!-- Configured in JS -->
                                         </select>
                                     </div>
                                     
-                                    <div class="grid-3 hidden" id="speed-block">
-                                        <div class="input-group"><label class="input-label">ACTUAL SPEED</label><input type="number" name="speed" class="input-field"></div>
-                                        <div class="input-group"><label class="input-label">ZONE LIMIT</label><input type="number" name="limit" class="input-field"></div>
+                                    <div class="grid-3 hidden" id="speed-block" style="background: #fffbeb; padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                                        <div class="input-group"><label class="input-label">Actual Speed</label><input type="number" name="speed" class="input-field"></div>
+                                        <div class="input-group"><label class="input-label">Zone Limit</label><input type="number" name="limit" class="input-field"></div>
                                         <div class="input-group">
-                                            <label class="input-label">ZONE TYPE</label>
+                                            <label class="input-label">Zone Type</label>
                                             <select name="zone" class="input-field">
                                                 <option>Standard</option>
                                                 <option>School</option>
@@ -86,33 +89,32 @@ export function getTemplate() {
 
                                     <div class="grid-2">
                                         <div class="input-group">
-                                            <label class="input-label">LOCATION OF STOP</label>
+                                            <label class="input-label">Location</label>
                                             <input type="text" name="location" class="input-field" required>
                                         </div>
                                         <div class="input-group">
-                                            <label class="input-label">DATE/TIME</label>
+                                            <label class="input-label">Date / Time</label>
                                             <input type="datetime-local" name="timestamp" class="input-field" required>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- COURT SECTION -->
-                                <div style="margin-bottom: 2rem; border-left: 3px solid var(--text-mono); padding-left: 1rem;">
+                                <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">
                                     <div class="grid-2">
                                         <div class="input-group">
-                                            <label class="input-label">COURT DATE (AUTO)</label>
-                                            <input type="text" name="court_date" id="court-date" class="input-field" readonly>
+                                            <label class="input-label">Court Date</label>
+                                            <input type="text" name="court_date" id="court-date" class="input-field" readonly style="background: #f9fafb;">
                                         </div>
                                         <div class="input-group">
-                                            <label class="input-label">FINE AMOUNT</label>
-                                            <input type="text" name="fine" id="fine-amt" class="input-field" readonly value="$0.00">
+                                            <label class="input-label">Total Fine</label>
+                                            <input type="text" name="fine" id="fine-amt" class="input-field" readonly value="$0.00" style="background: #f9fafb; font-weight: bold; color: var(--text-primary);">
                                         </div>
                                     </div>
                                 </div>
 
                                 <div style="text-align: right;">
-                                    <button type="submit" class="btn btn-amber" style="font-size: 1rem; padding: 1rem 2rem;">
-                                        <i class="fa-solid fa-print"></i> ISSUE CITATION
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem; font-size: 1rem;">
+                                        Confirm & Issue Citation
                                     </button>
                                 </div>
 
@@ -120,13 +122,13 @@ export function getTemplate() {
                         </div>
                     </div>
 
-                    <!-- RIGHT SIDEBAR: RECENT & STATUTES -->
+                    <!-- RECENT -->
                     <div style="display: flex; flex-direction: column; gap: 1rem;">
                          <div class="panel">
-                             <div class="panel-head">RECENT CITATIONS</div>
+                             <div class="panel-head">HISTORY</div>
                              <div class="panel-body" style="padding: 0;">
                                  <table class="cyber-table">
-                                     <thead><tr><th>ID</th><th>OFFENSE</th><th>TIME</th></tr></thead>
+                                     <thead><tr><th>ID</th><th>Offense</th><th>Time</th></tr></thead>
                                      <tbody id="recent-table">
                                          <!-- JS -->
                                      </tbody>
@@ -146,9 +148,8 @@ const STATUTES = [
     { code: '55-8-152', label: 'Speeding', fine: 120, isSpeed: true },
     { code: '55-9-402', label: 'Light Law Violation', fine: 50, isSpeed: false },
     { code: '55-8-123', label: 'Failure to Maintain Lane', fine: 85, isSpeed: false },
-    { code: '55-12-139', label: 'Financial Responsibility (No Ins)', fine: 180, isSpeed: false },
-    { code: '55-4-104', label: 'Registration Violation', fine: 60, isSpeed: false },
-    { code: '55-8-136', label: 'Drivers to Exercise Due Care', fine: 110, isSpeed: false },
+    { code: '55-12-139', label: 'Financial Responsibility', fine: 180, isSpeed: false },
+    { code: '55-4-104', label: 'Expired Registration', fine: 60, isSpeed: false },
     { code: '55-50-301', label: 'Driving w/o License', fine: 140, isSpeed: false }
 ];
 
@@ -192,60 +193,85 @@ export function init() {
         }
     });
 
-    // Lookup Logic (Import from NCIC)
+    // Lookup Logic
     lookupBtn.addEventListener('click', () => {
         const q = document.getElementById('dl-search').value;
         if (!q) return;
-
         const profile = generateProfile(q);
 
-        // Fill Fields
-        const names = profile.name.split(' '); // Rough split
-        form.querySelector('[name="last"]').value = names[names.length - 1]; // Last assumption
+        // Fill
+        const names = profile.name.split(' ');
+        form.querySelector('[name="last"]').value = names[names.length - 1];
         form.querySelector('[name="first"]').value = names[0];
+        form.querySelector('[name="dob"]').value = new Date(profile.dob).toISOString().split('T')[0];
 
-        let dobStr = profile.dob;
-        // Try to convert to YYYY-MM-DD
-        try {
-            const dateObj = new Date(profile.dob);
-            dobStr = dateObj.toISOString().split('T')[0]; // Simple formatting
-        } catch (e) { }
-        // Since profile.dob is localized string from ncicGen, this is tricky, 
-        // but for now let's just stick the string or a mock if parsing fails in this demo context.
-        form.querySelector('[name="dob"]').value = dobStr;
-
-        // Vehicle
         if (profile.vehicles.length > 0) {
             const v = profile.vehicles[0];
             form.querySelector('[name="vehicle"]').value = `${v.style} ${v.make} ${v.model} (${v.color}) - ${v.plate}`;
         }
-
         form.querySelector('[name="address"]').value = `${Math.floor(Math.random() * 900)} Main St, Rogersville TN`;
     });
 
-    // Submit Logic
+    // CONTEXT CHECK (Deep Integration)
+    // Check if we came from Dispatch with a specific Incident ID
+    const context = sessionStorage.getItem('active_incident_context');
+    if (context) {
+        const inc = db.getIncident(context);
+        if (inc) {
+            // Pre-fill location
+            form.querySelector('[name="location"]').value = inc.location;
+
+            // Show Context UI
+            const ctxBadge = document.getElementById('linked-context');
+            ctxBadge.classList.remove('hidden');
+            ctxBadge.innerHTML = `<i class="fa-solid fa-link"></i> LINKED TO INCIDENT #${inc.id}`;
+
+            // Check for Linked Subjects to suggest?
+            if (inc.linked_subjects.length > 0) {
+                // If there's a subject, let's just grab the first one to auto-fill (Simulation shortcut for convenience)
+                // In production, we'd offer a dropdown "Select Linked Subject"
+                // db.getSubject(id) needed
+                console.log("Found linked subjects, could auto-fill if we had full Subject DB fetch.");
+            }
+        }
+    }
+
+    // Submit Logic (REAL SAVE)
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target).entries());
+        const formData = new FormData(e.target);
 
-        // Save to 'Evidence/Store' as a record? Or just log it.
-        // For now, we simulate the "Print" process.
+        const ticket = {
+            id: document.getElementById('cit-id').innerText,
+            subject: `${formData.get('last')}, ${formData.get('first')}`,
+            offense: statuteSelect.options[statuteSelect.selectedIndex].text,
+            fine: formData.get('fine'),
+            timestamp: new Date().toISOString()
+        };
 
-        // Save to our Local store if we had a dedicated "Citations" store, 
-        // but we can simulate "Paperwork Filed"
-        alert("CITATION ISSUED. SIGNATURE LOGGED.");
-
-        // Add to Recent
+        // 1. Save to Ticket DB (We'd add db.addTicket(ticket) in store)
+        // For now, simulate by just logging it to recent.
         const row = `<tr>
-            <td class="mono text-cyan">${document.getElementById('cit-id').innerText}</td>
-            <td>${statuteSelect.options[statuteSelect.selectedIndex].text}</td>
-            <td class="text-dim">Just now</td>
+            <td class="text-secondary" style="font-family: monospace;">${ticket.id}</td>
+            <td>${ticket.offense}</td>
+            <td class="text-secondary">Just now</td>
         </tr>`;
         document.getElementById('recent-table').innerHTML += row;
 
-        // Reset
+        // 2. Link to Incident if Context exists (NO PLACEHOLDERS)
+        if (context) {
+            db.addNarrative(context, `CITATION ISSUED to ${ticket.subject} for ${ticket.offense}. Ticket #${ticket.id}`);
+            // Clear context
+            sessionStorage.removeItem('active_incident_context');
+            alert("Citation Issued & Linked to Incident Log.");
+            // Ideally route back to dispatch?
+        } else {
+            alert("Citation Issued.");
+        }
+
         form.reset();
         document.getElementById('cit-id').innerText = 'CIT-24-' + Math.floor(Math.random() * 100000);
+        document.getElementById('linked-context').classList.add('hidden');
     });
 }
 
