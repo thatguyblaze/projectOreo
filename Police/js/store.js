@@ -130,6 +130,10 @@ class DataStore {
         return JSON.parse(localStorage.getItem(STORE_KEYS.OFFICER));
     }
 
+    setCurrentOfficer(data) {
+        localStorage.setItem(STORE_KEYS.OFFICER, JSON.stringify(data));
+    }
+
     getAllOfficers() {
         const officers = JSON.parse(localStorage.getItem('rpd_all_officers_v1'));
         if (!officers) {
