@@ -1,7 +1,6 @@
 import * as Dashboard from './modules/dashboard.js';
+import * as Tickets from './modules/traffic.js';
 import * as Cases from './modules/cases.js';
-import * as Traffic from './modules/traffic.js';
-import * as Redaction from './modules/redaction.js';
 import * as Intelligence from './modules/intelligence.js';
 import * as Admin from './modules/admin.js';
 
@@ -15,16 +14,18 @@ class App {
     }
 
     init() {
-        // Navigation Logic
+        // Navigation Logic (Top Bar)
         this.navItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 const viewName = item.dataset.view;
-                this.switchView(viewName);
 
                 // Update active state
                 this.navItems.forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
+
+                // Switch View
+                this.switchView(viewName);
             });
         });
 
@@ -33,41 +34,47 @@ class App {
     }
 
     switchView(viewName) {
-        // Clear container
-        this.viewContainer.innerHTML = '';
+        // Clear container with fade effect
+        this.viewContainer.style.opacity = '0';
 
-        switch (viewName) {
-            case 'dashboard':
-                this.pageTitle.innerText = 'Command Dashboard';
-                this.viewContainer.innerHTML = Dashboard.getTemplate();
-                Dashboard.init();
-                break;
-            case 'cases':
-                this.pageTitle.innerText = 'Case Management';
-                this.viewContainer.innerHTML = Cases.getTemplate();
-                Cases.init();
-                break;
-            case 'traffic':
-                this.pageTitle.innerText = 'Traffic & OCR Terminal';
-                this.viewContainer.innerHTML = Traffic.getTemplate();
-                Traffic.init();
-                break;
-            case 'redaction':
-                this.pageTitle.innerText = 'Redaction Studio';
-                this.viewContainer.innerHTML = Redaction.getTemplate();
-                Redaction.init();
-                break;
-            case 'intelligence':
-                this.pageTitle.innerText = 'Intelligence & Analytics';
-                this.viewContainer.innerHTML = Intelligence.getTemplate();
-                Intelligence.init();
-                break;
-            case 'admin':
-                this.pageTitle.innerText = 'Admin Center';
-                this.viewContainer.innerHTML = Admin.getTemplate();
-                Admin.init();
-                break;
-        }
+        setTimeout(() => {
+            this.viewContainer.innerHTML = '';
+
+            switch (viewName) {
+                case 'dashboard':
+                    this.updateHeader('Command Dashboard', 'Overview');
+                    this.viewContainer.innerHTML = Dashboard.getTemplate();
+                    Dashboard.init();
+                    break;
+                case 'tickets':
+                    this.updateHeader('Citation Management', 'Traffic & Enforcement');
+                    this.viewContainer.innerHTML = Tickets.getTemplate();
+                    Tickets.init(); // Now handles sub-views internally
+                    break;
+                case 'cases':
+                    this.updateHeader('Case Manager', 'Investigations');
+                    this.viewContainer.innerHTML = Cases.getTemplate();
+                    Cases.init();
+                    break;
+                case 'intelligence':
+                    this.updateHeader('Intelligence', 'Maps & Analytics');
+                    this.viewContainer.innerHTML = Intelligence.getTemplate();
+                    Intelligence.init();
+                    break;
+                case 'admin':
+                    this.updateHeader('Admin Center', 'System Control');
+                    this.viewContainer.innerHTML = Admin.getTemplate();
+                    Admin.init();
+                    break;
+            }
+
+            // Restore Opacity
+            this.viewContainer.style.opacity = '1';
+        }, 150);
+    }
+
+    updateHeader(title, subtitle) {
+        this.pageTitle.innerHTML = `<i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; margin-right: 10px; color: var(--text-muted);"></i> ${title} <span style="font-weight: 400; color: var(--text-muted); margin-left: 10px;">| ${subtitle}</span>`;
     }
 }
 

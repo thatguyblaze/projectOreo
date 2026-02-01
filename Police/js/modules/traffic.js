@@ -1,98 +1,58 @@
 export function getTemplate() {
     return `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; height: 100%;">
-            <!-- Left: Scanner View -->
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <div class="card" style="flex: 1; margin-bottom: 0; display: flex; flex-direction: column;">
-                    <div class="card-header">
-                        <div class="card-title"><i class="fa-solid fa-camera"></i> Live OCR Feed</div>
-                        <div class="badge badge-success">CAMERA ACTIVE</div>
+        <div id="traffic-root" class="fade-in">
+            <!-- 1. Selection Hub (Default View) -->
+            <div id="citation-hub">
+                <h2 style="margin-bottom: 2rem; color: var(--brand-navy); font-weight: 300;">Select Citation Type</h2>
+                <div class="ticket-type-grid">
+                    <div class="ticket-type-card" data-type="speeding">
+                        <i class="fa-solid fa-gauge-high ticket-icon"></i>
+                        <div class="ticket-name">Speeding Violation</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">M.G.L. c.90 §17</div>
                     </div>
-                    <div class="card-body" style="padding: 0; flex: 1; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        <!-- Simulated Camera View -->
-                        <div style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; opacity: 0.3; background: linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111), linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111); background-size: 20px 20px; background-position: 0 0, 10px 10px;"></div>
-                        
-                        <div id="scan-overlay" style="border: 2px solid var(--status-success); width: 60%; height: 30%; position: relative; box-shadow: 0 0 0 1000px rgba(0,0,0,0.7);">
-                            <div style="position: absolute; top: -25px; left: 0; color: var(--status-success); font-weight: bold; background: black; padding: 2px 8px;">TARGET ACQUIRED</div>
-                        </div>
-
-                        <div id="scanned-plate-display" style="position: absolute; bottom: 20px; font-family: monospace; font-size: 3rem; color: var(--status-success); text-shadow: 0 0 10px var(--status-success);">
-                            ABC-1234
-                        </div>
+                    <div class="ticket-type-card" data-type="parking">
+                        <i class="fa-solid fa-square-parking ticket-icon"></i>
+                        <div class="ticket-name">Parking Violation</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Local Ordinance 4-2</div>
                     </div>
-                    <div class="card-footer" style="padding: 1rem; border-top: 1px solid var(--border-light);">
-                        <button class="btn-primary" style="width: 100%; justify-content: center;" id="trigger-scan">
-                            <i class="fa-solid fa-expand"></i> TRIGGER MANUAL SCAN
-                        </button>
+                    <div class="ticket-type-card" data-type="equipment">
+                        <i class="fa-solid fa-car-burst ticket-icon"></i>
+                        <div class="ticket-name">Equipment Failure</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Light / Inspection</div>
+                    </div>
+                     <div class="ticket-type-card" data-type="moving">
+                        <i class="fa-solid fa-ban ticket-icon"></i>
+                        <div class="ticket-name">Moving Violation</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Stop Sign / Red Light</div>
+                    </div>
+                    <div class="ticket-type-card" data-type="ocr">
+                        <i class="fa-solid fa-camera ticket-icon"></i>
+                        <div class="ticket-name">Scan Plate (OCR)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Automated Entry</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Validation Form -->
-            <div style="display: flex; flex-direction: column;">
-                <div class="card" style="flex: 1; margin-bottom: 0;">
+            <!-- 2. Dynamic Form Containers (Hidden by default) -->
+            <div id="ticket-form-container" class="hidden">
+                <div style="margin-bottom: 1.5rem;">
+                     <button id="back-to-hub" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Selection</button>
+                </div>
+                
+                <div class="card">
                     <div class="card-header">
-                        <div class="card-title">Validation & Enforcement</div>
-                        <div class="badge badge-success" id="ncic-status">NCIC: CONNECTED</div>
+                        <div class="card-title" id="form-title">Speeding Citation</div>
+                        <div class="badge badge-warning">DRAFT</div>
                     </div>
                     <div class="card-body">
-                         <div class="alert" style="background: #ecfdf5; border: 1px solid #10b981; color: #065f46; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; display: flex; gap: 10px; align-items: flex-start;">
-                            <i class="fa-solid fa-circle-check" style="margin-top: 2px;"></i>
-                            <div>
-                                <div style="font-weight: bold;">Confirmed Match</div>
-                                <div style="font-size: 0.9rem;">Vehicle registration matches OCR scan.</div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>License Plate (OCR)</label>
-                            <div style="display: flex; gap: 10px;">
-                                <input type="text" class="form-control" value="ABC-1234" style="font-weight: bold; letter-spacing: 2px; background: #f0fdf4; border-color: #10b981;">
-                                <button class="btn-icon" style="color: #10b981;"><i class="fa-solid fa-check"></i></button>
-                            </div>
-                        </div>
-
-                        <div style="margin: 1.5rem 0; border-top: 1px solid var(--border-light);"></div>
-
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Vehicle Make</label>
-                                <input type="text" class="form-control" value="Toyota">
-                            </div>
-                            <div class="form-group">
-                                <label>Model</label>
-                                <input type="text" class="form-control" value="Camry">
-                            </div>
-                            <div class="form-group">
-                                <label>Color</label>
-                                <input type="text" class="form-control" value="Black">
-                            </div>
-                             <div class="form-group">
-                                <label>Year</label>
-                                <input type="text" class="form-control" value="2018">
-                            </div>
-                        </div>
-
-                        <div style="margin: 1.5rem 0; border-top: 1px solid var(--border-light);"></div>
-
-                        <div class="form-group">
-                            <label>Registered Owner</label>
-                            <input type="text" class="form-control" value="DOWNEY, ROBERT JR.">
-                        </div>
-
-                         <div class="form-group">
-                            <label>Address</label>
-                            <input type="text" class="form-control" value="10880 Malibu Point, Malibu, CA">
-                        </div>
-
-                        <div style="margin-top: 2rem;">
-                            <button class="btn-primary" style="width: 100%; background: var(--status-warning); border-color: var(--status-warning); color: #78350f; justify-content: center;">
-                                <i class="fa-solid fa-triangle-exclamation"></i> FLAGGED: EXPIRED REGISTRATION
-                            </button>
-                            <button class="btn-primary" style="width: 100%; margin-top: 10px; justify-content: center;">
-                                <i class="fa-solid fa-print"></i> ISSUE CITATION
-                            </button>
-                        </div>
+                        <!-- Dynamic Fields injected here -->
+                        <form id="dynamic-ticket-form">
+                            <!-- Fields go here -->
+                        </form>
+                    </div>
+                    <div class="card-footer" style="padding: 1.5rem; background: #f8fafc; border-top: 1px solid var(--border); text-align: right;">
+                         <button type="button" class="btn btn-outline" style="margin-right: 10px;">Cancel</button>
+                         <button type="submit" form="dynamic-ticket-form" class="btn btn-primary">Issue Citation & Print</button>
                     </div>
                 </div>
             </div>
@@ -101,22 +61,193 @@ export function getTemplate() {
 }
 
 export function init() {
-    const btn = document.getElementById('trigger-scan');
-    const display = document.getElementById('scanned-plate-display');
+    const root = document.getElementById('traffic-root');
+    const hub = document.getElementById('citation-hub');
+    const formContainer = document.getElementById('ticket-form-container');
+    const backBtn = document.getElementById('back-to-hub');
+    const formTitle = document.getElementById('form-title');
+    const dynamicForm = document.getElementById('dynamic-ticket-form');
 
-    if (btn) {
+    // Selection Logic
+    const types = root.querySelectorAll('.ticket-type-card');
+    types.forEach(card => {
+        card.addEventListener('click', () => {
+            const type = card.dataset.type;
+            loadForm(type);
+        });
+    });
+
+    // Back Navigation
+    backBtn.addEventListener('click', () => {
+        formContainer.classList.add('hidden');
+        hub.classList.remove('hidden');
+    });
+
+    // Dynamic Form Loader
+    function loadForm(type) {
+        // Hide Hub, Show Form
+        hub.classList.add('hidden');
+        formContainer.classList.remove('hidden');
+
+        // Reset Form
+        dynamicForm.innerHTML = '';
+
+        switch (type) {
+            case 'speeding':
+                formTitle.innerText = "Speeding Citation (Civil)";
+                dynamicForm.innerHTML = getSpeedingFields();
+                break;
+            case 'parking':
+                formTitle.innerText = "Parking Violation Notice";
+                dynamicForm.innerHTML = getParkingFields();
+                break;
+            case 'equipment':
+                formTitle.innerText = "Equipment / Inspection Violation";
+                dynamicForm.innerHTML = getGeneralFields();
+                break;
+            case 'moving':
+                formTitle.innerText = "Moving Violation (Criminal/Civil)";
+                dynamicForm.innerHTML = getGeneralFields();
+                break;
+            case 'ocr':
+                // For OCR, we might redirect to a specialized OCR view or load it here.
+                // Reusing the logic from previous step for now within a "form" context
+                formTitle.innerText = "Automated OCR Entry";
+                dynamicForm.innerHTML = getOCRInterface();
+                attachOCRLogic(); // Attach JS for scanner
+                return; // Early return as OCR has custom logic
+        }
+
+        // Generic Submit Mock
+        dynamicForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert("Ticket Issued! Sent to Court Sync.");
+        });
+    }
+
+    // --- Field Templates ---
+
+    function getSpeedingFields() {
+        return `
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>License Plate</label>
+                    <input type="text" class="form-input" placeholder="ABC-1234">
+                </div>
+                <div class="form-group">
+                    <label>State</label>
+                    <select class="form-input"><option>MA</option><option>NH</option><option>RI</option></select>
+                </div>
+            </div>
+            <div class="grid-3" style="align-items: end;">
+                <div class="form-group">
+                    <label>Speed Limit</label>
+                    <input type="number" class="form-input" value="35">
+                </div>
+                <div class="form-group">
+                    <label>Recorded Speed</label>
+                    <input type="number" class="form-input" placeholder="e.g. 52">
+                </div>
+                <div class="form-group">
+                    <label>Method</label>
+                    <select class="form-input"><option>LIDAR</option><option>RADAR</option><option>PACE</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" class="form-input" placeholder="Street Name / Intersection">
+            </div>
+            <div class="form-group">
+                <label>Officer Notes</label>
+                <textarea class="form-input" rows="3" placeholder="Weather conditions, traffic density..."></textarea>
+            </div>
+        `;
+    }
+
+    function getParkingFields() {
+        return `
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>License Plate</label>
+                    <input type="text" class="form-input" placeholder="ABC-1234">
+                </div>
+                <div class="form-group">
+                    <label>Make / Model</label>
+                    <input type="text" class="form-input" placeholder="Toyota Camry">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Violation</label>
+                <select class="form-input">
+                    <option>Expired Meter</option>
+                    <option>No Parking Zone</option>
+                    <option>Blocking Hydrant</option>
+                    <option>Handicap Zone (No Placard)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fine Amount</label>
+                <input type="text" class="form-input" value="$50.00" readonly style="background: #f1f5f9;">
+            </div>
+        `;
+    }
+
+    function getGeneralFields() {
+        return `
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Driver License #</label>
+                    <input type="text" class="form-input" placeholder="S12345678">
+                </div>
+                 <div class="form-group">
+                    <label>License Plate</label>
+                    <input type="text" class="form-input" placeholder="ABC-1234">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Offense Description</label>
+                <input type="text" class="form-input" placeholder="e.g. Broken Taillight">
+            </div>
+            <div class="grid-2">
+                 <div class="form-group">
+                    <label>Action Taken</label>
+                    <select class="form-input">
+                        <option>Verbal Warning</option>
+                        <option>Written Warning</option>
+                        <option>Civil Infraction</option>
+                        <option>Criminal Application</option>
+                    </select>
+                </div>
+            </div>
+        `;
+    }
+
+    function getOCRInterface() {
+        return `
+            <div style="background: #000; height: 300px; display: flex; align-items: center; justify-content: center; color: white; border-radius: 4px; position: relative;">
+                <i class="fa-solid fa-camera fa-3x"></i>
+                <div id="ocr-scan-btn" style="position: absolute; bottom: 20px; background: var(--success); color: white; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                    ACTIVATE CAMERA
+                </div>
+                <div id="ocr-result" style="position: absolute; top: 20px; font-family: monospace; font-size: 2rem; display: none;">Scan Complete: 829-JKA</div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <p style="color: var(--text-muted); font-size: 0.9rem;">System will auto-fill citation fields upon successful scan.</p>
+            </div>
+        `;
+    }
+
+    function attachOCRLogic() {
+        // Simple mock for the OCR "Form"
+        const btn = document.getElementById('ocr-scan-btn');
+        const res = document.getElementById('ocr-result');
         btn.addEventListener('click', () => {
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SCANNING...';
+            btn.innerText = "SCANNING...";
             setTimeout(() => {
-                // Randomize Plate
-                const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                let plate = "";
-                for (let i = 0; i < 7; i++) plate += chars.charAt(Math.floor(Math.random() * chars.length));
-                plate = plate.substring(0, 3) + "-" + plate.substring(3);
-
-                display.innerText = plate;
-                btn.innerHTML = '<i class="fa-solid fa-expand"></i> TRIGGER MANUAL SCAN';
-            }, 800);
+                res.style.display = "block";
+                btn.innerText = "RE-SCAN";
+                // In a real app, this would populate value fields
+            }, 1000);
         });
     }
 }
