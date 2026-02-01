@@ -4,12 +4,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-Citation Writer - Metro PD</title>
+    <title>Professional e-Citation - Metro PD</title>
     <link rel="stylesheet" href="css/style.css">
     <script>
-        // Redirect if not logged in
-        if (!localStorage.getItem('mpd_session')) window.location.href = 'portal.html';
+        // Use simulated session or default if testing file directly
+        const session = localStorage.getItem('mpd_session');
+        // if (!session) window.location.href = 'portal.html';
     </script>
+    <style>
+        .category-header {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        /* Thermal Print Styling */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        #ticket-printout {
+            font-family: 'Share Tech Mono', monospace;
+            background: #fff;
+            padding: 20px;
+            color: #000;
+            border: 1px solid #ccc;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+
+        .t-header {
+            text-align: center;
+            border-bottom: 2px solid black;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .t-section {
+            border-bottom: 1px dashed black;
+            padding: 8px 0;
+        }
+
+        .t-label {
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .t-val {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .t-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .t-big {
+            font-size: 18px;
+            font-weight: 900;
+        }
+    </style>
 </head>
 
 <body>
@@ -27,94 +96,226 @@
 
         <main class="main-content">
             <header class="portal-header no-print">
-                <h3>e-Citation Writer</h3>
-                <div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <h3>e-Citation Information System</h3>
+                    <span
+                        style="font-size:0.8rem; background:#e0f2fe; color:#0284c7; padding:2px 8px; border-radius:4px;">PRO
+                        VERSION v2.0</span>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="resetForm()" class="btn-login" style="background:#64748b;">Reset</button>
                     <button onclick="window.print()" class="btn-login" style="background: var(--accent-blue);">🖨️ Issue
-                        & Print</button>
+                        Citation</button>
                 </div>
             </header>
 
             <div class="content-area" style="display: flex; gap: 2rem;">
 
-                <!-- EDITOR FORM -->
-                <div class="card no-print" style="flex: 1;">
-                    <div class="form-group">
-                        <label>Quick Select Violation</label>
-                        <select class="form-control" onchange="prefillViolation(this)">
-                            <option value="">-- Select --</option>
-                            <option value="speeding">Speeding (10+ over)</option>
-                            <option value="redlight">Running Red Light</option>
-                            <option value="parking">Illegal Parking</option>
-                        </select>
+                <!-- ADVANCED EDITOR FORM -->
+                <div class="card no-print" style="flex: 1; overflow-y:auto; max-height: calc(100vh - 120px);">
+
+                    <div
+                        style="background:#f8fafc; padding:1rem; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:1.5rem;">
+                        <h4 style="margin:0 0 0.5rem 0;">1. Quick Violation Selector</h4>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="cat-select" class="form-control" onchange="loadViolations()">
+                                    <option value="traffic">Traffic - Moving</option>
+                                    <option value="equip">Traffic - Equipment</option>
+                                    <option value="parking">Parking & Standing</option>
+                                    <option value="criminal">Criminal / Misdemeanor</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Offense</label>
+                                <select id="offense-select" class="form-control" onchange="selectOffense()">
+                                    <option>-- Select Category First --</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <h4 style="border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-top: 1.5rem;">Violator Info
-                    </h4>
+                    <h4 class="category-header">2. Violator Information</h4>
                     <div class="grid-2">
-                        <div class="form-group"><label>Name</label><input type="text" id="in-name" class="form-control"
-                                oninput="updateTicket()"></div>
-                        <div class="form-group"><label>DL #</label><input type="text" id="in-dl" class="form-control"
-                                oninput="updateTicket()"></div>
+                        <div class="form-group"><label>Last Name</label><input type="text" id="in-last"
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>First Name</label><input type="text" id="in-first"
+                                class="form-control" oninput="updateT()"></div>
+                    </div>
+                    <div class="form-group"><label>Street Address</label><input type="text" id="in-addr"
+                            class="form-control" oninput="updateT()"></div>
+                    <div class="grid-3">
+                        <div class="form-group"><label>City</label><input type="text" id="in-city" value="Metro City"
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>State</label><input type="text" id="in-state" value="SA"
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>Zip</label><input type="text" id="in-zip" class="form-control"
+                                oninput="updateT()"></div>
+                    </div>
+                    <div class="grid-4">
+                        <div class="form-group"><label>DOB</label><input type="date" id="in-dob" class="form-control"
+                                oninput="updateT()"></div>
+                        <div class="form-group"><label>Sex</label>
+                            <select id="in-sex" class="form-control" onchange="updateT()">
+                                <option>M</option>
+                                <option>F</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Race</label>
+                            <select id="in-race" class="form-control" onchange="updateT()">
+                                <option>W</option>
+                                <option>B</option>
+                                <option>H</option>
+                                <option>A</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Hgt/Wgt</label><input type="text" id="in-hgt"
+                                placeholder="602 / 200" class="form-control" oninput="updateT()"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Driver Lic #</label><input type="text" id="in-dl"
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>State</label><input type="text" id="in-dlstate" value="SA"
+                                class="form-control" oninput="updateT()"></div>
                     </div>
 
-                    <h4 style="border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-top: 1rem;">Vehicle</h4>
-                    <div class="grid-2">
+                    <h4 class="category-header">3. Vehicle Info</h4>
+                    <div class="grid-3">
                         <div class="form-group"><label>Plate</label><input type="text" id="in-plate"
-                                class="form-control" oninput="updateTicket()"></div>
-                        <div class="form-group"><label>Make/Model</label><input type="text" id="in-make"
-                                class="form-control" oninput="updateTicket()"></div>
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>State</label><input type="text" id="in-pstate" value="SA"
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>Year</label><input type="text" id="in-year" class="form-control"
+                                oninput="updateT()"></div>
+                    </div>
+                    <div class="grid-3">
+                        <div class="form-group"><label>Make</label><input type="text" id="in-make" class="form-control"
+                                oninput="updateT()"></div>
+                        <div class="form-group"><label>Model</label><input type="text" id="in-model"
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>Color</label><input type="text" id="in-color"
+                                class="form-control" oninput="updateT()"></div>
                     </div>
 
-                    <h4 style="border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-top: 1rem;">Violation</h4>
-                    <div class="grid-2">
+                    <h4 class="category-header">4. Violation Details</h4>
+                    <div class="grid-3">
                         <div class="form-group"><label>Code</label><input type="text" id="in-code" class="form-control"
-                                oninput="updateTicket()"></div>
-                        <div class="form-group"><label>Fine ($)</label><input type="number" id="in-fine"
-                                class="form-control" oninput="updateTicket()"></div>
+                                oninput="updateT()" readonly></div>
+                        <div class="form-group"><label>Points</label><input type="text" id="in-points"
+                                class="form-control" readonly></div>
+                        <div class="form-group"><label>Fine ($)</label><input type="text" id="in-fine"
+                                class="form-control" oninput="updateT()"></div>
                     </div>
-                    <div class="form-group"><label>Description</label><input type="text" id="in-desc"
-                            class="form-control" oninput="updateTicket()"></div>
+                    <div class="form-group"><label>Charge Description</label><input type="text" id="in-desc"
+                            class="form-control" oninput="updateT()"></div>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Location of Offense</label><input type="text" id="in-loc"
+                                class="form-control" oninput="updateT()"></div>
+                        <div class="form-group"><label>Date/Time</label><input type="datetime-local" id="in-date"
+                                class="form-control" oninput="updateT()"></div>
+                    </div>
+
+                    <h4 class="category-header">5. Court Info</h4>
+                    <div class="form-group"><label>Court Date (Auto +30 Days)</label><input type="date" id="in-court"
+                            class="form-control" oninput="updateT()"></div>
                 </div>
 
-                <!-- LIVE PREVIEW -->
-                <div style="flex: 0 0 350px;">
-                    <div id="ticket-printout" class="ticket-preview">
-                        <div style="text-align: center; margin-bottom: 1rem;">
-                            <img src="vite.svg" width="40" style="opacity:0.5;">
-                            <h3 style="margin:0;">METRO POLICE</h3>
-                            <div style="font-size:0.8rem;">NOTICE TO APPEAR</div>
-                            <div style="font-size:0.8rem; font-weight:bold; margin-top:5px;">CITATION #<span
-                                    id="t-id">88421</span></div>
+                <!-- LIVE PREVIEW THERMAL LOOK -->
+                <div style="flex: 0 0 380px;">
+                    <div id="ticket-printout">
+                        <div class="t-header">
+                            <img src="vite.svg" width="50" style="display:block; margin:0 auto 10px;">
+                            <div style="font-size:16px; font-weight:900;">METRO POLICE DEPT</div>
+                            <div style="font-size:12px;">TRAFFIC & MISDEMEANOR CITATION</div>
+                            <div style="margin-top:5px;">CITATION #: <span id="t-id" class="t-big">00000</span></div>
                         </div>
 
-                        <div class="ticket-row"><span class="ticket-label">DATE/TIME</span><span class="ticket-value"
-                                id="t-date">...</span></div>
-
-                        <div style="margin: 1rem 0; font-weight:bold; border-bottom:1px solid #000;">VIOLATOR</div>
-                        <div class="ticket-row"><span class="ticket-label">NAME</span><span class="ticket-value"
-                                id="t-name">UNKNOWN</span></div>
-                        <div class="ticket-row"><span class="ticket-label">DL NO.</span><span class="ticket-value"
-                                id="t-dl">-</span></div>
-
-                        <div style="margin: 1rem 0; font-weight:bold; border-bottom:1px solid #000;">VEHICLE</div>
-                        <div class="ticket-row"><span class="ticket-label">PLATE</span><span class="ticket-value"
-                                id="t-plate">-</span></div>
-                        <div class="ticket-row"><span class="ticket-label">VEHICLE</span><span class="ticket-value"
-                                id="t-make">-</span></div>
-
-                        <div style="margin: 1rem 0; font-weight:bold; border-bottom:1px solid #000;">OFFENSE</div>
-                        <div class="ticket-row"><span class="ticket-label">CODE</span><span class="ticket-value"
-                                id="t-code">-</span></div>
-                        <div class="ticket-row"><span class="ticket-label">FINE</span><span class="ticket-value"
-                                style="font-weight:bold;" id="t-fine">$0.00</span></div>
-                        <div style="font-size: 0.85rem; margin-top: 5px;" id="t-desc">...</div>
-
-                        <div style="margin-top: 2rem; border-top: 1px solid #000; padding-top: 5px;">
-                            <div class="ticket-label">OFFICER SIGNATURE</div>
-                            <div
-                                style="font-family: 'Mrs Saint Delafield', cursive; font-size: 1.5rem; margin-top: 10px;">
-                                Ofc. John Doe</div>
+                        <div class="t-section">
+                            <div class="t-row"><span class="t-label">DATE OF OFFENSE</span><span class="t-val"
+                                    id="t-date">01/01/2024 12:00</span></div>
+                            <div class="t-row"><span class="t-label">LOCATION</span><span class="t-val"
+                                    id="t-loc">--</span></div>
                         </div>
+
+                        <div class="t-section">
+                            <div class="t-label" style="text-align:center; margin-bottom:5px;">VIOLATOR INFORMATION
+                            </div>
+                            <div class="t-row"><span class="t-label">NAME</span><span class="t-val" id="t-name">,</span>
+                            </div>
+                            <div class="t-row"><span class="t-label">ADDRESS</span><span class="t-val"
+                                    id="t-addr"></span></div>
+                            <div class="t-row">
+                                <div><span class="t-label">CITY/ST/ZIP</span> <span class="t-val"
+                                        id="t-citystate"></span></div>
+                            </div>
+                            <div class="t-row" style="margin-top:5px;">
+                                <div><span class="t-label">DOB</span> <span id="t-dob">--/--/--</span></div>
+                                <div><span class="t-label">SEX</span> <span id="t-sex">-</span></div>
+                                <div><span class="t-label">RACE</span> <span id="t-race">-</span></div>
+                                <div><span class="t-label">HGT/WGT</span> <span id="t-hgt"></span></div>
+                            </div>
+                            <div class="t-row" style="margin-top:5px;">
+                                <div><span class="t-label">DL NO.</span> <span class="t-val" id="t-dl"></span></div>
+                                <div><span class="t-label">ST</span> <span class="t-val" id="t-dlstate"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="t-section">
+                            <div class="t-label" style="text-align:center; margin-bottom:5px;">VEHICLE INFORMATION</div>
+                            <div class="t-row">
+                                <div><span class="t-label">TAG</span> <span class="t-val" id="t-plate"></span></div>
+                                <div><span class="t-label">ST</span> <span class="t-val" id="t-pstate"></span></div>
+                                <div><span class="t-label">YR</span> <span class="t-val" id="t-year"></span></div>
+                            </div>
+                            <div class="t-row">
+                                <div><span class="t-label">COLOR</span> <span class="t-val" id="t-color"></span></div>
+                                <div><span class="t-label">MAKE/MOD</span> <span class="t-val" id="t-make"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="t-section" style="border: 2px solid #000; padding: 10px; margin: 10px 0;">
+                            <div class="t-label">OFFENSE CHARGED</div>
+                            <div class="t-val t-big" id="t-code">TR-000</div>
+                            <div class="t-val" id="t-desc" style="white-space: pre-wrap;"></div>
+                            <div class="t-row" style="margin-top:10px;">
+                                <span class="t-label" style="font-size:12px;">TOTAL FINE:</span>
+                                <span class="t-val t-big" id="t-fine">$0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="t-section">
+                            <div class="t-label">COURT APPEARANCE REQUIRED</div>
+                            <div style="margin:5px 0;">YOU ARE HEREBY ORDERED TO APPEAR AT:</div>
+                            <div class="t-val">METRO MUNICIPAL COURT</div>
+                            <div class="t-val">100 JUSTICE WAY, ROOM 101</div>
+                            <div class="t-row" style="margin-top:5px;">
+                                <span class="t-label" style="font-size:12px;">DATE:</span>
+                                <span class="t-val t-big" id="t-court">--/--/--</span>
+                            </div>
+                            <div class="t-row">
+                                <span class="t-label">TIME:</span>
+                                <span class="t-val">09:00 AM</span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <div class="t-label">ISSUING OFFICER</div>
+                            <div class="t-val">Ofc. J. Doe #4492</div>
+                            <div class="t-label" style="margin-top:10px;">SIGNATURE:</div>
+                            <div style="border-bottom:1px solid #000; height:30px;"></div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <div class="t-label">VIOLATOR SIGNATURE</div>
+                            <div style="font-size:9px;">(Promise to appear, not admission of guilt)</div>
+                            <div style="border-bottom:1px solid #000; height:30px;"></div>
+                        </div>
+
+                        <div style="text-align:center; font-size:10px; margin-top:20px;">
+                            PAY ONLINE AT METROPOLICE.GOV<br>
+                            HELPLINE: (555) 012-3456
+                        </div>
+
                     </div>
                 </div>
 
@@ -136,6 +337,7 @@
                 padding: 0;
                 height: auto;
                 display: block;
+                overflow: visible;
             }
 
             .ticket-preview {
@@ -145,38 +347,131 @@
                 top: 0;
                 left: 0;
                 width: 100%;
-                max-width: 100%;
             }
+
+            #ticket-printout {
+                border: none;
+                width: 80mm;
+                margin: 0 auto;
+            }
+
+            /* Thermal width approx */
         }
     </style>
 
     <script>
-        function updateTicket() {
-            document.getElementById('t-name').textContent = document.getElementById('in-name').value || 'UNKNOWN';
-            document.getElementById('t-dl').textContent = document.getElementById('in-dl').value || '-';
-            document.getElementById('t-plate').textContent = document.getElementById('in-plate').value || '-';
-            document.getElementById('t-make').textContent = document.getElementById('in-make').value || '-';
-            document.getElementById('t-code').textContent = document.getElementById('in-code').value || '-';
-            document.getElementById('t-fine').textContent = '$' + (document.getElementById('in-fine').value || '0.00');
-            document.getElementById('t-desc').textContent = document.getElementById('in-desc').value || '...';
+        // VIOLATION DATABASE
+        const DB = {
+            traffic: [
+                { code: "TR-401", fine: 153.00, points: 2, desc: "SPEEDING 1-10 MPH OVER LIMIT" },
+                { code: "TR-402", fine: 284.00, points: 3, desc: "SPEEDING 11-20 MPH OVER LIMIT" },
+                { code: "TR-403", fine: 450.00, points: 6, desc: "SPEEDING 21+ MPH OVER - RECKLESS" },
+                { code: "TR-305", fine: 180.00, points: 3, desc: "FAILURE TO STOP AT RED LIGHT" },
+                { code: "TR-306", fine: 180.00, points: 3, desc: "FAILURE TO STOP AT STOP SIGN" },
+                { code: "TR-202", fine: 135.00, points: 2, desc: "UNSAFE LANE CHANGE" },
+                { code: "TR-505", fine: 250.00, points: 0, desc: "TEXTING WHILE DRIVING" },
+                { code: "TR-100", fine: 0.00, points: 0, desc: "WARNING - MOVING VIOLATION" }
+            ],
+            equip: [
+                { code: "EQ-101", fine: 55.00, points: 0, desc: "HEADLIGHT OUT / BROKEN" },
+                { code: "EQ-102", fine: 55.00, points: 0, desc: "TAIL LIGHT OUT / BROKEN" },
+                { code: "EQ-103", fine: 110.00, points: 0, desc: "EXPIRED REGISTRATION < 6 MO" },
+                { code: "EQ-104", fine: 220.00, points: 0, desc: "NO INSURANCE PROVIDED" },
+                { code: "EQ-105", fine: 85.00, points: 0, desc: "ILLEGAL TINT" }
+            ],
+            parking: [
+                { code: "PK-101", fine: 35.00, points: 0, desc: "PARKED IN NO PARKING ZONE" },
+                { code: "PK-102", fine: 250.00, points: 0, desc: "PARKED IN HANDICAP SPOT" },
+                { code: "PK-103", fine: 50.00, points: 0, desc: "BLOCKING DRIVEWAY" },
+                { code: "PK-104", fine: 100.00, points: 0, desc: "FIRE HYDRANT (< 15 FT)" }
+            ],
+            criminal: [
+                { code: "CR-901", fine: 1500.00, points: 0, desc: "D.U.I - ALCOHOL/DRUGS" },
+                { code: "CR-505", fine: 450.00, points: 0, desc: "DRIVING WITH SUSPENDED LICENSE" },
+                { code: "CR-210", fine: 350.00, points: 0, desc: "POSSESSION OF PARAPHERNALIA" },
+                { code: "CR-110", fine: 500.00, points: 0, desc: "DISORDERLY CONDUCT" }
+            ]
+        };
+
+        function loadViolations() {
+            const cat = document.getElementById('cat-select').value;
+            const select = document.getElementById('offense-select');
+            select.innerHTML = '<option value="">-- Select Offense --</option>';
+
+            DB[cat].forEach((v, index) => {
+                const opt = document.createElement('option');
+                opt.value = index; // Store index to retrieve obj later
+                opt.textContent = `[${v.code}] ${v.desc} ($${v.fine})`;
+                select.appendChild(opt);
+            });
         }
 
-        function prefillViolation(select) {
-            const val = select.value;
-            if (val === 'speeding') {
-                document.getElementById('in-code').value = 'TR-402';
-                document.getElementById('in-fine').value = '250';
-                document.getElementById('in-desc').value = 'Speeding 15+ MPH over limit';
-            } else if (val === 'redlight') {
-                document.getElementById('in-code').value = 'TR-305';
-                document.getElementById('in-fine').value = '180';
-                document.getElementById('in-desc').value = 'Failure to stop at signal';
-            }
-            updateTicket();
+        function selectOffense() {
+            const cat = document.getElementById('cat-select').value;
+            const idx = document.getElementById('offense-select').value;
+            if (idx === "") return;
+
+            const vi = DB[cat][idx];
+            document.getElementById('in-code').value = vi.code;
+            document.getElementById('in-fine').value = vi.fine.toFixed(2);
+            document.getElementById('in-points').value = vi.points;
+            document.getElementById('in-desc').value = vi.desc;
+            updateT();
         }
 
-        document.getElementById('t-date').textContent = new Date().toLocaleString();
-        document.getElementById('t-id').textContent = Math.floor(Math.random() * 90000) + 10000;
+        function updateT() {
+            const getVal = (id) => document.getElementById(id).value;
+            const setTxt = (id, val) => document.getElementById(id).textContent = val;
+
+            setTxt('t-date', getVal('in-date').replace("T", " ") || new Date().toLocaleString());
+            setTxt('t-loc', getVal('in-loc').toUpperCase());
+
+            setTxt('t-name', `${getVal('in-last').toUpperCase()}, ${getVal('in-first').toUpperCase()}`);
+            setTxt('t-addr', getVal('in-addr').toUpperCase());
+            setTxt('t-citystate', `${getVal('in-city').toUpperCase()}, ${getVal('in-state').toUpperCase()} ${getVal('in-zip')}`);
+
+            setTxt('t-dob', getVal('in-dob') || '--/--/--');
+            setTxt('t-sex', getVal('in-sex'));
+            setTxt('t-race', getVal('in-race'));
+            setTxt('t-hgt', getVal('in-hgt'));
+
+            setTxt('t-dl', getVal('in-dl').toUpperCase());
+            setTxt('t-dlstate', getVal('in-dlstate').toUpperCase());
+
+            setTxt('t-plate', getVal('in-plate').toUpperCase());
+            setTxt('t-pstate', getVal('in-pstate').toUpperCase());
+            setTxt('t-year', getVal('in-year'));
+            setTxt('t-make', `${getVal('in-make').toUpperCase()} / ${getVal('in-model').toUpperCase()}`);
+            setTxt('t-color', getVal('in-color').toUpperCase());
+
+            setTxt('t-code', getVal('in-code'));
+            setTxt('t-fine', '$' + getVal('in-fine'));
+            setTxt('t-desc', getVal('in-desc').toUpperCase());
+
+            setTxt('t-court', getVal('in-court') || 'TBD');
+        }
+
+        function init() {
+            // Default Date
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
+            document.getElementById('in-date').value = localISOTime;
+
+            // Default Court Date (+30 days)
+            const court = new Date();
+            court.setDate(court.getDate() + 30);
+            document.getElementById('in-court').value = court.toISOString().split('T')[0];
+
+            // Load initial list
+            loadViolations();
+
+            // Random ID
+            document.getElementById('t-id').textContent = Math.floor(Math.random() * 900000) + 100000;
+            updateT();
+        }
+
+        init();
     </script>
 </body>
 
