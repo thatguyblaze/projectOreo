@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-Citation Writer - Metro PD</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        // Redirect if not logged in
+        if (!localStorage.getItem('mpd_session')) window.location.href = 'portal.html';
+    </script>
+</head>
+
+<body>
+    <div class="portal-container">
+        <aside class="sidebar no-print">
+            <div class="sidebar-header">
+                <div class="badge-logo">MPD</div>
+                <div>OFFICER<br>PORTAL</div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="portal.html" class="nav-item">← Back to Dashboard</a>
+                <a href="#" class="nav-item active">📝 e-Citations</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="portal-header no-print">
+                <h3>e-Citation Writer</h3>
+                <div>
+                    <button onclick="window.print()" class="btn-login" style="background: var(--accent-blue);">🖨️ Issue
+                        & Print</button>
+                </div>
+            </header>
+
+            <div class="content-area" style="display: flex; gap: 2rem;">
+
+                <!-- EDITOR FORM -->
+                <div class="card no-print" style="flex: 1;">
+                    <div class="form-group">
+                        <label>Quick Select Violation</label>
+                        <select class="form-control" onchange="prefillViolation(this)">
+                            <option value="">-- Select --</option>
+                            <option value="speeding">Speeding (10+ over)</option>
+                            <option value="redlight">Running Red Light</option>
+                            <option value="parking">Illegal Parking</option>
+                        </select>
+                    </div>
+
+                    <h4 style="border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-top: 1.5rem;">Violator Info
+                    </h4>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Name</label><input type="text" id="in-name" class="form-control"
+                                oninput="updateTicket()"></div>
+                        <div class="form-group"><label>DL #</label><input type="text" id="in-dl" class="form-control"
+                                oninput="updateTicket()"></div>
+                    </div>
+
+                    <h4 style="border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-top: 1rem;">Vehicle</h4>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Plate</label><input type="text" id="in-plate"
+                                class="form-control" oninput="updateTicket()"></div>
+                        <div class="form-group"><label>Make/Model</label><input type="text" id="in-make"
+                                class="form-control" oninput="updateTicket()"></div>
+                    </div>
+
+                    <h4 style="border-bottom: 1px solid #ddd; padding-bottom: 0.5rem; margin-top: 1rem;">Violation</h4>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Code</label><input type="text" id="in-code" class="form-control"
+                                oninput="updateTicket()"></div>
+                        <div class="form-group"><label>Fine ($)</label><input type="number" id="in-fine"
+                                class="form-control" oninput="updateTicket()"></div>
+                    </div>
+                    <div class="form-group"><label>Description</label><input type="text" id="in-desc"
+                            class="form-control" oninput="updateTicket()"></div>
+                </div>
+
+                <!-- LIVE PREVIEW -->
+                <div style="flex: 0 0 350px;">
+                    <div id="ticket-printout" class="ticket-preview">
+                        <div style="text-align: center; margin-bottom: 1rem;">
+                            <img src="vite.svg" width="40" style="opacity:0.5;">
+                            <h3 style="margin:0;">METRO POLICE</h3>
+                            <div style="font-size:0.8rem;">NOTICE TO APPEAR</div>
+                            <div style="font-size:0.8rem; font-weight:bold; margin-top:5px;">CITATION #<span
+                                    id="t-id">88421</span></div>
+                        </div>
+
+                        <div class="ticket-row"><span class="ticket-label">DATE/TIME</span><span class="ticket-value"
+                                id="t-date">...</span></div>
+
+                        <div style="margin: 1rem 0; font-weight:bold; border-bottom:1px solid #000;">VIOLATOR</div>
+                        <div class="ticket-row"><span class="ticket-label">NAME</span><span class="ticket-value"
+                                id="t-name">UNKNOWN</span></div>
+                        <div class="ticket-row"><span class="ticket-label">DL NO.</span><span class="ticket-value"
+                                id="t-dl">-</span></div>
+
+                        <div style="margin: 1rem 0; font-weight:bold; border-bottom:1px solid #000;">VEHICLE</div>
+                        <div class="ticket-row"><span class="ticket-label">PLATE</span><span class="ticket-value"
+                                id="t-plate">-</span></div>
+                        <div class="ticket-row"><span class="ticket-label">VEHICLE</span><span class="ticket-value"
+                                id="t-make">-</span></div>
+
+                        <div style="margin: 1rem 0; font-weight:bold; border-bottom:1px solid #000;">OFFENSE</div>
+                        <div class="ticket-row"><span class="ticket-label">CODE</span><span class="ticket-value"
+                                id="t-code">-</span></div>
+                        <div class="ticket-row"><span class="ticket-label">FINE</span><span class="ticket-value"
+                                style="font-weight:bold;" id="t-fine">$0.00</span></div>
+                        <div style="font-size: 0.85rem; margin-top: 5px;" id="t-desc">...</div>
+
+                        <div style="margin-top: 2rem; border-top: 1px solid #000; padding-top: 5px;">
+                            <div class="ticket-label">OFFICER SIGNATURE</div>
+                            <div
+                                style="font-family: 'Mrs Saint Delafield', cursive; font-size: 1.5rem; margin-top: 10px;">
+                                Ofc. John Doe</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body,
+            .portal-container,
+            .main-content {
+                background: white;
+                margin: 0;
+                padding: 0;
+                height: auto;
+                display: block;
+            }
+
+            .ticket-preview {
+                box-shadow: none;
+                border: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+
+    <script>
+        function updateTicket() {
+            document.getElementById('t-name').textContent = document.getElementById('in-name').value || 'UNKNOWN';
+            document.getElementById('t-dl').textContent = document.getElementById('in-dl').value || '-';
+            document.getElementById('t-plate').textContent = document.getElementById('in-plate').value || '-';
+            document.getElementById('t-make').textContent = document.getElementById('in-make').value || '-';
+            document.getElementById('t-code').textContent = document.getElementById('in-code').value || '-';
+            document.getElementById('t-fine').textContent = '$' + (document.getElementById('in-fine').value || '0.00');
+            document.getElementById('t-desc').textContent = document.getElementById('in-desc').value || '...';
+        }
+
+        function prefillViolation(select) {
+            const val = select.value;
+            if (val === 'speeding') {
+                document.getElementById('in-code').value = 'TR-402';
+                document.getElementById('in-fine').value = '250';
+                document.getElementById('in-desc').value = 'Speeding 15+ MPH over limit';
+            } else if (val === 'redlight') {
+                document.getElementById('in-code').value = 'TR-305';
+                document.getElementById('in-fine').value = '180';
+                document.getElementById('in-desc').value = 'Failure to stop at signal';
+            }
+            updateTicket();
+        }
+
+        document.getElementById('t-date').textContent = new Date().toLocaleString();
+        document.getElementById('t-id').textContent = Math.floor(Math.random() * 90000) + 10000;
+    </script>
+</body>
+
+</html>
