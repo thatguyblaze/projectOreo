@@ -4,85 +4,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPD Command Portal | Rogersville Police Dept.</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>RPD Command Portal | Rogersville Police Dept</title>
+    <link rel="stylesheet" href="css/style.css">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="css/style.css">
-
-    <!-- Maps (Leaflet) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Government Fonts (Inter + Merriweather) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@300;400;700;900&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
-    <div id="app">
-        <!-- Top Navigation Bar -->
-        <header class="main-header">
-            <div class="header-left">
-                <img src="images/logo.png" alt="RPD Shield" class="logo-img">
-                <div class="brand-info">
-                    <div class="brand-text">ROGERSVILLE PD</div>
-                    <div class="brand-subtitle">COMMAND PORTAL</div>
-                </div>
+
+    <!-- 1. LOGIN SCREEN -->
+    <div id="login-root">
+        <!-- Rendered by login.js -->
+    </div>
+
+    <!-- 2. MAIN APPLICATION (Hidden until Auth) -->
+    <div id="app" class="hidden">
+        <!-- Top Navigation -->
+        <nav id="top-nav">
+            <div class="brand">
+                <i class="fa-solid fa-building-columns"></i> Rogersville PD
             </div>
 
-            <nav class="top-nav">
-                <a href="#" class="nav-item active" data-view="dashboard">
-                    <i class="fa-solid fa-gauge-high"></i> DASHBOARD
-                </a>
-                <a href="#" class="nav-item" data-view="tickets">
-                    <i class="fa-solid fa-file-invoice"></i> CITATIONS
-                </a>
-                <a href="#" class="nav-item" data-view="cases">
-                    <i class="fa-solid fa-folder-open"></i> CASE MANAGER
-                </a>
-                <a href="#" class="nav-item" data-view="intelligence">
-                    <i class="fa-solid fa-map-location-dot"></i> INTEL
-                </a>
-                <a href="#" class="nav-item" data-view="admin">
-                    <i class="fa-solid fa-users-gear"></i> ADMIN
-                </a>
-            </nav>
+            <div class="nav-links" id="main-nav">
+                <!-- Data-Routes mapped to JS modules -->
+                <a class="nav-item active" data-route="dashboard"><i class="fa-solid fa-chart-line"></i> Briefing</a>
+                <a class="nav-item" data-route="traffic"><i class="fa-solid fa-car-on"></i> Citations</a>
+                <a class="nav-item" data-route="cases"><i class="fa-solid fa-folder-open"></i> Cases</a>
+                <a class="nav-item" data-route="intelligence"><i class="fa-solid fa-map-location-dot"></i> Intel</a>
 
-            <div class="user-panel">
-                <div class="user-info">
-                    <span class="officer-name">Sgt. Miller</span>
-                    <span class="badge-number">#8921</span>
-                </div>
-                <div class="user-avatar">JM</div>
+                <!-- New Legal Module -->
+                <a class="nav-item" data-route="legal"><i class="fa-solid fa-scale-balanced"></i> Resources</a>
+
+                <!-- Admin (Conditional) -->
+                <a class="nav-item hidden" data-route="admin" id="nav-admin"><i class="fa-solid fa-user-shield"></i>
+                    Admin</a>
             </div>
-        </header>
+
+            <div class="user-profile">
+                <div style="text-align: right; line-height: 1.2;">
+                    <div style="font-weight: 700; text-transform: uppercase;" id="user-name">...</div>
+                    <div style="font-size: 0.7rem; color: #94a3b8;" id="user-rank">...</div>
+                </div>
+                <button class="btn-icon" id="logout-btn" title="Sign Out" style="margin-left: 10px; color: #fff;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </nav>
 
         <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Context Bar (Breadcrumbs & Status) -->
-            <div class="context-bar">
-                <div class="breadcrumbs">
-                    <span id="page-title">Command Dashboard</span>
-                </div>
-                <div class="system-status">
-                    <span class="status-pill success"><i class="fa-solid fa-check-circle"></i> COURT SYNC</span>
-                    <span class="status-pill success"><i class="fa-solid fa-wifi"></i> NCIC LIVE</span>
-                </div>
-            </div>
-
-            <!-- View Container -->
-            <div id="view-container" class="view-container">
-                <!-- Content injected here -->
-            </div>
+        <main id="main-content">
+            <!-- Dynamic Module Content Loads Here -->
         </main>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 

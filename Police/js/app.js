@@ -1,84 +1,91 @@
+import * as Login from './modules/login.js';
 import * as Dashboard from './modules/dashboard.js';
 import * as Tickets from './modules/traffic.js';
 import * as Cases from './modules/cases.js';
-import * as Intelligence from './modules/intelligence.js';
+import * as Intelligence from './modules/intelligence.js'; // Will update later
 import * as Admin from './modules/admin.js';
+import * as Redaction from './modules/redaction.js';
+import * as Legal from './modules/legal.js'; // New Module
 
-class App {
-    constructor() {
-        this.viewContainer = document.getElementById('view-container');
-        this.pageTitle = document.getElementById('page-title');
-        this.navItems = document.querySelectorAll('.nav-item');
+// State
+let currentUser = null;
 
-        this.init();
+const routes = {
+    'dashboard': Dashboard,
+    'traffic': Tickets,
+    'cases': Cases,
+    'intelligence': Intelligence,
+    'redaction': Redaction,
+    'admin': Admin,
+    'legal': Legal
+};
+
+// Start
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Initialize Login
+    const loginRoot = document.getElementById('login-root');
+    loginRoot.innerHTML = Login.getTemplate();
+    Login.init((user) => {
+        handleLoginSuccess(user);
+    });
+});
+
+function handleLoginSuccess(user) {
+    currentUser = user;
+
+    // UI Switch
+    document.getElementById('login-root').classList.add('hidden');
+    const app = document.getElementById('app');
+    app.classList.remove('hidden');
+
+    // Set Profile
+    document.getElementById('user-name').innerText = user.name.toUpperCase();
+    document.getElementById('user-rank').innerText = user.rank.toUpperCase();
+
+    // RBAC (Role Based Access)
+    const adminNav = document.getElementById('nav-admin');
+    if (user.rank === 'Captain' || user.rank === 'Sergeant') {
+        adminNav.classList.remove('hidden');
     }
 
-    init() {
-        // Navigation Logic (Top Bar)
-        this.navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                const viewName = item.dataset.view;
+    // Init Router
+    initRouter();
 
-                // Update active state
-                this.navItems.forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-
-                // Switch View
-                this.switchView(viewName);
-            });
-        });
-
-        // Load default view (Dashboard)
-        this.switchView('dashboard');
-    }
-
-    switchView(viewName) {
-        // Clear container with fade effect
-        this.viewContainer.style.opacity = '0';
-
-        setTimeout(() => {
-            this.viewContainer.innerHTML = '';
-
-            switch (viewName) {
-                case 'dashboard':
-                    this.updateHeader('Command Dashboard', 'Overview');
-                    this.viewContainer.innerHTML = Dashboard.getTemplate();
-                    Dashboard.init();
-                    break;
-                case 'tickets':
-                    this.updateHeader('Citation Management', 'Traffic & Enforcement');
-                    this.viewContainer.innerHTML = Tickets.getTemplate();
-                    Tickets.init(); // Now handles sub-views internally
-                    break;
-                case 'cases':
-                    this.updateHeader('Case Manager', 'Investigations');
-                    this.viewContainer.innerHTML = Cases.getTemplate();
-                    Cases.init();
-                    break;
-                case 'intelligence':
-                    this.updateHeader('Intelligence', 'Maps & Analytics');
-                    this.viewContainer.innerHTML = Intelligence.getTemplate();
-                    Intelligence.init();
-                    break;
-                case 'admin':
-                    this.updateHeader('Admin Center', 'System Control');
-                    this.viewContainer.innerHTML = Admin.getTemplate();
-                    Admin.init();
-                    break;
-            }
-
-            // Restore Opacity
-            this.viewContainer.style.opacity = '1';
-        }, 150);
-    }
-
-    updateHeader(title, subtitle) {
-        this.pageTitle.innerHTML = `<i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; margin-right: 10px; color: var(--text-muted);"></i> ${title} <span style="font-weight: 400; color: var(--text-muted); margin-left: 10px;">| ${subtitle}</span>`;
-    }
+    // Logout Logic
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        location.reload(); // Simple logout
+    });
 }
 
-// Initialize App
-document.addEventListener('DOMContentLoaded', () => {
-    new App();
-});
+function initRouter() {
+    const navItems = document.querySelectorAll('.nav-item');
+    const contentArea = document.getElementById('main-content');
+
+    // Default Route
+    loadRoute('dashboard');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            // Active State
+            navItems.forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+
+            // Load Content
+            const route = item.dataset.route;
+            loadRoute(route);
+        });
+    });
+
+    function loadRoute(route) {
+        const module = routes[route];
+        if (module) {
+            contentArea.innerHTML = module.getTemplate();
+            // Checking if module has init function before calling it
+            if (typeof module.init === 'function') {
+                module.init();
+            }
+        } else {
+            contentArea.innerHTML = `<div style="padding: 2rem; text-align: center;">Module '${route}' under development.</div>`;
+        }
+    }
+}

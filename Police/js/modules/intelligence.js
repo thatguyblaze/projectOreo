@@ -1,153 +1,175 @@
 export function getTemplate() {
     return `
-        <div class="grid-2 fade-in" style="height: calc(100vh - 140px);">
-            <!-- Left: Controls -->
-            <div style="display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto;">
-                <div class="card" style="margin-bottom: 0;">
-                    <div class="card-header">
-                        <div class="card-title">Analysis Filters</div>
-                    </div>
-                    <div class="card-body">
-                         <div class="form-group">
-                            <label>Time Range Analysis</label>
-                            <input type="range" class="form-input" style="padding: 0;" min="1" max="100" value="24" oninput="this.nextElementSibling.innerText = this.value + ' Hours'">
-                            <div style="text-align: right; font-size: 0.8rem; font-weight: bold; color: var(--brand-cobalt); margin-top: 5px;">24 Hours</div>
+        <div class="fade-in">
+             <div class="grid-2" style="grid-template-columns: 2fr 1fr;">
+                
+                <!-- LEFT COLUMN: BRIEFING & NCIC -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    
+                    <!-- 1. SHIFT BRIEFING -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-bullhorn"></i> Shift Briefing Notes</div>
+                            <div class="badge badge-warning">DO NOT REDISSEMINATE</div>
                         </div>
+                        <div class="card-body">
+                            <div style="background: #fffbeb; border: 1px solid #fcd34d; padding: 1rem; margin-bottom: 1rem; font-size: 0.9rem;">
+                                <strong>Watch Commander (Sgt. Miller):</strong> 
+                                Focus patrols on Main St corridor between 2200-0200 due to recent break-ins. Be advised: 
+                                Silver Ford F-150 reported fleeing scene of reckless driving incident near Hwy 11.
+                            </div>
+                            <table class="data-table">
+                                <thead><tr><th>BOLO Type</th><th>Description</th><th>Case Ref</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge badge-danger">STOLEN VEH</span></td>
+                                        <td>2018 Honda Accord, Grey. Plate: 4B2-99L. Rear bumper damage.</td>
+                                        <td>26-0034</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-warning">MISSING</span></td>
+                                        <td>J. Smith (14yo M). Last seen wearing Blue Hoodie near High School.</td>
+                                        <td>26-0041</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                        <div style="margin-top: 1.5rem;">
-                            <label style="font-weight: 500; display: block; margin-bottom: 0.5rem;">Crime Layers</label>
-                            
-                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer;">
-                                <input type="checkbox" checked class="layer-toggle" data-layer="violent">
-                                <span class="badge badge-danger">Class A Felonies</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer;">
-                                <input type="checkbox" checked class="layer-toggle" data-layer="property">
-                                <span class="badge badge-warning">Property / Theft</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; cursor: pointer;">
-                                <input type="checkbox" class="layer-toggle" data-layer="traffic">
-                                <span class="badge badge-success">Traffic Stops</span>
-                            </label>
+                    <!-- 2. NCIC SIMULATOR -->
+                    <div class="card">
+                         <div class="card-header">
+                            <div class="card-title"><i class="fa-solid fa-database"></i> NCIC / TIES Lookup</div>
+                        </div>
+                        <div class="card-body">
+                            <form id="ncic-form" style="display: flex; gap: 10px; align-items: flex-end;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.7rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">Search Query (Name, VIN, Plate)</label>
+                                    <input type="text" id="ncic-query" class="form-input" placeholder="ENTER QUERY..." style="font-family: monospace; text-transform: uppercase;">
+                                </div>
+                                <div style="width: 150px;">
+                                     <label style="font-size: 0.7rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase;">Database</label>
+                                    <select class="form-input">
+                                        <option>PERSONS</option>
+                                        <option>VEHICLES</option>
+                                        <option>GUNS</option>
+                                        <option>ARTICLES</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="ncic-btn">RUN QUERY</button>
+                            </form>
+
+                            <div id="ncic-result" class="hidden" style="margin-top: 1rem; border: 1px solid var(--border); background: #f1f5f9; padding: 1rem; font-family: monospace; font-size: 0.85rem;">
+                                <!-- Dynamic Result -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN: WARRANTS -->
+                <div class="card" style="height: fit-content;">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-gavel"></i> Active Warrants</div>
+                    </div>
+                    <div class="card-body" style="padding: 0;">
+                        <table class="data-table" style="font-size: 0.8rem;">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Charge</th>
+                                    <th>Bond</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>WILSON, Greg</strong><br>DOB: 11/02/1985</td>
+                                    <td>FTA: Driving Suspended</td>
+                                    <td>$500</td>
+                                </tr>
+                                 <tr>
+                                    <td><strong>DAVIS, Sarah</strong><br>DOB: 05/14/1992</td>
+                                    <td>VOP: Theft U/$1000</td>
+                                    <td>NO BOND</td>
+                                </tr>
+                                 <tr>
+                                    <td><strong>JONES, Mike</strong><br>DOB: 01/22/2001</td>
+                                    <td>Domestic Assault</td>
+                                    <td>$2500</td>
+                                </tr>
+                                <tr style="background: #fee2e2;">
+                                    <td><strong>UNKNOWN</strong><br>Alias: "Slim"</td>
+                                    <td>Agg. Robbery</td>
+                                    <td>$50,000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 0.7rem;">
+                            CONFIRM ALL WARRANTS WITH DISPATCH PRIOR TO ARREST
                         </div>
                     </div>
                 </div>
 
-                <div class="card" style="margin-bottom: 0;">
-                    <div class="card-header">
-                         <div class="card-title">Reports</div>
-                    </div>
-                    <div class="card-body">
-                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
-                            Generate intelligence brief for command staff based on current map view.
-                        </p>
-                        <button class="btn btn-primary" style="width: 100%; justify-content: center;" id="gen-report-btn">
-                            <i class="fa-solid fa-file-pdf"></i> GENERATE TACTICAL BRIEF
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right: Map -->
-            <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; overflow: hidden;">
-                <div class="card-header">
-                    <div class="card-title">Rogersville Sector Map</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">LIVE FEED</div>
-                </div>
-                <div id="map-container" style="flex: 1; background: #e2e8f0; position: relative;">
-                    <!-- Leaflet inject -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Report Modal -->
-        <div id="report-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center;">
-            <div style="background: white; padding: 2rem; border-radius: 8px; width: 400px; text-align: center;">
-                <i class="fa-solid fa-file-contract" style="font-size: 3rem; color: var(--brand-cobalt); margin-bottom: 1rem;"></i>
-                <h3 style="margin-bottom: 0.5rem;">Generating Brief...</h3>
-                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Compiling crime stats and heatmap data.</p>
-                <div style="height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; margin-bottom: 1rem;">
-                    <div id="report-progress" style="width: 0%; height: 100%; background: var(--brand-cobalt); transition: width 0.2s;"></div>
-                </div>
-                <button id="download-report" class="btn btn-primary hidden" style="width: 100%;">DOWNLOAD PDF</button>
-            </div>
+             </div>
         </div>
     `;
 }
 
 export function init() {
-    let map = null;
-    const layers = {};
+    const form = document.getElementById('ncic-form');
+    const resultBox = document.getElementById('ncic-result');
+    const btn = document.getElementById('ncic-btn');
 
-    // 1. Initialize Map
-    // Wait for DOM
-    setTimeout(() => {
-        const container = document.getElementById('map-container');
-        if (container && typeof L !== 'undefined') {
-            map = L.map('map-container').setView([36.1627, -86.7816], 13);
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const query = document.getElementById('ncic-query').value;
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }).addTo(map);
+        if (!query) return;
 
-            // Create Layers
-            layers.violent = L.layerGroup([
-                L.circle([36.1627, -86.7816], { color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 500 }).bindPopup("ASSAULT - 2HRS AGO"),
-                L.circle([36.1500, -86.7900], { color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 300 }).bindPopup("ROBBERY - 6HRS AGO")
-            ]).addTo(map);
+        // Simulate Loading
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> RUNNING...';
+        resultBox.classList.remove('hidden');
+        resultBox.innerHTML = 'Creating TIES Data Link... <span style="color:green">CONNECTED</span><br>Querying NCIC...';
 
-            layers.property = L.layerGroup([
-                L.circle([36.1700, -86.7700], { color: 'orange', fillColor: '#f59e0b', fillOpacity: 0.5, radius: 400 }).bindPopup("BURGLARY SERIES"),
-                L.circle([36.1400, -86.7600], { color: 'orange', fillColor: '#f59e0b', fillOpacity: 0.5, radius: 400 })
-            ]).addTo(map);
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = 'RUN QUERY';
 
-            layers.traffic = L.layerGroup([
-                L.circle([36.1800, -86.7500], { color: 'green', fillColor: '#10b981', fillOpacity: 0.5, radius: 200 }).bindPopup("DUI CHECKPOINT")
-            ]); // Not added by default
+            // Randomly return result or no hit
+            const isHit = Math.random() > 0.5;
 
-            setTimeout(() => map.invalidateSize(), 200);
-        }
-    }, 100);
-
-    // 2. Toggles
-    document.querySelectorAll('.layer-toggle').forEach(chk => {
-        chk.addEventListener('change', (e) => {
-            const layerName = e.target.dataset.layer;
-            if (e.target.checked) {
-                map.addLayer(layers[layerName]);
+            if (query.toUpperCase() === 'TEST') {
+                resultBox.innerHTML += `
+                    <br>----------------------------------------
+                    <br><strong>MKE/WANTED PERSON</strong>
+                    <br>NAM/TEST, SUBJECT  SEX/M RAC/W
+                    <br>HIT CONFIRMATION REQUIRED
+                    <br>ORI/TN0370100
+                    <br>OFF/AGGRAVATED ASSAULT
+                    <br>WRN/24-1102A
+                    <br>----------------------------------------
+                    <br><strong style="color:red">** SUBJECT IS ARMED AND DANGEROUS **</strong>
+                `;
+            } else if (isHit) {
+                resultBox.innerHTML += `
+                    <br>----------------------------------------
+                    <br><strong>NO RECORD FOUND</strong>
+                    <br>NIC/NONE
+                    <br>DTE/${new Date().toLocaleDateString()}
+                    <br>----------------------------------------
+                `;
             } else {
-                map.removeLayer(layers[layerName]);
+                resultBox.innerHTML += `
+                    <br>----------------------------------------
+                    <br><strong>MKE/VEHICLE REGISTRATION</strong>
+                    <br>LIC/${query.toUpperCase()}  ST/TN  AYR/2025
+                    <br>VIN/1GNEC12T34J...
+                    <br>STS/VALID  OWN/DOE, JOHN
+                    <br>----------------------------------------
+                `;
             }
-        });
-    });
 
-    // 3. Report Generation
-    const btn = document.getElementById('gen-report-btn');
-    const modal = document.getElementById('report-modal');
-    const progress = document.getElementById('report-progress');
-    const dlBtn = document.getElementById('download-report');
-
-    btn.addEventListener('click', () => {
-        modal.classList.remove('hidden');
-        progress.style.width = '0%';
-        dlBtn.classList.add('hidden');
-
-        // Simulate Progress
-        let width = 0;
-        const interval = setInterval(() => {
-            width += 5;
-            progress.style.width = width + '%';
-            if (width >= 100) {
-                clearInterval(interval);
-                dlBtn.classList.remove('hidden');
-            }
-        }, 100);
-    });
-
-    dlBtn.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        alert("Report Downloaded to Local Disk.");
+        }, 1500);
     });
 }
