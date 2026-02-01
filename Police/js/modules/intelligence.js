@@ -60,7 +60,7 @@ export function getTemplate() {
                             </form>
 
                             <div id="ncic-result" class="hidden" style="margin-top: 1rem; border: 1px solid var(--border); background: #f1f5f9; padding: 1rem; font-family: monospace; font-size: 0.85rem;">
-                                <!-- Dynamic Result -->
+                                <!-- Dynamic result -->
                             </div>
                         </div>
                     </div>
@@ -73,7 +73,7 @@ export function getTemplate() {
                         <div class="card-title"><i class="fa-solid fa-gavel"></i> Active Warrants</div>
                     </div>
                     <div class="card-body" style="padding: 0;">
-                        <table class="data-table" style="font-size: 0.8rem;">
+                         <table class="data-table" style="font-size: 0.8rem;">
                             <thead>
                                 <tr>
                                     <th>Subject</th>
@@ -120,9 +120,14 @@ export function init() {
     const resultBox = document.getElementById('ncic-result');
     const btn = document.getElementById('ncic-btn');
 
+    // Data Generators
+    const firstNames = ['JAMES', 'JOHN', 'ROBERT', 'MICHAEL', 'WILLIAM', 'DAVID', 'RICHARD', 'JOSEPH', 'THOMAS', 'CHARLES', 'MARY', 'PATRICIA', 'JENNIFER', 'LINDA', 'ELIZABETH'];
+    const lastNames = ['SMITH', 'JOHNSON', 'WILLIAMS', 'BROWN', 'JONES', 'GARCIA', 'MILLER', 'DAVIS', 'RODRIGUEZ', 'MARTINEZ'];
+    const charges = ['AGG ASSAULT', 'THEFT OF PROPERTY', 'FAIL TO APPEAR', 'VIOLATION OF PROBATION', 'DRUGS: MFG/DEL/SELL', 'DUI 2ND OFFENSE'];
+
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const query = document.getElementById('ncic-query').value;
+        const query = document.getElementById('ncic-query').value.trim().toUpperCase();
 
         if (!query) return;
 
@@ -136,10 +141,24 @@ export function init() {
             btn.disabled = false;
             btn.innerText = 'RUN QUERY';
 
-            // Randomly return result or no hit
-            const isHit = Math.random() > 0.5;
+            // Generate Random Result
+            const rFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const rLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const rCharge = charges[Math.floor(Math.random() * charges.length)];
+            const rDOB = `${Math.floor(Math.random() * 12) + 1}/${Math.floor(Math.random() * 28) + 1}/${1960 + Math.floor(Math.random() * 40)}`;
 
-            if (query.toUpperCase() === 'TEST') {
+            // Heuristic: If query has numbers and is short, assume Plate/VIN. If just letters, assume Name.
+            const isPlate = /\d/.test(query);
+
+            // Random Probability
+            const rand = Math.random();
+            // 0.0 - 0.2: WARRANT HIT (Red)
+            // 0.2 - 0.3: STOLEN (Red)
+            // 0.3 - 0.6: WARNING / SUSPENDED (Yellow)
+            // 0.6 - 1.0: CLEAR (Green/Plain)
+
+            if (query === 'TEST') {
+                // Hardcoded Test
                 resultBox.innerHTML += `
                     <br>----------------------------------------
                     <br><strong>MKE/WANTED PERSON</strong>
@@ -151,25 +170,76 @@ export function init() {
                     <br>----------------------------------------
                     <br><strong style="color:red">** SUBJECT IS ARMED AND DANGEROUS **</strong>
                 `;
-            } else if (isHit) {
+            } else if (rand < 0.2 && !isPlate) {
+                // WANTED PERSON HIT
                 resultBox.innerHTML += `
                     <br>----------------------------------------
-                    <br><strong>NO RECORD FOUND</strong>
-                    <br>NIC/NONE
-                    <br>DTE/${new Date().toLocaleDateString()}
+                    <br><strong style="color:red; background:yellow;">** WANTED PERSON **</strong>
+                    <br>NAM/${rLastName}, ${rFirstName}
+                    <br>SEX/M RAC/W DOB/${rDOB}
+                    <br>
+                    <br>OFFENSE: ${rCharge}
+                    <br>WARRANT #: ${Math.floor(Math.random() * 90000) + 10000}
+                    <br>AGENCY: ROGERSVILLE PD
+                    <br>----------------------------------------
+                    <br>CONFIRM WITH DISPATCH BEFORE ARREST
+                `;
+            } else if (rand < 0.2 && isPlate) {
+                // STOLEN VEHICLE HIT
+                resultBox.innerHTML += `
+                    <br>----------------------------------------
+                    <br><strong style="color:red; background:yellow;">** STOLEN VEHICLE **</strong>
+                    <br>LIC/${query}  ST/TN  AYR/2021
+                    <br>VMA/TOYT  VMO/CAMRY  COL/SIL
+                    <br>VIN/4T1B...${Math.floor(Math.random() * 10000)}
+                    <br>
+                    <br>DATE OF THEFT: ${new Date().toLocaleDateString()}
+                    <br>WANTED BY: HAWKINS COUNTY SO
+                    <br>----------------------------------------
+                    <br>USE CAUTION - OCCUPANTS MAY BE ARMED
+                `;
+            } else if (rand < 0.4 && !isPlate) {
+                // DRIVER SUSPENDED
+                resultBox.innerHTML += `
+                    <br>----------------------------------------
+                    <br><strong>DRIVER LICENSE QUERY</strong>
+                    <br>NAM/${rLastName}, ${rFirstName}
+                    <br>DOB/${rDOB}  SEX/M
+                    <br>
+                    <br>STATUS: <strong style="color:orange">SUSPENDED</strong>
+                    <br>REASON: FAIL TO PAY FINES
+                    <br>REINSTATEMENT FEE: $155.00
                     <br>----------------------------------------
                 `;
             } else {
-                resultBox.innerHTML += `
-                    <br>----------------------------------------
-                    <br><strong>MKE/VEHICLE REGISTRATION</strong>
-                    <br>LIC/${query.toUpperCase()}  ST/TN  AYR/2025
-                    <br>VIN/1GNEC12T34J...
-                    <br>STS/VALID  OWN/DOE, JOHN
-                    <br>----------------------------------------
-                `;
+                // NO RECORD / VALID
+                if (!isPlate) {
+                    resultBox.innerHTML += `
+                        <br>----------------------------------------
+                        <br><strong>DRIVER LICENSE QUERY</strong>
+                        <br>NAM/${rLastName}, ${rFirstName}
+                        <br>DOB/${rDOB}  SEX/M
+                        <br>
+                        <br>STATUS: <strong>VALID</strong>
+                        <br>CLASS: D
+                        <br>POINTS: 0
+                        <br>----------------------------------------
+                    `;
+                } else {
+                    resultBox.innerHTML += `
+                        <br>----------------------------------------
+                        <br><strong>VEHICLE REGISTRATION</strong>
+                        <br>LIC/${query}  ST/TN  AYR/2023
+                        <br>VMA/PONT  VMO/G6  COL/BLK
+                        <br>VIN/1G2...${Math.floor(Math.random() * 10000)}
+                        <br>
+                        <br>STATUS: <strong>VALID</strong>
+                        <br>OWNER: ${rLastName}, ${rFirstName}
+                        <br>----------------------------------------
+                    `;
+                }
             }
 
-        }, 1500);
+        }, 800 + Math.random() * 1000); // Random delay 0.8s - 1.8s
     });
 }
