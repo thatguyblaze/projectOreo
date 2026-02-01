@@ -83,14 +83,15 @@ function loadRoute(route) {
     mainContent.innerHTML = ''; // Clear current
 
     switch (route) {
+
         case 'dashboard':
-            // "Command Center" Dashboard - CommandOS Theme
+            // "Command Center" Dashboard - OFFICIAL LIGHT
             mainContent.innerHTML = `
-                <div class="fade-in" style="height: 100%; display: flex; flex-direction: column;">
+                < div class="fade-in" style = "height: 100%; display: flex; flex-direction: column;" >
                     <div class="workspace-header">
                         <div>
-                            <div class="ws-title">COMMAND CENTER</div>
-                            <div class="mono text-dim" style="font-size: 0.8rem;">${new Date().toLocaleDateString().toUpperCase()}</div>
+                            <div class="ws-title">Department Dashboard</div>
+                            <div class="text-secondary" style="font-size: 0.85rem;">Overview for ${new Date().toLocaleDateString()}</div>
                         </div>
                     </div>
 
@@ -98,28 +99,28 @@ function loadRoute(route) {
                         <div class="grid-3" style="margin-bottom: 2rem;">
                              <div class="panel" style="margin:0;">
                                 <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
-                                    <div style="font-size: 2rem; color: var(--accent-cyan);"><i class="fa-solid fa-tower-broadcast"></i></div>
+                                    <div style="font-size: 2rem; color: var(--gov-blue); padding: 10px; background: #dbeafe; border-radius: 8px;"><i class="fa-solid fa-tower-broadcast"></i></div>
                                     <div>
-                                        <div class="mono text-bright" style="font-size: 1.5rem; font-weight: bold;">5</div>
-                                        <div class="text-dim" style="font-size: 0.7rem;">ACTIVE CALLS</div>
+                                        <div class="text-primary" style="font-size: 1.8rem; font-weight: 700; line-height: 1.2;">5</div>
+                                        <div class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">ACTIVE CALLS</div>
                                     </div>
                                 </div>
                             </div>
                              <div class="panel" style="margin:0;">
                                 <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
-                                    <div style="font-size: 2rem; color: var(--text-bright);"><i class="fa-solid fa-file-invoice"></i></div>
+                                    <div style="font-size: 2rem; color: var(--text-primary); padding: 10px; background: #f3f4f6; border-radius: 8px;"><i class="fa-solid fa-file-invoice"></i></div>
                                     <div>
-                                        <div class="mono text-bright" style="font-size: 1.5rem; font-weight: bold;">12</div>
-                                        <div class="text-dim" style="font-size: 0.7rem;">CITATIONS (SHIFT)</div>
+                                        <div class="text-primary" style="font-size: 1.8rem; font-weight: 700; line-height: 1.2;">12</div>
+                                        <div class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">CITATIONS (SHIFT)</div>
                                     </div>
                                 </div>
                             </div>
                              <div class="panel" style="margin:0;">
                                 <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
-                                    <div style="font-size: 2rem; color: var(--accent-amber);"><i class="fa-solid fa-users-viewfinder"></i></div>
+                                    <div style="font-size: 2rem; color: #b45309; padding: 10px; background: #fef3c7; border-radius: 8px;"><i class="fa-solid fa-users-viewfinder"></i></div>
                                     <div>
-                                        <div class="mono text-bright" style="font-size: 1.5rem; font-weight: bold;">3</div>
-                                        <div class="text-dim" style="font-size: 0.7rem;">BOLOS / WARRANTS</div>
+                                        <div class="text-primary" style="font-size: 1.8rem; font-weight: 700; line-height: 1.2;">3</div>
+                                        <div class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">BOLOS / WARRANTS</div>
                                     </div>
                                 </div>
                             </div>
@@ -127,27 +128,28 @@ function loadRoute(route) {
 
                         <div class="grid-2">
                             <div class="panel">
-                                 <div class="panel-head">PENDING REPORTS</div>
+                                 <div class="panel-head">Pending Reports</div>
                                  <div class="panel-body">
-                                    <div class="text-dim mono" style="text-align: center; padding: 1rem;">
-                                        <i class="fa-solid fa-check-circle text-green" style="margin-bottom: 10px; display: block; font-size: 1.5rem;"></i>
-                                        ALL REPORTS FILED
+                                    <div class="text-secondary" style="text-align: center; padding: 2rem;">
+                                        <i class="fa-solid fa-check-circle text-green" style="margin-bottom: 1rem; display: block; font-size: 2rem; color: var(--status-success);"></i>
+                                        All reports up to date.
                                     </div>
                                  </div>
                             </div>
                             <div class="panel">
-                                 <div class="panel-head">DEPARTMENT NOTICES</div>
+                                 <div class="panel-head">Department Notices</div>
                                  <div class="panel-body">
-                                    <div style="padding: 10px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--accent-amber); font-size: 0.85rem;">
-                                        <strong class="text-amber">RANGE TRAINING</strong><br>
-                                        Mandatory requalification Tuesday 0800.
+                                    <div style="padding: 1rem; background: #fffbeb; border-left: 4px solid var(--status-warning); font-size: 0.9rem; border-radius: 0 4px 4px 0;">
+                                        <strong style="color: #b45309; display: block; margin-bottom: 4px;">Range Training</strong>
+                                        Mandatory requalification next Tuesday at 0800.<br>
+                                        <span class="text-secondary" style="font-size: 0.8rem; margin-top: 4px; display: block;">Posted by: Sgt. Slaughter</span>
                                     </div>
-                                 </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                </div >
+                `;
             break;
 
         case 'dispatch':
