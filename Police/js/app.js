@@ -62,19 +62,13 @@ function setupNav() {
 
 async function loadModule(name) {
     const content = document.getElementById('main-content');
-    const sidebar = document.getElementById('sidebar');
     const container = document.getElementById('app-container');
 
     // Handle Login View Mode
     if (name === 'login') {
-        sidebar.classList.add('hidden');
-        content.style.marginLeft = '0';
-        content.style.width = '100vw';
-    } else if (sidebar.classList.contains('hidden')) {
-        // Restore Sidebar if coming from login
-        sidebar.classList.remove('hidden');
-        content.style.marginLeft = '260px'; // Matching CSS
-        content.style.width = 'calc(100vw - 260px)';
+        document.getElementById('top-nav')?.classList.add('hidden');
+    } else {
+        document.getElementById('top-nav')?.classList.remove('hidden');
     }
 
     try {
@@ -136,10 +130,10 @@ function initializeApp(user) {
         }
     };
 
-    lock('cases', 1);
-    lock('reports', 1);
-    lock('ficards', 1);
-    lock('intelligence', 2);
+    lock('cases', 0); // Unlocked for now
+    lock('reports', 0);
+    lock('ficards', 0);
+    lock('intelligence', 0); // CRITICAL FIX: Unlock NCIC for everyone
 
     // Admin is special
     const adminBtn = document.querySelector(`.nav-item[data-page="admin"]`);
