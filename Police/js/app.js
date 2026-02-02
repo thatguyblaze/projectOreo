@@ -130,17 +130,8 @@ function initializeApp(user) {
             const level = user.rankLevel || 0;
 
             if (level < minRank) {
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-                // Avoid double-locking visual
-                if (!btn.innerHTML.includes('fa-lock')) {
-                    btn.innerHTML += ' <i class="fa-solid fa-lock" style="font-size: 0.7em; margin-left: 6px;"></i>';
-                }
-                btn.title = `Requires Promotion`;
-
-                // Disable click by replacing the element
-                const newBtn = btn.cloneNode(true);
-                btn.replaceWith(newBtn);
+                // MINIMAL LOOK: Hide completely
+                btn.style.display = 'none';
             }
         }
     };
