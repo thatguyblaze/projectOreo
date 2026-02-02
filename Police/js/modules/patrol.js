@@ -194,10 +194,20 @@ function scheduleNextCall() {
 
 function generateCall() {
     const type = CALL_TYPES[Math.floor(Math.random() * CALL_TYPES.length)];
+    const subject = generateProfile();
+
+    // Pick a vehicle if they have one, otherwise generic
+    let vehicleDesc = "Unknown Vehicle";
+    if (subject.vehicles.length > 0) {
+        const v = subject.vehicles[0];
+        vehicleDesc = `${v.color} ${v.year} ${v.make} ${v.model}`;
+    }
+
     currentCall = {
         ...type,
         id: 'CALL-' + Math.floor(Math.random() * 1000),
-        subject: generateProfile(),
+        subject: subject,
+        vehicleDesc: vehicleDesc,
         stage: 'DISPATCH'
     };
 
@@ -219,12 +229,15 @@ function generateCall() {
                 <div style="margin-bottom: 1rem; color: var(--text-secondary);">
                     <i class="fa-solid fa-location-dot"></i> ${Math.floor(Math.random() * 100)} Main St
                 </div>
+                 <div style="margin-bottom: 1rem; font-size: 0.9rem; background: #fffbe6; padding: 0.5rem; border-radius: 4px; border: 1px solid #e5e7eb;">
+                    <span style="font-weight: 600;">SUSPECT VEHICLE:</span> ${vehicleDesc}
+                </div>
                 <button id="btn-respond" class="btn btn-primary" style="width: 100%;">RESPOND (CODE 3)</button>
             </div>
         </div>
     `;
 
-    logRadio(`DISPATCH: Unit 4921, respond to ${currentCall.type} at Main St.`, "DISPATCH");
+    logRadio(`DISPATCH: Unit 4921, respond to ${currentCall.label}. Suspect in a ${vehicleDesc} at Main St.`, "DISPATCH");
 
     document.getElementById('btn-respond').onclick = () => {
         startInteraction();

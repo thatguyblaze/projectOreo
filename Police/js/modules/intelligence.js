@@ -186,7 +186,7 @@ export function init() {
             vehTable.innerHTML = p.vehicles.map(v => `
                 <tr>
                     <td style="font-family: monospace; font-weight: 600;">${v.plate}</td>
-                    <td>${v.make} ${v.model}</td>
+                    <td>${v.year} ${v.make} ${v.model}</td>
                     <td>${v.color}</td>
                 </tr>
             `).join('');

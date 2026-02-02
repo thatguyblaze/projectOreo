@@ -235,7 +235,7 @@ export function init() {
 
         if (profile.vehicles.length > 0) {
             const v = profile.vehicles[0];
-            form.querySelector('[name="vehicle"]').value = `${v.style} ${v.make} ${v.model} (${v.color}) - ${v.plate}`;
+            form.querySelector('[name="vehicle"]').value = `${v.year} ${v.style} ${v.make} ${v.model} (${v.color}) - ${v.plate}`;
         }
         form.querySelector('[name="address"]').value = `${Math.floor(Math.random() * 900)} Main St, Rogersville TN`;
     });

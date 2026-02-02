@@ -2,6 +2,7 @@
 // Simulates a massive database by generating consistent details from a name seed
 
 export function generateProfile(nameQuery) {
+    if (!nameQuery) nameQuery = generateRandomName();
     const seed = nameQuery.toUpperCase().replace(/[^A-Z]/g, '');
     const isWarrant = simpleHash(seed) % 5 === 0; // 20% Risk
     const isGang = simpleHash(seed) % 8 === 0; // 12% Risk
@@ -161,4 +162,11 @@ function simpleHash(str) {
         hash |= 0;
     }
     return Math.abs(hash);
+}
+
+function generateRandomName() {
+    const firsts = ['JAMES', 'JOHN', 'ROBERT', 'MICHAEL', 'WILLIAM', 'DAVID', 'RICHARD', 'JOSEPH', 'THOMAS', 'MARY', 'PATRICIA', 'JENNIFER', 'LINDA', 'ELIZABETH', 'BARBARA', 'SUSAN', 'JESSICA', 'SARAH', 'KAREN'];
+    const lasts = ['SMITH', 'JOHNSON', 'WILLIAMS', 'BROWN', 'JONES', 'GARCIA', 'MILLER', 'DAVIS', 'RODRIGUEZ', 'MARTINEZ', 'HERNANDEZ', 'LOPEZ', 'GONZALEZ', 'WILSON', 'ANDERSON', 'THOMAS', 'TAYLOR', 'MOORE'];
+
+    return `${lasts[Math.floor(Math.random() * lasts.length)]}, ${firsts[Math.floor(Math.random() * firsts.length)]}`;
 }
