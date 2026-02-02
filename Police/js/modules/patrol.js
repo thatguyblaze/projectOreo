@@ -56,26 +56,36 @@ export function getTemplate() {
                     </div>
                 </div>
 
-                <!-- RIGHT: RADIO & ACTIONS -->
+                <!-- RIGHT: RADIO & TOOLS -->
                 <div style="display: flex; flex-direction: column; gap: 1rem; overflow: hidden;">
                     
-                    <!-- RADIO FEED -->
-                    <div class="panel" style="flex: 1; display: flex; flex-direction: column; max-height: 50%;">
-                        <div class="panel-head">RADIO TRAFFIC</div>
-                        <div id="radio-feed" style="flex: 1; overflow-y: auto; padding: 1rem; font-family: monospace; font-size: 0.85rem; background: #111827; color: #10b981;">
+                    <!-- TABBED RIGHT PANEL -->
+                    <div class="panel" style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="panel-head" style="padding: 0; display: flex;">
+                            <button class="nav-item active" style="flex:1; border-radius:0; justify-content:center; margin:0;" onclick="window.switchPatrolTab('radio')">RADIO</button>
+                            <button class="nav-item" style="flex:1; border-radius:0; justify-content:center; margin:0;" onclick="window.switchPatrolTab('notes')">NOTEPAD</button>
+                        </div>
+                        
+                        <!-- RADIO FEED -->
+                        <div id="tab-radio" style="flex: 1; overflow-y: auto; padding: 1rem; font-family: monospace; font-size: 0.85rem; background: #111827; color: #10b981;">
                             <div>[SYSTEM] MDT CONNECTED...</div>
                             <div>[SYSTEM] CHANNEL 1 ACTIVE...</div>
+                            <div id="radio-feed-content"></div>
+                        </div>
+
+                        <!-- NOTEPAD -->
+                        <div id="tab-notes" class="hidden" style="flex: 1; display: flex; flex-direction: column; background: #fffbe6;">
+                            <textarea id="officer-notes" style="flex: 1; background: transparent; border: none; padding: 1rem; font-family: 'Courier New', monospace; resize: none; font-size: 0.9rem; line-height: 1.5;" placeholder="Enter investigative notes here... (Vehicle descriptions, suspect statements, etc.)"></textarea>
+                            <div style="padding: 5px; border-top: 1px solid #e5e7eb; font-size: 0.7rem; color: #666; text-align: center;">AUTO-SAVE ENABLED</div>
                         </div>
                     </div>
 
                     <!-- TOOLS -->
-                    <div class="panel" style="flex: 1;">
+                    <div class="panel" style="flex-shrink: 0;">
                         <div class="panel-head">QUICK ACTIONS</div>
                         <div class="grid-2" style="gap: 0.5rem; padding: 1rem;">
                             <button class="btn" onclick="window.runPlate()">Run Plate</button>
-                            <button class="btn" disabled>Request Backup</button>
-                            <button class="btn" disabled>Tow Service</button>
-                            <button class="btn" disabled>EMS</button>
+                            <button class="btn btn-ghost" onclick="window.requestBackup()">Request Backup</button>
                         </div>
                     </div>
 
@@ -128,6 +138,23 @@ export function init() {
     window.runPlate = () => {
         const p = prompt("Enter Plate Number:");
         if (p) logRadio(`Unit 4921 running plate: ${p.toUpperCase()}... Comes back CLEAR.`, 'DISPATCH');
+    };
+
+    window.switchPatrolTab = (tab) => {
+        if (tab === 'radio') {
+            document.getElementById('tab-radio').classList.remove('hidden');
+            document.getElementById('tab-notes').classList.add('hidden');
+        } else {
+            document.getElementById('tab-radio').classList.add('hidden');
+            document.getElementById('tab-notes').classList.remove('hidden');
+        }
+    };
+
+    window.requestBackup = () => {
+        logRadio("Unit 4921 requesting 10-78 (Backup)!", "UNIT");
+        setTimeout(() => {
+            logRadio("Units en route to your location. ETA 2 minutes.", "DISPATCH");
+        }, 1500);
     };
 }
 
@@ -304,16 +331,25 @@ function completeCall() {
 }
 
 function logRadio(msg, author) {
-    const feed = document.getElementById('radio-feed');
-    const line = document.createElement('div');
-    line.style.marginBottom = '6px';
-    const time = new Date().toLocaleTimeString();
+    function logRadio(msg, author) {
+        // We append to the radio tab container directly or a content div?
+        // In previous edit I added id="radio-feed-content" implicitly inside #tab-radio? 
+        // Wait, my previous edit replaced #radio-feed with #tab-radio containing #radio-feed-content?
+        // No, I kept #tab-radio and added an inner div maybe?
+        // Let's check the replaced content "RIGHT: RADIO & TOOLS" block.
+        // It has <div id="tab-radio"><div id="radio-feed-content">...
 
-    let color = '#10b981';
-    if (author === 'DISPATCH') color = '#fbbf24';
-    if (author === 'UNIT') color = '#60a5fa';
+        // So target is tab-radio, but I should probably target tab-radio directly to keep scrolling working.
+        const feed = document.getElementById('tab-radio');
+        const line = document.createElement('div');
+        line.style.marginBottom = '6px';
+        const time = new Date().toLocaleTimeString();
 
-    line.innerHTML = `<span style="opacity:0.6;">[${time}]</span> <strong style="color:${color};">${author}:</strong> ${msg}`;
-    feed.appendChild(line);
-    feed.scrollTop = feed.scrollHeight;
-}
+        let color = '#10b981';
+        if (author === 'DISPATCH') color = '#fbbf24';
+        if (author === 'UNIT') color = '#60a5fa';
+
+        line.innerHTML = `<span style="opacity:0.6;">[${time}]</span> <strong style="color:${color};">${author}:</strong> ${msg}`;
+        feed.appendChild(line);
+        feed.scrollTop = feed.scrollHeight;
+    }
