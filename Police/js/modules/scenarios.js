@@ -15,7 +15,7 @@ export const DIALOG_TREES = {
             { text: "DRIVER OUT OF THE CAR!", next: 'agitated', effect: 'escalate' }
         ],
         states: {
-            'docs': { text: "Subject hands over paperwork. 'Is there a problem, Officer?'", options: [{ text: "Check NCIC", action: 'run_ncic' }] },
+            'docs': { text: "Subject hands over paperwork. 'Is there a problem, Officer?'", options: [{ text: "Take ID (Reveal Identity)", action: 'reveal_id' }] },
             'why': { text: "'Honestly no idea. Was I speeding?'", options: [{ text: "Yes, 15 over.", next: 'docs' }, { text: "Tail light out.", next: 'docs' }] },
             'agitated': { text: "Subject grips steering wheel. 'I didn't do anything!'", options: [{ text: "Calm down, just need ID.", next: 'docs' }, { text: "Taser! Taser!", action: 'force' }] }
         }
@@ -27,7 +27,7 @@ export const DIALOG_TREES = {
             { text: "Stop! Hands where I can see them!", next: 'run', effect: 'bad' }
         ],
         states: {
-            'casual': { text: "'Just waiting for a ride, officer. My car broke down.'", options: [{ text: "ID please.", action: 'run_ncic' }, { text: "Move along.", action: 'clear' }] },
+            'casual': { text: "'Just waiting for a ride, officer. My car broke down.'", options: [{ text: "ID please.", action: 'reveal_id' }, { text: "Move along.", action: 'clear' }] },
             'run': { text: "Subject sprints down the alleyway!", options: [{ text: "Foot Pursuit", action: 'chase' }] }
         }
     },
