@@ -1,6 +1,7 @@
 /**
- * Police Portal Main Controller v2
+ * Police Portal Main Controller v3
  */
+import { db } from './store.js';
 
 // Module Imports (Dynamic)
 const MODULES = {
@@ -18,14 +19,6 @@ const MODULES = {
 
 let currentModule = null;
 
-// DOM Elements
-const app = document.getElementById('app-container');
-const sidebar = document.getElementById('sidebar');
-const mainContent = document.getElementById('main-content');
-const userName = document.querySelector('.user-name'); // Need to ensure these exist in HTML or remove
-const userRank = document.querySelector('.user-rank');
-// Note: index.html structure might not match these legacy selectors exactly, but we'll try to find them if they exist or fail gracefully.
-
 // Init
 document.addEventListener('DOMContentLoaded', () => {
     // Check Auth
@@ -34,16 +27,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!officer) {
         loadModule('login');
     } else {
-        // Parse officer data from localStorage
-        const currentUser = JSON.parse(officer);
-        db.setCurrentOfficer(currentUser); // Sync to store
-        initializeApp(currentUser);
-        setupNav();
-        loadModule('dashboard');
+        try {
+            // Parse officer data from localStorage
+            const currentUser = JSON.parse(officer);
+            db.setCurrentOfficer(currentUser); // Sync to store
+            initializeApp(currentUser);
+            setupNav();
+            loadModule('dashboard');
+        } catch (e) {
+            console.error("Auth Error", e);
+            loadModule('login'); // Fallback
+        }
     }
 });
-
-import { db } from './store.js';
 
 function setupNav() {
     document.querySelectorAll('.nav-item').forEach(btn => {
@@ -65,7 +61,6 @@ function setupNav() {
 }
 
 async function loadModule(name) {
-    // DOM Elements - re-fetch to be safe
     const content = document.getElementById('main-content');
     const sidebar = document.getElementById('sidebar');
     const container = document.getElementById('app-container');
@@ -124,26 +119,28 @@ async function loadModule(name) {
 }
 
 function initializeApp(user) {
-    // Optional: Update sidebar user info if the elements exist in index.html
     console.log("App Initialized for: " + user.name);
 
     // GAMIFICATION: Rank Unlocks
-    // Rank 0 (Cadet): Patrol, Traffic
-    // Rank 1 (Officer I): + Cases, FI
-    // Rank 2 (Officer II): + Intelligence / Legal
-    // Rank 5 (Captain): + Admin
-
     // Helpers
     const lock = (page, minRank) => {
         const btn = document.querySelector(`.nav-item[data-page="${page}"]`);
         if (btn) {
-            if (user.rankLevel < minRank) {
+            // Check if user has rankLevel, default to 0
+            const level = user.rankLevel || 0;
+
+            if (level < minRank) {
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
-                btn.innerHTML += ' <i class="fa-solid fa-lock" style="font-size: 0.7em;"></i>';
-                btn.title = `Requires Rank Level ${minRank}`;
-                // Disable click
-                btn.replaceWith(btn.cloneNode(true)); // Strip listeners
+                // Avoid double-locking visual
+                if (!btn.innerHTML.includes('fa-lock')) {
+                    btn.innerHTML += ' <i class="fa-solid fa-lock" style="font-size: 0.7em; margin-left: 6px;"></i>';
+                }
+                btn.title = `Requires Promotion`;
+
+                // Disable click by replacing the element
+                const newBtn = btn.cloneNode(true);
+                btn.replaceWith(newBtn);
             }
         }
     };
@@ -151,9 +148,7 @@ function initializeApp(user) {
     lock('cases', 1);
     lock('reports', 1);
     lock('ficards', 1);
-
-    // Note: Intelligence isn't in my nav list in this file, but 'legal' is. Let's lock Legal/Admin
-    lock('legal', 0); // Open for all
+    lock('intelligence', 2);
 
     // Admin is special
     const adminBtn = document.querySelector(`.nav-item[data-page="admin"]`);
