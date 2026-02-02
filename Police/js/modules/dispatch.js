@@ -61,9 +61,16 @@ export function getTemplate() {
                                     <i class="fa-solid fa-location-dot"></i> <span id="active-loc">Location</span>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
-                                <div style="font-weight: 700; font-size: 1.25rem; color: var(--status-warning);" id="active-timer">00:00</div>
-                                <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600;">TIME ELAPSED</div>
+                            <div style="text-align: right; display: flex; align-items: center; gap: 1rem;">
+                                <select id="active-status-select" onchange="window.updateCallStatus(this.value)" class="input-field" style="padding: 4px; font-size: 0.8rem; width: auto; border-color: var(--status-warning);">
+                                    <option value="ACTIVE">ACTIVE</option>
+                                    <option value="CLEARED">CLEARED</option>
+                                    <option value="ARCHIVED">ARCHIVED</option>
+                                </select>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 1.25rem; color: var(--status-warning);" id="active-timer">00:00</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600;">TIME ELAPSED</div>
+                                </div>
                             </div>
                         </div>
 
@@ -208,6 +215,24 @@ export function init() {
         renderList();
     };
 
+    window.updateCallStatus = (newStatus) => {
+        if (!currentIncident) return;
+
+        // Update DB
+        db.updateIncident(currentIncident.id, { status: newStatus });
+
+        // Log it
+        if (newStatus !== 'ACTIVE') {
+            db.addNarrative(currentIncident.id, `Incident marked as ${newStatus}`, 'DISPATCH');
+        }
+
+        // Refresh
+        // If archived or cleared, maybe close?
+        // For now just re-load to update UI state if needed
+        loadIncident(currentIncident.id);
+        renderList(); // Update list sidebar
+    };
+
     // REAL ROUTING - NO ALERTS
     window.openReport = (type) => {
         if (!currentIncident) return;
@@ -255,6 +280,16 @@ export function init() {
         document.getElementById('active-id').innerText = currentIncident.id;
         document.getElementById('active-type').innerText = currentIncident.type;
         document.getElementById('active-loc').innerText = currentIncident.location;
+
+        // Set Status Dropdown
+        const statusSel = document.getElementById('active-status-select');
+        if (statusSel) {
+            statusSel.value = currentIncident.status;
+            // Visual feedback
+            if (currentIncident.status === 'ACTIVE') statusSel.style.borderColor = 'var(--status-warning)';
+            else if (currentIncident.status === 'CLEARED') statusSel.style.borderColor = 'var(--status-success)';
+            else statusSel.style.borderColor = 'var(--border)';
+        }
 
         const log = document.getElementById('narrative-log');
         log.innerHTML = currentIncident.narrative_log.map(n => `
