@@ -1,188 +1,166 @@
-import { db } from './store.js';
-import * as traffic from './modules/traffic.js';
-import * as cases from './modules/cases.js';
-import * as intelligence from './modules/intelligence.js';
-import * as legal from './modules/legal.js';
-import * as login from './modules/login.js';
-import * as dispatch from './modules/dispatch.js';
-import * as ficards from './modules/ficards.js';
+/**
+ * Police Portal Main Controller v2
+ */
+
+// Module Imports (Dynamic)
+const MODULES = {
+    'dashboard': './modules/dashboard.js',
+    'dispatch': './modules/dispatch.js',
+    'traffic': './modules/traffic.js',
+    'cases': './modules/cases.js',
+    'reports': './modules/reports.js',
+    'ficards': './modules/ficards.js',
+    'legal': './modules/legal.js',
+    'admin': './modules/admin.js',
+    'patrol': './modules/patrol.js',
+    'login': './modules/login.js'
+};
+
+let currentModule = null;
 
 // DOM Elements
-const app = document.getElementById('app');
-const loginRoot = document.getElementById('login-root');
-// Sidebar User Pod
-const userAvatar = document.querySelector('.user-avatar'); // Class selector in new theme
-const userName = document.querySelector('.user-name');
-const userRank = document.querySelector('.user-rank');
+const app = document.getElementById('app-container');
 const sidebar = document.getElementById('sidebar');
-const adminLabel = document.getElementById('admin-label'); // Might need adjustment if ID changed
-const navAdmin = document.getElementById('nav-admin');
 const mainContent = document.getElementById('main-content');
-const logoutBtn = document.getElementById('logout-btn'); // Will need to re-add to HTML or find by class
-
-// State
-let currentUser = null;
+const userName = document.querySelector('.user-name'); // Need to ensure these exist in HTML or remove
+const userRank = document.querySelector('.user-rank');
+// Note: index.html structure might not match these legacy selectors exactly, but we'll try to find them if they exist or fail gracefully.
 
 // Init
 document.addEventListener('DOMContentLoaded', () => {
-    // Start with Login
-    showLogin();
+    // Check Auth
+    const officer = localStorage.getItem('cmd_officer_v2');
 
-    // Sidebar Navigation Logic
-    sidebar.addEventListener('click', (e) => {
-        const item = e.target.closest('.nav-item');
-        if (!item) return;
-
-        // Visual Active State
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        item.classList.add('active');
-
-        // Route
-        const route = item.dataset.route;
-        loadRoute(route);
-    });
+    if (!officer) {
+        loadModule('login');
+    } else {
+        // Parse officer data from localStorage
+        const currentUser = JSON.parse(officer);
+        db.setCurrentOfficer(currentUser); // Sync to store
+        initializeApp(currentUser);
+        setupNav();
+        loadModule('dashboard');
+    }
 });
 
-function showLogin() {
-    loginRoot.innerHTML = login.getTemplate();
-    loginRoot.classList.remove('hidden');
-    login.init((user) => {
-        // Auth Success
-        currentUser = user;
-        db.setCurrentOfficer(user); // Sync to store
-        loginRoot.innerHTML = ''; // Clear login
-        loginRoot.classList.add('hidden');
-        initializeApp();
+import { db } from './store.js';
+
+function setupNav() {
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Remove active class
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            // Add active
+            e.currentTarget.classList.add('active');
+
+            const target = e.currentTarget.dataset.page;
+            if (target === 'logout') {
+                localStorage.removeItem('cmd_officer_v2');
+                window.location.reload();
+            } else {
+                loadModule(target);
+            }
+        });
     });
 }
 
-function initializeApp() {
-    app.classList.remove('hidden');
+async function loadModule(name) {
+    // DOM Elements - re-fetch to be safe
+    const content = document.getElementById('main-content');
+    const sidebar = document.getElementById('sidebar');
+    const container = document.getElementById('app-container');
 
-    // Set Sidebar User Info
-    userName.innerText = currentUser.name;
-    userRank.innerText = currentUser.rank;
-    userAvatar.innerText = currentUser.initials;
+    // Handle Login View Mode
+    if (name === 'login') {
+        sidebar.classList.add('hidden');
+        content.style.marginLeft = '0';
+        content.style.width = '100vw';
+    } else if (sidebar.classList.contains('hidden')) {
+        // Restore Sidebar if coming from login
+        sidebar.classList.remove('hidden');
+        content.style.marginLeft = '260px'; // Matching CSS
+        content.style.width = 'calc(100vw - 260px)';
+    }
 
-    // Handle Admin Visibility (If element exists)
-    if (adminLabel && navAdmin) {
-        if (currentUser.badge === '001') {
-            adminLabel.classList.remove('hidden');
-            navAdmin.classList.remove('hidden');
+    try {
+        const modulePath = MODULES[name];
+        if (!modulePath) {
+            console.warn("Module not found: " + name);
+            content.innerHTML = `<div style="padding: 2rem;">Module '${name}' is under construction.</div>`;
+            return;
+        }
+
+        const mod = await import(modulePath);
+
+        // 1. Get Template
+        if (mod.getTemplate) {
+            content.innerHTML = mod.getTemplate();
         } else {
-            adminLabel.classList.add('hidden');
-            navAdmin.classList.add('hidden');
+            content.innerHTML = `<div style="padding: 2rem;">Error: Module '${name}' has no template.</div>`;
+        }
+
+        // 2. Init Logic
+        if (mod.init) {
+            if (name === 'login') {
+                mod.init((officerData) => {
+                    // On Auth Success
+                    localStorage.setItem('cmd_officer_v2', JSON.stringify(officerData));
+                    db.setCurrentOfficer(officerData); // Sync to store
+                    initializeApp(officerData);
+                    setupNav(); // Re-bind nav
+                    loadModule('dashboard');
+                });
+            } else {
+                mod.init();
+            }
+        }
+
+        currentModule = name;
+
+    } catch (err) {
+        console.error(err);
+        content.innerHTML = `<div style="padding: 2rem; color: red;">Error loading module: ${name}<br>${err.message}</div>`;
+    }
+}
+
+function initializeApp(user) {
+    // Optional: Update sidebar user info if the elements exist in index.html
+    console.log("App Initialized for: " + user.name);
+
+    // GAMIFICATION: Rank Unlocks
+    // Rank 0 (Cadet): Patrol, Traffic
+    // Rank 1 (Officer I): + Cases, FI
+    // Rank 2 (Officer II): + Intelligence / Legal
+    // Rank 5 (Captain): + Admin
+
+    // Helpers
+    const lock = (page, minRank) => {
+        const btn = document.querySelector(`.nav-item[data-page="${page}"]`);
+        if (btn) {
+            if (user.rankLevel < minRank) {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML += ' <i class="fa-solid fa-lock" style="font-size: 0.7em;"></i>';
+                btn.title = `Requires Rank Level ${minRank}`;
+                // Disable click
+                btn.replaceWith(btn.cloneNode(true)); // Strip listeners
+            }
+        }
+    };
+
+    lock('cases', 1);
+    lock('reports', 1);
+    lock('ficards', 1);
+
+    // Note: Intelligence isn't in my nav list in this file, but 'legal' is. Let's lock Legal/Admin
+    lock('legal', 0); // Open for all
+
+    // Admin is special
+    const adminBtn = document.querySelector(`.nav-item[data-page="admin"]`);
+    if (adminBtn) {
+        if (user.badge !== '001') {
+            adminBtn.style.display = 'none';
         }
     }
-
-    // Default Route
-    loadRoute('dashboard');
 }
 
-function loadRoute(route) {
-    mainContent.innerHTML = ''; // Clear current
-
-    switch (route) {
-
-        case 'dashboard':
-            // "Command Center" Dashboard - OFFICIAL LIGHT
-            mainContent.innerHTML = `
-                < div class="fade-in" style = "height: 100%; display: flex; flex-direction: column;" >
-                    <div class="workspace-header">
-                        <div>
-                            <div class="ws-title">Department Dashboard</div>
-                            <div class="text-secondary" style="font-size: 0.85rem;">Overview for ${new Date().toLocaleDateString()}</div>
-                        </div>
-                    </div>
-
-                    <div class="scroller">
-                        <div class="grid-3" style="margin-bottom: 2rem;">
-                             <div class="panel" style="margin:0;">
-                                <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
-                                    <div style="font-size: 2rem; color: var(--gov-blue); padding: 10px; background: #dbeafe; border-radius: 8px;"><i class="fa-solid fa-tower-broadcast"></i></div>
-                                    <div>
-                                        <div class="text-primary" style="font-size: 1.8rem; font-weight: 700; line-height: 1.2;">5</div>
-                                        <div class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">ACTIVE CALLS</div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="panel" style="margin:0;">
-                                <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
-                                    <div style="font-size: 2rem; color: var(--text-primary); padding: 10px; background: #f3f4f6; border-radius: 8px;"><i class="fa-solid fa-file-invoice"></i></div>
-                                    <div>
-                                        <div class="text-primary" style="font-size: 1.8rem; font-weight: 700; line-height: 1.2;">12</div>
-                                        <div class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">CITATIONS (SHIFT)</div>
-                                    </div>
-                                </div>
-                            </div>
-                             <div class="panel" style="margin:0;">
-                                <div class="panel-body" style="display: flex; align-items: center; gap: 1rem;">
-                                    <div style="font-size: 2rem; color: #b45309; padding: 10px; background: #fef3c7; border-radius: 8px;"><i class="fa-solid fa-users-viewfinder"></i></div>
-                                    <div>
-                                        <div class="text-primary" style="font-size: 1.8rem; font-weight: 700; line-height: 1.2;">3</div>
-                                        <div class="text-secondary" style="font-size: 0.8rem; font-weight: 600;">BOLOS / WARRANTS</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid-2">
-                            <div class="panel">
-                                 <div class="panel-head">Pending Reports</div>
-                                 <div class="panel-body">
-                                    <div class="text-secondary" style="text-align: center; padding: 2rem;">
-                                        <i class="fa-solid fa-check-circle text-green" style="margin-bottom: 1rem; display: block; font-size: 2rem; color: var(--status-success);"></i>
-                                        All reports up to date.
-                                    </div>
-                                 </div>
-                            </div>
-                            <div class="panel">
-                                 <div class="panel-head">Department Notices</div>
-                                 <div class="panel-body">
-                                    <div style="padding: 1rem; background: #fffbeb; border-left: 4px solid var(--status-warning); font-size: 0.9rem; border-radius: 0 4px 4px 0;">
-                                        <strong style="color: #b45309; display: block; margin-bottom: 4px;">Range Training</strong>
-                                        Mandatory requalification next Tuesday at 0800.<br>
-                                        <span class="text-secondary" style="font-size: 0.8rem; margin-top: 4px; display: block;">Posted by: Sgt. Slaughter</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div >
-                `;
-            break;
-
-        case 'dispatch':
-            mainContent.innerHTML = dispatch.getTemplate();
-            dispatch.init();
-            break;
-
-        case 'traffic':
-            mainContent.innerHTML = traffic.getTemplate();
-            traffic.init();
-            break;
-
-        case 'cases':
-            mainContent.innerHTML = cases.getTemplate();
-            cases.init();
-            break;
-
-        case 'ficards':
-            mainContent.innerHTML = ficards.getTemplate();
-            ficards.init();
-            break;
-
-        case 'intelligence':
-            mainContent.innerHTML = intelligence.getTemplate();
-            intelligence.init();
-            break;
-
-        case 'legal':
-            mainContent.innerHTML = legal.getTemplate();
-            legal.init();
-            break;
-
-        default:
-            mainContent.innerHTML = '<div style="padding: 2rem;">Module Construction In Progress...</div>';
-    }
-}

@@ -1,4 +1,6 @@
 /* LOGIN MODULE v3 - OFFICIAL */
+import { db } from '../store.js';
+
 export function getTemplate() {
     return `
         <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #f0f2f5;">
@@ -12,15 +14,15 @@ export function getTemplate() {
 
                 <form id="login-form">
                     <div class="input-group" style="margin-bottom: 1.5rem;">
-                        <input type="text" id="badge-in" class="input-field" placeholder="Badge Number" style="padding: 12px; font-size: 1rem;">
+                        <input type="text" id="badge-in" class="input-field" placeholder="Badge Number / Save Slot" style="padding: 12px; font-size: 1rem;" required>
                     </div>
                     
                     <div class="input-group" style="margin-bottom: 2rem;">
-                        <input type="password" id="pass-in" class="input-field" placeholder="Password" style="padding: 12px; font-size: 1rem;">
+                        <input type="text" id="name-in" class="input-field" placeholder="Officer Name (For New Profile)" style="padding: 12px; font-size: 1rem;">
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem; border-radius: 6px;">
-                        Sign In
+                        Sign In / Start Shift
                     </button>
                     
                     <div id="login-error" class="hidden" style="margin-top: 1rem; color: #b91c1c; font-size: 0.85rem; text-align: center; padding: 10px; background: #fef2f2; border-radius: 4px;">
@@ -39,29 +41,21 @@ export function getTemplate() {
 export function init(onSuccess) {
     document.getElementById('login-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        const b = document.getElementById('badge-in').value;
-        const p = document.getElementById('pass-in').value;
+        const b = document.getElementById('badge-in').value.trim();
+        const n = document.getElementById('name-in').value.trim();
 
-        // Mock Auth
-        if (b === '001' && p === 'password') {
-            onSuccess({ name: 'Admin User', badge: '001', rank: 'Admin', initials: 'AU' });
-        } else if (b === 'miller' || b === 'Miller') {
-            onSuccess({ name: 'Ofc. Miller', badge: '4921', rank: 'Officer', initials: 'JM' });
-        } else if (b === '4921') {
-            onSuccess({ name: 'Ofc. Miller', badge: '4921', rank: 'Officer', initials: 'JM' });
-        } else {
-            const err = document.getElementById('login-error');
-            err.classList.remove('hidden');
-            err.innerHTML = `<strong>Access Denied</strong><br>Check Badge ID. (Try: 4921 / password)`;
+        if (!b) return;
 
-            // Shake
-            const panel = document.querySelector('.panel');
-            panel.animate([
-                { transform: 'translateX(0)' },
-                { transform: 'translateX(-5px)' },
-                { transform: 'translateX(5px)' },
-                { transform: 'translateX(0)' }
-            ], { duration: 300 });
-        }
+        // Gamified Login: Use badge as key, name as optional creator props
+        // If badge exists, load it. If not, create it using name (or default).
+
+        let profile = db.loadProfile(b, n);
+
+        // Save it back to ensure it exists if new
+        db.setCurrentOfficer(profile);
+        db.saveProfile();
+
+        // Success
+        onSuccess(profile);
     });
 }

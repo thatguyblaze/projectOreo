@@ -1,9 +1,10 @@
-/* RELATIONAL DATA STORE v2 */
+/* RELATIONAL DATA STORE v3 - OFFICIAL */
 const STORE_KEYS = {
     INCIDENTS: 'cmd_incidents_v1',
     SUBJECTS: 'cmd_subjects_v1',
     EVIDENCE: 'cmd_evidence_v1',
-    OFFICER: 'cmd_officer_v1'
+    OFFICER: 'cmd_officer_v2', // Upgraded version for XP
+    TICKETS: 'cmd_tickets_v1'
 };
 
 class DataStore {
@@ -15,15 +16,8 @@ class DataStore {
         if (!localStorage.getItem(STORE_KEYS.INCIDENTS)) localStorage.setItem(STORE_KEYS.INCIDENTS, JSON.stringify([]));
         if (!localStorage.getItem(STORE_KEYS.SUBJECTS)) localStorage.setItem(STORE_KEYS.SUBJECTS, JSON.stringify([]));
         if (!localStorage.getItem(STORE_KEYS.EVIDENCE)) localStorage.setItem(STORE_KEYS.EVIDENCE, JSON.stringify([]));
-        if (!localStorage.getItem(STORE_KEYS.OFFICER)) {
-            // Seed Default User
-            this.setCurrentOfficer({
-                badge: '4921',
-                name: 'Ofc. Miller',
-                rank: 'Officer',
-                initials: 'JM'
-            });
-        }
+        if (!localStorage.getItem(STORE_KEYS.TICKETS)) localStorage.setItem(STORE_KEYS.TICKETS, JSON.stringify([]));
+        // Officer Key is managed by Login now
     }
 
     // --- GENERIC ---
@@ -83,29 +77,36 @@ class DataStore {
     }
 
     // --- SUBJECTS (People) ---
-    // Subjects are global. They can be linked to multiple incidents.
     createSubject(personData) {
-        // Person Data: { first, last, dob, race, sex, history: [], flags: [] }
         return this._add(STORE_KEYS.SUBJECTS, personData);
     }
 
-    getMethods() { return { createSubject: this.createSubject.bind(this) }; } // Helper for console use
+    getMethods() { return { createSubject: this.createSubject.bind(this) }; }
 
     linkSubjectToIncident(incidentId, subjectId, role) {
-        // Role: Suspect, Victim, Witness
         const inc = this.getIncident(incidentId);
         if (!inc) return;
-
-        // Check if already linked
         if (inc.linked_subjects.some(s => s.id === subjectId)) return;
-
         inc.linked_subjects.push({ id: subjectId, role: role });
         this.updateIncident(incidentId, { linked_subjects: inc.linked_subjects });
     }
 
+    // --- TICKETS ---
+    addTicket(ticket) {
+        return this._add(STORE_KEYS.TICKETS, ticket);
+    }
+
+    getTickets() {
+        return this._get(STORE_KEYS.TICKETS);
+    }
+
+    getCases() {
+        // Wrapper for the separate case module storage key for dashboard uniformity
+        return JSON.parse(localStorage.getItem('cmd_cases_v2') || '[]');
+    }
+
     // --- EVIDENCE ---
     logEvidence(incidentId, itemDescription, type) {
-        // e.g. "Bloody Knife", "Weapon"
         const item = {
             id: 'EV-' + Math.floor(Math.random() * 100000),
             incident_id: incidentId,
@@ -116,12 +117,9 @@ class DataStore {
             ]
         };
         this._add(STORE_KEYS.EVIDENCE, item);
-
-        // Link to Incident
         const inc = this.getIncident(incidentId);
         inc.linked_evidence.push(item.id);
         this.updateIncident(incidentId, { linked_evidence: inc.linked_evidence });
-
         return item;
     }
 
@@ -130,9 +128,71 @@ class DataStore {
         return all.filter(e => e.incident_id === incidentId);
     }
 
-    // --- OFFICER SESSION ---
-    getCurrentOfficer() { return JSON.parse(localStorage.getItem(STORE_KEYS.OFFICER)); }
-    setCurrentOfficer(data) { localStorage.setItem(STORE_KEYS.OFFICER, JSON.stringify(data)); }
+    // --- OFFICER SESSION & GAMIFICATION ---
+    getCurrentOfficer() {
+        return JSON.parse(localStorage.getItem(STORE_KEYS.OFFICER));
+    }
+
+    setCurrentOfficer(data) {
+        localStorage.setItem(STORE_KEYS.OFFICER, JSON.stringify(data));
+    }
+
+    // XP SYSTEM
+    addXP(amount) {
+        const officer = this.getCurrentOfficer();
+        if (!officer) return;
+
+        officer.xp = (officer.xp || 0) + amount;
+
+        // Level Up Logic
+        const nextRank = Math.floor(officer.xp / 100);
+
+        if (nextRank > officer.rankLevel) {
+            officer.rankLevel = nextRank;
+            officer.rank = this.getRankTitle(nextRank);
+            alert(`PROMOTION: You have reached the rank of ${officer.rank}!`);
+        }
+
+        this.setCurrentOfficer(officer);
+        // Also save to profile
+        this.saveProfile();
+        return officer;
+    }
+
+    getRankTitle(level) {
+        const ranks = ['Cadet', 'Officer I', 'Officer II', 'Sergeant', 'Lieutenant', 'Captain', 'Deputy Chief', 'Chief'];
+        return ranks[level] || 'Chief';
+    }
+
+    getProfileKey(badge) {
+        return `cmd_profile_${badge}`;
+    }
+
+    // Save current session to persistent profile slot
+    saveProfile() {
+        const officer = this.getCurrentOfficer();
+        if (officer) {
+            localStorage.setItem(this.getProfileKey(officer.badge), JSON.stringify(officer));
+        }
+    }
+
+    // Load profile from slot or create new
+    loadProfile(badge, name) {
+        const saved = localStorage.getItem(this.getProfileKey(badge));
+        if (saved) {
+            return JSON.parse(saved);
+        } else {
+            return {
+                name: name || 'Unknown Officer',
+                badge: badge,
+                rank: 'Cadet',
+                rankLevel: 0,
+                xp: 0,
+                initials: name ? name.split(' ').map(n => n[0]).join('') : 'XX',
+                stats: { calls: 0, arrests: 0 }
+            };
+        }
+    }
 }
 
 export const db = new DataStore();

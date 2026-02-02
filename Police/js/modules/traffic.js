@@ -139,6 +139,34 @@ export function getTemplate() {
 
                 </div>
             </div>
+            
+            <!-- MODAL: TICKET PREVIEW -->
+            <div id="modal-ticket-view" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center;">
+                <div class="panel" style="width: 400px; padding: 0;">
+                    <div style="background: var(--gov-navy); color: white; padding: 1rem; text-align: center;">
+                        <div style="font-weight: 700;">ROGERSVILLE POLICE DEPT</div>
+                        <div style="font-size: 0.8rem;">CITATION FOR VIOLATION</div>
+                    </div>
+                    <div class="panel-body">
+                         <div style="text-align: center; margin-bottom: 1rem; border-bottom: 1px dashed #ccc; padding-bottom: 1rem;">
+                            <div style="font-size: 1.2rem; font-weight: 700;" id="tv-fine">$120.00</div>
+                            <div style="color: var(--text-secondary);" id="tv-offense">Speeding</div>
+                         </div>
+                         <div class="grid-2" style="font-size: 0.9rem; margin-bottom: 1rem;">
+                            <div>
+                                <div class="text-secondary" style="font-size: 0.75rem;">VIOLATOR</div>
+                                <div id="tv-subject">Doe, John</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="text-secondary" style="font-size: 0.75rem;">DATE</div>
+                                <div id="tv-date">...</div>
+                            </div>
+                         </div>
+                         <button class="btn btn-ghost" style="width: 100%;" onclick="document.getElementById('modal-ticket-view').classList.add('hidden')">Close Preview</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     `;
 }
@@ -236,6 +264,9 @@ export function init() {
         }
     }
 
+    // Initial Render
+    renderRecent();
+
     // Submit Logic (REAL SAVE)
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -246,17 +277,14 @@ export function init() {
             subject: `${formData.get('last')}, ${formData.get('first')}`,
             offense: statuteSelect.options[statuteSelect.selectedIndex].text,
             fine: formData.get('fine'),
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            // Extra details for view
+            plate: formData.get('vehicle'),
+            speed: formData.get('speed')
         };
 
-        // 1. Save to Ticket DB (We'd add db.addTicket(ticket) in store)
-        // For now, simulate by just logging it to recent.
-        const row = `<tr>
-            <td class="text-secondary" style="font-family: monospace;">${ticket.id}</td>
-            <td>${ticket.offense}</td>
-            <td class="text-secondary">Just now</td>
-        </tr>`;
-        document.getElementById('recent-table').innerHTML += row;
+        // Save using Store
+        db.addTicket(ticket);
 
         // 2. Link to Incident if Context exists (NO PLACEHOLDERS)
         if (context) {
@@ -266,13 +294,37 @@ export function init() {
             alert("Citation Issued & Linked to Incident Log.");
             // Ideally route back to dispatch?
         } else {
-            alert("Citation Issued.");
+            // Standard flow
+            renderRecent();
         }
 
         form.reset();
         document.getElementById('cit-id').innerText = 'CIT-24-' + Math.floor(Math.random() * 100000);
         document.getElementById('linked-context').classList.add('hidden');
     });
+}
+
+function renderRecent() {
+    const list = db.getTickets().slice(0, 10); // Show last 10
+    const tbody = document.getElementById('recent-table');
+
+    tbody.innerHTML = list.map((t, idx) => `
+        <tr style="cursor: pointer;" onclick="window.viewTicket(${idx})">
+            <td class="text-secondary" style="font-family: monospace;">${t.id}</td>
+            <td>${t.offense}</td>
+            <td class="text-secondary">${new Date(t.timestamp).toLocaleTimeString()}</td>
+        </tr>
+    `).join('');
+
+    // Helper to open modal
+    window.viewTicket = (idx) => {
+        const t = list[idx];
+        document.getElementById('tv-fine').innerText = t.fine;
+        document.getElementById('tv-offense').innerText = t.offense;
+        document.getElementById('tv-subject').innerText = t.subject;
+        document.getElementById('tv-date').innerText = new Date(t.timestamp).toLocaleDateString();
+        document.getElementById('modal-ticket-view').classList.remove('hidden');
+    }
 }
 
 window.resetForm = () => document.getElementById('ticket-form').reset();

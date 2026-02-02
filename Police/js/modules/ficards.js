@@ -102,6 +102,37 @@ export function getTemplate() {
 
                 </div>
             </div>
+
+            <!-- MODAL: VIEW CARD -->
+            <div id="modal-fi-view" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center;">
+                <div class="panel" style="width: 500px; max-width: 90vw; margin: 0;">
+                    <div class="panel-head">
+                        <span id="view-id">FI-24-XXX</span>
+                        <button class="btn btn-ghost" onclick="document.getElementById('modal-fi-view').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="panel-body">
+                         <div class="grid-2" style="margin-bottom: 1rem;">
+                            <div>
+                                <label class="input-label">Subject</label>
+                                <div id="view-subject" style="font-weight: 600;"></div>
+                            </div>
+                            <div>
+                                <label class="input-label">Time</label>
+                                <div id="view-time"></div>
+                            </div>
+                         </div>
+                         <div style="margin-bottom: 1rem;">
+                            <label class="input-label">Reason & Location</label>
+                            <div id="view-meta"></div>
+                         </div>
+                         <div style="background: #f9fafb; padding: 1rem; border-radius: var(--radius);">
+                            <label class="input-label">NARRATIVE</label>
+                            <div id="view-narrative" style="white-space: pre-wrap; font-size: 0.9rem; color: var(--text-secondary);"></div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     `;
 }
@@ -160,8 +191,8 @@ function renderList() {
         return;
     }
 
-    container.innerHTML = list.map(c => `
-        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s;" class="hover-bg-gray">
+    container.innerHTML = list.map((c, index) => `
+        <div class="fi-item hover-bg-gray" data-idx="${index}" style="padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                 <span style="font-weight: 600; color: var(--text-primary);">${c.subject}</span>
                 <span class="text-secondary" style="font-size: 0.75rem;">${new Date(c.time).toLocaleTimeString()}</span>
@@ -171,11 +202,25 @@ function renderList() {
         </div>
     `).join('');
 
-    // Add hover effect via manual JS since style block is separate or inline
-    container.querySelectorAll('.hover-bg-gray').forEach(el => {
+    // Add click listeners
+    container.querySelectorAll('.fi-item').forEach(el => {
+        el.addEventListener('click', () => {
+            const idx = el.dataset.idx;
+            openCard(list[idx]);
+        });
         el.addEventListener('mouseenter', () => el.style.background = '#f9fafb');
         el.addEventListener('mouseleave', () => el.style.background = 'transparent');
     });
+}
+
+function openCard(card) {
+    document.getElementById('view-id').innerText = card.id;
+    document.getElementById('view-subject').innerText = card.subject;
+    document.getElementById('view-time').innerText = new Date(card.time).toLocaleString();
+    document.getElementById('view-meta').innerText = `${card.reason} at ${card.location}`;
+    document.getElementById('view-narrative').innerText = card.narrative || "No narrative entered.";
+
+    document.getElementById('modal-fi-view').classList.remove('hidden');
 }
 
 window.resetFI = () => document.getElementById('fi-form').reset();

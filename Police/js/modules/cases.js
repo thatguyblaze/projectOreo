@@ -80,6 +80,31 @@ export function getTemplate() {
                 </div>
             </div>
 
+            <!-- MODAL: VIEW CASE -->
+            <div id="modal-view-case" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center;">
+                <div class="panel" style="width: 600px; max-width: 90vw; margin: 0;">
+                    <div class="panel-head">
+                        <span id="vc-title">CASE #...</span>
+                        <button class="btn btn-ghost" onclick="document.getElementById('modal-view-case').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="panel-body">
+                         <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span class="badge" id="vc-status" style="font-size: 0.9rem;">ACTIVE</span>
+                            <span class="text-secondary" id="vc-lead">Lead: ...</span>
+                         </div>
+                         <div style="margin-bottom: 1.5rem;">
+                            <label class="input-label">Case Summary</label>
+                            <div id="vc-summary" style="line-height: 1.5; color: var(--text-primary);"></div>
+                         </div>
+                         
+                         <div style="background: #f9fafb; padding: 1rem; border-radius: var(--radius); text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
+                            <i class="fa-solid fa-lock"></i> Full Investigative Report Access Restricted.<br>
+                            Contact Records Division for complete file.
+                         </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     `;
 }
@@ -142,9 +167,9 @@ function renderBoard() {
     // Clear
     Object.values(cols).forEach(c => c.innerHTML = '');
 
-    cases.forEach(c => {
+    cases.forEach((c, index) => {
         const card = document.createElement('div');
-        card.className = 'panel';
+        card.className = 'panel case-card';
         card.style.cursor = 'pointer';
         card.style.marginBottom = '10px';
         card.innerHTML = `
@@ -165,9 +190,26 @@ function renderBoard() {
             </div>
         `;
 
-        // No alert here - ideally clicking opens details, but for this step we focused on "Create" working.
+        card.addEventListener('click', () => openCase(c));
+
         if (cols[c.status]) cols[c.status].appendChild(card);
     });
+}
+
+function openCase(c) {
+    const officer = db.getCurrentOfficer();
+    // Rank Lock check (Mock: Only 'Admin' or 'Detective' or Rank > 2 can view detailed files)
+    // For now, we'll just allow it but maybe showing a 'Restricted' lock if we wanted to enforce gamification.
+    // The user asked to "Enable opening", so we enable it.
+
+    document.getElementById('vc-title').innerText = `CASE #${c.id} - ${c.title}`;
+    document.getElementById('vc-status').innerText = c.status;
+    document.getElementById('vc-status').style.background = getStatusColor(c.status);
+    document.getElementById('vc-status').style.color = 'white';
+    document.getElementById('vc-lead').innerText = `Lead: ${c.lead}`;
+    document.getElementById('vc-summary').innerText = c.summary;
+
+    document.getElementById('modal-view-case').classList.remove('hidden');
 }
 
 function getStatusColor(status) {
