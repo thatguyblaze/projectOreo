@@ -331,25 +331,25 @@ function completeCall() {
 }
 
 function logRadio(msg, author) {
-    function logRadio(msg, author) {
-        // We append to the radio tab container directly or a content div?
-        // In previous edit I added id="radio-feed-content" implicitly inside #tab-radio? 
-        // Wait, my previous edit replaced #radio-feed with #tab-radio containing #radio-feed-content?
-        // No, I kept #tab-radio and added an inner div maybe?
-        // Let's check the replaced content "RIGHT: RADIO & TOOLS" block.
-        // It has <div id="tab-radio"><div id="radio-feed-content">...
+    // Target tab-radio directly to keep scrolling working.
+    const feed = document.getElementById('tab-radio');
+    const line = document.createElement('div');
+    line.style.marginBottom = '6px';
+    const time = new Date().toLocaleTimeString();
 
-        // So target is tab-radio, but I should probably target tab-radio directly to keep scrolling working.
-        const feed = document.getElementById('tab-radio');
-        const line = document.createElement('div');
-        line.style.marginBottom = '6px';
-        const time = new Date().toLocaleTimeString();
+    let color = '#10b981';
+    if (author === 'DISPATCH') color = '#fbbf24';
+    if (author === 'UNIT') color = '#60a5fa';
 
-        let color = '#10b981';
-        if (author === 'DISPATCH') color = '#fbbf24';
-        if (author === 'UNIT') color = '#60a5fa';
+    line.innerHTML = `<span style="opacity:0.6;">[${time}]</span> <strong style="color:${color};">${author}:</strong> ${msg}`;
 
-        line.innerHTML = `<span style="opacity:0.6;">[${time}]</span> <strong style="color:${color};">${author}:</strong> ${msg}`;
+    // Add to feed if it exists (might be hidden or not init yet)
+    if (feed) {
+        if (author === 'DISPATCH') {
+            // Dispatch also goes to the "Radio" list in main view if we wanted, 
+            // but here we just append to the tab.
+        }
         feed.appendChild(line);
         feed.scrollTop = feed.scrollHeight;
     }
+}
