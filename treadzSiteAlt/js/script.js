@@ -175,8 +175,9 @@ function downloadvCard() {
 }
 
 // Scroll Spy for Navigation Active State
+// Scroll Spy for Navigation Active State
 window.addEventListener('scroll', () => {
-    const sections = document.querySelectorAll('section, footer'); // Include footer if linked
+    const sections = document.querySelectorAll('header, section, footer'); // Include header for Home
     const navLinks = document.querySelectorAll('.nav-links a');
 
     let currentSectionId = '';
@@ -185,14 +186,20 @@ window.addEventListener('scroll', () => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.clientHeight;
         // -150 to trigger the change slightly before the top of the section hits the top of the viewport
-        if (pageYOffset >= (sectionTop - 150)) {
+        if (window.pageYOffset >= (sectionTop - 150)) {
             currentSectionId = section.getAttribute('id');
         }
     });
 
+    // Force "Contact" to be active if at the bottom of the page
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+        currentSectionId = 'contact';
+    }
+
     navLinks.forEach(link => {
         link.classList.remove('active');
-        if (link.getAttribute('href').includes(currentSectionId) && currentSectionId !== '') {
+        // Check if the link's href matches the current section ID
+        if (link.getAttribute('href') === `#${currentSectionId}`) {
             link.classList.add('active');
         }
     });
