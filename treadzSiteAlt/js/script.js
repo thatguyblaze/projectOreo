@@ -138,6 +138,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // --- Auto Dark Mode Map Logic ---
+    const mapWrapper = document.querySelector('.map-wrapper-pinned iframe');
+    if (mapWrapper) {
+        // Check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            mapWrapper.style.filter = "invert(92%) hue-rotate(180deg) brightness(85%) contrast(110%)";
+            mapWrapper.style.opacity = "0.9";
+        }
+
+        // Listen for changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                mapWrapper.style.filter = "invert(92%) hue-rotate(180deg) brightness(85%) contrast(110%)";
+                mapWrapper.style.opacity = "0.9";
+            } else {
+                mapWrapper.style.filter = "none";
+                mapWrapper.style.opacity = "1";
+            }
+        });
+    }
+
 });
 
 /**
