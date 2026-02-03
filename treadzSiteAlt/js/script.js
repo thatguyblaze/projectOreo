@@ -137,34 +137,10 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
-
-    // --- Auto Dark Mode Map Logic ---
-    const mapWrapper = document.querySelector('.map-wrapper-pinned iframe');
-
-    if (mapWrapper) {
-        // Function to apply dark mode
-        const applyMapTheme = (isDark) => {
-            if (isDark) {
-                mapWrapper.classList.add('dark-mode-map');
-            } else {
-                mapWrapper.classList.remove('dark-mode-map');
-            }
-        };
-
-        // 1. Check initial state
-        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        applyMapTheme(darkModeMediaQuery.matches);
-
-        // 2. Listen for changes (Modern & Legacy Support)
-        if (darkModeMediaQuery.addEventListener) {
-            darkModeMediaQuery.addEventListener('change', e => applyMapTheme(e.matches));
-        } else if (darkModeMediaQuery.addListener) {
-            // Deprecated but good fallback
-            darkModeMediaQuery.addListener(e => applyMapTheme(e.matches));
-        }
-    }
-
 });
+
+
+
 
 /**
  * Generates and downloads a vCard (.vcf) file for Treadz Tire & Towing
