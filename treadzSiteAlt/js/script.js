@@ -115,15 +115,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
-        // Only attach listener if the structure matches accordion (prevents error on old structure)
-        if (question) {
-            question.addEventListener('click', () => {
-                // Optional: Close others when one opens
-                // faqItems.forEach(otherItem => {
-                //     if (otherItem !== item) otherItem.classList.remove('active');
-                // });
+        const answer = item.querySelector('.faq-answer');
 
+        if (question && answer) {
+            question.addEventListener('click', (e) => {
+                // Prevent bubbling if necessary, though structure is simple
+                e.stopPropagation();
+
+                const isActive = item.classList.contains('active');
+
+                // Toggle active class
                 item.classList.toggle('active');
+
+                if (!isActive) {
+                    // Opening: Set max-height to scrollHeight
+                    answer.style.maxHeight = answer.scrollHeight + "px";
+                } else {
+                    // Closing: Set max-height back to null (or 0 via css, but null allows css to take over)
+                    answer.style.maxHeight = null;
+                }
             });
         }
     });
