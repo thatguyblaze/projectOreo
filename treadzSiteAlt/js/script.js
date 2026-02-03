@@ -109,6 +109,25 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // --- FAQ Accordion Logic ---
+    const faqItems = document.querySelectorAll('.faq-item');
+
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        // Only attach listener if the structure matches accordion (prevents error on old structure)
+        if (question) {
+            question.addEventListener('click', () => {
+                // Optional: Close others when one opens
+                // faqItems.forEach(otherItem => {
+                //     if (otherItem !== item) otherItem.classList.remove('active');
+                // });
+
+                item.classList.toggle('active');
+            });
+        }
+    });
+
 });
 
 /**
