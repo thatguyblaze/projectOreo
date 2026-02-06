@@ -288,7 +288,15 @@
                             class="h-12 w-auto group-hover:scale-110 transition-transform">
                     </a>
                 </div>
-                <div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleHistoryModal(true)"
+                        class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2 hover:bg-gray-100 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20v-6M6 20V10M18 20V4" />
+                        </svg>
+                        History
+                    </button>
                     <a href="../index.html"
                         class="btn btn-secondary font-semibold py-2 px-4 flex items-center gap-2 hover:bg-gray-100 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -324,17 +332,7 @@
                                 </div>
                             </div>
 
-                            <!-- Customer / Vehicle Fields (Print Only) -->
-                            <div class="print-info-grid">
-                                <div class="border-b border-gray-300 pb-1">
-                                    <div class="text-[10px] text-gray-400 uppercase tracking-widest mb-4">Customer Name
-                                    </div>
-                                </div>
-                                <div class="border-b border-gray-300 pb-1">
-                                    <div class="text-[10px] text-gray-400 uppercase tracking-widest mb-4">Vehicle /
-                                        Notes</div>
-                                </div>
-                            </div>
+                            <!-- Customer / Vehicle Fields (Visible Screen & Print) -->
                         </div>
 
                         <h2 class="text-3xl font-bold text-gray-800 mb-2 print:hidden">Tire Quote</h2>
@@ -342,6 +340,24 @@
                     </div>
 
                     <div class="grid gap-8">
+                        <!-- Customer Info Inputs -->
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50/50 rounded-xl border border-dashed border-gray-200 print:p-0 print:bg-transparent print:border-none print:gap-4 print:mb-4">
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">Customer
+                                    Name</label>
+                                <input type="text" id="cust-name" placeholder="Enter Name..."
+                                    class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none py-1 font-semibold text-lg text-gray-800 placeholder-gray-300 print:border-b-2 print:border-gray-800">
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">Vehicle
+                                    / Notes</label>
+                                <input type="text" id="cust-vehicle" placeholder="Vehicle Year/Make/Model..."
+                                    class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none py-1 font-semibold text-lg text-gray-800 placeholder-gray-300 print:border-b-2 print:border-gray-800">
+                            </div>
+                        </div>
                         <!-- Inputs -->
                         <!-- Tire Details -->
                         <div id="tire-info-container">
@@ -480,7 +496,7 @@
                                 Reset
                             </button>
                             <!-- Main Print/Copy Button could go here later if needed -->
-                            <button onclick="window.print()"
+                            <button onclick="handlePrint()"
                                 class="w-2/3 btn btn-primary font-bold py-4 rounded-xl shadow-lg hover:shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -503,6 +519,35 @@
         </main>
     </div>
 
+    <!-- History Modal -->
+    <div id="history-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
+        style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+        <div
+            class="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col m-4 animate-[fadeIn_0.2s_ease-out]">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Quote History</h2>
+                <button onclick="toggleHistoryModal(false)" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex-grow overflow-auto p-6" id="history-list">
+                <!-- Javascript will populate this -->
+                <div class="text-center text-gray-500 py-10">No history found.</div>
+            </div>
+            <div class="p-6 border-t bg-gray-50 rounded-b-2xl flex justify-end">
+                <button onclick="clearHistory()"
+                    class="text-xs text-red-500 font-semibold hover:underline mr-auto">Clear
+                    History</button>
+                <button onclick="toggleHistoryModal(false)"
+                    class="btn btn-secondary py-2 px-6 rounded-lg">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const STATE_FEE_PER_TIRE = 1.35;
         const DISPOSAL_FEE_PER_TIRE = 4.00;
@@ -512,6 +557,117 @@
         const qtyInput = document.getElementById('quantity');
         const tireInfoInput = document.getElementById('tire-info-input');
         const tireInfoContainer = document.getElementById('tire-info-container');
+        const custNameInput = document.getElementById('cust-name');
+        const custVehicleInput = document.getElementById('cust-vehicle');
+
+        // --- HISTORY LOGIC ---
+        function getHistory() {
+            return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
+        }
+
+        function saveQuote() {
+            const history = getHistory();
+            const quote = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                customer: custNameInput.value.trim() || 'Walk-In',
+                vehicle: custVehicleInput.value.trim(),
+                tireInfo: tireInfoInput.value.trim(),
+                pricePerTire: parseFloat(priceInput.value) || 0,
+                qty: parseInt(qtyInput.value) || 0,
+                total: document.getElementById('total-card-display').textContent // Capture the final string
+            };
+
+            // Avoid saving empty junk
+            if (quote.pricePerTire === 0 && quote.tireInfo === '') return;
+
+            history.unshift(quote);
+            // Limit to last 50
+            if (history.length > 50) history.pop();
+
+            localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
+        }
+
+        function handlePrint() {
+            saveQuote();
+            window.print();
+        }
+
+        function renderHistory() {
+            const history = getHistory();
+            const container = document.getElementById('history-list');
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-10">No quote history yet. Print a quote to save it here.</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
+                            <th class="py-3">Date</th>
+                            <th class="py-3">Customer</th>
+                            <th class="py-3">Vehicle</th>
+                            <th class="py-3">Tire Info</th>
+                            <th class="py-3 text-right">Total</th>
+                            <th class="py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        ${history.map(item => `
+                            <tr class="hover:bg-gray-50 group transition-colors">
+                                <td class="py-3 text-gray-500 text-sm whitespace-nowrap">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
+                                <td class="py-3 font-semibold text-gray-800">${item.customer}</td>
+                                <td class="py-3 text-gray-600 text-sm">${item.vehicle || '-'}</td>
+                                <td class="py-3 text-gray-800 text-sm">
+                                    <div class="font-medium">${item.tireInfo || 'Unknown Tire'}</div>
+                                    <div class="text-xs text-gray-400">${item.qty} x $${item.pricePerTire.toFixed(2)}</div>
+                                </td>
+                                <td class="py-3 text-right font-bold text-blue-600">${item.total}</td>
+                                <td class="py-3 text-right">
+                                    <button onclick='loadQuote(${JSON.stringify(item)})' class="text-blue-500 hover:text-blue-700 font-medium text-sm border border-blue-200 hover:border-blue-500 rounded px-3 py-1 bg-blue-50 hover:bg-white transition-all">Recall</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function toggleHistoryModal(show) {
+            const modal = document.getElementById('history-modal');
+            if (show) {
+                renderHistory();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function loadQuote(item) {
+            custNameInput.value = item.customer;
+            custVehicleInput.value = item.vehicle;
+            tireInfoInput.value = item.tireInfo;
+            priceInput.value = item.pricePerTire;
+            qtyInput.value = item.qty;
+            toggleHistoryModal(false);
+            calculate();
+            // Pulse effect to show it loaded
+            document.body.classList.add('bg-blue-50');
+            setTimeout(() => document.body.classList.remove('bg-blue-50'), 300);
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to delete all history?')) {
+                localStorage.removeItem('treadzQuoteHistoryV1');
+                renderHistory();
+            }
+        }
+
+        // --- END HISTORY LOGIC ---
 
         function calculate() {
             const priceVal = priceInput.value;
@@ -585,6 +741,9 @@
         function reset() {
             priceInput.value = '';
             qtyInput.value = 4; // Default to 4 tires as it's most common
+            custNameInput.value = '';
+            custVehicleInput.value = '';
+            tireInfoInput.value = '';
             calculate();
             priceInput.focus();
         }
