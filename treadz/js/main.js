@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UTILITIES ---
     const parseTireSize = (input) => {
         if (!input) return null;
-        const cleaned = input.replace(/[\s/rR.\-]/g, '');
+        const cleaned = input.replace(/\D/g, '');
         const flotationMatch = cleaned.match(/^(\d{2})(\d{4})(\d{2})$/);
         if (flotationMatch) {
             const [_, diameter, widthRaw, rim] = flotationMatch;
@@ -227,7 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = `tire-card p-4 flex justify-between items-center ${matchClass}`;
         card.innerHTML = `
             <div class="pr-4">
-                <p class="font-mono text-lg font-semibold">${formatTireSize(tire.size)}</p>
+                <p class="font-mono text-lg font-semibold">
+                    ${formatTireSize(tire.size)}
+                    <span class="text-sm font-normal text-gray-500 ml-2">(${tire.condition.toUpperCase()})</span>
+                </p>
                 <p class="text-xs text-gray-500 stock-quantity-wrapper" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
                     Stock: 
                     <span class="stock-quantity-display font-semibold">${tire.quantity}</span>
