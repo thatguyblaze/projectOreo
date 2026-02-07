@@ -524,24 +524,27 @@
         style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
         <div
             class="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col m-4 animate-[fadeIn_0.2s_ease-out]">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-800">Quote History</h2>
-                <button onclick="toggleHistoryModal(false)" class="text-gray-400 hover:text-red-500 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+            <div class="p-6 border-b flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Quote History</h2>
+                    <button onclick="toggleHistoryModal(false)"
+                        class="text-gray-400 hover:text-red-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <input type="text" id="history-search" placeholder="Search by customer, vehicle, tire info..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
             </div>
+
             <div class="flex-grow overflow-auto p-6" id="history-list">
                 <!-- Javascript will populate this -->
-                <div class="text-center text-gray-500 py-10">No history found.</div>
             </div>
             <div class="p-6 border-t bg-gray-50 rounded-b-2xl flex justify-end">
-                <button onclick="clearHistory()"
-                    class="text-xs text-red-500 font-semibold hover:underline mr-auto">Clear
-                    History</button>
+
                 <button onclick="toggleHistoryModal(false)"
                     class="btn btn-secondary py-2 px-6 rounded-lg">Close</button>
             </div>
@@ -559,6 +562,7 @@
         const tireInfoContainer = document.getElementById('tire-info-container');
         const custNameInput = document.getElementById('cust-name');
         const custVehicleInput = document.getElementById('cust-vehicle');
+        const historySearchInput = document.getElementById('history-search');
 
         // --- HISTORY LOGIC ---
         function getHistory() {
@@ -581,6 +585,18 @@
             // Avoid saving empty junk
             if (quote.pricePerTire === 0 && quote.tireInfo === '') return;
 
+            // Check for duplicates (ignore ID and Timestamp)
+            const isDuplicate = history.some(item =>
+                item.customer === quote.customer &&
+                item.vehicle === quote.vehicle &&
+                item.tireInfo === quote.tireInfo &&
+                item.pricePerTire === quote.pricePerTire &&
+                item.qty === quote.qty &&
+                item.total === quote.total
+            );
+
+            if (isDuplicate) return;
+
             history.unshift(quote);
             // Limit to last 50
             if (history.length > 50) history.pop();
@@ -593,12 +609,22 @@
             window.print();
         }
 
-        function renderHistory() {
+        function renderHistory(filterText = '') {
             const history = getHistory();
             const container = document.getElementById('history-list');
 
-            if (history.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-500 py-10">No quote history yet. Print a quote to save it here.</div>';
+            const filteredHistory = history.filter(item => {
+                const searchStr = filterText.toLowerCase();
+                return (
+                    item.customer.toLowerCase().includes(searchStr) ||
+                    (item.vehicle && item.vehicle.toLowerCase().includes(searchStr)) ||
+                    (item.tireInfo && item.tireInfo.toLowerCase().includes(searchStr)) ||
+                    item.total.includes(searchStr)
+                );
+            });
+
+            if (filteredHistory.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-10">No matching history found.</div>';
                 return;
             }
 
@@ -615,7 +641,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        ${history.map(item => `
+                        ${filteredHistory.map(item => `
                             <tr class="hover:bg-gray-50 group transition-colors">
                                 <td class="py-3 text-gray-500 text-sm whitespace-nowrap">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                 <td class="py-3 font-semibold text-gray-800">${item.customer}</td>
@@ -626,7 +652,16 @@
                                 </td>
                                 <td class="py-3 text-right font-bold text-blue-600">${item.total}</td>
                                 <td class="py-3 text-right">
-                                    <button onclick='loadQuote(${JSON.stringify(item)})' class="text-blue-500 hover:text-blue-700 font-medium text-sm border border-blue-200 hover:border-blue-500 rounded px-3 py-1 bg-blue-50 hover:bg-white transition-all">Recall</button>
+                                    <div class="flex items-center justify-end gap-3">
+                                        <button onclick='loadQuote(${JSON.stringify(item)})' class="text-blue-500 hover:text-blue-700 font-medium text-sm border border-blue-200 hover:border-blue-500 rounded px-3 py-1 bg-blue-50 hover:bg-white transition-all">Recall</button>
+                                        <button onclick="deleteQuote(${item.id})" class="text-gray-300 hover:text-red-500 transition-all p-1 opacity-0 group-hover:opacity-100 focus:opacity-100" title="Delete Quote">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `).join('')}
@@ -638,6 +673,7 @@
         function toggleHistoryModal(show) {
             const modal = document.getElementById('history-modal');
             if (show) {
+                if (historySearchInput) historySearchInput.value = '';
                 renderHistory();
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -660,10 +696,14 @@
             setTimeout(() => document.body.classList.remove('bg-blue-50'), 300);
         }
 
-        function clearHistory() {
-            if (confirm('Are you sure you want to delete all history?')) {
-                localStorage.removeItem('treadzQuoteHistoryV1');
-                renderHistory();
+        function deleteQuote(id) {
+            if (confirm('Are you sure you want to delete this quote entry?')) {
+                const history = getHistory().filter(item => item.id !== id);
+                localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
+
+                // Refresh list, maintaining search filter if any
+                const currentSearch = historySearchInput ? historySearchInput.value : '';
+                renderHistory(currentSearch);
             }
         }
 
@@ -758,6 +798,12 @@
                 tireInfoContainer.classList.remove('print:hidden');
             }
         });
+
+        if (historySearchInput) {
+            historySearchInput.addEventListener('input', (e) => {
+                renderHistory(e.target.value);
+            });
+        }
 
         // Initial state
         reset();
