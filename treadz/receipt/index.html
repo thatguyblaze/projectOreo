@@ -8,228 +8,162 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* Additional glassmorphism and animation styles for the calculator */
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* The Paper Receipt Look */
+        .paper-receipt {
+            font-family: "Times New Roman", Times, serif;
+            color: black;
+            background: white;
+            position: relative;
+        }
+
+        .paper-receipt input {
+            font-family: inherit;
+            color: inherit;
+        }
+
+        .paper-receipt input::placeholder {
+            color: #ccc;
+            font-style: italic;
+        }
+
+        /* Table Styling */
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid black;
+        }
+
+        .receipt-table th {
+            border-right: 2px solid black;
+            border-bottom: 2px solid black;
+            padding: 4px;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .receipt-table td {
+            border-right: 2px solid black;
+            border-bottom: 1px solid black;
+            padding: 4px;
+            font-size: 16px;
+            height: 32px;
+            /* Fixed height for rows */
+            vertical-align: middle;
+        }
+
+        .receipt-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .receipt-table td.no-border-right {
+            border-right: none;
+        }
+
+        /* Totals Box */
+        .totals-box {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .totals-box td {
+            border: 1px solid black;
+            padding: 4px 8px;
+        }
+
+        .totals-box .label {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            text-align: right;
+            border-right: 2px solid black !important;
+            /* Visual fix */
+            width: 90px;
+        }
+
+        .totals-box .amount {
+            font-weight: bold;
+            text-align: right;
+            font-size: 16px;
+        }
+
+        /* Screen only override for main layout */
+        @media screen {
+            #receipt-container {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        /* Print Override */
         @media print {
             @page {
+                margin: 0.25in;
                 size: letter;
-                margin: 0.5in;
             }
 
             body {
-                background: white !important;
-                color: black !important;
-                font-family: 'Inter', sans-serif !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                overflow: visible !important;
-                height: auto !important;
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
-            #app {
-                display: block !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            /* Hide everything except center panel content */
+            /* Hide UI scaffolding */
             .main-nav,
             #history-panel,
             #upsell-panel,
-            .print-hidden-force {
-                display: none !important;
-            }
-
-            main {
-                display: block !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                height: auto !important;
-                overflow: visible !important;
-            }
-
-            /* Isolate the receipt */
-            #receipt-container {
-                width: 100% !important;
-                max-width: 100% !important;
-                box-shadow: none !important;
-                border: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-            }
-
-            /* Header Styling */
-            .print-header {
-                display: flex !important;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 2rem;
-                padding-bottom: 1rem;
-                border-bottom: 2px solid #000;
-            }
-
-            .print-header h1 {
-                font-size: 24px !important;
-                font-weight: 800 !important;
-                text-transform: uppercase;
-                letter-spacing: -0.5px;
-            }
-
-            .print-info-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem;
-                margin-bottom: 2rem;
-            }
-
-            /* Tire Info Styling */
-            #tire-info-container label {
-                display: none !important;
-            }
-
-            #tire-info-input {
-                font-size: 16px !important;
-                font-weight: 700 !important;
-                border: none !important;
-                background: none !important;
-                padding: 0 !important;
-                margin-bottom: 1rem;
-                width: 100%;
-            }
-
-            /* Hiding original breakdown visual clutter */
-            .print-hide-math,
-            .print-hide-labels span.rounded,
-            .print-hide-labels span.bg-blue-100 {
-                display: none !important;
-            }
-
-            .summary-row {
-                display: flex !important;
-                justify-content: space-between !important;
-                padding: 4px 0 !important;
-                border-bottom: 1px dashed #eee !important;
-            }
-
-            .summary-row:last-child {
-                border-bottom: none !important;
-            }
-
-            /* Totals Section */
-            .totals-section {
-                display: flex !important;
-                flex-direction: column;
-                align-items: flex-end;
-                border-top: 2px solid #000 !important;
-                padding-top: 1rem !important;
-                margin-top: 2rem !important;
-                margin-bottom: 2rem !important;
-            }
-
-            .print-simple-total {
-                background: none !important;
-                border: none !important;
-                display: flex !important;
-                flex-direction: row !important;
-                justify-content: space-between !important;
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                text-align: right !important;
-            }
-
-            .grid.gap-8 {
-                gap: 1rem !important;
-            }
-
-            /* Footer */
-            .print-footer {
-                display: block !important;
-                position: static !important;
-                margin-top: auto !important;
-                width: 100%;
-                padding-top: 1rem;
-                border-top: 1px solid #eee;
-                font-size: 10px;
-                color: #666;
-                text-align: center;
-            }
-
-            /* Hide non-table elements */
-            .print-hidden,
+            .screen-only,
             button {
                 display: none !important;
             }
 
-            /* Remove container styling for print */
-            .bg-gray-50\/80 {
-                background: none !important;
-                border: none !important;
+            #app,
+            main,
+            section {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
             }
 
-            .totals-section .bg-green-50,
-            .totals-section .bg-blue-50 {
-                background: none !important;
-                border: none !important;
+            #receipt-container {
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
                 padding: 0 !important;
             }
 
-            .print-simple-total .absolute {
-                display: none !important;
+            /* Ensure inputs print their values correctly */
+            input {
+                border: none !important;
+                background: transparent !important;
             }
 
-            .print-add-fee::after {
-                content: " (+3.5% Fee)";
-                text-transform: none !important;
-                font-weight: normal !important;
-                font-size: 11px !important;
-                margin-left: 4px;
-                color: #444 !important;
-                display: inline-block !important;
+            input::placeholder {
+                color: transparent !important;
             }
 
-            /* Show recommended services in print if wanted, otherwise hidden */
-            .right-panel-upsells {
-                display: block !important;
-                margin-top: 2rem;
-                border-top: 1px dashed #ccc;
-                padding-top: 1rem;
+            /* Ensure table borders print */
+            .receipt-table,
+            .receipt-table td,
+            .receipt-table th,
+            .totals-box td {
+                border-color: black !important;
             }
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        }
-
-        .calc-input {
-            transition: all 0.3s ease;
-        }
-
-        .calc-input:focus {
-            transform: scale(1.01);
-            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.1);
-        }
-
-        .summary-row {
-            transition: all 0.3s ease;
-        }
-
-        .summary-row:hover {
-            background-color: rgba(243, 244, 246, 0.8);
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
-            border-radius: 0.5rem;
-            margin-left: -0.5rem;
-            margin-right: -0.5rem;
-        }
-
-        /* Scrollbar styling for sidebars */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -243,8 +177,9 @@
             border-radius: 3px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+        /* Utility */
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -264,8 +199,7 @@
                         </svg>
                     </button>
                     <a href="../index.html" class="flex items-center gap-4 group">
-                        <img src="../treadztntLogo.png" alt="Treadz Logo"
-                            class="h-10 w-auto group-hover:scale-105 transition-transform bg-white rounded-md p-0.5">
+                        <img src="../treadztntLogo.png" alt="Treadz Logo" class="h-10 w-auto bg-white rounded-md p-0.5">
                     </a>
                     <span class="text-xl font-bold tracking-tight text-white hidden sm:block">RECEIPTS</span>
                 </div>
@@ -295,7 +229,7 @@
         <!-- Main Workspace -->
         <main class="flex-grow flex flex-col lg:flex-row h-full overflow-hidden">
 
-            <!-- LEFT PANEL: Receipts / History -->
+            <!-- LEFT PANEL: History -->
             <aside id="history-panel"
                 class="w-full lg:w-80 bg-white border-r border-gray-200 flex flex-col shadow-lg z-20 flex-shrink-0 transition-all duration-300 absolute lg:relative h-full lg:transform-none transform -translate-x-full">
                 <div class="p-4 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
@@ -328,350 +262,376 @@
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                        <input type="text" id="history-search" placeholder="Search history..."
+                        <input type="text" id="history-search" placeholder="Search..."
                             oninput="renderHistory(this.value)"
-                            class="w-full pl-9 pr-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none">
+                            class="w-full pl-9 pr-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 outline-none">
                     </div>
                 </div>
-                <div id="history-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50">
-                    <!-- History Rendered Here -->
-                </div>
+                <div id="history-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50"></div>
             </aside>
 
-            <!-- CENTER PANEL: Receipt / Quote -->
-            <section class="flex-grow overflow-y-auto bg-gray-100 p-4 sm:p-6 flex flex-col items-center relative"
-                id="main-content-scroll">
-                <div id="receipt-container"
-                    class="w-full max-w-2xl bg-white shadow-2xl rounded-2xl flex flex-col overflow-hidden min-h-[600px] print:shadow-none print:rounded-none">
+            <!-- CENTER PANEL: Receipt Paper -->
+            <section class="flex-grow overflow-y-auto bg-gray-200 p-4 sm:p-8 flex flex-col items-center">
 
-                    <!-- Receipt Header (Visual similar to Print) -->
-                    <div class="p-8 pb-0 print:p-0">
-                        <div class="flex justify-between items-start border-b-2 border-gray-900 pb-4 mb-6">
-                            <div>
-                                <img src="../treadztntLogo.png" alt="Treadz"
-                                    class="h-16 w-auto mb-2 object-contain bg-white">
-                                <div class="text-xs text-gray-500 uppercase tracking-widest font-semibold ml-1">Tire &
-                                    Towing Services</div>
-                            </div>
-                            <div class="text-right">
-                                <h1 class="text-4xl font-black text-gray-900 tracking-tighter mb-1">RECEIPT</h1>
-                                <div class="text-sm font-medium text-gray-500" id="receipt-date"></div>
-                                <div class="text-sm font-medium text-gray-500 mt-1">#<span
-                                        id="quote-id-display">--</span></div>
+                <!-- THE PAPER RECEIPT CONTAINER -->
+                <div id="receipt-container" class="paper-receipt w-full max-w-2xl bg-white p-8 sm:p-12 mb-8"
+                    style="min-height: 800px;">
+
+                    <!-- HEADER -->
+                    <div class="flex justify-between items-start mb-6">
+                        <!-- Left Logo/Address -->
+                        <div class="flex flex-col w-1/2">
+                            <img src="../treadztntLogo.png" class="h-16 w-auto object-contain self-start mb-2"
+                                alt="Treadz">
+                            <div class="pl-2 pt-1 text-lg leading-tight space-y-1">
+                                <div>409 Main Street E.</div>
+                                <div>Mt. Carmel, TN 37645</div>
                             </div>
                         </div>
-
-                        <!-- Customer Inputs Row -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 print:mb-4">
-                            <div class="space-y-1">
-                                <label
-                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Customer</label>
-                                <input type="text" id="cust-name" placeholder="Enter Name..."
-                                    class="w-full bg-transparent border-b border-gray-200 focus:border-blue-500 outline-none py-1 font-bold text-lg text-gray-800 placeholder-gray-300 transition-colors">
-                            </div>
-                            <div class="space-y-1">
-                                <label
-                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Vehicle</label>
-                                <input type="text" id="cust-vehicle" placeholder="Year Make Model..."
-                                    class="w-full bg-transparent border-b border-gray-200 focus:border-blue-500 outline-none py-1 font-bold text-lg text-gray-800 placeholder-gray-300 transition-colors">
-                            </div>
+                        <!-- Right Info -->
+                        <div class="text-right w-1/2">
+                            <div class="text-4xl font-bold tracking-widest mb-2" id="receipt-id-display">--</div>
+                            <div class="text-2xl font-bold">423-357-4551</div>
                         </div>
                     </div>
 
-                    <!-- Main Entry Area -->
-                    <div class="flex-grow p-8 pt-0 print:p-0">
-                        <!-- Tire Input Big -->
-                        <div class="mb-8" id="tire-info-container">
-                            <input type="text" id="tire-info-input" placeholder="Enter Tire Size / Description..."
-                                class="w-full text-2xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none focus:ring-0 bg-transparent py-2"
-                                style="font-family: 'Inter', sans-serif;">
-                            <div class="h-0.5 w-full bg-gray-100 mt-1"></div>
+                    <!-- DATE -->
+                    <div class="flex items-end mb-6 text-xl">
+                        <span class="mr-2 font-serif">Date:</span>
+                        <div class="flex-grow border-b-2 border-black px-2 font-bold" id="receipt-date"></div>
+                    </div>
+
+                    <!-- CUSTOMER INFO LINES -->
+                    <div class="space-y-4 mb-6">
+                        <input type="text" id="cust-name-input"
+                            class="w-full text-2xl font-bold border-b-2 border-black outline-none bg-transparent uppercase"
+                            placeholder="CUSTOMER NAME">
+                        <input type="text" id="cust-vehicle-input"
+                            class="w-full text-2xl font-bold border-b-2 border-black outline-none bg-transparent uppercase"
+                            placeholder="VEHICLE INFO">
+                    </div>
+
+                    <!-- DISCLAIMER -->
+                    <div class="mb-4">
+                        <p class="text-lg underline decoration-1 text-black font-serif">*Re-Torque lugs after 150 miles.
+                        </p>
+                    </div>
+
+                    <!-- TABLE -->
+                    <div class="mb-0">
+                        <table class="receipt-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">QTY</th>
+                                    <th>DESCRIPTION</th>
+                                    <th style="width: 100px;">UNIT PRICE</th>
+                                    <th style="width: 100px; border-right: none;">AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="line-items-body">
+                                <!-- Primary Input Row -->
+                                <tr>
+                                    <td class="p-0"><input type="number" id="qty-input" value="4"
+                                            class="w-full h-full text-center font-bold outline-none bg-transparent"
+                                            min="1"></td>
+                                    <td class="p-0"><input type="text" id="desc-input" placeholder="TIRE SIZE / BRAND"
+                                            class="w-full h-full px-2 font-bold outline-none bg-transparent uppercase">
+                                    </td>
+                                    <td class="p-0 relative">
+                                        <input type="number" id="price-input" placeholder="0.00"
+                                            class="w-full h-full pr-2 text-right font-bold outline-none bg-transparent"
+                                            step="0.01">
+                                    </td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="line-total-display">$0.00</td>
+                                </tr>
+                                <!-- Fees (Auto Filled) -->
+                                <tr id="row-state-fee">
+                                    <td class="text-center align-middle" id="fee-state-qty"></td>
+                                    <td class="uppercase text-sm align-middle" id="fee-state-desc"></td>
+                                    <td class="text-right align-middle" id="fee-state-price"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="fee-state-total"></td>
+                                </tr>
+                                <tr id="row-disp-fee">
+                                    <td class="text-center align-middle" id="fee-disp-qty"></td>
+                                    <td class="uppercase text-sm align-middle" id="fee-disp-desc"></td>
+                                    <td class="text-right align-middle" id="fee-disp-price"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="fee-disp-total"></td>
+                                </tr>
+                                <!-- Upsells / Filler Rows -->
+                                <tr id="row-upsell-rotation" class="hidden">
+                                    <td class="text-center align-middle">1</td>
+                                    <td class="uppercase text-sm align-middle">TIRE ROTATION</td>
+                                    <td class="text-right align-middle">$0.00</td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+                                </tr>
+                                <tr id="row-upsell-balance" class="hidden">
+                                    <td class="text-center align-middle">1</td>
+                                    <td class="uppercase text-sm align-middle">TIRE BALANCE</td>
+                                    <td class="text-right align-middle">$0.00</td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+                                </tr>
+                                <tr id="row-upsell-stem" class="hidden">
+                                    <td class="text-center align-middle">4</td>
+                                    <td class="uppercase text-sm align-middle">VALVE STEMS (NEW)</td>
+                                    <td class="text-right align-middle">$0.00</td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+                                </tr>
+                                <tr id="row-upsell-sensor" class="hidden">
+                                    <td class="text-center align-middle">4</td>
+                                    <td class="uppercase text-sm align-middle">TPMS SENSOR CHECK</td>
+                                    <td class="text-right align-middle">$0.00</td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+                                </tr>
+                                <!-- Filler Empty Rows -->
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="no-border-right"></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="no-border-right"></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="no-border-right"></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="no-border-right"></td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="no-border-right"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div class="flex border-2 border-t-0 border-black">
+                        <!-- Message -->
+                        <div class="flex-grow flex items-end justify-center p-6 text-center">
+                            <h2 class="font-bold text-2xl uppercase font-serif max-w-[250px] leading-tight mb-2">THANK
+                                YOU FOR YOUR BUSINESS!</h2>
                         </div>
-
-                        <!-- Interactive Math Lines -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 print:hidden">
-                            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Price
-                                    Per Tire</label>
-                                <div class="relative flex items-center">
-                                    <span class="text-lg text-gray-400 font-medium mr-2">$</span>
-                                    <input type="number" id="tire-price" placeholder="0.00" min="0" step="0.01"
-                                        class="w-full bg-transparent text-2xl font-bold text-gray-800 outline-none">
-                                </div>
-                            </div>
-                            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                <label
-                                    class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Quantity</label>
-                                <div class="flex items-center gap-3">
-                                    <button onclick="adjustQuantity(-1)"
-                                        class="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:bg-blue-50 transition-colors font-bold">-</button>
-                                    <input type="number" id="quantity" value="4" min="1"
-                                        class="w-16 bg-transparent text-center text-2xl font-bold text-gray-800 outline-none">
-                                    <button onclick="adjustQuantity(1)"
-                                        class="w-8 h-8 rounded-full bg-white shadow flex items-center justify-center text-gray-600 hover:bg-blue-50 transition-colors font-bold">+</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Print Friendly Line Item (Hidden on screen usually, but we want WYSIWYG so let's mirror it) -->
-                        <div class="hidden print:flex justify-between mb-4 border-b border-gray-100 pb-2">
-                            <span class="text-sm font-bold text-gray-600">TIRES</span>
-                            <div class="flex gap-8">
-                                <span class="text-sm font-medium"><span id="print-qty">4</span> x <span
-                                        id="print-price">$0.00</span></span>
-                                <span class="text-sm font-bold text-gray-900" id="print-line-total">$0.00</span>
-                            </div>
-                        </div>
-
-                        <!-- Fees Breakdown -->
-                        <div class="space-y-2 mt-4">
-                            <!-- Item -->
-                            <div
-                                class="summary-row flex justify-between items-center py-2 border-b border-dashed border-gray-100">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-600">Tires Subtotal</div>
-                                    <div id="subtotal-math" class="text-[10px] text-gray-400 font-mono print-hide-math">
-                                    </div>
-                                </div>
-                                <div class="font-bold text-gray-800" id="subtotal-display">$0.00</div>
-                            </div>
-                            <!-- Item -->
-                            <div
-                                class="summary-row flex justify-between items-center py-2 border-b border-dashed border-gray-100">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-600 flex items-center gap-2">
-                                        State Tire Fee
-                                        <span
-                                            class="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 print-hidden">$1.35/ea</span>
-                                    </div>
-                                    <div id="state-fee-math"
-                                        class="text-[10px] text-gray-400 font-mono print-hide-math"></div>
-                                </div>
-                                <div class="font-bold text-gray-800" id="state-fee-display">$0.00</div>
-                            </div>
-                            <!-- Item -->
-                            <div
-                                class="summary-row flex justify-between items-center py-2 border-b border-dashed border-gray-100">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-600 flex items-center gap-2">
-                                        Disposal Fee
-                                        <span
-                                            class="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500 print-hidden">$4.00/ea</span>
-                                    </div>
-                                    <div id="disposal-fee-math"
-                                        class="text-[10px] text-gray-400 font-mono print-hide-math"></div>
-                                </div>
-                                <div class="font-bold text-gray-800" id="disposal-fee-display">$0.00</div>
-                            </div>
-                            <!-- Item -->
-                            <div
-                                class="summary-row flex justify-between items-center py-2 border-b border-dashed border-gray-100">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-600 flex items-center gap-2">
-                                        Sales Tax
-                                        <span
-                                            class="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded print-hidden">9.75%</span>
-                                    </div>
-                                    <div id="tax-math" class="text-[10px] text-gray-400 font-mono print-hide-math">
-                                    </div>
-                                </div>
-                                <div class="font-bold text-gray-800" id="tax-display">$0.00</div>
-                            </div>
-                        </div>
-
-                        <!-- Print visual for Upsells -->
-                        <div id="print-upsells-area"
-                            class="hidden print:block mt-6 pt-4 border-t border-dashed border-gray-300">
-                            <h4 class="text-xs font-bold uppercase text-gray-500 mb-2">Service Recommendations</h4>
-                            <div id="print-upsells-list" class="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                                <!-- Populated by JS -->
-                            </div>
-                        </div>
-
-                        <!-- Spacer -->
-                        <div class="flex-grow min-h-[50px]"></div>
-
                         <!-- Totals -->
-                        <div class="totals-section mt-8 pt-6 border-t-2 border-gray-900">
-                            <div class="grid grid-cols-2 gap-4 w-full">
-                                <!-- CASH -->
-                                <div
-                                    class="flex flex-col items-center justify-center p-4 rounded-xl bg-green-50 border border-green-100 print-simple-total">
-                                    <span
-                                        class="text-xs font-bold text-green-700 uppercase tracking-widest mb-1 print:text-black">Cash
-                                        Total</span>
-                                    <span id="total-cash-display"
-                                        class="text-3xl font-black text-green-700 print:text-lg print:text-black">$0.00</span>
-                                </div>
-                                <!-- CARD -->
-                                <div
-                                    class="flex flex-col items-center justify-center p-4 rounded-xl bg-blue-50 border border-blue-100 relative overflow-hidden print-simple-total">
-                                    <div
-                                        class="absolute top-0 right-0 bg-blue-200 text-blue-800 text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg print:hidden">
-                                        +3.5%</div>
-                                    <span
-                                        class="text-xs font-bold text-blue-700 uppercase tracking-widest mb-1 print:text-black print-add-fee">Card
-                                        Total</span>
-                                    <span id="total-card-display"
-                                        class="text-3xl font-black text-blue-700 print:text-lg print:text-black">$0.00</span>
-                                    <span id="card-fee-display" class="text-[10px] text-blue-400 mt-1 print:hidden">Fee:
-                                        $0.00</span>
-                                </div>
+                        <div class="w-72 border-l-2 border-black">
+                            <table class="totals-box border-none">
+                                <tr>
+                                    <td class="label border-t-0 border-l-0 border-b-2">SUBTOTAL</td>
+                                    <td class="amount border-t-0 border-r-0 border-b-2" id="subtotal-final">$0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="label border-l-0 border-b-2">TAX</td>
+                                    <td class="amount border-r-0 border-b-2" id="tax-final">$0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="label border-l-0 border-b-0">TOTAL</td>
+                                    <td class="amount border-r-0 border-b-0 text-2xl" id="total-final">$0.00</td>
+                                </tr>
+                            </table>
+                            <!-- Card Logic Hidden Calculation -->
+                            <div
+                                class="border-t-2 border-black p-1 text-right text-xs bg-gray-50 print:hidden text-gray-500">
+                                Card Total (+3.5%): <span id="card-total-preview" class="font-bold">$0.00</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Footer - Screen Only -->
-                    <div class="bg-gray-50 p-6 border-t border-gray-100 flex gap-4 print:hidden">
-                        <button onclick="handlePrint()"
-                            class="flex-1 btn btn-primary py-4 rounded-xl text-lg shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
-                                </path>
-                                <rect width="12" height="8" x="6" y="14"></rect>
-                            </svg>
-                            Print Receipt
-                        </button>
-                    </div>
-                    <div class="hidden print:block text-center text-[10px] text-gray-500 pb-4">
-                        Thank you for your business! | Treadz Tire & Towing
-                    </div>
                 </div>
 
-                <div class="mt-8 text-center text-gray-400 text-sm print:hidden">
-                    &copy; Treadz Inventory System
+                <!-- BUTTONS -->
+                <div class="flex gap-4 print:hidden w-full max-w-2xl px-4">
+                    <button onclick="handlePrint()"
+                        class="flex-1 btn btn-primary py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect width="12" height="8" x="6" y="14"></rect>
+                        </svg>
+                        Print Receipt
+                    </button>
                 </div>
+
             </section>
 
-            <!-- RIGHT PANEL: Recommended Services -->
+            <!-- RIGHT PANEL: Recommended Services (Checklist) -->
             <aside id="upsell-panel"
                 class="w-full lg:w-72 bg-white border-l border-gray-200 shadow-xl z-20 flex-shrink-0 flex flex-col hidden lg:flex">
                 <div class="p-6 border-b border-gray-200">
-                    <h3 class="font-bold text-lg text-gray-800">Additional Services</h3>
-                    <p class="text-xs text-gray-500 mt-1">Services we also could've done.</p>
+                    <h3 class="font-bold text-lg text-gray-800 font-sans">Services Performed</h3>
+                    <p class="text-xs text-gray-500 mt-1 font-sans">Check to add line items.</p>
                 </div>
-                <div class="p-6 space-y-4 overflow-y-auto flex-grow">
-                    <!-- Checklist -->
+                <div class="p-6 space-y-4 overflow-y-auto flex-grow font-sans">
                     <div class="space-y-3">
                         <label
-                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-                            <input type="checkbox" id="srv-rotation"
-                                class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                                onchange="updateUpsellPrint()">
-                            <div class="flex-grow">
-                                <span
-                                    class="block font-semibold text-gray-700 group-hover:text-blue-700">Rotation</span>
-                                <span class="text-xs text-gray-400">Regular maintenance</span>
-                            </div>
+                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" id="srv-rotation" class="mt-1 w-5 h-5 text-blue-600 rounded"
+                                onchange="calculate()">
+                            <div><span class="block font-semibold text-gray-700">Rotation</span></div>
                         </label>
-
                         <label
-                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-                            <input type="checkbox" id="srv-balance"
-                                class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                                onchange="updateUpsellPrint()">
-                            <div class="flex-grow">
-                                <span class="block font-semibold text-gray-700 group-hover:text-blue-700">Balance</span>
-                                <span class="text-xs text-gray-400">Improve ride quality</span>
-                            </div>
+                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" id="srv-balance" class="mt-1 w-5 h-5 text-blue-600 rounded"
+                                onchange="calculate()">
+                            <div><span class="block font-semibold text-gray-700">Balance</span></div>
                         </label>
-
                         <label
-                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-                            <input type="checkbox" id="srv-stem"
-                                class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                                onchange="updateUpsellPrint()">
-                            <div class="flex-grow">
-                                <span class="block font-semibold text-gray-700 group-hover:text-blue-700">Tire
-                                    Stem</span>
-                                <span class="text-xs text-gray-400">Valve replacement</span>
-                            </div>
+                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" id="srv-stem" class="mt-1 w-5 h-5 text-blue-600 rounded"
+                                onchange="calculate()">
+                            <div><span class="block font-semibold text-gray-700">Tire Stems</span></div>
                         </label>
-
                         <label
-                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer group">
-                            <input type="checkbox" id="srv-sensor"
-                                class="mt-1 w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                                onchange="updateUpsellPrint()">
-                            <div class="flex-grow">
-                                <span class="block font-semibold text-gray-700 group-hover:text-blue-700">Sensor
-                                    Check</span>
-                                <span class="text-xs text-gray-400">TPMS Diagnostics</span>
-                            </div>
+                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" id="srv-sensor" class="mt-1 w-5 h-5 text-blue-600 rounded"
+                                onchange="calculate()">
+                            <div><span class="block font-semibold text-gray-700">Sensor Check</span></div>
                         </label>
                     </div>
                 </div>
-                <div class="p-4 bg-gray-50 border-t border-gray-200 text-xs text-gray-500 text-center">
-                    Check services to include in printout
-                </div>
             </aside>
-
         </main>
     </div>
-
-    <!-- No Modal, History is now sidebar -->
 
     <script>
         const STATE_FEE_PER_TIRE = 1.35;
         const DISPOSAL_FEE_PER_TIRE = 4.00;
         const TAX_RATE = 0.0975;
+        const CARD_FEE_RATE = 0.035;
 
         // Elements
-        const priceInput = document.getElementById('tire-price');
-        const qtyInput = document.getElementById('quantity');
-        const tireInfoInput = document.getElementById('tire-info-input');
-        const tireInfoContainer = document.getElementById('tire-info-container');
-        const custNameInput = document.getElementById('cust-name');
-        const custVehicleInput = document.getElementById('cust-vehicle');
-        const historySearchInput = document.getElementById('history-search');
-        const itemDateDisplay = document.getElementById('receipt-date');
-        const quoteIdDisplay = document.getElementById('quote-id-display');
+        const qtyInput = document.getElementById('qty-input');
+        const descInput = document.getElementById('desc-input');
+        const priceInput = document.getElementById('price-input');
 
-        // Initial Setup
-        itemDateDisplay.textContent = new Date().toLocaleDateString();
+        const custNameInput = document.getElementById('cust-name-input');
+        const custVehicleInput = document.getElementById('cust-vehicle-input');
+        const dateDisplay = document.getElementById('receipt-date');
+        const idDisplay = document.getElementById('receipt-id-display');
 
-        // --- SIDEBAR & HISTORY LOGIC ---
-        function toggleReceipts() {
-            const sidebar = document.getElementById('history-panel');
-            sidebar.classList.toggle('-translate-x-full');
-            // For Desktop, we might want to just slide it? 
-            // Current CSS class '-translate-x-full' hides it.
-            // On large screens it is relative, this toggle primarily works for mobile absolute positioning
-            // To make it toggleable on desktop:
-            if (window.innerWidth >= 1024) {
-                if (sidebar.style.display === 'none') {
-                    sidebar.style.display = 'flex';
-                } else {
-                    sidebar.style.display = 'none';
-                }
+        // Fee Rows
+        const feeStateQty = document.getElementById('fee-state-qty');
+        const feeStateDesc = document.getElementById('fee-state-desc');
+        const feeStatePrice = document.getElementById('fee-state-price');
+        const feeStateTotal = document.getElementById('fee-state-total');
+
+        const feeDispQty = document.getElementById('fee-disp-qty');
+        const feeDispDesc = document.getElementById('fee-disp-desc');
+        const feeDispPrice = document.getElementById('fee-disp-price');
+        const feeDispTotal = document.getElementById('fee-disp-total');
+
+        // Totals
+        const subtotalFinal = document.getElementById('subtotal-final');
+        const taxFinal = document.getElementById('tax-final');
+        const totalFinal = document.getElementById('total-final');
+        const cardTotalPreview = document.getElementById('card-total-preview');
+
+        // Init
+        dateDisplay.textContent = new Date().toLocaleDateString();
+        // Generate random ID if needed, or use history? 
+        if (idDisplay.textContent === '--') {
+            idDisplay.textContent = Math.floor(1000 + Math.random() * 9000);
+        }
+
+        // --- CALCULATION LOGIC ---
+        function calculate() {
+            const qty = parseInt(qtyInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+
+            // 1. Primary Line Item
+            const lineTotal = qty * price;
+            document.getElementById('line-total-display').textContent = formatMoney(lineTotal);
+
+            let currentSubtotal = lineTotal;
+
+            // 2. Fees (Only if price or desc entered, mimics activity)
+            if (qty > 0 && (descInput.value.length > 0 || price > 0)) {
+                // State Fee
+                const stateTotal = qty * STATE_FEE_PER_TIRE;
+                feeStateQty.textContent = qty;
+                feeStateDesc.textContent = 'STATE TIRE FEE';
+                feeStatePrice.textContent = formatMoney(STATE_FEE_PER_TIRE);
+                feeStateTotal.textContent = formatMoney(stateTotal);
+
+                // Disposal Fee
+                const dispTotal = qty * DISPOSAL_FEE_PER_TIRE;
+                feeDispQty.textContent = qty;
+                feeDispDesc.textContent = 'TIRE DISPOSAL';
+                feeDispPrice.textContent = formatMoney(DISPOSAL_FEE_PER_TIRE);
+                feeDispTotal.textContent = formatMoney(dispTotal);
+
+                currentSubtotal += stateTotal + dispTotal;
+            } else {
+                // Clear fees if no input
+                clearFees();
+            }
+
+            // 3. Upsells
+            toggleUpsellRow('row-upsell-rotation', 'srv-rotation');
+            toggleUpsellRow('row-upsell-balance', 'srv-balance');
+            toggleUpsellRow('row-upsell-stem', 'srv-stem');
+            toggleUpsellRow('row-upsell-sensor', 'srv-sensor');
+
+            // 4. Totals
+            const tax = currentSubtotal * TAX_RATE;
+            const total = currentSubtotal + tax;
+            const cardTotal = total + (total * CARD_FEE_RATE);
+
+            subtotalFinal.textContent = formatMoney(currentSubtotal);
+            taxFinal.textContent = formatMoney(tax);
+            totalFinal.textContent = formatMoney(total);
+            cardTotalPreview.textContent = formatMoney(cardTotal);
+        }
+
+        function toggleUpsellRow(rowId, checkboxId) {
+            const row = document.getElementById(rowId);
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox.checked) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
             }
         }
 
-        // Better sidebar toggle for responsive
-        function toggleSidebar() {
-            const sidebar = document.getElementById('history-panel');
-            sidebar.classList.toggle('-translate-x-full');
+        function clearFees() {
+            feeStateQty.textContent = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
+            feeDispQty.textContent = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
         }
 
-        function getHistory() {
-            return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
+        function formatMoney(amount) {
+            return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
+
+        // --- HISTORY LOGIC ---
+        function getHistory() { return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || []; }
 
         function saveQuote() {
             const history = getHistory();
             const quote = {
                 id: Date.now(),
                 timestamp: new Date().toISOString(),
+                displayId: idDisplay.textContent,
                 customer: custNameInput.value.trim() || 'Walk-In',
                 vehicle: custVehicleInput.value.trim(),
-                tireInfo: tireInfoInput.value.trim(),
+                tireInfo: descInput.value.trim(),
                 pricePerTire: parseFloat(priceInput.value) || 0,
                 qty: parseInt(qtyInput.value) || 0,
-                total: document.getElementById('total-card-display').textContent,
-                // Save checked upsells
+                total: totalFinal.textContent,
                 upsells: {
                     rotation: document.getElementById('srv-rotation').checked,
                     balance: document.getElementById('srv-balance').checked,
@@ -680,27 +640,19 @@
                 }
             };
 
-            // Avoid saving empty junk
-            if (quote.pricePerTire === 0 && quote.tireInfo === '') return;
-
-            // Check for duplicates (ignore ID and Timestamp)
+            // Dedupe
             const isDuplicate = history.some(item =>
                 item.customer === quote.customer &&
                 item.vehicle === quote.vehicle &&
                 item.tireInfo === quote.tireInfo &&
-                item.pricePerTire === quote.pricePerTire &&
-                item.qty === quote.qty &&
                 item.total === quote.total
             );
-
             if (isDuplicate) return;
 
             history.unshift(quote);
-            // Limit to last 50
             if (history.length > 50) history.pop();
-
             localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
-            renderHistory(); // Update list immediately
+            renderHistory();
         }
 
         function handlePrint() {
@@ -712,7 +664,7 @@
             const history = getHistory();
             const container = document.getElementById('history-list');
 
-            if (!container) return;
+            if (!container) return; // Guard
 
             const filteredHistory = history.filter(item => {
                 const searchStr = filterText.toLowerCase();
@@ -724,25 +676,17 @@
                 );
             });
 
-            if (filteredHistory.length === 0) {
-                container.innerHTML = '<div class="text-center text-gray-400 py-10 text-xs">No matching history found.</div>';
-                return;
-            }
-
             container.innerHTML = filteredHistory.map(item => `
-                <div onclick='loadQuote(${JSON.stringify(item)})' class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:border-blue-400 hover:shadow-md transition-all group relative">
+                <div onclick='loadQuote(${JSON.stringify(item)})' class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all">
                     <div class="flex justify-between items-start mb-1">
-                        <div class="font-bold text-gray-800 text-sm truncate pr-2">${item.customer}</div>
+                        <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3">${item.customer}</div>
                         <div class="text-xs font-mono text-gray-500">${new Date(item.timestamp).toLocaleDateString()}</div>
                     </div>
-                    <div class="text-xs text-gray-600 mb-1 truncate">${item.tireInfo || 'Unknown Tire'}</div>
-                    <div class="flex justify-between items-end mt-2">
-                         <div class="text-xs text-gray-400">${item.qty} x $${item.pricePerTire}</div>
-                         <div class="font-bold text-blue-600 text-sm">${item.total}</div>
+                    <div class="text-xs text-gray-600 truncate mb-1">${item.tireInfo || 'Item'}</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <div class="font-bold text-blue-600 text-sm">${item.total}</div>
+                        <div class="text-xs text-gray-400">#${item.displayId || '---'}</div>
                     </div>
-                    <button onclick="deleteQuote(event, ${item.id})" class="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-white rounded-full shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
                 </div>
             `).join('');
         }
@@ -750,174 +694,52 @@
         function loadQuote(item) {
             custNameInput.value = item.customer;
             custVehicleInput.value = item.vehicle;
-            tireInfoInput.value = item.tireInfo;
+            descInput.value = item.tireInfo;
             priceInput.value = item.pricePerTire;
             qtyInput.value = item.qty;
-            quoteIdDisplay.textContent = item.id.toString().slice(-6); // Mock ID display
+            idDisplay.textContent = item.displayId || Math.floor(1000 + Math.random() * 9000);
 
-            // Load Upsells if present
             if (item.upsells) {
-                document.getElementById('srv-rotation').checked = item.upsells.rotation || false;
-                document.getElementById('srv-balance').checked = item.upsells.balance || false;
-                document.getElementById('srv-stem').checked = item.upsells.stem || false;
-                document.getElementById('srv-sensor').checked = item.upsells.sensor || false;
+                document.getElementById('srv-rotation').checked = item.upsells.rotation;
+                document.getElementById('srv-balance').checked = item.upsells.balance;
+                document.getElementById('srv-stem').checked = item.upsells.stem;
+                document.getElementById('srv-sensor').checked = item.upsells.sensor;
             } else {
-                // Reset check boxes
                 document.getElementById('srv-rotation').checked = false;
                 document.getElementById('srv-balance').checked = false;
                 document.getElementById('srv-stem').checked = false;
                 document.getElementById('srv-sensor').checked = false;
             }
-            updateUpsellPrint();
 
             calculate();
-
-            // Visual feedback
-            const container = document.getElementById('receipt-container');
-            container.classList.add('ring-2', 'ring-blue-400');
-            setTimeout(() => container.classList.remove('ring-2', 'ring-blue-400'), 400);
-
-            // On mobile, close sidebar after pick
-            if (window.innerWidth < 1024) {
-                document.getElementById('history-panel').classList.add('-translate-x-full');
-            }
-        }
-
-        function deleteQuote(e, id) {
-            e.stopPropagation(); // Prevent loading the quote
-            if (confirm('Delete this receipt?')) {
-                const history = getHistory().filter(item => item.id !== id);
-                localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
-                const currentSearch = historySearchInput ? historySearchInput.value : '';
-                renderHistory(currentSearch);
-            }
-        }
-
-        function calculate() {
-            const priceVal = priceInput.value;
-            const pricePerTire = priceVal === '' ? 0 : parseFloat(priceVal);
-            const qty = parseInt(qtyInput.value) || 0;
-
-            // Core calculations
-            const tiresSubtotal = pricePerTire * qty;
-            const totalStateFee = STATE_FEE_PER_TIRE * qty;
-            const totalDisposalFee = DISPOSAL_FEE_PER_TIRE * qty;
-
-            const CARD_FEE_RATE = 0.035;
-
-            // Tax on the Sale (Tires + Fees)
-            const taxableAmount = tiresSubtotal + totalStateFee + totalDisposalFee;
-            const tax = taxableAmount * TAX_RATE;
-
-            const cashTotal = taxableAmount + tax;
-
-            // Card calculations (Total + 3% of that total)
-            const cardFee = cashTotal * CARD_FEE_RATE;
-            const cardTotal = cashTotal + cardFee;
-
-            // Render Breakdown
-            updateDisplay('subtotal-display', tiresSubtotal);
-            const subtotalMathEl = document.getElementById('subtotal-math');
-            if (subtotalMathEl) subtotalMathEl.textContent = `${qty} x ` + formatMoney(pricePerTire);
-
-            document.getElementById('print-qty').textContent = qty;
-            document.getElementById('print-price').textContent = formatMoney(pricePerTire);
-            document.getElementById('print-line-total').textContent = formatMoney(tiresSubtotal);
-
-            updateDisplay('state-fee-display', totalStateFee);
-            const stateFeeMathEl = document.getElementById('state-fee-math');
-            if (stateFeeMathEl) stateFeeMathEl.textContent = `${qty} x ` + formatMoney(STATE_FEE_PER_TIRE);
-
-            updateDisplay('disposal-fee-display', totalDisposalFee);
-            const disposalFeeMathEl = document.getElementById('disposal-fee-math');
-            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${qty} x ` + formatMoney(DISPOSAL_FEE_PER_TIRE);
-
-            updateDisplay('tax-display', tax);
-            const taxMathEl = document.getElementById('tax-math');
-            if (taxMathEl) taxMathEl.textContent = `9.75% of ` + formatMoney(taxableAmount);
-
-            // Render Totals
-            updateDisplay('total-cash-display', cashTotal);
-            updateDisplay('total-card-display', cardTotal);
-            updateDisplay('card-fee-display', cardFee, true);
-        }
-
-        function updateDisplay(id, amount, isFeeLabel = false) {
-            const el = document.getElementById(id);
-            if (isFeeLabel) {
-                el.textContent = 'Fee: ' + formatMoney(amount);
-            } else {
-                el.textContent = formatMoney(amount);
-            }
-        }
-
-        function formatMoney(amount) {
-            return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function adjustQuantity(delta) {
-            let val = parseInt(qtyInput.value) || 0;
-            val += delta;
-            if (val < 1) val = 1;
-            qtyInput.value = val;
-            calculate();
+            if (window.innerWidth < 1024) toggleSidebar();
         }
 
         function reset() {
-            priceInput.value = '';
             qtyInput.value = 4;
+            descInput.value = '';
+            priceInput.value = '';
             custNameInput.value = '';
             custVehicleInput.value = '';
-            tireInfoInput.value = '';
-            // Reset upsells
-            if (document.getElementById('srv-rotation')) {
-                document.getElementById('srv-rotation').checked = false;
-                document.getElementById('srv-balance').checked = false;
-                document.getElementById('srv-stem').checked = false;
-                document.getElementById('srv-sensor').checked = false;
-            }
-            updateUpsellPrint();
+            idDisplay.textContent = Math.floor(1000 + Math.random() * 9000);
+            document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             calculate();
-            priceInput.focus();
-            quoteIdDisplay.textContent = '--';
         }
 
-        function updateUpsellPrint() {
-            const printArea = document.getElementById('print-upsells-list');
-            if (!printArea) return;
-
-            const upsells = [
-                { id: 'srv-rotation', label: 'Rotation' },
-                { id: 'srv-balance', label: 'Balance' },
-                { id: 'srv-stem', label: 'Tire Stem' },
-                { id: 'srv-sensor', label: 'Sensor Check' }
-            ];
-
-            const activeUpsells = upsells.filter(u => document.getElementById(u.id).checked);
-
-            if (activeUpsells.length === 0) {
-                document.getElementById('print-upsells-area').classList.add('hidden');
-                printArea.innerHTML = '';
-            } else {
-                document.getElementById('print-upsells-area').classList.remove('hidden');
-                printArea.innerHTML = activeUpsells.map(u => `
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-black"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>${u.label}</span>
-                    </div>
-                 `).join('');
-            }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('history-panel');
+            sidebar.classList.toggle('-translate-x-full');
         }
 
         // Event Listeners
-        if (priceInput) priceInput.addEventListener('input', calculate);
-        if (qtyInput) qtyInput.addEventListener('input', calculate);
-        if (tireInfoInput) tireInfoInput.addEventListener('input', () => {
-            // Logic to show/hide if needed
-        });
+        qtyInput.addEventListener('input', calculate);
+        priceInput.addEventListener('input', calculate);
+        descInput.addEventListener('input', calculate);
 
         // Init
         renderHistory();
+        calculate();
+
     </script>
 </body>
 
