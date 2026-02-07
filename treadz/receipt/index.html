@@ -86,7 +86,6 @@
             font-size: 12px;
             text-align: right;
             border-right: 2px solid black !important;
-            /* Visual fix */
             width: 90px;
         }
 
@@ -121,7 +120,8 @@
             #history-panel,
             #upsell-panel,
             .screen-only,
-            button {
+            button,
+            .print-hidden {
                 display: none !important;
             }
 
@@ -142,19 +142,28 @@
                 max-width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                min-height: 0 !important;
             }
 
-            /* Ensure inputs print their values correctly */
+            /* Clean up inputs for print */
             input {
                 border: none !important;
                 background: transparent !important;
+                width: auto !important;
+                padding: 0 !important;
             }
 
             input::placeholder {
                 color: transparent !important;
             }
 
-            /* Ensure table borders print */
+            /* Hide spinner on number inputs */
+            input[type=number]::-webkit-inner-spin-button,
+            input[type=number]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
             .receipt-table,
             .receipt-table td,
             .receipt-table th,
@@ -177,7 +186,6 @@
             border-radius: 3px;
         }
 
-        /* Utility */
         .hidden {
             display: none;
         }
@@ -360,44 +368,87 @@
                                     <td class="no-border-right text-right font-bold align-middle pr-2"
                                         id="fee-disp-total"></td>
                                 </tr>
-                                <!-- Upsells / Filler Rows -->
-                                <tr id="row-upsell-rotation" class="hidden">
-                                    <td class="text-center align-middle">1</td>
-                                    <td class="uppercase text-sm align-middle">TIRE ROTATION</td>
-                                    <td class="text-right align-middle">$0.00</td>
-                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+
+                                <!-- Dynamic Services Rows -->
+                                <!-- Rotation -->
+                                <tr id="row-srv-rotation" class="hidden">
+                                    <td class="p-0"><input type="number" id="qty-rotation" value="1"
+                                            class="w-full h-full text-center outline-none bg-transparent"
+                                            oninput="calculate()"></td>
+                                    <td class="uppercase text-sm align-middle pl-1">TIRE ROTATION</td>
+                                    <td class="p-0"><input type="number" id="price-rotation" value="50.00"
+                                            class="w-full h-full text-right pr-2 outline-none bg-transparent"
+                                            step="0.01" oninput="calculate()"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="total-rotation">$50.00</td>
                                 </tr>
-                                <tr id="row-upsell-balance" class="hidden">
-                                    <td class="text-center align-middle">1</td>
-                                    <td class="uppercase text-sm align-middle">TIRE BALANCE</td>
-                                    <td class="text-right align-middle">$0.00</td>
-                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+
+                                <!-- Balance -->
+                                <tr id="row-srv-balance" class="hidden">
+                                    <td class="p-0"><input type="number" id="qty-balance" value="1"
+                                            class="w-full h-full text-center outline-none bg-transparent"
+                                            oninput="calculate()"></td>
+                                    <td class="uppercase text-sm align-middle pl-1">TIRE BALANCE</td>
+                                    <td class="p-0"><input type="number" id="price-balance" value="50.00"
+                                            class="w-full h-full text-right pr-2 outline-none bg-transparent"
+                                            step="0.01" oninput="calculate()"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="total-balance">$50.00</td>
                                 </tr>
-                                <tr id="row-upsell-stem" class="hidden">
-                                    <td class="text-center align-middle">4</td>
-                                    <td class="uppercase text-sm align-middle">VALVE STEMS (NEW)</td>
-                                    <td class="text-right align-middle">$0.00</td>
-                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+
+                                <!-- Stem (Still Incl or changed? User didn't specify price, default 0 or allow edit) -->
+                                <tr id="row-srv-stem" class="hidden">
+                                    <td class="p-0"><input type="number" id="qty-stem" value="4"
+                                            class="w-full h-full text-center outline-none bg-transparent"
+                                            oninput="calculate()"></td>
+                                    <td class="uppercase text-sm align-middle pl-1">VALVE STEMS (NEW)</td>
+                                    <td class="p-0"><input type="number" id="price-stem" value="0.00"
+                                            class="w-full h-full text-right pr-2 outline-none bg-transparent"
+                                            step="0.01" oninput="calculate()"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2" id="total-stem">
+                                        $0.00</td>
                                 </tr>
-                                <tr id="row-upsell-sensor" class="hidden">
-                                    <td class="text-center align-middle">4</td>
-                                    <td class="uppercase text-sm align-middle">TPMS SENSOR CHECK</td>
-                                    <td class="text-right align-middle">$0.00</td>
-                                    <td class="no-border-right text-right font-bold align-middle pr-2">INCL</td>
+
+                                <!-- Sensor Check -> New TPMS Sensors -->
+                                <tr id="row-srv-sensor" class="hidden">
+                                    <td class="p-0"><input type="number" id="qty-sensor" value="4"
+                                            class="w-full h-full text-center outline-none bg-transparent"
+                                            oninput="calculate()"></td>
+                                    <td class="uppercase text-sm align-middle pl-1">NEW TPMS SENSORS</td>
+                                    <td class="p-0"><input type="number" id="price-sensor" value="59.99"
+                                            class="w-full h-full text-right pr-2 outline-none bg-transparent"
+                                            step="0.01" oninput="calculate()"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="total-sensor">$239.96</td>
                                 </tr>
+
+                                <!-- Patch -->
+                                <tr id="row-srv-patch" class="hidden">
+                                    <td class="p-0"><input type="number" id="qty-patch" value="1"
+                                            class="w-full h-full text-center outline-none bg-transparent"
+                                            oninput="calculate()"></td>
+                                    <td class="uppercase text-sm align-middle pl-1">TIRE PATCH</td>
+                                    <td class="p-0"><input type="number" id="price-patch" value="20.00"
+                                            class="w-full h-full text-right pr-2 outline-none bg-transparent"
+                                            step="0.01" oninput="calculate()"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2" id="total-patch">
+                                        $20.00</td>
+                                </tr>
+
+                                <!-- Plug -->
+                                <tr id="row-srv-plug" class="hidden">
+                                    <td class="p-0"><input type="number" id="qty-plug" value="1"
+                                            class="w-full h-full text-center outline-none bg-transparent"
+                                            oninput="calculate()"></td>
+                                    <td class="uppercase text-sm align-middle pl-1">TIRE PLUG</td>
+                                    <td class="p-0"><input type="number" id="price-plug" value="10.00"
+                                            class="w-full h-full text-right pr-2 outline-none bg-transparent"
+                                            step="0.01" oninput="calculate()"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2" id="total-plug">
+                                        $10.00</td>
+                                </tr>
+
                                 <!-- Filler Empty Rows -->
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="no-border-right"></td>
-                                </tr>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="no-border-right"></td>
-                                </tr>
                                 <tr>
                                     <td>&nbsp;</td>
                                     <td></td>
@@ -453,18 +504,30 @@
 
                 </div>
 
-                <!-- BUTTONS -->
-                <div class="flex gap-4 print:hidden w-full max-w-2xl px-4">
-                    <button onclick="handlePrint()"
-                        class="flex-1 btn btn-primary py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                            <rect width="12" height="8" x="6" y="14"></rect>
-                        </svg>
-                        Print Receipt
-                    </button>
+                <!-- SPACER FOR BUTTONS OVERLAP -->
+                <div class="h-24"></div>
+
+                <!-- BUTTONS STICKY FOOTER -->
+                <div
+                    class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-200 p-4 print:hidden z-50 flex justify-center gap-4">
+                    <div class="w-full max-w-2xl flex gap-4">
+                        <button onclick="reset()"
+                            class="btn px-6 py-4 rounded-xl text-gray-500 hover:text-red-500 font-bold bg-white border border-gray-200 shadow-sm">
+                            Reset
+                        </button>
+                        <button onclick="handlePrint()"
+                            class="flex-1 btn btn-primary py-4 rounded-xl text-xl shadow-xl flex items-center justify-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
+                                </path>
+                                <rect width="12" height="8" x="6" y="14"></rect>
+                            </svg>
+                            PRINT RECEIPT
+                        </button>
+                    </div>
                 </div>
 
             </section>
@@ -476,31 +539,50 @@
                     <h3 class="font-bold text-lg text-gray-800 font-sans">Services Performed</h3>
                     <p class="text-xs text-gray-500 mt-1 font-sans">Check to add line items.</p>
                 </div>
-                <div class="p-6 space-y-4 overflow-y-auto flex-grow font-sans">
+                <div class="p-6 space-y-4 overflow-y-auto flex-grow font-sans pb-24">
                     <div class="space-y-3">
                         <label
                             class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" id="srv-rotation" class="mt-1 w-5 h-5 text-blue-600 rounded"
-                                onchange="calculate()">
-                            <div><span class="block font-semibold text-gray-700">Rotation</span></div>
+                                onchange="toggleService('srv-rotation', 'row-srv-rotation')">
+                            <div><span class="block font-semibold text-gray-700">Rotation</span> <span
+                                    class="text-xs text-gray-400">Default: $50</span></div>
                         </label>
                         <label
                             class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" id="srv-balance" class="mt-1 w-5 h-5 text-blue-600 rounded"
-                                onchange="calculate()">
-                            <div><span class="block font-semibold text-gray-700">Balance</span></div>
+                                onchange="toggleService('srv-balance', 'row-srv-balance')">
+                            <div><span class="block font-semibold text-gray-700">Balance</span> <span
+                                    class="text-xs text-gray-400">Default: $50</span></div>
                         </label>
                         <label
                             class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" id="srv-stem" class="mt-1 w-5 h-5 text-blue-600 rounded"
-                                onchange="calculate()">
-                            <div><span class="block font-semibold text-gray-700">Tire Stems</span></div>
+                                onchange="toggleService('srv-stem', 'row-srv-stem')">
+                            <div><span class="block font-semibold text-gray-700">Tire Stems</span> <span
+                                    class="text-xs text-gray-400">Default: Free</span></div>
                         </label>
                         <label
                             class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
                             <input type="checkbox" id="srv-sensor" class="mt-1 w-5 h-5 text-blue-600 rounded"
-                                onchange="calculate()">
-                            <div><span class="block font-semibold text-gray-700">Sensor Check</span></div>
+                                onchange="toggleService('srv-sensor', 'row-srv-sensor')">
+                            <div><span class="block font-semibold text-gray-700">New TPMS Sensors</span> <span
+                                    class="text-xs text-gray-400">Default: $59.99</span></div>
+                        </label>
+                        <hr class="border-gray-100">
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" id="srv-patch" class="mt-1 w-5 h-5 text-blue-600 rounded"
+                                onchange="toggleService('srv-patch', 'row-srv-patch')">
+                            <div><span class="block font-semibold text-gray-700">Tire Patch</span> <span
+                                    class="text-xs text-gray-400">Default: $20.00</span></div>
+                        </label>
+                        <label
+                            class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" id="srv-plug" class="mt-1 w-5 h-5 text-blue-600 rounded"
+                                onchange="toggleService('srv-plug', 'row-srv-plug')">
+                            <div><span class="block font-semibold text-gray-700">Tire Plug</span> <span
+                                    class="text-xs text-gray-400">Default: $10.00</span></div>
                         </label>
                     </div>
                 </div>
@@ -543,23 +625,33 @@
 
         // Init
         dateDisplay.textContent = new Date().toLocaleDateString();
-        // Generate random ID if needed, or use history? 
+        // Generate random ID if needed
         if (idDisplay.textContent === '--') {
             idDisplay.textContent = Math.floor(1000 + Math.random() * 9000);
         }
 
+        function toggleService(cbId, rowId) {
+            const cb = document.getElementById(cbId);
+            const row = document.getElementById(rowId);
+            if (cb.checked) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+            calculate();
+        }
+
         // --- CALCULATION LOGIC ---
         function calculate() {
+            // 1. Primary Line Item
             const qty = parseInt(qtyInput.value) || 0;
             const price = parseFloat(priceInput.value) || 0;
-
-            // 1. Primary Line Item
             const lineTotal = qty * price;
             document.getElementById('line-total-display').textContent = formatMoney(lineTotal);
 
             let currentSubtotal = lineTotal;
 
-            // 2. Fees (Only if price or desc entered, mimics activity)
+            // 2. Fees (Only if primary input active)
             if (qty > 0 && (descInput.value.length > 0 || price > 0)) {
                 // State Fee
                 const stateTotal = qty * STATE_FEE_PER_TIRE;
@@ -577,15 +669,27 @@
 
                 currentSubtotal += stateTotal + dispTotal;
             } else {
-                // Clear fees if no input
                 clearFees();
             }
 
-            // 3. Upsells
-            toggleUpsellRow('row-upsell-rotation', 'srv-rotation');
-            toggleUpsellRow('row-upsell-balance', 'srv-balance');
-            toggleUpsellRow('row-upsell-stem', 'srv-stem');
-            toggleUpsellRow('row-upsell-sensor', 'srv-sensor');
+            // 3. Helper to sum upsell row
+            const sumRow = (prefix) => {
+                if (document.getElementById('srv-' + prefix).checked) {
+                    const q = parseInt(document.getElementById('qty-' + prefix).value) || 0;
+                    const p = parseFloat(document.getElementById('price-' + prefix).value) || 0;
+                    const t = q * p;
+                    document.getElementById('total-' + prefix).textContent = formatMoney(t);
+                    return t;
+                }
+                return 0;
+            };
+
+            currentSubtotal += sumRow('rotation');
+            currentSubtotal += sumRow('balance');
+            currentSubtotal += sumRow('stem');
+            currentSubtotal += sumRow('sensor');
+            currentSubtotal += sumRow('patch');
+            currentSubtotal += sumRow('plug');
 
             // 4. Totals
             const tax = currentSubtotal * TAX_RATE;
@@ -596,16 +700,6 @@
             taxFinal.textContent = formatMoney(tax);
             totalFinal.textContent = formatMoney(total);
             cardTotalPreview.textContent = formatMoney(cardTotal);
-        }
-
-        function toggleUpsellRow(rowId, checkboxId) {
-            const row = document.getElementById(rowId);
-            const checkbox = document.getElementById(checkboxId);
-            if (checkbox.checked) {
-                row.classList.remove('hidden');
-            } else {
-                row.classList.add('hidden');
-            }
         }
 
         function clearFees() {
@@ -632,13 +726,17 @@
                 pricePerTire: parseFloat(priceInput.value) || 0,
                 qty: parseInt(qtyInput.value) || 0,
                 total: totalFinal.textContent,
+                // Save states
                 upsells: {
                     rotation: document.getElementById('srv-rotation').checked,
                     balance: document.getElementById('srv-balance').checked,
                     stem: document.getElementById('srv-stem').checked,
-                    sensor: document.getElementById('srv-sensor').checked
+                    sensor: document.getElementById('srv-sensor').checked,
+                    patch: document.getElementById('srv-patch').checked,
+                    plug: document.getElementById('srv-plug').checked
                 }
             };
+            // Ignore complexity of saving individual edited prices in history for now, just the basics + total
 
             // Dedupe
             const isDuplicate = history.some(item =>
@@ -699,17 +797,32 @@
             qtyInput.value = item.qty;
             idDisplay.textContent = item.displayId || Math.floor(1000 + Math.random() * 9000);
 
+            // Helper for restoration
+            const setCheck = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.checked = !!val;
+                }
+            };
+
             if (item.upsells) {
-                document.getElementById('srv-rotation').checked = item.upsells.rotation;
-                document.getElementById('srv-balance').checked = item.upsells.balance;
-                document.getElementById('srv-stem').checked = item.upsells.stem;
-                document.getElementById('srv-sensor').checked = item.upsells.sensor;
+                setCheck('srv-rotation', item.upsells.rotation);
+                setCheck('srv-balance', item.upsells.balance);
+                setCheck('srv-stem', item.upsells.stem);
+                setCheck('srv-sensor', item.upsells.sensor);
+                setCheck('srv-patch', item.upsells.patch);
+                setCheck('srv-plug', item.upsells.plug);
             } else {
-                document.getElementById('srv-rotation').checked = false;
-                document.getElementById('srv-balance').checked = false;
-                document.getElementById('srv-stem').checked = false;
-                document.getElementById('srv-sensor').checked = false;
+                document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             }
+
+            // Trigger visual updates
+            toggleService('srv-rotation', 'row-srv-rotation');
+            toggleService('srv-balance', 'row-srv-balance');
+            toggleService('srv-stem', 'row-srv-stem');
+            toggleService('srv-sensor', 'row-srv-sensor');
+            toggleService('srv-patch', 'row-srv-patch');
+            toggleService('srv-plug', 'row-srv-plug');
 
             calculate();
             if (window.innerWidth < 1024) toggleSidebar();
@@ -723,6 +836,20 @@
             custVehicleInput.value = '';
             idDisplay.textContent = Math.floor(1000 + Math.random() * 9000);
             document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+
+            // Re-hide all
+            ['row-srv-rotation', 'row-srv-balance', 'row-srv-stem', 'row-srv-sensor', 'row-srv-patch', 'row-srv-plug'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            // Reset default prices just in case edited
+            document.getElementById('price-rotation').value = "50.00";
+            document.getElementById('price-balance').value = "50.00";
+            document.getElementById('price-stem').value = "0.00";
+            document.getElementById('price-sensor').value = "59.99";
+            document.getElementById('price-patch').value = "20.00";
+            document.getElementById('price-plug').value = "10.00";
+
             calculate();
         }
 
