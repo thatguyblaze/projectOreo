@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="pr-4">
                 <p class="font-mono text-lg font-semibold">
                     ${formatTireSize(tire.size)}
-                    <span class="text-sm font-normal text-gray-500 ml-2">(${tire.condition.toUpperCase()})</span>
+                    <span class="badge badge-${tire.condition} ml-2">${tire.condition.toUpperCase()}</span>
                 </p>
                 <p class="text-xs text-gray-500 stock-quantity-wrapper" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
                     Stock: 
