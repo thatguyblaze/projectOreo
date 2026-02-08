@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Treadz - Towing Quote</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="../../css/style.css">
@@ -14,20 +17,10 @@
             font-family: 'Inter', sans-serif;
         }
 
-        .map-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            /* 16:9 aspect ratio */
-            height: 0;
-            overflow: hidden;
-        }
-
-        .map-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #map {
             width: 100%;
             height: 100%;
+            z-index: 1;
         }
     </style>
 </head>
@@ -87,7 +80,7 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Pickup Location</label>
                         <div class="relative">
                             <input type="text" id="pickup-input" placeholder="Enter Pickup Address"
-                                class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all">
+                                class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all text-gray-900">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" class="absolute left-3 top-2.5 text-green-500">
@@ -98,11 +91,12 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Dropoff Location</label>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Dropoff Location (Default:
+                            Shop)</label>
                         <div class="relative">
                             <input type="text" id="dropoff-input" placeholder="Enter Destination"
-                                value="409 Main Street E, Mt. Carmel, TN 37645"
-                                class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all">
+                                value="409 E Main St, Mount Carmel, TN 37645"
+                                class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all text-gray-900">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" class="absolute left-3 top-2.5 text-red-500">
@@ -112,15 +106,15 @@
                         </div>
                     </div>
 
-                    <button onclick="openRoute()"
+                    <button id="calculate-route-btn" onclick="calculateRoute()"
                         class="w-full btn bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium flex items-center justify-center gap-2 shadow-sm transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
                         </svg>
-                        Get Route & ETA (Google Maps)
+                        Calculate Route & Miles
                     </button>
-                    <p class="text-xs text-center text-gray-400">Opens in new tab. Check miles and enter below.</p>
+                    <div id="route-status" class="text-xs text-center text-gray-500 h-4"></div>
                 </div>
 
                 <hr class="border-gray-100">
@@ -131,13 +125,15 @@
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Total Miles</label>
-                            <input type="number" id="miles-input" value="0" min="0" step="0.1"
-                                class="w-full p-2 bg-white border border-gray-300 rounded-lg text-right font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+                            <input type="number" id="miles-input" value="0.0" min="0" step="0.1"
+                                class="w-full p-2 bg-white border border-gray-300 rounded-lg text-right font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none text-gray-900">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Loaded Miles
-                                Info</label>
-                            <div class="text-xs text-gray-400 mt-2">Only charge for loaded?</div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">ETA</label>
+                            <div id="eta-display"
+                                class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-right font-mono text-xs text-gray-500 flex items-center justify-end h-[42px]">
+                                -- min
+                            </div>
                         </div>
                     </div>
 
@@ -145,12 +141,12 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Hook Fee ($)</label>
                             <input type="number" id="hook-fee-input" value="75.00" min="0" step="5"
-                                class="w-full p-2 bg-white border border-gray-300 rounded-lg text-right font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+                                class="w-full p-2 bg-white border border-gray-300 rounded-lg text-right font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none text-gray-900">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Rate / Mile ($)</label>
                             <input type="number" id="rate-input" value="4.00" min="0" step="0.50"
-                                class="w-full p-2 bg-white border border-gray-300 rounded-lg text-right font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+                                class="w-full p-2 bg-white border border-gray-300 rounded-lg text-right font-mono font-bold focus:ring-2 focus:ring-blue-500 outline-none text-gray-900">
                         </div>
                     </div>
                 </div>
@@ -164,49 +160,179 @@
                         </div>
                     </div>
                     <div class="flex justify-between text-xs text-gray-500 pt-2 border-t border-gray-700 mt-2">
-                        <span id="mileage-breakdown">0 miles @ $4.00</span>
+                        <span id="mileage-breakdown">0 miles @ $4.00/mi</span>
                         <span>+ Hook Fee</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Panel: Map Placeholder / Quick Actions -->
+        <!-- Right Panel: Leaflet Map -->
         <div class="flex-grow bg-gray-100 flex flex-col p-6 hidden lg:flex">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-grow p-1 overflow-hidden relative">
-                <!-- Placeholder for map visual -->
-                <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 bg-gray-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
-                        class="mb-4">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="2" y1="12" x2="22" y2="12" />
-                        <path
-                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                    <p class="text-lg font-medium">Map View</p>
-                    <p class="text-sm opacity-75">Click "Get Route" to open Google Maps</p>
-                </div>
-
-                <!-- If we had an Embed API Key, iframe goes here. 
-                      Since we don't, we'll just show the placeholder or maybe a static map image if available. -->
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-grow p-1 overflow-hidden relative z-0">
+                <div id="map"></div>
             </div>
         </div>
 
     </main>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script>
-        // Elements
+        // --- ELEMENTS ---
         const milesInput = document.getElementById('miles-input');
         const hookFeeInput = document.getElementById('hook-fee-input');
         const rateInput = document.getElementById('rate-input');
         const totalDisplay = document.getElementById('total-display');
         const breakdownDisplay = document.getElementById('mileage-breakdown');
-
+        const etaDisplay = document.getElementById('eta-display');
         const pickupInput = document.getElementById('pickup-input');
         const dropoffInput = document.getElementById('dropoff-input');
+        const btnCalc = document.getElementById('calculate-route-btn');
+        const statusDiv = document.getElementById('route-status');
 
-        function calculate() {
+        // --- STATE ---
+        let map;
+        let routeLayer;
+        let markers = [];
+
+        // --- INIT MAP ---
+        function initMap() {
+            // Default center: Mt Carmel TN
+            map = L.map('map').setView([36.5644, -82.6580], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+        }
+
+
+        // --- OPEN API HELPERS ---
+        // 1. Nominatim for Geocoding (Address -> Lat/Lon)
+        async function geocode(address) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), display_name: data[0].display_name };
+                }
+                return null;
+            } catch (error) {
+                console.error("Geocoding failed", error);
+                return null;
+            }
+        }
+
+        // 2. OSRM for Routing (Lat/Lon -> Route geometry & distance)
+        async function getRouteData(start, end) {
+            try {
+                // formatting: lon,lat;lon,lat
+                const coords = `${start.lon},${start.lat};${end.lon},${end.lat}`;
+                const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                    return data.routes[0];
+                }
+                return null;
+            } catch (error) {
+                console.error("Routing failed", error);
+                return null;
+            }
+        }
+
+
+        // --- MAIN LOGIC ---
+        async function calculateRoute() {
+            const startAddr = pickupInput.value.trim();
+            const endAddr = dropoffInput.value.trim();
+
+            if (!startAddr || !endAddr) {
+                statusDiv.textContent = "Please enter both addresses.";
+                statusDiv.className = "text-xs text-center text-red-500 h-4";
+                return;
+            }
+
+            statusDiv.textContent = "Calculating route...";
+            statusDiv.className = "text-xs text-center text-blue-500 h-4 animate-pulse";
+            btnCalc.disabled = true;
+
+            // 1. Geocode
+            const start = await geocode(startAddr);
+            const end = await geocode(endAddr);
+
+            if (!start || !end) {
+                statusDiv.textContent = "Could not find one or both addresses.";
+                statusDiv.className = "text-xs text-center text-red-500 h-4";
+                btnCalc.disabled = false;
+                return;
+            }
+
+            // 2. Get Route
+            const route = await getRouteData(start, end);
+
+            if (route) {
+                // Update Inputs
+                const distanceMeters = route.distance;
+                const durationSeconds = route.duration;
+
+                // Convert to Miles (1 meter = 0.000621371 mile)
+                const distanceMiles = (distanceMeters * 0.000621371).toFixed(1);
+                const durationMinutes = Math.round(durationSeconds / 60);
+
+                milesInput.value = distanceMiles;
+                etaDisplay.textContent = `${durationMinutes} min`;
+
+                // Trigger Recalc
+                calculateTotal();
+
+                // 3. Update Map
+                updateMapVisuals(start, end, route.geometry);
+
+                statusDiv.textContent = "Route found!";
+                statusDiv.className = "text-xs text-center text-green-600 h-4";
+
+            } else {
+                statusDiv.textContent = "Could not calculate driving route.";
+                statusDiv.className = "text-xs text-center text-red-500 h-4";
+            }
+
+            btnCalc.disabled = false;
+        }
+
+        function updateMapVisuals(start, end, geometry) {
+            // Clear old
+            if (routeLayer) map.removeLayer(routeLayer);
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            // Add Markers
+            const startMarker = L.marker([start.lat, start.lon]).addTo(map).bindPopup("Pickup: " + start.display_name);
+            const endMarker = L.marker([end.lat, end.lon]).addTo(map).bindPopup("Dropoff: " + end.display_name);
+            markers.push(startMarker, endMarker);
+
+            // Add Route Line
+            if (geometry) {
+                // GeoJSON layer
+                routeLayer = L.geoJSON(geometry, {
+                    style: { color: 'blue', weight: 5, opacity: 0.7 }
+                }).addTo(map);
+
+                // Fit bounds
+                const bounds = L.latLngBounds([start.lat, start.lon], [end.lat, end.lon]);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
+        }
+
+
+        // --- CALCULATOR ---
+        function calculateTotal() {
             const miles = parseFloat(milesInput.value) || 0;
             const hookFee = parseFloat(hookFeeInput.value) || 0;
             const rate = parseFloat(rateInput.value) || 0;
@@ -214,34 +340,18 @@
             const total = hookFee + (miles * rate);
 
             totalDisplay.textContent = '$' + total.toFixed(2);
-            breakdownDisplay.textContent = `${miles.toFixed(1)} miles @ $${rate.toFixed(2)}`;
-        }
-
-        function openRoute() {
-            const origin = encodeURIComponent(pickupInput.value);
-            const destination = encodeURIComponent(dropoffInput.value);
-
-            if (!origin || !destination) {
-                alert("Please enter both pickup and dropoff locations.");
-                return;
-            }
-
-            // Open Google Maps in new tab
-            const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
-            window.open(url, '_blank');
+            breakdownDisplay.textContent = `${miles.toFixed(1)} miles @ $${rate.toFixed(2)}/mi`;
         }
 
         // Listeners
-        milesInput.addEventListener('input', calculate);
-        hookFeeInput.addEventListener('input', calculate);
-        rateInput.addEventListener('input', calculate);
+        milesInput.addEventListener('input', calculateTotal);
+        hookFeeInput.addEventListener('input', calculateTotal);
+        rateInput.addEventListener('input', calculateTotal);
 
         // Init
-        calculate();
+        initMap();
+        calculateTotal();
 
-        // Try to get geolocation for pickup if empty?
-        // Basic feature for dashboard: focus on pickup input on load
-        pickupInput.focus();
     </script>
 </body>
 
