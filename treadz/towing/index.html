@@ -183,6 +183,12 @@
                     </div>
                 </div>
             </div>
+            <!-- Reset Pin -->
+            <div class="mt-4 text-center">
+                <button onclick="resetShopLocation()" class="text-xs text-gray-400 hover:text-red-500 underline">
+                    Reset Shop Location Pin
+                </button>
+            </div>
         </div>
 
         <!-- Right Panel: Leaflet Map -->
@@ -224,18 +230,26 @@
 
         // --- INIT MAP ---
         function initMap() {
+            // Versioned storage key to bust cache of "bad" locations
+            const STORAGE_KEY = 'treadz_shop_coords_v2';
+
+            // Refined Shop Coords (Actual Building Location)
+            const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
+
             // Restore Saved Shop Location or Use Refined Default
-            const savedShop = localStorage.getItem('treadz_shop_coords');
+            const savedShop = localStorage.getItem(STORAGE_KEY);
             if (savedShop) {
-                points.shop = JSON.parse(savedShop);
+                try {
+                    points.shop = JSON.parse(savedShop);
+                } catch (e) {
+                    points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
+                }
             } else {
-                // Refined Default
-                const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
                 points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
             }
 
             // center on Shop
-            map = L.map('map').setView([points.shop.lat, points.shop.lon], 18); // Zoom in closer
+            map = L.map('map').setView([points.shop.lat, points.shop.lon], 18);
 
             // 1. Google Streets
             const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -261,10 +275,19 @@
 
             updateMarkers();
 
-            // Fix "Stretched" canvas issues by forcing a redraw after load
+            // Fix "Stretched" canvas issues
             setTimeout(() => {
                 map.invalidateSize();
             }, 250);
+        }
+
+        function resetShopLocation() {
+            const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
+            points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
+            localStorage.removeItem('treadz_shop_coords_v2'); // Clear saved
+            updateMarkers();
+            map.setView([points.shop.lat, points.shop.lon], 18);
+            recalculateRoute();
         }
 
         // --- OPEN API HELPERS ---
@@ -396,7 +419,7 @@
                     const ll = e.target.getLatLng();
                     points.shop.lat = ll.lat;
                     points.shop.lon = ll.lng;
-                    localStorage.setItem('treadz_shop_coords', JSON.stringify(points.shop));
+                    localStorage.setItem('treadz_shop_coords_v2', JSON.stringify(points.shop));
                     recalculateRoute(); // If a route exists, recalculate from new shop location
                 });
             }
