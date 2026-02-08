@@ -110,7 +110,7 @@
             }
 
             body {
-                background: white;
+                background: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -121,7 +121,8 @@
             #upsell-panel,
             .screen-only,
             button,
-            .print-hidden {
+            .print-hidden,
+            .print\:hidden {
                 display: none !important;
             }
 
@@ -134,6 +135,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
+                background: white !important;
             }
 
             #receipt-container {
@@ -143,6 +145,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 min-height: 0 !important;
+                background: white !important;
             }
 
             /* Clean up inputs for print */
@@ -169,6 +172,19 @@
             .receipt-table th,
             .totals-box td {
                 border-color: black !important;
+            }
+
+            /* Specific fix for gray backgrounds in print */
+            .bg-gray-50,
+            .bg-gray-100,
+            .bg-gray-200,
+            .bg-gray-900 {
+                background-color: transparent !important;
+            }
+
+            /* Ensure Card Preview is hidden */
+            #card-total-preview-container {
+                display: none !important;
             }
         }
 
@@ -220,9 +236,14 @@
                         class="btn btn-secondary py-2 px-4 flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors text-sm rounded-lg border-transparent text-white bg-transparent">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect>
-                            <line x1="12" y1="2" x2="12" y2="22"></line>
-                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                            <line x1="8" y1="6" x2="16" y2="6"></line>
+                            <line x1="16" y1="14" x2="16" y2="14"></line>
+                            <line x1="8" y1="14" x2="8" y2="14"></line>
+                            <line x1="12" y1="14" x2="12" y2="14"></line>
+                            <line x1="16" y1="18" x2="16" y2="18"></line>
+                            <line x1="8" y1="18" x2="8" y2="18"></line>
+                            <line x1="12" y1="18" x2="12" y2="18"></line>
                         </svg>
                         Quote Calculator
                     </a>
@@ -495,7 +516,7 @@
                                 </tr>
                             </table>
                             <!-- Card Logic Hidden Calculation -->
-                            <div
+                            <div id="card-total-preview-container"
                                 class="border-t-2 border-black p-1 text-right text-xs bg-gray-50 print:hidden text-gray-500">
                                 Card Total (+3.5%): <span id="card-total-preview" class="font-bold">$0.00</span>
                             </div>
@@ -625,9 +646,16 @@
 
         // Init
         dateDisplay.textContent = new Date().toLocaleDateString();
-        // Generate random ID if needed
-        if (idDisplay.textContent === '--') {
-            idDisplay.textContent = Math.floor(1000 + Math.random() * 9000);
+
+        // Number System: Sequential ID
+        function getNextReceiptId() {
+            // Get last generated ID or default 1000
+            const last = parseInt(localStorage.getItem('treadzLastReceiptId')) || 1000;
+            return last + 1;
+        }
+
+        if (idDisplay.textContent === '--' || idDisplay.textContent === '') {
+            idDisplay.textContent = getNextReceiptId();
         }
 
         function toggleService(cbId, rowId) {
@@ -642,11 +670,16 @@
         }
 
         // --- CALCULATION LOGIC ---
+        // Basic rounding helper for currency math
+        function round2(num) {
+            return Math.round((num + Number.EPSILON) * 100) / 100;
+        }
+
         function calculate() {
             // 1. Primary Line Item
             const qty = parseInt(qtyInput.value) || 0;
             const price = parseFloat(priceInput.value) || 0;
-            const lineTotal = qty * price;
+            const lineTotal = round2(qty * price);
             document.getElementById('line-total-display').textContent = formatMoney(lineTotal);
 
             let currentSubtotal = lineTotal;
@@ -654,47 +687,50 @@
             // 2. Fees (Only if primary input active)
             if (qty > 0 && (descInput.value.length > 0 || price > 0)) {
                 // State Fee
-                const stateTotal = qty * STATE_FEE_PER_TIRE;
+                const stateTotal = round2(qty * STATE_FEE_PER_TIRE);
                 feeStateQty.textContent = qty;
                 feeStateDesc.textContent = 'STATE TIRE FEE';
                 feeStatePrice.textContent = formatMoney(STATE_FEE_PER_TIRE);
                 feeStateTotal.textContent = formatMoney(stateTotal);
 
                 // Disposal Fee
-                const dispTotal = qty * DISPOSAL_FEE_PER_TIRE;
+                const dispTotal = round2(qty * DISPOSAL_FEE_PER_TIRE);
                 feeDispQty.textContent = qty;
                 feeDispDesc.textContent = 'TIRE DISPOSAL';
                 feeDispPrice.textContent = formatMoney(DISPOSAL_FEE_PER_TIRE);
                 feeDispTotal.textContent = formatMoney(dispTotal);
 
-                currentSubtotal += stateTotal + dispTotal;
+                currentSubtotal = round2(currentSubtotal + stateTotal + dispTotal);
             } else {
                 clearFees();
             }
 
             // 3. Helper to sum upsell row
             const sumRow = (prefix) => {
-                if (document.getElementById('srv-' + prefix).checked) {
+                const cb = document.getElementById('srv-' + prefix);
+                if (cb && cb.checked) {
                     const q = parseInt(document.getElementById('qty-' + prefix).value) || 0;
                     const p = parseFloat(document.getElementById('price-' + prefix).value) || 0;
-                    const t = q * p;
+                    const t = round2(q * p);
                     document.getElementById('total-' + prefix).textContent = formatMoney(t);
                     return t;
                 }
                 return 0;
             };
 
-            currentSubtotal += sumRow('rotation');
-            currentSubtotal += sumRow('balance');
-            currentSubtotal += sumRow('stem');
-            currentSubtotal += sumRow('sensor');
-            currentSubtotal += sumRow('patch');
-            currentSubtotal += sumRow('plug');
+            currentSubtotal = round2(currentSubtotal + sumRow('rotation'));
+            currentSubtotal = round2(currentSubtotal + sumRow('balance'));
+            currentSubtotal = round2(currentSubtotal + sumRow('stem'));
+            currentSubtotal = round2(currentSubtotal + sumRow('sensor'));
+            currentSubtotal = round2(currentSubtotal + sumRow('patch'));
+            currentSubtotal = round2(currentSubtotal + sumRow('plug'));
 
             // 4. Totals
-            const tax = currentSubtotal * TAX_RATE;
-            const total = currentSubtotal + tax;
-            const cardTotal = total + (total * CARD_FEE_RATE);
+            const tax = round2(currentSubtotal * TAX_RATE);
+            const total = round2(currentSubtotal + tax);
+
+            // Card total: Total + 3.5%
+            const cardTotal = round2(total + (total * CARD_FEE_RATE));
 
             subtotalFinal.textContent = formatMoney(currentSubtotal);
             taxFinal.textContent = formatMoney(tax);
@@ -754,8 +790,37 @@
         }
 
         function handlePrint() {
+            // Commit ID if it's new
+            const currentId = parseInt(idDisplay.textContent);
+            const lastSaved = parseInt(localStorage.getItem('treadzLastReceiptId')) || 1000;
+
+            // Only increment global counter if we are printing a *new* ID (higher than last saved)
+            if (currentId > lastSaved) {
+                localStorage.setItem('treadzLastReceiptId', currentId);
+            }
+
             saveQuote();
             window.print();
+        }
+
+        function reset() {
+            qtyInput.value = 4;
+            descInput.value = '';
+            priceInput.value = '';
+            custNameInput.value = '';
+            custVehicleInput.value = '';
+
+            // Uncheck all services
+            ['rotation', 'balance', 'stem', 'sensor', 'patch', 'plug'].forEach(id => {
+                const el = document.getElementById('srv-' + id);
+                if (el) {
+                    el.checked = false;
+                    toggleService('srv-' + id, 'row-srv-' + id);
+                }
+            });
+
+            idDisplay.textContent = getNextReceiptId();
+            calculate();
         }
 
         function renderHistory(filterText = '') {
@@ -795,78 +860,47 @@
             descInput.value = item.tireInfo;
             priceInput.value = item.pricePerTire;
             qtyInput.value = item.qty;
-            idDisplay.textContent = item.displayId || Math.floor(1000 + Math.random() * 9000);
-
-            // Helper for restoration
-            const setCheck = (id, val) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.checked = !!val;
-                }
-            };
+            idDisplay.textContent = item.displayId || getNextReceiptId();
 
             if (item.upsells) {
-                setCheck('srv-rotation', item.upsells.rotation);
-                setCheck('srv-balance', item.upsells.balance);
-                setCheck('srv-stem', item.upsells.stem);
-                setCheck('srv-sensor', item.upsells.sensor);
-                setCheck('srv-patch', item.upsells.patch);
-                setCheck('srv-plug', item.upsells.plug);
+                // Restore upsells
+                Object.keys(item.upsells).forEach(k => {
+                    const cb = document.getElementById('srv-' + k);
+                    if (cb) {
+                        cb.checked = item.upsells[k];
+                        toggleService('srv-' + k, 'row-srv-' + k);
+                    }
+                });
             } else {
-                document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+                // Reset upsells if legacy data
+                ['rotation', 'balance', 'stem', 'sensor', 'patch', 'plug'].forEach(id => {
+                    const el = document.getElementById('srv-' + id);
+                    if (el) {
+                        el.checked = false;
+                        toggleService('srv-' + id, 'row-srv-' + id);
+                    }
+                });
             }
 
-            // Trigger visual updates
-            toggleService('srv-rotation', 'row-srv-rotation');
-            toggleService('srv-balance', 'row-srv-balance');
-            toggleService('srv-stem', 'row-srv-stem');
-            toggleService('srv-sensor', 'row-srv-sensor');
-            toggleService('srv-patch', 'row-srv-patch');
-            toggleService('srv-plug', 'row-srv-plug');
-
             calculate();
-            if (window.innerWidth < 1024) toggleSidebar();
-        }
-
-        function reset() {
-            qtyInput.value = 4;
-            descInput.value = '';
-            priceInput.value = '';
-            custNameInput.value = '';
-            custVehicleInput.value = '';
-            idDisplay.textContent = Math.floor(1000 + Math.random() * 9000);
-            document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-
-            // Re-hide all
-            ['row-srv-rotation', 'row-srv-balance', 'row-srv-stem', 'row-srv-sensor', 'row-srv-patch', 'row-srv-plug'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-
-            // Reset default prices just in case edited
-            document.getElementById('price-rotation').value = "50.00";
-            document.getElementById('price-balance').value = "50.00";
-            document.getElementById('price-stem').value = "0.00";
-            document.getElementById('price-sensor').value = "59.99";
-            document.getElementById('price-patch').value = "20.00";
-            document.getElementById('price-plug').value = "10.00";
-
-            calculate();
+            toggleSidebar(); // Close on mobile if open
         }
 
         function toggleSidebar() {
-            const sidebar = document.getElementById('history-panel');
-            sidebar.classList.toggle('-translate-x-full');
+            const p = document.getElementById('history-panel');
+            p.classList.toggle('-translate-x-full');
+            p.classList.toggle('absolute');
+            p.classList.toggle('fixed'); // Ensure it overlays on mobile
         }
 
-        // Event Listeners
-        qtyInput.addEventListener('input', calculate);
-        priceInput.addEventListener('input', calculate);
-        descInput.addEventListener('input', calculate);
+        // Setup
+        ['qty-input', 'descInput', 'price-input', 'cust-name-input', 'cust-vehicle-input'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', calculate);
+        });
 
-        // Init
-        renderHistory();
         calculate();
-
+        renderHistory();
     </script>
 </body>
 
