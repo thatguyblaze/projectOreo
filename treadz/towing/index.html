@@ -136,13 +136,25 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Pickup Location</label>
                         <div class="relative">
                             <input type="text" id="pickup-input" placeholder="Enter Pickup Address"
-                                class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all text-gray-900">
+                                class="w-full pl-9 pr-10 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm transition-all text-gray-900">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" class="absolute left-3 top-2.5 text-green-500">
                                 <circle cx="12" cy="10" r="3" />
                                 <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" />
                             </svg>
+
+                            <!-- Instant Street View Button -->
+                            <button onclick="viewStreetView('pickup')"
+                                class="absolute right-2 top-1.5 p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                                title="Instant Street View">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
                             <ul id="pickup-suggestions"
                                 class="absolute left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-50 hidden max-h-48 overflow-y-auto top-full mt-1">
                                 <!-- Suggestions rendered here -->
@@ -548,6 +560,44 @@
             } catch (error) {
                 console.error("Routing failed", error);
                 return null;
+            }
+        }
+
+        // --- STREET VIEW HELPER ---
+        async function viewStreetView(type) {
+            let point = points[type];
+            const inputId = type === 'pickup' ? 'pickup-input' : 'dropoff-input';
+            const val = document.getElementById(inputId).value.trim();
+
+            if (!val) {
+                alert("Please enter an address first.");
+                return;
+            }
+
+            // If no point cached, or cached point doesn't match input (rough check), try to geocode
+            if (!point) {
+                // Show loading state on button?
+                const btn = document.querySelector(`button[onclick="viewStreetView('${type}')"]`);
+                const original = btn.innerHTML;
+                btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+
+                point = await geocode(val);
+
+                btn.innerHTML = original;
+
+                if (point) {
+                    points[type] = point; // Cache it
+                } else {
+                    alert("Could not locate address for Street View.");
+                    return;
+                }
+            }
+
+            if (point && point.lat) {
+                // Open "Instant" Street View
+                // using map_action=pano to force street view if available
+                const url = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${point.lat},${point.lon}`;
+                window.open(url, '_blank', 'width=1000,height=600,noopener,noreferrer');
             }
         }
 
