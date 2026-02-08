@@ -224,35 +224,44 @@
 
         // --- INIT MAP ---
         function initMap() {
-            // Refined Shop Coords (Actual Building Location)
-            const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
-            points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
+            // Restore Saved Shop Location or Use Refined Default
+            const savedShop = localStorage.getItem('treadz_shop_coords');
+            if (savedShop) {
+                points.shop = JSON.parse(savedShop);
+            } else {
+                // Refined Default
+                const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
+                points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
+            }
 
-            // center on Mt Carmel
-            map = L.map('map').setView([REFINED_SHOP.lat, REFINED_SHOP.lon], 18); // Zoom in closer
+            // center on Shop
+            map = L.map('map').setView([points.shop.lat, points.shop.lon], 18); // Zoom in closer
 
-            // 1. Esri World Street Map (Modern, "Google-like")
+            // 1. Esri World Street Map
             const streets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri',
                 maxZoom: 19
             });
 
-            // 2. Esri Satellite (Accurate Aerial View) - DEFAULT
+            // 2. Esri Satellite (Default)
             const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri',
                 maxZoom: 19
             });
 
-            // Default to SATELLITE (User feedback implies they trust visual verification more)
             satellite.addTo(map);
 
-            // Layer Control
             L.control.layers({
                 "Satellite": satellite,
                 "Street Map": streets
             }).addTo(map);
 
             updateMarkers();
+
+            // Fix "Stretched" canvas issues by forcing a redraw after load
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 250);
         }
 
         // --- OPEN API HELPERS ---
@@ -370,10 +379,23 @@
 
             // 1. Shop (Green/Fixed) -- using CSS color filter usually, or custom icon. 
             // For now, standard blue icon.
+            // 1. Shop (Green/Fixed)
             if (points.shop) {
-                markers.shop = L.marker([points.shop.lat, points.shop.lon], { title: 'Shop' })
+                // Now Draggable to allow user refinement
+                markers.shop = L.marker([points.shop.lat, points.shop.lon], {
+                    draggable: true,
+                    title: 'Shop (Drag to fix)'
+                })
                     .addTo(map)
-                    .bindPopup(`<b>Shop (Start)</b><br>${points.shop.display_name}`);
+                    .bindPopup(`<b>Shop (Start)</b><br>Drag pin to exact location if wrong.`);
+
+                markers.shop.on('dragend', (e) => {
+                    const ll = e.target.getLatLng();
+                    points.shop.lat = ll.lat;
+                    points.shop.lon = ll.lng;
+                    localStorage.setItem('treadz_shop_coords', JSON.stringify(points.shop));
+                    recalculateRoute(); // If a route exists, recalculate from new shop location
+                });
             }
 
             // 2. Pickup (Draggable)
