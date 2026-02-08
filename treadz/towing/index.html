@@ -415,6 +415,24 @@
             }
         }
 
+        async function reverseGeocode(lat, lon) {
+            try {
+                // ArcGIS Reverse Geocode
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/reverseGeocode?f=json&location=${lon},${lat}&distance=100&outSR=4326`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.address) {
+                    return data.address.Match_addr || data.address.LongLabel;
+                }
+                return null;
+            } catch (error) {
+                console.error("Reverse geocoding failed", error);
+                return null;
+            }
+        }
+
         async function getRouteData(p1, p2, p3) {
             try {
                 const coords = `${p1.lon},${p1.lat};${p2.lon},${p2.lat};${p3.lon},${p3.lat}`;
@@ -484,10 +502,21 @@
                     .addTo(map)
                     .bindPopup("<b>Pickup (Start)</b><br>Drag to fix location");
 
-                markers.pickup.on('dragend', (e) => {
+                markers.pickup.on('dragend', async (e) => {
                     const ll = e.target.getLatLng();
                     points.pickup.lat = ll.lat;
                     points.pickup.lon = ll.lng;
+
+                    // Reverse Geocode
+                    pickupInput.value = "Updating address...";
+                    const addr = await reverseGeocode(ll.lat, ll.lng);
+                    if (addr) {
+                        pickupInput.value = addr;
+                        points.pickup.display_name = addr;
+                    } else {
+                        pickupInput.value = "Custom Location";
+                    }
+
                     recalculateRoute();
                 });
             }
@@ -498,10 +527,21 @@
                     .addTo(map)
                     .bindPopup("<b>Dropoff (End)</b><br>Drag to fix location");
 
-                markers.dropoff.on('dragend', (e) => {
+                markers.dropoff.on('dragend', async (e) => {
                     const ll = e.target.getLatLng();
                     points.dropoff.lat = ll.lat;
                     points.dropoff.lon = ll.lng;
+
+                    // Reverse Geocode
+                    dropoffInput.value = "Updating address...";
+                    const addr = await reverseGeocode(ll.lat, ll.lng);
+                    if (addr) {
+                        dropoffInput.value = addr;
+                        points.dropoff.display_name = addr;
+                    } else {
+                        dropoffInput.value = "Custom Location";
+                    }
+
                     recalculateRoute();
                 });
             }
