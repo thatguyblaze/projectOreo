@@ -455,34 +455,13 @@
             if (markers.pickup) map.removeLayer(markers.pickup);
             if (markers.dropoff) map.removeLayer(markers.dropoff);
 
-            // 1. Shop (Green/Fixed) -- using CSS color filter usually, or custom icon. 
-            // For now, standard blue icon.
-            // 1. Shop (Green/Fixed)
-            if (points.shop) {
-                // Now Draggable to allow user refinement
-                markers.shop = L.marker([points.shop.lat, points.shop.lon], {
-                    draggable: true,
-                    title: 'Shop (Drag to fix)'
-                })
-                    .addTo(map)
-                    .bindPopup(`<b>Shop (Start)</b><br>Drag pin to exact location if wrong.`);
+            // SHOP MARKER REMOVED PER USER REQUEST
 
-                markers.shop.on('dragend', (e) => {
-                    const ll = e.target.getLatLng();
-                    points.shop.lat = ll.lat;
-                    points.shop.lon = ll.lng;
-                    localStorage.setItem('treadz_shop_coords_v3', JSON.stringify(points.shop));
-                    recalculateRoute(); // If a route exists, recalculate from new shop location
-
-                    showMapToast("✅ Shop Location Verified & Saved!", "success");
-                });
-            }
-
-            // 2. Pickup (Draggable)
+            // 1. Pickup (Draggable)
             if (points.pickup) {
                 markers.pickup = L.marker([points.pickup.lat, points.pickup.lon], { draggable: true, title: 'Pickup' })
                     .addTo(map)
-                    .bindPopup("<b>Pickup</b><br>Drag to fix location");
+                    .bindPopup("<b>Pickup (Start)</b><br>Drag to fix location");
 
                 markers.pickup.on('dragend', (e) => {
                     const ll = e.target.getLatLng();
@@ -492,11 +471,11 @@
                 });
             }
 
-            // 3. Dropoff (Draggable)
+            // 2. Dropoff (Draggable)
             if (points.dropoff) {
                 markers.dropoff = L.marker([points.dropoff.lat, points.dropoff.lon], { draggable: true, title: 'Dropoff' })
                     .addTo(map)
-                    .bindPopup("<b>Dropoff</b><br>Drag to fix location");
+                    .bindPopup("<b>Dropoff (End)</b><br>Drag to fix location");
 
                 markers.dropoff.on('dragend', (e) => {
                     const ll = e.target.getLatLng();
@@ -508,12 +487,56 @@
 
             // Fit Bounds
             const group = [];
-            if (points.shop) group.push([points.shop.lat, points.shop.lon]);
             if (points.pickup) group.push([points.pickup.lat, points.pickup.lon]);
             if (points.dropoff) group.push([points.dropoff.lat, points.dropoff.lon]);
 
             if (group.length > 1) {
                 map.fitBounds(L.latLngBounds(group), { padding: [50, 50] });
+            }
+        }
+
+        async function recalculateRoute() {
+            if (!points.pickup || !points.dropoff) return;
+
+            // Simple 2-point route: Pickup -> Dropoff
+            const data = await getRouteDataTwoPoints(points.pickup, points.dropoff);
+
+            if (data && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+
+                // Draw Line
+                if (routeLayer) map.removeLayer(routeLayer);
+                routeLayer = L.geoJSON(route.geometry, {
+                    style: { color: '#2563eb', weight: 5, opacity: 0.8 }
+                }).addTo(map);
+
+                // metrics
+                const totalMeters = route.distance;
+                const factor = 0.000621371;
+
+                const miles = (totalMeters * factor);
+                milesInput.value = miles.toFixed(1);
+
+                const timeMin = Math.round(route.duration / 60);
+                etaDisplay.innerText = `${timeMin} min`;
+
+                // Clear "enroute" data since we are only doing A -> B
+                milesInput.dataset.enroute = 0;
+                milesInput.dataset.towing = milesInput.value;
+
+                calculateTotal();
+            }
+        }
+
+        async function getRouteDataTwoPoints(p1, p2) {
+            try {
+                const coords = `${p1.lon},${p1.lat};${p2.lon},${p2.lat}`;
+                const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+                const response = await fetch(url);
+                return await response.json();
+            } catch (error) {
+                console.error("Routing failed", error);
+                return null;
             }
         }
 
@@ -551,18 +574,17 @@
         }
 
         function calculateTotal() {
-            const m = parseFloat(milesInput.value) || 0;
+            const miles = parseFloat(milesInput.value) || 0;
             const hook = parseFloat(hookFeeInput.value) || 0;
             const rate = parseFloat(rateInput.value) || 0;
 
-            const total = hook + (m * rate);
-            totalDisplay.innerText = '$' + total.toFixed(2);
+            const total = hook + (miles * rate);
 
-            const e = milesInput.dataset.enroute || 0;
-            const t = milesInput.dataset.towing || 0;
-            breakdownDisplay.innerText = `${m.toFixed(1)} miles (${e} + ${t}) @ $${rate}/mi`;
+            totalDisplay.innerText = `$${total.toFixed(2)}`;
+
+            // Simplified display: Just towing miles
+            breakdownDisplay.innerText = `${miles.toFixed(1)} miles @ $${rate.toFixed(2)}/mi`;
         }
-
         // Listeners
         milesInput.addEventListener('input', calculateTotal);
         hookFeeInput.addEventListener('input', calculateTotal);
