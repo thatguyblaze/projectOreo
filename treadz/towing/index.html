@@ -359,48 +359,50 @@
         }
 
         // --- OPEN API HELPERS ---
-        async function geocode(address) {
+        // --- OPEN API HELPERS ---
+        async function geocode(addressInput) {
             try {
-                let query = address.trim();
-                const lower = query.toLowerCase();
+                let query = addressInput.trim();
 
-                // 1. Strict State Appending
-                // If it doesn't look like they typed a state, append ", TN"
-                // Also handle "Mount Carmel" specifically to help context
-                if (!lower.includes(' tn') && !lower.includes(' tennessee') && !lower.includes(' va') && !lower.includes(' virginia')) {
-                    query += ", TN";
+                // 1. Smart Suffixing: If user typed just "123 Main St", append local context
+                const lower = query.toLowerCase();
+                if (!lower.includes('tn') && !lower.includes('tennessee') && !lower.includes('va') && !lower.includes('virginia')) {
+                    // Bias towards shop location's city if just a street is given
+                    query += ", Mount Carmel, TN";
                 }
 
-                // 2. Photon Search with Bias
-                const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=3&lat=${SHOP_COORDS.lat}&lon=${SHOP_COORDS.lon}`;
+                // 2. Nominatim Search (More reliable for US Streets than Photon sometimes)
+                // Use viewbox to bias results to the local region (NE Tennessee / SW Virginia)
+                // Box: [left, top, right, bottom] -> [lon1, lat1, lon2, lat2]
+                // Approx 50 mile radius around Mt Carmel
+                const viewbox = "-83.2,36.8,-82.0,36.2";
 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(response.status);
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&viewbox=${viewbox}&bounded=1&limit=5&addressdetails=1&countrycodes=us`;
+
+                const response = await fetch(url, {
+                    headers: { 'User-Agent': 'TreadzTowingApp/1.0' } // Required by OSM
+                });
+
+                if (!response.ok) throw new Error("Geocode Error");
                 const data = await response.json();
 
-                if (data.features?.length > 0) {
-                    // 3. Filter/Prioritize Results
-                    // Look for results in TN or VA preferably
-                    let bestMatch = data.features[0];
+                if (data && data.length > 0) {
+                    // Return best match
+                    const match = data[0];
 
-                    // Simple check: prefer results with state 'Tennessee' or 'Virginia'
-                    const regionalMatch = data.features.find(f => {
-                        const s = f.properties.state?.toLowerCase() || "";
-                        return s.includes('tennessee') || s.includes('virginia');
-                    });
-
-                    if (regionalMatch) bestMatch = regionalMatch;
-
-                    const p = bestMatch.properties;
-                    let label = p.name || p.street || address;
-                    if (p.city) label += `, ${p.city}`;
-                    if (p.state) label += `, ${p.state}`;
+                    // Format a nice label
+                    let label = match.display_name;
+                    // Simplify label if too long (OSM labels are huge)
+                    const parts = label.split(',');
+                    if (parts.length > 3) {
+                        label = parts.slice(0, 3).join(',');
+                    }
 
                     return {
-                        lat: bestMatch.geometry.coordinates[1],
-                        lon: bestMatch.geometry.coordinates[0],
+                        lat: parseFloat(match.lat),
+                        lon: parseFloat(match.lon),
                         display_name: label,
-                        raw: p // keep raw props for debugging
+                        raw: match
                     };
                 }
                 return null;
