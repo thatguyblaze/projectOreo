@@ -219,8 +219,12 @@
 
         // --- INIT MAP ---
         function initMap() {
+            // Refined Shop Coords (Actual Building Location)
+            const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
+            points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
+
             // center on Mt Carmel
-            map = L.map('map').setView([SHOP_COORDS.lat, SHOP_COORDS.lon], 12);
+            map = L.map('map').setView([REFINED_SHOP.lat, REFINED_SHOP.lon], 18); // Zoom in closer
 
             // 1. Esri World Street Map (Modern, "Google-like")
             const streets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -228,23 +232,21 @@
                 maxZoom: 19
             });
 
-            // 2. Esri Satellite (Accurate Aerial View)
+            // 2. Esri Satellite (Accurate Aerial View) - DEFAULT
             const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri',
                 maxZoom: 19
             });
 
-            // Default to Streets
-            streets.addTo(map);
+            // Default to SATELLITE (User feedback implies they trust visual verification more)
+            satellite.addTo(map);
 
             // Layer Control
             L.control.layers({
-                "Street Map": streets,
-                "Satellite": satellite
+                "Satellite": satellite,
+                "Street Map": streets
             }).addTo(map);
 
-            // Add Shop Marker Immediately
-            points.shop = { lat: SHOP_COORDS.lat, lon: SHOP_COORDS.lon, display_name: SHOP_ADDRESS };
             updateMarkers();
         }
 
