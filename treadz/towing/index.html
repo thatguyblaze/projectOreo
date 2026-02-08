@@ -30,8 +30,8 @@
     <nav class="main-nav sticky top-0 z-40 p-4 w-full flex-shrink-0 bg-gray-900 text-white shadow-lg">
         <div class="max-w-full mx-auto flex items-center justify-between px-4">
             <div class="flex items-center gap-4">
-                <a href="../../index.html" class="flex items-center gap-4 group">
-                    <img src="../../treadztntLogo.png" alt="Treadz Logo" class="h-12 w-auto bg-white rounded-md p-0.5">
+                <a href="../index.html" class="flex items-center gap-4 group">
+                    <img src="../treadztntLogo.png" alt="Treadz Logo" class="h-12 w-auto">
                 </a>
                 <span class="text-xl font-bold tracking-tight text-white hidden sm:block">TOWING DASHBOARD</span>
             </div>
@@ -44,7 +44,7 @@
                     class="btn btn-secondary py-2 px-4 flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors text-sm rounded-lg border-transparent text-white bg-transparent">
                     Quote Calculator
                 </a>
-                <a href="../../index.html"
+                <a href="../index.html"
                     class="btn btn-secondary py-2 px-4 flex items-center gap-2 hover:bg-gray-100 hover:text-gray-900 transition-colors text-sm rounded-lg border-transparent text-white bg-transparent">
                     Inventory
                 </a>
@@ -212,49 +212,38 @@
 
 
         // --- OPEN API HELPERS ---
-        // 1. Nominatim for Geocoding (Address -> Lat/Lon)
-        async function geocode(address, retryCount = 0) {
+        // 1. Photon (Komoot) Geocoding - More lenient/reliable free search
+        async function geocode(address) {
             try {
-                // Bias search to user's region (TN/VA) if state not specified
+                // Bias to TN if not specified (helps context)
                 let query = address.trim();
                 const lower = query.toLowerCase();
                 if (!lower.includes(' tn') && !lower.includes(' tennessee') && !lower.includes(' va') && !lower.includes(' virginia')) {
                     query += ", TN";
                 }
 
-                // Use 'addressdetails=1' to arguably get better matching
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`;
+                const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`;
+                const response = await fetch(url);
 
-                const response = await fetch(url, {
-                    headers: { 'Accept-Language': 'en-US' }
-                });
+                if (!response.ok) throw new Error(`Geocode Error: ${response.status}`);
 
-                if (response.status === 429 || response.status === 503) {
-                    if (retryCount < 2) {
-                        console.warn(`Geocoding rate limited (${response.status}). Retrying...`);
-                        await new Promise(r => setTimeout(r, 1500)); // Wait 1.5s
-                        return geocode(address, retryCount + 1);
-                    }
-                    throw new Error(`Geocoding server overload: ${response.status}`);
-                }
+                const data = await response.json();
 
-                if (!response.ok) throw new Error(`Geocoding error: ${response.status}`);
+                if (data.features && data.features.length > 0) {
+                    const f = data.features[0];
+                    const p = f.properties;
+                    // Construct a readable label
+                    let label = p.name || p.street || address;
+                    if (p.city) label += `, ${p.city}`;
+                    if (p.state) label += `, ${p.state}`;
 
-                const text = await response.text();
-                try {
-                    const data = JSON.parse(text);
-                    if (Array.isArray(data) && data.length > 0) {
-                        return {
-                            lat: parseFloat(data[0].lat),
-                            lon: parseFloat(data[0].lon),
-                            display_name: data[0].display_name
-                        };
-                    }
-                } catch (e) {
-                    console.error("Geocoding invalid JSON response:", text.substring(0, 100));
+                    return {
+                        lat: f.geometry.coordinates[1], // GeoJSON is [lon, lat]
+                        lon: f.geometry.coordinates[0],
+                        display_name: label
+                    };
                 }
                 return null;
-
             } catch (error) {
                 console.error("Geocoding failed:", error);
                 return null;
