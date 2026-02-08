@@ -517,7 +517,9 @@
                 const miles = (totalMeters * factor);
                 milesInput.value = miles.toFixed(1);
 
-                const timeMin = Math.round(route.duration / 60);
+                // Google Maps Reality Adjustment (0.7x factor)
+                // OSRM is very conservative; this brings it closer to real-world driving times.
+                const timeMin = Math.round((route.duration / 60) * 0.7);
                 etaDisplay.innerText = `${timeMin} min`;
 
                 // Clear "enroute" data since we are only doing A -> B
