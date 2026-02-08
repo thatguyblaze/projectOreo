@@ -364,44 +364,26 @@
             try {
                 let query = addressInput.trim();
 
-                // 1. Smart Suffixing: If user typed just "123 Main St", append local context
+                // 1. Smart Suffixing
                 const lower = query.toLowerCase();
                 if (!lower.includes('tn') && !lower.includes('tennessee') && !lower.includes('va') && !lower.includes('virginia')) {
-                    // Bias towards shop location's city if just a street is given
                     query += ", Mount Carmel, TN";
                 }
 
-                // 2. Nominatim Search (More reliable for US Streets than Photon sometimes)
-                // Use viewbox to bias results to the local region (NE Tennessee / SW Virginia)
-                // Box: [left, top, right, bottom] -> [lon1, lat1, lon2, lat2]
-                // Approx 50 mile radius around Mt Carmel
-                const viewbox = "-83.2,36.8,-82.0,36.2";
+                // 2. ArcGIS World Geocoding Service (High Accuracy for US)
+                // Using public endpoint
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(query)}&maxLocations=1&outFields=Match_addr,Addr_type`;
 
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&viewbox=${viewbox}&bounded=1&limit=5&addressdetails=1&countrycodes=us`;
-
-                const response = await fetch(url, {
-                    headers: { 'User-Agent': 'TreadzTowingApp/1.0' } // Required by OSM
-                });
-
+                const response = await fetch(url);
                 if (!response.ok) throw new Error("Geocode Error");
                 const data = await response.json();
 
-                if (data && data.length > 0) {
-                    // Return best match
-                    const match = data[0];
-
-                    // Format a nice label
-                    let label = match.display_name;
-                    // Simplify label if too long (OSM labels are huge)
-                    const parts = label.split(',');
-                    if (parts.length > 3) {
-                        label = parts.slice(0, 3).join(',');
-                    }
-
+                if (data.candidates && data.candidates.length > 0) {
+                    const match = data.candidates[0];
                     return {
-                        lat: parseFloat(match.lat),
-                        lon: parseFloat(match.lon),
-                        display_name: label,
+                        lat: match.location.y,
+                        lon: match.location.x,
+                        display_name: match.address, // "Match_addr" from Esri is usually very clean
                         raw: match
                     };
                 }
