@@ -229,12 +229,14 @@
         let markers = { shop: null, pickup: null, dropoff: null };
 
         // --- INIT MAP ---
+        // --- INIT MAP ---
         function initMap() {
             // Versioned storage key to bust cache of "bad" locations
-            const STORAGE_KEY = 'treadz_shop_coords_v2';
+            const STORAGE_KEY = 'treadz_shop_coords_v3';
 
-            // Refined Shop Coords (Actual Building Location)
-            const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
+            // Refined Shop Coords (Main St / Commercial Area Estimate)
+            // Moved South from previous guess to align with US-11W
+            const REFINED_SHOP = { lat: 36.5602, lon: -82.6560 };
 
             // Restore Saved Shop Location or Use Refined Default
             const savedShop = localStorage.getItem(STORAGE_KEY);
@@ -282,9 +284,9 @@
         }
 
         function resetShopLocation() {
-            const REFINED_SHOP = { lat: 36.56385, lon: -82.65825 };
+            const REFINED_SHOP = { lat: 36.5602, lon: -82.6560 };
             points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
-            localStorage.removeItem('treadz_shop_coords_v2'); // Clear saved
+            localStorage.removeItem('treadz_shop_coords_v3'); // Clear saved
             updateMarkers();
             map.setView([points.shop.lat, points.shop.lon], 18);
             recalculateRoute();
@@ -419,7 +421,7 @@
                     const ll = e.target.getLatLng();
                     points.shop.lat = ll.lat;
                     points.shop.lon = ll.lng;
-                    localStorage.setItem('treadz_shop_coords_v2', JSON.stringify(points.shop));
+                    localStorage.setItem('treadz_shop_coords_v3', JSON.stringify(points.shop));
                     recalculateRoute(); // If a route exists, recalculate from new shop location
                 });
             }
