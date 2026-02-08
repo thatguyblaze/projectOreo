@@ -658,17 +658,6 @@
             idDisplay.textContent = getNextReceiptId();
         }
 
-        function toggleService(cbId, rowId) {
-            const cb = document.getElementById(cbId);
-            const row = document.getElementById(rowId);
-            if (cb.checked) {
-                row.classList.remove('hidden');
-            } else {
-                row.classList.add('hidden');
-            }
-            calculate();
-        }
-
         // --- CALCULATION LOGIC ---
         // Basic rounding helper for currency math
         function round2(num) {
@@ -738,6 +727,18 @@
             cardTotalPreview.textContent = formatMoney(cardTotal);
         }
 
+        function toggleService(cbId, rowId, shouldSave = true) {
+            const cb = document.getElementById(cbId);
+            const row = document.getElementById(rowId);
+            if (cb.checked) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+            calculate();
+            if (shouldSave) saveQuote();
+        }
+
         function clearFees() {
             feeStateQty.textContent = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
             feeDispQty.textContent = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
@@ -748,13 +749,16 @@
         }
 
         // --- HISTORY LOGIC ---
+        let currentEditingId = null;
+        let autoSaveTimeout = null;
+
         function getHistory() { return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || []; }
 
         function saveQuote() {
             const history = getHistory();
-            const quote = {
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
+            const now = Date.now();
+
+            const quoteData = {
                 displayId: idDisplay.textContent,
                 customer: custNameInput.value.trim() || 'Walk-In',
                 vehicle: custVehicleInput.value.trim(),
@@ -762,7 +766,7 @@
                 pricePerTire: parseFloat(priceInput.value) || 0,
                 qty: parseInt(qtyInput.value) || 0,
                 total: totalFinal.textContent,
-                // Save states
+                timestamp: new Date().toISOString(), // Update timestamp on save
                 upsells: {
                     rotation: document.getElementById('srv-rotation').checked,
                     balance: document.getElementById('srv-balance').checked,
@@ -772,21 +776,50 @@
                     plug: document.getElementById('srv-plug').checked
                 }
             };
-            // Ignore complexity of saving individual edited prices in history for now, just the basics + total
 
-            // Dedupe
-            const isDuplicate = history.some(item =>
-                item.customer === quote.customer &&
-                item.vehicle === quote.vehicle &&
-                item.tireInfo === quote.tireInfo &&
-                item.total === quote.total
-            );
-            if (isDuplicate) return;
+            // If we are editing an existing record, update it
+            if (currentEditingId) {
+                const index = history.findIndex(item => item.id === currentEditingId);
+                if (index !== -1) {
+                    // Update existing
+                    history[index] = { ...history[index], ...quoteData };
+                    // Move to top to show recently modified
+                    const item = history.splice(index, 1)[0];
+                    history.unshift(item);
+                } else {
+                    // ID not found (deleted?), treat as new
+                    currentEditingId = now;
+                    history.unshift({ id: now, ...quoteData });
+                }
+            } else {
+                // Check if we can "resume" a draft with the same Display ID that hasn't been finalized?
+                // For simplicity, if we don't have an editing ID, we look if there is an item with the SAME display ID at the top of the list.
+                // If so, we assume we are editing that "latest draft".
+                const sameIdIndex = history.findIndex(item => item.displayId === quoteData.displayId);
 
-            history.unshift(quote);
+                if (sameIdIndex !== -1 && sameIdIndex === 0) { // Only if it's the very latest one
+                    currentEditingId = history[sameIdIndex].id;
+                    history[sameIdIndex] = { ...history[sameIdIndex], ...quoteData };
+                } else {
+                    // Create New
+                    currentEditingId = now;
+                    history.unshift({ id: now, ...quoteData });
+                }
+            }
+
+            // Limit history size
             if (history.length > 50) history.pop();
+
             localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
             renderHistory();
+        }
+
+        // Debounced Save for text inputs
+        function triggerAutoSave() {
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveQuote();
+            }, 800); // 800ms debounce
         }
 
         function handlePrint() {
@@ -799,7 +832,7 @@
                 localStorage.setItem('treadzLastReceiptId', currentId);
             }
 
-            saveQuote();
+            saveQuote(); // Force immediate save
             window.print();
         }
 
@@ -815,11 +848,14 @@
                 const el = document.getElementById('srv-' + id);
                 if (el) {
                     el.checked = false;
-                    toggleService('srv-' + id, 'row-srv-' + id);
+                    toggleService('srv-' + id, 'row-srv-' + id, false); // Pass false to skip save
                 }
             });
 
+            // Generate NEW ID
             idDisplay.textContent = getNextReceiptId();
+            currentEditingId = null; // Clear editing ID so next save creates new
+
             calculate();
         }
 
@@ -840,7 +876,7 @@
             });
 
             container.innerHTML = filteredHistory.map(item => `
-                <div onclick='loadQuote(${JSON.stringify(item)})' class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all">
+                <div onclick='loadQuote(${JSON.stringify(item)})' class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all ${item.id === currentEditingId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
                     <div class="flex justify-between items-start mb-1">
                         <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3">${item.customer}</div>
                         <div class="text-xs font-mono text-gray-500">${new Date(item.timestamp).toLocaleDateString()}</div>
@@ -855,12 +891,14 @@
         }
 
         function loadQuote(item) {
+            currentEditingId = item.id;
+
             custNameInput.value = item.customer;
             custVehicleInput.value = item.vehicle;
             descInput.value = item.tireInfo;
             priceInput.value = item.pricePerTire;
             qtyInput.value = item.qty;
-            idDisplay.textContent = item.displayId || getNextReceiptId();
+            idDisplay.textContent = item.displayId; // Keep original ID
 
             if (item.upsells) {
                 // Restore upsells
@@ -868,7 +906,7 @@
                     const cb = document.getElementById('srv-' + k);
                     if (cb) {
                         cb.checked = item.upsells[k];
-                        toggleService('srv-' + k, 'row-srv-' + k);
+                        toggleService('srv-' + k, 'row-srv-' + k, false); // No save on load
                     }
                 });
             } else {
@@ -877,12 +915,13 @@
                     const el = document.getElementById('srv-' + id);
                     if (el) {
                         el.checked = false;
-                        toggleService('srv-' + id, 'row-srv-' + id);
+                        toggleService('srv-' + id, 'row-srv-' + id, false);
                     }
                 });
             }
 
-            calculate();
+            calculate(); // Recalc totals
+            renderHistory(); // Re-render to highlight selected
             toggleSidebar(); // Close on mobile if open
         }
 
@@ -893,15 +932,15 @@
             p.classList.toggle('fixed'); // Ensure it overlays on mobile
         }
 
-        // Setup
-        ['qty-input', 'descInput', 'price-input', 'cust-name-input', 'cust-vehicle-input'].forEach(id => {
+        // Setup Listeners
+        ['qty-input', 'desc-input', 'price-input', 'cust-name-input', 'cust-vehicle-input'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('input', calculate);
+            if (el) el.addEventListener('input', () => {
+                calculate();
+                triggerAutoSave();
+            });
         });
 
         calculate();
         renderHistory();
     </script>
-</body>
-
-</html>
