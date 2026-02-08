@@ -34,6 +34,44 @@
             box-shadow: none;
             border: none;
         }
+
+        /* Map Toast / Calibration UI */
+        #map-toast {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #map-toast.visible {
+            opacity: 1;
+            top: 20px;
+        }
+
+        #map-toast.success {
+            border-left: 4px solid #22c55e;
+            color: #14532d;
+        }
+
+        #map-toast.warning {
+            border-left: 4px solid #f59e0b;
+            color: #78350f;
+        }
     </style>
 </head>
 
@@ -196,6 +234,8 @@
             <div
                 class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-grow p-1 overflow-hidden relative z-0">
                 <div id="map"></div>
+                <!-- Calibration Toast -->
+                <div id="map-toast"></div>
             </div>
         </div>
 
@@ -238,11 +278,14 @@
             // Moved South from previous guess to align with US-11W
             const REFINED_SHOP = { lat: 36.5602, lon: -82.6560 };
 
+            let isVerified = false;
+
             // Restore Saved Shop Location or Use Refined Default
             const savedShop = localStorage.getItem(STORAGE_KEY);
             if (savedShop) {
                 try {
                     points.shop = JSON.parse(savedShop);
+                    isVerified = true;
                 } catch (e) {
                     points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
                 }
@@ -280,7 +323,30 @@
             // Fix "Stretched" canvas issues
             setTimeout(() => {
                 map.invalidateSize();
-            }, 250);
+
+                // Show Status Feedback
+                if (isVerified) {
+                    showMapToast("✅ Using Verified Shop Location", "success");
+                } else {
+                    showMapToast("⚠️ Map data may be inaccurate. Drag Green Pin to exact shop location to fix.", "warning");
+                }
+            }, 500);
+        }
+
+        // --- TOAST HELPER ---
+        function showMapToast(msg, type = 'info') {
+            const toast = document.getElementById('map-toast');
+            if (!toast) return;
+
+            toast.innerText = msg;
+            toast.className = ''; // reset
+            toast.classList.add(type);
+            toast.classList.add('visible');
+
+            // Auto hide after 5s
+            setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 6000);
         }
 
         function resetShopLocation() {
@@ -423,6 +489,8 @@
                     points.shop.lon = ll.lng;
                     localStorage.setItem('treadz_shop_coords_v3', JSON.stringify(points.shop));
                     recalculateRoute(); // If a route exists, recalculate from new shop location
+
+                    showMapToast("✅ Shop Location Verified & Saved!", "success");
                 });
             }
 
