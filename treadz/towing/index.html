@@ -22,6 +22,13 @@
             height: 100%;
             z-index: 1;
         }
+
+        /* Fix for Tailwind CSS conflict with Leaflet */
+        .leaflet-tile {
+            border: none !important;
+            max-width: none !important;
+            max-height: none !important;
+        }
     </style>
 </head>
 
@@ -106,7 +113,7 @@
                         </div>
                     </div>
 
-                    <button id="calculate-route-btn" onclick="calculateRoute()"
+                    <button id="calculate-route-btn"
                         class="w-full btn bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium flex items-center justify-center gap-2 shadow-sm transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -114,7 +121,7 @@
                         </svg>
                         Calculate Route & Miles
                     </button>
-                    <div id="route-status" class="text-xs text-center text-gray-500 h-4"></div>
+                    <div id="route-status" class="text-xs text-center text-gray-500 h-4 min-h-[1rem]"></div>
                 </div>
 
                 <hr class="border-gray-100">
@@ -194,52 +201,73 @@
         const btnCalc = document.getElementById('calculate-route-btn');
         const statusDiv = document.getElementById('route-status');
 
+        // Shop Config: Mount Carmel, TN
+        const SHOP_COORDS = { lat: 36.5644, lon: -82.6580 };
         const SHOP_ADDRESS = "409 E Main St, Mount Carmel, TN 37645";
 
         // --- STATE ---
         let map;
         let routeLayer;
-        let markers = [];
+        let points = { shop: null, pickup: null, dropoff: null };
+        let markers = { shop: null, pickup: null, dropoff: null };
 
         // --- INIT MAP ---
         function initMap() {
-            // Default center: Mt Carmel TN
-            map = L.map('map').setView([36.5644, -82.6580], 13);
-
+            // Force Shop Center
+            map = L.map('map').setView([SHOP_COORDS.lat, SHOP_COORDS.lon], 12);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '© OpenStreetMap'
             }).addTo(map);
+
+            // Add Shop Marker Immediately
+            points.shop = { lat: SHOP_COORDS.lat, lon: SHOP_COORDS.lon, display_name: SHOP_ADDRESS };
+            updateMarkers();
         }
 
-
         // --- OPEN API HELPERS ---
-        // 1. Photon (Komoot) Geocoding
         async function geocode(address) {
             try {
                 let query = address.trim();
                 const lower = query.toLowerCase();
-                // Bias to user region
+
+                // 1. Strict State Appending
+                // If it doesn't look like they typed a state, append ", TN"
+                // Also handle "Mount Carmel" specifically to help context
                 if (!lower.includes(' tn') && !lower.includes(' tennessee') && !lower.includes(' va') && !lower.includes(' virginia')) {
                     query += ", TN";
                 }
 
-                const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`;
+                // 2. Photon Search with Bias
+                const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=3&lat=${SHOP_COORDS.lat}&lon=${SHOP_COORDS.lon}`;
+
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(response.status);
                 const data = await response.json();
 
                 if (data.features?.length > 0) {
-                    const f = data.features[0];
-                    const p = f.properties;
+                    // 3. Filter/Prioritize Results
+                    // Look for results in TN or VA preferably
+                    let bestMatch = data.features[0];
+
+                    // Simple check: prefer results with state 'Tennessee' or 'Virginia'
+                    const regionalMatch = data.features.find(f => {
+                        const s = f.properties.state?.toLowerCase() || "";
+                        return s.includes('tennessee') || s.includes('virginia');
+                    });
+
+                    if (regionalMatch) bestMatch = regionalMatch;
+
+                    const p = bestMatch.properties;
                     let label = p.name || p.street || address;
                     if (p.city) label += `, ${p.city}`;
                     if (p.state) label += `, ${p.state}`;
 
                     return {
-                        lat: f.geometry.coordinates[1],
-                        lon: f.geometry.coordinates[0],
-                        display_name: label
+                        lat: bestMatch.geometry.coordinates[1],
+                        lon: bestMatch.geometry.coordinates[0],
+                        display_name: label,
+                        raw: p // keep raw props for debugging
                     };
                 }
                 return null;
@@ -249,155 +277,166 @@
             }
         }
 
-        // 2. OSRM Multi-Point Routing (Shop -> Pickup -> Dropoff)
-        async function getRouteData(points) {
+        async function getRouteData(p1, p2, p3) {
             try {
-                // formatting: lon,lat;lon,lat;lon,lat...
-                const coords = points.map(p => `${p.lon},${p.lat}`).join(';');
-                // Request steps=true to get leg details if needed, usually legs array is present by default
+                const coords = `${p1.lon},${p1.lat};${p2.lon},${p2.lat};${p3.lon},${p3.lat}`;
                 const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
                 const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
-                    return data.routes[0];
-                }
-                return null;
+                return await response.json();
             } catch (error) {
                 console.error("Routing failed", error);
                 return null;
             }
         }
 
-
         // --- MAIN LOGIC ---
-        async function calculateRoute() {
+        async function handleCalculateClick() {
             const startAddr = pickupInput.value.trim();
             const endAddr = dropoffInput.value.trim();
 
             if (!startAddr || !endAddr) {
-                statusDiv.textContent = "Please enter both addresses.";
-                statusDiv.className = "text-xs text-center text-red-500 h-4";
+                statusDiv.innerText = "Please enter both addresses.";
+                statusDiv.className = "text-xs text-center text-red-500 font-bold";
                 return;
             }
 
-            statusDiv.textContent = "Calculating full trip...";
-            statusDiv.className = "text-xs text-center text-blue-500 h-4 animate-pulse";
+            statusDiv.innerText = "Searching...";
+            statusDiv.className = "text-xs text-center text-blue-600 animate-pulse font-bold";
             btnCalc.disabled = true;
 
-            // 1. Geocode All Points (Shop + 2 User Points)
-            const [shop, pickup, dropoff] = await Promise.all([
-                geocode(SHOP_ADDRESS),
-                geocode(startAddr),
-                geocode(endAddr)
-            ]);
+            // Resolve
+            const [pickup, dropoff] = await Promise.all([geocode(startAddr), geocode(endAddr)]);
 
-            if (!shop || !pickup || !dropoff) {
-                statusDiv.textContent = "Could not locate one or more addresses.";
-                statusDiv.className = "text-xs text-center text-red-500 h-4";
+            if (!pickup || !dropoff) {
+                statusDiv.innerText = "Could not locate address. Try adding city/zip.";
+                statusDiv.className = "text-xs text-center text-red-500 font-bold";
                 btnCalc.disabled = false;
                 return;
             }
 
-            // 2. Get Route: Shop -> Pickup -> Dropoff
-            const route = await getRouteData([shop, pickup, dropoff]);
+            points.pickup = pickup;
+            points.dropoff = dropoff;
 
-            if (route) {
-                // route.legs[0] = Shop -> Pickup (En Route)
-                // route.legs[1] = Pickup -> Dropoff (Towing)
+            // Show Found Info
+            statusDiv.innerHTML = `
+                <div class="space-y-1">
+                    <div class="text-green-700">1: ${pickup.display_name}</div>
+                    <div class="text-green-700">2: ${dropoff.display_name}</div>
+                    <div class="text-gray-400 font-normal">Drag markers to correct locations.</div>
+                </div>`;
+            statusDiv.className = "text-[10px] text-center mb-2 font-medium";
 
-                const leg1Meters = route.legs?.[0]?.distance || 0;
-                const leg2Meters = route.legs?.[1]?.distance || 0;
-                const totalMeters = route.distance;
-                const durationSeconds = route.duration;
-
-                // Convert to Miles
-                const leg1Miles = (leg1Meters * 0.000621371).toFixed(1);
-                const leg2Miles = (leg2Meters * 0.000621371).toFixed(1);
-                const totalMiles = (totalMeters * 0.000621371).toFixed(1);
-                const totalMinutes = Math.round(durationSeconds / 60);
-
-                milesInput.value = totalMiles;
-                etaDisplay.textContent = `${totalMinutes} min`;
-
-                // Update calculated state for breakdown
-                milesInput.dataset.enroute = leg1Miles;
-                milesInput.dataset.towing = leg2Miles;
-
-                calculateTotal();
-
-                // 3. Update Map
-                updateMapVisuals([shop, pickup, dropoff], route.geometry);
-
-                statusDiv.textContent = "Full trip calculated!";
-                statusDiv.className = "text-xs text-center text-green-600 h-4";
-
-            } else {
-                statusDiv.textContent = "Route calculation failed.";
-                statusDiv.className = "text-xs text-center text-red-500 h-4";
-            }
+            updateMarkers();
+            await recalculateRoute();
 
             btnCalc.disabled = false;
         }
 
-        function updateMapVisuals(points, geometry) {
-            // [Shop, Pickup, Dropoff]
-            if (routeLayer) map.removeLayer(routeLayer);
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
+        function updateMarkers() {
+            // Remove old
+            if (markers.shop) map.removeLayer(markers.shop);
+            if (markers.pickup) map.removeLayer(markers.pickup);
+            if (markers.dropoff) map.removeLayer(markers.dropoff);
 
-            const [shop, pickup, dropoff] = points;
+            // 1. Shop (Green/Fixed) -- using CSS color filter usually, or custom icon. 
+            // For now, standard blue icon.
+            if (points.shop) {
+                markers.shop = L.marker([points.shop.lat, points.shop.lon], { title: 'Shop' })
+                    .addTo(map)
+                    .bindPopup(`<b>Shop (Start)</b><br>${points.shop.display_name}`);
+            }
 
-            // Markers
-            const shopMarker = L.marker([shop.lat, shop.lon], {
-                title: 'Shop'
-            }).addTo(map).bindPopup(`<b>Shop (Start)</b><br>${shop.display_name}`);
+            // 2. Pickup (Draggable)
+            if (points.pickup) {
+                markers.pickup = L.marker([points.pickup.lat, points.pickup.lon], { draggable: true, title: 'Pickup' })
+                    .addTo(map)
+                    .bindPopup("<b>Pickup</b><br>Drag to fix location");
 
-            const pickupMarker = L.marker([pickup.lat, pickup.lon]).addTo(map).bindPopup(`<b>1. Pickup</b><br>${pickup.display_name}`);
+                markers.pickup.on('dragend', (e) => {
+                    const ll = e.target.getLatLng();
+                    points.pickup.lat = ll.lat;
+                    points.pickup.lon = ll.lng;
+                    recalculateRoute();
+                });
+            }
 
-            const dropoffMarker = L.marker([dropoff.lat, dropoff.lon]).addTo(map).bindPopup(`<b>2. Dropoff</b><br>${dropoff.display_name}`);
+            // 3. Dropoff (Draggable)
+            if (points.dropoff) {
+                markers.dropoff = L.marker([points.dropoff.lat, points.dropoff.lon], { draggable: true, title: 'Dropoff' })
+                    .addTo(map)
+                    .bindPopup("<b>Dropoff</b><br>Drag to fix location");
 
-            markers.push(shopMarker, pickupMarker, dropoffMarker);
+                markers.dropoff.on('dragend', (e) => {
+                    const ll = e.target.getLatLng();
+                    points.dropoff.lat = ll.lat;
+                    points.dropoff.lon = ll.lng;
+                    recalculateRoute();
+                });
+            }
 
-            // GeoJSON Route
-            if (geometry) {
-                routeLayer = L.geoJSON(geometry, {
-                    style: { color: 'blue', weight: 5, opacity: 0.7 }
-                }).addTo(map);
+            // Fit Bounds
+            const group = [];
+            if (points.shop) group.push([points.shop.lat, points.shop.lon]);
+            if (points.pickup) group.push([points.pickup.lat, points.pickup.lon]);
+            if (points.dropoff) group.push([points.dropoff.lat, points.dropoff.lon]);
 
-                // Fit bounds
-                const bounds = L.latLngBounds([shop.lat, shop.lon], [pickup.lat, pickup.lon], [dropoff.lat, dropoff.lon]);
-                map.fitBounds(bounds, { padding: [50, 50] });
+            if (group.length > 1) {
+                map.fitBounds(L.latLngBounds(group), { padding: [50, 50] });
             }
         }
 
-        // --- CALCULATOR ---
+        async function recalculateRoute() {
+            if (!points.shop || !points.pickup || !points.dropoff) return;
+
+            const data = await getRouteData(points.shop, points.pickup, points.dropoff);
+
+            if (data && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+
+                // Draw Line
+                if (routeLayer) map.removeLayer(routeLayer);
+                routeLayer = L.geoJSON(route.geometry, {
+                    style: { color: '#2563eb', weight: 5, opacity: 0.8 }
+                }).addTo(map);
+
+                // metrics
+                const leg1 = route.legs[0].distance; // meters
+                const leg2 = route.legs[1].distance;
+                const totalMeters = route.distance;
+
+                const factor = 0.000621371;
+                milesInput.value = (totalMeters * factor).toFixed(1);
+
+                const timeMin = Math.round(route.duration / 60);
+                etaDisplay.innerText = `${timeMin} min`;
+
+                // Save specific
+                milesInput.dataset.enroute = (leg1 * factor).toFixed(1);
+                milesInput.dataset.towing = (leg2 * factor).toFixed(1);
+
+                calculateTotal();
+            }
+        }
+
         function calculateTotal() {
-            const miles = parseFloat(milesInput.value) || 0;
-            const hookFee = parseFloat(hookFeeInput.value) || 0;
+            const m = parseFloat(milesInput.value) || 0;
+            const hook = parseFloat(hookFeeInput.value) || 0;
             const rate = parseFloat(rateInput.value) || 0;
 
-            const total = hookFee + (miles * rate);
+            const total = hook + (m * rate);
+            totalDisplay.innerText = '$' + total.toFixed(2);
 
-            totalDisplay.textContent = '$' + total.toFixed(2);
-
-            // Detailed breakdown logic if available
-            const enroute = milesInput.dataset.enroute || 0;
-            const towing = milesInput.dataset.towing || 0;
-
-            if (enroute > 0 || towing > 0) {
-                breakdownDisplay.textContent = `${miles.toFixed(1)} miles (${enroute} en-route + ${towing} tow) @ $${rate.toFixed(2)}/mi`;
-            } else {
-                breakdownDisplay.textContent = `${miles.toFixed(1)} miles @ $${rate.toFixed(2)}/mi`;
-            }
+            const e = milesInput.dataset.enroute || 0;
+            const t = milesInput.dataset.towing || 0;
+            breakdownDisplay.innerText = `${m.toFixed(1)} miles (${e} + ${t}) @ $${rate}/mi`;
         }
 
         // Listeners
         milesInput.addEventListener('input', calculateTotal);
         hookFeeInput.addEventListener('input', calculateTotal);
         rateInput.addEventListener('input', calculateTotal);
+        btnCalc.onclick = handleCalculateClick;
 
-        // Init
         initMap();
         calculateTotal();
 
