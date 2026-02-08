@@ -540,38 +540,7 @@
             }
         }
 
-        async function recalculateRoute() {
-            if (!points.shop || !points.pickup || !points.dropoff) return;
 
-            const data = await getRouteData(points.shop, points.pickup, points.dropoff);
-
-            if (data && data.routes && data.routes.length > 0) {
-                const route = data.routes[0];
-
-                // Draw Line
-                if (routeLayer) map.removeLayer(routeLayer);
-                routeLayer = L.geoJSON(route.geometry, {
-                    style: { color: '#2563eb', weight: 5, opacity: 0.8 }
-                }).addTo(map);
-
-                // metrics
-                const leg1 = route.legs[0].distance; // meters
-                const leg2 = route.legs[1].distance;
-                const totalMeters = route.distance;
-
-                const factor = 0.000621371;
-                milesInput.value = (totalMeters * factor).toFixed(1);
-
-                const timeMin = Math.round(route.duration / 60);
-                etaDisplay.innerText = `${timeMin} min`;
-
-                // Save specific
-                milesInput.dataset.enroute = (leg1 * factor).toFixed(1);
-                milesInput.dataset.towing = (leg2 * factor).toFixed(1);
-
-                calculateTotal();
-            }
-        }
 
         function calculateTotal() {
             const miles = parseFloat(milesInput.value) || 0;
