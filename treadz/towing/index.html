@@ -194,6 +194,8 @@
         const btnCalc = document.getElementById('calculate-route-btn');
         const statusDiv = document.getElementById('route-status');
 
+        const SHOP_ADDRESS = "409 E Main St, Mount Carmel, TN 37645";
+
         // --- STATE ---
         let map;
         let routeLayer;
@@ -212,33 +214,30 @@
 
 
         // --- OPEN API HELPERS ---
-        // 1. Photon (Komoot) Geocoding - More lenient/reliable free search
+        // 1. Photon (Komoot) Geocoding
         async function geocode(address) {
             try {
-                // Bias to TN if not specified (helps context)
                 let query = address.trim();
                 const lower = query.toLowerCase();
+                // Bias to user region
                 if (!lower.includes(' tn') && !lower.includes(' tennessee') && !lower.includes(' va') && !lower.includes(' virginia')) {
                     query += ", TN";
                 }
 
                 const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=1`;
                 const response = await fetch(url);
-
-                if (!response.ok) throw new Error(`Geocode Error: ${response.status}`);
-
+                if (!response.ok) throw new Error(response.status);
                 const data = await response.json();
 
-                if (data.features && data.features.length > 0) {
+                if (data.features?.length > 0) {
                     const f = data.features[0];
                     const p = f.properties;
-                    // Construct a readable label
                     let label = p.name || p.street || address;
                     if (p.city) label += `, ${p.city}`;
                     if (p.state) label += `, ${p.state}`;
 
                     return {
-                        lat: f.geometry.coordinates[1], // GeoJSON is [lon, lat]
+                        lat: f.geometry.coordinates[1],
                         lon: f.geometry.coordinates[0],
                         display_name: label
                     };
@@ -250,11 +249,12 @@
             }
         }
 
-        // 2. OSRM for Routing (Lat/Lon -> Route geometry & distance)
-        async function getRouteData(start, end) {
+        // 2. OSRM Multi-Point Routing (Shop -> Pickup -> Dropoff)
+        async function getRouteData(points) {
             try {
-                // formatting: lon,lat;lon,lat
-                const coords = `${start.lon},${start.lat};${end.lon},${end.lat}`;
+                // formatting: lon,lat;lon,lat;lon,lat...
+                const coords = points.map(p => `${p.lon},${p.lat}`).join(';');
+                // Request steps=true to get leg details if needed, usually legs array is present by default
                 const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
                 const response = await fetch(url);
                 const data = await response.json();
@@ -281,77 +281,95 @@
                 return;
             }
 
-            statusDiv.textContent = "Calculating route...";
+            statusDiv.textContent = "Calculating full trip...";
             statusDiv.className = "text-xs text-center text-blue-500 h-4 animate-pulse";
             btnCalc.disabled = true;
 
-            // 1. Geocode
-            const start = await geocode(startAddr);
-            const end = await geocode(endAddr);
+            // 1. Geocode All Points (Shop + 2 User Points)
+            const [shop, pickup, dropoff] = await Promise.all([
+                geocode(SHOP_ADDRESS),
+                geocode(startAddr),
+                geocode(endAddr)
+            ]);
 
-            if (!start || !end) {
-                statusDiv.textContent = "Could not find one or both addresses.";
+            if (!shop || !pickup || !dropoff) {
+                statusDiv.textContent = "Could not locate one or more addresses.";
                 statusDiv.className = "text-xs text-center text-red-500 h-4";
                 btnCalc.disabled = false;
                 return;
             }
 
-            // 2. Get Route
-            const route = await getRouteData(start, end);
+            // 2. Get Route: Shop -> Pickup -> Dropoff
+            const route = await getRouteData([shop, pickup, dropoff]);
 
             if (route) {
-                // Update Inputs
-                const distanceMeters = route.distance;
+                // route.legs[0] = Shop -> Pickup (En Route)
+                // route.legs[1] = Pickup -> Dropoff (Towing)
+
+                const leg1Meters = route.legs?.[0]?.distance || 0;
+                const leg2Meters = route.legs?.[1]?.distance || 0;
+                const totalMeters = route.distance;
                 const durationSeconds = route.duration;
 
-                // Convert to Miles (1 meter = 0.000621371 mile)
-                const distanceMiles = (distanceMeters * 0.000621371).toFixed(1);
-                const durationMinutes = Math.round(durationSeconds / 60);
+                // Convert to Miles
+                const leg1Miles = (leg1Meters * 0.000621371).toFixed(1);
+                const leg2Miles = (leg2Meters * 0.000621371).toFixed(1);
+                const totalMiles = (totalMeters * 0.000621371).toFixed(1);
+                const totalMinutes = Math.round(durationSeconds / 60);
 
-                milesInput.value = distanceMiles;
-                etaDisplay.textContent = `${durationMinutes} min`;
+                milesInput.value = totalMiles;
+                etaDisplay.textContent = `${totalMinutes} min`;
 
-                // Trigger Recalc
+                // Update calculated state for breakdown
+                milesInput.dataset.enroute = leg1Miles;
+                milesInput.dataset.towing = leg2Miles;
+
                 calculateTotal();
 
                 // 3. Update Map
-                updateMapVisuals(start, end, route.geometry);
+                updateMapVisuals([shop, pickup, dropoff], route.geometry);
 
-                statusDiv.textContent = "Route found!";
+                statusDiv.textContent = "Full trip calculated!";
                 statusDiv.className = "text-xs text-center text-green-600 h-4";
 
             } else {
-                statusDiv.textContent = "Could not calculate driving route.";
+                statusDiv.textContent = "Route calculation failed.";
                 statusDiv.className = "text-xs text-center text-red-500 h-4";
             }
 
             btnCalc.disabled = false;
         }
 
-        function updateMapVisuals(start, end, geometry) {
-            // Clear old
+        function updateMapVisuals(points, geometry) {
+            // [Shop, Pickup, Dropoff]
             if (routeLayer) map.removeLayer(routeLayer);
             markers.forEach(m => map.removeLayer(m));
             markers = [];
 
-            // Add Markers
-            const startMarker = L.marker([start.lat, start.lon]).addTo(map).bindPopup("Pickup: " + start.display_name);
-            const endMarker = L.marker([end.lat, end.lon]).addTo(map).bindPopup("Dropoff: " + end.display_name);
-            markers.push(startMarker, endMarker);
+            const [shop, pickup, dropoff] = points;
 
-            // Add Route Line
+            // Markers
+            const shopMarker = L.marker([shop.lat, shop.lon], {
+                title: 'Shop'
+            }).addTo(map).bindPopup(`<b>Shop (Start)</b><br>${shop.display_name}`);
+
+            const pickupMarker = L.marker([pickup.lat, pickup.lon]).addTo(map).bindPopup(`<b>1. Pickup</b><br>${pickup.display_name}`);
+
+            const dropoffMarker = L.marker([dropoff.lat, dropoff.lon]).addTo(map).bindPopup(`<b>2. Dropoff</b><br>${dropoff.display_name}`);
+
+            markers.push(shopMarker, pickupMarker, dropoffMarker);
+
+            // GeoJSON Route
             if (geometry) {
-                // GeoJSON layer
                 routeLayer = L.geoJSON(geometry, {
                     style: { color: 'blue', weight: 5, opacity: 0.7 }
                 }).addTo(map);
 
                 // Fit bounds
-                const bounds = L.latLngBounds([start.lat, start.lon], [end.lat, end.lon]);
+                const bounds = L.latLngBounds([shop.lat, shop.lon], [pickup.lat, pickup.lon], [dropoff.lat, dropoff.lon]);
                 map.fitBounds(bounds, { padding: [50, 50] });
             }
         }
-
 
         // --- CALCULATOR ---
         function calculateTotal() {
@@ -362,7 +380,16 @@
             const total = hookFee + (miles * rate);
 
             totalDisplay.textContent = '$' + total.toFixed(2);
-            breakdownDisplay.textContent = `${miles.toFixed(1)} miles @ $${rate.toFixed(2)}/mi`;
+
+            // Detailed breakdown logic if available
+            const enroute = milesInput.dataset.enroute || 0;
+            const towing = milesInput.dataset.towing || 0;
+
+            if (enroute > 0 || towing > 0) {
+                breakdownDisplay.textContent = `${miles.toFixed(1)} miles (${enroute} en-route + ${towing} tow) @ $${rate.toFixed(2)}/mi`;
+            } else {
+                breakdownDisplay.textContent = `${miles.toFixed(1)} miles @ $${rate.toFixed(2)}/mi`;
+            }
         }
 
         // Listeners
