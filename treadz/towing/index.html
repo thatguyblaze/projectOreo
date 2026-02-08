@@ -143,6 +143,10 @@
                                 <circle cx="12" cy="10" r="3" />
                                 <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" />
                             </svg>
+                            <ul id="pickup-suggestions"
+                                class="absolute left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-50 hidden max-h-48 overflow-y-auto top-full mt-1">
+                                <!-- Suggestions rendered here -->
+                            </ul>
                         </div>
                     </div>
 
@@ -159,6 +163,10 @@
                                 <circle cx="12" cy="10" r="3" />
                                 <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" />
                             </svg>
+                            <ul id="dropoff-suggestions"
+                                class="absolute left-0 w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-50 hidden max-h-48 overflow-y-auto top-full mt-1">
+                                <!-- Suggestions rendered here -->
+                            </ul>
                         </div>
                     </div>
 
@@ -259,7 +267,8 @@
         const statusDiv = document.getElementById('route-status');
 
         // Shop Config: Mount Carmel, TN
-        const SHOP_COORDS = { lat: 36.5644, lon: -82.6580 };
+        // Shop Config: Mount Carmel, TN
+        const SHOP_COORDS = { lat: 36.5602, lon: -82.6560 };
         const SHOP_ADDRESS = "409 E Main St, Mount Carmel, TN 37645";
 
         // --- STATE ---
@@ -562,7 +571,93 @@
         rateInput.addEventListener('input', calculateTotal);
         btnCalc.onclick = handleCalculateClick;
 
+        // --- AUTOCOMPLETE LOGIC ---
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        async function fetchSuggestions(text) {
+            if (text.length < 3) return [];
+
+            try {
+                // Bias to Shop Area (approx 50km radius)
+                const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(text)}&maxSuggestions=5&location=${location}&distance=50000`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.suggestions || [];
+            } catch (e) {
+                console.error("Suggestion error:", e);
+                return [];
+            }
+        }
+
+        function renderSuggestions(suggestions, containerId, inputId) {
+            const container = document.getElementById(containerId);
+            const input = document.getElementById(inputId);
+
+            container.innerHTML = '';
+
+            if (suggestions.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            suggestions.forEach(s => {
+                const li = document.createElement('li');
+                li.className = "px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 border-b last:border-0 border-gray-100";
+                li.innerText = s.text;
+
+                li.onclick = () => {
+                    input.value = s.text;
+                    container.classList.add('hidden');
+                    // Optional: Trigger calculation or geocoding immediately? 
+                    // Let's just fill it for now.
+                };
+
+                container.appendChild(li);
+            });
+
+            container.classList.remove('hidden');
+        }
+
+        function setupAutocomplete() {
+            const setupInput = (inputId, containerId) => {
+                const input = document.getElementById(inputId);
+                const container = document.getElementById(containerId);
+
+                const handleInput = debounce(async (e) => {
+                    const text = e.target.value;
+                    if (!text) {
+                        container.classList.add('hidden');
+                        return;
+                    }
+                    const suggestions = await fetchSuggestions(text);
+                    renderSuggestions(suggestions, containerId, inputId);
+                }, 300);
+
+                input.addEventListener('input', handleInput);
+
+                // Hide on click outside
+                document.addEventListener('click', (e) => {
+                    if (!input.contains(e.target) && !container.contains(e.target)) {
+                        container.classList.add('hidden');
+                    }
+                });
+            };
+
+            setupInput('pickup-input', 'pickup-suggestions');
+            setupInput('dropoff-input', 'dropoff-suggestions');
+        }
+
+        // Initialize
         initMap();
+        setupAutocomplete();
         calculateTotal();
 
     </script>
