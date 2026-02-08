@@ -237,23 +237,26 @@
             // center on Shop
             map = L.map('map').setView([points.shop.lat, points.shop.lon], 18); // Zoom in closer
 
-            // 1. Esri World Street Map
-            const streets = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri',
-                maxZoom: 19
+            // 1. Google Streets
+            const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: 'Map data &copy; Google'
             });
 
-            // 2. Esri Satellite (Default)
-            const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri',
-                maxZoom: 19
+            // 2. Google Hybrid (Satellite + Labels) - DEFAULT
+            const googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: 'Map data &copy; Google'
             });
 
-            satellite.addTo(map);
+            // Default to Google Hybrid
+            googleHybrid.addTo(map);
 
             L.control.layers({
-                "Satellite": satellite,
-                "Street Map": streets
+                "Google Hybrid": googleHybrid,
+                "Google Streets": googleStreets
             }).addTo(map);
 
             updateMarkers();
