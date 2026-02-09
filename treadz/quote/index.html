@@ -431,9 +431,11 @@
                                 <div>
                                     <div class="flex items-center gap-2 text-sm font-medium">
                                         State Tire Fee
-                                        <input type="number" id="state-fee-input"
-                                            class="w-20 bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 text-xs print-hidden outline-none text-right font-mono border-b border-gray-300 focus:border-blue-500"
-                                            step="0.01" min="0">
+                                        <input type="number" id="state-fee-qty"
+                                            class="w-12 bg-white border border-gray-300 px-1 py-0.5 rounded text-center text-gray-900 text-sm focus:border-blue-500 outline-none print:hidden custom-qty-input"
+                                            value="4">
+                                        <!-- Hidden span for print -->
+                                        <span class="hidden print:inline text-xs ml-1" id="print-state-qty"></span>
                                     </div>
                                     <div id="state-fee-math" class="text-[10px] text-gray-400 font-mono mt-0.5"></div>
                                 </div>
@@ -444,9 +446,10 @@
                                 <div>
                                     <div class="flex items-center gap-2 text-sm font-medium">
                                         Disposal Fee
-                                        <input type="number" id="disposal-fee-input"
-                                            class="w-20 bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 text-xs print-hidden outline-none text-right font-mono border-b border-gray-300 focus:border-blue-500"
-                                            step="0.01" min="0">
+                                        <input type="number" id="disposal-fee-qty"
+                                            class="w-12 bg-white border border-gray-300 px-1 py-0.5 rounded text-center text-gray-900 text-sm focus:border-blue-500 outline-none print:hidden custom-qty-input"
+                                            value="4">
+                                        <span class="hidden print:inline text-xs ml-1" id="print-disposal-qty"></span>
                                     </div>
                                     <div id="disposal-fee-math" class="text-[10px] text-gray-400 font-mono mt-0.5">
                                     </div>
@@ -575,15 +578,15 @@
         const custVehicleInput = document.getElementById('cust-vehicle');
         const historySearchInput = document.getElementById('history-search');
 
-        // Fee Inputs (New)
-        const stateFeeInput = document.getElementById('state-fee-input');
-        const disposalFeeInput = document.getElementById('disposal-fee-input');
+        // Fee Inputs (New QTY based)
+        const stateFeeQtyInput = document.getElementById('state-fee-qty');
+        const disposalFeeQtyInput = document.getElementById('disposal-fee-qty');
+
+        // Dirty Flags (to track if user manually overrode the fee qty)
+        let isStateDirty = false;
+        let isDisposalDirty = false;
 
         // --- INIT ---
-        // Set defaults from Config
-        if (stateFeeInput) stateFeeInput.value = TreadzConfig.FEES.TIRE_STATE.toFixed(2);
-        if (disposalFeeInput) disposalFeeInput.value = TreadzConfig.FEES.TIRE_DISPOSAL.toFixed(2);
-
         // Enable global scroll behavior
         TreadzUtils.enableGlobalScroll();
 
@@ -602,13 +605,13 @@
                 tireInfo: tireInfoInput.value.trim(),
                 pricePerTire: parseFloat(priceInput.value) || 0,
                 qty: parseInt(qtyInput.value) || 0,
-                total: document.getElementById('total-card-display').textContent // Capture the final string
+                total: document.getElementById('total-card-display').textContent
             };
 
             // Avoid saving empty junk
             if (quote.pricePerTire === 0 && quote.tireInfo === '') return;
 
-            // Check for duplicates (ignore ID and Timestamp)
+            // Check for duplicates
             const isDuplicate = history.some(item =>
                 item.customer === quote.customer &&
                 item.vehicle === quote.vehicle &&
@@ -621,13 +624,20 @@
             if (isDuplicate) return;
 
             history.unshift(quote);
-            // Limit to last 50
-            if (history.length > 50) history.pop();
-
+            if (history.length > 50) history.pop(); // Limit to 50
             localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
         }
 
         function handlePrint() {
+            // Update print-only spans with current qty
+            const sQty = stateFeeQtyInput.value || 0;
+            const dQty = disposalFeeQtyInput.value || 0;
+            const printState = document.getElementById('print-state-qty');
+            const printDisp = document.getElementById('print-disposal-qty');
+
+            if (printState) printState.textContent = `(${sQty})`;
+            if (printDisp) printDisp.textContent = `(${dQty})`;
+
             saveQuote();
             window.print();
         }
@@ -706,15 +716,23 @@
             }
         }
 
-        function loadQuote(item) {
+        function loadQuote(item) { // Note: variable named item in new renderHistory
+            if (typeof item === 'string') item = JSON.parse(item); // Safety
+
             custNameInput.value = item.customer;
-            custVehicleInput.value = item.vehicle;
-            tireInfoInput.value = item.tireInfo;
+            custVehicleInput.value = item.vehicle || '';
+            tireInfoInput.value = item.tireInfo || '';
             priceInput.value = item.pricePerTire;
             qtyInput.value = item.qty;
+
+            // Assume fees sync to tire qty on load (simple)
+            stateFeeQtyInput.value = item.qty;
+            disposalFeeQtyInput.value = item.qty;
+            isStateDirty = false;
+            isDisposalDirty = false;
+
             toggleHistoryModal(false);
             calculate();
-            // Pulse effect to show it loaded
             document.body.classList.add('bg-blue-50');
             setTimeout(() => document.body.classList.remove('bg-blue-50'), 300);
         }
@@ -723,14 +741,11 @@
             if (confirm('Are you sure you want to delete this quote entry?')) {
                 const history = getHistory().filter(item => item.id !== id);
                 localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
-
-                // Refresh list, maintaining search filter if any
                 const currentSearch = historySearchInput ? historySearchInput.value : '';
                 renderHistory(currentSearch);
             }
         }
 
-        // --- END HISTORY LOGIC ---
 
         // --- CALCULATION LOGIC ---
         function calculate() {
@@ -738,14 +753,16 @@
             const pricePerTire = priceVal === '' ? 0 : parseFloat(priceVal);
             const qty = parseInt(qtyInput.value) || 0;
 
-            // Fee Overrides (User Editable) - Defaults to 0 if empty
-            const feeStateVal = parseFloat(stateFeeInput.value) || 0;
-            const feeDispVal = parseFloat(disposalFeeInput.value) || 0;
+            // Get QTY for Fees
+            const sQty = parseInt(stateFeeQtyInput.value) || 0;
+            const dQty = parseInt(disposalFeeQtyInput.value) || 0;
 
             // Core calculations
             const tiresSubtotal = pricePerTire * qty;
-            const totalStateFee = feeStateVal * qty;
-            const totalDisposalFee = feeDispVal * qty;
+
+            // Fee Totals using Config Rate * Custom Qty
+            const totalStateFee = sQty * TreadzConfig.FEES.TIRE_STATE;
+            const totalDisposalFee = dQty * TreadzConfig.FEES.TIRE_DISPOSAL;
 
             const CARD_FEE_RATE = TreadzConfig.CARD_FEE_RATE;
 
@@ -769,11 +786,11 @@
 
             updateDisplay('state-fee-display', totalStateFee);
             const stateFeeMathEl = document.getElementById('state-fee-math');
-            if (stateFeeMathEl) stateFeeMathEl.textContent = `${qty} x ` + formatMoney(feeStateVal);
+            if (stateFeeMathEl) stateFeeMathEl.textContent = `${sQty} x ` + formatMoney(TreadzConfig.FEES.TIRE_STATE);
 
             updateDisplay('disposal-fee-display', totalDisposalFee);
             const disposalFeeMathEl = document.getElementById('disposal-fee-math');
-            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${qty} x ` + formatMoney(feeDispVal);
+            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${dQty} x ` + formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
 
             updateDisplay('tax-display', tax);
             const taxMathEl = document.getElementById('tax-math');
@@ -787,15 +804,12 @@
 
         function updateDisplay(id, amount, isFeeLabel = false) {
             const el = document.getElementById(id);
-            if (isFeeLabel) {
-                // The old code used 'Fee: $...', but user asked for standard formatting usually.
-                // We will stick to the previous behavior for card fee display if valid.
-                // Actually previous call was `updateDisplay('card-fee-display', cardFee, true)`
-                // but `updateDisplay` impl was slightly different in my head versus file.
-                // Let's match the file's impl.
-                el.textContent = 'Fee: ' + (typeof formatMoney === 'function' ? formatMoney(amount) : '$' + amount.toFixed(2));
-            } else {
-                el.textContent = (typeof formatMoney === 'function' ? formatMoney(amount) : '$' + amount.toFixed(2));
+            if (el) {
+                if (isFeeLabel) {
+                    el.textContent = 'Fee: ' + formatMoney(amount);
+                } else {
+                    el.textContent = formatMoney(amount);
+                }
             }
         }
 
@@ -808,7 +822,9 @@
             val += delta;
             if (val < 1) val = 1;
             qtyInput.value = val;
-            calculate();
+
+            // Dispatch event for sync logic
+            qtyInput.dispatchEvent(new Event('input'));
         }
 
         function reset() {
@@ -819,9 +835,11 @@
                 custVehicleInput.value = '';
                 tireInfoInput.value = '';
 
-                // Reset Fees
-                stateFeeInput.value = TreadzConfig.FEES.TIRE_STATE.toFixed(2);
-                disposalFeeInput.value = TreadzConfig.FEES.TIRE_DISPOSAL.toFixed(2);
+                // Reset Defaults and Status
+                stateFeeQtyInput.value = 4;
+                disposalFeeQtyInput.value = 4;
+                isStateDirty = false;
+                isDisposalDirty = false;
 
                 calculate();
                 priceInput.focus();
@@ -830,9 +848,24 @@
 
         // Event Listeners
         if (priceInput) priceInput.addEventListener('input', calculate);
-        if (qtyInput) qtyInput.addEventListener('input', calculate);
-        if (stateFeeInput) stateFeeInput.addEventListener('input', calculate);
-        if (disposalFeeInput) disposalFeeInput.addEventListener('input', calculate);
+
+        // Qty Sync Logic
+        if (qtyInput) qtyInput.addEventListener('input', () => {
+            const v = qtyInput.value;
+            if (!isStateDirty) stateFeeQtyInput.value = v;
+            if (!isDisposalDirty) disposalFeeQtyInput.value = v;
+            calculate();
+        });
+
+        // Track Dirty State
+        if (stateFeeQtyInput) stateFeeQtyInput.addEventListener('input', () => {
+            isStateDirty = true;
+            calculate();
+        });
+        if (disposalFeeQtyInput) disposalFeeQtyInput.addEventListener('input', () => {
+            isDisposalDirty = true;
+            calculate();
+        });
 
         if (tireInfoInput) tireInfoInput.addEventListener('input', () => {
             if (tireInfoInput.value.trim() === '') {
@@ -842,17 +875,14 @@
             }
         });
 
+        // Print
+        const printBtn = document.getElementById('print-btn');
+        if (printBtn) printBtn.onclick = handlePrint;
+
         // New Quote Button Action
         const newQuoteBtn = document.getElementById('new-quote-btn');
         if (newQuoteBtn) {
-            // Remove old listener if any (by replacing node or just overwriting onclick)
-            // But here we are editing the script block so we just define it.
             newQuoteBtn.onclick = reset;
-            // Note: The previous code had `document.getElementById('new-quote-btn').addEventListener...`
-            // If that was outside this block, we might double bind. 
-            // Looking at the file, `reset` was called by `onclick="reset()"` in HTML or similar?
-            // Actually line 804 was `function reset()`.
-            // Let's standardise on `addEventListener` if possible or just keep `reset` function.
         }
     </script>
 </body>
