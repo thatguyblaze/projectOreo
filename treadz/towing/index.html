@@ -383,17 +383,12 @@
         // --- OPEN API HELPERS ---
         async function geocode(addressInput) {
             try {
-                let query = addressInput.trim();
+                const query = addressInput.trim();
+                const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
 
-                // 1. Smart Suffixing
-                const lower = query.toLowerCase();
-                if (!lower.includes('tn') && !lower.includes('tennessee') && !lower.includes('va') && !lower.includes('virginia')) {
-                    query += ", Mount Carmel, TN";
-                }
-
-                // 2. ArcGIS World Geocoding Service (High Accuracy for US)
-                // Using public endpoint
-                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(query)}&maxLocations=1&outFields=Match_addr,Addr_type`;
+                // ArcGIS World Geocoding with Location Biasing (approx 50 miles / 80km)
+                // This allows finding "Walmart", "Taco Bell", "Yankee Line", etc. sorted by distance to shop.
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(query)}&maxLocations=1&outFields=Match_addr,Addr_type&location=${location}&distance=80000`;
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Geocode Error");
@@ -674,9 +669,9 @@
             if (text.length < 3) return [];
 
             try {
-                // Bias to Shop Area (approx 50km radius)
+                // Bias to Shop Area (approx 50 miles / 80km)
                 const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
-                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(text)}&maxSuggestions=5&location=${location}&distance=50000`;
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(text)}&maxSuggestions=10&location=${location}&distance=80000`;
 
                 const response = await fetch(url);
                 const data = await response.json();
