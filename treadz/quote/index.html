@@ -901,6 +901,33 @@
             calculate();
         });
 
+        // Enhanced Interaction for Fee Text (Click to Edit, Scroll to Change)
+        ['state-fee-math', 'disposal-fee-math'].forEach(id => {
+            const container = document.getElementById(id);
+            if (!container) return;
+            const input = container.querySelector('input');
+            if (!input) return;
+
+            // Click entire text -> Focus Input
+            container.addEventListener('click', (e) => {
+                if (e.target !== input) {
+                    input.focus();
+                }
+            });
+
+            // Scroll on text -> Change Value
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 1 : -1;
+                let val = parseInt(input.value) || 0;
+                val += delta;
+                if (val < 0) val = 0;
+                input.value = val;
+                input.dispatchEvent(new Event('input'));
+            }, { passive: false });
+        });
+
+
         if (tireInfoInput) tireInfoInput.addEventListener('input', () => {
             if (tireInfoInput.value.trim() === '') {
                 tireInfoContainer.classList.add('print:hidden');
