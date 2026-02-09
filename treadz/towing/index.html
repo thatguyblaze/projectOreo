@@ -687,7 +687,55 @@
             }
         }
 
-        function renderSuggestions(suggestions, containerId, inputId) {
+        async function getDetailsFromMagicKey(magicKey) {
+            const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&magicKey=${magicKey}&maxLocations=1&outFields=Match_addr,Addr_type`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.candidates && data.candidates.length > 0) {
+                    const match = data.candidates[0];
+                    return {
+                        lat: match.location.y,
+                        lon: match.location.x,
+                        display_name: match.address,
+                        raw: match
+                    };
+                }
+            } catch (e) {
+                console.error("MagicKey details error:", e);
+            }
+            return null;
+        }
+
+        async function handleSuggestionSelect(type, suggestion) {
+            const inputId = type === 'pickup' ? 'pickup-input' : 'dropoff-input';
+            const containerId = type === 'pickup' ? 'pickup-suggestions' : 'dropoff-suggestions';
+
+            const input = document.getElementById(inputId);
+            const container = document.getElementById(containerId);
+
+            input.value = suggestion.text;
+            container.classList.add('hidden');
+
+            // Feedback
+            statusDiv.innerText = "Loading location...";
+            statusDiv.className = "text-xs text-center text-blue-600 animate-pulse font-bold";
+
+            // Get Details
+            const point = await getDetailsFromMagicKey(suggestion.magicKey);
+
+            if (point) {
+                points[type] = point;
+                statusDiv.innerText = "";
+                updateMarkers();
+                recalculateRoute();
+            } else {
+                statusDiv.innerText = "Could not load location.";
+                statusDiv.className = "text-xs text-center text-red-500";
+            }
+        }
+
+        function renderSuggestions(suggestions, containerId, inputId, type) {
             const container = document.getElementById(containerId);
             const input = document.getElementById(inputId);
 
@@ -704,10 +752,7 @@
                 li.innerText = s.text;
 
                 li.onclick = () => {
-                    input.value = s.text;
-                    container.classList.add('hidden');
-                    // Optional: Trigger calculation or geocoding immediately? 
-                    // Let's just fill it for now.
+                    handleSuggestionSelect(type, s);
                 };
 
                 container.appendChild(li);
@@ -717,7 +762,7 @@
         }
 
         function setupAutocomplete() {
-            const setupInput = (inputId, containerId) => {
+            const setupInput = (inputId, containerId, type) => {
                 const input = document.getElementById(inputId);
                 const container = document.getElementById(containerId);
 
@@ -728,7 +773,7 @@
                         return;
                     }
                     const suggestions = await fetchSuggestions(text);
-                    renderSuggestions(suggestions, containerId, inputId);
+                    renderSuggestions(suggestions, containerId, inputId, type);
                 }, 300);
 
                 input.addEventListener('input', handleInput);
@@ -741,8 +786,8 @@
                 });
             };
 
-            setupInput('pickup-input', 'pickup-suggestions');
-            setupInput('dropoff-input', 'dropoff-suggestions');
+            setupInput('pickup-input', 'pickup-suggestions', 'pickup');
+            setupInput('dropoff-input', 'dropoff-suggestions', 'dropoff');
         }
 
         // --- DISPATCH HELPERS ---
