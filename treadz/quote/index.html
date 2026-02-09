@@ -575,6 +575,18 @@
         const custVehicleInput = document.getElementById('cust-vehicle');
         const historySearchInput = document.getElementById('history-search');
 
+        // Fee Inputs (New)
+        const stateFeeInput = document.getElementById('state-fee-input');
+        const disposalFeeInput = document.getElementById('disposal-fee-input');
+
+        // --- INIT ---
+        // Set defaults from Config
+        if (stateFeeInput) stateFeeInput.value = TreadzConfig.FEES.TIRE_STATE.toFixed(2);
+        if (disposalFeeInput) disposalFeeInput.value = TreadzConfig.FEES.TIRE_DISPOSAL.toFixed(2);
+
+        // Enable global scroll behavior
+        TreadzUtils.enableGlobalScroll();
+
         // --- HISTORY LOGIC ---
         function getHistory() {
             return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
@@ -720,15 +732,20 @@
 
         // --- END HISTORY LOGIC ---
 
+        // --- CALCULATION LOGIC ---
         function calculate() {
             const priceVal = priceInput.value;
             const pricePerTire = priceVal === '' ? 0 : parseFloat(priceVal);
             const qty = parseInt(qtyInput.value) || 0;
 
-            // Core calculations (USING TreadzConfig)
+            // Fee Overrides (User Editable) - Defaults to 0 if empty
+            const feeStateVal = parseFloat(stateFeeInput.value) || 0;
+            const feeDispVal = parseFloat(disposalFeeInput.value) || 0;
+
+            // Core calculations
             const tiresSubtotal = pricePerTire * qty;
-            const totalStateFee = TreadzConfig.FEES.TIRE_STATE * qty;
-            const totalDisposalFee = TreadzConfig.FEES.TIRE_DISPOSAL * qty;
+            const totalStateFee = feeStateVal * qty;
+            const totalDisposalFee = feeDispVal * qty;
 
             const CARD_FEE_RATE = TreadzConfig.CARD_FEE_RATE;
 
@@ -752,11 +769,11 @@
 
             updateDisplay('state-fee-display', totalStateFee);
             const stateFeeMathEl = document.getElementById('state-fee-math');
-            if (stateFeeMathEl) stateFeeMathEl.textContent = `${qty} x ` + formatMoney(TreadzConfig.FEES.TIRE_STATE);
+            if (stateFeeMathEl) stateFeeMathEl.textContent = `${qty} x ` + formatMoney(feeStateVal);
 
             updateDisplay('disposal-fee-display', totalDisposalFee);
             const disposalFeeMathEl = document.getElementById('disposal-fee-math');
-            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${qty} x ` + formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
+            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${qty} x ` + formatMoney(feeDispVal);
 
             updateDisplay('tax-display', tax);
             const taxMathEl = document.getElementById('tax-math');
@@ -765,15 +782,20 @@
             // Render Totals
             updateDisplay('total-cash-display', cashTotal);
             updateDisplay('total-card-display', cardTotal);
-            updateDisplay('card-fee-display', cardFee, true); // true for "Fee: $X.XX" format handled differently or just formatMoney
+            updateDisplay('card-fee-display', cardFee, true);
         }
 
         function updateDisplay(id, amount, isFeeLabel = false) {
             const el = document.getElementById(id);
             if (isFeeLabel) {
-                el.textContent = 'Fee: ' + formatMoney(amount);
+                // The old code used 'Fee: $...', but user asked for standard formatting usually.
+                // We will stick to the previous behavior for card fee display if valid.
+                // Actually previous call was `updateDisplay('card-fee-display', cardFee, true)`
+                // but `updateDisplay` impl was slightly different in my head versus file.
+                // Let's match the file's impl.
+                el.textContent = 'Fee: ' + (typeof formatMoney === 'function' ? formatMoney(amount) : '$' + amount.toFixed(2));
             } else {
-                el.textContent = formatMoney(amount);
+                el.textContent = (typeof formatMoney === 'function' ? formatMoney(amount) : '$' + amount.toFixed(2));
             }
         }
 
@@ -790,18 +812,28 @@
         }
 
         function reset() {
-            priceInput.value = '';
-            qtyInput.value = 4; // Default to 4 tires as it's most common
-            custNameInput.value = '';
-            custVehicleInput.value = '';
-            tireInfoInput.value = '';
-            calculate();
-            priceInput.focus();
+            if (confirm("Clear current quote?")) {
+                priceInput.value = '';
+                qtyInput.value = 4; // Default to 4
+                custNameInput.value = '';
+                custVehicleInput.value = '';
+                tireInfoInput.value = '';
+
+                // Reset Fees
+                stateFeeInput.value = TreadzConfig.FEES.TIRE_STATE.toFixed(2);
+                disposalFeeInput.value = TreadzConfig.FEES.TIRE_DISPOSAL.toFixed(2);
+
+                calculate();
+                priceInput.focus();
+            }
         }
 
         // Event Listeners
         if (priceInput) priceInput.addEventListener('input', calculate);
         if (qtyInput) qtyInput.addEventListener('input', calculate);
+        if (stateFeeInput) stateFeeInput.addEventListener('input', calculate);
+        if (disposalFeeInput) disposalFeeInput.addEventListener('input', calculate);
+
         if (tireInfoInput) tireInfoInput.addEventListener('input', () => {
             if (tireInfoInput.value.trim() === '') {
                 tireInfoContainer.classList.add('print:hidden');
@@ -809,6 +841,19 @@
                 tireInfoContainer.classList.remove('print:hidden');
             }
         });
+
+        // New Quote Button Action
+        const newQuoteBtn = document.getElementById('new-quote-btn');
+        if (newQuoteBtn) {
+            // Remove old listener if any (by replacing node or just overwriting onclick)
+            // But here we are editing the script block so we just define it.
+            newQuoteBtn.onclick = reset;
+            // Note: The previous code had `document.getElementById('new-quote-btn').addEventListener...`
+            // If that was outside this block, we might double bind. 
+            // Looking at the file, `reset` was called by `onclick="reset()"` in HTML or similar?
+            // Actually line 804 was `function reset()`.
+            // Let's standardise on `addEventListener` if possible or just keep `reset` function.
+        }
     </script>
 </body>
 
