@@ -64,6 +64,42 @@ const TreadzUtils = {
      */
     calculateTax: (subtotal) => {
         return subtotal * TreadzConfig.TAX_RATE;
+    },
+
+    /**
+     * Standardizes input behavior across the app.
+     * 1. Scroll Wheel on focused number inputs changes value by +/- 1
+     */
+    enableGlobalScroll: () => {
+        document.addEventListener('wheel', (e) => {
+            if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
+                // Only hijack if the element is focused (User said "When you have it selected")
+                if (document.activeElement === e.target) {
+                    e.preventDefault();
+
+                    // User requested "change it by 1 dollar as a standard"
+                    const delta = e.deltaY < 0 ? 1 : -1;
+
+                    let currentVal = parseFloat(e.target.value) || 0;
+                    let newVal = currentVal + delta;
+
+                    // Respect min attribute if present
+                    if (e.target.min !== "" && newVal < parseFloat(e.target.min)) {
+                        newVal = parseFloat(e.target.min);
+                    }
+
+                    // For fields that might show decimals, keep them clean if they are whole numbers
+                    // But if it's a price field, it might render as 15.00
+                    // Since we are adding an integer 1, precision usually stays fine.
+
+                    e.target.value = newVal; // Or .toFixed(2) if strictly currency? 
+                    // Input values are strings, let's keep it simple unless it breaks formatting.
+
+                    // Trigger input event so calculations update
+                    e.target.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        }, { passive: false });
     }
 };
 
