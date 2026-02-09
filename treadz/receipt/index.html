@@ -501,25 +501,13 @@
         </main>
     </div>
 
+    <script src="../js/treadz-core.js"></script>
     <script>
-        const STATE_FEE_PER_TIRE = 1.35;
-        const DISPOSAL_FEE_PER_TIRE = 4.00;
-        const TAX_RATE = 0.0975;
-        const CARD_FEE_RATE = 0.035;
+        // --- CONSTANTS REMOVED: Using TreadzConfig from treadz-core.js ---
 
         // --- STATE MANAGEMENT ---
         let currentEditingId = null;
         let autoSaveTimeout = null;
-
-        // Default Services Configuration
-        const DEFAULT_SERVICES = [
-            { id: 'srv_rotation', name: 'Tire Rotation', defaultPrice: 50.00, defaultQty: 1 },
-            { id: 'srv_balance', name: 'Tire Balance', defaultPrice: 50.00, defaultQty: 1 },
-            { id: 'srv_stem', name: 'Valve Stems (New)', defaultPrice: 0.00, defaultQty: 4 },
-            { id: 'srv_sensor', name: 'New TPMS Sensors', defaultPrice: 59.99, defaultQty: 4 },
-            { id: 'srv_patch', name: 'Tire Patch', defaultPrice: 20.00, defaultQty: 1 },
-            { id: 'srv_plug', name: 'Tire Plug', defaultPrice: 10.00, defaultQty: 1 }
-        ];
 
         // Active State of Services for the CURRENT receipt
         // Map: serviceId -> { checked: boolean, qty: number, price: number }
@@ -578,7 +566,7 @@
 
         // --- CONFIG MANAGEMENT ---
         function getServiceConfig() {
-            return JSON.parse(localStorage.getItem('treadzServicesConfig')) || DEFAULT_SERVICES;
+            return JSON.parse(localStorage.getItem('treadzServicesConfig')) || TreadzConfig.DEFAULT_SERVICES;
         }
 
         function saveServiceConfig(config) {
@@ -750,17 +738,17 @@
             // 2. Fees
             if (qty > 0 && (descInput.value.length > 0 || price > 0)) {
                 // State Fee
-                const stateTotal = round2(qty * STATE_FEE_PER_TIRE);
+                const stateTotal = round2(qty * TreadzConfig.FEES.TIRE_STATE);
                 feeStateQty.textContent = qty;
                 feeStateDesc.textContent = 'STATE TIRE FEE';
-                feeStatePrice.textContent = formatMoney(STATE_FEE_PER_TIRE);
+                feeStatePrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_STATE);
                 feeStateTotal.textContent = formatMoney(stateTotal);
 
                 // Disposal Fee
-                const dispTotal = round2(qty * DISPOSAL_FEE_PER_TIRE);
+                const dispTotal = round2(qty * TreadzConfig.FEES.TIRE_DISPOSAL);
                 feeDispQty.textContent = qty;
                 feeDispDesc.textContent = 'TIRE DISPOSAL';
-                feeDispPrice.textContent = formatMoney(DISPOSAL_FEE_PER_TIRE);
+                feeDispPrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
                 feeDispTotal.textContent = formatMoney(dispTotal);
 
                 currentSubtotal = round2(currentSubtotal + stateTotal + dispTotal);
@@ -794,14 +782,15 @@
             currentSubtotal = round2(currentSubtotal + servicesSum);
 
             // 4. Totals
-            const tax = round2(currentSubtotal * TAX_RATE);
+            const tax = round2(currentSubtotal * TreadzConfig.TAX_RATE);
             const total = round2(currentSubtotal + tax);
-            const cardTotal = round2(total + (total * CARD_FEE_RATE));
+            const cardTotal = round2(total + (total * TreadzConfig.CARD_FEE_RATE));
+            // Show Card Total Logic just for preview
+            cardTotalPreview.textContent = formatMoney(cardTotal);
 
             subtotalFinal.textContent = formatMoney(currentSubtotal);
             taxFinal.textContent = formatMoney(tax);
             totalFinal.textContent = formatMoney(total);
-            cardTotalPreview.textContent = formatMoney(cardTotal);
         }
 
 

@@ -262,6 +262,7 @@
     </main>
 
     <!-- Leaflet JS -->
+    <script src="../js/treadz-core.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
@@ -278,10 +279,10 @@
         const btnCalc = document.getElementById('calculate-route-btn');
         const statusDiv = document.getElementById('route-status');
 
-        // Shop Config: Mount Carmel, TN
-        // Shop Config: Mount Carmel, TN
-        const SHOP_COORDS = { lat: 36.5602, lon: -82.6560 };
-        const SHOP_ADDRESS = "409 E Main St, Mount Carmel, TN 37645";
+        // --- INIT FROM CONFIG ---
+        // dropoffInput.value = TreadzConfig.SHOP_ADDRESS; // Optional: Pre-fill
+        hookFeeInput.value = TreadzConfig.FEES.TOW_HOOK.toFixed(2);
+        rateInput.value = TreadzConfig.FEES.TOW_RATE_PER_MILE.toFixed(2);
 
         // --- STATE ---
         let map;
@@ -290,32 +291,27 @@
         let markers = { shop: null, pickup: null, dropoff: null };
 
         // --- INIT MAP ---
-        // --- INIT MAP ---
         function initMap() {
             // Versioned storage key to bust cache of "bad" locations
-            const STORAGE_KEY = 'treadz_shop_coords_v3';
-
-            // Refined Shop Coords (Main St / Commercial Area Estimate)
-            // Moved South from previous guess to align with US-11W
-            const REFINED_SHOP = { lat: 36.5602, lon: -82.6560 };
+            const STORAGE_KEY = 'treadz_shop_coords_v4'; // Bumped version
 
             let isVerified = false;
 
-            // Restore Saved Shop Location or Use Refined Default
+            // Restore Saved Shop Location or Use Config Default
             const savedShop = localStorage.getItem(STORAGE_KEY);
             if (savedShop) {
                 try {
                     points.shop = JSON.parse(savedShop);
                     isVerified = true;
                 } catch (e) {
-                    points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
+                    points.shop = { ...TreadzConfig.SHOP_COORDS, display_name: TreadzConfig.BUSINESS_NAME };
                 }
             } else {
-                points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
+                points.shop = { ...TreadzConfig.SHOP_COORDS, display_name: TreadzConfig.BUSINESS_NAME };
             }
 
-            // center on Mount Carmel, TN (zoomed out to show city)
-            map = L.map('map').setView([36.5602, -82.6560], 14);
+            // center on Shop
+            map = L.map('map').setView([points.shop.lat, points.shop.lon], 14);
 
             // 1. Google Streets
             const googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -348,8 +344,6 @@
                 // Show Status Feedback
                 if (isVerified) {
                     showMapToast("✅ Using Verified Shop Location", "success");
-                } else {
-                    showMapToast("⚠️ Map data may be inaccurate. Drag Green Pin to exact shop location to fix.", "warning");
                 }
             }, 500);
         }
@@ -371,24 +365,19 @@
         }
 
         function resetShopLocation() {
-            const REFINED_SHOP = { lat: 36.5602, lon: -82.6560 };
-            points.shop = { ...REFINED_SHOP, display_name: "Treadz (Shop)" };
-            localStorage.removeItem('treadz_shop_coords_v3'); // Clear saved
+            points.shop = { ...TreadzConfig.SHOP_COORDS, display_name: TreadzConfig.BUSINESS_NAME };
+            localStorage.removeItem('treadz_shop_coords_v4'); // Clear saved
             updateMarkers();
             map.setView([points.shop.lat, points.shop.lon], 18);
             recalculateRoute();
         }
 
         // --- OPEN API HELPERS ---
-        // --- OPEN API HELPERS ---
-        // --- OPEN API HELPERS ---
-        // CONSTANTS for Search Strategy
-        const RADIUS_LOCAL = 50000;    // 50km (~30 miles)
-        const RADIUS_REGIONAL = 800000; // 800km (~500 miles)
+        // SEARCH STRATEGY CONSTANTS IMPORTED FROM CONFIG
 
         async function geocode(addressInput) {
             const query = addressInput.trim();
-            const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
+            const location = `${TreadzConfig.SHOP_COORDS.lon},${TreadzConfig.SHOP_COORDS.lat}`;
 
             // Helper to run fetch
             const runGeocode = async (dist) => {
@@ -402,12 +391,12 @@
             try {
                 // STRATEGY: Local First -> Then Regional
                 // 1. Try Local
-                let match = await runGeocode(RADIUS_LOCAL);
+                let match = await runGeocode(TreadzConfig.SEARCH.RADIUS_LOCAL_METERS);
 
                 // 2. If nothing, try Wide
                 if (!match) {
                     // console.log("Local miss, expanding search...");
-                    match = await runGeocode(RADIUS_REGIONAL);
+                    match = await runGeocode(TreadzConfig.SEARCH.RADIUS_REGIONAL_METERS);
                 }
 
                 if (match) {
@@ -428,7 +417,7 @@
         async function fetchSuggestions(text) {
             if (text.length < 3) return [];
 
-            const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
+            const location = `${TreadzConfig.SHOP_COORDS.lon},${TreadzConfig.SHOP_COORDS.lat}`;
 
             // Helper
             const runSuggest = async (dist, max) => {
@@ -439,17 +428,16 @@
 
             try {
                 // STRATEGY: Local First -> Then Regional
-                // 1. Try Local (Strict 50km)
-                let data = await runSuggest(RADIUS_LOCAL, 5); // 5 local suggestions is plenty enough
+                // 1. Try Local (Strict)
+                let data = await runSuggest(TreadzConfig.SEARCH.RADIUS_LOCAL_METERS, TreadzConfig.SEARCH.SUGGESTIONS_LOCAL_MAX);
                 let suggestions = data.suggestions || [];
 
-                // 2. If results are poor (0 or very few), try Wide (800km)
-                // We expand if we find NOTHING or very few matches locally.
+                // 2. If results are poor (0 or very few), try Wide
                 if (suggestions.length < 2) {
-                    const wideData = await runSuggest(RADIUS_REGIONAL, 20); // Get more suggestions for wide search
+                    const wideData = await runSuggest(TreadzConfig.SEARCH.RADIUS_REGIONAL_METERS, TreadzConfig.SEARCH.SUGGESTIONS_TOTAL_MAX);
                     const wideSuggestions = wideData.suggestions || [];
 
-                    // Deduplicate based on magicKey or text to avoid showing the same item twice if it was found in both (rare but possible)
+                    // Deduplicate
                     const existingKeys = new Set(suggestions.map(s => s.magicKey));
 
                     wideSuggestions.forEach(s => {

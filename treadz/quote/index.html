@@ -560,10 +560,9 @@
         </div>
     </div>
 
+    <script src="../js/treadz-core.js"></script>
     <script>
-        const STATE_FEE_PER_TIRE = 1.35;
-        const DISPOSAL_FEE_PER_TIRE = 4.00;
-        const TAX_RATE = 0.0975;
+        // --- CONSTANTS REMOVED: Using TreadzConfig from treadz-core.js ---
 
         const priceInput = document.getElementById('tire-price');
         const qtyInput = document.getElementById('quantity');
@@ -723,20 +722,20 @@
             const pricePerTire = priceVal === '' ? 0 : parseFloat(priceVal);
             const qty = parseInt(qtyInput.value) || 0;
 
-            // Core calculations
+            // Core calculations (USING TreadzConfig)
             const tiresSubtotal = pricePerTire * qty;
-            const totalStateFee = STATE_FEE_PER_TIRE * qty;
-            const totalDisposalFee = DISPOSAL_FEE_PER_TIRE * qty;
+            const totalStateFee = TreadzConfig.FEES.TIRE_STATE * qty;
+            const totalDisposalFee = TreadzConfig.FEES.TIRE_DISPOSAL * qty;
 
-            const CARD_FEE_RATE = 0.035;
+            const CARD_FEE_RATE = TreadzConfig.CARD_FEE_RATE;
 
             // Tax on the Sale (Tires + Fees)
             const taxableAmount = tiresSubtotal + totalStateFee + totalDisposalFee;
-            const tax = taxableAmount * TAX_RATE;
+            const tax = taxableAmount * TreadzConfig.TAX_RATE;
 
             const cashTotal = taxableAmount + tax;
 
-            // Card calculations (Total + 3% of that total)
+            // Card calculations (Total + 3.5% of that total)
             const cardFee = cashTotal * CARD_FEE_RATE;
             const cardTotal = cashTotal + cardFee;
 
@@ -750,15 +749,15 @@
 
             updateDisplay('state-fee-display', totalStateFee);
             const stateFeeMathEl = document.getElementById('state-fee-math');
-            if (stateFeeMathEl) stateFeeMathEl.textContent = `${qty} x ` + formatMoney(STATE_FEE_PER_TIRE);
+            if (stateFeeMathEl) stateFeeMathEl.textContent = `${qty} x ` + formatMoney(TreadzConfig.FEES.TIRE_STATE);
 
             updateDisplay('disposal-fee-display', totalDisposalFee);
             const disposalFeeMathEl = document.getElementById('disposal-fee-math');
-            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${qty} x ` + formatMoney(DISPOSAL_FEE_PER_TIRE);
+            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${qty} x ` + formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
 
             updateDisplay('tax-display', tax);
             const taxMathEl = document.getElementById('tax-math');
-            if (taxMathEl) taxMathEl.textContent = `9.75% of ` + formatMoney(taxableAmount);
+            if (taxMathEl) taxMathEl.textContent = `${(TreadzConfig.TAX_RATE * 100).toFixed(2)}% of ` + formatMoney(taxableAmount);
 
             // Render Totals
             updateDisplay('total-cash-display', cashTotal);
