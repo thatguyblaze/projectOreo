@@ -10,6 +10,32 @@
     <link rel="stylesheet" href="../css/style.css">
     <style>
         /* Additional glassmorphism and animation styles for the calculator */
+
+        /* Hide Spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Print Input Reset */
+        @media print {
+
+            input,
+            textarea {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                resize: none !important;
+                /* Force appearance */
+                -webkit-appearance: none !important;
+                -moz-appearance: none !important;
+                appearance: none !important;
+            }
+        }
+
         @media print {
             @page {
                 size: letter;
@@ -431,13 +457,17 @@
                                 <div>
                                     <div class="flex items-center gap-2 text-sm font-medium">
                                         State Tire Fee
-                                        <input type="number" id="state-fee-qty"
-                                            class="w-12 bg-white border border-gray-300 px-1 py-0.5 rounded text-center text-gray-900 text-sm focus:border-blue-500 outline-none print:hidden custom-qty-input"
-                                            value="4">
-                                        <!-- Hidden span for print -->
-                                        <span class="hidden print:inline text-xs ml-1" id="print-state-qty"></span>
+                                        <!-- No separate input here -->
                                     </div>
-                                    <div id="state-fee-math" class="text-[10px] text-gray-400 font-mono mt-0.5"></div>
+                                    <div id="state-fee-math"
+                                        class="text-[10px] text-gray-400 font-mono mt-0.5 flex items-center gap-1 cursor-text hover:text-blue-600 transition-colors"
+                                        title="Click to edit quantity">
+                                        <input type="number" id="state-fee-qty"
+                                            class="w-4 bg-transparent text-right outline-none p-0 m-0 h-auto leading-none text-gray-500 hover:text-blue-600 focus:text-blue-600 font-mono focus:w-8 transition-all"
+                                            value="4">
+                                        <span>x</span>
+                                        <span id="state-fee-rate-display">$1.35</span>
+                                    </div>
                                 </div>
                                 <span id="state-fee-display" class="font-medium">$0.00</span>
                             </div>
@@ -446,12 +476,16 @@
                                 <div>
                                     <div class="flex items-center gap-2 text-sm font-medium">
                                         Disposal Fee
-                                        <input type="number" id="disposal-fee-qty"
-                                            class="w-12 bg-white border border-gray-300 px-1 py-0.5 rounded text-center text-gray-900 text-sm focus:border-blue-500 outline-none print:hidden custom-qty-input"
-                                            value="4">
-                                        <span class="hidden print:inline text-xs ml-1" id="print-disposal-qty"></span>
+                                        <!-- No separate input here -->
                                     </div>
-                                    <div id="disposal-fee-math" class="text-[10px] text-gray-400 font-mono mt-0.5">
+                                    <div id="disposal-fee-math"
+                                        class="text-[10px] text-gray-400 font-mono mt-0.5 flex items-center gap-1 cursor-text hover:text-blue-600 transition-colors"
+                                        title="Click to edit quantity">
+                                        <input type="number" id="disposal-fee-qty"
+                                            class="w-4 bg-transparent text-right outline-none p-0 m-0 h-auto leading-none text-gray-500 hover:text-blue-600 focus:text-blue-600 font-mono focus:w-8 transition-all"
+                                            value="4">
+                                        <span>x</span>
+                                        <span id="disposal-fee-rate-display">$4.00</span>
                                     </div>
                                 </div>
                                 <span id="disposal-fee-display" class="font-medium">$0.00</span>
@@ -785,12 +819,12 @@
             document.getElementById('print-price').textContent = formatMoney(pricePerTire);
 
             updateDisplay('state-fee-display', totalStateFee);
-            const stateFeeMathEl = document.getElementById('state-fee-math');
-            if (stateFeeMathEl) stateFeeMathEl.textContent = `${sQty} x ` + formatMoney(TreadzConfig.FEES.TIRE_STATE);
+            const stateRateEl = document.getElementById('state-fee-rate-display');
+            if (stateRateEl) stateRateEl.textContent = formatMoney(TreadzConfig.FEES.TIRE_STATE);
 
             updateDisplay('disposal-fee-display', totalDisposalFee);
-            const disposalFeeMathEl = document.getElementById('disposal-fee-math');
-            if (disposalFeeMathEl) disposalFeeMathEl.textContent = `${dQty} x ` + formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
+            const disposalRateEl = document.getElementById('disposal-fee-rate-display');
+            if (disposalRateEl) disposalRateEl.textContent = formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
 
             updateDisplay('tax-display', tax);
             const taxMathEl = document.getElementById('tax-math');
