@@ -73,11 +73,9 @@ const TreadzUtils = {
     enableGlobalScroll: () => {
         document.addEventListener('wheel', (e) => {
             if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
-                // Only hijack if the element is focused (User said "When you have it selected")
                 if (document.activeElement === e.target) {
                     e.preventDefault();
 
-                    // User requested "change it by 1 dollar as a standard"
                     const delta = e.deltaY < 0 ? 1 : -1;
 
                     let currentVal = parseFloat(e.target.value) || 0;
