@@ -381,25 +381,40 @@
 
         // --- OPEN API HELPERS ---
         // --- OPEN API HELPERS ---
+        // --- OPEN API HELPERS ---
+        // CONSTANTS for Search Strategy
+        const RADIUS_LOCAL = 50000;    // 50km (~30 miles)
+        const RADIUS_REGIONAL = 800000; // 800km (~500 miles)
+
         async function geocode(addressInput) {
+            const query = addressInput.trim();
+            const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
+
+            // Helper to run fetch
+            const runGeocode = async (dist) => {
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(query)}&maxLocations=1&outFields=Match_addr,Addr_type&location=${location}&distance=${dist}`;
+                const res = await fetch(url);
+                if (!res.ok) return null;
+                const d = await res.json();
+                return (d.candidates && d.candidates.length > 0) ? d.candidates[0] : null;
+            };
+
             try {
-                const query = addressInput.trim();
-                const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
+                // STRATEGY: Local First -> Then Regional
+                // 1. Try Local
+                let match = await runGeocode(RADIUS_LOCAL);
 
-                // ArcGIS World Geocoding with Location Biasing (approx 50 miles / 80km)
-                // This allows finding "Walmart", "Taco Bell", "Yankee Line", etc. sorted by distance to shop.
-                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(query)}&maxLocations=1&outFields=Match_addr,Addr_type&location=${location}&distance=80000`;
+                // 2. If nothing, try Wide
+                if (!match) {
+                    // console.log("Local miss, expanding search...");
+                    match = await runGeocode(RADIUS_REGIONAL);
+                }
 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Geocode Error");
-                const data = await response.json();
-
-                if (data.candidates && data.candidates.length > 0) {
-                    const match = data.candidates[0];
+                if (match) {
                     return {
                         lat: match.location.y,
                         lon: match.location.x,
-                        display_name: match.address, // "Match_addr" from Esri is usually very clean
+                        display_name: match.address,
                         raw: match
                     };
                 }
@@ -407,6 +422,47 @@
             } catch (error) {
                 console.error("Geocoding failed:", error);
                 return null;
+            }
+        }
+
+        async function fetchSuggestions(text) {
+            if (text.length < 3) return [];
+
+            const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
+
+            // Helper
+            const runSuggest = async (dist, max) => {
+                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(text)}&maxSuggestions=${max}&location=${location}&distance=${dist}`;
+                const res = await fetch(url);
+                return await res.json();
+            };
+
+            try {
+                // STRATEGY: Local First -> Then Regional
+                // 1. Try Local (Strict 50km)
+                let data = await runSuggest(RADIUS_LOCAL, 5); // 5 local suggestions is plenty enough
+                let suggestions = data.suggestions || [];
+
+                // 2. If results are poor (0 or very few), try Wide (800km)
+                // We expand if we find NOTHING or very few matches locally.
+                if (suggestions.length < 2) {
+                    const wideData = await runSuggest(RADIUS_REGIONAL, 20); // Get more suggestions for wide search
+                    const wideSuggestions = wideData.suggestions || [];
+
+                    // Deduplicate based on magicKey or text to avoid showing the same item twice if it was found in both (rare but possible)
+                    const existingKeys = new Set(suggestions.map(s => s.magicKey));
+
+                    wideSuggestions.forEach(s => {
+                        if (!existingKeys.has(s.magicKey)) {
+                            suggestions.push(s);
+                        }
+                    });
+                }
+
+                return suggestions;
+            } catch (e) {
+                console.error("Suggestion error:", e);
+                return [];
             }
         }
 
@@ -665,22 +721,7 @@
             };
         }
 
-        async function fetchSuggestions(text) {
-            if (text.length < 3) return [];
 
-            try {
-                // Bias to Shop Area (approx 50 miles / 80km)
-                const location = `${SHOP_COORDS.lon},${SHOP_COORDS.lat}`;
-                const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?f=json&text=${encodeURIComponent(text)}&maxSuggestions=10&location=${location}&distance=80000`;
-
-                const response = await fetch(url);
-                const data = await response.json();
-                return data.suggestions || [];
-            } catch (e) {
-                console.error("Suggestion error:", e);
-                return [];
-            }
-        }
 
         async function getDetailsFromMagicKey(magicKey) {
             const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&magicKey=${magicKey}&maxLocations=1&outFields=Match_addr,Addr_type`;
