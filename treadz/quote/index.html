@@ -646,9 +646,7 @@
             }
 
             const quote = {
-                id: currentQuoteId, // Use the sequential ID as the primary key? Or keep timestamp as key and this as display?
-                // Let's keep timestamp as unique key internally if needed, but displayId is separate.
-                // Actually user wants "identifier number", so let's use that.
+                id: currentQuoteId,
                 displayId: currentQuoteId,
                 timestamp: new Date().toISOString(),
                 customer: custNameInput.value.trim() || 'Walk-In',
@@ -662,20 +660,32 @@
             // Avoid saving empty junk
             if (quote.pricePerTire === 0 && quote.tireInfo === '') return;
 
-            // Check for duplicates
-            const isDuplicate = history.some(item =>
-                item.customer === quote.customer &&
-                item.vehicle === quote.vehicle &&
-                item.tireInfo === quote.tireInfo &&
-                item.pricePerTire === quote.pricePerTire &&
-                item.qty === quote.qty &&
-                item.total === quote.total
-            );
+            // Check if this ID already exists in history (Update Mode)
+            const existingIndex = history.findIndex(item => item.id === currentQuoteId);
 
-            if (isDuplicate) return;
+            if (existingIndex !== -1) {
+                // Update existing entry
+                // Preserve original timestamp if desired, or update it? 
+                // Usually "Recent History" sorts by timestamp. If we update, we might want to bump it.
+                // But user asked to "save to original instance".
+                // I will update the data but keep the ID.
+                history[existingIndex] = { ...history[existingIndex], ...quote };
 
-            history.unshift(quote);
-            if (history.length > 50) history.pop(); // Limit to 50
+                // Move to top to show it was recently modified?
+                const updatedItem = history.splice(existingIndex, 1)[0];
+                history.unshift(updatedItem);
+            } else {
+                // New Entry
+                // Check for duplicate CONTENT (to prevent spamming new IDs for same data if ID was null? 
+                // But we generated ID above. So ID is unique now.)
+
+                // We should only check content duplicate if we *forced* a new ID but data is same as previous?
+                // No, if user clicked Reset then typed same thing, it's a new quote.
+
+                history.unshift(quote);
+                if (history.length > 50) history.pop();
+            }
+
             localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
         }
 
@@ -782,8 +792,11 @@
             }
         }
 
-        function loadQuote(item) { // Note: variable named item in new renderHistory
-            if (typeof item === 'string') item = JSON.parse(item); // Safety
+        function loadQuote(item) {
+            if (typeof item === 'string') item = JSON.parse(item);
+
+            currentQuoteId = item.id;
+            document.getElementById('quote-id-display').textContent = '#' + (item.displayId || item.id);
 
             custNameInput.value = item.customer;
             custVehicleInput.value = item.vehicle || '';

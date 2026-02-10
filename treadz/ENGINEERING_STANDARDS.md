@@ -36,8 +36,16 @@ To maintain the high level of quality established in the Towing module, all futu
 - Don't just look for "Mount Carmel, TN". Look for *Shop Coordinates* + Radius.
 - If the shop moves, we change one config value (`SHOP_COORDS`), and the whole search logic updates automatically.
 
+## 6. Smart History & Data Consistency (UPSERT)
+**Concept:** When editing existing records, always update the ORIGINAL entry rather than creating duplicates. Preserve the unique identifier.
+**Application:**
+- **Quotes/Receipts:** If a user recalls a quote from history, edits it, and saves, find the original ID and update it in place.
+- **Move to Top:** Updated items should move to the top of history (LRU behavior) but keep their original ID.
+- **Sequential IDs:** Use a shared global counter for transaction IDs to avoid collisions and gaps. Generate IDs only when saving/finalizing to avoid wasting numbers on abandoned drafts.
+
 ---
 ## Implementation Roadmap
 1. **Extract Config:** Move fees, tax rates, and address to `js/treadz-core.js`.
 2. **Standardize Utils:** Move money formatting, date formatting, and geocoding logic to shared utils.
 3. **Refactor Modules:** Update Quote, Receipt, and Towing to use these shared resources.
+4. **Enforce Upsert:** Audit all save functions to ensure they check for existing IDs before creating new ones.

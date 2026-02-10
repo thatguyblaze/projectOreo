@@ -724,6 +724,18 @@
                 }, { passive: false });
             });
 
+            // MAIN QTY Scroll Logic
+            qtyInput.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const delta = e.deltaY < 0 ? 1 : -1;
+                let val = parseInt(qtyInput.value) || 0;
+                val += delta;
+                if (val < 0) val = 0;
+                qtyInput.value = val;
+                qtyInput.dispatchEvent(new Event('input'));
+            }, { passive: false });
+
             renderServicesSidebar();
             renderHistory();
             calculate();
@@ -861,15 +873,34 @@
 
                     row.innerHTML = `
                         <td class="p-0"><input type="number" value="${currentQty}" 
-                            class="w-full h-full text-center outline-none bg-transparent"
-                            oninput="updateServiceRow('${svc.id}', this.value, null)"></td>
+                            class="w-full h-full text-center outline-none bg-transparent service-qty-input"
+                            data-id="${svc.id}"></td>
                         <td class="uppercase text-sm align-middle pl-1">${svc.name}</td>
                         <td class="p-0"><input type="number" value="${currentPrice.toFixed(2)}" 
-                            class="w-full h-full text-right pr-2 outline-none bg-transparent"
-                            step="0.01" oninput="updateServiceRow('${svc.id}', null, this.value)"></td>
+                            class="w-full h-full text-right pr-2 outline-none bg-transparent service-price-input"
+                            step="0.01" data-id="${svc.id}"></td>
                         <td class="no-border-right text-right font-bold align-middle pr-2 row-total">$${total.toFixed(2)}</td>
                     `;
                     dynamicServicesBody.appendChild(row);
+
+                    // Attach Listeners immediately
+                    const qInput = row.querySelector('.service-qty-input');
+                    const pInput = row.querySelector('.service-price-input');
+
+                    qInput.addEventListener('input', (e) => updateServiceRow(svc.id, e.target.value, null));
+                    pInput.addEventListener('input', (e) => updateServiceRow(svc.id, null, e.target.value));
+
+                    // Wheel Listener for Qty
+                    qInput.addEventListener('wheel', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const delta = e.deltaY < 0 ? 1 : -1;
+                        let val = parseInt(qInput.value) || 0;
+                        val += delta;
+                        if (val < 0) val = 0;
+                        qInput.value = val;
+                        qInput.dispatchEvent(new Event('input'));
+                    }, { passive: false });
                 }
             });
         }
