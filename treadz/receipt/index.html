@@ -382,14 +382,22 @@
                                 </tr>
                                 <!-- Fees (Auto Filled) -->
                                 <tr id="row-state-fee">
-                                    <td class="text-center align-middle" id="fee-state-qty"></td>
+                                    <td class="p-0 text-center align-middle">
+                                        <input type="number" id="fee-state-qty-input"
+                                            class="w-full h-full text-center outline-none bg-transparent appearance-none"
+                                            placeholder="0">
+                                    </td>
                                     <td class="uppercase text-sm align-middle" id="fee-state-desc"></td>
                                     <td class="text-right align-middle" id="fee-state-price"></td>
                                     <td class="no-border-right text-right font-bold align-middle pr-2"
                                         id="fee-state-total"></td>
                                 </tr>
                                 <tr id="row-disp-fee">
-                                    <td class="text-center align-middle" id="fee-disp-qty"></td>
+                                    <td class="p-0 text-center align-middle">
+                                        <input type="number" id="fee-disp-qty-input"
+                                            class="w-full h-full text-center outline-none bg-transparent appearance-none"
+                                            placeholder="0">
+                                    </td>
                                     <td class="uppercase text-sm align-middle" id="fee-disp-desc"></td>
                                     <td class="text-right align-middle" id="fee-disp-price"></td>
                                     <td class="no-border-right text-right font-bold align-middle pr-2"
@@ -523,14 +531,17 @@
         const idDisplay = document.getElementById('receipt-id-display');
 
         // Fees
-        const feeStateQty = document.getElementById('fee-state-qty');
+        const feeStateQtyInput = document.getElementById('fee-state-qty-input');
         const feeStateDesc = document.getElementById('fee-state-desc');
         const feeStatePrice = document.getElementById('fee-state-price');
         const feeStateTotal = document.getElementById('fee-state-total');
-        const feeDispQty = document.getElementById('fee-disp-qty');
+        const feeDispQtyInput = document.getElementById('fee-disp-qty-input');
         const feeDispDesc = document.getElementById('fee-disp-desc');
         const feeDispPrice = document.getElementById('fee-disp-price');
         const feeDispTotal = document.getElementById('fee-disp-total');
+
+        let isStateDirty = false;
+        let isDispDirty = false;
 
         // Totals
         const subtotalFinal = document.getElementById('subtotal-final');
@@ -546,7 +557,12 @@
         // --- INIT ---
         function init() {
             dateDisplay.textContent = new Date().toLocaleDateString();
-            if (idDisplay.textContent === '--' || idDisplay.textContent === '') {
+
+            // Only set ID if empty or placeholder
+            const currentIdText = idDisplay.textContent.trim();
+            if (currentIdText === '--' || currentIdText === '') {
+                // Check if we are loading an existing one via URL or other state? 
+                // For now just get next.
                 idDisplay.textContent = getNextReceiptId();
             }
 
@@ -557,9 +573,40 @@
             ['qty-input', 'desc-input', 'price-input', 'cust-name-input', 'cust-vehicle-input'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('input', () => {
+                    // If main qty changes, we might need to sync fees if they are not dirty
                     calculate();
                     triggerAutoSave();
                 });
+            });
+
+            // Fee Input Listeners (Scroll & Edit)
+            [feeStateQtyInput, feeDispQtyInput].forEach(el => {
+                if (!el) return;
+
+                // Track manual changes
+                el.addEventListener('input', () => {
+                    const qty = parseInt(qtyInput.value) || 0;
+                    const val = parseInt(el.value) || 0;
+
+                    // If user manually sets it back to match, cleary dirty flag
+                    if (el === feeStateQtyInput) isStateDirty = (val !== qty);
+                    if (el === feeDispQtyInput) isDispDirty = (val !== qty);
+
+                    calculate();
+                    triggerAutoSave();
+                });
+
+                // Wheel Scroll Logic
+                el.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const delta = e.deltaY < 0 ? 1 : -1;
+                    let val = parseInt(el.value) || 0;
+                    val += delta;
+                    if (val < 0) val = 0;
+                    el.value = val;
+                    el.dispatchEvent(new Event('input'));
+                }, { passive: false });
             });
 
             renderServicesSidebar();
@@ -740,16 +787,21 @@
 
             // 2. Fees
             if (qty > 0 && (descInput.value.length > 0 || price > 0)) {
-                // State Fee
-                const stateTotal = round2(qty * TreadzConfig.FEES.TIRE_STATE);
-                feeStateQty.textContent = qty;
+
+                // --- State Fee ---
+                if (!isStateDirty) feeStateQtyInput.value = qty;
+                const sQty = parseInt(feeStateQtyInput.value) || 0;
+
+                const stateTotal = round2(sQty * TreadzConfig.FEES.TIRE_STATE);
                 feeStateDesc.textContent = 'STATE TIRE FEE';
                 feeStatePrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_STATE);
                 feeStateTotal.textContent = formatMoney(stateTotal);
 
-                // Disposal Fee
-                const dispTotal = round2(qty * TreadzConfig.FEES.TIRE_DISPOSAL);
-                feeDispQty.textContent = qty;
+                // --- Disposal Fee ---
+                if (!isDispDirty) feeDispQtyInput.value = qty;
+                const dQty = parseInt(feeDispQtyInput.value) || 0;
+
+                const dispTotal = round2(dQty * TreadzConfig.FEES.TIRE_DISPOSAL);
                 feeDispDesc.textContent = 'TIRE DISPOSAL';
                 feeDispPrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
                 feeDispTotal.textContent = formatMoney(dispTotal);
@@ -798,8 +850,8 @@
 
 
         function clearFees() {
-            feeStateQty.textContent = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
-            feeDispQty.textContent = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
+            feeStateQtyInput.value = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
+            feeDispQtyInput.value = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
         }
 
         function formatMoney(amount) {
