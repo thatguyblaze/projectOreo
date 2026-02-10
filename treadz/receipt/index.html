@@ -515,94 +515,14 @@
 
         // --- STATE MANAGEMENT ---
         let currentEditingId = null; // Key for existing record
-        let sessionReceiptId = null; // Key for NEW session
         let autoSaveTimeout = null;
 
         // ... (Active Services State map is fine)
         let activeServicesState = {}; // Restored
 
-        // --- HISTORY LOGIC ---
-        function getHistory() {
-            try {
-                return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
-            } catch (e) {
-                console.error("Failed to parse history", e);
-                return [];
-            }
-        }
+        // ... (getHistory and loadQuoteById are skipped here as they are above)
 
-        function loadQuoteById(id) {
-            const history = getHistory();
-            const item = history.find(i => i.id == id);
-            if (item) loadQuote(item);
-        }
-
-        function saveQuote() {
-            const history = getHistory();
-            const now = Date.now();
-
-            // Determine ID
-            let displayIdVal = sessionReceiptId;
-
-            // If editing existing, use its ID (stored in displayId property usually)
-            if (currentEditingId) {
-                const existing = history.find(h => h.id === currentEditingId);
-                if (existing) displayIdVal = existing.displayId;
-            }
-            // New Session?
-            else if (!sessionReceiptId) {
-                // Generate New ID
-                sessionReceiptId = TreadzUtils.incrementGlobalId();
-                displayIdVal = sessionReceiptId;
-                idDisplay.textContent = displayIdVal;
-            }
-
-            const receiptData = {
-                id: currentEditingId || now, // Use timestamp as primary key
-                displayId: displayIdVal,
-                timestamp: new Date().toISOString(),
-                customer: custNameInput.value.trim() || 'Walk-In',
-                vehicle: custVehicleInput.value.trim(),
-                services: activeServicesState, // Store services state
-                description: descInput.value, // Main tire desc
-                tirePrice: parseFloat(priceInput.value),
-                tireQty: parseInt(qtyInput.value),
-                total: totalFinal.textContent
-            };
-
-            // UPSERT
-            if (currentEditingId) {
-                const index = history.findIndex(item => item.id === currentEditingId);
-                if (index !== -1) {
-                    history[index] = { ...history[index], ...receiptData };
-                    // Move to top
-                    const item = history.splice(index, 1)[0];
-                    history.unshift(item);
-                }
-            } else {
-                // New
-                // Check if we just saved this session (id matches)?
-                // Actually `currentEditingId` remaining null meant we kept creating new entries on every autosave?
-                // We should fix that. Once saved, set currentEditingId?
-
-                // If we have a sessionReceiptId, we should try to find if we already saved it in history?
-                // A better approach: Once saved, switch to "editing mode" for this session.
-
-                const existingSessionIndex = history.findIndex(h => h.id === now); // Wait, 'now' changes.
-                // We need to store the 'id' (timestamp) in session too?
-
-                // Let's simplify:
-                // 1. If !currentEditingId, create new record.
-                // 2. Set currentEditingId = newRecord.id
-
-                currentEditingId = receiptData.id;
-                history.unshift(receiptData);
-            }
-
-            if (history.length > 50) history.pop();
-            localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
-            renderHistory();
-        }
+        // ... (saveQuote is skipped here as it was just edited)
 
         function triggerAutoSave() {
             if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
@@ -639,14 +559,79 @@
             renderServiceRows(); // Clears rows
 
             // Reset IDs for new session
-            sessionReceiptId = null;
             currentEditingId = null;
 
             // Preview Next (without incrementing until save)
-            idDisplay.textContent = TreadzUtils.getNextGlobalId();
+            // Stored ID is "Last Used" or "Current High Water Mark"
+            // So next one is +1
+            idDisplay.textContent = TreadzUtils.getNextGlobalId() + 1;
 
             calculate();
         }
+
+        // --- HISTORY LOGIC ---
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
+            } catch (e) {
+                console.error("Failed to parse history", e);
+                return [];
+            }
+        }
+
+        function loadQuoteById(id) {
+            const history = getHistory();
+            const item = history.find(i => i.id == id);
+            if (item) loadQuote(item);
+        }
+
+        function saveQuote() {
+            const history = getHistory();
+
+            // 1. Determine ID
+            // If we are starting fresh (no currentEditingId), we need a new Sequential ID
+            if (!currentEditingId) {
+                // Check if we have a session ID already floating (from previous save that didn't stick? Unlikely with this logic)
+                currentEditingId = TreadzUtils.incrementGlobalId();
+                idDisplay.textContent = currentEditingId;
+            }
+
+            // 2. Build Data Object
+            const receiptData = {
+                id: currentEditingId, // Primary Key is now the Sequential ID
+                displayId: currentEditingId,
+                timestamp: new Date().toISOString(),
+                customer: custNameInput.value.trim() || 'Walk-In',
+                vehicle: custVehicleInput.value.trim(),
+                services: activeServicesState,
+                description: descInput.value,
+                tirePrice: parseFloat(priceInput.value) || 0,
+                tireQty: parseInt(qtyInput.value) || 0,
+                total: totalFinal.textContent
+            };
+
+            // 3. UPSERT Logic
+            const existingIndex = history.findIndex(item => item.id == currentEditingId);
+
+            if (existingIndex !== -1) {
+                // Verify we aren't overwriting a DIFFERENT receipt (unlikely with unique IDs)
+                history[existingIndex] = { ...history[existingIndex], ...receiptData };
+
+                // Move to Top
+                const item = history.splice(existingIndex, 1)[0];
+                history.unshift(item);
+            } else {
+                // New Entry
+                history.unshift(receiptData);
+            }
+
+            // 4. Persistence
+            if (history.length > 50) history.pop();
+            localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
+            renderHistory();
+        }
+
+
 
         // --- DOM ELEMENTS ---
         const qtyInput = document.getElementById('qty-input');
@@ -1051,7 +1036,7 @@
 
         function loadQuote(item) {
             currentEditingId = item.id;
-            sessionReceiptId = null; // Clear any new session ID since we are editing an existing one
+
 
             custNameInput.value = item.customer;
             custVehicleInput.value = item.vehicle;
