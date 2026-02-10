@@ -359,6 +359,9 @@
                                     </div>
                                     <div class="text-xs text-gray-500 uppercase tracking-widest">Tire & Towing Services
                                     </div>
+                                    <div class="text-sm font-bold text-gray-800 mt-1" id="shop-phone-display">
+                                        <!-- JS Injected -->
+                                    </div>
                                 </div>
                                 <div class="text-right">
                                     <h2 class="text-2xl font-bold text-gray-900 mb-1">QUOTE</h2>
@@ -963,6 +966,30 @@
         if (newQuoteBtn) {
             newQuoteBtn.onclick = reset;
         }
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Inject Config
+            const phoneEl = document.getElementById('shop-phone-display');
+            if (phoneEl && TreadzConfig.PHONE_NUMBER) {
+                phoneEl.textContent = TreadzConfig.PHONE_NUMBER;
+            }
+
+            // 2. Set Date
+            const d = new Date();
+            const dateStr = d.toLocaleDateString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+            const printDateEl = document.getElementById('print-date');
+            if (printDateEl) printDateEl.textContent = dateStr;
+
+            // 3. Initial Calc
+            calculate();
+        });
     </script>
 </body>
 

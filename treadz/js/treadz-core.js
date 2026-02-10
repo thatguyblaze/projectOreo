@@ -10,6 +10,7 @@
 const TreadzConfig = {
     // Business Info
     BUSINESS_NAME: "Treadz Tire & Towing",
+    PHONE_NUMBER: "(423) 357-4551", // Verified via Web Search
     // Addresses
     SHOP_ADDRESS: "409 E Main St, Mount Carmel, TN 37645",
     SHOP_COORDS: { lat: 36.5602, lon: -82.6560 }, // Mount Carmel, TN
