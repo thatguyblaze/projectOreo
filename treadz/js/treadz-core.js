@@ -99,6 +99,26 @@ const TreadzUtils = {
                 }
             }
         }, { passive: false });
+    },
+
+    /**
+     * GLOBAL ID SYSTEM (Quotes & Receipts Linked)
+     * Starts at 1000.
+     */
+    getNextGlobalId: () => {
+        const stored = localStorage.getItem('treadzGlobalSequenceId');
+        if (!stored) {
+            localStorage.setItem('treadzGlobalSequenceId', '1000');
+            return 1000;
+        }
+        return parseInt(stored);
+    },
+
+    incrementGlobalId: () => {
+        const current = TreadzUtils.getNextGlobalId();
+        const next = current + 1;
+        localStorage.setItem('treadzGlobalSequenceId', next.toString());
+        return next;
     }
 };
 

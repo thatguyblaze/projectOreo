@@ -514,12 +514,128 @@
         // --- CONSTANTS REMOVED: Using TreadzConfig from treadz-core.js ---
 
         // --- STATE MANAGEMENT ---
-        let currentEditingId = null;
+        let currentEditingId = null; // Key for existing record
+        let sessionReceiptId = null; // Key for NEW session
         let autoSaveTimeout = null;
 
-        // Active State of Services for the CURRENT receipt
-        // Map: serviceId -> { checked: boolean, qty: number, price: number }
-        let activeServicesState = {};
+        // ... (Active Services State map is fine)
+        let activeServicesState = {}; // Restored
+
+        // --- HISTORY LOGIC ---
+        function getHistory() {
+            return JSON.parse(localStorage.getItem('treadzReceiptHistoryV1')) || [];
+        }
+
+        function saveQuote() {
+            const history = getHistory();
+            const now = Date.now();
+
+            // Determine ID
+            let displayIdVal = sessionReceiptId;
+
+            // If editing existing, use its ID (stored in displayId property usually)
+            if (currentEditingId) {
+                const existing = history.find(h => h.id === currentEditingId);
+                if (existing) displayIdVal = existing.displayId;
+            }
+            // New Session?
+            else if (!sessionReceiptId) {
+                // Generate New ID
+                sessionReceiptId = TreadzUtils.incrementGlobalId();
+                displayIdVal = sessionReceiptId;
+                idDisplay.textContent = displayIdVal;
+            }
+
+            const receiptData = {
+                id: currentEditingId || now, // Use timestamp as primary key
+                displayId: displayIdVal,
+                timestamp: new Date().toISOString(),
+                customer: custNameInput.value.trim() || 'Walk-In',
+                vehicle: custVehicleInput.value.trim(),
+                services: activeServicesState, // Store services state
+                description: descInput.value, // Main tire desc
+                tirePrice: parseFloat(priceInput.value),
+                tireQty: parseInt(qtyInput.value),
+                total: totalFinal.textContent
+            };
+
+            // UPSERT
+            if (currentEditingId) {
+                const index = history.findIndex(item => item.id === currentEditingId);
+                if (index !== -1) {
+                    history[index] = { ...history[index], ...receiptData };
+                    // Move to top
+                    const item = history.splice(index, 1)[0];
+                    history.unshift(item);
+                }
+            } else {
+                // New
+                // Check if we just saved this session (id matches)?
+                // Actually `currentEditingId` remaining null meant we kept creating new entries on every autosave?
+                // We should fix that. Once saved, set currentEditingId?
+
+                // If we have a sessionReceiptId, we should try to find if we already saved it in history?
+                // A better approach: Once saved, switch to "editing mode" for this session.
+
+                const existingSessionIndex = history.findIndex(h => h.id === now); // Wait, 'now' changes.
+                // We need to store the 'id' (timestamp) in session too?
+
+                // Let's simplify:
+                // 1. If !currentEditingId, create new record.
+                // 2. Set currentEditingId = newRecord.id
+
+                currentEditingId = receiptData.id;
+                history.unshift(receiptData);
+            }
+
+            if (history.length > 50) history.pop();
+            localStorage.setItem('treadzReceiptHistoryV1', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function triggerAutoSave() {
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveQuote();
+            }, 800);
+        }
+
+        function handlePrint() {
+            saveQuote();
+            window.print();
+        }
+
+        function reset() {
+            if (!confirm("Start new receipt?")) return;
+
+            qtyInput.value = 4;
+            descInput.value = '';
+            priceInput.value = '';
+            custNameInput.value = '';
+            custVehicleInput.value = '';
+
+            // Clear Fees
+            feeStateQtyInput.value = '';
+            feeDispQtyInput.value = '';
+            isStateDirty = false;
+            isDispDirty = false;
+
+            // Clear active services
+            activeServicesState = {};
+
+            // Re-render
+            renderServicesSidebar(); // Unchecks boxes
+            renderServiceRows(); // Clears rows
+
+            // Reset IDs for new session
+            sessionReceiptId = null;
+            currentEditingId = null;
+
+            // Preview Next (without incrementing until save)
+            idDisplay.textContent = TreadzUtils.getNextGlobalId();
+
+            calculate();
+        }
 
         // --- DOM ELEMENTS ---
         const qtyInput = document.getElementById('qty-input');
@@ -561,9 +677,8 @@
             // Only set ID if empty or placeholder
             const currentIdText = idDisplay.textContent.trim();
             if (currentIdText === '--' || currentIdText === '') {
-                // Check if we are loading an existing one via URL or other state? 
-                // For now just get next.
-                idDisplay.textContent = getNextReceiptId();
+                // Preview Next Global ID
+                idDisplay.textContent = TreadzUtils.getNextGlobalId();
             }
 
             // Enable Standard Scroll Behavior
@@ -860,108 +975,7 @@
 
 
         // --- HISTORY LOGIC ---
-        function getNextReceiptId() {
-            const last = parseInt(localStorage.getItem('treadzLastReceiptId')) || 1000;
-            return last + 1;
-        }
 
-        function getHistory() { return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || []; }
-
-        function saveQuote() {
-            const history = getHistory();
-            const now = Date.now();
-
-            // Serialize Active Services
-            const savedServices = [];
-            const config = getServiceConfig();
-            config.forEach(svc => {
-                const state = activeServicesState[svc.id];
-                if (state && state.checked) {
-                    savedServices.push({
-                        id: svc.id,
-                        name: svc.name, // Snapshot name in case config changes later
-                        qty: state.qty,
-                        price: state.price
-                    });
-                }
-            });
-
-            const quoteData = {
-                displayId: idDisplay.textContent,
-                customer: custNameInput.value.trim() || 'Walk-In',
-                vehicle: custVehicleInput.value.trim(),
-                tireInfo: descInput.value.trim(),
-                pricePerTire: parseFloat(priceInput.value) || 0,
-                qty: parseInt(qtyInput.value) || 0,
-                total: totalFinal.textContent,
-                timestamp: new Date().toISOString(),
-                // NEW: Save array of services check
-                services: savedServices
-            };
-
-            // UPSERT Logic
-            if (currentEditingId) {
-                const index = history.findIndex(item => item.id === currentEditingId);
-                if (index !== -1) {
-                    history[index] = { ...history[index], ...quoteData };
-                    const item = history.splice(index, 1)[0];
-                    history.unshift(item);
-                } else {
-                    currentEditingId = now;
-                    history.unshift({ id: now, ...quoteData });
-                }
-            } else {
-                const sameIdIndex = history.findIndex(item => item.displayId === quoteData.displayId);
-                if (sameIdIndex !== -1 && sameIdIndex === 0) {
-                    currentEditingId = history[sameIdIndex].id;
-                    history[sameIdIndex] = { ...history[sameIdIndex], ...quoteData };
-                } else {
-                    currentEditingId = now;
-                    history.unshift({ id: now, ...quoteData });
-                }
-            }
-
-            if (history.length > 50) history.pop();
-            localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
-            renderHistory();
-        }
-
-        function triggerAutoSave() {
-            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
-            autoSaveTimeout = setTimeout(() => {
-                saveQuote();
-            }, 800);
-        }
-
-        function handlePrint() {
-            const currentId = parseInt(idDisplay.textContent);
-            const lastSaved = parseInt(localStorage.getItem('treadzLastReceiptId')) || 1000;
-            if (currentId > lastSaved) {
-                localStorage.setItem('treadzLastReceiptId', currentId);
-            }
-            saveQuote();
-            window.print();
-        }
-
-        function reset() {
-            qtyInput.value = 4;
-            descInput.value = '';
-            priceInput.value = '';
-            custNameInput.value = '';
-            custVehicleInput.value = '';
-
-            // Clear active services
-            activeServicesState = {};
-
-            // Re-render
-            renderServicesSidebar(); // Unchecks boxes
-            renderServiceRows(); // Clears rows
-
-            idDisplay.textContent = getNextReceiptId();
-            currentEditingId = null;
-
-            calculate();
-        }
 
         function renderHistory(filterText = '') {
             const history = getHistory();
@@ -995,6 +1009,7 @@
 
         function loadQuote(item) {
             currentEditingId = item.id;
+            sessionReceiptId = null; // Clear any new session ID since we are editing an existing one
 
             custNameInput.value = item.customer;
             custVehicleInput.value = item.vehicle;
@@ -1013,10 +1028,11 @@
                     const exists = config.some(c => c.id === svc.id);
                     if (exists) {
                         activeServicesState[svc.id] = { checked: true, qty: svc.qty, price: svc.price };
-                    } else {
-                        // Fallback logic here if needed
                     }
                 });
+            } else if (item.services && typeof item.services === 'object') {
+                // New Format (Direct Map)
+                activeServicesState = JSON.parse(JSON.stringify(item.services));
             } else if (item.upsells) {
                 // LEGACY MIGRATION
                 const legacyMap = {
