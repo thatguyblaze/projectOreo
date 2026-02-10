@@ -633,7 +633,19 @@
         let currentQuoteId = null;
 
         function getHistory() {
-            return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
+            try {
+                return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
+            } catch (e) {
+                console.error("Failed to read history", e);
+                return [];
+            }
+        }
+
+        // Safe loader
+        function loadQuoteById(id) {
+            const history = getHistory();
+            const item = history.find(i => i.id == id);
+            if (item) loadQuote(item);
         }
 
         function saveQuote() {
@@ -762,7 +774,7 @@
                                 <td class="py-3 text-right font-bold text-blue-600">${item.total}</td>
                                 <td class="py-3 text-right">
                                     <div class="flex items-center justify-end gap-3">
-                                        <button onclick='loadQuote(${JSON.stringify(item)})' class="text-blue-500 hover:text-blue-700 font-medium text-sm border border-blue-200 hover:border-blue-500 rounded px-3 py-1 bg-blue-50 hover:bg-white transition-all">Recall</button>
+                                        <button onclick="loadQuoteById('${item.id}')" class="text-blue-500 hover:text-blue-700 font-medium text-sm border border-blue-200 hover:border-blue-500 rounded px-3 py-1 bg-blue-50 hover:bg-white transition-all">Recall</button>
                                         <button onclick="deleteQuote(${item.id})" class="text-gray-300 hover:text-red-500 transition-all p-1 opacity-0 group-hover:opacity-100 focus:opacity-100" title="Delete Quote">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M3 6h18"></path>

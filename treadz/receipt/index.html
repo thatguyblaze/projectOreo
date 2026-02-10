@@ -523,7 +523,18 @@
 
         // --- HISTORY LOGIC ---
         function getHistory() {
-            return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
+            try {
+                return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
+            } catch (e) {
+                console.error("Failed to parse history", e);
+                return [];
+            }
+        }
+
+        function loadQuoteById(id) {
+            const history = getHistory();
+            const item = history.find(i => i.id == id);
+            if (item) loadQuote(item);
         }
 
         function saveQuote() {
@@ -1024,7 +1035,7 @@
             });
 
             container.innerHTML = filteredHistory.map(item => `
-                <div onclick='loadQuote(${JSON.stringify(item)})' class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all ${item.id === currentEditingId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
+                <div onclick="loadQuoteById('${item.id}')" class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all ${item.id === currentEditingId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
                     <div class="flex justify-between items-start mb-1">
                         <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3">${item.customer}</div>
                         <div class="text-xs font-mono text-gray-500">${new Date(item.timestamp).toLocaleDateString()}</div>
