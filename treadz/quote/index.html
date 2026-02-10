@@ -914,11 +914,15 @@
 
         // Track Dirty State
         if (stateFeeQtyInput) stateFeeQtyInput.addEventListener('input', () => {
-            isStateDirty = true;
+            const currentQty = parseInt(qtyInput.value) || 0;
+            const feeQty = parseInt(stateFeeQtyInput.value) || 0;
+            isStateDirty = (currentQty !== feeQty);
             calculate();
         });
         if (disposalFeeQtyInput) disposalFeeQtyInput.addEventListener('input', () => {
-            isDisposalDirty = true;
+            const currentQty = parseInt(qtyInput.value) || 0;
+            const feeQty = parseInt(disposalFeeQtyInput.value) || 0;
+            isDisposalDirty = (currentQty !== feeQty);
             calculate();
         });
 
