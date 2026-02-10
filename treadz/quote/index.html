@@ -574,36 +574,45 @@
     </div>
 
     <!-- History Modal -->
-    <div id="history-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
-        style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">
+    <div id="history-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden animate-[fadeIn_0.2s_ease-out]">
         <div
-            class="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col m-4 animate-[fadeIn_0.2s_ease-out]">
-            <div class="p-6 border-b flex flex-col gap-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Quote History</h2>
-                    <button onclick="toggleHistoryModal(false)"
-                        class="text-gray-400 hover:text-red-500 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <input type="text" id="history-search" placeholder="Search by customer, vehicle, tire info..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
-            </div>
-
-            <div class="flex-grow overflow-auto p-6" id="history-list">
-                <!-- Javascript will populate this -->
-            </div>
-            <div class="p-6 border-t bg-gray-50 rounded-b-2xl flex justify-end">
-
+            class="bg-white w-full max-w-4xl h-[80vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-[scaleIn_0.2s_ease-out]">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50/50">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="text-blue-600">
+                        <path d="M12 20v-6M6 20V10M18 20V4" />
+                    </svg>
+                    Quote History
+                </h3>
                 <button onclick="toggleHistoryModal(false)"
-                    class="btn btn-secondary py-2 px-6 rounded-lg">Close</button>
+                    class="p-2 hover:bg-gray-200 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="text-gray-500">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4 bg-gray-50 border-b">
+                <input type="text" id="history-search-input" placeholder="Search customer, vehicle, tire size..."
+                    oninput="renderHistory(this.value)"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+            <div id="history-list-container" class="flex-grow overflow-y-auto p-4 bg-gray-50">
+                <!-- History Items Injected Here -->
+            </div>
+            <div class="p-4 border-t bg-gray-50 text-right">
+                <button onclick="toggleHistoryModal(false)"
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors">Close</button>
             </div>
         </div>
     </div>
+
+
 
     <script src="../js/treadz-core.js"></script>
     <script>
@@ -615,11 +624,12 @@
         const tireInfoContainer = document.getElementById('tire-info-container');
         const custNameInput = document.getElementById('cust-name');
         const custVehicleInput = document.getElementById('cust-vehicle');
-        const historySearchInput = document.getElementById('history-search');
 
         // Fee Inputs (New QTY based)
         const stateFeeQtyInput = document.getElementById('state-fee-qty');
         const disposalFeeQtyInput = document.getElementById('disposal-fee-qty');
+        const historySearchInput = document.getElementById('history-search-input');
+        const historyListContainer = document.getElementById('history-list-container');
 
         // Dirty Flags (to track if user manually overrode the fee qty)
         let isStateDirty = false;

@@ -604,9 +604,9 @@
                 customer: custNameInput.value.trim() || 'Walk-In',
                 vehicle: custVehicleInput.value.trim(),
                 services: activeServicesState,
-                description: descInput.value,
-                tirePrice: parseFloat(priceInput.value) || 0,
-                tireQty: parseInt(qtyInput.value) || 0,
+                tireInfo: descInput.value, // Changed from description
+                pricePerTire: parseFloat(priceInput.value) || 0, // Changed from tirePrice
+                qty: parseInt(qtyInput.value) || 0, // Changed from tireQty
                 total: totalFinal.textContent
             };
 
@@ -1025,7 +1025,7 @@
                         <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3">${item.customer}</div>
                         <div class="text-xs font-mono text-gray-500">${new Date(item.timestamp).toLocaleDateString()}</div>
                     </div>
-                    <div class="text-xs text-gray-600 truncate mb-1">${item.tireInfo || 'Item'}</div>
+                    <div class="text-xs text-gray-600 truncate mb-1">${item.tireInfo || item.description || 'Item'}</div>
                     <div class="flex justify-between items-center mt-1">
                         <div class="font-bold text-blue-600 text-sm">${item.total}</div>
                         <div class="text-xs text-gray-400">#${item.displayId || '---'}</div>
@@ -1037,12 +1037,11 @@
         function loadQuote(item) {
             currentEditingId = item.id;
 
-
             custNameInput.value = item.customer;
             custVehicleInput.value = item.vehicle;
-            descInput.value = item.tireInfo;
-            priceInput.value = item.pricePerTire;
-            qtyInput.value = item.qty;
+            descInput.value = item.tireInfo || item.description || '';
+            priceInput.value = item.pricePerTire || item.tirePrice || '';
+            qtyInput.value = item.qty || item.tireQty || 0;
             idDisplay.textContent = item.displayId || '---';
 
             activeServicesState = {};
