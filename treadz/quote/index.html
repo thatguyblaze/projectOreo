@@ -772,20 +772,24 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        ${filteredHistory.map(item => `
+                        ${filteredHistory.map(item => {
+                const price = parseFloat(item.pricePerTire);
+                const safePrice = isNaN(price) ? 0 : price;
+                const qty = parseInt(item.qty) || 0;
+                return `
                             <tr class="hover:bg-gray-50 group transition-colors">
                                 <td class="py-3 text-gray-500 text-sm whitespace-nowrap">${new Date(item.timestamp).toLocaleDateString()} ${new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                                 <td class="py-3 font-semibold text-gray-800">${item.customer}</td>
                                 <td class="py-3 text-gray-600 text-sm">${item.vehicle || '-'}</td>
                                 <td class="py-3 text-gray-800 text-sm">
                                     <div class="font-medium">${item.tireInfo || 'Unknown Tire'}</div>
-                                    <div class="text-xs text-gray-400">${item.qty} x $${item.pricePerTire.toFixed(2)}</div>
+                                    <div class="text-xs text-gray-400">${qty} x $${safePrice.toFixed(2)}</div>
                                 </td>
                                 <td class="py-3 text-right font-bold text-blue-600">${item.total}</td>
                                 <td class="py-3 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <button onclick="loadQuoteById('${item.id}')" class="text-blue-500 hover:text-blue-700 font-medium text-sm border border-blue-200 hover:border-blue-500 rounded px-3 py-1 bg-blue-50 hover:bg-white transition-all">Recall</button>
-                                        <button onclick="deleteQuote(${item.id})" class="text-gray-300 hover:text-red-500 transition-all p-1 opacity-0 group-hover:opacity-100 focus:opacity-100" title="Delete Quote">
+                                        <button onclick="deleteQuote('${item.id}')" class="text-gray-300 hover:text-red-500 transition-all p-1 opacity-0 group-hover:opacity-100 focus:opacity-100" title="Delete Quote">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M3 6h18"></path>
                                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -795,7 +799,7 @@
                                     </div>
                                 </td>
                             </tr>
-                        `).join('')}
+                        `}).join('')}
                     </tbody>
                 </table>
             `;
@@ -820,15 +824,15 @@
             currentQuoteId = item.id;
             document.getElementById('quote-id-display').textContent = '#' + (item.displayId || item.id);
 
-            custNameInput.value = item.customer;
+            custNameInput.value = item.customer || '';
             custVehicleInput.value = item.vehicle || '';
             tireInfoInput.value = item.tireInfo || '';
-            priceInput.value = item.pricePerTire;
-            qtyInput.value = item.qty;
+            priceInput.value = item.pricePerTire !== undefined ? item.pricePerTire : '';
+            qtyInput.value = item.qty !== undefined ? item.qty : 4;
 
             // Assume fees sync to tire qty on load (simple)
-            stateFeeQtyInput.value = item.qty;
-            disposalFeeQtyInput.value = item.qty;
+            stateFeeQtyInput.value = item.qty !== undefined ? item.qty : 4;
+            disposalFeeQtyInput.value = item.qty !== undefined ? item.qty : 4;
             isStateDirty = false;
             isDisposalDirty = false;
 
@@ -840,7 +844,7 @@
 
         function deleteQuote(id) {
             if (confirm('Are you sure you want to delete this quote entry?')) {
-                const history = getHistory().filter(item => item.id !== id);
+                const history = getHistory().filter(item => item.id != id);
                 localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
                 const currentSearch = historySearchInput ? historySearchInput.value : '';
                 renderHistory(currentSearch);
