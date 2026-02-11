@@ -453,11 +453,17 @@
                                     <td class="amount border-r-0 border-b-2" id="tax-final">$0.00</td>
                                 </tr>
                                 <tr>
-                                    <td class="label border-l-0 border-b-0">TOTAL</td>
-                                    <td class="amount border-r-0 border-b-0 text-2xl" id="total-final">$0.00</td>
+                                    <td class="label border-l-0 border-b-2">TOTAL</td>
+                                    <td class="amount border-r-0 border-b-2 text-2xl" id="total-final">$0.00</td>
+                                </tr>
+                                <!-- Added Card Total Row for Print Visibility -->
+                                <tr class="hidden print:table-row">
+                                    <td class="label border-l-0 border-b-0 pb-0 pt-2 text-xs">CARD TOTAL</td>
+                                    <td class="amount border-r-0 border-b-0 pb-0 pt-2 text-lg" id="card-total-print">
+                                        $0.00</td>
                                 </tr>
                             </table>
-                            <!-- Card Logic Hidden Calculation -->
+                            <!-- Card Logic Hidden Calculation (Screen Only) -->
                             <div id="card-total-preview-container"
                                 class="border-t-2 border-black p-1 text-right text-xs bg-gray-50 print:hidden text-gray-500">
                                 Card Total (+3.5%): <span id="card-total-preview" class="font-bold">$0.00</span>
@@ -501,12 +507,13 @@
                 <div class="p-6 border-b border-gray-200">
                     <h3 class="font-bold text-lg text-gray-800 font-sans">Services Performed</h3>
                     <p class="text-xs text-gray-500 mt-1 font-sans">Check to add line items.</p>
-                    <div class="mt-3 flex items-center">
+                    <label
+                        class="mt-3 flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all group">
+                        <span class="text-sm font-medium text-gray-700 font-sans group-hover:text-blue-700">Tax
+                            Exempt</span>
                         <input type="checkbox" id="tax-exempt-checkbox" onchange="calculate()"
-                            class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                        <label for="tax-exempt-checkbox" class="ml-2 text-sm font-medium text-gray-700 font-sans">Tax
-                            Exempt</label>
-                    </div>
+                            class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                    </label>
                 </div>
                 <div class="p-6 space-y-4 overflow-y-auto flex-grow font-sans pb-24" id="services-list-container">
                     <!-- Dynamic Services will be injected here -->
@@ -996,6 +1003,9 @@
             const cardTotal = round2(total + (total * TreadzConfig.CARD_FEE_RATE));
             // Show Card Total Logic just for preview
             cardTotalPreview.textContent = formatMoney(cardTotal);
+            // Update Print Version
+            const cardPrintEl = document.getElementById('card-total-print');
+            if (cardPrintEl) cardPrintEl.textContent = formatMoney(cardTotal);
 
             subtotalFinal.textContent = formatMoney(currentSubtotal);
             taxFinal.textContent = formatMoney(tax);
@@ -1032,7 +1042,7 @@
             });
 
             container.innerHTML = filteredHistory.map(item => {
-                const displayId = (item.displayId && item.displayId.toString().length > 5) ? 'HIST' : (item.displayId || '---');
+                const displayId = (item.displayId && item.displayId.toString().length > 5) ? item.displayId.toString().slice(-4) : (item.displayId || '---');
                 return `
                 <div onclick="loadQuoteById('${item.id}')" class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all ${item.id === currentEditingId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
                     <div class="flex justify-between items-start mb-1">
@@ -1059,7 +1069,7 @@
             priceInput.value = item.pricePerTire || item.tirePrice || '';
             qtyInput.value = item.qty || item.tireQty || 0;
 
-            const displayId = (item.displayId && item.displayId.toString().length > 5) ? 'HIST' : (item.displayId || '---');
+            const displayId = (item.displayId && item.displayId.toString().length > 5) ? item.displayId.toString().slice(-4) : (item.displayId || '---');
             idDisplay.textContent = displayId;
 
             activeServicesState = {};
