@@ -544,8 +544,7 @@
                             <button class="toggle-btn" onclick="toggleBtn(this)" data-group="agency"
                                 data-value="Other">Other</button>
                         </div>
-                        <input type="text" id="other-agency-input" class="form-input mt-2 hidden"
-                            placeholder="Specify Agency...">
+                        <input type="text" id="other-agency-input" class="form-input mt-2 hidden" placeholder="Specify">
                     </div>
 
                     <!-- Damage Toggles -->
@@ -897,6 +896,8 @@
                     feeMileage: document.getElementById('tt-fee-mileage').value,
                     feeGate: document.getElementById('tt-fee-gate').value,
                     feeMisc: document.getElementById('tt-fee-misc').value,
+                    agency: document.querySelector('.toggle-btn[data-group="agency"].active')?.dataset.value,
+                    otherAgency: document.getElementById('other-agency-input').value,
                     storeRate: document.querySelector('.toggle-btn[data-group="store-rate"].active')?.dataset.value || 45,
                     storeStart: document.getElementById('tt-store-start').value,
                     storeEnd: document.getElementById('tt-store-end').value,
@@ -905,6 +906,12 @@
                     driver: document.getElementById('tt-driver').value
                 }
             };
+
+
+
+            // Validation: Don't save empty tickets (Must have Customer, Vehicle, or VIN)
+            const hasContent = ticketData.billTo || ticketData.vehicle.trim() || ticketData.vin;
+            if (!hasContent) return;
 
             // Upsert
             const index = history.findIndex(t => t.id === id);
@@ -969,6 +976,23 @@
                     b.classList.remove('active');
                     if (b.dataset.value == rate) b.classList.add('active');
                 });
+
+                // Restore Agency
+                const ag = f.agency;
+                if (ag) {
+                    document.querySelectorAll('.toggle-btn[data-group="agency"]').forEach(b => {
+                        b.classList.remove('active');
+                        if (b.dataset.value === ag) b.classList.add('active');
+                    });
+                    if (ag === 'Other') {
+                        const oa = document.getElementById('other-agency-input');
+                        oa.classList.remove('hidden');
+                        oa.value = f.otherAgency || '';
+                    } else {
+                        document.getElementById('other-agency-input').classList.add('hidden');
+                        document.getElementById('other-agency-input').value = '';
+                    }
+                }
             }
 
             currentTicketId = id;
@@ -1080,7 +1104,12 @@
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
                         <span class="font-bold text-gray-800 text-sm">#${t.id}</span>
-                        <span class="text-xs text-gray-500">${t.date}</span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="deleteTicket('${t.id}', event)" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50" title="Delete Ticket">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                            <span class="text-xs text-gray-500">${t.date}</span>
+                        </div>
                     </div>
                     <div class="text-xs font-bold text-gray-700 truncate mt-1">${t.billTo || 'Unknown Customer'}</div>
                     <div class="text-xs text-gray-500 truncate">${t.vehicle || 'Vehicle Info'}</div>
@@ -1094,6 +1123,18 @@
                 `;
                 list.appendChild(div);
             });
+        }
+
+        function deleteTicket(id, e) {
+            if (e) e.stopPropagation();
+            if (!confirm('Are you sure you want to delete Ticket #' + id + '?')) return;
+
+            let history = getHistory();
+            history = history.filter(t => String(t.id) !== String(id));
+            localStorage.setItem('treadzTowHistoryV1', JSON.stringify(history));
+
+            const searchVal = document.querySelector('input[placeholder="Search..."]')?.value || '';
+            renderHistory(searchVal);
         }
 
         function toggleSidebar() {
@@ -1168,8 +1209,12 @@
                 const end = endVal ? new Date(endVal) : new Date();
 
                 // Diff in milliseconds
+                // Diff in milliseconds
                 const diffTime = Math.abs(end - start);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                // First 24 hours free logic required by state
+                diffDays = diffDays - 1;
 
                 document.getElementById('tt-store-days').value = diffDays > 0 ? diffDays : 0;
                 calcTicketTotal();
@@ -1601,19 +1646,27 @@
         <!-- SECTION 3: VEHICLE -->
         <div class="mb-4">
             <h3 class="font-bold text-sm uppercase border-b border-black mb-2 pb-1">Vehicle Information</h3>
-            <div class="grid grid-cols-4 gap-y-1 gap-x-4 text-xs">
-                <div class="font-bold text-gray-600">Make/Model:</div>
-                <div id="pv-vehicle" class="font-bold"></div>
-                <div class="font-bold text-gray-600">Color:</div>
-                <div id="pv-color"></div>
-
-                <div class="font-bold text-gray-600">VIN:</div>
-                <div id="pv-vin" class="font-mono text-sm col-span-2"></div> <!-- Span 2 if long -->
-                <div class="font-bold text-gray-600">Tag:</div>
-                <div id="pv-tag"></div>
-
-                <div class="font-bold text-gray-600">Mileage:</div>
-                <div id="pv-mileage"></div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.75rem;">
+                <div>
+                    <span class="font-bold text-gray-600 block text-[10px] uppercase">Make/Model</span>
+                    <span id="pv-vehicle" class="font-bold"></span>
+                </div>
+                <div>
+                    <span class="font-bold text-gray-600 block text-[10px] uppercase">Color</span>
+                    <span id="pv-color"></span>
+                </div>
+                <div>
+                    <span class="font-bold text-gray-600 block text-[10px] uppercase">VIN</span>
+                    <span id="pv-vin" class="font-mono text-xs"></span>
+                </div>
+                <div>
+                    <span class="font-bold text-gray-600 block text-[10px] uppercase">Tag</span>
+                    <span id="pv-tag"></span>
+                </div>
+                <div>
+                    <span class="font-bold text-gray-600 block text-[10px] uppercase">Mileage</span>
+                    <span id="pv-mileage"></span>
+                </div>
             </div>
         </div>
 
