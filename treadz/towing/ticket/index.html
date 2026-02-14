@@ -251,41 +251,37 @@
             }
         }
 
-        /* SEPARATE PRINT VIEW STRATEGY */
+        /* SEPARATE PRINT VIEW STRATEGY - UPDATED */
         @media print {
             @page {
                 size: A4;
-                margin: 0.5in;
+                margin: 0.25in;
             }
 
-            /* Hide the main app wrapper and everything else */
             body>*:not(#print-view) {
                 display: none !important;
             }
 
-            /* Show the print view */
             #print-view {
                 display: block !important;
                 background: white;
-                width: 100%;
-                font-size: 11px;
+                min-height: 100vh;
+                font-size: 14px;
+                line-height: 1.5;
                 color: black;
-                font-family: sans-serif;
-                position: absolute;
-                top: 0;
-                left: 0;
+                font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                padding: 2rem !important;
             }
 
-            /* Reset body */
             body {
                 background: white !important;
-                padding: 0 !important;
                 margin: 0 !important;
-                height: 100% !important;
+                padding: 0 !important;
+                height: auto !important;
                 overflow: visible !important;
             }
 
-            /* Helpers */
+            /* Utils */
             .flex {
                 display: flex !important;
             }
@@ -298,66 +294,66 @@
                 display: none !important;
             }
 
-            .font-bold {
-                font-weight: bold !important;
-            }
-
-            .uppercase {
-                text-transform: uppercase !important;
-            }
-
-            .text-right {
-                text-align: right !important;
-            }
-
-            .text-center {
-                text-align: center !important;
-            }
-
-            /* Typography */
+            /* Typography Scale */
             h1 {
-                font-size: 18px !important;
-                margin-bottom: 5px;
+                font-size: 28px !important;
+                margin-bottom: 0.5rem;
             }
 
-            .text-xs {
-                font-size: 10px !important;
+            h2 {
+                font-size: 22px !important;
+                margin-bottom: 0.5rem;
+            }
+
+            h3 {
+                font-size: 18px !important;
+                margin-bottom: 0.5rem;
+            }
+
+            .text-xl {
+                font-size: 20px !important;
+            }
+
+            .text-lg {
+                font-size: 18px !important;
+            }
+
+            .text-base {
+                font-size: 16px !important;
             }
 
             .text-sm {
-                font-size: 11px !important;
+                font-size: 14px !important;
             }
 
-            /* Table styling */
+            /* Tables */
             table {
                 width: 100%;
                 border-collapse: collapse;
-            }
-
-            th,
-            td {
-                padding: 4px;
-                border-bottom: 1px solid #ddd;
+                margin-bottom: 2rem;
             }
 
             th {
                 border-bottom: 2px solid #000;
+                padding: 10px 4px;
+                text-align: left;
+                font-weight: bold;
+                font-size: 15px;
             }
 
-            .font-mono {
-                font-family: monospace !important;
+            td {
+                border-bottom: 1px solid #ddd;
+                padding: 10px 4px;
+                font-size: 15px;
             }
 
-            /* Images */
-            img {
-                max-height: 50px !important;
-            }
-
-            /* Signatures */
             .font-signature {
                 font-family: 'Dancing Script', cursive !important;
+                font-size: 2.5rem !important;
             }
         }
+
+
 
         /* Screen Styles for Print View */
         #print-view {
@@ -1635,111 +1631,112 @@
     </script>
     <!-- Print View Container -->
     <div id="print-view">
-        <!-- Compact Header -->
-        <div class="flex justify-between items-start mb-4 border-b pb-2">
-            <img src="../../images/logo.png" class="h-12 object-contain" alt="Treadz">
+        <!-- Header -->
+        <div class="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
+            <img src="../../images/logo.png" class="h-20 object-contain" alt="Treadz">
             <div class="text-right">
-                <h1 class="text-xl font-bold uppercase tracking-wide">TOWING INVOICE</h1>
-                <div class="text-sm text-gray-600 font-bold">Ticket #: <span id="pv-ticket-id"></span></div>
-                <div class="text-sm text-gray-600">Date: <span id="pv-date"></span></div>
+                <h1 class="font-black uppercase tracking-wide text-3xl">TOWING INVOICE</h1>
+                <div class="text-lg text-gray-600 font-bold">Ticket #: <span id="pv-ticket-id"></span></div>
+                <div class="text-lg text-gray-600">Date: <span id="pv-date"></span></div>
             </div>
         </div>
 
-        <!-- Bill To / Info Grid -->
-        <div class="grid grid-cols-2 gap-8 mb-6 text-xs">
-            <!-- Left Col -->
-            <div>
-                <div class="mb-4">
-                    <div class="font-bold text-gray-500 uppercase mb-1 border-b text-[10px]">Bill To</div>
-                    <div id="pv-bill-to" class="font-bold text-base"></div>
-                    <div id="pv-address"></div>
-                    <div id="pv-phone"></div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <div class="font-bold text-gray-500 uppercase border-b text-[10px]">Picked Up At</div>
-                        <div id="pv-location" class="font-bold mt-1"></div>
-                    </div>
-                    <div>
-                        <div class="font-bold text-gray-500 uppercase border-b text-[10px]">Delivered To</div>
-                        <div id="pv-delivered" class="font-bold mt-1"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Col -->
-            <div>
-                <div class="font-bold text-gray-500 uppercase mb-1 border-b text-[10px]">Vehicle Information</div>
-                <div class="grid grid-cols-2 gap-y-1 gap-x-2">
-                    <div class="text-gray-500">Make/Model:</div>
-                    <div id="pv-vehicle" class="font-bold"></div>
-                    <div class="text-gray-500">Color:</div>
-                    <div id="pv-color"></div>
-                    <div class="text-gray-500">VIN:</div>
-                    <div id="pv-vin" class="font-mono"></div>
-                    <div class="text-gray-500">Tag:</div>
-                    <div id="pv-tag"></div>
-                    <div class="text-gray-500">Mileage:</div>
-                    <div id="pv-mileage"></div>
-                </div>
+        <!-- SECTION 1: CUSTOMER -->
+        <div class="mb-8">
+            <h3 class="font-bold text-lg uppercase border-b-2 border-gray-800 mb-4 pb-1">Customer Information</h3>
+            <div class="grid grid-cols-1 gap-2">
+                <div class="text-xl font-bold" id="pv-bill-to"></div>
+                <div class="text-lg" id="pv-address"></div>
+                <div class="text-lg" id="pv-phone"></div>
             </div>
         </div>
 
-        <!-- Charges Table -->
-        <div class="mb-6">
-            <div class="font-bold text-gray-500 uppercase mb-1 border-b text-[10px]">Fees & Charges</div>
-            <table class="w-full text-xs">
+        <!-- SECTION 2: LOCATIONS -->
+        <div class="mb-8 grid grid-cols-2 gap-8">
+            <div>
+                <div class="font-bold text-gray-500 uppercase border-b mb-1 text-sm">Picked Up At</div>
+                <div id="pv-location" class="font-bold text-lg mt-1"></div>
+            </div>
+            <div>
+                <div class="font-bold text-gray-500 uppercase border-b mb-1 text-sm">Delivered To</div>
+                <div id="pv-delivered" class="font-bold text-lg mt-1"></div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: VEHICLE -->
+        <div class="mb-8">
+            <h3 class="font-bold text-lg uppercase border-b-2 border-gray-800 mb-4 pb-1">Vehicle Information</h3>
+            <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-base">
+                <div class="text-gray-600 font-medium">Make/Model:</div>
+                <div id="pv-vehicle" class="font-bold"></div>
+                <div class="text-gray-600 font-medium">Color:</div>
+                <div id="pv-color"></div>
+                <div class="text-gray-600 font-medium">VIN:</div>
+                <div id="pv-vin" class="font-mono text-lg"></div>
+                <div class="text-gray-600 font-medium">Tag:</div>
+                <div id="pv-tag"></div>
+                <div class="text-gray-600 font-medium">Mileage:</div>
+                <div id="pv-mileage"></div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: CHARGES -->
+        <div class="mb-8">
+            <h3 class="font-bold text-lg uppercase border-b-2 border-gray-800 mb-4 pb-1">Fees & Charges</h3>
+            <table class="w-full text-base">
                 <thead>
-                    <tr class="text-gray-500">
-                        <th class="text-left font-normal py-1">Description</th>
-                        <th class="text-right font-normal py-1 w-32">Amount</th>
+                    <tr class="text-gray-600">
+                        <th class="text-left py-2">Description</th>
+                        <th class="text-right py-2 w-48">Amount</th>
                     </tr>
                 </thead>
                 <tbody id="pv-charges-body">
                     <!-- Dynamic Rows -->
                 </tbody>
-                <tfoot class="border-t-2 border-black">
+                <tfoot class="border-t-4 border-black">
                     <tr>
-                        <td class="text-right py-2 font-bold text-sm">TOTAL DUE:</td>
-                        <td class="text-right py-2 font-black text-lg" id="pv-total-due">$0.00</td>
+                        <td class="text-right py-4 font-bold text-xl">TOTAL DUE:</td>
+                        <td class="text-right py-4 font-black text-2xl" id="pv-total-due">$0.00</td>
                     </tr>
                 </tfoot>
             </table>
         </div>
 
         <!-- Notes -->
-        <div class="mb-8 border p-2 rounded bg-gray-50 text-xs">
-            <span class="font-bold uppercase text-[10px] text-gray-500 block mb-1">Notes</span>
-            <div id="pv-notes" class="italic"></div>
+        <div class="mb-10 border-2 border-gray-200 p-4 rounded bg-gray-50">
+            <span class="font-bold uppercase text-sm text-gray-500 block mb-2">Notes</span>
+            <div id="pv-notes" class="italic text-base"></div>
         </div>
 
         <!-- Disclaimer -->
-        <div class="text-[9px] text-gray-500 text-justify mb-8 leading-tight">
+        <div class="text-xs text-gray-500 text-justify mb-12 leading-normal">
             I have removed all personal belongings from my vehicle and hold No one responsible for lost or
             stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
             winching vehicle.
         </div>
 
         <!-- Signatures -->
-        <div class="grid grid-cols-2 gap-12 text-xs">
-            <div>
-                <div class="border-b border-black mb-1 h-12 flex items-end justify-center relative">
-                    <img id="pv-sig-img" class="h-12 hidden object-contain">
+        <div class="gap-12 text-base">
+            <div class="mb-8">
+                <div class="border-b-2 border-black mb-2 h-16 flex items-end justify-start relative w-1/2">
+                    <img id="pv-sig-img" class="h-16 hidden object-contain">
                     <div id="pv-sig-line" class="absolute bottom-0 w-full hidden"></div>
                 </div>
-                <div class="text-center font-bold uppercase">Customer Signature</div>
-                <div class="text-[9px] text-gray-400 text-center mt-1">
+                <div class="font-bold uppercase">Customer Signature</div>
+                <div class="text-xs text-gray-400 mt-1">
                     I agree to the terms and authorize services.
                 </div>
             </div>
             <div>
-                <div class="border-b border-black mb-1 h-12 flex items-end justify-center font-signature text-2xl"
+                <div class="border-b-2 border-black mb-2 h-16 flex items-end justify-start font-signature text-3xl w-1/2"
                     id="pv-driver-sig"></div>
-                <div class="text-center font-bold uppercase">Driver</div>
+                <div class="font-bold uppercase">Driver</div>
             </div>
         </div>
     </div>
+    </div>
+
+
 </body>
 
 </html>
