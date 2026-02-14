@@ -277,8 +277,13 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div class="col-span-2">
                             <label class="form-label">Address</label>
-                            <input type="text" id="tt-address" class="form-input mb-2">
-                            <input type="text" id="tt-address-2" class="form-input" placeholder="City, State, Zip">
+                            <div class="relative">
+                                <input type="text" id="tt-address" class="form-input"
+                                    placeholder="Start typing address..." autocomplete="off">
+                                <ul id="address-suggestions"
+                                    class="absolute left-0 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto top-full mt-1">
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -304,11 +309,58 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div class="col-span-2">
                         <label class="form-label">Pickup Location</label>
-                        <input type="text" id="tt-location" class="form-input">
+                        <div class="relative">
+                            <input type="text" id="tt-location" class="form-input"
+                                placeholder="Start typing location..." autocomplete="off">
+                            <ul id="location-suggestions"
+                                class="absolute left-0 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto top-full mt-1">
+                            </ul>
+                        </div>
                     </div>
-                    <div class="col-span-2">
-                        <label class="form-label">Make & Model</label>
-                        <input type="text" id="tt-make-model" class="form-input">
+                    <div class="col-span-2 grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="form-label">Make</label>
+                            <select id="tt-make" class="form-input appearance-none" onchange="updateMakeModel()">
+                                <option value="">Select Make</option>
+                                <option value="Acura">Acura</option>
+                                <option value="Audi">Audi</option>
+                                <option value="BMW">BMW</option>
+                                <option value="Buick">Buick</option>
+                                <option value="Cadillac">Cadillac</option>
+                                <option value="Chevrolet">Chevrolet</option>
+                                <option value="Chrysler">Chrysler</option>
+                                <option value="Dodge">Dodge</option>
+                                <option value="Ford">Ford</option>
+                                <option value="GMC">GMC</option>
+                                <option value="Honda">Honda</option>
+                                <option value="Hyundai">Hyundai</option>
+                                <option value="Infiniti">Infiniti</option>
+                                <option value="Jeep">Jeep</option>
+                                <option value="Kia">Kia</option>
+                                <option value="Lexus">Lexus</option>
+                                <option value="Lincoln">Lincoln</option>
+                                <option value="Mazda">Mazda</option>
+                                <option value="Mercedes-Benz">Mercedes-Benz</option>
+                                <option value="Mercury">Mercury</option>
+                                <option value="Mini">Mini</option>
+                                <option value="Mitsubishi">Mitsubishi</option>
+                                <option value="Nissan">Nissan</option>
+                                <option value="Pontiac">Pontiac</option>
+                                <option value="Ram">Ram</option>
+                                <option value="Subaru">Subaru</option>
+                                <option value="Tesla">Tesla</option>
+                                <option value="Toyota">Toyota</option>
+                                <option value="Volkswagen">Volkswagen</option>
+                                <option value="Volvo">Volvo</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Model</label>
+                            <input type="text" id="tt-model" class="form-input" placeholder="Model"
+                                oninput="updateMakeModel()">
+                        </div>
+                        <input type="hidden" id="tt-make-model">
                     </div>
                     <div>
                         <label class="form-label">Tag Number</label>
@@ -316,7 +368,23 @@
                     </div>
                     <div>
                         <label class="form-label">Color</label>
-                        <input type="text" id="tt-color" class="form-input">
+                        <select id="tt-color" class="form-input appearance-none">
+                            <option value="">Select...</option>
+                            <option value="Black">Black</option>
+                            <option value="White">White</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gray">Gray</option>
+                            <option value="Red">Red</option>
+                            <option value="Blue">Blue</option>
+                            <option value="Brown">Brown</option>
+                            <option value="Green">Green</option>
+                            <option value="Beige">Beige</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Orange">Orange</option>
+                            <option value="Yellow">Yellow</option>
+                            <option value="Purple">Purple</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                     <div>
                         <label class="form-label">Mileage</label>
@@ -439,7 +507,7 @@
                             <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
                                     value="40" onchange="calcTicketTotal()" class="accent-blue-600"> $40</label>
                             <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
-                                    value="45" onchange="calcTicketTotal()" class="accent-blue-600"> $45</label>
+                                    value="45" onchange="calcTicketTotal()" class="accent-blue-600" checked> $45</label>
                         </div>
                         <div class="flex items-center gap-1">
                             <input type="number" id="tt-store-days"
@@ -456,9 +524,13 @@
                         <span class="text-sm font-medium text-gray-500">Tow Total</span>
                         <span id="display-tow-total" class="font-bold text-gray-800">$0.00</span>
                     </div>
-                    <div class="flex justify-between items-end mb-2">
+                    <div class="flex justify-between items-end mb-1">
                         <span class="text-sm font-medium text-gray-500">Storage Total</span>
-                        <span id="display-store-total" class="font-bold text-gray-800">$0.00</span>
+                        <span id="display-store-subtotal" class="font-bold text-gray-800">$0.00</span>
+                    </div>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-xs font-medium text-gray-400">Storage Tax (3.5%)</span>
+                        <span id="display-store-tax" class="font-bold text-gray-600">$0.00</span>
                         <input type="hidden" id="tt-total-storage">
                     </div>
                     <div class="flex justify-between items-end mt-4 pt-4 border-t border-gray-200">
@@ -581,15 +653,19 @@
 
             document.getElementById('display-tow-total').innerText = '$' + towTotal.toFixed(2);
 
+
             // Storage
             let storeRate = 0;
             const rateEls = document.getElementsByName('store-rate');
             for (let el of rateEls) { if (el.checked) storeRate = parseFloat(el.value); }
 
             const days = parseFloat(document.getElementById('tt-store-days').value) || 0;
-            const storeTotal = storeRate * days;
+            const storeSubtotal = storeRate * days;
+            const storeTax = storeSubtotal * 0.035;
+            const storeTotal = storeSubtotal + storeTax;
 
-            document.getElementById('display-store-total').innerText = '$' + storeTotal.toFixed(2);
+            document.getElementById('display-store-subtotal').innerText = '$' + storeSubtotal.toFixed(2);
+            document.getElementById('display-store-tax').innerText = '$' + storeTax.toFixed(2);
             document.getElementById('tt-total-storage').value = storeTotal.toFixed(2);
 
             const total = towTotal + storeTotal;
@@ -615,6 +691,77 @@
             // Temporary styles for PDF generation if needed
             html2pdf().set(opt).from(element).save();
         }
+
+        // --- Autocomplete Logic ---
+        function updateMakeModel() {
+            const make = document.getElementById('tt-make').value;
+            const model = document.getElementById('tt-model').value;
+            document.getElementById('tt-make-model').value = (make + ' ' + model).trim();
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        async function fetchSuggestions(text) {
+            const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=${encodeURIComponent(text)}&f=json&maxSuggestions=5`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.suggestions || [];
+            } catch (e) {
+                console.error("Autocomplete error:", e);
+                return [];
+            }
+        }
+
+        function setupAutocomplete(inputId, containerId) {
+            const input = document.getElementById(inputId);
+            const container = document.getElementById(containerId);
+
+            const handleInput = debounce(async (e) => {
+                const text = e.target.value;
+                if (!text || text.length < 3) {
+                    container.classList.add('hidden');
+                    return;
+                }
+                const suggestions = await fetchSuggestions(text);
+
+                container.innerHTML = '';
+                if (suggestions.length > 0) {
+                    suggestions.forEach(s => {
+                        const li = document.createElement('li');
+                        li.className = "px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm text-gray-700 border-b last:border-0 border-gray-100";
+                        li.innerText = s.text;
+                        li.onclick = () => {
+                            input.value = s.text;
+                            container.classList.add('hidden');
+                        };
+                        container.appendChild(li);
+                    });
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            }, 300);
+
+            input.addEventListener('input', handleInput);
+
+            // Close on click outside
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !container.contains(e.target)) {
+                    container.classList.add('hidden');
+                }
+            });
+        }
+
+        // Initialize Autocomplete
+        setupAutocomplete('tt-address', 'address-suggestions');
+        setupAutocomplete('tt-location', 'location-suggestions');
     </script>
 </body>
 
