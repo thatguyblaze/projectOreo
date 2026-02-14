@@ -458,49 +458,49 @@
                 <div class="space-y-2 text-sm">
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Base Tow</span>
-                        <input type="number" id="tt-fee-base"
+                        <input type="number" id="tt-fee-base" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Winch Fees</span>
-                        <input type="number" id="tt-fee-winch"
+                        <input type="number" id="tt-fee-winch" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Clean-Up</span>
-                        <input type="number" id="tt-fee-clean"
+                        <input type="number" id="tt-fee-clean" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">VTS/ Admin Fee</span>
-                        <input type="number" id="tt-fee-admin"
+                        <input type="number" id="tt-fee-admin" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Additional Labor</span>
-                        <input type="number" id="tt-fee-labor"
+                        <input type="number" id="tt-fee-labor" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Mileage Charges</span>
-                        <input type="number" id="tt-fee-mileage"
+                        <input type="number" id="tt-fee-mileage" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Gate Fee(s)</span>
-                        <input type="number" id="tt-fee-gate"
+                        <input type="number" id="tt-fee-gate" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-gray-600">Misc. Fees</span>
-                        <input type="number" id="tt-fee-misc"
+                        <input type="number" id="tt-fee-misc" inputmode="decimal"
                             class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
                             onchange="calcTicketTotal()">
                     </div>
@@ -511,14 +511,14 @@
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-bold text-blue-800 uppercase">Storage Calculator</span>
                     </div>
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex gap-2">
-                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
-                                    value="35" onchange="calcTicketTotal()" class="accent-blue-600"> $35</label>
-                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
-                                    value="40" onchange="calcTicketTotal()" class="accent-blue-600"> $40</label>
-                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
-                                    value="45" onchange="calcTicketTotal()" class="accent-blue-600" checked> $45</label>
+                    <div class="flex justify-between items-center text-sm w-full">
+                        <div class="grid grid-cols-3 gap-2 w-full">
+                            <button class="toggle-btn" onclick="toggleBtn(this)" data-group="store-rate"
+                                data-value="35">$35</button>
+                            <button class="toggle-btn" onclick="toggleBtn(this)" data-group="store-rate"
+                                data-value="40">$40</button>
+                            <button class="toggle-btn active" onclick="toggleBtn(this)" data-group="store-rate"
+                                data-value="45">$45</button>
                         </div>
                     </div>
 
@@ -739,6 +739,11 @@
                 // Trigger calc
                 calcTicketTotal();
             }
+
+            // Storage Rate Logic
+            if (group === 'store-rate') {
+                calcTicketTotal();
+            }
         }
 
         function updateStorageDays() {
@@ -801,8 +806,10 @@
 
             // Storage
             let storeRate = 0;
-            const rateEls = document.getElementsByName('store-rate');
-            for (let el of rateEls) { if (el.checked) storeRate = parseFloat(el.value); }
+            const activeRateBtn = document.querySelector('.toggle-btn[data-group="store-rate"].active');
+            if (activeRateBtn) {
+                storeRate = parseFloat(activeRateBtn.dataset.value);
+            }
 
             const days = parseFloat(document.getElementById('tt-store-days').value) || 0;
             const storeSubtotal = storeRate * days;
