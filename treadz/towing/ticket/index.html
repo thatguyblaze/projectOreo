@@ -531,8 +531,20 @@
                         </div>
                         <div>
                             <label class="text-[10px] uppercase font-bold text-gray-500">Released Date/Time</label>
-                            <input type="datetime-local" id="tt-store-end" class="form-input text-xs p-1"
-                                onchange="updateStorageDays()">
+                            <div class="flex items-center gap-1">
+                                <input type="datetime-local" id="tt-store-end" class="form-input text-xs p-1"
+                                    onchange="updateStorageDays()">
+                                <button onclick="setReleasedToNow()"
+                                    class="btn btn-sm btn-ghost p-1 text-blue-600 border border-blue-200 rounded hover:bg-blue-50"
+                                    title="Set Release Time to Now">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -733,22 +745,26 @@
             const startVal = document.getElementById('tt-store-start').value;
             const endVal = document.getElementById('tt-store-end').value;
 
-            if (startVal && endVal) {
+            if (startVal) {
                 const start = new Date(startVal);
-                const end = new Date(endVal);
+                // If end date is empty, assume "Now" (Ongoing) but don't auto-fill input unless clicked
+                const end = endVal ? new Date(endVal) : new Date();
 
                 // Diff in milliseconds
                 const diffTime = Math.abs(end - start);
-                // Diff in days (rounded up to next full day as standard practice, or just pure math)
-                // "Tracks the days". Usually any part of a day is a day, or 24h blocks.
-                // We'll use Math.ceil for full days logic.
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // Ensure at least 1 day if dates are same or valid
-                document.getElementById('tt-store-days').value = diffDays > 0 ? diffDays : 0; // Use 0 if same time or negative? Actually usually min 1 day charge if stored?
-                // Letting user override means we just set it here.
+                document.getElementById('tt-store-days').value = diffDays > 0 ? diffDays : 0;
                 calcTicketTotal();
             }
+        }
+
+        function setReleasedToNow() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
+            document.getElementById('tt-store-end').value = localISOTime;
+            updateStorageDays();
         }
 
         function initStorageDates() {
@@ -761,9 +777,8 @@
                 return localISOTime;
             };
 
-            document.getElementById('tt-store-end').value = toLocalISO(now);
-            // Default start to now as well? Or leave blank? User needs to set In selection.
-            // Let's leave start blank so they pick it, or default to now.
+            // Leave End Date empty to imply "Ongoing" (auto-calcs to now)
+            document.getElementById('tt-store-end').value = "";
             document.getElementById('tt-store-start').value = toLocalISO(now);
         }
 
