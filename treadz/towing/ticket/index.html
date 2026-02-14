@@ -509,11 +509,28 @@
                             <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
                                     value="45" onchange="calcTicketTotal()" class="accent-blue-600" checked> $45</label>
                         </div>
+                    </div>
+
+                    <!-- Date Selection for Storage -->
+                    <div class="mt-3 grid grid-cols-2 gap-3 mb-2">
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-gray-500">In Date/Time</label>
+                            <input type="datetime-local" id="tt-store-start" class="form-input text-xs p-1"
+                                onchange="updateStorageDays()">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-gray-500">Released Date/Time</label>
+                            <input type="datetime-local" id="tt-store-end" class="form-input text-xs p-1"
+                                onchange="updateStorageDays()">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end items-center gap-2">
+                        <span class="text-sm font-bold text-gray-700">Billable Days:</span>
                         <div class="flex items-center gap-1">
                             <input type="number" id="tt-store-days"
-                                class="w-10 text-center bg-white border border-gray-300 rounded"
+                                class="w-16 text-center font-bold bg-white border border-gray-300 rounded p-1"
                                 onchange="calcTicketTotal()" placeholder="0">
-                            <span class="text-gray-600 text-xs">days</span>
                         </div>
                     </div>
                 </div>
@@ -609,8 +626,10 @@
             document.querySelector('.param-ticket-id').innerText = id;
             document.getElementById('tt-date').value = date.toLocaleDateString();
 
+            initStorageDates();
             populateFromStorage();
         });
+
 
         // Toggle Button Logic
         function toggleBtn(btn) {
@@ -634,7 +653,65 @@
                 } else {
                     input.classList.add('hidden');
                 }
+            } else if (group === 'agency') {
+                // Hide "Other" input if switching to another agency
+                document.getElementById('other-agency-input').classList.add('hidden');
             }
+
+            // Agency Price Logic
+            if (group === 'agency' && btn.classList.contains('active')) {
+                const val = btn.dataset.value;
+                const baseInput = document.getElementById('tt-fee-base');
+                const adminInput = document.getElementById('tt-fee-admin');
+
+                if (val === 'Hawkins' || val === 'KPD') {
+                    baseInput.value = 225;
+                    adminInput.value = 175;
+                } else if (val === 'THP') {
+                    baseInput.value = 375;
+                    adminInput.value = 175;
+                }
+                // Trigger calc
+                calcTicketTotal();
+            }
+        }
+
+        function updateStorageDays() {
+            const startVal = document.getElementById('tt-store-start').value;
+            const endVal = document.getElementById('tt-store-end').value;
+
+            if (startVal && endVal) {
+                const start = new Date(startVal);
+                const end = new Date(endVal);
+
+                // Diff in milliseconds
+                const diffTime = Math.abs(end - start);
+                // Diff in days (rounded up to next full day as standard practice, or just pure math)
+                // "Tracks the days". Usually any part of a day is a day, or 24h blocks.
+                // We'll use Math.ceil for full days logic.
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                // Ensure at least 1 day if dates are same or valid
+                document.getElementById('tt-store-days').value = diffDays > 0 ? diffDays : 0; // Use 0 if same time or negative? Actually usually min 1 day charge if stored?
+                // Letting user override means we just set it here.
+                calcTicketTotal();
+            }
+        }
+
+        function initStorageDates() {
+            const now = new Date();
+
+            // Format for datetime-local: YYYY-MM-DDTHH:mm
+            const toLocalISO = (date) => {
+                const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+                const localISOTime = (new Date(date - offset)).toISOString().slice(0, 16);
+                return localISOTime;
+            };
+
+            document.getElementById('tt-store-end').value = toLocalISO(now);
+            // Default start to now as well? Or leave blank? User needs to set In selection.
+            // Let's leave start blank so they pick it, or default to now.
+            document.getElementById('tt-store-start').value = toLocalISO(now);
         }
 
         // Try to read query params or local storage from calculator if we want to be fancy
