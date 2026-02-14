@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../css/style.css">
 
     <style>
@@ -15,6 +16,12 @@
             font-family: 'Inter', sans-serif;
             background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
+        }
+
+        .font-signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            line-height: normal;
         }
 
         .glass-panel {
@@ -102,81 +109,145 @@
 
         @media print {
             @page {
-                size: 4.5in auto;
-                margin: 0;
+                size: A4;
+                margin: 0.5cm;
             }
 
             body {
+                font-size: 11px !important;
                 background: white !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
-            .ticket-page {
-                box-shadow: none !important;
-                border: none !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                background: white !important;
-            }
-
+            .ticket-page,
             .glass-panel {
                 box-shadow: none !important;
                 border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 background: white !important;
             }
 
-            .print\:hidden {
+            .print\:hidden,
+            .no-print,
+            .no-print-bg,
+            button,
+            nav,
+            #history-panel,
+            .sidebar-toggle,
+            .sticky-footer,
+            #sig-pad-wrapper,
+            #sig-empty-state,
+            .toggle-btn:not(.active),
+            #other-agency-input.hidden {
                 display: none !important;
             }
 
-            .form-input {
-                background: transparent !important;
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                font-weight: 600;
-                color: black !important;
-                resize: none !important;
-                height: auto !important;
+            /* Layout Overrides */
+            .flex-col {
+                flex-direction: row !important;
+                /* Force rows where possible */
+                flex-wrap: wrap;
             }
 
-            /* Hide inactive toggle buttons completely */
-            .toggle-btn {
-                display: none !important;
-            }
-
-            /* Show active toggle buttons as plain text */
-            .toggle-btn.active {
-                display: block !important;
-                background: transparent !important;
-                color: black !important;
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                font-weight: bold !important;
-                text-align: left !important;
-            }
-
-            /* Adjust grid gaps since items are hidden */
+            /* Restore Grid for Print */
             .grid {
-                display: block !important;
+                display: grid !important;
             }
 
-            .grid>* {
-                margin-bottom: 4px;
+            /* Force specific print grids */
+            .print\:grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+
+            .print\:gap-x-8 {
+                column-gap: 2rem !important;
+            }
+
+            /* Input Styling */
+            input,
+            select,
+            textarea {
+                border: none !important;
+                border-bottom: 1px solid #ccc !important;
+                background: transparent !important;
+                padding: 0 !important;
+                height: auto !important;
+                font-size: 11px !important;
+                min-height: 0 !important;
+                box-shadow: none !important;
+                margin-bottom: 2px !important;
+            }
+
+            /* Hide dropdown arrows */
+            select {
+                appearance: none !important;
+                -webkit-appearance: none !important;
+                background-image: none !important;
+            }
+
+            .form-label {
+                font-size: 9px !important;
+                color: #666 !important;
+                margin-bottom: 0 !important;
+                text-transform: uppercase;
+                font-weight: bold;
             }
 
             .section-title {
-                border-bottom: 2px solid #000;
-                margin-top: 10px;
-                margin-bottom: 5px;
+                font-size: 12px !important;
+                margin-top: 8px !important;
+                margin-bottom: 4px !important;
+                padding-bottom: 2px !important;
+                border-bottom: 1px solid #000 !important;
             }
 
-            .no-print-bg {
+            /* Toggle Buttons as Text tags */
+            .toggle-btn.active {
+                display: inline-block !important;
                 background: none !important;
+                color: black !important;
+                border: 1px solid black !important;
+                padding: 1px 6px !important;
+                font-size: 10px !important;
+                border-radius: 4px;
+                margin-right: 4px;
+            }
+
+            /* Storage Inputs Hidden */
+            #storage-calc-inputs {
+                display: none !important;
+            }
+
+            /* Print Sig Fallback */
+            #sig-empty-state {
+                display: block !important;
                 border: none !important;
-                padding: 0 !important;
+                border-bottom: 1px solid black !important;
+                height: 30px !important;
+                margin-bottom: 2px !important;
+            }
+
+            #sig-empty-state span {
+                display: none !important;
+            }
+
+            #sig-empty-state::after {
+                content: "Customer Signature";
+                color: black;
+                font-size: 8px;
+                display: block;
+                margin-top: 32px;
+                text-transform: uppercase;
+                font-weight: bold;
+            }
+
+            /* Images */
+            img {
+                max-height: 40px !important;
             }
         }
     </style>
@@ -491,18 +562,20 @@
                 </div>
 
                 <!-- 4. FEES & CHARGES -->
-                <div class="mb-6">
-                    <div class="section-title">
+                <div class="mb-4 print:mb-2">
+                    <div
+                        class="section-title flex items-center gap-2 text-lg font-bold text-gray-800 border-b border-gray-200 pb-2 mb-4 print:text-sm print:mb-2 print:pb-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="text-blue-600">
+                            class="text-blue-600 print:hidden">
                             <line x1="12" y1="1" x2="12" y2="23"></line>
                             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                         </svg>
                         FEES & CHARGES
                     </div>
 
-                    <div class="space-y-2 text-sm">
+                    <div
+                        class="space-y-2 text-sm print:grid print:grid-cols-2 print:gap-x-8 print:gap-y-1 print:space-y-0">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-600">Base Tow</span>
                             <input type="number" id="tt-fee-base" inputmode="decimal"
@@ -553,8 +626,12 @@
                         </div>
                     </div>
 
-                    <!-- Storage Calc -->
-                    <div class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg no-print-bg">
+                </div>
+
+                <!-- Storage Calc -->
+                <div
+                    class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg no-print-bg print:mt-2 print:p-0 print:border-none">
+                    <div id="storage-calc-inputs">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-xs font-bold text-blue-800 uppercase">Storage Calculator</span>
                         </div>
@@ -594,114 +671,119 @@
                                 </div>
                             </div>
                         </div>
+                    </div> <!-- End Storage Inputs Wrapper -->
 
-                        <div class="flex justify-end items-center gap-2">
-                            <span class="text-sm font-bold text-gray-700">Billable Days:</span>
-                            <div class="flex items-center gap-1">
-                                <input type="number" id="tt-store-days"
-                                    class="w-16 text-center font-bold bg-white border border-gray-300 rounded p-1"
-                                    onchange="calcTicketTotal()" placeholder="0">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TOTALS -->
-                    <div class="mt-6 pt-4 border-t-2 border-gray-200">
-                        <div class="flex justify-between items-end mb-2">
-                            <span class="text-sm font-medium text-gray-500">Tow Total</span>
-                            <span id="display-tow-total" class="font-bold text-gray-800">$0.00</span>
-                        </div>
-                        <div class="flex justify-between items-end mb-1">
-                            <span class="text-sm font-medium text-gray-500">Storage Total</span>
-                            <span id="display-store-subtotal" class="font-bold text-gray-800">$0.00</span>
-                        </div>
-                        <div class="flex justify-between items-end mb-2">
-                            <span class="text-xs font-medium text-gray-400">Storage Tax (3.5%)</span>
-                            <span id="display-store-tax" class="font-bold text-gray-600">$0.00</span>
-                            <input type="hidden" id="tt-total-storage">
-                        </div>
-                        <div class="flex justify-between items-end mt-4 pt-4 border-t border-gray-200">
-                            <span class="text-lg font-black text-gray-900">TOTAL DUE</span>
-                            <input type="text" id="tt-total-due"
-                                class="text-right font-black text-2xl bg-transparent border-none text-blue-600 w-40"
-                                readonly>
-                        </div>
+                    <!-- Storage Result (Always Visible) -->
+                    <div class="mt-2 text-sm border-t border-blue-200 pt-2 print:border-none print:pt-0">
                     </div>
                 </div>
 
-                <!-- 5. FOOTER & NOTES -->
-                <div>
-                    <label class="form-label">Notes</label>
-                    <textarea id="tt-notes" class="form-input h-20 resize-none mb-4"></textarea>
+                <div class="flex justify-end items-center gap-2">
+                    <span class="text-sm font-bold text-gray-700">Billable Days:</span>
+                    <div class="flex items-center gap-1">
+                        <input type="number" id="tt-store-days"
+                            class="w-16 text-center font-bold bg-white border border-gray-300 rounded p-1"
+                            onchange="calcTicketTotal()" placeholder="0">
+                    </div>
+                </div>
+            </div>
 
-                    <p class="text-[10px] text-gray-500 leading-tight text-justify mb-6">
-                        I have removed all personal belongings from my vehicle and hold No one responsible for lost or
-                        stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
-                        winching vehicle.
-                    </p>
+            <!-- TOTALS -->
+            <div class="mt-6 pt-4 border-t-2 border-gray-200">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-sm font-medium text-gray-500">Tow Total</span>
+                    <span id="display-tow-total" class="font-bold text-gray-800">$0.00</span>
+                </div>
+                <div class="flex justify-between items-end mb-1">
+                    <span class="text-sm font-medium text-gray-500">Storage Total</span>
+                    <span id="display-store-subtotal" class="font-bold text-gray-800">$0.00</span>
+                </div>
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-xs font-medium text-gray-400">Storage Tax (3.5%)</span>
+                    <span id="display-store-tax" class="font-bold text-gray-600">$0.00</span>
+                    <input type="hidden" id="tt-total-storage">
+                </div>
+                <div class="flex justify-between items-end mt-4 pt-4 border-t border-gray-200">
+                    <span class="text-lg font-black text-gray-900">TOTAL DUE</span>
+                    <input type="text" id="tt-total-due"
+                        class="text-right font-black text-2xl bg-transparent border-none text-blue-600 w-40" readonly>
+                </div>
+            </div>
+            </div>
 
-                    <!-- Signatures -->
-                    <div class="grid grid-cols-1 gap-6">
-                        <div>
-                            <!-- Signature State: Empty -->
-                            <div id="sig-empty-state"
-                                class="border-b border-black pt-8 cursor-pointer hover:bg-gray-50 transition-colors"
-                                onclick="openSignaturePad()">
-                                <span
-                                    class="text-[10px] font-bold uppercase tracking-widest text-blue-600 flex items-center gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                    Click to Sign Customer Signature
-                                </span>
-                            </div>
+            <!-- 5. FOOTER & NOTES -->
+            <div>
+                <label class="form-label">Notes</label>
+                <textarea id="tt-notes" class="form-input h-20 resize-none mb-4"></textarea>
 
-                            <!-- Signature State: Signing (Canvas) -->
-                            <div id="sig-pad-wrapper" class="hidden border border-gray-300 rounded bg-gray-50 p-2">
-                                <canvas id="sig-canvas"
-                                    class="w-full h-32 bg-white border border-gray-200 rounded touch-none cursor-crosshair mb-2"></canvas>
-                                <div class="flex justify-between items-center">
-                                    <button type="button" onclick="clearSignature()"
-                                        class="text-xs text-red-500 font-bold uppercase tracking-wider px-2 py-1">Clear</button>
-                                    <span class="text-[10px] text-gray-400">Sign Above</span>
-                                    <button type="button" onclick="saveSignature()"
-                                        class="text-xs bg-blue-600 text-white font-bold uppercase tracking-wider px-3 py-1 rounded">Apply</button>
-                                </div>
-                            </div>
+                <p class="text-[10px] text-gray-500 leading-tight text-justify mb-6">
+                    I have removed all personal belongings from my vehicle and hold No one responsible for lost or
+                    stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
+                    winching vehicle.
+                </p>
 
-                            <!-- Signature State: Signed (Image) -->
-                            <div id="sig-result" class="hidden border-b border-black pb-1 cursor-pointer relative group"
-                                onclick="openSignaturePad()">
-                                <img id="sig-image" class="h-12 object-contain" alt="Customer Signature">
-                                <div
-                                    class="absolute inset-0 bg-white/80 hidden group-hover:flex items-center justify-center text-xs font-bold text-gray-500">
-                                    Click to Re-Sign
-                                </div>
-                                <span
-                                    class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mt-1">Customer
-                                    Signature</span>
+                <!-- Signatures -->
+                <div class="grid grid-cols-1 print:grid-cols-2 gap-6 items-end">
+                    <div>
+                        <!-- Signature State: Empty -->
+                        <div id="sig-empty-state"
+                            class="border-b border-black pt-8 cursor-pointer hover:bg-gray-50 transition-colors"
+                            onclick="openSignaturePad()">
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-widest text-blue-600 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Click to Sign Customer Signature
+                            </span>
+                        </div>
+
+                        <!-- Signature State: Signing (Canvas) -->
+                        <div id="sig-pad-wrapper" class="hidden border border-gray-300 rounded bg-gray-50 p-2">
+                            <canvas id="sig-canvas"
+                                class="w-full h-32 bg-white border border-gray-200 rounded touch-none cursor-crosshair mb-2"></canvas>
+                            <div class="flex justify-between items-center">
+                                <button type="button" onclick="clearSignature()"
+                                    class="text-xs text-red-500 font-bold uppercase tracking-wider px-2 py-1">Clear</button>
+                                <span class="text-[10px] text-gray-400">Sign Above</span>
+                                <button type="button" onclick="saveSignature()"
+                                    class="text-xs bg-blue-600 text-white font-bold uppercase tracking-wider px-3 py-1 rounded">Apply</button>
                             </div>
                         </div>
-                        <div class="flex items-end gap-2">
-                            <div class="flex-grow">
-                                <label class="form-label block mb-1">Driver</label>
-                                <select id="tt-driver"
-                                    class="form-input appearance-none bg-transparent border-b border-black rounded-none p-0 pb-1 font-bold text-gray-800 focus:ring-0"
-                                    placeholder="Select Driver" onchange="saveDriver()">
-                                    <option value="">Select Driver</option>
-                                    <option value="Tyler">Tyler</option>
-                                    <option value="David">David</option>
-                                    <option value="Bucky">Bucky</option>
-                                </select>
+
+                        <!-- Signature State: Signed (Image) -->
+                        <div id="sig-result" class="hidden border-b border-black pb-1 cursor-pointer relative group"
+                            onclick="openSignaturePad()">
+                            <img id="sig-image" class="h-12 object-contain" alt="Customer Signature">
+                            <div
+                                class="absolute inset-0 bg-white/80 hidden group-hover:flex items-center justify-center text-xs font-bold text-gray-500">
+                                Click to Re-Sign
                             </div>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mt-1">Customer
+                                Signature</span>
+                        </div>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <div class="flex-grow">
+                            <label class="form-label block mb-1">Driver</label>
+                            <select id="tt-driver"
+                                class="appearance-none bg-transparent border-b border-black rounded-none p-0 pb-1 font-bold text-gray-800 focus:ring-0 focus:border-blue-500 w-full outline-none transition-all"
+                                placeholder="Select Driver" onchange="saveDriver()">
+                                <option value="" class="font-sans text-base">Select Driver</option>
+                                <option value="Tyler" class="font-sans text-base">Tyler</option>
+                                <option value="David" class="font-sans text-base">David</option>
+                                <option value="Bucky" class="font-sans text-base">Bucky</option>
+                            </select>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Footer moved to sticky bar -->
+            <!-- Footer moved to sticky bar -->
             </div>
 
             </div>
@@ -913,7 +995,11 @@
 
             // Restore driver pref
             const savedDriver = localStorage.getItem('treadz_tow_driver');
-            if (savedDriver) document.getElementById('tt-driver').value = savedDriver;
+            if (savedDriver) {
+                document.getElementById('tt-driver').value = savedDriver;
+                // Update visuals
+                if (typeof saveDriver === 'function') saveDriver();
+            }
 
             // Clear Signatures
             if (typeof clearSignature === 'function') {
@@ -1247,15 +1333,29 @@
 
         // Driver Persistence
         function saveDriver() {
-            const driver = document.getElementById('tt-driver').value;
+            const driverSelect = document.getElementById('tt-driver');
+            const driver = driverSelect.value;
             localStorage.setItem('treadz_tow_driver', driver);
+
+            // Toggle Signature Font
+            if (driver) {
+                driverSelect.classList.add('font-signature', 'text-2xl', 'text-blue-900');
+                driverSelect.classList.remove('font-bold', 'text-gray-800');
+            } else {
+                driverSelect.classList.remove('font-signature', 'text-2xl', 'text-blue-900');
+                driverSelect.classList.add('font-bold', 'text-gray-800');
+            }
         }
 
         // Load Driver Preference on Init
         const savedDriver = localStorage.getItem('treadz_tow_driver');
         if (savedDriver) {
             const driverSelect = document.getElementById('tt-driver');
-            if (driverSelect) driverSelect.value = savedDriver;
+            if (driverSelect) {
+                driverSelect.value = savedDriver;
+                // Trigger visual update
+                saveDriver();
+            }
         }
 
         // --- Signature Pad Logic ---
