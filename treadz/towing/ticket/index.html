@@ -1,150 +1,162 @@
-<style>
-    body {
-        font-family: 'Inter', sans-serif;
-        background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    .glass-panel {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tow Ticket - Treadz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
 
-    .ticket-page {
-        width: 100%;
-        max-width: 500px;
-        /* Slightly wider for modern look */
-        margin: 0 auto;
-        position: relative;
-    }
-
-    .form-input {
-        width: 100%;
-        background: rgba(243, 244, 246, 0.6);
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        transition: all 0.2s;
-    }
-
-    .form-input:focus {
-        outline: none;
-        background: white;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-
-    .form-label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #4b5563;
-        margin-bottom: 0.25rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .toggle-btn {
-        width: 100%;
-        padding: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border-radius: 0.5rem;
-        border: 1px solid #e5e7eb;
-        background: white;
-        color: #4b5563;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.25rem;
-    }
-
-    .toggle-btn:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
-    }
-
-    .toggle-btn.active {
-        background: #2563eb;
-        color: white;
-        border-color: #2563eb;
-        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-    }
-
-    .section-title {
-        font-size: 0.875rem;
-        font-weight: 700;
-        color: #111827;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid #e5e7eb;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    @media print {
-        @page {
-            size: 4.5in auto;
-            /* Auto height for continuous roll or fit content */
-            margin: 0;
-        }
-
+    <style>
         body {
-            background: white !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-
-        .ticket-page {
-            box-shadow: none !important;
-            border: none !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-            background: white !important;
+            font-family: 'Inter', sans-serif;
+            background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
 
         .glass-panel {
-            box-shadow: none !important;
-            border: none !important;
-            background: white !important;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
         }
 
-        .print\:hidden {
-            display: none !important;
+        .ticket-page {
+            width: 100%;
+            max-width: 500px;
+            /* Slightly wider for modern look */
+            margin: 0 auto;
+            position: relative;
         }
 
         .form-input {
-            background: transparent !important;
-            border: none !important;
-            border-bottom: 1px solid #000 !important;
-            border-radius: 0 !important;
-            padding: 0 0 2px 0 !important;
-            font-weight: bold;
+            width: 100%;
+            background: rgba(243, 244, 246, 0.6);
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: white;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .toggle-btn {
-            border: 1px solid #000 !important;
-            color: #000 !important;
-            background: white !important;
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #4b5563;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .toggle-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
         }
 
         .toggle-btn.active {
-            background: #000 !important;
-            color: white !important;
-            font-weight: bold !important;
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
         }
 
-        .no-print-bg {
-            background: none !important;
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #111827;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-    }
-</style>
+
+        @media print {
+            @page {
+                size: 4.5in auto;
+                /* Auto height for continuous roll or fit content */
+                margin: 0;
+            }
+
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .ticket-page {
+                box-shadow: none !important;
+                border: none !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                background: white !important;
+            }
+
+            .glass-panel {
+                box-shadow: none !important;
+                border: none !important;
+                background: white !important;
+            }
+
+            .print\:hidden {
+                display: none !important;
+            }
+
+            .form-input {
+                background: transparent !important;
+                border: none !important;
+                border-bottom: 1px solid #000 !important;
+                border-radius: 0 !important;
+                padding: 0 0 2px 0 !important;
+                font-weight: bold;
+            }
+
+            .toggle-btn {
+                border: 1px solid #000 !important;
+                color: #000 !important;
+                background: white !important;
+            }
+
+            .toggle-btn.active {
+                background: #000 !important;
+                color: white !important;
+                font-weight: bold !important;
+            }
+
+            .no-print-bg {
+                background: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="antialiased flex flex-col overflow-hidden">
@@ -195,8 +207,6 @@
             </div>
         </div>
     </nav>
-
-
 
     <!-- Main Content -->
     <main class="flex-grow flex justify-center p-4 overflow-y-auto print:overflow-visible">
@@ -574,3 +584,5 @@
         }
     </script>
 </body>
+
+</html>
