@@ -317,6 +317,16 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="col-span-2">
+                        <label class="form-label">Delivered To</label>
+                        <div class="relative">
+                            <input type="text" id="tt-delivered" class="form-input"
+                                placeholder="Start typing location..." autocomplete="off">
+                            <ul id="delivered-suggestions"
+                                class="absolute left-0 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto top-full mt-1">
+                            </ul>
+                        </div>
+                    </div>
                     <div class="col-span-2 grid grid-cols-2 gap-2">
                         <div>
                             <label class="form-label">Make</label>
@@ -357,8 +367,9 @@
                         </div>
                         <div>
                             <label class="form-label">Model</label>
-                            <input type="text" id="tt-model" class="form-input" placeholder="Model"
+                            <input type="text" id="tt-model" class="form-input" placeholder="Model" list="model-list"
                                 oninput="updateMakeModel()">
+                            <datalist id="model-list"></datalist>
                         </div>
                         <input type="hidden" id="tt-make-model">
                     </div>
@@ -576,14 +587,17 @@
                         <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Customer
                             Signature</span>
                     </div>
-                    <div class="border-b border-black pt-8">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Driver
-                            Signature</span>
-                    </div>
                     <div class="flex items-end gap-2">
-                        <div class="flex-grow border-b border-black pt-8">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Delivered
-                                To</span>
+                        <div class="flex-grow">
+                            <label class="form-label block mb-1">Driver</label>
+                            <select id="tt-driver"
+                                class="form-input appearance-none bg-transparent border-b border-black rounded-none p-0 pb-1 font-bold text-gray-800 focus:ring-0"
+                                placeholder="Select Driver" onchange="saveDriver()">
+                                <option value="">Select Driver</option>
+                                <option value="Tyler">Tyler</option>
+                                <option value="David">David</option>
+                                <option value="Bucky">Bucky</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -839,6 +853,73 @@
         // Initialize Autocomplete
         setupAutocomplete('tt-address', 'address-suggestions');
         setupAutocomplete('tt-location', 'location-suggestions');
+        setupAutocomplete('tt-delivered', 'delivered-suggestions');
+
+        // Car Models Data
+        const carModels = {
+            'Acura': ['MDX', 'RDX', 'TLX', 'ILX', 'Integra'],
+            'Audi': ['A3', 'A4', 'A6', 'Q3', 'Q5', 'Q7', 'Q8'],
+            'BMW': ['3 Series', '5 Series', 'X3', 'X5', 'X7', 'M3', 'M4'],
+            'Buick': ['Encore', 'Enclave', 'Envision'],
+            'Cadillac': ['Escalade', 'XT5', 'XT6', 'CT4', 'CT5'],
+            'Chevrolet': ['Silverado', 'Equinox', 'Malibu', 'Tahoe', 'Suburban', 'Traverse', 'Colorado', 'Blazer', 'Camaro', 'Corvette'],
+            'Chrysler': ['300', 'Pacifica', 'Voyager'],
+            'Dodge': ['Ram 1500', 'Charger', 'Challenger', 'Durango', 'Grand Caravan'],
+            'Ford': ['F-150', 'F-250', 'Explorer', 'Escape', 'Edge', 'Expedition', 'Mustang', 'Bronco', 'Ranger', 'Maverick'],
+            'GMC': ['Sierra', 'Terrain', 'Acadia', 'Yukon', 'Canyon'],
+            'Honda': ['Civic', 'Accord', 'CR-V', 'Pilot', 'Odyssey', 'HR-V', 'Passport', 'Ridgeline'],
+            'Hyundai': ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade', 'Kona'],
+            'Infiniti': ['Q50', 'QX60', 'QX80', 'QX50'],
+            'Jeep': ['Wrangler', 'Grand Cherokee', 'Cherokee', 'Compass', 'Renegade', 'Gladiator'],
+            'Kia': ['Forte', 'Optima', 'K5', 'Sportage', 'Sorento', 'Telluride', 'Soul'],
+            'Lexus': ['RX', 'NX', 'ES', 'IS', 'GX', 'LX'],
+            'Lincoln': ['Navigator', 'Aviator', 'Corsair', 'Nautilus'],
+            'Mazda': ['CX-5', 'CX-30', 'CX-9', 'Mazda3', 'Miata'],
+            'Mercedes-Benz': ['C-Class', 'E-Class', 'S-Class', 'GLC', 'GLE', 'GLS', 'G-Class'],
+            'Mercury': ['Grand Marquis', 'Mountaineer', 'Mariner'],
+            'Mini': ['Cooper', 'Countryman', 'Clubman'],
+            'Mitsubishi': ['Outlander', 'Eclipse Cross', 'Mirage'],
+            'Nissan': ['Altima', 'Rogue', 'Sentra', 'Maxima', 'Murano', 'Pathfinder', 'Frontier', 'Titan'],
+            'Pontiac': ['Grand Prix', 'G6', 'Vibe'],
+            'Ram': ['1500', '2500', '3500'],
+            'Subaru': ['Outback', 'Forester', 'Crosstrek', 'Impreza', 'Ascent'],
+            'Tesla': ['Model 3', 'Model Y', 'Model S', 'Model X', 'Cybertruck'],
+            'Toyota': ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Tacoma', 'Tundra', '4Runner', 'Prius', 'Sienna'],
+            'Volkswagen': ['Jetta', 'Passat', 'Tiguan', 'Atlas', 'Golf'],
+            'Volvo': ['XC90', 'XC60', 'XC40', 'S60', 'S90']
+        };
+
+        // Listen for Make changes to populate Model list
+        document.getElementById('tt-make').addEventListener('change', function () {
+            const make = this.value;
+            const dataList = document.getElementById('model-list');
+            const modelInput = document.getElementById('tt-model');
+
+            dataList.innerHTML = ''; // Clear existing
+            modelInput.value = ''; // Clear model input on make change
+
+            if (make && carModels[make]) {
+                carModels[make].forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    dataList.appendChild(option);
+                });
+            }
+            updateMakeModel();
+        });
+
+        // Driver Persistence
+        function saveDriver() {
+            const driver = document.getElementById('tt-driver').value;
+            localStorage.setItem('treadz_tow_driver', driver);
+        }
+
+        // Load Driver Preference on Init
+        const savedDriver = localStorage.getItem('treadz_tow_driver');
+        if (savedDriver) {
+            const driverSelect = document.getElementById('tt-driver');
+            if (driverSelect) driverSelect.value = savedDriver;
+        }
     </script>
 </body>
 
