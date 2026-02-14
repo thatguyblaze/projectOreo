@@ -814,7 +814,7 @@
                         Download PDF
                     </button>
 
-                    <button onclick="saveTicket(); alert('Ticket Saved Successfully!');"
+                    <button onclick="saveTicket(); resetTicket();"
                         class="btn btn-primary py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all text-lg font-bold flex items-center gap-3">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1056,6 +1056,7 @@
 
                 // Days in Lot Logic
                 let daysHtml = '';
+                let vtsHtml = '';
                 const f = t.fields || {};
                 if (f.delivered === 'Lot 1' || f.delivered === 'Lot 2') {
                     if (f.storeStart) {
@@ -1068,6 +1069,9 @@
                             // Only show if >= 0
                             if (days >= 0) {
                                 daysHtml = `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded ml-2 border border-orange-200 whitespace-nowrap">${days} Days</span>`;
+                                if (days > 3) {
+                                    vtsHtml = `<span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded ml-1 border border-purple-200 whitespace-nowrap">Sent to VTS</span>`;
+                                }
                             }
                         }
                     }
@@ -1081,9 +1085,10 @@
                     <div class="text-xs font-bold text-gray-700 truncate mt-1">${t.billTo || 'Unknown Customer'}</div>
                     <div class="text-xs text-gray-500 truncate">${t.vehicle || 'Vehicle Info'}</div>
                     <div class="mt-2 flex justify-between items-center border-t border-gray-100 pt-1">
-                        <div class="flex items-center w-full">
+                        <div class="flex items-center w-full flex-wrap gap-y-1">
                             <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
                             ${daysHtml}
+                            ${vtsHtml}
                         </div>
                     </div>
                 `;
