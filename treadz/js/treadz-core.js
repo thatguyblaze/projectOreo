@@ -37,10 +37,10 @@ const TreadzConfig = {
 
     // Default Services Checklist
     DEFAULT_SERVICES: [
-        { id: 'srv_rotation', name: 'Tire Rotation', defaultPrice: 50.00, defaultQty: 1 },
-        { id: 'srv_balance', name: 'Tire Balance', defaultPrice: 50.00, defaultQty: 1 },
-        { id: 'srv_stem', name: 'Valve Stems (New)', defaultPrice: 0.00, defaultQty: 4 },
-        { id: 'srv_sensor', name: 'New TPMS Sensors', defaultPrice: 59.99, defaultQty: 4 },
+        { id: 'srv_rotation', name: 'Tire Rotation', defaultPrice: 20.00, defaultQty: 1 },
+        { id: 'srv_balance', name: 'Tire Balance', defaultPrice: 20.00, defaultQty: 1 },
+        { id: 'srv_stem', name: 'Valve Stems', defaultPrice: 0.00, defaultQty: 4 },
+        { id: 'srv_sensor', name: 'TPMS Sensor', defaultPrice: 59.99, defaultQty: 4 },
         { id: 'srv_patch', name: 'Tire Patch', defaultPrice: 20.00, defaultQty: 1 },
         { id: 'srv_plug', name: 'Tire Plug', defaultPrice: 10.00, defaultQty: 1 }
     ]

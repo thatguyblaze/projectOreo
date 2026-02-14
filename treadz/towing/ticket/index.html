@@ -103,7 +103,6 @@
         @media print {
             @page {
                 size: 4.5in auto;
-                /* Auto height for continuous roll or fit content */
                 margin: 0;
             }
 
@@ -134,32 +133,56 @@
             .form-input {
                 background: transparent !important;
                 border: none !important;
-                border-bottom: 1px solid #000 !important;
-                border-radius: 0 !important;
-                padding: 0 0 2px 0 !important;
-                font-weight: bold;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-weight: 600;
+                color: black !important;
+                resize: none !important;
+                height: auto !important;
             }
 
+            /* Hide inactive toggle buttons completely */
             .toggle-btn {
-                border: 1px solid #000 !important;
-                color: #000 !important;
-                background: white !important;
+                display: none !important;
             }
 
+            /* Show active toggle buttons as plain text */
             .toggle-btn.active {
-                background: #000 !important;
-                color: white !important;
+                display: block !important;
+                background: transparent !important;
+                color: black !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
                 font-weight: bold !important;
+                text-align: left !important;
+            }
+
+            /* Adjust grid gaps since items are hidden */
+            .grid {
+                display: block !important;
+            }
+
+            .grid>* {
+                margin-bottom: 4px;
+            }
+
+            .section-title {
+                border-bottom: 2px solid #000;
+                margin-top: 10px;
+                margin-bottom: 5px;
             }
 
             .no-print-bg {
                 background: none !important;
+                border: none !important;
+                padding: 0 !important;
             }
         }
     </style>
 </head>
 
-<body class="antialiased flex flex-col overflow-hidden">
+<body class="antialiased flex flex-col min-h-screen">
     <!-- Navigation -->
     <nav class="main-nav sticky top-0 z-40 p-4 w-full print:hidden flex-shrink-0">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -209,7 +232,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow flex justify-center p-4 overflow-y-auto print:overflow-visible">
+    <main class="flex-grow flex justify-center p-4 pb-24 overflow-y-auto print:overflow-visible">
 
         <!-- TICKET PAPER -->
         <div id="ticket-body" class="ticket-page glass-panel rounded-2xl p-6 md:p-8 animate-[fadeIn_0.5s_ease-out]">
@@ -225,8 +248,7 @@
                     <div>Mt. Carmel, TN 37645</div>
                     <div class="font-bold mt-1 text-sm">423-357-4551</div>
                 </div>
-                <div
-                    class="absolute top-2 left-0 text-xl font-bold font-serif text-red-600 border-2 border-red-600 px-2 py-1 rounded rotate-[-5deg] opacity-90 param-ticket-id">
+                <div class="absolute top-2 left-0 text-xl font-bold font-serif text-red-600 param-ticket-id">
                     <!-- ID injected via JS -->
                 </div>
                 <div class="absolute top-2 right-0 flex flex-col items-end">
@@ -490,6 +512,17 @@
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
                 </button>
+                <div class="flex gap-2">
+                    <button onclick="printTowTicket()" class="btn btn-sm btn-primary flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        Print Ticket
+                    </button>
+                </div>
             </div>
 
         </div>
