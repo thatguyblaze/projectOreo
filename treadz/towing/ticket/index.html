@@ -250,6 +250,119 @@
                 max-height: 40px !important;
             }
         }
+
+        /* SEPARATE PRINT VIEW STRATEGY */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0.5in;
+            }
+
+            /* Hide the main app wrapper and everything else */
+            body>*:not(#print-view) {
+                display: none !important;
+            }
+
+            /* Show the print view */
+            #print-view {
+                display: block !important;
+                background: white;
+                width: 100%;
+                font-size: 11px;
+                color: black;
+                font-family: sans-serif;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            /* Reset body */
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                height: 100% !important;
+                overflow: visible !important;
+            }
+
+            /* Helpers */
+            .flex {
+                display: flex !important;
+            }
+
+            .grid {
+                display: grid !important;
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            .font-bold {
+                font-weight: bold !important;
+            }
+
+            .uppercase {
+                text-transform: uppercase !important;
+            }
+
+            .text-right {
+                text-align: right !important;
+            }
+
+            .text-center {
+                text-align: center !important;
+            }
+
+            /* Typography */
+            h1 {
+                font-size: 18px !important;
+                margin-bottom: 5px;
+            }
+
+            .text-xs {
+                font-size: 10px !important;
+            }
+
+            .text-sm {
+                font-size: 11px !important;
+            }
+
+            /* Table styling */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th,
+            td {
+                padding: 4px;
+                border-bottom: 1px solid #ddd;
+            }
+
+            th {
+                border-bottom: 2px solid #000;
+            }
+
+            .font-mono {
+                font-family: monospace !important;
+            }
+
+            /* Images */
+            img {
+                max-height: 50px !important;
+            }
+
+            /* Signatures */
+            .font-signature {
+                font-family: 'Dancing Script', cursive !important;
+            }
+        }
+
+        /* Screen Styles for Print View */
+        #print-view {
+            display: none;
+        }
     </style>
 </head>
 
@@ -1187,7 +1300,83 @@
 
         function printTowTicket() {
             saveTicket();
+            populatePrintView();
             window.print();
+        }
+
+        function populatePrintView() {
+            // Header
+            document.getElementById('pv-ticket-id').innerText = document.querySelector('.param-ticket-id').innerText;
+            document.getElementById('pv-date').innerText = document.getElementById('tt-date').value;
+
+            // Bill To
+            document.getElementById('pv-bill-to').innerText = document.getElementById('tt-bill-to').value;
+            document.getElementById('pv-address').innerText = document.getElementById('tt-address').value;
+            document.getElementById('pv-phone').innerText = document.getElementById('tt-phone').value;
+
+            // Locations
+            document.getElementById('pv-location').innerText = document.getElementById('tt-location').value;
+            document.getElementById('pv-delivered').innerText = document.getElementById('tt-delivered').value;
+
+            // Vehicle
+            const make = document.getElementById('tt-make').value;
+            const model = document.getElementById('tt-model').value;
+            document.getElementById('pv-vehicle').innerText = `${make} ${model}`;
+            document.getElementById('pv-color').innerText = document.getElementById('tt-color').value;
+            document.getElementById('pv-vin').innerText = document.getElementById('tt-vin').value;
+            document.getElementById('pv-tag').innerText = document.getElementById('tt-tag').value;
+            document.getElementById('pv-mileage').innerText = document.getElementById('tt-mileage').value;
+
+            // Charges
+            const tbody = document.getElementById('pv-charges-body');
+            tbody.innerHTML = '';
+
+            const addRow = (desc, amount) => {
+                if (!amount || amount == 0) return;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="text-left">${desc}</td><td class="text-right">$${parseFloat(amount).toFixed(2)}</td>`;
+                tbody.appendChild(tr);
+            };
+
+            addRow('Base Tow', document.getElementById('tt-fee-base').value);
+            addRow('Winch Fee', document.getElementById('tt-fee-winch').value);
+            addRow('Clean-Up', document.getElementById('tt-fee-clean').value);
+            addRow('Admin Fee', document.getElementById('tt-fee-admin').value);
+            addRow('Labor', document.getElementById('tt-fee-labor').value);
+            addRow('Mileage', document.getElementById('tt-fee-mileage').value);
+            addRow('Gate Fee', document.getElementById('tt-fee-gate').value);
+            addRow('Misc Fees', document.getElementById('tt-fee-misc').value);
+
+            // Storage
+            const storeDays = document.getElementById('tt-store-days').value;
+            const storeTotal = document.getElementById('tt-total-storage').value;
+            if (storeTotal > 0) {
+                addRow(`Storage (${storeDays} days)`, storeTotal);
+            }
+
+            // Total
+            document.getElementById('pv-total-due').innerText = document.getElementById('tt-total-due').value;
+
+            // Signatures
+            const sigImg = document.getElementById('sig-image');
+            const pvSigImg = document.getElementById('pv-sig-img');
+            const pvSigLine = document.getElementById('pv-sig-line');
+
+            if (sigImg.src && !document.getElementById('sig-result').classList.contains('hidden')) {
+                pvSigImg.src = sigImg.src;
+                pvSigImg.classList.remove('hidden');
+                if (pvSigLine) pvSigLine.classList.add('hidden');
+            } else {
+                pvSigImg.classList.add('hidden');
+                if (pvSigLine) pvSigLine.classList.remove('hidden');
+            }
+
+            // Driver Sig
+            const driver = document.getElementById('tt-driver').value;
+            document.getElementById('pv-driver-sig').innerText = driver;
+
+            // Notes
+            document.getElementById('pv-notes').innerText = document.getElementById('tt-notes').value;
         }
 
         function downloadTowTicket() {
@@ -1444,6 +1633,113 @@
         document.addEventListener('touchend', endSign);
 
     </script>
+    <!-- Print View Container -->
+    <div id="print-view">
+        <!-- Compact Header -->
+        <div class="flex justify-between items-start mb-4 border-b pb-2">
+            <img src="../../images/logo.png" class="h-12 object-contain" alt="Treadz">
+            <div class="text-right">
+                <h1 class="text-xl font-bold uppercase tracking-wide">TOWING INVOICE</h1>
+                <div class="text-sm text-gray-600 font-bold">Ticket #: <span id="pv-ticket-id"></span></div>
+                <div class="text-sm text-gray-600">Date: <span id="pv-date"></span></div>
+            </div>
+        </div>
+
+        <!-- Bill To / Info Grid -->
+        <div class="grid grid-cols-2 gap-8 mb-6 text-xs">
+            <!-- Left Col -->
+            <div>
+                <div class="mb-4">
+                    <div class="font-bold text-gray-500 uppercase mb-1 border-b text-[10px]">Bill To</div>
+                    <div id="pv-bill-to" class="font-bold text-base"></div>
+                    <div id="pv-address"></div>
+                    <div id="pv-phone"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <div class="font-bold text-gray-500 uppercase border-b text-[10px]">Picked Up At</div>
+                        <div id="pv-location" class="font-bold mt-1"></div>
+                    </div>
+                    <div>
+                        <div class="font-bold text-gray-500 uppercase border-b text-[10px]">Delivered To</div>
+                        <div id="pv-delivered" class="font-bold mt-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Col -->
+            <div>
+                <div class="font-bold text-gray-500 uppercase mb-1 border-b text-[10px]">Vehicle Information</div>
+                <div class="grid grid-cols-2 gap-y-1 gap-x-2">
+                    <div class="text-gray-500">Make/Model:</div>
+                    <div id="pv-vehicle" class="font-bold"></div>
+                    <div class="text-gray-500">Color:</div>
+                    <div id="pv-color"></div>
+                    <div class="text-gray-500">VIN:</div>
+                    <div id="pv-vin" class="font-mono"></div>
+                    <div class="text-gray-500">Tag:</div>
+                    <div id="pv-tag"></div>
+                    <div class="text-gray-500">Mileage:</div>
+                    <div id="pv-mileage"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charges Table -->
+        <div class="mb-6">
+            <div class="font-bold text-gray-500 uppercase mb-1 border-b text-[10px]">Fees & Charges</div>
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="text-gray-500">
+                        <th class="text-left font-normal py-1">Description</th>
+                        <th class="text-right font-normal py-1 w-32">Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="pv-charges-body">
+                    <!-- Dynamic Rows -->
+                </tbody>
+                <tfoot class="border-t-2 border-black">
+                    <tr>
+                        <td class="text-right py-2 font-bold text-sm">TOTAL DUE:</td>
+                        <td class="text-right py-2 font-black text-lg" id="pv-total-due">$0.00</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-8 border p-2 rounded bg-gray-50 text-xs">
+            <span class="font-bold uppercase text-[10px] text-gray-500 block mb-1">Notes</span>
+            <div id="pv-notes" class="italic"></div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="text-[9px] text-gray-500 text-justify mb-8 leading-tight">
+            I have removed all personal belongings from my vehicle and hold No one responsible for lost or
+            stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
+            winching vehicle.
+        </div>
+
+        <!-- Signatures -->
+        <div class="grid grid-cols-2 gap-12 text-xs">
+            <div>
+                <div class="border-b border-black mb-1 h-12 flex items-end justify-center relative">
+                    <img id="pv-sig-img" class="h-12 hidden object-contain">
+                    <div id="pv-sig-line" class="absolute bottom-0 w-full hidden"></div>
+                </div>
+                <div class="text-center font-bold uppercase">Customer Signature</div>
+                <div class="text-[9px] text-gray-400 text-center mt-1">
+                    I agree to the terms and authorize services.
+                </div>
+            </div>
+            <div>
+                <div class="border-b border-black mb-1 h-12 flex items-end justify-center font-signature text-2xl"
+                    id="pv-driver-sig"></div>
+                <div class="text-center font-bold uppercase">Driver</div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
