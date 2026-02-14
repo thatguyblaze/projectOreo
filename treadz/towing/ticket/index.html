@@ -583,9 +583,48 @@
 
                 <!-- Signatures -->
                 <div class="grid grid-cols-1 gap-6">
-                    <div class="border-b border-black pt-8">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Customer
-                            Signature</span>
+                    <div>
+                        <!-- Signature State: Empty -->
+                        <div id="sig-empty-state"
+                            class="border-b border-black pt-8 cursor-pointer hover:bg-gray-50 transition-colors"
+                            onclick="openSignaturePad()">
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-widest text-blue-600 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Click to Sign Customer Signature
+                            </span>
+                        </div>
+
+                        <!-- Signature State: Signing (Canvas) -->
+                        <div id="sig-pad-wrapper" class="hidden border border-gray-300 rounded bg-gray-50 p-2">
+                            <canvas id="sig-canvas"
+                                class="w-full h-32 bg-white border border-gray-200 rounded touch-none cursor-crosshair mb-2"></canvas>
+                            <div class="flex justify-between items-center">
+                                <button type="button" onclick="clearSignature()"
+                                    class="text-xs text-red-500 font-bold uppercase tracking-wider px-2 py-1">Clear</button>
+                                <span class="text-[10px] text-gray-400">Sign Above</span>
+                                <button type="button" onclick="saveSignature()"
+                                    class="text-xs bg-blue-600 text-white font-bold uppercase tracking-wider px-3 py-1 rounded">Apply</button>
+                            </div>
+                        </div>
+
+                        <!-- Signature State: Signed (Image) -->
+                        <div id="sig-result" class="hidden border-b border-black pb-1 cursor-pointer relative group"
+                            onclick="openSignaturePad()">
+                            <img id="sig-image" class="h-12 object-contain" alt="Customer Signature">
+                            <div
+                                class="absolute inset-0 bg-white/80 hidden group-hover:flex items-center justify-center text-xs font-bold text-gray-500">
+                                Click to Re-Sign
+                            </div>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-widest text-gray-400 block mt-1">Customer
+                                Signature</span>
+                        </div>
                     </div>
                     <div class="flex items-end gap-2">
                         <div class="flex-grow">
@@ -920,6 +959,92 @@
             const driverSelect = document.getElementById('tt-driver');
             if (driverSelect) driverSelect.value = savedDriver;
         }
+
+        // --- Signature Pad Logic ---
+        const sigCanvas = document.getElementById('sig-canvas');
+        const sigCtx = sigCanvas.getContext('2d');
+        let isSigning = false;
+
+        // Resize canvas to correct resolution
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            sigCanvas.width = sigCanvas.offsetWidth * ratio;
+            sigCanvas.height = sigCanvas.offsetHeight * ratio;
+            sigCtx.scale(ratio, ratio);
+            sigCtx.lineWidth = 2; // Fixed line width
+            sigCtx.lineCap = 'round';
+            sigCtx.strokeStyle = '#000';
+        }
+
+        function openSignaturePad() {
+            document.getElementById('sig-empty-state').classList.add('hidden');
+            document.getElementById('sig-result').classList.add('hidden');
+            document.getElementById('sig-pad-wrapper').classList.remove('hidden');
+
+            // Wait for display change to effect layout, then resize
+            setTimeout(resizeCanvas, 10);
+        }
+
+        function clearSignature() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            sigCtx.clearRect(0, 0, sigCanvas.width / ratio, sigCanvas.height / ratio);
+        }
+
+        function saveSignature() {
+            // Check if empty? (optional)
+
+            const dataUrl = sigCanvas.toDataURL('image/png');
+            document.getElementById('sig-image').src = dataUrl;
+
+            document.getElementById('sig-pad-wrapper').classList.add('hidden');
+            document.getElementById('sig-result').classList.remove('hidden');
+        }
+
+        // Drawing Event Listeners
+        function getPos(e) {
+            const rect = sigCanvas.getBoundingClientRect();
+            // Handle touch or mouse
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startSign(e) {
+            isSigning = true;
+            // Allow default for mouse, prevent for touch to stop scroll
+            if (e.type === 'touchstart') e.preventDefault();
+
+            const pos = getPos(e);
+            sigCtx.beginPath();
+            sigCtx.moveTo(pos.x, pos.y);
+        }
+
+        function moveSign(e) {
+            if (!isSigning) return;
+            if (e.type === 'touchmove') e.preventDefault();
+
+            const pos = getPos(e);
+            sigCtx.lineTo(pos.x, pos.y);
+            sigCtx.stroke();
+        }
+
+        function endSign(e) {
+            isSigning = false;
+        }
+
+        // Attach listeners
+        sigCanvas.addEventListener('mousedown', startSign);
+        sigCanvas.addEventListener('touchstart', startSign, { passive: false });
+
+        sigCanvas.addEventListener('mousemove', moveSign);
+        sigCanvas.addEventListener('touchmove', moveSign, { passive: false });
+
+        document.addEventListener('mouseup', endSign);
+        document.addEventListener('touchend', endSign);
+
     </script>
 </body>
 
