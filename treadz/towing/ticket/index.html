@@ -1,92 +1,153 @@
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treadz - Tow Ticket</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="../../css/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    }
+
+    .ticket-page {
+        width: 100%;
+        max-width: 500px;
+        /* Slightly wider for modern look */
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .form-input {
+        width: 100%;
+        background: rgba(243, 244, 246, 0.6);
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        background: white;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .toggle-btn {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        background: white;
+        color: #4b5563;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+
+    .toggle-btn:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    .toggle-btn.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #111827;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    @media print {
+        @page {
+            size: 4.5in auto;
+            /* Auto height for continuous roll or fit content */
+            margin: 0;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
-        /* Ticket Specific Styles */
         .ticket-page {
-            width: 100%;
-            max-width: 450px;
-            /* Force narrow width to match paper ticket */
-            margin: 0 auto;
-            background: white;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            position: relative;
+            box-shadow: none !important;
+            border: none !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            background: white !important;
         }
 
-        .ticket-lines input {
-            border: none;
-            border-bottom: 1px solid #333;
-            width: 100%;
-            background: transparent;
-            font-family: inherit;
-            font-size: 14px;
-            padding: 0 4px;
-            border-radius: 0;
-            line-height: normal;
+        .glass-panel {
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
         }
 
-        .ticket-lines input:focus {
-            outline: none;
-            border-bottom: 2px solid #2563eb;
+        .print\:hidden {
+            display: none !important;
         }
 
-        .ticket-label {
-            font-size: 12px;
-            color: #666;
-            margin-right: 8px;
-            white-space: nowrap;
+        .form-input {
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #000 !important;
+            border-radius: 0 !important;
+            padding: 0 0 2px 0 !important;
+            font-weight: bold;
         }
 
-        .ticket-header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+        .toggle-btn {
+            border: 1px solid #000 !important;
+            color: #000 !important;
+            background: white !important;
         }
 
-        @media print {
-            @page {
-                size: 4.5in 11in;
-                margin: 0;
-            }
-
-            body {
-                background: white;
-            }
-
-            .ticket-page {
-                box-shadow: none;
-                margin: 0;
-                width: 100%;
-                max-width: 100%;
-            }
-
-            .print\:hidden {
-                display: none !important;
-            }
-
-            input {
-                border: none !important;
-                border-bottom: 1px solid #000 !important;
-            }
+        .toggle-btn.active {
+            background: #000 !important;
+            color: white !important;
+            font-weight: bold !important;
         }
-    </style>
+
+        .no-print-bg {
+            background: none !important;
+        }
+    }
+</style>
 </head>
 
-<body class="antialiased h-screen flex flex-col bg-gray-100 overflow-hidden">
+<body class="antialiased flex flex-col overflow-hidden">
     <!-- Navigation -->
     <nav class="main-nav sticky top-0 z-40 p-4 w-full print:hidden flex-shrink-0">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -121,7 +182,7 @@
                     </svg>
                     Back to Calculator
                 </a>
-                <button onclick="printTicket()"
+                <button onclick="printTowTicket()"
                     class="btn bg-gray-800 hover:bg-black text-white py-2 px-4 rounded-lg flex items-center gap-2 shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -135,256 +196,336 @@
         </div>
     </nav>
 
-    <!-- Sub-Nav for Towing Section -->
-    <div class="bg-white border-b border-gray-200 px-4 py-2 print:hidden">
-        <div class="max-w-7xl mx-auto flex gap-4 text-sm font-medium text-gray-500">
-            <a href="../index.html" class="hover:text-blue-600 pb-1">Calculator & Map</a>
-            <span class="text-gray-300">|</span>
-            <a href="#" class="text-blue-600 border-b-2 border-blue-600 pb-1">Tow Ticket</a>
-        </div>
-    </div>
+
 
     <!-- Main Content -->
-    <main class="flex-grow flex justify-center p-4 overflow-y-auto bg-gray-100">
+    <main class="flex-grow flex justify-center p-4 overflow-y-auto print:overflow-visible">
 
         <!-- TICKET PAPER -->
-        <div id="ticket-body"
-            class="ticket-page p-6 md:p-8 text-gray-900 font-sans text-sm relative ticket-lines h-fit">
+        <div id="ticket-body" class="ticket-page glass-panel rounded-2xl p-6 md:p-8 animate-[fadeIn_0.5s_ease-out]">
 
-            <!-- HEADER -->
-            <div class="ticket-header">
-                <div class="flex justify-center mb-2">
-                    <img src="../../treadztntLogo.png" alt="Treadz" class="h-12 w-auto grayscale contrast-125">
+            <!-- TICKET HEADER -->
+            <div class="text-center mb-6 pb-4 border-b-2 border-gray-900 relative">
+                <div class="flex justify-center mb-3">
+                    <img src="../../treadztntLogo.png" alt="Treadz" class="h-14 w-auto grayscale contrast-125">
                 </div>
-                <div class="text-center text-xs font-serif leading-tight">
-                    <div class="font-bold text-sm">TIRE & TOWING</div>
+                <div class="text-xs font-serif leading-tight text-gray-800">
+                    <div class="font-bold text-sm tracking-wide">TIRE & TOWING</div>
                     <div>409 Main Street E.</div>
                     <div>Mt. Carmel, TN 37645</div>
-                    <div class="font-bold mt-1">423-357-4551</div>
+                    <div class="font-bold mt-1 text-sm">423-357-4551</div>
                 </div>
-                <div class="absolute top-8 left-6 text-lg font-bold font-serif text-red-600 param-ticket-id">
+                <div
+                    class="absolute top-2 left-0 text-xl font-bold font-serif text-red-600 border-2 border-red-600 px-2 py-1 rounded rotate-[-5deg] opacity-90 param-ticket-id">
                     <!-- ID injected via JS -->
+                </div>
+                <div class="absolute top-2 right-0 flex flex-col items-end">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Date</span>
+                    <input type="text" id="tt-date"
+                        class="text-right text-xs font-bold bg-transparent border-none w-24 p-0">
                 </div>
             </div>
 
-            <!-- FORM -->
-            <div class="space-y-2">
-                <div class="flex items-end">
-                    <span class="ticket-label w-12">Bill To</span>
-                    <input type="text" id="tt-bill-to">
+            <!-- 1. CUSTOMER INFO -->
+            <div class="mb-6">
+                <div class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="text-blue-600">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    CUSTOMER DETIALS
                 </div>
-                <div class="flex items-end">
-                    <span class="ticket-label w-12">Address</span>
-                    <input type="text" id="tt-address">
-                </div>
-                <div class="flex items-end">
-                    <input type="text" id="tt-address-2">
-                </div>
-                <div class="flex items-end mt-2">
-                    <span class="ticket-label w-24">Phone Number</span>
-                    <input type="text" id="tt-phone">
-                </div>
-                <div class="flex items-end">
-                    <span class="ticket-label w-24">Vehicle Location</span>
-                    <input type="text" id="tt-location">
-                </div>
-                <div class="flex items-end">
-                    <span class="ticket-label w-24">Make & Model</span>
-                    <input type="text" id="tt-make-model">
-                </div>
-
-                <div class="flex gap-4">
-                    <div class="flex items-end flex-grow">
-                        <span class="ticket-label">Tag Number</span>
-                        <input type="text" id="tt-tag">
+                <div class="grid grid-cols-1 gap-3">
+                    <div>
+                        <label class="form-label">Bill To</label>
+                        <input type="text" id="tt-bill-to" class="form-input">
                     </div>
-                    <div class="flex items-end w-24 flex-shrink-0">
-                        <span class="ticket-label">Color</span>
-                        <input type="text" id="tt-color">
-                    </div>
-                </div>
-
-                <div class="flex gap-4">
-                    <div class="flex items-end flex-grow">
-                        <span class="ticket-label">Mileage</span>
-                        <input type="number" id="tt-mileage">
-                    </div>
-                </div>
-                <div class="flex items-end">
-                    <span class="ticket-label w-10">VIN #</span>
-                    <input type="text" id="tt-vin" class="font-mono tracking-widest">
-                </div>
-
-                <div class="border-b-2 border-black my-2"></div>
-
-                <!-- DAMAGE -->
-                <div class="mb-2">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-bold underline">Vehicle Damage(s)</span>
-                        <div class="flex gap-2 text-xs">
-                            <label class="flex items-center gap-1"><input type="checkbox"> FRT</label>
-                            <label class="flex items-center gap-1"><input type="checkbox"> REAR</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="col-span-2">
+                            <label class="form-label">Address</label>
+                            <input type="text" id="tt-address" class="form-input mb-2">
+                            <input type="text" id="tt-address-2" class="form-input" placeholder="City, State, Zip">
                         </div>
                     </div>
-                    <div class="flex justify-between gap-2 text-xs">
-                        <div class="flex items-center gap-1 border-b border-gray-400 pb-1 flex-1">
-                            <span class="w-6">LF</span> <input type="text"
-                                class="border-none w-full bg-transparent p-0 h-4">
-                        </div>
-                        <div class="flex items-center gap-1 border-b border-gray-400 pb-1 flex-1">
-                            <span class="w-6">RF</span> <input type="text"
-                                class="border-none w-full bg-transparent p-0 h-4">
-                        </div>
+                    <div>
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" id="tt-phone" class="form-input">
                     </div>
-                    <div class="flex justify-between gap-2 text-xs mt-1">
-                        <div class="flex items-center gap-1 border-b border-gray-400 pb-1 flex-1">
-                            <span class="w-6">RR</span> <input type="text"
-                                class="border-none w-full bg-transparent p-0 h-4">
-                        </div>
-                        <div class="flex items-center gap-1 border-b border-gray-400 pb-1 flex-1">
-                            <span class="w-6">LR</span> <input type="text"
-                                class="border-none w-full bg-transparent p-0 h-4">
-                        </div>
+                </div>
+            </div>
+
+            <!-- 2. VEHICLE INFO -->
+            <div class="mb-6">
+                <div class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="text-blue-600">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                    VEHICLE INFORMATION
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="col-span-2">
+                        <label class="form-label">Pickup Location</label>
+                        <input type="text" id="tt-location" class="form-input">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="form-label">Make & Model</label>
+                        <input type="text" id="tt-make-model" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Tag Number</label>
+                        <input type="text" id="tt-tag" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Color</label>
+                        <input type="text" id="tt-color" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Mileage</label>
+                        <input type="number" id="tt-mileage" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">VIN #</label>
+                        <input type="text" id="tt-vin" class="form-input font-mono tracking-wider text-xs">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. DAMAGE & AGENCY -->
+            <div class="mb-6 bg-gray-50/50 p-4 rounded-xl border border-gray-100 no-print-bg">
+                <!-- Agency Toggles -->
+                <div class="mb-4">
+                    <label class="form-label mb-2">AGENCY / POLICE</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-group="agency"
+                            data-value="Hawkins">Hawkins</button>
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-group="agency"
+                            data-value="KPD">KPD</button>
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-group="agency"
+                            data-value="THP">THP</button>
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-group="agency"
+                            data-value="Other">Other</button>
+                    </div>
+                    <input type="text" id="other-agency-input" class="form-input mt-2 hidden"
+                        placeholder="Specify Agency...">
+                </div>
+
+                <!-- Damage Toggles -->
+                <div>
+                    <label class="form-label mb-2">VEHICLE DAMAGE</label>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-value="FRT">Front (FRT)</button>
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-value="REAR">Rear</button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-value="LF">LF</button>
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-value="RF">RF</button>
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-value="RR">RR</button>
+                        <button class="toggle-btn" onclick="toggleBtn(this)" data-value="LR">LR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. FEES & CHARGES -->
+            <div class="mb-6">
+                <div class="section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="text-blue-600">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    FEES & CHARGES
+                </div>
+
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Base Tow</span>
+                        <input type="number" id="tt-fee-base"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Winch Fees</span>
+                        <input type="number" id="tt-fee-winch"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Clean-Up</span>
+                        <input type="number" id="tt-fee-clean"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">VTS/ Admin Fee</span>
+                        <input type="number" id="tt-fee-admin"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Additional Labor</span>
+                        <input type="number" id="tt-fee-labor"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Mileage Charges</span>
+                        <input type="number" id="tt-fee-mileage"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Gate Fee(s)</span>
+                        <input type="number" id="tt-fee-gate"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Misc. Fees</span>
+                        <input type="number" id="tt-fee-misc"
+                            class="text-right font-bold w-24 bg-transparent border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                            onchange="calcTicketTotal()">
                     </div>
                 </div>
 
-                <!-- POLICE -->
-                <div class="flex justify-between items-center text-xs font-bold pt-2 pb-2">
-                    <label class="flex items-center gap-2"><input type="checkbox"> Hawkins</label>
-                    <label class="flex items-center gap-2"><input type="checkbox"> KPD</label>
-                    <label class="flex items-center gap-2"><input type="checkbox"> THP</label>
-                    <input type="text" class="border-b border-gray-400 w-16" placeholder="Other">
-                </div>
-
-                <!-- FEES -->
-                <div class="space-y-1 mt-2">
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">Base Tow</span>
-                        <input type="number" id="tt-fee-base" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
+                <!-- Storage Calc -->
+                <div class="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg no-print-bg">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-blue-800 uppercase">Storage Calculator</span>
                     </div>
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">Winch Fees</span>
-                        <input type="number" id="tt-fee-winch" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
-                    </div>
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">Clean-Up</span>
-                        <input type="number" id="tt-fee-clean" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
-                    </div>
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">VTS/ Admin Fee</span>
-                        <input type="number" id="tt-fee-admin" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
-                    </div>
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">Additional Labor</span>
-                        <input type="number" id="tt-fee-labor" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
-                    </div>
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">Mileage Charges</span>
-                        <input type="number" id="tt-fee-mileage" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
-                    </div>
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">Gate Fee(s)</span>
-                        <input type="number" id="tt-fee-gate" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
-                    </div>
-                    <div class="flex items-end justify-between">
-                        <span class="ticket-label">Misc. Fees</span>
-                        <input type="number" id="tt-fee-misc" class="text-right w-24 font-bold"
-                            onchange="calcTicketTotal()">
-                    </div>
-                </div>
-
-                <!-- STORAGE -->
-                <div class="mt-4 border p-2 text-xs">
-                    <div class="flex justify-between mb-2">
-                        <span>Storage Rates</span>
+                    <div class="flex justify-between items-center text-sm">
                         <div class="flex gap-2">
-                            <label><input type="radio" name="store-rate" value="35" onchange="calcTicketTotal()">
-                                $35</label>
-                            <label><input type="radio" name="store-rate" value="40" onchange="calcTicketTotal()">
-                                $40</label>
-                            <label><input type="radio" name="store-rate" value="45" onchange="calcTicketTotal()">
-                                $45</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
+                                    value="35" onchange="calcTicketTotal()" class="accent-blue-600"> $35</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
+                                    value="40" onchange="calcTicketTotal()" class="accent-blue-600"> $40</label>
+                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="store-rate"
+                                    value="45" onchange="calcTicketTotal()" class="accent-blue-600"> $45</label>
                         </div>
                         <div class="flex items-center gap-1">
-                            <input type="number" id="tt-store-days" class="w-8 border-b border-black text-center"
-                                onchange="calcTicketTotal()"> days
+                            <input type="number" id="tt-store-days"
+                                class="w-10 text-center bg-white border border-gray-300 rounded"
+                                onchange="calcTicketTotal()" placeholder="0">
+                            <span class="text-gray-600 text-xs">days</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- TOTALS -->
-                <div class="mt-4 space-y-1">
-                    <div class="flex justify-between items-end">
-                        <span class="font-bold">Tow Total</span>
-                        <div class="flex flex-col items-end w-1/2">
-                            <span class="text-[10px] text-gray-500">Storage Total</span>
-                            <input type="number" id="tt-total-storage"
-                                class="text-right w-full font-bold border-b border-black" readonly>
-                        </div>
+                <div class="mt-6 pt-4 border-t-2 border-gray-200">
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-sm font-medium text-gray-500">Tow Total</span>
+                        <span id="display-tow-total" class="font-bold text-gray-800">$0.00</span>
                     </div>
-                    <div class="flex justify-between items-end">
-                        <span class="font-bold">Total Due</span>
-                        <div class="flex flex-col items-end w-1/2">
-                            <span class="text-[10px] text-gray-500">Tow + Storage</span>
-                            <input type="number" id="tt-total-due"
-                                class="text-right w-full font-bold text-lg border-b-2 border-black" readonly>
-                        </div>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-sm font-medium text-gray-500">Storage Total</span>
+                        <span id="display-store-total" class="font-bold text-gray-800">$0.00</span>
+                        <input type="hidden" id="tt-total-storage">
+                    </div>
+                    <div class="flex justify-between items-end mt-4 pt-4 border-t border-gray-200">
+                        <span class="text-lg font-black text-gray-900">TOTAL DUE</span>
+                        <input type="text" id="tt-total-due"
+                            class="text-right font-black text-2xl bg-transparent border-none text-blue-600 w-40"
+                            readonly>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-4">
-                    <span class="text-xs font-bold">Notes:</span>
-                    <textarea class="w-full border border-gray-300 p-2 text-xs h-20 resize-none header-font"
-                        id="tt-notes"></textarea>
-                </div>
+            <!-- 5. FOOTER & NOTES -->
+            <div>
+                <label class="form-label">Notes</label>
+                <textarea id="tt-notes" class="form-input h-20 resize-none mb-4"></textarea>
 
-                <div class="mt-4 text-[10px] text-justify leading-tight text-gray-600">
+                <p class="text-[10px] text-gray-500 leading-tight text-justify mb-6">
                     I have removed all personal belongings from my vehicle and hold No one responsible for lost or
                     stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
                     winching vehicle.
-                </div>
+                </p>
 
-                <!-- SIGNATURES -->
-                <div class="mt-6 space-y-4">
-                    <div class="flex items-end">
-                        <span class="w-20 text-xs font-bold uppercase">Customer</span>
-                        <input type="text" class="border-b border-black w-full">
+                <!-- Signatures -->
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="border-b border-black pt-8">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Customer
+                            Signature</span>
                     </div>
-                    <div class="flex items-end">
-                        <span class="w-20 text-xs font-bold uppercase">Driver</span>
-                        <input type="text" class="border-b border-black w-full">
+                    <div class="border-b border-black pt-8">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Driver
+                            Signature</span>
                     </div>
-                    <div class="flex items-end">
-                        <span class="w-20 text-xs font-bold uppercase">Delivered To</span>
-                        <input type="text" class="border-b border-black w-full">
-                    </div>
-                    <div class="flex items-end">
-                        <span class="w-20 text-xs font-bold uppercase">Date</span>
-                        <input type="text" id="tt-date" class="border-b border-black w-full">
+                    <div class="flex items-end gap-2">
+                        <div class="flex-grow border-b border-black pt-8">
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Delivered
+                                To</span>
+                        </div>
                     </div>
                 </div>
-
             </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between items-center print:hidden">
+                <button onclick="downloadTowTicket()"
+                    class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">
+                    Download PDF
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                </button>
+            </div>
+
+        </div>
     </main>
 
     <script src="../../js/mobile-nav.js"></script>
     <script>
         // Init Logic
         document.addEventListener('DOMContentLoaded', () => {
-            // Check for passed params (if we want to support that later)
-            // For now, init blank or random
             const date = new Date();
             const id = Math.floor(Math.random() * 9000) + 1000;
             document.querySelector('.param-ticket-id').innerText = id;
             document.getElementById('tt-date').value = date.toLocaleDateString();
+
+            populateFromStorage();
         });
+
+        // Toggle Button Logic
+        function toggleBtn(btn) {
+            // Check if it's a radio-style group (like agencies)
+            const group = btn.dataset.group;
+            if (group) {
+                // Deselect others in group
+                document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => {
+                    if (b !== btn) b.classList.remove('active');
+                });
+            }
+
+            btn.classList.toggle('active');
+
+            // Handle "Other" input visibility
+            if (btn.dataset.value === 'Other') {
+                const input = document.getElementById('other-agency-input');
+                if (btn.classList.contains('active')) {
+                    input.classList.remove('hidden');
+                    input.focus();
+                } else {
+                    input.classList.add('hidden');
+                }
+            }
+        }
+
+        // Try to read query params or local storage from calculator if we want to be fancy
+        function populateFromStorage() {
+            // For now just basic defaults
+        }
 
         function calcTicketTotal() {
             // Sum Fees
@@ -395,6 +536,8 @@
                 towTotal += parseFloat(document.getElementById(id).value) || 0;
             });
 
+            document.getElementById('display-tow-total').innerText = '$' + towTotal.toFixed(2);
+
             // Storage
             let storeRate = 0;
             const rateEls = document.getElementsByName('store-rate');
@@ -403,14 +546,31 @@
             const days = parseFloat(document.getElementById('tt-store-days').value) || 0;
             const storeTotal = storeRate * days;
 
+            document.getElementById('display-store-total').innerText = '$' + storeTotal.toFixed(2);
             document.getElementById('tt-total-storage').value = storeTotal.toFixed(2);
-            document.getElementById('tt-total-due').value = (towTotal + storeTotal).toFixed(2);
+
+            const total = towTotal + storeTotal;
+            document.getElementById('tt-total-due').value = '$' + total.toFixed(2);
         }
 
-        function printTicket() {
+        function printTowTicket() {
             window.print();
+        }
+
+        function downloadTowTicket() {
+            const element = document.getElementById('ticket-body');
+            const id = document.querySelector('.param-ticket-id').innerText;
+
+            const opt = {
+                margin: 0,
+                filename: `Treadz_TowTicket_${id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: [4.5, 11], orientation: 'portrait' }
+            };
+
+            // Temporary styles for PDF generation if needed
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
-
-</html>
