@@ -107,149 +107,6 @@
             gap: 0.5rem;
         }
 
-        @media print {
-            @page {
-                size: A4;
-                margin: 0.5cm;
-            }
-
-            body {
-                font-size: 11px !important;
-                background: white !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .ticket-page,
-            .glass-panel {
-                box-shadow: none !important;
-                border: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-            }
-
-            .print\:hidden,
-            .no-print,
-            .no-print-bg,
-            button,
-            nav,
-            #history-panel,
-            .sidebar-toggle,
-            .sticky-footer,
-            #sig-pad-wrapper,
-            #sig-empty-state,
-            .toggle-btn:not(.active),
-            #other-agency-input.hidden {
-                display: none !important;
-            }
-
-            /* Layout Overrides */
-            .flex-col {
-                flex-direction: row !important;
-                /* Force rows where possible */
-                flex-wrap: wrap;
-            }
-
-            /* Restore Grid for Print */
-            .grid {
-                display: grid !important;
-            }
-
-            /* Force specific print grids */
-            .print\:grid-cols-2 {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-
-            .print\:gap-x-8 {
-                column-gap: 2rem !important;
-            }
-
-            /* Input Styling */
-            input,
-            select,
-            textarea {
-                border: none !important;
-                border-bottom: 1px solid #ccc !important;
-                background: transparent !important;
-                padding: 0 !important;
-                height: auto !important;
-                font-size: 11px !important;
-                min-height: 0 !important;
-                box-shadow: none !important;
-                margin-bottom: 2px !important;
-            }
-
-            /* Hide dropdown arrows */
-            select {
-                appearance: none !important;
-                -webkit-appearance: none !important;
-                background-image: none !important;
-            }
-
-            .form-label {
-                font-size: 9px !important;
-                color: #666 !important;
-                margin-bottom: 0 !important;
-                text-transform: uppercase;
-                font-weight: bold;
-            }
-
-            .section-title {
-                font-size: 12px !important;
-                margin-top: 8px !important;
-                margin-bottom: 4px !important;
-                padding-bottom: 2px !important;
-                border-bottom: 1px solid #000 !important;
-            }
-
-            /* Toggle Buttons as Text tags */
-            .toggle-btn.active {
-                display: inline-block !important;
-                background: none !important;
-                color: black !important;
-                border: 1px solid black !important;
-                padding: 1px 6px !important;
-                font-size: 10px !important;
-                border-radius: 4px;
-                margin-right: 4px;
-            }
-
-            /* Storage Inputs Hidden */
-            #storage-calc-inputs {
-                display: none !important;
-            }
-
-            /* Print Sig Fallback */
-            #sig-empty-state {
-                display: block !important;
-                border: none !important;
-                border-bottom: 1px solid black !important;
-                height: 30px !important;
-                margin-bottom: 2px !important;
-            }
-
-            #sig-empty-state span {
-                display: none !important;
-            }
-
-            #sig-empty-state::after {
-                content: "Customer Signature";
-                color: black;
-                font-size: 8px;
-                display: block;
-                margin-top: 32px;
-                text-transform: uppercase;
-                font-weight: bold;
-            }
-
-            /* Images */
-            img {
-                max-height: 40px !important;
-            }
-        }
 
         /* SEPARATE PRINT VIEW STRATEGY - UPDATED */
         /* SEPARATE PRINT VIEW STRATEGY - UPDATED */
@@ -570,13 +427,25 @@
                             </div>
                         </div>
                         <div class="col-span-2">
-                            <label class="form-label">Delivered To</label>
-                            <div class="relative">
-                                <input type="text" id="tt-delivered" class="form-input"
-                                    placeholder="Start typing location..." autocomplete="off">
-                                <ul id="delivered-suggestions"
-                                    class="absolute left-0 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto top-full mt-1">
-                                </ul>
+                            <div class="col-span-2">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="form-label mb-0">Delivered To</label>
+                                    <div class="flex gap-2">
+                                        <button type="button"
+                                            class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded hover:bg-gray-300 transition-colors"
+                                            onclick="setDelivered('Lot 1')">Lot 1</button>
+                                        <button type="button"
+                                            class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded hover:bg-gray-300 transition-colors"
+                                            onclick="setDelivered('Lot 2')">Lot 2</button>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <input type="text" id="tt-delivered" class="form-input"
+                                        placeholder="Start typing location..." autocomplete="off">
+                                    <ul id="delivered-suggestions"
+                                        class="absolute left-0 w-full bg-white border border-gray-300 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto top-full mt-1">
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                         <div class="col-span-2 grid grid-cols-2 gap-2">
@@ -820,110 +689,111 @@
                             onchange="calcTicketTotal()" placeholder="0">
                     </div>
                 </div>
-            </div>
 
-            <!-- TOTALS & FOOTER CENTERED -->
-            <div class="mt-8 pt-6 border-t-2 border-gray-100 max-w-lg mx-auto">
+                <!-- TOTALS & FOOTER CENTERED -->
+                <div class="mt-8 pt-6 border-t-2 border-gray-100 max-w-lg mx-auto">
 
-                <!-- Centered Totals -->
-                <div class="mb-8 space-y-3">
-                    <div class="flex justify-between items-center px-8">
-                        <span class="text-sm font-bold text-gray-500 uppercase tracking-wide">Tow Total</span>
-                        <span id="display-tow-total" class="font-bold text-gray-800 text-lg">$0.00</span>
-                    </div>
-                    <div class="flex justify-between items-center px-8">
-                        <span class="text-sm font-bold text-gray-500 uppercase tracking-wide">Storage Total</span>
-                        <span id="display-store-subtotal" class="font-bold text-gray-800 text-lg">$0.00</span>
-                    </div>
-                    <div class="flex justify-between items-center px-8 border-b border-gray-100 pb-3 mb-3">
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Storage Tax (3.5%)</span>
-                        <span id="display-store-tax" class="font-bold text-gray-500">$0.00</span>
-                        <input type="hidden" id="tt-total-storage">
-                    </div>
-                    <div class="flex justify-between items-center px-4 bg-blue-50/50 rounded-xl p-3">
-                        <span class="text-lg font-black text-gray-900 uppercase">TOTAL DUE</span>
-                        <input type="text" id="tt-total-due"
-                            class="text-right font-black text-2xl bg-transparent border-none text-blue-600 w-40 focus:ring-0"
-                            readonly>
-                    </div>
-                </div>
-
-                <!-- Centered Notes -->
-                <div class="text-center mb-8">
-                    <label
-                        class="form-label block mb-2 uppercase tracking-wide text-xs font-bold text-gray-400">Notes</label>
-                    <textarea id="tt-notes"
-                        class="form-input h-24 resize-none mb-4 text-center text-sm bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"></textarea>
-
-                    <p class="text-[10px] text-gray-400 leading-tight max-w-md mx-auto mb-6 px-4">
-                        I have removed all personal belongings from my vehicle and hold No one responsible for lost or
-                        stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
-                        winching vehicle.
-                    </p>
-                </div>
-
-                <!-- Centered Signatures -->
-                <div class="space-y-8 text-center max-w-sm mx-auto">
-                    <!-- Customer -->
-                    <div>
-                        <div id="sig-empty-state"
-                            class="border-b-2 border-dashed border-gray-300 pt-8 pb-2 cursor-pointer hover:bg-gray-50 transition-colors flex justify-center items-center group rounded relative"
-                            onclick="openSignaturePad()">
-                            <span
-                                class="text-[10px] font-bold uppercase tracking-widest text-blue-400 flex items-center gap-2 group-hover:text-blue-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                                Click to Sign Customer Signature
-                            </span>
+                    <!-- Centered Totals -->
+                    <div class="mb-8 space-y-3">
+                        <div class="flex justify-between items-center px-8">
+                            <span class="text-sm font-bold text-gray-500 uppercase tracking-wide">Tow Total</span>
+                            <span id="display-tow-total" class="font-bold text-gray-800 text-lg">$0.00</span>
                         </div>
-
-                        <!-- Canvas -->
-                        <div id="sig-pad-wrapper"
-                            class="hidden border border-gray-300 rounded bg-gray-50 p-2 shadow-inner">
-                            <canvas id="sig-canvas"
-                                class="w-full h-32 bg-white border border-gray-200 rounded touch-none cursor-crosshair mb-2"></canvas>
-                            <div class="flex justify-between items-center">
-                                <button type="button" onclick="clearSignature()"
-                                    class="text-xs text-red-500 font-bold uppercase tracking-wider px-2 py-1 hover:bg-red-50 rounded">Clear</button>
-                                <span class="text-[10px] text-gray-400">Sign Above</span>
-                                <button type="button" onclick="saveSignature()"
-                                    class="text-xs bg-blue-600 text-white font-bold uppercase tracking-wider px-3 py-1 rounded hover:bg-blue-700 shadow-sm">Apply</button>
-                            </div>
+                        <div class="flex justify-between items-center px-8">
+                            <span class="text-sm font-bold text-gray-500 uppercase tracking-wide">Storage Total</span>
+                            <span id="display-store-subtotal" class="font-bold text-gray-800 text-lg">$0.00</span>
                         </div>
-
-                        <!-- Result -->
-                        <div id="sig-result"
-                            class="hidden border-b-2 border-black pb-2 cursor-pointer relative group flex justify-center"
-                            onclick="openSignaturePad()">
-                            <img id="sig-image" class="h-16 object-contain" alt="Customer Signature">
-                            <div
-                                class="absolute inset-0 bg-white/90 hidden group-hover:flex items-center justify-center text-xs font-bold text-gray-500 border rounded">
-                                Click to Re-Sign
-                            </div>
+                        <div class="flex justify-between items-center px-8 border-b border-gray-100 pb-3 mb-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Storage Tax
+                                (3.5%)</span>
+                            <span id="display-store-tax" class="font-bold text-gray-500">$0.00</span>
+                            <input type="hidden" id="tt-total-storage">
+                        </div>
+                        <div class="flex justify-between items-center px-4 bg-blue-50/50 rounded-xl p-3">
+                            <span class="text-lg font-black text-gray-900 uppercase">TOTAL DUE</span>
+                            <input type="text" id="tt-total-due"
+                                class="text-right font-black text-2xl bg-transparent border-none text-blue-600 w-40 focus:ring-0"
+                                readonly>
                         </div>
                     </div>
 
-                    <!-- Driver -->
-                    <div>
+                    <!-- Centered Notes -->
+                    <div class="text-center mb-8">
                         <label
-                            class="form-label mb-1 block uppercase tracking-wide text-xs font-bold text-gray-400">Driver</label>
-                        <select id="tt-driver"
-                            class="text-center appearance-none bg-transparent border-b border-gray-300 rounded-none p-0 pb-1 font-bold text-xl text-gray-800 focus:ring-0 focus:border-blue-500 w-full outline-none transition-all cursor-pointer hover:border-blue-400"
-                            onchange="saveDriver()">
-                            <option value="" class="font-sans text-base text-gray-400">Select Driver</option>
-                            <option value="Tyler" class="font-sans text-base">Tyler</option>
-                            <option value="David" class="font-sans text-base">David</option>
-                            <option value="Bucky" class="font-sans text-base">Bucky</option>
-                        </select>
+                            class="form-label block mb-2 uppercase tracking-wide text-xs font-bold text-gray-400">Notes</label>
+                        <textarea id="tt-notes"
+                            class="form-input h-24 resize-none mb-4 text-center text-sm bg-gray-50 border-gray-200 rounded-xl focus:bg-white transition-colors"></textarea>
+
+                        <p class="text-[10px] text-gray-400 leading-tight max-w-md mx-auto mb-6 px-4">
+                            I have removed all personal belongings from my vehicle and hold No one responsible for lost
+                            or
+                            stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
+                            winching vehicle.
+                        </p>
+                    </div>
+
+                    <!-- Centered Signatures -->
+                    <div class="space-y-8 text-center max-w-sm mx-auto">
+                        <!-- Customer -->
+                        <div>
+                            <div id="sig-empty-state"
+                                class="border-b-2 border-dashed border-gray-300 pt-8 pb-2 cursor-pointer hover:bg-gray-50 transition-colors flex justify-center items-center group rounded relative"
+                                onclick="openSignaturePad()">
+                                <span
+                                    class="text-[10px] font-bold uppercase tracking-widest text-blue-400 flex items-center gap-2 group-hover:text-blue-600 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    Click to Sign Customer Signature
+                                </span>
+                            </div>
+
+                            <!-- Canvas -->
+                            <div id="sig-pad-wrapper"
+                                class="hidden border border-gray-300 rounded bg-gray-50 p-2 shadow-inner">
+                                <canvas id="sig-canvas"
+                                    class="w-full h-32 bg-white border border-gray-200 rounded touch-none cursor-crosshair mb-2"></canvas>
+                                <div class="flex justify-between items-center">
+                                    <button type="button" onclick="clearSignature()"
+                                        class="text-xs text-red-500 font-bold uppercase tracking-wider px-2 py-1 hover:bg-red-50 rounded">Clear</button>
+                                    <span class="text-[10px] text-gray-400">Sign Above</span>
+                                    <button type="button" onclick="saveSignature()"
+                                        class="text-xs bg-blue-600 text-white font-bold uppercase tracking-wider px-3 py-1 rounded hover:bg-blue-700 shadow-sm">Apply</button>
+                                </div>
+                            </div>
+
+                            <!-- Result -->
+                            <div id="sig-result"
+                                class="hidden border-b-2 border-black pb-2 cursor-pointer relative group flex justify-center"
+                                onclick="openSignaturePad()">
+                                <img id="sig-image" class="h-16 object-contain" alt="Customer Signature">
+                                <div
+                                    class="absolute inset-0 bg-white/90 hidden group-hover:flex items-center justify-center text-xs font-bold text-gray-500 border rounded">
+                                    Click to Re-Sign
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Driver -->
+                        <div>
+                            <label
+                                class="form-label mb-1 block uppercase tracking-wide text-xs font-bold text-gray-400">Driver</label>
+                            <select id="tt-driver"
+                                class="text-center appearance-none bg-transparent border-b border-gray-300 rounded-none p-0 pb-1 font-bold text-xl text-gray-800 focus:ring-0 focus:border-blue-500 w-full outline-none transition-all cursor-pointer hover:border-blue-400"
+                                onchange="saveDriver()">
+                                <option value="" class="font-sans text-base text-gray-400">Select Driver</option>
+                                <option value="Tyler" class="font-sans text-base">Tyler</option>
+                                <option value="David" class="font-sans text-base">David</option>
+                                <option value="Bucky" class="font-sans text-base">Bucky</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Footer moved to sticky bar -->
+                <!-- Footer moved to sticky bar -->
             </div>
 
             </div>
@@ -944,16 +814,15 @@
                         Download PDF
                     </button>
 
-                    <button onclick="printTowTicket()"
+                    <button onclick="saveTicket(); alert('Ticket Saved Successfully!');"
                         class="btn btn-primary py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all text-lg font-bold flex items-center gap-3">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
-                            </path>
-                            <rect x="6" y="14" width="12" height="8"></rect>
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
                         </svg>
-                        PRINT TICKET
+                        SAVE TICKET
                     </button>
                 </div>
             </div>
@@ -1156,13 +1025,27 @@
             calcTicketTotal();
         }
 
+        // Helper to set Delivery from buttons
+        function setDelivered(val) {
+            const input = document.getElementById('tt-delivered');
+            if (input) {
+                input.value = val;
+                // Add class visual feedback briefly?
+                input.classList.add('bg-blue-50');
+                setTimeout(() => input.classList.remove('bg-blue-50'), 300);
+                saveTicket();
+            }
+        }
+
         function renderHistory(query = '') {
             const list = document.getElementById('history-list');
             list.innerHTML = '';
 
             const history = getHistory().filter(t => {
                 if (!query) return true;
-                const txt = (t.id + t.billTo + t.vehicle).toLowerCase();
+                // Safely access fields in case they are missing on legacy records
+                const fields = t.fields || {};
+                const txt = (t.id + (t.billTo || '') + (t.vehicle || '') + (fields.vin || '')).toLowerCase();
                 return txt.includes(query.toLowerCase());
             });
 
@@ -1170,6 +1053,26 @@
                 const div = document.createElement('div');
                 div.className = "p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all";
                 div.onclick = () => loadTicket(t.id);
+
+                // Days in Lot Logic
+                let daysHtml = '';
+                const f = t.fields || {};
+                if (f.delivered === 'Lot 1' || f.delivered === 'Lot 2') {
+                    if (f.storeStart) {
+                        const start = new Date(f.storeStart);
+                        const now = new Date();
+                        const diff = now - start;
+                        if (!isNaN(diff)) {
+                            // Difference in milliseconds -> Days (rounded up)
+                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                            // Only show if >= 0
+                            if (days >= 0) {
+                                daysHtml = `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded ml-2 border border-orange-200 whitespace-nowrap">${days} Days</span>`;
+                            }
+                        }
+                    }
+                }
+
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
                         <span class="font-bold text-gray-800 text-sm">#${t.id}</span>
@@ -1177,8 +1080,11 @@
                     </div>
                     <div class="text-xs font-bold text-gray-700 truncate mt-1">${t.billTo || 'Unknown Customer'}</div>
                     <div class="text-xs text-gray-500 truncate">${t.vehicle || 'Vehicle Info'}</div>
-                    <div class="mt-2 flex justify-between items-end border-t border-gray-100 pt-1">
-                        <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
+                    <div class="mt-2 flex justify-between items-center border-t border-gray-100 pt-1">
+                        <div class="flex items-center w-full">
+                            <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
+                            ${daysHtml}
+                        </div>
                     </div>
                 `;
                 list.appendChild(div);
@@ -1654,105 +1560,110 @@
     <!-- Print View Container -->
     <div id="print-view">
         <!-- Header -->
-        <div class="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
-            <img src="../../images/logo.png" class="h-20 object-contain" alt="Treadz">
+        <div class="flex justify-between items-start mb-4 border-b-2 border-black pb-2">
+            <!-- Inline style for Logo -->
+            <img src="../../treadztntLogo.png" style="height: 4rem; width: auto; max-width: 200px; display: block;"
+                alt="Treadz">
             <div class="text-right">
-                <h1 class="font-black uppercase tracking-wide text-3xl">TOWING INVOICE</h1>
-                <div class="text-lg text-gray-600 font-bold">Ticket #: <span id="pv-ticket-id"></span></div>
-                <div class="text-lg text-gray-600">Date: <span id="pv-date"></span></div>
+                <h1 class="font-black uppercase tracking-wide text-2xl">TOWING INVOICE</h1>
+                <div class="text-sm text-gray-600 font-bold">Ticket #: <span id="pv-ticket-id"></span></div>
+                <div class="text-sm text-gray-600">Date: <span id="pv-date"></span></div>
             </div>
         </div>
 
         <!-- SECTION 1: CUSTOMER -->
-        <div class="mb-8">
-            <h3 class="font-bold text-lg uppercase border-b-2 border-gray-800 mb-4 pb-1">Customer Information</h3>
-            <div class="grid grid-cols-1 gap-2">
-                <div class="text-xl font-bold" id="pv-bill-to"></div>
-                <div class="text-lg" id="pv-address"></div>
-                <div class="text-lg" id="pv-phone"></div>
+        <div class="mb-4">
+            <h3 class="font-bold text-sm uppercase border-b border-black mb-2 pb-1">Customer Information</h3>
+            <div class="text-sm">
+                <div class="font-bold text-base" id="pv-bill-to"></div>
+                <div id="pv-address"></div>
+                <div id="pv-phone"></div>
             </div>
         </div>
 
         <!-- SECTION 2: LOCATIONS -->
-        <div class="mb-8 grid grid-cols-2 gap-8">
+        <div class="mb-4 grid grid-cols-2 gap-8 text-sm">
             <div>
-                <div class="font-bold text-gray-500 uppercase border-b mb-1 text-sm">Picked Up At</div>
-                <div id="pv-location" class="font-bold text-lg mt-1"></div>
+                <div class="font-bold text-gray-500 uppercase border-b mb-1 text-xs">Picked Up At</div>
+                <div id="pv-location" class="font-bold mt-1"></div>
             </div>
             <div>
-                <div class="font-bold text-gray-500 uppercase border-b mb-1 text-sm">Delivered To</div>
-                <div id="pv-delivered" class="font-bold text-lg mt-1"></div>
+                <div class="font-bold text-gray-500 uppercase border-b mb-1 text-xs">Delivered To</div>
+                <div id="pv-delivered" class="font-bold mt-1"></div>
             </div>
         </div>
 
         <!-- SECTION 3: VEHICLE -->
-        <div class="mb-8">
-            <h3 class="font-bold text-lg uppercase border-b-2 border-gray-800 mb-4 pb-1">Vehicle Information</h3>
-            <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-base">
-                <div class="text-gray-600 font-medium">Make/Model:</div>
+        <div class="mb-4">
+            <h3 class="font-bold text-sm uppercase border-b border-black mb-2 pb-1">Vehicle Information</h3>
+            <div class="grid grid-cols-4 gap-y-1 gap-x-4 text-xs">
+                <div class="font-bold text-gray-600">Make/Model:</div>
                 <div id="pv-vehicle" class="font-bold"></div>
-                <div class="text-gray-600 font-medium">Color:</div>
+                <div class="font-bold text-gray-600">Color:</div>
                 <div id="pv-color"></div>
-                <div class="text-gray-600 font-medium">VIN:</div>
-                <div id="pv-vin" class="font-mono text-lg"></div>
-                <div class="text-gray-600 font-medium">Tag:</div>
+
+                <div class="font-bold text-gray-600">VIN:</div>
+                <div id="pv-vin" class="font-mono text-sm col-span-2"></div> <!-- Span 2 if long -->
+                <div class="font-bold text-gray-600">Tag:</div>
                 <div id="pv-tag"></div>
-                <div class="text-gray-600 font-medium">Mileage:</div>
+
+                <div class="font-bold text-gray-600">Mileage:</div>
                 <div id="pv-mileage"></div>
             </div>
         </div>
 
         <!-- SECTION 4: CHARGES -->
-        <div class="mb-8">
-            <h3 class="font-bold text-lg uppercase border-b-2 border-gray-800 mb-4 pb-1">Fees & Charges</h3>
-            <table class="w-full text-base">
+        <div class="mb-4">
+            <h3 class="font-bold text-sm uppercase border-b border-black mb-2 pb-1">Fees & Charges</h3>
+            <table class="w-full text-xs">
                 <thead>
-                    <tr class="text-gray-600">
-                        <th class="text-left py-2">Description</th>
-                        <th class="text-right py-2 w-48">Amount</th>
+                    <tr class="text-gray-600 border-b border-gray-300">
+                        <th class="text-left py-1">Description</th>
+                        <th class="text-right py-1 w-24">Amount</th>
                     </tr>
                 </thead>
                 <tbody id="pv-charges-body">
                     <!-- Dynamic Rows -->
                 </tbody>
-                <tfoot class="border-t-4 border-black">
+                <tfoot class="border-t-2 border-black">
                     <tr>
-                        <td class="text-right py-4 font-bold text-xl">TOTAL DUE:</td>
-                        <td class="text-right py-4 font-black text-2xl" id="pv-total-due">$0.00</td>
+                        <td class="text-right py-2 font-bold text-base">TOTAL DUE:</td>
+                        <td class="text-right py-2 font-black text-lg" id="pv-total-due">$0.00</td>
                     </tr>
                 </tfoot>
             </table>
         </div>
 
         <!-- Notes -->
-        <div class="mb-10 border-2 border-gray-200 p-4 rounded bg-gray-50">
-            <span class="font-bold uppercase text-sm text-gray-500 block mb-2">Notes</span>
-            <div id="pv-notes" class="italic text-base"></div>
+        <div class="mb-4 border border-gray-300 p-2 rounded bg-gray-50">
+            <span class="font-bold uppercase text-xs text-gray-500 block mb-1">Notes</span>
+            <div id="pv-notes" class="italic text-sm"></div>
         </div>
 
         <!-- Disclaimer -->
-        <div class="text-xs text-gray-500 text-justify mb-12 leading-normal">
+        <div class="text-[10px] text-gray-500 text-justify mb-4 leading-tight">
             I have removed all personal belongings from my vehicle and hold No one responsible for lost or
             stolen items. Towing Company is not Responsible for any damages incurred while towing and/or
             winching vehicle.
         </div>
 
-        <!-- Signatures -->
-        <div class="gap-12 text-base">
-            <div class="mb-8">
-                <div class="border-b-2 border-black mb-2 h-16 flex items-end justify-start relative w-1/2">
-                    <img id="pv-sig-img" class="h-16 hidden object-contain">
+        <!-- Signatures Horizontal via Inline Grid -->
+        <div
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; border-top: 1px solid #ddd; padding-top: 1rem; align-items: end;">
+            <div>
+                <div class="border-b border-black mb-1 h-12 flex items-end justify-start relative w-full">
+                    <img id="pv-sig-img" class="h-12 hidden object-contain">
                     <div id="pv-sig-line" class="absolute bottom-0 w-full hidden"></div>
                 </div>
-                <div class="font-bold uppercase">Customer Signature</div>
-                <div class="text-xs text-gray-400 mt-1">
+                <div class="font-bold uppercase text-xs">Customer Signature</div>
+                <div class="text-[10px] text-gray-400 mt-0.5">
                     I agree to the terms and authorize services.
                 </div>
             </div>
             <div>
-                <div class="border-b-2 border-black mb-2 h-16 flex items-end justify-start font-signature text-3xl w-1/2"
+                <div class="border-b border-black mb-1 h-12 flex items-end justify-start font-bold text-base w-full"
                     id="pv-driver-sig"></div>
-                <div class="font-bold uppercase">Driver</div>
+                <div class="font-bold uppercase text-xs">Driver</div>
             </div>
         </div>
     </div>
