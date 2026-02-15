@@ -832,7 +832,7 @@
                             <polyline points="17 21 17 13 7 13 7 21"></polyline>
                             <polyline points="7 3 7 8 15 8"></polyline>
                         </svg>
-                        SAVE TICKET
+                        NEW TICKET
                     </button>
                 </div>
             </div>
@@ -1102,28 +1102,7 @@
             }
         }
 
-        function toggleBtn(btn) {
-            const group = btn.dataset.group;
-            document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
 
-            if (group === 'agency') {
-                const val = btn.dataset.value;
-                const otherInput = document.getElementById('other-agency-input');
-                if (val === 'Other') {
-                    if (otherInput) otherInput.classList.remove('hidden');
-                } else {
-                    if (otherInput) {
-                        otherInput.classList.add('hidden');
-                        otherInput.value = '';
-                    }
-                }
-            }
-
-            if (typeof saveTicket === 'function') saveTicket();
-
-            if (group === 'store-rate' && typeof calcTicketTotal === 'function') calcTicketTotal();
-        }
 
         function renderHistory(query = '') {
             const list = document.getElementById('history-list');
@@ -1218,10 +1197,17 @@
             sidebar.classList.toggle('-translate-x-full');
         }
 
-        // Auto Save Listener
-        document.getElementById('ticket-body').addEventListener('input', debounce(() => {
+        // Auto Save Listeners
+        const ticketBody = document.getElementById('ticket-body');
+        const debouncedSave = debounce(() => saveTicket(), 1000);
+
+        // Input (Typing)
+        ticketBody.addEventListener('input', debouncedSave);
+
+        // Change (Dropdowns, Toggles, Blur)
+        ticketBody.addEventListener('change', () => {
             saveTicket();
-        }, 1000));
+        });
 
 
 
@@ -1273,6 +1259,9 @@
             if (group === 'store-rate') {
                 calcTicketTotal();
             }
+
+            // Always save on toggle change
+            if (typeof saveTicket === 'function') saveTicket();
         }
 
         function updateStorageDays() {
