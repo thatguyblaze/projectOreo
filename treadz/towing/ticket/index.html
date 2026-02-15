@@ -368,13 +368,37 @@
                 </div>
 
                 <!-- TICKET STATUS -->
-                <div class="flex justify-center gap-2 mb-4 no-print">
+                <div class="flex justify-center gap-2 mb-4 no-print flex-wrap">
                     <button class="toggle-btn active" onclick="toggleBtn(this)" data-group="tk-status"
-                        data-value="Active">Active</button>
+                        data-value="In Lot">In Lot</button>
                     <button class="toggle-btn" onclick="toggleBtn(this)" data-group="tk-status"
-                        data-value="Picked Up (Insurance)">Picked Up (Ins.)</button>
+                        data-value="Released">Released</button>
+                    <button class="toggle-btn" onclick="toggleBtn(this)" data-group="tk-status"
+                        data-value="Insurance">Insurance</button>
                     <button class="toggle-btn" onclick="toggleBtn(this)" data-group="tk-status"
                         data-value="Scrapped">Scrapped</button>
+                </div>
+
+                <!-- VTS / COMPLIANCE SECTION -->
+                <div
+                    class="mb-6 p-3 bg-indigo-50 border border-indigo-100 rounded-lg no-print flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="text-xs font-bold text-indigo-900 uppercase tracking-wide">VTS Status</div>
+                        <label class="flex items-center cursor-pointer gap-2 select-none">
+                            <input type="checkbox" id="tt-vts-sent" onchange="saveTicket()"
+                                class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300">
+                            <span class="text-xs font-medium text-gray-700">VTS Processed/Sent</span>
+                        </label>
+                    </div>
+                    <button onclick="sendVTSEmail()"
+                        class="text-[10px] font-bold bg-white text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded hover:bg-indigo-50 hover:text-indigo-800 transition-colors flex items-center gap-1 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                        </svg>
+                        Email Title Clerk
+                    </button>
                 </div>
 
                 <!-- 1. CUSTOMER INFO -->
@@ -914,8 +938,9 @@
                     storeEnd: document.getElementById('tt-store-end').value,
                     storeDays: document.getElementById('tt-store-days').value,
                     notes: document.getElementById('tt-notes').value,
+                    vtsSent: document.getElementById('tt-vts-sent').checked,
                     driver: document.getElementById('tt-driver').value,
-                    status: document.querySelector('.toggle-btn[data-group="tk-status"].active')?.dataset.value || 'Active',
+                    status: document.querySelector('.toggle-btn[data-group="tk-status"].active')?.dataset.value || 'In Lot',
                     signature: document.getElementById('sig-result').classList.contains('hidden') ? '' : document.getElementById('sig-image').src
                 }
             };
@@ -1008,11 +1033,18 @@
                     document.getElementById('other-agency-input').value = '';
                 }
 
+                // Restore VTS
+                document.getElementById('tt-vts-sent').checked = f.vtsSent || false;
+
                 // Restore Status
-                const st = f.status || 'Active';
+                const st = f.status || 'In Lot';
+                // Handle legacy 'Active' mapping if needed
+                const statusMap = { 'Active': 'In Lot', 'Picked Up (Insurance)': 'Insurance' };
+                const finalStatus = statusMap[st] || st;
+
                 document.querySelectorAll('.toggle-btn[data-group="tk-status"]').forEach(b => {
                     b.classList.remove('active');
-                    if (b.dataset.value === st) b.classList.add('active');
+                    if (b.dataset.value === finalStatus) b.classList.add('active');
                 });
 
                 // Restore Signature
@@ -1056,8 +1088,9 @@
             // Reset Status
             document.querySelectorAll('.toggle-btn[data-group="tk-status"]').forEach(b => {
                 b.classList.remove('active');
-                if (b.dataset.value === 'Active') b.classList.add('active');
+                if (b.dataset.value === 'In Lot') b.classList.add('active');
             });
+            document.getElementById('tt-vts-sent').checked = false;
             const otherInput = document.getElementById('other-agency-input');
             if (otherInput) otherInput.classList.add('hidden');
 
@@ -1128,7 +1161,7 @@
 
                 const f = t.fields || {};
 
-                const isFinal = f.status === 'Scrapped' || f.status === 'Picked Up (Insurance)';
+                const isFinal = f.status === 'Scrapped' || f.status === 'Insurance' || f.status === 'Released' || f.status === 'Picked Up (Insurance)';
 
                 if (isFinal) {
                     statusHtml = `<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded ml-1 border border-gray-300 whitespace-nowrap">${f.status}</span>`;
@@ -1147,7 +1180,7 @@
                             if (days >= 0) {
                                 daysHtml = `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded ml-2 border border-orange-200 whitespace-nowrap">${days} Days</span>`;
                                 if (days > 3) {
-                                    vtsHtml = `<span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded ml-1 border border-purple-200 whitespace-nowrap">Sent to VTS</span>`;
+                                    vtsHtml = `<span class="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded ml-1 border border-red-200 whitespace-nowrap animate-pulse">VTS DUE!</span>`;
                                 }
                             }
                         }
@@ -1170,7 +1203,7 @@
                         <div class="flex items-center w-full flex-wrap gap-y-1">
                             <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
                             ${daysHtml}
-                            ${vtsHtml}
+                            ${f.vtsSent ? '<span class="text-[10px] font-bold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded ml-1 border border-teal-200 whitespace-nowrap">VTS Sent</span>' : vtsHtml}
                             ${signedHtml}
                             ${statusHtml}
                         </div>
@@ -1447,6 +1480,36 @@
 
             // Temporary styles for PDF generation if needed
             html2pdf().set(opt).from(element).save();
+        }
+
+        function sendVTSEmail() {
+            // 1. Gather Info
+            const id = document.querySelector('.param-ticket-id').innerText;
+            const vin = document.getElementById('tt-vin').value || 'N/A';
+            const make = document.getElementById('tt-make').value || '';
+            const model = document.getElementById('tt-model').value || '';
+            const year = document.getElementById('tt-year')?.value || ''; // Year might not exist in form yet, use make/model
+            const date = document.getElementById('tt-date').value;
+            const vehicle = `${year} ${make} ${model}`.trim();
+
+            const subject = `VTS Request - Ticket #${id} - ${vehicle}`;
+            const body = `Please process VTS for the following vehicle:\n\nTicket #: ${id}\nDate Towed: ${date}\nVehicle: ${vehicle}\nVIN: ${vin}\n\nSee attached PDF for full details.`;
+
+            // 2. Open Mail Client (Draft)
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+
+            // 3. Download PDF (User must attach)
+            downloadTowTicket();
+
+            // 4. Alert User
+            setTimeout(() => {
+                alert("Email draft opened.\n\nA PDF of the ticket has been downloaded.\n\nPLEASE ATTACH THE PDF TO THE EMAIL.");
+
+                // Optional: Auto-check VTS as sent? Maybe let them do it manually to confirm.
+                // document.getElementById('tt-vts-sent').checked = true;
+                // saveTicket();
+            }, 1000);
         }
 
         // --- Autocomplete Logic ---
