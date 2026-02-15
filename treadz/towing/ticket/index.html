@@ -397,7 +397,8 @@
                         </div>
                         <div>
                             <label class="form-label">Phone Number</label>
-                            <input type="text" id="tt-phone" class="form-input">
+                            <input type="tel" id="tt-phone" class="form-input" inputmode="numeric"
+                                placeholder="(555) 555-5555" maxlength="14" oninput="formatPhoneNumber(this)">
                         </div>
                     </div>
                 </div>
@@ -437,6 +438,12 @@
                                         <button type="button"
                                             class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded hover:bg-gray-300 transition-colors"
                                             onclick="setDelivered('Lot 2')">Lot 2</button>
+                                        <button type="button"
+                                            class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded hover:bg-purple-200 transition-colors"
+                                            onclick="setDelivered('Picked up by Insurance')">Ins.</button>
+                                        <button type="button"
+                                            class="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded hover:bg-red-200 transition-colors"
+                                            onclick="setDelivered('Scrapped')">Scrap</button>
                                     </div>
                                 </div>
                                 <div class="relative">
@@ -1097,11 +1104,16 @@
                 let daysHtml = '';
                 let vtsHtml = '';
                 let signedHtml = '<span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1 border border-gray-200 whitespace-nowrap">Unsigned</span>';
+                let statusHtml = '';
 
                 const f = t.fields || {};
 
-                // Signed Check
-                if (f.signature && f.signature.length > 100) {
+                const isFinal = f.delivered === 'Scrapped' || (f.delivered && f.delivered.toLowerCase().includes('insurance'));
+
+                if (isFinal) {
+                    statusHtml = `<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded ml-1 border border-gray-300 whitespace-nowrap">${f.delivered}</span>`;
+                    signedHtml = ''; // Hide signed/unsigned tag
+                } else if (f.signature && f.signature.length > 100) {
                     signedHtml = '<span class="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded ml-1 border border-green-200 whitespace-nowrap">Signed</span>';
                 }
 
@@ -1140,6 +1152,7 @@
                             ${daysHtml}
                             ${vtsHtml}
                             ${signedHtml}
+                            ${statusHtml}
                         </div>
                     </div>
                 `;
@@ -1269,6 +1282,12 @@
         // Try to read query params or local storage from calculator if we want to be fancy
         function populateFromStorage() {
             // For now just basic defaults
+        }
+
+        function formatPhoneNumber(input) {
+            if (!input) return;
+            let x = input.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+            input.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
         }
 
         function calcTicketTotal() {
@@ -1547,6 +1566,7 @@
         const sigCanvas = document.getElementById('sig-canvas');
         const sigCtx = sigCanvas.getContext('2d');
         let isSigning = false;
+        let hasSignatureContent = false;
 
         // Resize canvas to correct resolution
         function resizeCanvas() {
@@ -1565,16 +1585,27 @@
             document.getElementById('sig-pad-wrapper').classList.remove('hidden');
 
             // Wait for display change to effect layout, then resize
-            setTimeout(resizeCanvas, 10);
+            setTimeout(() => {
+                resizeCanvas();
+                hasSignatureContent = false;
+            }, 10);
         }
 
         function clearSignature() {
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             sigCtx.clearRect(0, 0, sigCanvas.width / ratio, sigCanvas.height / ratio);
+            hasSignatureContent = false;
         }
 
         function saveSignature() {
-            // Check if empty? (optional)
+            if (!hasSignatureContent) {
+                document.getElementById('sig-image').src = '';
+                document.getElementById('sig-result').classList.add('hidden');
+                document.getElementById('sig-empty-state').classList.remove('hidden');
+                document.getElementById('sig-pad-wrapper').classList.add('hidden');
+                if (typeof saveTicket === 'function') saveTicket();
+                return;
+            }
 
             const dataUrl = sigCanvas.toDataURL('image/png');
             document.getElementById('sig-image').src = dataUrl;
@@ -1600,6 +1631,7 @@
 
         function startSign(e) {
             isSigning = true;
+            hasSignatureContent = true;
             // Allow default for mouse, prevent for touch to stop scroll
             if (e.type === 'touchstart') e.preventDefault();
 
