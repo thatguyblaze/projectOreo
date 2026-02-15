@@ -381,9 +381,9 @@
                 </div>
 
                 <!-- VTS / COMPLIANCE SECTION -->
-                <div class="mb-4 no-print hidden md:block">
+                <div class="mb-4 no-print block">
                     <label class="form-label mb-2">VTS COMPLIANCE</label>
-                    <div class="grid grid-cols-3 gap-2">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                         <button class="toggle-btn" id="btn-vts-sent" onclick="toggleVts(this, 'tt-vts-sent')">
                             VTS Sent
                         </button>
@@ -1359,6 +1359,24 @@
 
         // Toggle Button Logic
         function toggleVts(btn, inputId) {
+            const isActive = !btn.classList.contains('active');
+
+            // Mutual Exclusion Logic
+            if (inputId === 'tt-title-received' && isActive) {
+                // If Title is ON, turn VTS OFF
+                const vtsBtn = document.getElementById('btn-vts-sent');
+                const vtsInput = document.getElementById('tt-vts-sent');
+                if (vtsBtn) vtsBtn.classList.remove('active');
+                if (vtsInput) vtsInput.checked = false;
+            } else if (inputId === 'tt-vts-sent' && isActive) {
+                // If VTS is ON, turn Title OFF
+                const titleBtn = document.getElementById('btn-title-rec');
+                const titleInput = document.getElementById('tt-title-received');
+                if (titleBtn) titleBtn.classList.remove('active');
+                if (titleInput) titleInput.checked = false;
+            }
+
+            // Toggle Current
             btn.classList.toggle('active');
             const input = document.getElementById(inputId);
             if (input) {
@@ -1589,19 +1607,26 @@
         }
 
         function downloadTowTicket() {
-            const element = document.getElementById('ticket-body');
+            saveTicket();
+            populatePrintView();
+
+            const element = document.getElementById('print-view');
             const id = document.querySelector('.param-ticket-id').innerText;
 
+            // Make compatible with desktop/print CSS
+            element.classList.remove('hidden');
+
             const opt = {
-                margin: 0,
+                margin: [0.25, 0.25, 0.25, 0.25], // Small margins
                 filename: `Treadz_TowTicket_${id}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: [4.5, 11], orientation: 'portrait' }
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            // Temporary styles for PDF generation if needed
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set(opt).from(element).save().then(() => {
+                element.classList.add('hidden'); // Re-hide
+            });
         }
 
         function sendVTSEmail() {
@@ -1930,7 +1955,7 @@
 
     </script>
     <!-- Print View Container -->
-    <div id="print-view">
+    <div id="print-view" class="hidden print:block bg-white p-8 max-w-[8.5in] mx-auto text-black">
         <!-- Header -->
         <div class="mb-6 pb-4 border-b-2 border-black relative">
             <div class="text-center">
