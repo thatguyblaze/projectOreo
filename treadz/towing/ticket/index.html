@@ -381,32 +381,31 @@
                 </div>
 
                 <!-- VTS / COMPLIANCE SECTION -->
-                <div
-                    class="mb-6 p-3 bg-indigo-50 border border-indigo-100 rounded-lg no-print hidden md:flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="text-xs font-bold text-indigo-900 uppercase tracking-wide">VTS Status</div>
-                        <label class="flex items-center cursor-pointer gap-2 select-none">
-                            <input type="checkbox" id="tt-vts-sent"
-                                class="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 border-gray-300"
-                                onchange="saveTicket()">
-                            <span class="text-xs font-medium text-gray-700">VTS Sent</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer gap-2 select-none">
-                            <input type="checkbox" id="tt-title-received"
-                                class="w-4 h-4 rounded text-purple-600 focus:ring-purple-500 border-gray-300"
-                                onchange="saveTicket()">
-                            <span class="text-xs font-medium text-gray-700">Title Received</span>
-                        </label>
+                <div class="mb-4 no-print hidden md:block">
+                    <label class="form-label mb-2">VTS COMPLIANCE</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="toggle-btn" id="btn-vts-sent" onclick="toggleVts(this, 'tt-vts-sent')">
+                            VTS Sent
+                        </button>
+                        <button class="toggle-btn" id="btn-title-rec" onclick="toggleVts(this, 'tt-title-received')">
+                            Title Received
+                        </button>
+                        <button
+                            class="toggle-btn bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 flex items-center justify-center gap-2"
+                            onclick="sendVTSEmail()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Email Clerk
+                        </button>
                     </div>
-                    <button onclick="sendVTSEmail()"
-                        class="text-[10px] font-bold bg-white text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded hover:bg-indigo-50 hover:text-indigo-800 transition-colors flex items-center gap-1 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                        </svg>
-                        Email Title Clerk
-                    </button>
+                    <!-- Hidden State -->
+                    <input type="checkbox" id="tt-vts-sent" class="hidden">
+                    <input type="checkbox" id="tt-title-received" class="hidden">
                 </div>
 
                 <!-- 1. CUSTOMER INFO -->
@@ -1080,6 +1079,18 @@
                 document.getElementById('tt-vts-sent').checked = f.vtsSent || false;
                 document.getElementById('tt-title-received').checked = f.titleReceived || false;
 
+                // Sync Buttons
+                const btnVts = document.getElementById('btn-vts-sent');
+                const btnTitle = document.getElementById('btn-title-rec');
+                if (btnVts) {
+                    if (f.vtsSent) btnVts.classList.add('active');
+                    else btnVts.classList.remove('active');
+                }
+                if (btnTitle) {
+                    if (f.titleReceived) btnTitle.classList.add('active');
+                    else btnTitle.classList.remove('active');
+                }
+
                 // Restore Status
                 const st = f.status || 'In Lot';
                 // Handle legacy 'Active' mapping if needed
@@ -1137,6 +1148,11 @@
             });
             document.getElementById('tt-vts-sent').checked = false;
             document.getElementById('tt-title-received').checked = false;
+            const btnVts = document.getElementById('btn-vts-sent');
+            const btnTitle = document.getElementById('btn-title-rec');
+            if (btnVts) btnVts.classList.remove('active');
+            if (btnTitle) btnTitle.classList.remove('active');
+
             const otherInput = document.getElementById('other-agency-input');
             if (otherInput) otherInput.classList.add('hidden');
 
@@ -1206,7 +1222,7 @@
 
             history.forEach(t => {
                 const div = document.createElement('div');
-                div.className = "p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all mb-2 group";
+                div.className = "p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all mb-1 group";
                 div.onclick = () => loadTicket(t.id);
 
                 const f = t.fields || {};
@@ -1242,7 +1258,7 @@
 
                 // --- Badges ---
                 let badges = [];
-                const createBadge = (html, classes) => `<div class="px-1.5 py-0.5 rounded text-[10px] font-bold border flex items-center justify-end gap-1 ${classes}">${html}</div>`;
+                const createBadge = (html, classes) => `<div class="px-1.5 py-0.5 rounded text-[9px] font-bold border flex items-center justify-center gap-1 leading-none ${classes}">${html}</div>`;
 
                 if (isFinal) {
                     badges.push(createBadge(f.status, "bg-gray-100 text-gray-600 border-gray-200"));
@@ -1257,13 +1273,13 @@
                     // 3. Status
                     if (f.titleReceived) {
                         badges.push(createBadge(`
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                            TITLE RECEIVED
+                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                            TITLE
                         `, "bg-purple-100 text-purple-700 border-purple-200"));
                     } else if (isVtsSent) {
                         badges.push(createBadge(`
-                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            VTS SENT
+                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            SENT
                         `, "bg-green-100 text-green-700 border-green-200"));
                     } else if (days >= 30) {
                         badges.push(createBadge(`ABANDONED`, "bg-red-100 text-red-700 border-red-200 animate-pulse"));
@@ -1274,32 +1290,32 @@
                     }
                 }
 
-                const badgeHtml = `<div class="flex flex-col items-end gap-1 mt-1">${badges.join('')}</div>`;
+                const badgeHtml = `<div class="flex flex-wrap justify-end gap-1 mt-1 max-w-[140px]">${badges.join('')}</div>`;
 
                 div.innerHTML = `
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="font-bold text-gray-800 text-sm">#${t.id}</span>
+                    <div class="flex justify-between items-start mb-0.5">
+                        <span class="font-bold text-gray-800 text-xs">#${t.id}</span>
                         <div class="flex flex-col items-end">
                             <div class="flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
-                                <span class="text-xs text-gray-500 font-medium">${t.date}</span>
+                                <span class="text-[10px] text-gray-500 font-medium">${t.date}</span>
                                 <button onclick="deleteTicket('${t.id}', event)" class="text-gray-400 hover:text-red-500 transition-colors" title="Delete Ticket">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
                             </div>
                             ${badgeHtml}
                         </div>
                     </div>
                     
-                    <div class="mb-2 pr-2">
-                        <div class="text-xs font-bold text-gray-800 truncate leading-tight">${t.billTo || 'Unknown Customer'}</div>
-                        <div class="text-[10px] text-gray-500 truncate font-medium">${t.vehicle || 'Vehicle Info'}</div>
+                    <div class="mb-1 pr-1">
+                        <div class="text-[11px] font-bold text-gray-800 truncate leading-tight">${t.billTo || 'Unknown Customer'}</div>
+                        <div class="text-[9px] text-gray-500 truncate font-medium">${t.vehicle || 'Vehicle Info'}</div>
                     </div>
 
-                    <div class="flex justify-between items-end border-t border-gray-100 pt-2 mt-1">
-                        <span class="font-bold text-blue-600 text-xs">${currentTotal}</span>
+                    <div class="flex justify-between items-end border-t border-gray-100 pt-1 mt-0.5">
+                        <span class="font-bold text-blue-600 text-[11px]">${currentTotal}</span>
                         ${!isFinal && !isSigned ?
-                        `<div class="text-[10px] font-bold text-red-500 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        `<div class="text-[9px] font-bold text-red-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                 Unsigned
                              </div>` : ''}
                     </div>
@@ -1340,6 +1356,15 @@
 
 
         // Toggle Button Logic
+        function toggleVts(btn, inputId) {
+            btn.classList.toggle('active');
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.checked = btn.classList.contains('active');
+                if (typeof saveTicket === 'function') saveTicket();
+            }
+        }
+
         function toggleBtn(btn) {
             // Check if it's a radio-style group (like agencies)
             const group = btn.dataset.group;
@@ -1601,6 +1626,7 @@
             setTimeout(() => {
                 if (confirm("PDF Downloaded.\n\nAfter you attach it to the email, click OK to mark VTS as SENT.")) {
                     document.getElementById('tt-vts-sent').checked = true;
+                    document.getElementById('btn-vts-sent').classList.add('active');
                     saveTicket();
                 }
             }, 1000);
