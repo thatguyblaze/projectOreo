@@ -1213,11 +1213,39 @@
             const list = document.getElementById('history-list');
             list.innerHTML = '';
 
-            const history = getHistory().filter(t => {
+            let history = getHistory().filter(t => {
                 if (!query) return true;
                 const fields = t.fields || {};
                 const txt = (t.id + (t.billTo || '') + (t.vehicle || '') + (fields.vin || '')).toLowerCase();
                 return txt.includes(query.toLowerCase());
+            });
+
+            // Priority Sort: VTS Due/Soon at top
+            history.sort((a, b) => {
+                const getPriority = (t) => {
+                    const f = t.fields || {};
+                    const isFinal = ['Scrapped', 'Insurance', 'Released', 'Picked Up (Insurance)'].includes(f.status);
+
+                    if (isFinal || f.vtsSent || f.titleReceived) return 0;
+
+                    let days = 0;
+                    if (f.storeStart) {
+                        const diff = Math.abs(new Date() - new Date(f.storeStart));
+                        // Replicate logic: ceil(millis/day) - 1
+                        days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)) - 1);
+                    }
+
+                    if (days >= 30) return 3; // Abandoned
+                    if (days >= 4) return 2;  // Due
+                    if (days >= 2) return 1;  // Soon
+                    return 0;
+                };
+
+                const pA = getPriority(a);
+                const pB = getPriority(b);
+
+                if (pA !== pB) return pB - pA; // Higher priority first
+                return b.id - a.id; // Then newest first
             });
 
             history.forEach(t => {
