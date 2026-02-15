@@ -1258,7 +1258,8 @@
 
                 // --- Badges ---
                 let badges = [];
-                const createBadge = (html, classes) => `<div class="px-1.5 py-0.5 rounded text-[9px] font-bold border flex items-center justify-center gap-1 leading-none ${classes}">${html}</div>`;
+                // Increased text size to text-[10px]
+                const createBadge = (html, classes) => `<div class="px-1.5 py-0.5 rounded text-[10px] font-bold border flex items-center justify-center gap-1 leading-none ${classes}">${html}</div>`;
 
                 if (isFinal) {
                     badges.push(createBadge(f.status, "bg-gray-100 text-gray-600 border-gray-200"));
@@ -1274,12 +1275,12 @@
                     if (f.titleReceived) {
                         badges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                            TITLE
+                            TITLE RECEIVED
                         `, "bg-purple-100 text-purple-700 border-purple-200"));
                     } else if (isVtsSent) {
                         badges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            SENT
+                            VTS SENT
                         `, "bg-green-100 text-green-700 border-green-200"));
                     } else if (days >= 30) {
                         badges.push(createBadge(`ABANDONED`, "bg-red-100 text-red-700 border-red-200 animate-pulse"));
@@ -1290,7 +1291,8 @@
                     }
                 }
 
-                const badgeHtml = `<div class="flex flex-wrap justify-end gap-1 mt-1 max-w-[140px]">${badges.join('')}</div>`;
+                // Removed max-width constraint
+                const badgeHtml = `<div class="flex flex-wrap justify-end gap-1 mt-1">${badges.join('')}</div>`;
 
                 div.innerHTML = `
                     <div class="flex justify-between items-start mb-0.5">
