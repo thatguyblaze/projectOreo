@@ -6,34 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Treadz - Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/data-store.js"></script>
     <script src="js/treadz-core.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen font-sans">
+<body class="bg-gray-100 min-h-screen font-sans flex flex-col">
 
     <!-- LOGIN MODAL -->
     <div id="login-modal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 transition-opacity duration-300">
-        <div class="bg-white p-8 rounded-lg shadow-2xl w-96 transform transition-all scale-100">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 transform transition-all scale-100">
             <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Admin Access</h2>
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Username</label>
                     <input type="text" id="username"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-blue-500 outline-none transition-shadow"
+                        class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm p-3 border focus:border-blue-500 focus:bg-white outline-none transition-all"
                         required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Password</label>
                     <input type="password" id="password"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-blue-500 outline-none transition-shadow"
+                        class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-50 shadow-sm p-3 border focus:border-blue-500 focus:bg-white outline-none transition-all"
                         required>
                 </div>
                 <button type="submit"
-                    class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-bold shadow-lg mt-2">Sign
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold shadow-lg mt-2">Sign
                     In</button>
             </form>
             <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden font-bold animate-pulse">Invalid
@@ -42,25 +48,25 @@
     </div>
 
     <!-- MAIN DASHBOARD (Hidden by default) -->
-    <div id="dashboard" class="hidden min-h-screen flex flex-col">
+    <div id="dashboard" class="hidden flex-grow flex flex-col">
         <nav class="bg-white shadow-md p-4 sticky top-0 z-40 border-b border-gray-200">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="max-w-7xl mx-auto flex justify-between items-center w-full">
                 <div class="flex items-center gap-4">
-                    <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
                             </path>
                         </svg>
-                        Treadz Administration
+                        Treadz Admin Center
                     </h1>
                     <span
-                        class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-200">Owner
+                        class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-blue-200 uppercase tracking-wide">Owner
                         View</span>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex gap-3">
                     <button onclick="exportData()"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition-all active:scale-95">
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition-all active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -70,142 +76,283 @@
                         Export CSV
                     </button>
                     <a href="index.html"
-                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-300">Exit</a>
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border border-gray-300">Exit</a>
                 </div>
             </div>
         </nav>
 
-        <main class="max-w-7xl mx-auto p-6 space-y-8 flex-grow w-full">
+        <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8 w-full flex-grow">
 
-            <!-- Summary Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Towing Stats -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Towing Performance</h3>
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <div class="text-3xl font-black text-gray-900" id="stat-tow-revenue">$0.00</div>
-                            <div class="text-xs text-green-600 font-medium mt-1">Total Estimated Revenue</div>
+            <!-- ANALYTICS TOP SECTION -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                <!-- REVENUE CHART -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 lg:col-span-2 flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-gray-900 font-bold text-lg flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            Revenue Trend
+                        </h3>
+                        <div class="flex gap-2">
+                            <button onclick="updateChartRange(7)"
+                                class="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors chart-filter active"
+                                id="filter-7d">7D</button>
+                            <button onclick="updateChartRange(30)"
+                                class="text-xs font-semibold px-3 py-1 rounded-full bg-white hover:bg-gray-50 text-gray-500 border border-gray-200 transition-colors chart-filter"
+                                id="filter-30d">30D</button>
                         </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold text-gray-700" id="stat-tow-count">0</div>
-                            <div class="text-xs text-gray-400">Tickets</div>
+                    </div>
+                    <div class="flex-grow w-full h-64 relative">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- METRICS & PIPELINE -->
+                <div class="space-y-6 flex flex-col">
+                    <!-- Total Revenue Card -->
+                    <div
+                        class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl shadow-lg text-white relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-blue-100 text-xs font-bold uppercase tracking-wider mb-2 relative z-10">Total
+                            Estimated Revenue</h3>
+                        <div class="text-3xl font-black relative z-10" id="stat-total-revenue">$0.00</div>
+                        <div
+                            class="mt-6 flex justify-between text-xs text-blue-100/80 relative z-10 pt-4 border-t border-blue-500/30">
+                            <div>
+                                <span class="block font-bold text-white text-lg" id="stat-tow-rev-small">$0.00</span>
+                                <span>Towing</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-white text-lg" id="stat-tire-rev-small">$0.00</span>
+                                <span>Tire Sales</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pipeline Pulse -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex-grow">
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4">Pipeline Pulse
+                            (Active)</h3>
+                        <div class="space-y-5">
+                            <!-- Intake -->
+                            <div class="flex justify-between items-center group cursor-default">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                        IN</div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-800">Intake / Draft</span>
+                                        <span class="text-[10px] text-gray-400">Tickets Created Today</span>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-gray-900 text-lg" id="pulse-intake">0</span>
+                            </div>
+                            <!-- Active/Storage -->
+                            <div class="flex justify-between items-center group cursor-default">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                                        ST</div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-800">Active Storage</span>
+                                        <span class="text-[10px] text-gray-400">Impound / Storage Lots</span>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-gray-900 text-lg" id="pulse-storage">0</span>
+                            </div>
+                            <!-- Disposition -->
+                            <div class="flex justify-between items-center group cursor-default">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center font-bold text-xs group-hover:bg-green-600 group-hover:text-white transition-colors">
+                                        RL</div>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-800">Released</span>
+                                        <span class="text-[10px] text-gray-400">Total processed</span>
+                                    </div>
+                                </div>
+                                <span class="font-bold text-gray-900 text-lg" id="pulse-released">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- MONTHLY PERFORMANCE -->
+                <div class="col-span-1 lg:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    <!-- Insight Cards -->
+                    <div class="space-y-6">
+                        <div
+                            class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 relative group overflow-hidden">
+                            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <svg class="w-20 h-20 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-indigo-800 text-xs font-bold uppercase tracking-wider mb-1">Monthly Avg.
+                                Tows</h4>
+                            <div class="text-3xl font-black text-indigo-900" id="stat-avg-tows">0</div>
+                            <p class="text-xs text-indigo-600 mt-2 font-medium">Based on active months</p>
+                        </div>
+
+                        <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100 relative group overflow-hidden">
+                            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <svg class="w-20 h-20 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-amber-800 text-xs font-bold uppercase tracking-wider mb-1">Busiest Month
+                            </h4>
+                            <div class="text-xl font-black text-amber-900 truncate" id="stat-busy-month">-</div>
+                            <p class="text-xs text-amber-600 mt-2 font-medium" id="stat-busy-month-vol">0 Tows</p>
+                        </div>
+
+                        <div
+                            class="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 relative group overflow-hidden">
+                            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <svg class="w-20 h-20 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-emerald-800 text-xs font-bold uppercase tracking-wider mb-1">Quote
+                                Conversion</h4>
+                            <div class="text-3xl font-black text-emerald-900" id="stat-conversion">0%</div>
+                            <p class="text-xs text-emerald-600 mt-2 font-medium">Quotes turned to Receipts</p>
+                        </div>
+                    </div>
+
+                    <!-- Volume Chart -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 lg:col-span-2 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-gray-900 font-bold text-lg flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                Monthly Tow Volume (Last 6 Months)
+                            </h3>
+                        </div>
+                        <div class="flex-grow w-full h-64 relative">
+                            <canvas id="volumeChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tire Sales Stats -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Tire Sales & Quotes</h3>
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <div class="text-3xl font-black text-gray-900" id="stat-tire-revenue">$0.00</div>
-                            <div class="text-xs text-blue-600 font-medium mt-1">Total Quoted Value</div>
+                <!-- DATA MANAGEMENT AREA -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <!-- Filters & Tabs Header -->
+                    <div
+                        class="border-b border-gray-200 bg-gray-50/80 p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
+
+                        <!-- Tabs -->
+                        <div class="flex bg-gray-200/50 p-1 rounded-xl w-full md:w-auto">
+                            <button onclick="switchTab('tow')" id="tab-tow"
+                                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all">
+                                Tow Tickets
+                            </button>
+                            <button onclick="switchTab('tire')" id="tab-tire"
+                                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all">
+                                Tire Sales
+                            </button>
                         </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-bold text-gray-700" id="stat-tire-count">0</div>
-                            <div class="text-xs text-gray-400">Records</div>
+
+                        <!-- Search & Date Filter -->
+                        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                            <div class="relative flex-grow md:w-64">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="table-search" oninput="filterTable()"
+                                    placeholder="Search customer, ID, vehicle..."
+                                    class="pl-10 text-sm shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full border-gray-300 rounded-lg p-2.5 border outline-none transition-all">
+                            </div>
+                            <select id="date-filter" onchange="filterTable()"
+                                class="text-sm border-gray-300 rounded-lg shadow-sm p-2.5 border outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
+                                <option value="all">All Time</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="1">Today</option>
+                            </select>
                         </div>
                     </div>
-                </div>
 
-                <!-- Combined Stats -->
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow bg-gradient-to-br from-gray-50 to-white">
-                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Total System Volume</h3>
-                    <div class="flex items-center gap-4 h-full pb-4">
-                        <div class="text-4xl font-black text-gray-800" id="stat-total-records">0</div>
-                        <div class="text-sm text-gray-500 leading-tight">Total Active Records<br>Across All Systems
+                    <!-- DATA TABLES -->
+                    <div class="p-0">
+                        <!-- Tow Table -->
+                        <div id="view-tow" class="overflow-x-auto min-h-[300px]">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            ID</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Date</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Customer / Bill To</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Vehicle</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Status</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="table-tow-body">
+                                    <!-- JS Injected -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Tire Table -->
+                        <div id="view-tire" class="hidden overflow-x-auto min-h-[300px]">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            ID</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Date</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Customer</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Items</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Qty</th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="table-tire-body">
+                                    <!-- JS Injected -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- TABS -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="border-b border-gray-200 bg-gray-50/50 px-6">
-                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                        <button onclick="switchTab('tow')" id="tab-tow"
-                            class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm transition-colors">
-                            Tow Tickets
-                        </button>
-                        <button onclick="switchTab('tire')" id="tab-tire"
-                            class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-                            Tire Quotes/Receipts
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- DATA TABLES -->
-                <div class="p-0">
-                    <!-- Tow Table -->
-                    <div id="view-tow" class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        ID</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Date</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Customer / Bill To</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Vehicle</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Status</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Total</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="table-tow-body">
-                                <!-- JS Injected -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Tire Table -->
-                    <div id="view-tire" class="hidden overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        ID</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Date</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Customer</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Items</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Qty</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Total</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="table-tire-body">
-                                <!-- JS Injected -->
-                            </tbody>
-                        </table>
+                    <div
+                        class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500 flex justify-between">
+                        <span id="record-count-display">Showing all records</span>
+                        <span>Sync Status: Local Only</span>
                     </div>
                 </div>
-
-                <!-- Pagination / Footer (Fake for now) -->
-                <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500">
-                    Showing all local records. Sync to cloud database for more history.
-                </div>
-            </div>
 
         </main>
     </div>
@@ -218,9 +365,10 @@
             const p = document.getElementById('password').value;
 
             if (u === 'admin' && p === 'admin') {
-                document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
+                const modal = document.getElementById('login-modal');
+                modal.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
                 setTimeout(() => {
-                    document.getElementById('login-modal').classList.add('hidden');
+                    modal.classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
                     initDashboard();
                 }, 300);
@@ -229,132 +377,327 @@
             }
         }
 
-        // --- DASHBOARD DATA ---
+        // --- DASHBOARD STATE ---
         let currentTab = 'tow';
+        let chartInstance = null;
+        let volumeChartInstance = null;
+        let allTowData = [];
+        let allTireData = [];
 
+        // --- HELPERS ---
+        const cleanMoney = str => {
+            if (!str) return 0;
+            return parseFloat(String(str).replace(/[^0-9.-]+/g, "")) || 0;
+        };
+        const formatMoney = num => '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        // --- INITIALIZATION ---
+        function initDashboard() {
+            // Load Data
+            allTowData = TreadzData.getAll('ticket');
+            allTireData = TreadzData.getAll('receipt');
+
+            renderStats();
+            renderAdvStats();
+            renderTables(); // Initial Render
+            initChart();
+            initVolumeChart();
+        }
+
+        // --- TABS & FILTERING ---
         function switchTab(tab) {
             currentTab = tab;
 
             // UI Toggle
-            document.getElementById('tab-tow').className = tab === 'tow' ?
-                "border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm transition-colors" :
-                "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors";
+            const towBtn = document.getElementById('tab-tow');
+            const tireBtn = document.getElementById('tab-tire');
 
-            document.getElementById('tab-tire').className = tab === 'tire' ?
-                "border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm transition-colors" :
-                "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors";
+            if (tab === 'tow') {
+                towBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all";
+                tireBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
+            } else {
+                towBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
+                tireBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all";
+            }
 
             document.getElementById('view-tow').classList.toggle('hidden', tab !== 'tow');
             document.getElementById('view-tire').classList.toggle('hidden', tab !== 'tire');
 
-            // Stats Refresh (Optional)
+            // Re-apply filter logic to show correct count/results
+            filterTable();
         }
 
-        function cleanMoney(str) {
-            if (!str) return 0;
-            // Handle "$1,234.56"
-            return parseFloat(String(str).replace(/[^0-9.-]+/g, "")) || 0;
+        function filterTable() {
+            const query = document.getElementById('table-search').value.toLowerCase();
+            const dateRange = document.getElementById('date-filter').value;
+
+            let data = currentTab === 'tow' ? allTowData : allTireData;
+
+            const now = new Date();
+            const cutoff = new Date();
+            if (dateRange !== 'all') {
+                cutoff.setDate(now.getDate() - parseInt(dateRange));
+            }
+
+            const filtered = data.filter(item => {
+                // Date Filter
+                const itemDate = new Date(item.timestamp || item.date);
+                if (dateRange !== 'all' && itemDate < cutoff) return false;
+
+                // Search Filter
+                if (query.length < 1) return true;
+
+                const searchStr = JSON.stringify(Object.values(item)).toLowerCase();
+                return searchStr.includes(query);
+            });
+
+            renderTableBody(currentTab, filtered);
         }
 
-        function formatMoney(num) {
-            return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        function renderTables() {
+            renderTableBody('tow', allTowData);
+            renderTableBody('tire', allTireData);
         }
 
-        function initDashboard() {
-            // Load Data using Central Store
-            const ticketData = TreadzData.getAll('ticket');
-            const receiptData = TreadzData.getAll('receipt'); // Includes Quotes due to shared key
+        function renderTableBody(type, data) {
+            const tbody = document.getElementById(type === 'tow' ? 'table-tow-body' : 'table-tire-body');
+            document.getElementById('record-count-display').textContent = `Showing ${data.length} records`;
 
-            // --- Stats Calculation ---
-            let towRev = 0;
-            let tireRev = 0;
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-gray-400 font-medium bg-gray-50/50">No records found matching criteria</td></tr>';
+                return;
+            }
 
-            // Render Tow
-            const towBody = document.getElementById('table-tow-body');
+            tbody.innerHTML = data.map(item => {
+                const dateRaw = item.timestamp || item.date;
+                const date = dateRaw ? new Date(dateRaw).toLocaleDateString() : 'N/A';
+                const total = formatMoney(cleanMoney(item.total));
 
-            if (ticketData.length === 0) {
-                towBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500 italic">No tow tickets found</td></tr>';
-            } else {
-                towBody.innerHTML = ticketData.map(t => {
-                    const total = cleanMoney(t.total);
-                    towRev += total;
-                    const dateRaw = t.timestamp || t.date;
-                    const date = dateRaw ? new Date(dateRaw).toLocaleDateString() : 'N/A';
-
-                    const f = t.fields || {};
+                if (type === 'tow') {
+                    const f = item.fields || {};
                     const status = f.status || 'Draft';
-
                     let statusColor = "bg-gray-100 text-gray-800";
                     if (status === 'Released') statusColor = "bg-green-100 text-green-800";
                     if (status === 'Impound') statusColor = "bg-red-100 text-red-800";
-                    if (status.includes('Storage')) statusColor = "bg-yellow-100 text-yellow-800";
+                    if (status.includes('Storage')) statusColor = "bg-amber-100 text-amber-800";
 
                     return `
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">#${t.id}</td>
+                        <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">#${item.id}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${date}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${t.billTo || f.billTo || 'Unknown'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${t.vehicle || f.vehicle || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.billTo || f.billTo || 'Unknown'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${item.vehicle || f.vehicle || '-'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-bold rounded-full ${statusColor}">
+                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-bold rounded-lg ${statusColor}">
                                     ${status}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900">${t.total || '$0.00'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900">${total}</td>
                         </tr>
                     `;
-                }).join('');
-            }
-
-            // Render Tire
-            const tireBody = document.getElementById('table-tire-body');
-
-            if (receiptData.length === 0) {
-                tireBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500 italic">No tire quotes found</td></tr>';
-            } else {
-                tireBody.innerHTML = receiptData.map(r => {
-                    const total = cleanMoney(r.total);
-                    tireRev += total;
-                    const dateRaw = r.timestamp;
-                    const date = dateRaw ? new Date(dateRaw).toLocaleDateString() : 'N/A';
-
-                    const shortDesc = r.tireInfo || r.description || 'Service/Parts';
+                } else {
+                    const shortDesc = item.tireInfo || item.description || 'Service/Parts';
+                    const isReceipt = item.type === 'receipt';
+                    const typeBadge = isReceipt ? '<span class="text-green-600 bg-green-50 px-1 py-0.5 rounded text-[10px] font-bold">SOLD</span>' : '<span class="text-gray-500 bg-gray-100 px-1 py-0.5 rounded text-[10px] font-bold">QUOTE</span>';
 
                     return `
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">#${r.displayId || r.id}</td>
+                        <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">#${item.displayId || item.id}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${date}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${r.customer || 'Walk-In'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.customer || 'Walk-In'}</td>
                             <td class="px-6 py-4 max-w-xs truncate text-sm text-gray-600" title="${shortDesc}">${shortDesc}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">${r.qty || 1}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900">${r.total || '$0.00'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm">${typeBadge}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900">${total}</td>
                         </tr>
                     `;
-                }).join('');
-            }
-
-            // Update Stats UI
-            document.getElementById('stat-tow-revenue').textContent = formatMoney(towRev);
-            document.getElementById('stat-tow-count').textContent = `${ticketData.length}`;
-
-            document.getElementById('stat-tire-revenue').textContent = formatMoney(tireRev);
-            document.getElementById('stat-tire-count').textContent = `${receiptData.length}`;
-
-            document.getElementById('stat-total-records').textContent = ticketData.length + receiptData.length;
+                }
+            }).join('');
         }
 
+
+        // --- STATS & CHART ---
+        function renderStats() {
+            let towRev = 0;
+            let tireRev = 0;
+            let intakeCount = 0;
+            let storageCount = 0;
+            let releasedCount = 0;
+
+            const now = new Date();
+            const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+
+            allTowData.forEach(t => {
+                towRev += cleanMoney(t.total);
+
+                const f = t.fields || {};
+                const d = new Date(t.timestamp || t.date);
+
+                // Pipeline Stats
+                if (d >= startOfDay) intakeCount++;
+                if (f.status && (f.status === 'Impound' || f.status.includes('Storage'))) storageCount++;
+                if (f.status === 'Released') releasedCount++;
+            });
+
+            allTireData.filter(t => t.type === 'receipt').forEach(t => {
+                tireRev += cleanMoney(t.total);
+            });
+
+            document.getElementById('stat-total-revenue').textContent = formatMoney(towRev + tireRev);
+            document.getElementById('stat-tow-rev-small').textContent = formatMoney(towRev);
+            document.getElementById('stat-tire-rev-small').textContent = formatMoney(tireRev);
+
+            document.getElementById('pulse-intake').textContent = intakeCount;
+            document.getElementById('pulse-storage').textContent = storageCount;
+            document.getElementById('pulse-released').textContent = releasedCount;
+        }
+
+        function renderAdvStats() {
+            // 1. Monthly Buckets
+            const buckets = {};
+            const formatMonth = d => d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+
+            allTowData.forEach(t => {
+                const d = new Date(t.timestamp || t.date);
+                const key = formatMonth(d);
+                if (!buckets[key]) buckets[key] = 0;
+                buckets[key]++;
+            });
+
+            const months = Object.keys(buckets);
+            if (months.length > 0) {
+                // Avg Tows
+                const totalTows = Object.values(buckets).reduce((a, b) => a + b, 0);
+                const avg = Math.round(totalTows / months.length);
+                document.getElementById('stat-avg-tows').textContent = avg;
+
+                // Busiest Month
+                const busyMonth = Object.entries(buckets).sort((a, b) => b[1] - a[1])[0];
+                document.getElementById('stat-busy-month').textContent = busyMonth ? busyMonth[0] : '-';
+                document.getElementById('stat-busy-month-vol').textContent = busyMonth ? `${busyMonth[1]} Tows` : '0 Tows';
+            }
+
+            // 2. Conversion (Quotes vs Receipts)
+            // Note: Since they share storage, we iterate allTireData
+            let quotes = 0;
+            let receipts = 0;
+            allTireData.forEach(t => {
+                if (t.type === 'receipt') receipts++;
+                else quotes++; // untagged or 'quote'
+            });
+            const total = quotes + receipts;
+            const rate = total > 0 ? Math.round((receipts / total) * 100) : 0;
+            document.getElementById('stat-conversion').textContent = `${rate}%`;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: getChartData(7),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                    scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                }
+            });
+        }
+
+        function initVolumeChart() {
+            const ctx = document.getElementById('volumeChart').getContext('2d');
+
+            // Generate last 6 months labels
+            const labels = [];
+            const data = [];
+
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date();
+                d.setMonth(d.getMonth() - i);
+                const label = d.toLocaleString('en-US', { month: 'short' });
+                labels.push(label);
+
+                // Count Tows for this month
+                const count = allTowData.filter(t => {
+                    const td = new Date(t.timestamp || t.date);
+                    return td.getMonth() === d.getMonth() && td.getFullYear() === d.getFullYear();
+                }).length;
+                data.push(count);
+            }
+
+            volumeChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Tow Volume',
+                        data: data,
+                        backgroundColor: '#6366f1', // Indigo 500
+                        borderRadius: 6,
+                        barThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [2, 4] }, ticks: { precision: 0 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateChartRange(days) {
+            document.querySelectorAll('.chart-filter').forEach(b => {
+                b.classList.remove('active', 'bg-gray-100', 'text-gray-600');
+                b.classList.add('bg-white', 'text-gray-500');
+            });
+            const btn = document.getElementById(`filter-${days}d`);
+            btn.classList.add('active', 'bg-gray-100', 'text-gray-600');
+            btn.classList.remove('bg-white', 'text-gray-500');
+            chartInstance.data = getChartData(days);
+            chartInstance.update();
+        }
+
+        function getChartData(days) {
+            const labels = []; const towData = []; const tireData = [];
+            for (let i = days - 1; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                const dayStart = new Date(d); dayStart.setHours(0, 0, 0, 0);
+                const dayEnd = new Date(d); dayEnd.setHours(23, 59, 59, 999);
+
+                const dayTow = allTowData.filter(x => {
+                    const xd = new Date(x.timestamp || x.date);
+                    return xd >= dayStart && xd <= dayEnd;
+                }).reduce((sum, x) => sum + cleanMoney(x.total), 0);
+
+                const dayTire = allTireData.filter(x => {
+                    // Only count Receipts for Revenue
+                    if (x.type !== 'receipt') return false;
+                    const xd = new Date(x.timestamp);
+                    return xd >= dayStart && xd <= dayEnd;
+                }).reduce((sum, x) => sum + cleanMoney(x.total), 0);
+
+                towData.push(dayTow); tireData.push(dayTire);
+            }
+            return {
+                labels: labels,
+                datasets: [
+                    { label: 'Towing', data: towData, borderColor: '#2563EB', backgroundColor: 'rgba(37, 99, 235, 0.1)', tension: 0.4, fill: true },
+                    { label: 'Tire Sales', data: tireData, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true }
+                ]
+            };
+        }
+
+        // --- EXPORT ---
         function exportData() {
-            let data = '';
             let filename = `treadz_export_${new Date().toISOString().slice(0, 10)}.csv`;
-
-            // If combined export is needed, we could merge. 
-            // For now, export CURRENT VIEW.
             const collection = currentTab === 'tow' ? 'ticket' : 'receipt';
-
-            data = TreadzData.exportToCSV(collection);
+            const data = TreadzData.exportToCSV(collection);
             filename = `treadz_${collection}_export_${new Date().getFullYear()}.csv`;
-
-            // Create invisible link
             const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
