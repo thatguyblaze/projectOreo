@@ -903,7 +903,8 @@
                     storeEnd: document.getElementById('tt-store-end').value,
                     storeDays: document.getElementById('tt-store-days').value,
                     notes: document.getElementById('tt-notes').value,
-                    driver: document.getElementById('tt-driver').value
+                    driver: document.getElementById('tt-driver').value,
+                    signature: document.getElementById('sig-result').classList.contains('hidden') ? '' : document.getElementById('sig-image').src
                 }
             };
 
@@ -928,6 +929,7 @@
 
             renderHistory();
         }
+
 
         function loadTicket(id) {
             const history = getHistory();
@@ -992,6 +994,20 @@
                         document.getElementById('other-agency-input').classList.add('hidden');
                         document.getElementById('other-agency-input').value = '';
                     }
+                }
+
+                // Restore Signature
+                const sig = f.signature;
+                if (sig && sig.length > 100) {
+                    document.getElementById('sig-image').src = sig;
+                    document.getElementById('sig-result').classList.remove('hidden');
+                    document.getElementById('sig-empty-state').classList.add('hidden');
+                    document.getElementById('sig-pad-wrapper').classList.add('hidden');
+                } else {
+                    // Start clean
+                    document.getElementById('sig-image').src = '';
+                    document.getElementById('sig-result').classList.add('hidden');
+                    document.getElementById('sig-empty-state').classList.remove('hidden');
                 }
             }
 
@@ -1067,7 +1083,6 @@
 
             const history = getHistory().filter(t => {
                 if (!query) return true;
-                // Safely access fields in case they are missing on legacy records
                 const fields = t.fields || {};
                 const txt = (t.id + (t.billTo || '') + (t.vehicle || '') + (fields.vin || '')).toLowerCase();
                 return txt.includes(query.toLowerCase());
@@ -1078,19 +1093,25 @@
                 div.className = "p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all";
                 div.onclick = () => loadTicket(t.id);
 
-                // Days in Lot Logic
+                // Days in Lot Logic & VTS
                 let daysHtml = '';
                 let vtsHtml = '';
+                let signedHtml = '<span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1 border border-gray-200 whitespace-nowrap">Unsigned</span>';
+
                 const f = t.fields || {};
+
+                // Signed Check
+                if (f.signature && f.signature.length > 100) {
+                    signedHtml = '<span class="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded ml-1 border border-green-200 whitespace-nowrap">Signed</span>';
+                }
+
                 if (f.delivered === 'Lot 1' || f.delivered === 'Lot 2') {
                     if (f.storeStart) {
                         const start = new Date(f.storeStart);
                         const now = new Date();
                         const diff = now - start;
                         if (!isNaN(diff)) {
-                            // Difference in milliseconds -> Days (rounded up)
                             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                            // Only show if >= 0
                             if (days >= 0) {
                                 daysHtml = `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded ml-2 border border-orange-200 whitespace-nowrap">${days} Days</span>`;
                                 if (days > 3) {
@@ -1118,6 +1139,7 @@
                             <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
                             ${daysHtml}
                             ${vtsHtml}
+                            ${signedHtml}
                         </div>
                     </div>
                 `;
