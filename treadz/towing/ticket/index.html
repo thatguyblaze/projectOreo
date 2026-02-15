@@ -1502,15 +1502,15 @@
             // 3. Download PDF (User must attach)
             downloadTowTicket();
 
-            // 4. Alert User
+            // 4. Simple Confirm to mark as sent
             setTimeout(() => {
-                alert("Email draft opened.\n\nA PDF of the ticket has been downloaded.\n\nPLEASE ATTACH THE PDF TO THE EMAIL.");
-
-                // Optional: Auto-check VTS as sent? Maybe let them do it manually to confirm.
-                // document.getElementById('tt-vts-sent').checked = true;
-                // saveTicket();
+                if (confirm("PDF Downloaded.\n\nAfter you attach it to the email, click OK to mark VTS as SENT.")) {
+                    document.getElementById('tt-vts-sent').checked = true;
+                    saveTicket();
+                }
             }, 1000);
         }
+
 
         // --- Autocomplete Logic ---
         function updateMakeModel() {
@@ -1877,6 +1877,8 @@
     </div>
     </div>
 
+
+    <!-- VTS Email Modal -->
 
 </body>
 
