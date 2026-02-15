@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tow Pipeline Flow - Treadz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            /* Light Slate background for business feel */
+            min-height: 100vh;
+        }
+
+        /* Connecting Lines Logic */
+        .pipeline-connector {
+            position: absolute;
+            width: 2px;
+            background-color: #cbd5e1;
+            /* slate-300 */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .step-card {
+            position: relative;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Pulse animation for active nodes if needed */
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.33);
+            }
+
+            80%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .pulse-ring::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            border-radius: 50%;
+            border: 2px solid #3b82f6;
+            animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+
+    <!-- Navigation (Simplified from Index) -->
+    <nav class="bg-slate-900 sticky top-0 z-50 shadow-lg text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-4">
+                    <a href="../../index.html" class="flex-shrink-0">
+                        <span class="font-bold text-xl tracking-tight">Treadz</span>
+                    </a>
+                    <div class="hidden md:block h-6 w-px bg-white/20"></div>
+                    <span class="text-sm font-medium text-slate-300">Standard Operating Procedure</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="index.html"
+                        class="text-sm font-medium text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Back to Ticketing
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 py-12">
+
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Tow Ticket Lifecycle</h1>
+            <p class="text-slate-500 max-w-2xl mx-auto">
+                Comprehensive workflow visualization of the towing, storage, compliance, and release process.
+                Adheres to standard business practices and state regulations.
+            </p>
+        </div>
+
+        <!-- Pipeline Container -->
+        <div class="relative max-w-3xl mx-auto">
+
+            <!-- Central Line -->
+            <div
+                class="absolute top-0 bottom-0 left-8 md:left-1/2 w-0.5 bg-slate-200 -translate-x-1/2 md:translate-x-0 hidden md:block">
+            </div>
+            <!-- Mobile Left Line -->
+            <div class="absolute top-0 bottom-0 left-6 w-0.5 bg-slate-200 block md:hidden"></div>
+
+            <!-- STEP 1: INITIATION -->
+            <div class="relative flex flex-col md:flex-row items-center cursor-default group mb-12">
+                <!-- Icon -->
+                <div
+                    class="absolute left-6 md:left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                </div>
+                <!-- Content (Right on Desktop) -->
+                <div class="ml-16 md:ml-auto md:w-[45%] md:pl-8">
+                    <div class="step-card p-6 border-l-4 border-blue-600">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">1. Intake & Dispatch</h3>
+                        <p class="text-sm text-gray-500 mb-3">Service request initiation via police dispatch, private
+                            property call, or consumer request.</p>
+                        <ul class="space-y-1 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                Create New Ticket ID
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                Assign Agency (KPD, THP, etc.)
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                Driver Deployment
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Spacer (Left on Desktop) -->
+                <div class="hidden md:block md:w-[45%]"></div>
+            </div>
+
+            <!-- STEP 2: RECOVERY -->
+            <div class="relative flex flex-col md:flex-row items-center cursor-default group mb-12">
+                <!-- Icon -->
+                <div
+                    class="absolute left-6 md:left-1/2 -translate-x-1/2 w-12 h-12 bg-indigo-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13"></rect>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                    </svg>
+                </div>
+                <!-- Spacer (Right on Desktop) -->
+                <div class="hidden md:block md:w-[45%]"></div>
+                <!-- Content (Left on Desktop) -->
+                <div class="ml-16 md:ml-0 md:mr-auto md:w-[45%] md:pr-8 md:text-right">
+                    <div class="step-card p-6 border-l-4 md:border-l-0 md:border-r-4 border-indigo-600">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">2. Recovery & Data Capture</h3>
+                        <p class="text-sm text-gray-500 mb-3">On-scene operations, vehicle securement, and digital
+                            documentation.</p>
+                        <ul
+                            class="space-y-1 text-xs text-gray-600 bg-gray-50 p-2 rounded inline-block text-left md:w-full">
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                VIN Decoding & Verification
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                Damage Inspection (FRT, RR, etc.)
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                Photographic Evidence
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: TRANSPORT DECISION -->
+            <div class="relative flex flex-col md:flex-row items-center cursor-default group mb-12">
+                <!-- Icon -->
+                <div
+                    class="absolute left-6 md:left-1/2 -translate-x-1/2 w-12 h-12 bg-amber-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <!-- Content (Right on Desktop) -->
+                <div class="ml-16 md:ml-auto md:w-[45%] md:pl-8">
+                    <div class="step-card p-6 border-l-4 border-amber-500">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">3. Transport & Storage</h3>
+                        <p class="text-sm text-gray-500 mb-3">Vehicle is transported to destination. Impounds enter the
+                            compliance clock.</p>
+
+                        <!-- Mini Flow -->
+                        <div class="flex gap-2">
+                            <div class="flex-1 bg-amber-50 rounded p-2 border border-amber-100">
+                                <div class="text-[10px] font-bold uppercase text-amber-600 mb-1">Standard Tow</div>
+                                <div class="text-xs text-gray-600">Drop at Customer/Shop</div>
+                            </div>
+                            <div class="flex-1 bg-slate-800 rounded p-2 border border-slate-700">
+                                <div class="text-[10px] font-bold uppercase text-white mb-1">IMPOUND / LOT</div>
+                                <div class="text-xs text-gray-300">Status: <span class="text-white font-bold">In
+                                        Lot</span></div>
+                                <div class="text-[10px] text-gray-400 mt-1">Clock Starts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Spacer (Left on Desktop) -->
+                <div class="hidden md:block md:w-[45%]"></div>
+            </div>
+
+            <!-- STEP 4: COMPLIANCE (Conditional) -->
+            <div class="relative flex flex-col md:flex-row items-center cursor-default group mb-12">
+                <!-- Icon -->
+                <div
+                    class="absolute left-6 md:left-1/2 -translate-x-1/2 w-12 h-12 bg-red-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <!-- Spacer (Right on Desktop) -->
+                <div class="hidden md:block md:w-[45%]"></div>
+                <!-- Content (Left on Desktop) -->
+                <div class="ml-16 md:ml-0 md:mr-auto md:w-[45%] md:pr-8 md:text-right">
+                    <div class="step-card p-6 border-l-4 md:border-l-0 md:border-r-4 border-red-600">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">4. Compliance & Lien (Impound)</h3>
+                        <p class="text-sm text-gray-500 mb-3">Time-sensitive legal requirements for vehicles remaining
+                            in storage.</p>
+
+                        <div class="space-y-3">
+                            <div
+                                class="flex items-center justify-between md:flex-row-reverse text-xs border-b border-gray-100 pb-2">
+                                <span class="font-bold text-gray-700">Day 0-3</span>
+                                <span class="text-gray-500">Inventory & Hold</span>
+                            </div>
+                            <div
+                                class="flex items-center justify-between md:flex-row-reverse text-xs border-b border-gray-100 pb-2">
+                                <span class="font-bold text-red-600">Day 4+</span>
+                                <span class="bg-red-100 text-red-700 rounded px-1.5 py-0.5 font-bold">VTS Due</span>
+                            </div>
+                            <div
+                                class="flex items-center justify-between md:flex-row-reverse text-xs border-b border-gray-100 pb-2">
+                                <span class="font-bold text-gray-700">Action</span>
+                                <span class="text-gray-500">Send VTS Letter → Receive Title</span>
+                            </div>
+                            <div class="flex items-center justify-between md:flex-row-reverse text-xs">
+                                <span class="font-bold text-purple-700">Day 30+</span>
+                                <span
+                                    class="bg-purple-100 text-purple-700 rounded px-1.5 py-0.5 font-bold">Abandoned</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: FINANCIAL & RELEASE -->
+            <div class="relative flex flex-col md:flex-row items-center cursor-default group mb-12">
+                <!-- Icon -->
+                <div
+                    class="absolute left-6 md:left-1/2 -translate-x-1/2 w-12 h-12 bg-green-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                </div>
+                <!-- Content (Right on Desktop) -->
+                <div class="ml-16 md:ml-auto md:w-[45%] md:pl-8">
+                    <div class="step-card p-6 border-l-4 border-green-600">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">5. Financial Resolution</h3>
+                        <p class="text-sm text-gray-500 mb-3">Fee compilation, payment processing, and final release.
+                        </p>
+
+                        <div class="bg-gray-50 rounded p-3 text-xs text-gray-600 mb-3">
+                            <div class="flex justify-between mb-1">
+                                <span>Tow Fees</span>
+                                <span class="font-bold">Base + Mileage + Labor</span>
+                            </div>
+                            <div class="flex justify-between border-b border-gray-300 pb-1 mb-1">
+                                <span>Storage</span>
+                                <span class="font-bold">Days × Rate + Tax</span>
+                            </div>
+                            <div class="flex justify-between text-green-700 font-bold">
+                                <span>TOTAL</span>
+                                <span>DUE</span>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 text-[10px] font-bold uppercase text-white text-center">
+                            <div class="flex-1 bg-green-500 rounded py-1">Cust Pay</div>
+                            <div class="flex-1 bg-blue-500 rounded py-1">Ins Pay</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Spacer (Left on Desktop) -->
+                <div class="hidden md:block md:w-[45%]"></div>
+            </div>
+
+            <!-- STEP 6: DISPOSITION -->
+            <div class="relative flex flex-col md:flex-row items-center cursor-default group">
+                <!-- Icon -->
+                <div
+                    class="absolute left-6 md:left-1/2 -translate-x-1/2 w-12 h-12 bg-slate-900 rounded-full border-4 border-white shadow-lg flex items-center justify-center z-20">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <!-- Spacer (Right on Desktop) -->
+                <div class="hidden md:block md:w-[45%]"></div>
+                <!-- Content (Left on Desktop) -->
+                <div class="ml-16 md:ml-0 md:mr-auto md:w-[45%] md:pr-8 md:text-right">
+                    <div class="step-card p-6 border-l-4 md:border-l-0 md:border-r-4 border-slate-900">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">6. Disposition & Archival</h3>
+                        <p class="text-sm text-gray-500 mb-3">Final exit status recorded in system history.</p>
+
+                        <div class="grid grid-cols-2 gap-2 text-center">
+                            <div
+                                class="border border-green-200 bg-green-50 text-green-700 rounded p-2 text-xs font-bold">
+                                RELEASED
+                                <div class="text-[9px] font-normal text-green-600 mt-1">Vehicle exited lot</div>
+                            </div>
+                            <div
+                                class="border border-purple-200 bg-purple-50 text-purple-700 rounded p-2 text-xs font-bold">
+                                SCRAPPED
+                                <div class="text-[9px] font-normal text-purple-600 mt-1">Title processed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-gray-400 text-xs">
+        &copy;
+        <script>document.write(new Date().getFullYear())</script> Treadz Tire & Towing. All Rights Reserved.
+    </footer>
+
+</body>
+
+</html>
