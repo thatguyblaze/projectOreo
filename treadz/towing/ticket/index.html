@@ -369,7 +369,7 @@
                 </div>
 
                 <!-- TICKET STATUS -->
-                <div class="flex justify-center gap-2 mb-4 no-print flex-wrap">
+                <div class="grid grid-cols-4 gap-2 mb-4 no-print">
                     <button class="toggle-btn active" onclick="toggleBtn(this)" data-group="tk-status"
                         data-value="In Lot">In Lot</button>
                     <button class="toggle-btn" onclick="toggleBtn(this)" data-group="tk-status"
@@ -382,7 +382,7 @@
 
                 <!-- VTS / COMPLIANCE SECTION -->
                 <div
-                    class="mb-6 p-3 bg-indigo-50 border border-indigo-100 rounded-lg no-print flex justify-between items-center">
+                    class="mb-6 p-3 bg-indigo-50 border border-indigo-100 rounded-lg no-print hidden md:flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <div class="text-xs font-bold text-indigo-900 uppercase tracking-wide">VTS Status</div>
                         <label class="flex items-center cursor-pointer gap-2 select-none">
@@ -1121,7 +1121,6 @@
             // Reset Agency Toggles
             document.querySelectorAll('.toggle-btn[data-group="agency"]').forEach(b => {
                 b.classList.remove('active');
-                // Removed default selection logic
             });
 
             // Reset Status
@@ -1239,11 +1238,14 @@
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
                         <span class="font-bold text-gray-800 text-sm">#${t.id}</span>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-start gap-2">
                             <button onclick="deleteTicket('${t.id}', event)" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50" title="Delete Ticket">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path></svg>
                             </button>
-                            <span class="text-xs text-gray-500">${t.date}</span>
+                            <div class="flex flex-col items-end">
+                                <span class="text-xs text-gray-500">${t.date}</span>
+                                ${f.vtsSent ? '<div class="mt-0.5" title="VTS Processed"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-teal-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>' : ''}
+                            </div>
                         </div>
                     </div>
                     <div class="text-xs font-bold text-gray-700 truncate mt-1">${t.billTo || 'Unknown Customer'}</div>
@@ -1252,7 +1254,7 @@
                         <div class="flex items-center w-full flex-wrap gap-y-1">
                             <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
                             ${daysHtml}
-                            ${f.vtsSent ? '<span class="text-[10px] font-bold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded ml-1 border border-teal-200 whitespace-nowrap">VTS Sent</span>' : vtsHtml}
+                            ${!f.vtsSent ? vtsHtml : ''}
                             ${signedHtml}
                             ${statusHtml}
                         </div>
