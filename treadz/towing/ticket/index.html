@@ -1257,54 +1257,57 @@
                 }
 
                 // --- Badges ---
-                let badges = [];
                 // Increased text size to text-[10px]
                 const createBadge = (html, classes) => `<div class="px-1.5 py-0.5 rounded text-[10px] font-bold border flex items-center justify-center gap-1 leading-none ${classes}">${html}</div>`;
 
+                let topBadges = [];
+                let bottomBadges = [];
+
                 if (isFinal) {
-                    badges.push(createBadge(f.status, "bg-gray-100 text-gray-600 border-gray-200"));
+                    topBadges.push(createBadge(f.status, "bg-gray-100 text-gray-600 border-gray-200"));
                 } else {
-                    // 1. Location
+                    // 1. Location & Days (Top Row)
                     const loc = f.delivered && f.delivered.includes('Lot') ? f.delivered.toUpperCase() : 'IN LOT';
-                    badges.push(createBadge(loc, "bg-blue-50 text-blue-700 border-blue-200 uppercase"));
+                    topBadges.push(createBadge(loc, "bg-blue-50 text-blue-700 border-blue-200 uppercase"));
+                    topBadges.push(createBadge(`${days} Days`, "bg-gray-50 text-gray-600 border-gray-200"));
 
-                    // 2. Day Counter (New)
-                    badges.push(createBadge(`${days} Days`, "bg-gray-50 text-gray-600 border-gray-200"));
-
-                    // 3. Status
+                    // 2. Status / VTS (Bottom Row)
                     if (f.titleReceived) {
-                        badges.push(createBadge(`
+                        bottomBadges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                             TITLE RECEIVED
                         `, "bg-purple-100 text-purple-700 border-purple-200"));
                     } else if (isVtsSent) {
-                        badges.push(createBadge(`
+                        bottomBadges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             VTS SENT
                         `, "bg-green-100 text-green-700 border-green-200"));
                     } else if (days >= 30) {
-                        badges.push(createBadge(`ABANDONED`, "bg-red-100 text-red-700 border-red-200 animate-pulse"));
+                        bottomBadges.push(createBadge(`ABANDONED`, "bg-red-100 text-red-700 border-red-200 animate-pulse"));
                     } else if (days >= 4) {
-                        badges.push(createBadge(`VTS DUE`, "bg-red-50 text-red-600 border-red-200"));
+                        bottomBadges.push(createBadge(`VTS DUE`, "bg-red-50 text-red-600 border-red-200"));
                     } else if (days >= 2) {
-                        badges.push(createBadge(`VTS SOON`, "bg-orange-50 text-orange-600 border-orange-200"));
+                        bottomBadges.push(createBadge(`VTS SOON`, "bg-orange-50 text-orange-600 border-orange-200"));
                     }
                 }
 
-                // Removed max-width constraint
-                const badgeHtml = `<div class="flex flex-wrap justify-end gap-1 mt-1">${badges.join('')}</div>`;
+                const topHtml = `<div class="flex flex-wrap justify-end gap-1">${topBadges.join('')}</div>`;
+                const bottomHtml = bottomBadges.length > 0 ? `<div class="flex flex-wrap justify-end gap-1 mt-1">${bottomBadges.join('')}</div>` : '';
 
                 div.innerHTML = `
                     <div class="flex justify-between items-start mb-0.5">
                         <span class="font-bold text-gray-800 text-xs">#${t.id}</span>
                         <div class="flex flex-col items-end">
-                            <div class="flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
+                            <div class="flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity mb-0.5">
                                 <span class="text-[10px] text-gray-500 font-medium">${t.date}</span>
                                 <button onclick="deleteTicket('${t.id}', event)" class="text-gray-400 hover:text-red-500 transition-colors" title="Delete Ticket">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
                             </div>
-                            ${badgeHtml}
+                            <div class="flex flex-col items-end">
+                                ${topHtml}
+                                ${bottomHtml}
+                            </div>
                         </div>
                     </div>
                     
@@ -1613,20 +1616,25 @@
             const element = document.getElementById('print-view');
             const id = document.querySelector('.param-ticket-id').innerText;
 
-            // Make compatible with desktop/print CSS
+            // Force visibility for screen rendering (html2canvas captures screen state)
             element.classList.remove('hidden');
+            element.style.display = 'block';
 
             const opt = {
-                margin: [0.25, 0.25, 0.25, 0.25], // Small margins
+                margin: [0.25, 0.25, 0.25, 0.25],
                 filename: `Treadz_TowTicket_${id}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
                 jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
-                element.classList.add('hidden'); // Re-hide
-            });
+            // Small delay to ensure browser paints standard visible state
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    element.classList.add('hidden');
+                    element.style.display = '';
+                });
+            }, 200);
         }
 
         function sendVTSEmail() {
