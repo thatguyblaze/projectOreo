@@ -1687,16 +1687,30 @@
             window.location.href = mailtoLink;
 
             // 3. Download PDF (User must attach)
-            downloadTowTicket();
-
-            // 4. Simple Confirm to mark as sent
+            // Delay slightly to ensure mail client launches first
             setTimeout(() => {
-                if (confirm("PDF Downloaded.\n\nAfter you attach it to the email, click OK to mark VTS as SENT.")) {
-                    document.getElementById('tt-vts-sent').checked = true;
-                    document.getElementById('btn-vts-sent').classList.add('active');
-                    saveTicket();
-                }
-            }, 1000);
+                downloadTowTicket();
+
+                // 4. Show Custom Modal (Non-blocking)
+                setTimeout(() => {
+                    document.getElementById('vts-modal').classList.remove('hidden');
+                }, 1000);
+            }, 500);
+        }
+
+        function closeVtsModal(confirmed) {
+            document.getElementById('vts-modal').classList.add('hidden');
+            if (confirmed) {
+                document.getElementById('tt-vts-sent').checked = true;
+                document.getElementById('btn-vts-sent').classList.add('active');
+
+                // Also ensure Title Received is OFF (Mutual Exclusion)
+                document.getElementById('tt-title-received').checked = false;
+                const btnTitle = document.getElementById('btn-title-rec');
+                if (btnTitle) btnTitle.classList.remove('active');
+
+                saveTicket();
+            }
         }
 
 
@@ -2127,6 +2141,24 @@
 
 
     <!-- VTS Email Modal -->
+    <div id="vts-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 text-black font-sans">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center mx-4">
+            <h3 class="font-bold text-lg mb-3">VTS Process Started</h3>
+            <div class="text-left text-sm text-gray-600 mb-6 space-y-2">
+                <p>1. <strong>Attach the PDF</strong> (just downloaded) to the email.</p>
+                <p>2. Send the email.</p>
+                <p>3. Click "Mark Sent" below.</p>
+            </div>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeVtsModal(false)"
+                    class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50 font-medium">Cancel</button>
+                <button onclick="closeVtsModal(true)"
+                    class="px-4 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow">Mark
+                    Sent</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 
