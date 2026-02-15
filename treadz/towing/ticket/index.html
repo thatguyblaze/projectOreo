@@ -367,6 +367,16 @@
                     </div>
                 </div>
 
+                <!-- TICKET STATUS -->
+                <div class="flex justify-center gap-2 mb-4 no-print">
+                    <button class="toggle-btn active" onclick="toggleBtn(this)" data-group="tk-status"
+                        data-value="Active">Active</button>
+                    <button class="toggle-btn" onclick="toggleBtn(this)" data-group="tk-status"
+                        data-value="Picked Up (Insurance)">Picked Up (Ins.)</button>
+                    <button class="toggle-btn" onclick="toggleBtn(this)" data-group="tk-status"
+                        data-value="Scrapped">Scrapped</button>
+                </div>
+
                 <!-- 1. CUSTOMER INFO -->
                 <div class="mb-6">
                     <div class="section-title">
@@ -438,12 +448,6 @@
                                         <button type="button"
                                             class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded hover:bg-gray-300 transition-colors"
                                             onclick="setDelivered('Lot 2')">Lot 2</button>
-                                        <button type="button"
-                                            class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded hover:bg-purple-200 transition-colors"
-                                            onclick="setDelivered('Picked up by Insurance')">Ins.</button>
-                                        <button type="button"
-                                            class="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded hover:bg-red-200 transition-colors"
-                                            onclick="setDelivered('Scrapped')">Scrap</button>
                                     </div>
                                 </div>
                                 <div class="relative">
@@ -911,6 +915,7 @@
                     storeDays: document.getElementById('tt-store-days').value,
                     notes: document.getElementById('tt-notes').value,
                     driver: document.getElementById('tt-driver').value,
+                    status: document.querySelector('.toggle-btn[data-group="tk-status"].active')?.dataset.value || 'Active',
                     signature: document.getElementById('sig-result').classList.contains('hidden') ? '' : document.getElementById('sig-image').src
                 }
             };
@@ -987,21 +992,28 @@
                 });
 
                 // Restore Agency
+                // Restore Agency
                 const ag = f.agency;
-                if (ag) {
-                    document.querySelectorAll('.toggle-btn[data-group="agency"]').forEach(b => {
-                        b.classList.remove('active');
-                        if (b.dataset.value === ag) b.classList.add('active');
-                    });
-                    if (ag === 'Other') {
-                        const oa = document.getElementById('other-agency-input');
-                        oa.classList.remove('hidden');
-                        oa.value = f.otherAgency || '';
-                    } else {
-                        document.getElementById('other-agency-input').classList.add('hidden');
-                        document.getElementById('other-agency-input').value = '';
-                    }
+                document.querySelectorAll('.toggle-btn[data-group="agency"]').forEach(b => {
+                    b.classList.remove('active');
+                    if (ag && b.dataset.value === ag) b.classList.add('active');
+                });
+
+                if (ag === 'Other') {
+                    const oa = document.getElementById('other-agency-input');
+                    oa.classList.remove('hidden');
+                    oa.value = f.otherAgency || '';
+                } else {
+                    document.getElementById('other-agency-input').classList.add('hidden');
+                    document.getElementById('other-agency-input').value = '';
                 }
+
+                // Restore Status
+                const st = f.status || 'Active';
+                document.querySelectorAll('.toggle-btn[data-group="tk-status"]').forEach(b => {
+                    b.classList.remove('active');
+                    if (b.dataset.value === st) b.classList.add('active');
+                });
 
                 // Restore Signature
                 const sig = f.signature;
@@ -1039,6 +1051,12 @@
             document.querySelectorAll('.toggle-btn[data-group="agency"]').forEach(b => {
                 b.classList.remove('active');
                 if (b.innerText.includes('Hawkins')) b.classList.add('active'); // Default
+            });
+
+            // Reset Status
+            document.querySelectorAll('.toggle-btn[data-group="tk-status"]').forEach(b => {
+                b.classList.remove('active');
+                if (b.dataset.value === 'Active') b.classList.add('active');
             });
             const otherInput = document.getElementById('other-agency-input');
             if (otherInput) otherInput.classList.add('hidden');
@@ -1084,6 +1102,29 @@
             }
         }
 
+        function toggleBtn(btn) {
+            const group = btn.dataset.group;
+            document.querySelectorAll(`.toggle-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (group === 'agency') {
+                const val = btn.dataset.value;
+                const otherInput = document.getElementById('other-agency-input');
+                if (val === 'Other') {
+                    if (otherInput) otherInput.classList.remove('hidden');
+                } else {
+                    if (otherInput) {
+                        otherInput.classList.add('hidden');
+                        otherInput.value = '';
+                    }
+                }
+            }
+
+            if (typeof saveTicket === 'function') saveTicket();
+
+            if (group === 'store-rate' && typeof calcTicketTotal === 'function') calcTicketTotal();
+        }
+
         function renderHistory(query = '') {
             const list = document.getElementById('history-list');
             list.innerHTML = '';
@@ -1108,16 +1149,16 @@
 
                 const f = t.fields || {};
 
-                const isFinal = f.delivered === 'Scrapped' || (f.delivered && f.delivered.toLowerCase().includes('insurance'));
+                const isFinal = f.status === 'Scrapped' || f.status === 'Picked Up (Insurance)';
 
                 if (isFinal) {
-                    statusHtml = `<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded ml-1 border border-gray-300 whitespace-nowrap">${f.delivered}</span>`;
-                    signedHtml = ''; // Hide signed/unsigned tag
+                    statusHtml = `<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded ml-1 border border-gray-300 whitespace-nowrap">${f.status}</span>`;
+                    signedHtml = '';
                 } else if (f.signature && f.signature.length > 100) {
                     signedHtml = '<span class="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded ml-1 border border-green-200 whitespace-nowrap">Signed</span>';
                 }
 
-                if (f.delivered === 'Lot 1' || f.delivered === 'Lot 2') {
+                if (!isFinal && (f.delivered === 'Lot 1' || f.delivered === 'Lot 2')) {
                     if (f.storeStart) {
                         const start = new Date(f.storeStart);
                         const now = new Date();
