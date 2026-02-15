@@ -566,17 +566,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const endCell = calendarGrid.children[segmentEndIndex + CHILD_OFFSET];
 
                 if (startCell && endCell) {
-                    // Increased offset to 48px to clear the day number and add button
-                    const topPos = startCell.offsetTop + 48 + (event._renderTrack * 28);
-                    const leftPos = startCell.offsetLeft + 4;
+                    // Adjusted offset to align with day cells more tightly on mobile
+                    const topPos = startCell.offsetTop + 32 + (event._renderTrack * 24);
+                    const leftPos = startCell.offsetLeft + 2;
                     // Width spans from start of startCell to end of endCell (minus margins)
-                    const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 8;
+                    const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 4;
 
                     const bar = document.createElement('div');
-                    bar.className = 'event-bar';
+                    bar.className = 'event-bar text-xs'; // Added text-xs for smaller font on mobile
                     bar.style.top = `${topPos}px`;
                     bar.style.left = `${leftPos}px`;
                     bar.style.width = `${width}px`;
+                    bar.style.height = '20px'; // Forced smaller height
+                    bar.style.lineHeight = '20px'; // Vertically center text
+                    bar.style.padding = '0 4px'; // Tighten padding
                     bar.style.backgroundColor = event.color || '#3B82F6';
                     bar.style.pointerEvents = 'auto'; // Re-enable clicks
                     bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
