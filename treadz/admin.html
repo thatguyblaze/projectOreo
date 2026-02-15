@@ -242,7 +242,7 @@
                 </div>
 
                 <!-- DRIVER & LOT ANALYSIS -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="col-span-1 lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Driver Performance Widget -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                         <div class="flex justify-between items-center mb-4">
@@ -316,7 +316,7 @@
                 </div>
 
                 <!-- BUSINESS INTELLIGENCE -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="col-span-1 lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     <!-- Top Accounts Widget -->
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                         <div class="flex justify-between items-center mb-4">
@@ -356,169 +356,169 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- DATA MANAGEMENT AREA -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <!-- Filters & Tabs Header -->
-                    <div
-                        class="border-b border-gray-200 bg-gray-50/80 p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
+            <!-- DATA MANAGEMENT AREA -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <!-- Filters & Tabs Header -->
+                <div
+                    class="border-b border-gray-200 bg-gray-50/80 p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
 
-                        <!-- Tabs -->
-                        <div class="flex bg-gray-200/50 p-1 rounded-xl w-full md:w-auto">
-                            <button onclick="switchTab('tow')" id="tab-tow"
-                                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all">
-                                Tow Tickets
-                            </button>
-                            <button onclick="switchTab('tire')" id="tab-tire"
-                                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all">
-                                Tire Sales
-                            </button>
-                            <button onclick="switchTab('vts')" id="tab-vts"
-                                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold text-red-600 hover:bg-white/50 transition-all flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                                VTS & Storage
-                            </button>
-                        </div>
-
-                        <!-- Search & Date Filter -->
-                        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                            <div class="relative flex-grow md:w-64">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="table-search" oninput="filterTable()"
-                                    placeholder="Search customer, ID, vehicle..."
-                                    class="pl-10 text-sm shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full border-gray-300 rounded-lg p-2.5 border outline-none transition-all">
-                            </div>
-                            <select id="date-filter" onchange="filterTable()"
-                                class="text-sm border-gray-300 rounded-lg shadow-sm p-2.5 border outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
-                                <option value="all">All Time</option>
-                                <option value="30">Last 30 Days</option>
-                                <option value="7">Last 7 Days</option>
-                                <option value="1">Today</option>
-                            </select>
-                        </div>
+                    <!-- Tabs -->
+                    <div class="flex bg-gray-200/50 p-1 rounded-xl w-full md:w-auto">
+                        <button onclick="switchTab('tow')" id="tab-tow"
+                            class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all">
+                            Tow Tickets
+                        </button>
+                        <button onclick="switchTab('tire')" id="tab-tire"
+                            class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all">
+                            Tire Sales
+                        </button>
+                        <button onclick="switchTab('vts')" id="tab-vts"
+                            class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold text-red-600 hover:bg-white/50 transition-all flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                            VTS & Storage
+                        </button>
                     </div>
 
-                    <!-- DATA TABLES -->
-                    <div class="p-0">
-                        <!-- Tow Table -->
-                        <div id="view-tow" class="overflow-x-auto min-h-[300px]">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            ID</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Date</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Customer / Bill To</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Vehicle</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Status</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200" id="table-tow-body">
-                                    <!-- JS Injected -->
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Tire Table -->
-                        <div id="view-tire" class="hidden overflow-x-auto min-h-[300px]">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            ID</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Date</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Customer</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Items</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Qty</th>
-                                        <th scope="col"
-                                            class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200" id="table-tire-body">
-                                    <!-- JS Injected -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- VTS Table -->
-                    <div id="view-vts" class="hidden overflow-x-auto min-h-[300px] bg-red-50/10">
-                        <div class="px-6 py-4 bg-red-50 border-b border-red-100 flex justify-between items-center">
-                            <h3 class="text-red-800 font-bold uppercase text-xs tracking-wider flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <!-- Search & Date Filter -->
+                    <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+                        <div class="relative flex-grow md:w-64">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
-                                Action Required: Vehicles in Storage
-                            </h3>
-                            <button onclick="exportVTS()"
-                                class="text-xs bg-white text-red-600 border border-red-200 px-3 py-1 rounded hover:bg-red-50 font-semibold transition-colors">
-                                Download Compliance Report
-                            </button>
+                            </span>
+                            <input type="text" id="table-search" oninput="filterTable()"
+                                placeholder="Search customer, ID, vehicle..."
+                                class="pl-10 text-sm shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full border-gray-300 rounded-lg p-2.5 border outline-none transition-all">
                         </div>
-                        <table class="min-w-full divide-y divide-red-200/50">
-                            <thead class="bg-red-50/50">
+                        <select id="date-filter" onchange="filterTable()"
+                            class="text-sm border-gray-300 rounded-lg shadow-sm p-2.5 border outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white">
+                            <option value="all">All Time</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="7">Last 7 Days</option>
+                            <option value="1">Today</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- DATA TABLES -->
+                <div class="p-0">
+                    <!-- Tow Table -->
+                    <div id="view-tow" class="overflow-x-auto min-h-[300px]">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Ticket / Date</th>
+                                        ID</th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Vehicle Info</th>
+                                        Date</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Customer / Bill To</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Vehicle</th>
                                     <th scope="col"
                                         class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Storage Time</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Compliance Status</th>
+                                        Status</th>
                                     <th scope="col"
                                         class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Accrued Fees</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                        Actions</th>
+                                        Total</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="table-vts-body">
+                            <tbody class="bg-white divide-y divide-gray-200" id="table-tow-body">
                                 <!-- JS Injected -->
                             </tbody>
                         </table>
                     </div>
 
-                    <div
-                        class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500 flex justify-between">
-                        <span id="record-count-display">Showing all records</span>
-                        <span>Sync Status: Local Only</span>
+                    <!-- Tire Table -->
+                    <div id="view-tire" class="hidden overflow-x-auto min-h-[300px]">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        ID</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Date</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Customer</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Items</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Qty</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="table-tire-body">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
+                <!-- VTS Table -->
+                <div id="view-vts" class="hidden overflow-x-auto min-h-[300px] bg-red-50/10">
+                    <div class="px-6 py-4 bg-red-50 border-b border-red-100 flex justify-between items-center">
+                        <h3 class="text-red-800 font-bold uppercase text-xs tracking-wider flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Action Required: Vehicles in Storage
+                        </h3>
+                        <button onclick="exportVTS()"
+                            class="text-xs bg-white text-red-600 border border-red-200 px-3 py-1 rounded hover:bg-red-50 font-semibold transition-colors">
+                            Download Compliance Report
+                        </button>
+                    </div>
+                    <table class="min-w-full divide-y divide-red-200/50">
+                        <thead class="bg-red-50/50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Ticket / Date</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Vehicle Info</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Storage Time</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Compliance Status</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Accrued Fees</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="table-vts-body">
+                            <!-- JS Injected -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500 flex justify-between">
+                    <span id="record-count-display">Showing all records</span>
+                    <span>Sync Status: Local Only</span>
+                </div>
+            </div>
 
         </main>
     </div>
