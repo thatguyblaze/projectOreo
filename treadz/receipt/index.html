@@ -574,17 +574,7 @@
 
         // ... (saveQuote is skipped here as it was just edited)
 
-        function triggerAutoSave() {
-            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
-            autoSaveTimeout = setTimeout(() => {
-                saveQuote();
-            }, 800);
-        }
 
-        function handlePrint() {
-            saveQuote();
-            window.print();
-        }
 
         function reset() {
             // if (!confirm("Start new receipt?")) return;
@@ -633,20 +623,29 @@
             if (item) loadQuote(item);
         }
 
-        function saveQuote() {
+        function saveQuote(finalized = false) {
             // 1. Determine ID
             // If we are starting fresh (no currentEditingId), we need a new Sequential ID
             if (!currentEditingId) {
-                // Check if we have a session ID already floating (from previous save that didn't stick? Unlikely with this logic)
                 currentEditingId = TreadzUtils.incrementGlobalId();
                 idDisplay.textContent = currentEditingId;
+            }
+
+            // Determine Status
+            let recordType = 'quote';
+            const existing = TreadzData.getById('receipt', currentEditingId);
+
+            if (finalized) {
+                recordType = 'receipt';
+            } else if (existing && existing.type === 'receipt') {
+                recordType = 'receipt'; // Don't downgrade if already sold
             }
 
             // 2. Build Data Object
             const receiptData = {
                 id: currentEditingId,
                 displayId: currentEditingId,
-                type: 'receipt', // Analytics Tag
+                type: recordType, // Analytics Tag
                 timestamp: new Date().toISOString(),
                 customer: custNameInput.value.trim() || 'Walk-In',
                 vehicle: custVehicleInput.value.trim(),
@@ -661,6 +660,18 @@
             // 3. Use TreadzData Service
             TreadzData.save('receipt', receiptData, 'Current User');
             renderHistory();
+        }
+
+        function triggerAutoSave() {
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveQuote(false); // Auto-save as draft/quote
+            }, 800);
+        }
+
+        function handlePrint() {
+            saveQuote(true); // Finalize as Receipt
+            window.print();
         }
 
 
