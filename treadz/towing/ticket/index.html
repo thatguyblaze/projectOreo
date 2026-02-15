@@ -470,10 +470,10 @@
                                 <label class="form-label mb-0">Delivered To</label>
                                 <div class="flex gap-2">
                                     <button type="button"
-                                        class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded hover:bg-gray-300 transition-colors"
+                                        class="text-xs font-bold bg-gray-200 text-gray-700 px-3 py-2 rounded hover:bg-gray-300 transition-colors"
                                         onclick="setDelivered('Lot 1')">Lot 1</button>
                                     <button type="button"
-                                        class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded hover:bg-gray-300 transition-colors"
+                                        class="text-xs font-bold bg-gray-200 text-gray-700 px-3 py-2 rounded hover:bg-gray-300 transition-colors"
                                         onclick="setDelivered('Lot 2')">Lot 2</button>
                                 </div>
                             </div>
@@ -1216,55 +1216,48 @@
                 }
 
                 // --- Unified Top-Right Badge ---
-                // Replaces the "Tags" system user disliked. 
-                // Uses the "VTS SENT" style (icon + text badge).
+                // Separated Location and Status/VTS into stacked badges
 
-                let badgeHtml = '';
+                let badges = [];
+                const createBadge = (html, classes) => `<div class="px-1.5 py-0.5 rounded text-[10px] font-bold border flex items-center justify-end gap-1 ${classes}">${html}</div>`;
 
-                // 1. Final Statuses override everything (Gray/Dark)
+                // 1. Final Ticket
                 if (isFinal) {
-                    badgeHtml = `
-                        <div class="mt-1 px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 text-[10px] font-bold border border-gray-200 flex items-center justify-end gap-1">
-                            ${f.status}
-                        </div>`;
+                    badges.push(createBadge(f.status, "bg-gray-100 text-gray-600 border-gray-200"));
                 }
-                // 2. Monitoring (VTS Sent) (Green)
-                else if (isVtsSent) {
-                    badgeHtml = `
-                        <div class="mt-1 px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold border border-green-200 flex items-center justify-end gap-1">
+                // 2. Active Ticket
+                else {
+                    // A. Location Badge
+                    const loc = f.delivered && f.delivered.includes('Lot') ? f.delivered.toUpperCase() : 'IN LOT';
+                    badges.push(createBadge(loc, "bg-blue-50 text-blue-700 border-blue-200 uppercase"));
+
+                    // B. Status / Warning Badge
+                    if (isVtsSent) {
+                        badges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             VTS SENT
-                        </div>`;
-                }
-                // 3. Warnings (Red/Orange)
-                else if (days >= 30) {
-                    badgeHtml = `
-                        <div class="mt-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-bold border border-red-200 flex items-center justify-end gap-1 animate-pulse">
+                        `, "bg-green-100 text-green-700 border-green-200"));
+                    } else if (days >= 30) {
+                        badges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                             ABANDONED
-                        </div>`;
-                }
-                else if (days >= 4) {
-                    badgeHtml = `
-                        <div class="mt-1 px-1.5 py-0.5 rounded bg-red-50 text-red-600 text-[10px] font-bold border border-red-200 flex items-center justify-end gap-1">
+                        `, "bg-red-100 text-red-700 border-red-200 animate-pulse"));
+                    } else if (days >= 4) {
+                        badges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                            VTS DUE
-                        </div>`;
-                }
-                else if (days >= 2) {
-                    badgeHtml = `
-                        <div class="mt-1 px-1.5 py-0.5 rounded bg-orange-50 text-orange-600 text-[10px] font-bold border border-orange-200 flex items-center justify-end gap-1">
+                            VTS DUE (${days}d)
+                        `, "bg-red-50 text-red-600 border-red-200"));
+                    } else if (days >= 2) {
+                        badges.push(createBadge(`
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            VTS SOON
-                        </div>`;
+                            VTS SOON (${days}d)
+                        `, "bg-orange-50 text-orange-600 border-orange-200"));
+                    } else if (days > 0) {
+                        badges.push(createBadge(`${days} Days`, "bg-gray-50 text-gray-400 border-gray-200"));
+                    }
                 }
-                // 4. Default In Lot (Blue/Gray)
-                else {
-                    badgeHtml = `
-                        <div class="mt-1 px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100 flex items-center justify-end gap-1">
-                            In Lot ${days > 0 ? `(${days}d)` : ''}
-                        </div>`;
-                }
+
+                const badgeHtml = `<div class="flex flex-col items-end gap-1 mt-1">${badges.join('')}</div>`;
 
                 div.innerHTML = `
                     <div class="flex justify-between items-start mb-1">
