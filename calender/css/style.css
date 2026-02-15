@@ -36,8 +36,12 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    height: calc(100vh - 40px);
-    /* Adjust height for footer */
+    /* Use dynamic viewport height for mobile browsers */
+    height: 100vh;
+    height: 100dvh;
+    /* Subtract footer height roughly */
+    max-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 main {
@@ -49,6 +53,7 @@ main {
 .calendar-container {
     transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
 #monthView {
@@ -337,6 +342,8 @@ main {
     border: 1px solid #4a4a4a;
     color: var(--text-primary);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Prevent iOS zoom on focus */
+    font-size: 16px !important;
 }
 
 .form-input:focus {
@@ -407,6 +414,7 @@ main {
 footer {
     text-align: center;
     padding: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
     font-size: 0.8rem;
     color: var(--text-secondary);
     flex-shrink: 0;
