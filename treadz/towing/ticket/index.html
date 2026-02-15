@@ -1626,6 +1626,7 @@
         setupAutocomplete('tt-delivered', 'delivered-suggestions');
 
         // --- VIN DECODER ---
+        // --- VIN DECODER ---
         async function decodeVin(vin) {
             if (!vin || vin.length < 17) return;
 
@@ -1634,32 +1635,33 @@
             vinInput.classList.add('bg-blue-50');
 
             try {
-                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/${vin}?format=json`);
+                // Use the DecodeVinValues endpoint for a flatter, easier response structure
+                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`);
                 const data = await response.json();
 
-                if (data.Results) {
-                    const getVal = (id) => data.Results.find(item => item.VariableId === id)?.Value;
+                if (data.Results && data.Results.length > 0) {
+                    const vehicle = data.Results[0];
 
-                    const year = getVal(29); // Model Year
-                    const make = getVal(26); // Make
-                    const model = getVal(28); // Model
+                    const year = vehicle.ModelYear;
+                    const make = vehicle.Make;
+                    const model = vehicle.Model;
 
                     if (year) document.getElementById('tt-year').value = year;
+
                     if (make) {
-                        // Try to match existing select, or set value if "Other" logic needed
-                        // For now simple set
                         const makeSelect = document.getElementById('tt-make');
-                        // Basic fuzzy match or direct set
+                        // Fuzzy match the make to our dropdown
                         for (let i = 0; i < makeSelect.options.length; i++) {
                             if (makeSelect.options[i].value.toUpperCase() === make.toUpperCase()) {
                                 makeSelect.selectedIndex = i;
                                 break;
                             }
                         }
-                        // Also trigger model list update
+                        // Trigger change to update model datalist
                         const event = new Event('change');
                         makeSelect.dispatchEvent(event);
                     }
+
                     if (model) document.getElementById('tt-model').value = model;
 
                     updateMakeModel();
@@ -1848,14 +1850,25 @@
     <!-- Print View Container -->
     <div id="print-view">
         <!-- Header -->
-        <div class="flex justify-between items-start mb-4 border-b-2 border-black pb-2">
-            <!-- Inline style for Logo -->
-            <img src="../../treadztntLogo.png" style="height: 4rem; width: auto; max-width: 200px; display: block;"
-                alt="Treadz">
-            <div class="text-right">
-                <h1 class="font-black uppercase tracking-wide text-2xl">TOWING INVOICE</h1>
-                <div class="text-sm text-gray-600 font-bold">Ticket #: <span id="pv-ticket-id"></span></div>
-                <div class="text-sm text-gray-600">Date: <span id="pv-date"></span></div>
+        <div class="mb-6 pb-4 border-b-2 border-black relative">
+            <div class="text-center">
+                <img src="../../treadztntLogo.png" style="height: 3.5rem; width: auto;"
+                    class="mx-auto mb-2 grayscale contrast-125 block" alt="Treadz">
+                <div class="text-xs font-serif leading-tight text-black">
+                    <div class="font-bold text-sm tracking-wide">TIRE & TOWING</div>
+                    <div>409 Main Street E.</div>
+                    <div>Mt. Carmel, TN 37645</div>
+                    <div class="font-bold mt-1 text-sm">423-357-4551</div>
+                </div>
+            </div>
+
+            <!-- Absolute Positioning for ID and Date -->
+            <div class="absolute top-0 left-0 text-xl font-bold text-black">
+                <span id="pv-ticket-id"></span>
+            </div>
+            <div class="absolute top-0 right-0 text-right">
+                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Date</div>
+                <div id="pv-date" class="font-bold text-sm"></div>
             </div>
         </div>
 
