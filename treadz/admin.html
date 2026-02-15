@@ -885,14 +885,22 @@
         }
 
         function renderLotStats() {
-            // Logic: 'Impound' status = Main Lot. 'Storage' status = Overflow/Storage Lot.
+            // Logic: Active tickets only (not released/scrapped).
+            // Lot 1 = Main Lot (Impound)
+            // Lot 2 = Overflow / Storage
             let mainLot = 0;
             let storageLot = 0;
 
             allTowData.forEach(t => {
-                const status = t.fields?.status || '';
-                if (status === 'Impound') mainLot++;
-                if (status.includes('Storage')) storageLot++;
+                const f = t.fields || {};
+                const status = f.status || '';
+                const delivered = (f.delivered || '').toLowerCase();
+
+                // Skip closed tickets
+                if (status === 'Released' || status === 'Scrapped' || status === 'Picked Up (Insurance)' || status === 'Insurance') return;
+
+                if (delivered.includes('lot 1') || delivered.includes('impound')) mainLot++;
+                else if (delivered.includes('lot 2') || delivered.includes('storage') || delivered.includes('overflow')) storageLot++;
             });
 
             // Update UI Bars (if elements exist)
