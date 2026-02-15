@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treadz - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/data-store.js"></script>
+    <script src="js/treadz-core.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen font-sans">
+
+    <!-- LOGIN MODAL -->
+    <div id="login-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 transition-opacity duration-300">
+        <div class="bg-white p-8 rounded-lg shadow-2xl w-96 transform transition-all scale-100">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Admin Access</h2>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-blue-500 outline-none transition-shadow"
+                        required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-blue-500 outline-none transition-shadow"
+                        required>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-bold shadow-lg mt-2">Sign
+                    In</button>
+            </form>
+            <p id="login-error" class="text-red-500 text-sm mt-4 text-center hidden font-bold animate-pulse">Invalid
+                Credentials</p>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD (Hidden by default) -->
+    <div id="dashboard" class="hidden min-h-screen flex flex-col">
+        <nav class="bg-white shadow-md p-4 sticky top-0 z-40 border-b border-gray-200">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                        Treadz Administration
+                    </h1>
+                    <span
+                        class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-200">Owner
+                        View</span>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="exportData()"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm transition-all active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Export CSV
+                    </button>
+                    <a href="index.html"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-300">Exit</a>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto p-6 space-y-8 flex-grow w-full">
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Towing Stats -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Towing Performance</h3>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <div class="text-3xl font-black text-gray-900" id="stat-tow-revenue">$0.00</div>
+                            <div class="text-xs text-green-600 font-medium mt-1">Total Estimated Revenue</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-gray-700" id="stat-tow-count">0</div>
+                            <div class="text-xs text-gray-400">Tickets</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tire Sales Stats -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Tire Sales & Quotes</h3>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <div class="text-3xl font-black text-gray-900" id="stat-tire-revenue">$0.00</div>
+                            <div class="text-xs text-blue-600 font-medium mt-1">Total Quoted Value</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-gray-700" id="stat-tire-count">0</div>
+                            <div class="text-xs text-gray-400">Records</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined Stats -->
+                <div
+                    class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow bg-gradient-to-br from-gray-50 to-white">
+                    <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Total System Volume</h3>
+                    <div class="flex items-center gap-4 h-full pb-4">
+                        <div class="text-4xl font-black text-gray-800" id="stat-total-records">0</div>
+                        <div class="text-sm text-gray-500 leading-tight">Total Active Records<br>Across All Systems
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="border-b border-gray-200 bg-gray-50/50 px-6">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button onclick="switchTab('tow')" id="tab-tow"
+                            class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm transition-colors">
+                            Tow Tickets
+                        </button>
+                        <button onclick="switchTab('tire')" id="tab-tire"
+                            class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            Tire Quotes/Receipts
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- DATA TABLES -->
+                <div class="p-0">
+                    <!-- Tow Table -->
+                    <div id="view-tow" class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        ID</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Date</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Customer / Bill To</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Vehicle</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Status</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="table-tow-body">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tire Table -->
+                    <div id="view-tire" class="hidden overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        ID</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Date</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Customer</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Items</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Qty</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="table-tire-body">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination / Footer (Fake for now) -->
+                <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500">
+                    Showing all local records. Sync to cloud database for more history.
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- AUTHENTICATION ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            if (u === 'admin' && p === 'admin') {
+                document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    document.getElementById('login-modal').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    initDashboard();
+                }, 300);
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        // --- DASHBOARD DATA ---
+        let currentTab = 'tow';
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // UI Toggle
+            document.getElementById('tab-tow').className = tab === 'tow' ?
+                "border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm transition-colors" :
+                "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors";
+
+            document.getElementById('tab-tire').className = tab === 'tire' ?
+                "border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm transition-colors" :
+                "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors";
+
+            document.getElementById('view-tow').classList.toggle('hidden', tab !== 'tow');
+            document.getElementById('view-tire').classList.toggle('hidden', tab !== 'tire');
+
+            // Stats Refresh (Optional)
+        }
+
+        function cleanMoney(str) {
+            if (!str) return 0;
+            // Handle "$1,234.56"
+            return parseFloat(String(str).replace(/[^0-9.-]+/g, "")) || 0;
+        }
+
+        function formatMoney(num) {
+            return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function initDashboard() {
+            // Load Data using Central Store
+            const ticketData = TreadzData.getAll('ticket');
+            const receiptData = TreadzData.getAll('receipt'); // Includes Quotes due to shared key
+
+            // --- Stats Calculation ---
+            let towRev = 0;
+            let tireRev = 0;
+
+            // Render Tow
+            const towBody = document.getElementById('table-tow-body');
+
+            if (ticketData.length === 0) {
+                towBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500 italic">No tow tickets found</td></tr>';
+            } else {
+                towBody.innerHTML = ticketData.map(t => {
+                    const total = cleanMoney(t.total);
+                    towRev += total;
+                    const dateRaw = t.timestamp || t.date;
+                    const date = dateRaw ? new Date(dateRaw).toLocaleDateString() : 'N/A';
+
+                    const f = t.fields || {};
+                    const status = f.status || 'Draft';
+
+                    let statusColor = "bg-gray-100 text-gray-800";
+                    if (status === 'Released') statusColor = "bg-green-100 text-green-800";
+                    if (status === 'Impound') statusColor = "bg-red-100 text-red-800";
+                    if (status.includes('Storage')) statusColor = "bg-yellow-100 text-yellow-800";
+
+                    return `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">#${t.id}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${date}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${t.billTo || f.billTo || 'Unknown'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${t.vehicle || f.vehicle || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-bold rounded-full ${statusColor}">
+                                    ${status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900">${t.total || '$0.00'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Render Tire
+            const tireBody = document.getElementById('table-tire-body');
+
+            if (receiptData.length === 0) {
+                tireBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500 italic">No tire quotes found</td></tr>';
+            } else {
+                tireBody.innerHTML = receiptData.map(r => {
+                    const total = cleanMoney(r.total);
+                    tireRev += total;
+                    const dateRaw = r.timestamp;
+                    const date = dateRaw ? new Date(dateRaw).toLocaleDateString() : 'N/A';
+
+                    const shortDesc = r.tireInfo || r.description || 'Service/Parts';
+
+                    return `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">#${r.displayId || r.id}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${date}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${r.customer || 'Walk-In'}</td>
+                            <td class="px-6 py-4 max-w-xs truncate text-sm text-gray-600" title="${shortDesc}">${shortDesc}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">${r.qty || 1}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900">${r.total || '$0.00'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Update Stats UI
+            document.getElementById('stat-tow-revenue').textContent = formatMoney(towRev);
+            document.getElementById('stat-tow-count').textContent = `${ticketData.length}`;
+
+            document.getElementById('stat-tire-revenue').textContent = formatMoney(tireRev);
+            document.getElementById('stat-tire-count').textContent = `${receiptData.length}`;
+
+            document.getElementById('stat-total-records').textContent = ticketData.length + receiptData.length;
+        }
+
+        function exportData() {
+            let data = '';
+            let filename = `treadz_export_${new Date().toISOString().slice(0, 10)}.csv`;
+
+            // If combined export is needed, we could merge. 
+            // For now, export CURRENT VIEW.
+            const collection = currentTab === 'tow' ? 'ticket' : 'receipt';
+
+            data = TreadzData.exportToCSV(collection);
+            filename = `treadz_${collection}_export_${new Date().getFullYear()}.csv`;
+
+            // Create invisible link
+            const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+
+</html>

@@ -10,6 +10,7 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/data-store.js"></script>
     <style>
         /* Base styles */
         body {
@@ -551,6 +552,10 @@
                 </div>
             </aside>
         </main>
+        <div class="text-center py-4 print:hidden">
+            <a href="../admin.html"
+                class="text-gray-300 hover:text-gray-500 text-xs no-underline transition-colors">Admin</a>
+        </div>
     </div>
 
     <script src="../js/treadz-core.js"></script>
@@ -620,23 +625,15 @@
 
         // --- HISTORY LOGIC ---
         function getHistory() {
-            try {
-                return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
-            } catch (e) {
-                console.error("Failed to parse history", e);
-                return [];
-            }
+            return TreadzData.getAll('receipt');
         }
 
         function loadQuoteById(id) {
-            const history = getHistory();
-            const item = history.find(i => i.id == id);
+            const item = TreadzData.getById('receipt', id);
             if (item) loadQuote(item);
         }
 
         function saveQuote() {
-            const history = getHistory();
-
             // 1. Determine ID
             // If we are starting fresh (no currentEditingId), we need a new Sequential ID
             if (!currentEditingId) {
@@ -660,24 +657,8 @@
                 total: totalFinal.textContent
             };
 
-            // 3. UPSERT Logic
-            const existingIndex = history.findIndex(item => item.id == currentEditingId);
-
-            if (existingIndex !== -1) {
-                // Verify we aren't overwriting a DIFFERENT receipt (unlikely with unique IDs)
-                history[existingIndex] = { ...history[existingIndex], ...receiptData };
-
-                // Move to Top
-                const item = history.splice(existingIndex, 1)[0];
-                history.unshift(item);
-            } else {
-                // New Entry
-                history.unshift(receiptData);
-            }
-
-            // 4. Persistence
-            if (history.length > 50) history.pop();
-            localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
+            // 3. Use TreadzData Service
+            TreadzData.save('receipt', receiptData, 'Current User');
             renderHistory();
         }
 

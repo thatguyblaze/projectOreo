@@ -9,15 +9,15 @@ const TreadzData = {
     CONFIG: {
         KEYS: {
             'ticket': 'treadzTowHistoryV1',
-            'receipt': 'treadzReceiptHistory',
-            'quote': 'treadzQuoteHistory',
+            'receipt': 'treadzQuoteHistoryV1', // Shared Storage with Quotes
+            'quote': 'treadzQuoteHistoryV1',
             'audit': 'treadz_audit_logs'
         }
     },
 
     // --- Core Storage Abstraction (The "Local" Database Layer) ---
     // In the future, replace these methods to switch to a Real Database (Firebase/SQL)
-    
+
     _getStorage: (collectionDesc) => {
         const key = TreadzData.CONFIG.KEYS[collectionDesc] || `treadz_${collectionDesc}`;
         try {
@@ -65,7 +65,7 @@ const TreadzData = {
     save: (collection, record, user = 'System') => {
         const records = TreadzData._getStorage(collection);
         const index = records.findIndex(r => r.id == record.id);
-        
+
         let action = '';
         let oldRecord = null;
 
@@ -76,8 +76,8 @@ const TreadzData = {
             action = 'UPDATE';
             oldRecord = records[index];
             // Merge capabilities could go here, for now we overwrite
-            records[index] = { 
-                ...oldRecord, 
+            records[index] = {
+                ...oldRecord,
                 ...record,
                 updatedAt: now,
                 version: (oldRecord.version || 1) + 1
@@ -94,10 +94,10 @@ const TreadzData = {
         if (records.length > 200) records.pop();
 
         TreadzData._setStorage(collection, records);
-        
+
         // Audit Log
         TreadzData.logAudit(collection, record.id, action, user, oldRecord ? 'Record updated' : 'New record created');
-        
+
         return records[index >= 0 ? index : 0];
     },
 
@@ -107,7 +107,7 @@ const TreadzData = {
     delete: (collection, id, user = 'System') => {
         let records = TreadzData._getStorage(collection);
         const record = records.find(r => r.id == id);
-        
+
         if (record) {
             records = records.filter(r => r.id != id);
             TreadzData._setStorage(collection, records);
@@ -118,10 +118,10 @@ const TreadzData = {
     },
 
     // --- Audit Logging System ---
-    
+
     logAudit: (targetCollection, targetId, action, user, details) => {
         const logs = TreadzData._getStorage('audit');
-        
+
         const logEntry = {
             id: Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
             timestamp: new Date().toISOString(),
@@ -133,18 +133,18 @@ const TreadzData = {
         };
 
         logs.unshift(logEntry);
-        
+
         // Keep logs manageable (Last 500 events)
         if (logs.length > 500) logs.pop();
-        
+
         TreadzData._setStorage('audit', logs);
         console.log(`[AUDIT] ${action} on ${targetCollection} #${targetId}`);
     },
 
     getAuditLogs: (collection, recordId) => {
         const logs = TreadzData._getStorage('audit');
-        return logs.filter(l => 
-            (!collection || l.targetCollection === collection) && 
+        return logs.filter(l =>
+            (!collection || l.targetCollection === collection) &&
             (!recordId || l.targetId == recordId)
         );
     },
@@ -158,7 +158,7 @@ const TreadzData = {
     search: (query, collections = ['ticket']) => {
         if (!query || query.length < 2) return [];
         const lowerQ = query.toLowerCase();
-        
+
         let results = [];
 
         collections.forEach(col => {
@@ -168,21 +168,36 @@ const TreadzData = {
                 const searchable = item.fields ? JSON.stringify(Object.values(item.fields)) : JSON.stringify(Object.values(item));
                 return searchable.toLowerCase().includes(lowerQ);
             });
-            
+
             // Normalize for UI
             const colResults = matches.map(m => ({
                 id: m.id,
                 type: col,
-                title: m.billTo || (m.fields ? m.fields.billTo : 'Unknown'),
+                title: m.billTo || m.customer || (m.fields ? m.fields.billTo : 'Unknown'),
                 subtitle: m.vehicle || (m.fields ? m.fields.vehicle : 'Unknown Item'),
                 date: m.date || m.timestamp,
                 raw: m
             }));
-            
+
             results = [...results, ...colResults];
         });
 
         return results;
+    },
+
+    // --- Export Tools ---
+    exportToCSV: (collection) => {
+        const records = TreadzData.getAll(collection);
+        if (!records.length) return '';
+
+        const headers = Object.keys(records[0]).join(',');
+        const rows = records.map(r =>
+            Object.values(r).map(v =>
+                typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : JSON.stringify(v)
+            ).join(',')
+        );
+
+        return [headers, ...rows].join('\n');
     }
 };
 

@@ -568,6 +568,8 @@
 
                 <p class="text-center text-gray-400 text-xs mt-4 print:hidden">
                     &copy; Treadz Inventory. Prices are estimates.
+                    <a href="../admin.html"
+                        class="text-gray-300 hover:text-gray-500 ml-2 no-underline transition-colors">Admin</a>
                 </p>
             </div>
         </main>
@@ -614,6 +616,7 @@
 
 
 
+    <script src="../js/data-store.js"></script>
     <script src="../js/treadz-core.js"></script>
     <script src="../js/mobile-nav.js" defer></script>
     <script>
@@ -644,24 +647,16 @@
         let currentQuoteId = null;
 
         function getHistory() {
-            try {
-                return JSON.parse(localStorage.getItem('treadzQuoteHistoryV1')) || [];
-            } catch (e) {
-                console.error("Failed to read history", e);
-                return [];
-            }
+            return TreadzData.getAll('quote');
         }
 
         // Safe loader
         function loadQuoteById(id) {
-            const history = getHistory();
-            const item = history.find(i => i.id == id);
+            const item = TreadzData.getById('quote', id);
             if (item) loadQuote(item);
         }
 
         function saveQuote() {
-            const history = getHistory();
-
             // Generate ID if not already generated for this session
             if (!currentQuoteId) {
                 currentQuoteId = TreadzUtils.incrementGlobalId();
@@ -683,33 +678,8 @@
             // Avoid saving empty junk
             if (quote.pricePerTire === 0 && quote.tireInfo === '') return;
 
-            // Check if this ID already exists in history (Update Mode)
-            const existingIndex = history.findIndex(item => item.id === currentQuoteId);
-
-            if (existingIndex !== -1) {
-                // Update existing entry
-                // Preserve original timestamp if desired, or update it? 
-                // Usually "Recent History" sorts by timestamp. If we update, we might want to bump it.
-                // But user asked to "save to original instance".
-                // I will update the data but keep the ID.
-                history[existingIndex] = { ...history[existingIndex], ...quote };
-
-                // Move to top to show it was recently modified?
-                const updatedItem = history.splice(existingIndex, 1)[0];
-                history.unshift(updatedItem);
-            } else {
-                // New Entry
-                // Check for duplicate CONTENT (to prevent spamming new IDs for same data if ID was null? 
-                // But we generated ID above. So ID is unique now.)
-
-                // We should only check content duplicate if we *forced* a new ID but data is same as previous?
-                // No, if user clicked Reset then typed same thing, it's a new quote.
-
-                history.unshift(quote);
-                if (history.length > 50) history.pop();
-            }
-
-            localStorage.setItem('treadzQuoteHistoryV1', JSON.stringify(history));
+            // Use TreadzData ('quote' maps to shared storage if configured)
+            TreadzData.save('quote', quote, 'Current User');
         }
 
         function handleSaveOnly() {
