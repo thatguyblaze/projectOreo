@@ -1198,65 +1198,93 @@
 
             history.forEach(t => {
                 const div = document.createElement('div');
-                div.className = "p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all";
+                div.className = "p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all mb-2";
                 div.onclick = () => loadTicket(t.id);
-
-                // Days in Lot Logic & VTS
-                let daysHtml = '';
-                let vtsHtml = '';
-                let signedHtml = '<span class="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1 border border-gray-200 whitespace-nowrap">Unsigned</span>';
-                let statusHtml = '';
 
                 const f = t.fields || {};
 
-                const isFinal = f.status === 'Scrapped' || f.status === 'Insurance' || f.status === 'Released' || f.status === 'Picked Up (Insurance)';
+                // --- Logic & State ---
+                const isFinal = ['Scrapped', 'Insurance', 'Released', 'Picked Up (Insurance)'].includes(f.status);
+                const isVtsSent = f.vtsSent;
+                const hasSignature = f.signature && f.signature.length > 100;
 
-                if (isFinal) {
-                    statusHtml = `<span class="text-[10px] font-bold text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded ml-1 border border-gray-300 whitespace-nowrap">${f.status}</span>`;
-                    signedHtml = '';
-                } else if (f.signature && f.signature.length > 100) {
-                    signedHtml = '<span class="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded ml-1 border border-green-200 whitespace-nowrap">Signed</span>';
+                // Days Calc
+                let days = 0;
+                if (f.storeStart) {
+                    const start = new Date(f.storeStart);
+                    const now = new Date(); // Always calc from now for active warnings
+                    const diff = now - start;
+                    days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 }
 
-                if (!isFinal && (f.delivered === 'Lot 1' || f.delivered === 'Lot 2')) {
-                    if (f.storeStart) {
-                        const start = new Date(f.storeStart);
-                        const now = new Date();
-                        const diff = now - start;
-                        if (!isNaN(diff)) {
-                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                            if (days >= 0) {
-                                daysHtml = `<span class="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded ml-2 border border-orange-200 whitespace-nowrap">${days} Days</span>`;
-                                if (days > 3) {
-                                    vtsHtml = `<span class="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded ml-1 border border-red-200 whitespace-nowrap animate-pulse">VTS DUE!</span>`;
-                                }
-                            }
-                        }
+                // --- Top Right Indicator (VTS Sent) ---
+                let vtsSentIndicator = '';
+                if (isVtsSent) {
+                    vtsSentIndicator = `
+                        <div class="mt-1 px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold border border-green-200 flex items-center justify-end gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            VTS SENT
+                        </div>`;
+                }
+
+                // --- Tag System ---
+                let tags = [];
+
+                // 1. Critical Warnings (Active Only)
+                if (!isFinal && !isVtsSent) {
+                    if (days >= 30) {
+                        tags.push('<span class="bg-red-600 text-white border border-red-700">ABANDONED?</span>');
+                    } else if (days >= 5) {
+                        tags.push(`<span class="bg-red-100 text-red-700 border border-red-200 animate-pulse">VTS DUE (${days}d)</span>`);
+                    } else if (days >= 3) {
+                        tags.push(`<span class="bg-orange-100 text-orange-700 border border-orange-200">VTS SOON (${days}d)</span>`);
+                    } else if (days > 0) {
+                        tags.push(`<span class="bg-blue-50 text-blue-600 border border-blue-100">${days} Days</span>`);
+                    } else {
+                        tags.push(`<span class="bg-gray-100 text-gray-500 border border-gray-200">New</span>`);
                     }
                 }
 
+                // 2. Signature Status
+                if (hasSignature) {
+                    tags.push('<span class="bg-gray-100 text-gray-400 border border-gray-200 line-through decoration-gray-400">Unsigned</span>');
+                } else {
+                    tags.push('<span class="bg-yellow-50 text-yellow-700 border border-yellow-200">Unsigned</span>');
+                }
+
+                // 3. Final Status / Main Status
+                if (isFinal) {
+                    tags.push(`<span class="bg-gray-800 text-white border border-gray-900">${f.status}</span>`);
+                } else {
+                    tags.push(`<span class="bg-white text-gray-700 border border-gray-300 shadow-sm">${f.status || 'In Lot'}</span>`);
+                }
+
+                // Build Tags HTML
+                const tagsHtml = tags.map(t => `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">${t}</span>`).join('');
+
                 div.innerHTML = `
-                    <div class="flex justify-between items-start">
+                    <div class="flex justify-between items-start mb-1">
                         <span class="font-bold text-gray-800 text-sm">#${t.id}</span>
-                        <div class="flex items-start gap-2">
-                            <button onclick="deleteTicket('${t.id}', event)" class="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-red-50" title="Delete Ticket">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path></svg>
-                            </button>
-                            <div class="flex flex-col items-end">
-                                <span class="text-xs text-gray-500">${t.date}</span>
-                                ${f.vtsSent ? '<div class="mt-0.5" title="VTS Processed"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-teal-600"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>' : ''}
+                        <div class="flex flex-col items-end">
+                            <div class="flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
+                                <span class="text-xs text-gray-500 font-medium">${t.date}</span>
+                                <button onclick="deleteTicket('${t.id}', event)" class="text-gray-400 hover:text-red-500 transition-colors" title="Delete Ticket">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
                             </div>
+                            ${vtsSentIndicator}
                         </div>
                     </div>
-                    <div class="text-xs font-bold text-gray-700 truncate mt-1">${t.billTo || 'Unknown Customer'}</div>
-                    <div class="text-xs text-gray-500 truncate">${t.vehicle || 'Vehicle Info'}</div>
-                    <div class="mt-2 flex justify-between items-center border-t border-gray-100 pt-1">
-                        <div class="flex items-center w-full flex-wrap gap-y-1">
-                            <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
-                            ${daysHtml}
-                            ${!f.vtsSent ? vtsHtml : ''}
-                            ${signedHtml}
-                            ${statusHtml}
+                    
+                    <div class="mb-2">
+                        <div class="text-xs font-bold text-gray-800 truncate leading-tight">${t.billTo || 'Unknown Customer'}</div>
+                        <div class="text-[10px] text-gray-500 truncate font-medium">${t.vehicle || 'Vehicle Info'}</div>
+                    </div>
+
+                    <div class="flex justify-between items-end border-t border-gray-100 pt-2 mt-1">
+                        <span class="font-bold text-blue-600 text-xs">${t.total || '$0.00'}</span>
+                        <div class="flex flex-wrap justify-end gap-1 max-w-[75%]">
+                            ${tagsHtml}
                         </div>
                     </div>
                 `;
