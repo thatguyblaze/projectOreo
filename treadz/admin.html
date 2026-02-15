@@ -181,6 +181,7 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- MONTHLY PERFORMANCE -->
                 <div class="col-span-1 lg:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -255,6 +256,11 @@
                             <button onclick="switchTab('tire')" id="tab-tire"
                                 class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all">
                                 Tire Sales
+                            </button>
+                            <button onclick="switchTab('vts')" id="tab-vts"
+                                class="flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold text-red-600 hover:bg-white/50 transition-all flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                VTS & Storage
                             </button>
                         </div>
 
@@ -347,6 +353,50 @@
                         </div>
                     </div>
 
+                    <!-- VTS Table -->
+                    <div id="view-vts" class="hidden overflow-x-auto min-h-[300px] bg-red-50/10">
+                        <div class="px-6 py-4 bg-red-50 border-b border-red-100 flex justify-between items-center">
+                            <h3 class="text-red-800 font-bold uppercase text-xs tracking-wider flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                Action Required: Vehicles in Storage
+                            </h3>
+                            <button onclick="exportVTS()"
+                                class="text-xs bg-white text-red-600 border border-red-200 px-3 py-1 rounded hover:bg-red-50 font-semibold transition-colors">
+                                Download Compliance Report
+                            </button>
+                        </div>
+                        <table class="min-w-full divide-y divide-red-200/50">
+                            <thead class="bg-red-50/50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Ticket / Date</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Vehicle Info</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Storage Time</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Compliance Status</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Accrued Fees</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="table-vts-body">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div
                         class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-xs text-gray-500 flex justify-between">
                         <span id="record-count-display">Showing all records</span>
@@ -411,19 +461,20 @@
             // UI Toggle
             const towBtn = document.getElementById('tab-tow');
             const tireBtn = document.getElementById('tab-tire');
+            const vtsBtn = document.getElementById('tab-vts');
 
-            if (tab === 'tow') {
-                towBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all";
-                tireBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
-            } else {
-                towBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
-                tireBtn.className = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all";
-            }
+            const inactiveClass = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 transition-all";
+            const activeClass = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-blue-600 transition-all";
+            const vtsActiveClass = "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold shadow-sm bg-white text-red-600 transition-all flex items-center gap-2 border border-red-100";
+
+            towBtn.className = tab === 'tow' ? activeClass : inactiveClass;
+            tireBtn.className = tab === 'tire' ? activeClass : inactiveClass;
+            vtsBtn.className = tab === 'vts' ? vtsActiveClass : "flex-1 md:flex-none px-6 py-2 rounded-lg text-sm font-bold text-red-600 hover:bg-white/50 transition-all flex items-center gap-2";
 
             document.getElementById('view-tow').classList.toggle('hidden', tab !== 'tow');
             document.getElementById('view-tire').classList.toggle('hidden', tab !== 'tire');
+            document.getElementById('view-vts').classList.toggle('hidden', tab !== 'vts');
 
-            // Re-apply filter logic to show correct count/results
             filterTable();
         }
 
@@ -431,7 +482,16 @@
             const query = document.getElementById('table-search').value.toLowerCase();
             const dateRange = document.getElementById('date-filter').value;
 
-            let data = currentTab === 'tow' ? allTowData : allTireData;
+            let data;
+            if (currentTab === 'tow') data = allTowData;
+            else if (currentTab === 'tire') data = allTireData;
+            else if (currentTab === 'vts') {
+                // Filter only Active Storage Tickets
+                data = allTowData.filter(t => {
+                    const status = t.fields?.status || '';
+                    return status === 'Impound' || status.includes('Storage') || status === 'Compliance';
+                });
+            }
 
             const now = new Date();
             const cutoff = new Date();
@@ -446,7 +506,6 @@
 
                 // Search Filter
                 if (query.length < 1) return true;
-
                 const searchStr = JSON.stringify(Object.values(item)).toLowerCase();
                 return searchStr.includes(query);
             });
@@ -460,7 +519,8 @@
         }
 
         function renderTableBody(type, data) {
-            const tbody = document.getElementById(type === 'tow' ? 'table-tow-body' : 'table-tire-body');
+            const tbodyId = type === 'tow' ? 'table-tow-body' : type === 'tire' ? 'table-tire-body' : 'table-vts-body';
+            const tbody = document.getElementById(tbodyId);
             document.getElementById('record-count-display').textContent = `Showing ${data.length} records`;
 
             if (data.length === 0) {
@@ -472,6 +532,52 @@
                 const dateRaw = item.timestamp || item.date;
                 const date = dateRaw ? new Date(dateRaw).toLocaleDateString() : 'N/A';
                 const total = formatMoney(cleanMoney(item.total));
+
+                if (type === 'vts') {
+                    const f = item.fields || {};
+                    const enteredDate = new Date(dateRaw);
+                    const diffTime = Math.abs(new Date() - enteredDate);
+                    const daysInStorage = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const storageFee = daysInStorage * 45; // $45/day auto-calc
+                    const accruedTotal = cleanMoney(item.total) + storageFee;
+
+                    let statusBadge = '';
+                    let actionBtn = '';
+
+                    if (daysInStorage < 3) {
+                        statusBadge = '<span class="text-gray-500 font-bold text-xs">New Intake</span>';
+                        actionBtn = '<span class="text-xs text-gray-400">Wait 24h</span>';
+                    } else if (daysInStorage >= 3 && daysInStorage < 30) {
+                        statusBadge = '<span class="text-amber-600 bg-amber-50 px-2 py-1 rounded text-xs font-bold animate-pulse">SEND LETTER</span>';
+                        actionBtn = `<button class="text-xs bg-blue-600 text-white px-3 py-1 rounded shadow hover:bg-blue-700" onclick="alert('Generating Certified Letter for #${item.id}...')">Print Certified</button>`;
+                    } else {
+                        statusBadge = '<span class="text-red-600 bg-red-50 px-2 py-1 rounded text-xs font-bold">TITLE ELIGIBLE</span>';
+                        actionBtn = `<button class="text-xs bg-red-600 text-white px-3 py-1 rounded shadow hover:bg-red-700" onclick="alert('Starting Title Process for #${item.id}...')">Start Title</button>`;
+                    }
+
+                    return `
+                        <tr class="hover:bg-red-50/30 transition-colors border-b border-red-100 last:border-0">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-bold text-gray-900">#${item.id}</div>
+                                <div class="text-xs text-gray-500">${date}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-bold text-gray-800">${item.vehicle || f.vehicle || 'Unknown'}</div>
+                                <div class="text-xs text-gray-500">${f.vin || 'No VIN'}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <span class="text-lg font-black text-gray-700">${daysInStorage}</span>
+                                <span class="text-xs text-gray-400 block">Days</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">${statusBadge}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <div class="text-sm font-bold text-gray-900">${formatMoney(accruedTotal)}</div>
+                                <div class="text-[10px] text-red-500">+${formatMoney(storageFee)} fees</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">${actionBtn}</td>
+                        </tr>
+                    `;
+                }
 
                 if (type === 'tow') {
                     const f = item.fields || {};
@@ -512,6 +618,52 @@
                     `;
                 }
             }).join('');
+        }
+
+        function exportVTS() {
+            // Creative Export: Compliance Report
+            const data = allTowData.filter(t => {
+                const status = t.fields?.status || '';
+                return status === 'Impound' || status.includes('Storage') || status === 'Compliance';
+            });
+
+            if (data.length === 0) { alert('No active VTS records to export.'); return; }
+
+            const headers = ['Ticket ID', 'Date In', 'Days in Storage', 'Vehicle', 'VIN', 'Original Total', 'Accrued Fees', 'Current Total', 'Status Action'];
+            const rows = data.map(item => {
+                const dateRaw = item.timestamp || item.date;
+                const enteredDate = new Date(dateRaw);
+                const diffTime = Math.abs(new Date() - enteredDate);
+                const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const fees = days * 45;
+                const total = cleanMoney(item.total) + fees;
+
+                let action = 'Monitor';
+                if (days >= 3 && days < 30) action = 'SEND LETTER';
+                if (days >= 30) action = 'TITLE ELIGIBLE';
+
+                return [
+                    item.id,
+                    new Date(dateRaw).toLocaleDateString(),
+                    days,
+                    (item.vehicle || item.fields?.vehicle || 'Unknown').replace(/,/g, ' '),
+                    (item.fields?.vin || ''),
+                    cleanMoney(item.total).toFixed(2),
+                    fees.toFixed(2),
+                    total.toFixed(2),
+                    action
+                ].join(',');
+            });
+
+            const csvContent = [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `VTS_Compliance_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
 
