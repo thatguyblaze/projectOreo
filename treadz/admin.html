@@ -475,9 +475,16 @@
                             </svg>
                             Vehicles In Storage / Impound
                         </h3>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 items-center">
+                            <select id="vts-lot-filter" onchange="filterTable()"
+                                class="text-xs bg-white border border-red-200 text-red-700 px-2 py-1.5 rounded font-bold outline-none focus:ring-1 focus:ring-red-500">
+                                <option value="all">All Lots</option>
+                                <option value="Lot 1">Lot 1</option>
+                                <option value="Lot 2">Lot 2</option>
+                                <option value="Overflow">Overflow</option>
+                            </select>
                             <button onclick="exportVTS()"
-                                class="text-xs bg-white text-red-600 border border-red-200 px-3 py-1.5 rounded hover:bg-red-50 font-bold transition-colors">
+                                class="text-xs bg-white text-red-600 border border-red-200 px-3 py-1.5 rounded hover:bg-red-50 font-bold transition-colors shadow-sm">
                                 VTS Report
                             </button>
                         </div>
@@ -491,6 +498,9 @@
                                 <th
                                     class="px-6 py-3 text-left text-xs font-bold text-red-900/50 uppercase tracking-wider">
                                     Vehicle</th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-bold text-red-900/50 uppercase tracking-wider">
+                                    Lot</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-bold text-red-900/50 uppercase tracking-wider">
                                     Days Stored</th>
@@ -841,8 +851,13 @@
             else if (currentTab === 'vts') {
                 // FIXED: Include 'In Lot' status for VTS
                 data = allTowData.filter(t => {
-                    // Check fields.status OR root status property if fields is missing
                     const f = t.fields || {};
+
+                    // Lot Filter
+                    const lotFilter = document.getElementById('vts-lot-filter').value;
+                    const lot = (f.delivered || '').toLowerCase();
+                    if (lotFilter !== 'all' && !lot.includes(lotFilter.toLowerCase())) return false;
+
                     const status = f.status || t.status || '';
                     return status === 'In Lot' || status === 'Impound' || status.includes('Storage') || status === 'Compliance';
                 });
@@ -907,34 +922,41 @@
                     const f = item.fields || {};
                     const enteredDate = new Date(dateRaw);
                     const diffTime = Math.abs(new Date() - enteredDate);
-                    const daysInStorage = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    // Safe Days Calculation
+                    const daysInStorage = isNaN(diffTime) ? 0 : Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                     // Fee Calculation
-                    const dailyRate = f.storeRate || 45; // Default 45 or use ticket rate
+                    const dailyRate = parseFloat(f.storeRate) || 45; // Default 45 or use ticket rate
+                    // Fix fee calc
                     const baseTotal = cleanMoney(item.total);
-                    // Calculate "Storage Only" portion if we wanted, but "Accrued" implies Total + New Days?
-                    // Let's assume Ticket Total includes storage up to point of invoice. 
-                    // If status is still In Lot, we keep adding. 
-                    // BETTER: Just show daily rate * days for "Storage Fees" column + Base Tow.
                     const storageFee = daysInStorage * dailyRate;
                     const accruedTotal = baseTotal + storageFee; // Simple approx
 
+                    // Lot Info
+                    const lotLocation = f.delivered || 'Unknown';
+                    const lotBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold border ${lotLocation.includes('2') ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-slate-100 text-slate-600 border-slate-200'}">${lotLocation}</span>`;
+
                     let statusBadge = '';
-                    let actionBtn = '';
+                    let actionBtn = ''; // We will append Email button to whatever action is here
                     let rowClass = 'hover:bg-red-50/20';
 
                     // Check Flags from Ticket
                     const vtsSent = f.vtsSent === true;
                     const titleRec = f.titleReceived === true;
 
+                    // Universal Email Button
+                    const emailBtn = `<button onclick="emailVTS('${item.id}')" class="text-[10px] uppercase font-bold bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-1 w-full mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                        Email
+                                      </button>`;
+
                     // Logic for Status/Actions
                     if (titleRec) {
-                        // Highest Importance? Or is it "Ready to Scrap"?
                         statusBadge = `
                             <div class="flex flex-col gap-1 items-center">
                                 <span class="text-green-700 bg-green-100 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase border border-green-200">TITLE RECEIVED</span>
                             </div>`;
-                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors shadow-sm">Process</button>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors shadow-sm w-full">Process</button>`;
                     }
                     else if (daysInStorage >= 30) {
                         // Title Eligible
@@ -943,7 +965,7 @@
                                 <span class="text-red-700 bg-red-100 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase border border-red-200 animate-pulse">Title Eligible</span>
                                 ${!vtsSent ? '<span class="text-xs text-red-600 font-bold">MISSING VTS!</span>' : '<span class="text-[9px] text-gray-400">VTS Sent</span>'}
                             </div>`;
-                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition-colors shadow-sm">Start Title</button>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition-colors shadow-sm w-full">Start Title</button>`;
                         rowClass = 'bg-red-50 hover:bg-red-100/50'; // Highlight row
                     }
                     else if (daysInStorage >= 3) {
@@ -954,12 +976,8 @@
                                 <span class="${isLate ? 'text-red-600 font-black animate-pulse' : 'text-amber-700'} bg-amber-100 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase border border-amber-200">VTS Required</span>
                                 ${vtsSent ? '<span class="text-[9px] text-green-600 font-bold">SENT ✅</span>' : '<span class="text-[9px] text-red-500 font-bold">NOT SENT ❌</span>'}
                             </div>`;
-                        actionBtn = `<button onclick="emailVTS('${item.id}')" class="text-[10px] uppercase font-bold bg-[#0047AB] text-white px-2 py-1 rounded hover:bg-[#003380] transition-colors shadow-sm flex items-center justify-center gap-1 w-full mb-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-                                        Email
-                                      </button>
-                                      <button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-slate-500 hover:text-blue-600 flex justify-center w-full">View</button>
-                                      `;
+                        // Primary action is Email, but we handle it uniformly below or here
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-slate-500 hover:text-blue-600 flex justify-center w-full bg-white border border-slate-200 rounded py-1">View</button>`;
                     }
                     else {
                         // Intake Hold
@@ -978,6 +996,9 @@
                                 <div class="text-xs text-slate-500 font-mono">${f.vin || 'VIN: N/A'}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
+                                ${lotBadge}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <div class="text-lg font-black text-slate-700 bg-white border border-slate-200 inline-block px-3 py-1 rounded-lg shadow-sm">${daysInStorage}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">${statusBadge}</td>
@@ -985,7 +1006,10 @@
                                 <div class="text-sm font-bold text-slate-900">${formatMoney(accruedTotal)}</div>
                                 <div class="text-[10px] text-red-500 font-mono">+${formatMoney(storageFee)} storage</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right flex flex-col items-end gap-1">${actionBtn}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right flex flex-col items-end gap-1">
+                                ${emailBtn}
+                                ${actionBtn}
+                            </td>
                         </tr>
                     `;
                 }
