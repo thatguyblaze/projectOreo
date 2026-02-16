@@ -143,7 +143,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-slate-800 font-bold text-lg flex items-center gap-2 uppercase tracking-wide">
                             <span class="w-2 h-2 rounded-full bg-[#0047AB]"></span>
-                            Revenue Trend
+                            Gross Revenue
                         </h3>
                         <div class="flex bg-slate-100 rounded-lg p-1">
                             <button onclick="updateChartRange(7)"
@@ -152,6 +152,12 @@
                             <button onclick="updateChartRange(30)"
                                 class="text-xs font-bold px-3 py-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-white/50 transition-colors chart-filter"
                                 id="filter-30d">30D</button>
+                            <button onclick="updateChartRange(180)"
+                                class="text-xs font-bold px-3 py-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-white/50 transition-colors chart-filter"
+                                id="filter-180d">6M</button>
+                            <button onclick="updateChartRange(365)"
+                                class="text-xs font-bold px-3 py-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-white/50 transition-colors chart-filter"
+                                id="filter-365d">1Y</button>
                         </div>
                     </div>
                     <div class="flex-grow w-full h-64 relative">
@@ -169,7 +175,7 @@
                         <div class="absolute -left-6 -bottom-6 w-32 h-32 rounded-full bg-white/5"></div>
 
                         <h3 class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-2 relative z-10">Total
-                            Estimated Revenue</h3>
+                            Sales</h3>
                         <div class="text-4xl font-black relative z-10 tracking-tight" id="stat-total-revenue">$0.00
                         </div>
 
@@ -190,7 +196,8 @@
                     <!-- Pipeline Pulse -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex-grow relative">
                         <div class="absolute top-0 left-0 w-1 h-full bg-slate-200"></div>
-                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-5 pl-2">Pipeline Pulse
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-5 pl-2">Current
+                            Workflow
                         </h3>
                         <div class="space-y-5 pl-2">
                             <!-- Intake -->
@@ -237,7 +244,7 @@
                 <div class="col-span-1 lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Insight Cards -->
                     <div class="bg-white p-5 rounded-xl border-l-4 border-indigo-500 shadow-sm">
-                        <h4 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Avg. Monthly Tows
+                        <h4 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Avg. Tows / Month
                         </h4>
                         <div class="text-3xl font-black text-slate-800" id="stat-avg-tows">0</div>
                     </div>
@@ -249,7 +256,7 @@
                     </div>
 
                     <div class="bg-white p-5 rounded-xl border-l-4 border-emerald-500 shadow-sm">
-                        <h4 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Quote Conversion
+                        <h4 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">Quote Close Rate
                         </h4>
                         <div class="text-3xl font-black text-slate-800" id="stat-conversion">0%</div>
                     </div>
@@ -260,7 +267,7 @@
                     <!-- Driver Performance Widget -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
-                            <h3 class="text-slate-800 font-bold text-sm tracking-wide uppercase">Driver Performance</h3>
+                            <h3 class="text-slate-800 font-bold text-sm tracking-wide uppercase">Driver Activity</h3>
                         </div>
                         <div class="space-y-3 overflow-y-auto max-h-[220px] pr-2" id="driver-stats-list">
                             <!-- JS Injected -->
@@ -852,12 +859,20 @@
             document.getElementById('stat-conversion').textContent = `${conversion}%`;
 
             // --- Monthly Avg ---
-            // Simplified: Total / 6 months
-            const avg = Math.round(allTowData.length / 6); // Mock logic for demo
+            const monthsActive = new Set(allTowData.map(t => (t.timestamp || t.date).substring(0, 7))).size || 1;
+            const avg = Math.round(allTowData.length / monthsActive);
             document.getElementById('stat-avg-tows').textContent = avg;
 
-            document.getElementById('stat-busy-month').textContent = "March"; // Mock
-            document.getElementById('stat-busy-month-vol').textContent = "42 Tows"; // Mock
+            // --- Busiest Month ---
+            const monthCounts = {};
+            allTowData.forEach(t => {
+                const d = new Date(t.timestamp || t.date);
+                const k = d.toLocaleDateString('en-US', { month: 'long' });
+                monthCounts[k] = (monthCounts[k] || 0) + 1;
+            });
+            const topMonth = Object.entries(monthCounts).sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('stat-busy-month').textContent = topMonth ? topMonth[0] : '-';
+            document.getElementById('stat-busy-month-vol').textContent = topMonth ? `${topMonth[1]} TOWS` : '';
 
         }
 
@@ -878,19 +893,70 @@
 
         function initChart() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
-
             if (chartInstance) chartInstance.destroy();
 
-            // Mock Data Generation based on range
             const labels = [];
             const dataPoints = [];
-            const steps = currentChartRange;
+            const activeRange = currentChartRange; // 7, 30, 180, 365
+            const now = new Date(); // anchor
 
-            for (let i = 0; i < steps; i++) {
-                const d = new Date();
-                d.setDate(d.getDate() - (steps - 1 - i));
-                labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                dataPoints.push(Math.floor(Math.random() * 800) + 100); // Mock data
+            // Aggregate Data
+            // Map: "YYYY-MM-DD" -> revenue
+            const dailyRevenue = {};
+
+            // 1. Towing
+            allTowData.forEach(t => {
+                const dateKey = new Date(t.timestamp || t.date).toISOString().split('T')[0];
+                dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + cleanMoney(t.total);
+            });
+            // 2. Tires (Receipts only)
+            allTireData.forEach(t => {
+                if (t.type === 'receipt') {
+                    const dateKey = new Date(t.timestamp || t.date).toISOString().split('T')[0];
+                    dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + cleanMoney(t.total);
+                }
+            });
+
+            // Generate Labels & Data Points based on Range
+            // If Range > 30, check if we should group by week or month? 
+            // For simplicity, let's keep daily data for 7/30d and group by Month for > 30d
+
+            const isLongRange = activeRange > 30;
+
+            if (isLongRange) {
+                // Group by Month
+                // Generate last N months based on activeRange approx (6m or 12m)
+                const monthSteps = Math.ceil(activeRange / 30);
+
+                // Temp map for monthly agg
+                const monthlyRevenue = {};
+                Object.entries(dailyRevenue).forEach(([dateStr, amt]) => {
+                    const mKey = dateStr.substring(0, 7); // YYYY-MM
+                    monthlyRevenue[mKey] = (monthlyRevenue[mKey] || 0) + amt;
+                });
+
+                for (let i = monthSteps - 1; i >= 0; i--) {
+                    const d = new Date();
+                    d.setMonth(d.getMonth() - i);
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const key = `${yyyy}-${mm}`;
+
+                    labels.push(d.toLocaleDateString('en-US', { month: 'short' })); // 'Feb'
+                    dataPoints.push(monthlyRevenue[key] || 0);
+                }
+
+            } else {
+                // Daily
+                for (let i = activeRange - 1; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const key = d.toISOString().split('T')[0];
+
+                    // Format Label
+                    labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                    dataPoints.push(dailyRevenue[key] || 0);
+                }
             }
 
             chartInstance = new Chart(ctx, {
@@ -898,7 +964,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Revenue',
+                        label: 'Gross Revenue',
                         data: dataPoints,
                         borderColor: '#FF6600',
                         backgroundColor: (context) => {
@@ -911,7 +977,7 @@
                         borderWidth: 3,
                         pointBackgroundColor: '#fff',
                         pointBorderColor: '#FF6600',
-                        pointRadius: 4,
+                        pointRadius: isLongRange ? 4 : 4,
                         pointHoverRadius: 6,
                         tension: 0.4,
                         fill: true
@@ -931,7 +997,7 @@
                             padding: 10,
                             callbacks: {
                                 label: function (context) {
-                                    return 'Revenue: $' + context.parsed.y;
+                                    return '$' + context.parsed.y.toLocaleString();
                                 }
                             }
                         }
@@ -939,21 +1005,12 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: '#f1f5f9',
-                                borderDash: [5, 5]
-                            },
-                            ticks: {
-                                font: { family: 'Inter' },
-                                color: '#94a3b8'
-                            }
+                            grid: { color: '#f1f5f9', borderDash: [5, 5] },
+                            ticks: { font: { family: 'Inter' }, color: '#94a3b8' }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: {
-                                font: { family: 'Inter' },
-                                color: '#94a3b8'
-                            }
+                            ticks: { font: { family: 'Inter' }, color: '#94a3b8' }
                         }
                     }
                 }

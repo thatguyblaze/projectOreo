@@ -860,14 +860,19 @@
 
             custNameInput.addEventListener('input', () => {
                 const val = custNameInput.value.toUpperCase();
+                const terms = val.split(/\s+/).filter(t => t.length > 0);
+
                 suggestionsEl.innerHTML = '';
 
-                if (val.length < 1) {
+                if (terms.length === 0) {
                     suggestionsEl.classList.add('hidden');
                     return;
                 }
 
-                const matches = customerList.filter(c => c.includes(val));
+                // Filter: Check if ALL terms are present in the candidate name
+                const matches = customerList.filter(name => {
+                    return terms.every(term => name.includes(term));
+                });
 
                 if (matches.length === 0) {
                     suggestionsEl.classList.add('hidden');
