@@ -279,9 +279,10 @@
                     <!-- Driver Performance Widget -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
-                            <h3 class="text-slate-800 font-bold text-sm tracking-wide uppercase">Driver Activity</h3>
+                            <h3 class="text-slate-800 font-bold text-sm tracking-wide uppercase">Driver Activity Log
+                            </h3>
                         </div>
-                        <div class="space-y-3 overflow-y-auto max-h-[220px] pr-2" id="driver-stats-list">
+                        <div class="space-y-3 overflow-y-auto max-h-[300px] pr-2" id="driver-stats-list">
                             <!-- JS Injected -->
                         </div>
                     </div>
@@ -289,36 +290,30 @@
                     <!-- Lot Management Widget -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                         <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-2">
-                            <h3 class="text-slate-800 font-bold text-sm tracking-wide uppercase">Lot Capacity Status
+                            <h3 class="text-slate-800 font-bold text-sm tracking-wide uppercase">Current Lot Inventory
                             </h3>
                         </div>
 
                         <!-- Main Lot (Impound) -->
                         <div class="mb-6">
                             <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
-                                <span>MAIN LOT (IMPOUND)</span>
-                                <span id="lot-main-count" class="text-[#0047AB]">0 Vehicles</span>
+                                <span>LOT 1</span>
+                                <span id="lot-main-count" class="text-[#0047AB] text-lg">0</span>
                             </div>
-                            <div class="w-full bg-slate-100 rounded-full h-3 relative overflow-hidden">
-                                <div id="lot-main-bar"
-                                    class="bg-[#0047AB] h-3 rounded-full transition-all duration-1000 shadow-sm"
-                                    style="width: 0%"></div>
+                            <div class="w-full bg-slate-100 rounded-full h-2 relative overflow-hidden">
+                                <div class="bg-[#0047AB] h-2 rounded-full w-full opacity-20"></div>
                             </div>
-                            <div class="text-right text-[10px] text-slate-400 mt-1 font-mono">CAPACITY: 50</div>
                         </div>
 
                         <!-- Storage Lot -->
                         <div>
                             <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
-                                <span>OVERFLOW / STORAGE</span>
-                                <span id="lot-storage-count" class="text-[#FF6600]">0 Vehicles</span>
+                                <span>LOT 2</span>
+                                <span id="lot-storage-count" class="text-[#FF6600] text-lg">0</span>
                             </div>
-                            <div class="w-full bg-slate-100 rounded-full h-3 relative overflow-hidden">
-                                <div id="lot-storage-bar"
-                                    class="bg-[#FF6600] h-3 rounded-full transition-all duration-1000 shadow-sm"
-                                    style="width: 0%"></div>
+                            <div class="w-full bg-slate-100 rounded-full h-2 relative overflow-hidden">
+                                <div class="bg-[#FF6600] h-2 rounded-full w-full opacity-20"></div>
                             </div>
-                            <div class="text-right text-[10px] text-slate-400 mt-1 font-mono">CAPACITY: 50</div>
                         </div>
                     </div>
                 </div>
@@ -339,7 +334,7 @@
                     <!-- Fleet Turnover -->
                     <div
                         class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center items-center text-center">
-                        <h3 class="text-slate-400 font-bold text-xs tracking-widest uppercase mb-4">Avg. Turnover Time
+                        <h3 class="text-slate-400 font-bold text-xs tracking-widest uppercase mb-4">Avg. Time to Release
                         </h3>
                         <div class="relative group cursor-pointer">
                             <div
@@ -524,6 +519,28 @@
         </main>
     </div>
 
+    <!-- EDITOR MODAL -->
+    <div id="editor-modal" class="fixed inset-0 z-[70] hidden flex flex-col bg-white">
+        <div class="bg-[#0B1221] h-14 flex items-center justify-between px-6 border-b-4 border-[#FF6600]">
+            <div class="flex items-center gap-4">
+                <span class="text-white font-bold uppercase tracking-widest text-sm">Record Editor</span>
+                <span id="editor-title" class="text-xs font-mono text-gray-400">LOADING...</span>
+            </div>
+            <button onclick="closeEditor()"
+                class="text-white hover:text-[#FF6600] text-sm font-bold uppercase transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                Close Editor
+            </button>
+        </div>
+        <div class="flex-grow w-full h-full bg-slate-100 relative">
+            <iframe id="editor-frame" src="about:blank" class="w-full h-full border-0"></iframe>
+        </div>
+    </div>
+
     <!-- SETTINGS MODAL -->
     <div id="settings-modal"
         class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden transition-opacity">
@@ -602,6 +619,37 @@
                             <input type="number" id="sets-tire-state" step="0.01"
                                 class="w-full mt-1 p-2 border border-slate-300 rounded font-mono font-bold text-slate-800">
                         </div>
+                    </div>
+                </div>
+
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                    <h3 class="text-sm font-bold text-indigo-800 uppercase mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-indigo-600">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Data Migration & Backup
+                    </h3>
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs text-indigo-600 max-w-[70%]">
+                            Download a complete JSON dump of all local databases (Tickets, Receipts, Audit Logs,
+                            Settings).
+                            Use this file to migrate to SQL or restore data later.
+                        </p>
+                        <button onclick="downloadFullBackup()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded shadow-sm transition-colors flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download JSON
+                        </button>
                     </div>
                 </div>
 
@@ -832,8 +880,8 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-slate-800">${total}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="window.open('towing/ticket/index.html?id=${item.id}', '_blank')" class="text-blue-600 hover:text-blue-900 mx-2">Edit</button>
-                                <button onclick="deleteRecord('${type}', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1">Del</button>
+                                <button onclick="openEditor('ticket', '${item.id}')" class="text-blue-600 hover:text-blue-900 mx-2 font-bold uppercase text-xs">Edit</button>
+                                <button onclick="deleteRecord('ticket', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1 font-bold uppercase text-xs">Del</button>
                             </td>
                         </tr>
                     `;
@@ -853,8 +901,8 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">${typeBadge}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-slate-800">${total}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="window.location.href='receipt/index.html?id=${item.displayId || item.id}'; window.focus()" class="text-blue-600 hover:text-blue-900 mx-2">Edit</button>
-                                <button onclick="deleteRecord('${type}', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1">Del</button>
+                                <button onclick="openEditor('receipt', '${item.displayId || item.id}')" class="text-blue-600 hover:text-blue-900 mx-2 font-bold uppercase text-xs">Edit</button>
+                                <button onclick="deleteRecord('receipt', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1 font-bold uppercase text-xs">Del</button>
                             </td>
                         </tr>
                     `;
@@ -908,25 +956,57 @@
             // 1. Avg Monthly Tows
             // 2. Busiest Month
             // 3. Quote Conversion
-            // 4. Driver Perf
-            // 5. Lot Capacity
+            // 4. Driver Perf (Activity Log)
+            // 5. Lot Counts
             // 6. Top Accounts
 
-            // --- Driver Stats ---
-            const driverCounts = {};
+            // --- Driver Stats (Activity Log) ---
+            // Group by driver, find most recent ticket
+            const driverActivity = {};
             allTowData.forEach(t => {
                 const driver = t.fields?.driver || 'Unassigned';
-                driverCounts[driver] = (driverCounts[driver] || 0) + 1;
-            });
-            const sortedDrivers = Object.entries(driverCounts).sort((a, b) => b[1] - a[1]);
+                const ts = new Date(t.timestamp || t.date).getTime();
 
-            const driverHTML = sortedDrivers.map(([name, count]) => `
-                <div class="flex justify-between items-center text-sm py-1 border-b border-dashed border-gray-100 last:border-0">
-                    <span class="font-medium text-gray-700">${name}</span>
-                    <span class="font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs">${count} Tows</span>
+                if (!driverActivity[driver] || ts > driverActivity[driver].ts) {
+                    driverActivity[driver] = {
+                        ts: ts,
+                        lastTicketId: t.id,
+                        lastAction: t.fields?.status || 'Active',
+                        totalTows: (driverActivity[driver]?.totalTows || 0) + 1
+                    };
+                } else {
+                    driverActivity[driver].totalTows++;
+                }
+            });
+
+            // Convert to Array & Sort by Recency
+            const activityList = Object.entries(driverActivity)
+                .map(([name, data]) => ({ name, ...data }))
+                .sort((a, b) => b.ts - a.ts);
+
+            const driverHTML = activityList.map(d => {
+                const date = new Date(d.ts);
+                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const dateStr = date.toLocaleDateString();
+                const isRecent = (Date.now() - d.ts) < (24 * 60 * 60 * 1000); // 24h
+
+                return `
+                <div class="flex flex-col py-3 border-b border-gray-100 last:border-0 hover:bg-slate-50 px-2 rounded transition-colors">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-slate-800 text-sm">${d.name}</span>
+                        <span class="text-[10px] font-mono ${isRecent ? 'text-green-600 font-bold' : 'text-slate-400'}">${dateStr} ${timeStr}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500">Last Action: <span class="font-medium text-slate-700">Ticket #${d.lastTicketId} (${d.lastAction})</span></span>
+                        <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">${d.totalTows} Total</span>
+                    </div>
                 </div>
-            `).join('');
-            document.getElementById('driver-stats-list').innerHTML = driverHTML || '<p class="text-xs text-gray-400 italic">No driver data</p>';
+            `}).join('');
+
+            document.getElementById('driver-stats-list').innerHTML = driverHTML || '<p class="text-xs text-gray-400 italic">No activity recorded</p>';
+
+
+            // --- Top Accounts (Towing & Tire Sales) ---
 
 
             // --- Top Accounts (Towing & Tire Sales) ---
@@ -959,7 +1039,7 @@
             document.getElementById('top-accounts-list').innerHTML = accountsHTML || '<p class="text-xs text-gray-400 italic">No account data</p>';
 
 
-            // --- Lot Capacity ---
+            // --- Lot Inventory (Simple Count) ---
             let lot1Count = 0;
             let lot2Count = 0;
             allTowData.forEach(t => {
@@ -974,15 +1054,9 @@
             });
 
             // Update Counts
-            document.getElementById('lot-main-count').textContent = `${lot1Count} Vehicles`;
-            document.getElementById('lot-storage-count').textContent = `${lot2Count} Vehicles`;
-
-            // Update Bars
-            const lot1Pct = Math.min((lot1Count / 50) * 100, 100);
-            const lot2Pct = Math.min((lot2Count / 50) * 100, 100);
-
-            document.getElementById('lot-main-bar').style.width = `${lot1Pct}%`;
-            document.getElementById('lot-storage-bar').style.width = `${lot2Pct}%`;
+            document.getElementById('lot-main-count').textContent = `${lot1Count}`;
+            document.getElementById('lot-storage-count').textContent = `${lot2Count}`;
+            // Removed Progress Bars logic as requested
 
 
             // --- Quote Conversion ---
@@ -1280,6 +1354,66 @@
                 alert('System Wiped. Rebooting...');
                 location.reload();
             }
+        }
+
+        // --- EXPORT / BACKUP ---
+        function downloadFullBackup() {
+            const backup = {
+                metadata: {
+                    exportedAt: new Date().toISOString(),
+                    version: '2.4.0',
+                    appName: 'TreadzTireTow'
+                },
+                data: {
+                    tickets: TreadzData.getAll('ticket'),
+                    receipts: TreadzData.getAll('receipt'),
+                    auditLogs: TreadzData.getAll('audit'),
+                    configOverrides: JSON.parse(localStorage.getItem('treadzConfigOverrides') || '{}'),
+                    globalSequence: localStorage.getItem('treadzGlobalSequenceId')
+                }
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backup, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `Treadz_Full_Backup_${new Date().toISOString().slice(0, 10)}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // --- EDITOR LOGIC ---
+        function openEditor(type, id) {
+            const modal = document.getElementById('editor-modal');
+            const frame = document.getElementById('editor-frame');
+            const title = document.getElementById('editor-title');
+
+            modal.classList.remove('hidden');
+
+            // Construct URL
+            // If type is ticket, id is relevant. If receipt, id is relevant.
+            // Ensure paths are correct relative to admin.html
+            let url = '';
+            if (type === 'ticket') {
+                url = `towing/ticket/index.html?id=${id}`;
+                title.textContent = `EDITING TOW TICKET #${id}`;
+            } else {
+                url = `receipt/index.html?id=${id}`;
+                title.textContent = `EDITING RECEIPT #${id}`;
+            }
+
+            frame.src = url;
+        }
+
+        function closeEditor() {
+            const modal = document.getElementById('editor-modal');
+            const frame = document.getElementById('editor-frame');
+
+            modal.classList.add('hidden');
+            frame.src = 'about:blank'; // Clear to stop scripts
+
+            // Refresh Data in Admin Panel
+            initDashboard();
         }
 
     </script>
