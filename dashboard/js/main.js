@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const options = { weekday: 'long', month: 'long', day: 'numeric' };
         dateDisplay.textContent = now.toLocaleDateString('en-US', options);
     }
-    calendarLink.addEventListener('click', () => { window.location.href = 'https://blazinik.com/calender/'; });
-
+    calendarLink.addEventListener('click', () => { window.location.href = 'https://blazinikportfolio.web.app/'; });
+    // made this change
     // --- FOCUS MODE ---
     function setFocusMode(isFocused) {
         document.body.classList.toggle('focus-mode', isFocused);
