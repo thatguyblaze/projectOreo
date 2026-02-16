@@ -7,7 +7,7 @@
  * ENGINEERING STANDARD: Single Source of Truth
  */
 
-const TreadzConfig = {
+const TreadzConfigDefault = {
     // Business Info
     BUSINESS_NAME: "Treadz Tire & Towing",
     PHONE_NUMBER: "(423) 357-4551", // Verified via Web Search
@@ -45,6 +45,15 @@ const TreadzConfig = {
         { id: 'srv_plug', name: 'Tire Plug', defaultPrice: 10.00, defaultQty: 1 }
     ]
 };
+
+// Apply Overrides if present
+const savedConfig = localStorage.getItem('treadzConfigOverrides');
+let TreadzConfig = savedConfig ? { ...TreadzConfigDefault, ...JSON.parse(savedConfig) } : TreadzConfigDefault;
+// Re-bind FEES deep merge if needed
+if (savedConfig) {
+    const overrides = JSON.parse(savedConfig);
+    if (overrides.FEES) TreadzConfig.FEES = { ...TreadzConfigDefault.FEES, ...overrides.FEES };
+}
 
 const TreadzUtils = {
     /**

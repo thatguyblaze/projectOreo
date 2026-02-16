@@ -51,6 +51,7 @@
         .brand-gradient-text {
             background: linear-gradient(135deg, #FF6600, #FF9933);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
     </style>
@@ -113,6 +114,17 @@
                                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> OPERATIONAL
                             </div>
                         </div>
+                        <button onclick="openSettings()"
+                            class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded text-sm font-bold flex items-center gap-2 transition-all border border-white/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
+                                </path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
                         <button onclick="exportData()"
                             class="bg-[#0047AB] hover:bg-[#003380] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 shadow-md transition-all active:scale-95 border border-white/10">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -411,6 +423,9 @@
                                     <th scope="col"
                                         class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Total</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100" id="table-tow-body"></tbody>
@@ -440,6 +455,9 @@
                                     <th scope="col"
                                         class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
                                         Total</th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100" id="table-tire-body"></tbody>
@@ -504,6 +522,117 @@
             </div>
 
         </main>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal"
+        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden transition-opacity">
+        <div
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100">
+            <div class="bg-[#0B1221] p-6 text-white flex justify-between items-center border-b-4 border-[#FF6600]">
+                <div>
+                    <h2 class="text-xl font-bold uppercase tracking-widest">Global Configuration</h2>
+                    <p class="text-xs text-gray-400 font-mono">System Parameters Override</p>
+                </div>
+                <button onclick="closeSettings()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+                <!-- Financials -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-green-600">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        Financial Constants
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Sales Tax Rate (Decimal)</label>
+                            <input type="number" id="sets-tax" step="0.0001"
+                                class="w-full mt-1 p-2 border border-slate-300 rounded font-mono font-bold text-slate-800">
+                            <span class="text-[10px] text-slate-400">e.g. 0.0975 for 9.75%</span>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Card Fee Rate (Decimal)</label>
+                            <input type="number" id="sets-card" step="0.001"
+                                class="w-full mt-1 p-2 border border-slate-300 rounded font-mono font-bold text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fees -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-blue-600">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        Standard Fees
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Tow Hook Fee</label>
+                            <input type="number" id="sets-tow-hook" step="0.01"
+                                class="w-full mt-1 p-2 border border-slate-300 rounded font-mono font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Mileage Rate</label>
+                            <input type="number" id="sets-tow-mile" step="0.01"
+                                class="w-full mt-1 p-2 border border-slate-300 rounded font-mono font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Tire Disposal</label>
+                            <input type="number" id="sets-tire-disp" step="0.01"
+                                class="w-full mt-1 p-2 border border-slate-300 rounded font-mono font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">State Tire Fee</label>
+                            <input type="number" id="sets-tire-state" step="0.01"
+                                class="w-full mt-1 p-2 border border-slate-300 rounded font-mono font-bold text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dangerous Zone -->
+                <div class="bg-red-50 p-4 rounded-xl border border-red-200">
+                    <h3 class="text-sm font-bold text-red-800 uppercase mb-2 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                            </path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        Danger Zone
+                    </h3>
+                    <p class="text-xs text-red-600 mb-4">Actions here cannot be undone. Be careful.</p>
+                    <button onclick="factoryReset()"
+                        class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded shadow-sm border border-red-800">
+                        FULL FACTORY RESET
+                    </button>
+                </div>
+            </div>
+            <div class="bg-gray-50 p-6 border-t border-gray-200 flex justify-end gap-3">
+                <button onclick="closeSettings()"
+                    class="px-4 py-2 rounded-lg text-slate-600 font-bold hover:bg-white border border-transparent hover:border-slate-200">Cancel</button>
+                <button onclick="saveSettings()"
+                    class="px-6 py-2 rounded-lg bg-[#0047AB] text-white font-bold shadow-lg hover:bg-[#003380] transform active:scale-95 transition-all">Save
+                    Changes</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -628,7 +757,7 @@
             document.getElementById('record-count-display').textContent = `RECORDS_FOUND: ${data.length}`;
 
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-10 text-center text-slate-400 font-medium bg-slate-50/50">NO CORRESPONDING DATA FOUND</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-slate-400 font-medium bg-slate-50/50">NO CORRESPONDING DATA FOUND</td></tr>';
                 return;
             }
 
@@ -691,7 +820,7 @@
                     if (status.includes('Storage')) statusColor = "bg-amber-50 text-amber-600 border border-amber-100";
 
                     return `
-                        <tr class="hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0">
+                        <tr class="hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0 group">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#0047AB]">#${item.id}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">${date}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700">${item.billTo || f.billTo || 'Unknown'}</td>
@@ -702,6 +831,10 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-slate-800">${total}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="window.open('towing/ticket/index.html?id=${item.id}', '_blank')" class="text-blue-600 hover:text-blue-900 mx-2">Edit</button>
+                                <button onclick="deleteRecord('${type}', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1">Del</button>
+                            </td>
                         </tr>
                     `;
                 } else {
@@ -712,13 +845,17 @@
                         : '<span class="text-slate-500 bg-slate-100 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200">QUOTE</span>';
 
                     return `
-                        <tr class="hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0">
+                        <tr class="hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0 group">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#0047AB]">#${item.displayId || item.id}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">${date}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${item.customer || 'Walk-In'}</td>
                             <td class="px-6 py-4 max-w-xs truncate text-sm text-slate-600" title="${shortDesc}">${shortDesc}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">${typeBadge}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-slate-800">${total}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="window.location.href='receipt/index.html?id=${item.displayId || item.id}'; window.focus()" class="text-blue-600 hover:text-blue-900 mx-2">Edit</button>
+                                <button onclick="deleteRecord('${type}', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1">Del</button>
+                            </td>
                         </tr>
                     `;
                 }
@@ -1090,6 +1227,59 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        }
+
+        // --- RECORD MANAGEMENT ---
+        function deleteRecord(collection, id) {
+            if (!confirm(`Are you sure you want to permanently delete ${collection.toUpperCase()} record #${id}?`)) return;
+
+            TreadzData.delete(collection, id, 'Admin');
+
+            // Reload all
+            initDashboard();
+        }
+
+        // --- SETTINGS MANAGEMENT ---
+        function openSettings() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            // Load current
+            document.getElementById('sets-tax').value = TreadzConfig.TAX_RATE;
+            document.getElementById('sets-card').value = TreadzConfig.CARD_FEE_RATE;
+            document.getElementById('sets-tow-hook').value = TreadzConfig.FEES.TOW_HOOK;
+            document.getElementById('sets-tow-mile').value = TreadzConfig.FEES.TOW_RATE_PER_MILE;
+            document.getElementById('sets-tire-disp').value = TreadzConfig.FEES.TIRE_DISPOSAL;
+            document.getElementById('sets-tire-state').value = TreadzConfig.FEES.TIRE_STATE;
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function saveSettings() {
+            const newConfig = {
+                TAX_RATE: parseFloat(document.getElementById('sets-tax').value),
+                CARD_FEE_RATE: parseFloat(document.getElementById('sets-card').value),
+                FEES: {
+                    TOW_HOOK: parseFloat(document.getElementById('sets-tow-hook').value),
+                    TOW_RATE_PER_MILE: parseFloat(document.getElementById('sets-tow-mile').value),
+                    TIRE_DISPOSAL: parseFloat(document.getElementById('sets-tire-disp').value),
+                    TIRE_STATE: parseFloat(document.getElementById('sets-tire-state').value)
+                }
+            };
+
+            // Save overrides
+            localStorage.setItem('treadzConfigOverrides', JSON.stringify(newConfig));
+            alert('System Configuration Updated. Reloading...');
+            location.reload();
+        }
+
+        function factoryReset() {
+            const phrase = prompt("Type 'DELETE EVERYTHING' to confirm factory reset. This will wipe ALL history.");
+            if (phrase === 'DELETE EVERYTHING') {
+                localStorage.clear();
+                alert('System Wiped. Rebooting...');
+                location.reload();
+            }
         }
 
     </script>
