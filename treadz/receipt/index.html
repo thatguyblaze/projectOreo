@@ -351,9 +351,14 @@
 
                     <!-- CUSTOMER INFO LINES -->
                     <div class="space-y-4 mb-8">
-                        <input type="text" id="cust-name-input"
-                            class="w-full text-2xl font-bold border-b-2 border-black outline-none bg-transparent uppercase"
-                            placeholder="CUSTOMER NAME">
+                        <div class="relative">
+                            <input type="text" id="cust-name-input"
+                                class="w-full text-2xl font-bold border-b-2 border-black outline-none bg-transparent uppercase"
+                                placeholder="CUSTOMER NAME" autocomplete="off">
+                            <ul id="cust-suggestions"
+                                class="absolute left-0 top-full w-full bg-white border-2 border-black z-50 hidden shadow-xl print:hidden max-h-60 overflow-y-auto mt-1 list-none p-0 m-0">
+                            </ul>
+                        </div>
                         <input type="text" id="cust-vehicle-input"
                             class="w-full text-2xl font-bold border-b-2 border-black outline-none bg-transparent uppercase"
                             placeholder="VEHICLE INFO">
@@ -826,6 +831,70 @@
                     el.value = val;
                     el.dispatchEvent(new Event('input'));
                 }, { passive: false });
+            });
+
+            // --- AUTOCOMPLETE LOGIC ---
+            const suggestionsEl = document.getElementById('cust-suggestions');
+            // Build unique list from Data Store
+            const uniqueCustomers = new Set();
+
+            // 1. From Tow Tickets
+            try {
+                const tickets = TreadzData.getAll('ticket');
+                tickets.forEach(t => {
+                    const name = t.fields?.billTo || t.billTo || t.customer;
+                    if (name && name.length > 2) uniqueCustomers.add(name.trim().toUpperCase());
+                });
+            } catch (e) { console.error("Error loading ticket history", e); }
+
+            // 2. From Receipts
+            try {
+                const receipts = TreadzData.getAll('receipt');
+                receipts.forEach(r => {
+                    const name = r.customer;
+                    if (name && name.length > 2) uniqueCustomers.add(name.trim().toUpperCase());
+                });
+            } catch (e) { console.error("Error loading receipt history", e); }
+
+            const customerList = Array.from(uniqueCustomers).sort();
+
+            custNameInput.addEventListener('input', () => {
+                const val = custNameInput.value.toUpperCase();
+                suggestionsEl.innerHTML = '';
+
+                if (val.length < 1) {
+                    suggestionsEl.classList.add('hidden');
+                    return;
+                }
+
+                const matches = customerList.filter(c => c.includes(val));
+
+                if (matches.length === 0) {
+                    suggestionsEl.classList.add('hidden');
+                    return;
+                }
+
+                suggestionsEl.classList.remove('hidden');
+
+                // Show top 5
+                matches.slice(0, 5).forEach(match => {
+                    const li = document.createElement('li');
+                    li.className = "px-4 py-2 hover:bg-gray-100 cursor-pointer text-lg font-bold border-b border-gray-100 last:border-0 font-sans text-black z-50 bg-white";
+                    li.textContent = match;
+                    li.onclick = () => {
+                        custNameInput.value = match;
+                        suggestionsEl.classList.add('hidden');
+                        triggerAutoSave();
+                    };
+                    suggestionsEl.appendChild(li);
+                });
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target !== custNameInput && e.target !== suggestionsEl && !suggestionsEl.contains(e.target)) {
+                    suggestionsEl.classList.add('hidden');
+                }
             });
 
             // MAIN QTY Scroll Logic

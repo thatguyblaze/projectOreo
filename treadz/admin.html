@@ -785,11 +785,22 @@
             document.getElementById('driver-stats-list').innerHTML = driverHTML || '<p class="text-xs text-gray-400 italic">No driver data</p>';
 
 
-            // --- Top Accounts ---
+            // --- Top Accounts (Towing & Tire Sales) ---
             const accountRev = {};
+
+            // 1. Towing
             allTowData.forEach(t => {
                 const acc = t.fields?.billTo || 'Cash/Private';
                 accountRev[acc] = (accountRev[acc] || 0) + cleanMoney(t.total);
+            });
+
+            // 2. Tire Sales (Receipts)
+            allTireData.forEach(t => {
+                // Only count finalized receipts, not quotes
+                if (t.type === 'receipt') {
+                    const acc = t.customer || 'Walk-In';
+                    accountRev[acc] = (accountRev[acc] || 0) + cleanMoney(t.total);
+                }
             });
             const sortedAccounts = Object.entries(accountRev).sort((a, b) => b[1] - a[1]).slice(0, 5);
             const accountsHTML = sortedAccounts.map(([name, rev], i) => `
