@@ -791,6 +791,21 @@
                 return searchStr.includes(query);
             });
 
+            // SORTING FOR VTS: Priority First!
+            if (currentTab === 'vts') {
+                filtered.sort((a, b) => {
+                    // Get Days for a
+                    const d1 = new Date(a.timestamp || a.date);
+                    const daysA = Math.ceil(Math.abs(new Date() - d1) / (1000 * 60 * 60 * 24));
+
+                    // Get Days for b
+                    const d2 = new Date(b.timestamp || b.date);
+                    const daysB = Math.ceil(Math.abs(new Date() - d2) / (1000 * 60 * 60 * 24));
+
+                    return daysB - daysA; // Oldest / Highest Days First
+                });
+            }
+
             renderTableBody(currentTab, filtered);
         }
 
@@ -819,25 +834,67 @@
                     const enteredDate = new Date(dateRaw);
                     const diffTime = Math.abs(new Date() - enteredDate);
                     const daysInStorage = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const storageFee = daysInStorage * 45; // $45/day auto-calc
-                    const accruedTotal = cleanMoney(item.total) + storageFee;
+
+                    // Fee Calculation
+                    const dailyRate = f.storeRate || 45; // Default 45 or use ticket rate
+                    const baseTotal = cleanMoney(item.total);
+                    // Calculate "Storage Only" portion if we wanted, but "Accrued" implies Total + New Days?
+                    // Let's assume Ticket Total includes storage up to point of invoice. 
+                    // If status is still In Lot, we keep adding. 
+                    // BETTER: Just show daily rate * days for "Storage Fees" column + Base Tow.
+                    const storageFee = daysInStorage * dailyRate;
+                    const accruedTotal = baseTotal + storageFee; // Simple approx
 
                     let statusBadge = '';
                     let actionBtn = '';
+                    let rowClass = 'hover:bg-red-50/20';
 
-                    if (daysInStorage < 3) {
-                        statusBadge = '<span class="text-slate-500 font-bold text-xs bg-slate-100 px-2 py-1 rounded">INTAKE HOLD</span>';
+                    // Check Flags from Ticket
+                    const vtsSent = f.vtsSent === true;
+                    const titleRec = f.titleReceived === true;
+
+                    // Logic for Status/Actions
+                    if (titleRec) {
+                        // Highest Importance? Or is it "Ready to Scrap"?
+                        statusBadge = `
+                            <div class="flex flex-col gap-1 items-center">
+                                <span class="text-green-700 bg-green-100 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase border border-green-200">TITLE RECEIVED</span>
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors shadow-sm">Process</button>`;
+                    }
+                    else if (daysInStorage >= 30) {
+                        // Title Eligible
+                        statusBadge = `
+                            <div class="flex flex-col gap-1 items-center">
+                                <span class="text-red-700 bg-red-100 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase border border-red-200 animate-pulse">Title Eligible</span>
+                                ${!vtsSent ? '<span class="text-xs text-red-600 font-bold">MISSING VTS!</span>' : '<span class="text-[9px] text-gray-400">VTS Sent</span>'}
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition-colors shadow-sm">Start Title</button>`;
+                        rowClass = 'bg-red-50 hover:bg-red-100/50'; // Highlight row
+                    }
+                    else if (daysInStorage >= 3) {
+                        // VTS Required
+                        const isLate = daysInStorage > 5 && !vtsSent;
+                        statusBadge = `
+                            <div class="flex flex-col gap-1 items-center">
+                                <span class="${isLate ? 'text-red-600 font-black animate-pulse' : 'text-amber-700'} bg-amber-100 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase border border-amber-200">VTS Required</span>
+                                ${vtsSent ? '<span class="text-[9px] text-green-600 font-bold">SENT ✅</span>' : '<span class="text-[9px] text-red-500 font-bold">NOT SENT ❌</span>'}
+                            </div>`;
+                        actionBtn = `<button onclick="emailVTS('${item.id}')" class="text-[10px] uppercase font-bold bg-[#0047AB] text-white px-2 py-1 rounded hover:bg-[#003380] transition-colors shadow-sm flex items-center justify-center gap-1 w-full mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                                        Email
+                                      </button>
+                                      <button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-slate-500 hover:text-blue-600 flex justify-center w-full">View</button>
+                                      `;
+                    }
+                    else {
+                        // Intake Hold
+                        statusBadge = '<span class="text-slate-500 font-bold text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200">INTAKE HOLD</span>';
                         actionBtn = '<span class="text-[10px] text-slate-400 font-mono">PENDING 24H</span>';
-                    } else if (daysInStorage >= 3 && daysInStorage < 30) {
-                        statusBadge = '<span class="text-amber-700 bg-amber-100 px-2 py-1 rounded text-[10px] font-bold tracking-wide uppercase">Letter Required</span>';
-                        actionBtn = `<button class="text-[10px] uppercase font-bold bg-[#0047AB] text-white px-2 py-1 rounded hover:bg-[#003380] transition-colors" onclick="alert('Generating Certified Letter for #${item.id}...')">Gen. Letter</button>`;
-                    } else {
-                        statusBadge = '<span class="text-red-700 bg-red-100 px-2 py-1 rounded text-[10px] font-bold tracking-wide uppercase animate-pulse">Title Eligible</span>';
-                        actionBtn = `<button class="text-[10px] uppercase font-bold bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition-colors" onclick="alert('Starting Title Process for #${item.id}...')">Start Title</button>`;
                     }
 
                     return `
-                        <tr class="hover:bg-red-50/20 transition-colors border-b border-red-50 last:border-0">
+                        <tr class="${rowClass} transition-colors border-b border-red-50 last:border-0">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-bold text-slate-900">#${item.id}</div>
                                 <div class="text-xs text-slate-500 font-mono">${date}</div>
@@ -847,14 +904,14 @@
                                 <div class="text-xs text-slate-500 font-mono">${f.vin || 'VIN: N/A'}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <div class="text-lg font-black text-slate-700 bg-slate-100 inline-block px-3 py-1 rounded-lg">${daysInStorage}</div>
+                                <div class="text-lg font-black text-slate-700 bg-white border border-slate-200 inline-block px-3 py-1 rounded-lg shadow-sm">${daysInStorage}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">${statusBadge}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                 <div class="text-sm font-bold text-slate-900">${formatMoney(accruedTotal)}</div>
-                                <div class="text-[10px] text-red-500 font-mono">+${formatMoney(storageFee)} accum</div>
+                                <div class="text-[10px] text-red-500 font-mono">+${formatMoney(storageFee)} storage</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">${actionBtn}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right flex flex-col items-end gap-1">${actionBtn}</td>
                         </tr>
                     `;
                 }
@@ -862,47 +919,136 @@
                 if (type === 'tow') {
                     const f = item.fields || {};
                     const status = f.status || 'Draft';
-                    let statusColor = "bg-slate-100 text-slate-600";
-                    if (status === 'Released') statusColor = "bg-green-100 text-green-700 border border-green-200";
-                    if (status === 'In Lot' || status === 'Impound') statusColor = "bg-red-50 text-red-600 border border-red-100";
-                    if (status.includes('Storage')) statusColor = "bg-amber-50 text-amber-600 border border-amber-100";
+
+                    // Smart Status Logic
+                    let statusBadge = '';
+                    let actionBtn = '';
+                    let rowClass = 'hover:bg-slate-50 border-b border-gray-100 last:border-0 group transition-colors';
+                    const daysOld = Math.floor((new Date() - new Date(item.timestamp || item.date)) / (1000 * 60 * 60 * 24));
+
+                    if (status === 'Released') {
+                        statusBadge = `
+                            <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-green-50 border border-green-100 text-green-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">Released</span>
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-slate-500 hover:text-blue-600 bg-white border border-slate-200 hover:border-blue-300 px-3 py-1 rounded shadow-sm transition-all">View</button>`;
+                    }
+                    else if (status === 'In Lot' || status === 'Impound') {
+                        statusBadge = `
+                            <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-red-50 border border-red-100 text-red-700 animate-pulse">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">Impound</span>
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-slate-800 text-white px-3 py-1 rounded hover:bg-black transition-colors shadow-sm">Manage</button>`;
+                    }
+                    else if (status === 'Draft') {
+                        statusBadge = `
+                            <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">Draft</span>
+                            </div>`;
+                        if (daysOld > 7) rowClass += ' opacity-60'; // Fade old drafts
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded transition-colors">Resume</button>`;
+                    }
+                    else {
+                        // Active / Dispatched
+                        statusBadge = `
+                            <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-blue-50 border border-blue-100 text-blue-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">${status}</span>
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-[#0047AB] text-white px-3 py-1 rounded hover:bg-[#003380] transition-colors shadow-sm">Open</button>`;
+                    }
+
+                    // Account styling
+                    const isAccount = item.billTo && item.billTo !== 'Cash/Private';
+                    const billToDisplay = isAccount
+                        ? `<div class="flex items-center gap-1 text-[#0047AB]"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M17 21v-8.5a2.5 2.5 0 0 0-5 0V21"/></svg>${item.billTo}</div>`
+                        : `<span class="text-slate-600">${f.billTo || 'Private'}</span>`;
+
 
                     return `
-                        <tr class="hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0 group">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#0047AB]">#${item.id}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">${date}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-700">${item.billTo || f.billTo || 'Unknown'}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${item.vehicle || f.vehicle || '-'}</td>
+                        <tr class="${rowClass}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-800">
+                                #${item.id}
+                                ${isAccount ? '<span class="ml-1 text-[9px] bg-blue-100 text-blue-700 px-1 rounded border border-blue-200">ACC</span>' : ''}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500 font-mono">${date}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${billToDisplay}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                ${item.vehicle || f.vehicle || '-'}
+                                <div class="text-[10px] text-slate-400 font-mono">${f.vin ? 'VIN: ' + f.vin.slice(-6) : ''}</div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="px-2.5 py-1 inline-flex text-[10px] uppercase font-bold rounded-lg ${statusColor} tracking-wide">
-                                    ${status}
-                                </span>
+                                ${statusBadge}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-slate-800">${total}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="openEditor('ticket', '${item.id}')" class="text-blue-600 hover:text-blue-900 mx-2 font-bold uppercase text-xs">Edit</button>
-                                <button onclick="deleteRecord('ticket', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1 font-bold uppercase text-xs">Del</button>
+                            <td class="px-6 py-4 whitespace-nowrap text-right flex items-center justify-end gap-2">
+                                ${actionBtn}
+                                <button onclick="deleteRecord('ticket', '${item.id}')" class="p-1 text-slate-300 hover:text-red-500 transition-colors" title="Delete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
                             </td>
                         </tr>
                     `;
                 } else {
                     const shortDesc = item.tireInfo || item.description || 'Service/Parts';
                     const isReceipt = item.type === 'receipt';
-                    const typeBadge = isReceipt
-                        ? '<span class="text-green-600 bg-green-50 px-2 py-0.5 rounded text-[10px] font-bold border border-green-100">SOLD</span>'
-                        : '<span class="text-slate-500 bg-slate-100 px-2 py-0.5 rounded text-[10px] font-bold border border-slate-200">QUOTE</span>';
+                    const daysOld = Math.floor((new Date() - new Date(item.timestamp || item.date)) / (1000 * 60 * 60 * 24));
+
+                    let statusBadge = '';
+                    let actionBtn = '';
+
+                    if (isReceipt) {
+                        statusBadge = `
+                            <div class="flex items-center justify-end gap-1.5 px-2 py-0.5 mt-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wide text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-100">Paid Receipt</span>
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('receipt', '${item.displayId || item.id}')" class="text-[10px] uppercase font-bold text-slate-500 hover:text-blue-600 bg-white border border-slate-200 hover:border-blue-300 px-3 py-1 rounded shadow-sm transition-all">View</button>`;
+                    } else {
+                        // Quote Logic
+                        let qStatus = 'Active';
+                        let qColor = 'bg-blue-50 text-blue-600 border-blue-100'; // Standard Active
+
+                        if (daysOld > 30) {
+                            qStatus = 'Archived';
+                            qColor = 'bg-gray-100 text-gray-500';
+                        } else if (daysOld > 7) {
+                            qStatus = 'Expiring';
+                            qColor = 'bg-amber-50 text-amber-600 border-amber-100';
+                        } else {
+                            // Recent Quote - High Potential
+                            qStatus = 'Open Quote';
+                            qColor = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                        }
+
+                        statusBadge = `
+                            <div class="flex items-center justify-end gap-1.5 px-2 py-0.5 mt-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border ${qColor}">${qStatus}</span>
+                            </div>`;
+
+                        actionBtn = `<button onclick="openEditor('receipt', '${item.displayId || item.id}')" class="text-[10px] uppercase font-bold bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors shadow-sm">Convert</button>`;
+                    }
 
                     return `
                         <tr class="hover:bg-slate-50 transition-colors border-b border-gray-100 last:border-0 group">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#0047AB]">#${item.displayId || item.id}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#0047AB]">
+                                #${item.displayId || item.id}
+                                <div class="text-[9px] text-slate-400 font-mono uppercase tracking-wider">${item.type}</div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-mono">${date}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${item.customer || 'Walk-In'}</td>
                             <td class="px-6 py-4 max-w-xs truncate text-sm text-slate-600" title="${shortDesc}">${shortDesc}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">${typeBadge}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-slate-800">${total}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onclick="openEditor('receipt', '${item.displayId || item.id}')" class="text-blue-600 hover:text-blue-900 mx-2 font-bold uppercase text-xs">Edit</button>
-                                <button onclick="deleteRecord('receipt', '${item.id}')" class="text-red-400 hover:text-red-600 mx-1 font-bold uppercase text-xs">Del</button>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                <div class="font-black text-slate-800 text-base">${total}</div>
+                                ${statusBadge}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right flex items-center justify-end gap-2 pt-6">
+                                ${actionBtn}
+                                <button onclick="deleteRecord('receipt', '${item.id}')" class="p-1 text-slate-300 hover:text-red-500 transition-colors" title="Delete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
                             </td>
                         </tr>
                     `;
@@ -1357,6 +1503,15 @@
         }
 
         // --- EXPORT / BACKUP ---
+        function emailVTS(id) {
+            // Mock Trigger
+            alert(`Opening Email Client for Ticket #${id} VTS Packet...`);
+            // In a real app, this would generate a PDF and attach it to a mailto: or send via backend
+            const subject = `VTS Notification - Ticket #${id}`;
+            const body = `Please find attached the VTS notification packet for vehicle [DETAILS FROM DB].`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
         function downloadFullBackup() {
             const backup = {
                 metadata: {
