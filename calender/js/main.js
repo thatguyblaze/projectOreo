@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function generateMonthView() {
+    function generateMonthView(direction = 'neutral') {
         calendarGrid.innerHTML = dayNamesShort.map(day => `<div class="text-center font-semibold text-text-secondary text-sm py-2">${day}</div>`).join('');
         monthYearHeader.textContent = `${monthNames[currentMonth]} ${currentYear}`;
 
@@ -417,7 +417,12 @@ document.addEventListener('DOMContentLoaded', () => {
             gridCells.push({ day: date.getDate(), date, isOtherMonth: true });
         }
 
-        gridCells.forEach(cell => {
+        // Determine Animation Class
+        let animationClass = 'fade-in';
+        if (direction === 'left') animationClass = 'slide-in-right';
+        else if (direction === 'right') animationClass = 'slide-in-left';
+
+        gridCells.forEach((cell, index) => {
             const { day, date, isOtherMonth } = cell;
             const isoDate = getISODate(date);
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
@@ -431,8 +436,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 cellStyle = `background-color: ${color}26;`; // ~15% opacity hex
             }
 
+            // Adjust animation delay based on index for wave effect, irrelevant for slide usually but kept
+            const delay = direction === 'neutral' ? `animation-delay:${index * 0.01}s;` : '';
+
             const dayCellHTML = `<div class="day-cell-wrapper">
-                <div class="day-cell flex flex-col p-1 sm:p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''} ${isOtherMonth ? 'day-cell-other-month' : ''}" data-date="${isoDate}" style="animation-delay:${dayCounter++ * 0.01}s; ${cellStyle}">
+                <div class="day-cell flex flex-col p-1 sm:p-2 rounded-lg cursor-pointer ${date.toDateString() === new Date().toDateString() ? 'today-highlight' : ''} ${isWeekend ? 'day-cell-weekend' : ''} ${isOtherMonth ? 'day-cell-other-month' : ''} ${animationClass}" data-date="${isoDate}" style="${delay} ${cellStyle}">
                     <div class="add-day-event-btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></div>
                     <span class="self-start day-number">${day}</span>
                 </div>
@@ -1115,7 +1123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             currentMonth = (currentMonth - 1 + 12) % 12;
             if (currentMonth === 11) currentYear--;
-            generateMonthView();
+            generateMonthView('right');
         }
         updateViewTitle();
     });
@@ -1131,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             currentMonth = (currentMonth + 1) % 12;
             if (currentMonth === 0) currentYear++;
-            generateMonthView();
+            generateMonthView('left');
         }
         updateViewTitle();
     });
@@ -1349,17 +1357,52 @@ document.addEventListener('DOMContentLoaded', () => {
     currentMonth = new Date().getMonth();
     switchToMonthView();
 
-    // Resize Handler
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            if (currentView === 'month') {
-                const text = monthYearHeader.textContent;
-                if (text) generateMonthView();
+    // Swipe & Resize Logic
+
+    // Swipe Handling
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const swipeThreshold = 50;
+
+    monthView.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    monthView.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+        if (currentView !== 'month') return;
+
+        const swipeDistance = touchEndX - touchStartX;
+
+        if (Math.abs(swipeDistance) > swipeThreshold) {
+            if (swipeDistance < 0) {
+                // Swipe Left -> Next Month
+                nextMonthBtn.click();
             } else {
-                updateView();
+                // Swipe Right -> Prev Month
+                prevMonthBtn.click();
             }
-        }, 200);
+        }
+    }
+
+    // Robust Resize Handling using ResizeObserver
+    const resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+            if (entry.target === calendarGrid && currentView === 'month') {
+                // Debounce slightly to avoid excessive calculations during rapid resize
+                requestAnimationFrame(() => {
+                    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+                    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                    renderEventBars(firstDayOfMonth, daysInMonth);
+                });
+            }
+        }
     });
+
+    resizeObserver.observe(calendarGrid);
+
 });
