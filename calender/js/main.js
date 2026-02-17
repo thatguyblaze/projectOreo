@@ -570,26 +570,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Get DOM Elements for geometry
-                // Use getBoundingClientRect for sub-pixel precision to prevent overlaps
+                // SWITCHED TO offsetLeft/Top to ignore CSS Transforms (animations) which caused "flooding"
                 const startCell = calendarGrid.children[currentRenderIndex + CHILD_OFFSET];
                 const endCell = calendarGrid.children[segmentEndIndex + CHILD_OFFSET];
-                const containerRect = eventBarsContainer.getBoundingClientRect();
 
-                if (startCell && endCell && containerRect.width > 0) {
-                    const startRect = startCell.getBoundingClientRect();
-                    const endRect = endCell.getBoundingClientRect();
+                if (startCell && endCell) {
 
                     // Calculate relative positions
                     // Top: Cell top relative to container + header offset + track offset
-                    const relativeTop = startRect.top - containerRect.top;
+                    const relativeTop = startCell.offsetTop;
                     const topPos = relativeTop + 34 + (event._renderTrack * 24);
 
                     // Left: Start cell left relative to container + margin
-                    const relativeLeft = startRect.left - containerRect.left;
+                    const relativeLeft = startCell.offsetLeft;
                     const leftPos = relativeLeft + 2;
 
                     // Width: Span from start-left to end-right - margins
-                    const totalSpan = endRect.right - startRect.left;
+                    const totalSpan = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft;
                     const width = totalSpan - 5; // 2px left + 3px right gap for safety
 
                     const bar = document.createElement('div');
