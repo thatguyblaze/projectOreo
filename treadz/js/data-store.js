@@ -198,8 +198,59 @@ const TreadzData = {
         );
 
         return [headers, ...rows].join('\n');
+    },
+
+    // --- Migration Utilities ---
+    migrateLegacyData: () => {
+        const legacyMap = {
+            'ticket': ['treadzTowHistory', 'treadz_tow_history'],
+            'receipt': ['treadzQuoteHistory', 'treadz_quote_history', 'treadzReceiptHistory'],
+            'quote': ['treadzQuoteHistory', 'treadz_quote_history']
+        };
+
+        let migratedCount = 0;
+
+        Object.entries(TreadzData.CONFIG.KEYS).forEach(([type, currentKey]) => {
+            const currentData = localStorage.getItem(currentKey);
+            // Only migrate if current is empty/null to avoid overwriting or duplication loops
+            if (!currentData || JSON.parse(currentData).length === 0) {
+                const legacyKeys = legacyMap[type];
+                if (legacyKeys) {
+                    for (const oldKey of legacyKeys) {
+                        const oldData = localStorage.getItem(oldKey);
+                        if (oldData) {
+                            console.log(`[Migration] Found legacy data for ${type} in ${oldKey}`);
+                            try {
+                                const parsed = JSON.parse(oldData);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                    localStorage.setItem(currentKey, oldData); // Port it over
+                                    migratedCount += parsed.length;
+                                    // Optional: localStorage.removeItem(oldKey); // Keep for safety for now
+                                    break; // Found one, stop looking
+                                }
+                            } catch (e) {
+                                console.error(`[Migration] Failed to parse legacy ${oldKey}`, e);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (migratedCount > 0) {
+            console.log(`[Migration] Successfully migrated ${migratedCount} records.`);
+            return true;
+        }
+        return false;
     }
 };
+
+// Auto-run migration on load
+try {
+    TreadzData.migrateLegacyData();
+} catch (e) {
+    console.warn("Migration failed or already run", e);
+}
 
 // Expose to window
 window.TreadzData = TreadzData;
