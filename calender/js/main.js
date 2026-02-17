@@ -570,26 +570,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Get DOM Elements for geometry
+                // Use getBoundingClientRect for sub-pixel precision to prevent overlaps
                 const startCell = calendarGrid.children[currentRenderIndex + CHILD_OFFSET];
                 const endCell = calendarGrid.children[segmentEndIndex + CHILD_OFFSET];
+                const containerRect = eventBarsContainer.getBoundingClientRect();
 
-                if (startCell && endCell) {
-                    // Adjusted offset to align with day cells more tightly on mobile
-                    const topPos = startCell.offsetTop + 32 + (event._renderTrack * 24);
-                    const leftPos = startCell.offsetLeft + 2;
-                    // Width spans from start of startCell to end of endCell (minus margins)
-                    const width = (endCell.offsetLeft + endCell.offsetWidth) - startCell.offsetLeft - 4;
+                if (startCell && endCell && containerRect.width > 0) {
+                    const startRect = startCell.getBoundingClientRect();
+                    const endRect = endCell.getBoundingClientRect();
+
+                    // Calculate relative positions
+                    // Top: Cell top relative to container + header offset + track offset
+                    const relativeTop = startRect.top - containerRect.top;
+                    const topPos = relativeTop + 34 + (event._renderTrack * 24);
+
+                    // Left: Start cell left relative to container + margin
+                    const relativeLeft = startRect.left - containerRect.left;
+                    const leftPos = relativeLeft + 2;
+
+                    // Width: Span from start-left to end-right - margins
+                    const totalSpan = endRect.right - startRect.left;
+                    const width = totalSpan - 5; // 2px left + 3px right gap for safety
 
                     const bar = document.createElement('div');
-                    bar.className = 'event-bar text-xs'; // Added text-xs for smaller font on mobile
+                    bar.className = 'event-bar text-xs';
                     bar.style.top = `${topPos}px`;
                     bar.style.left = `${leftPos}px`;
                     bar.style.width = `${width}px`;
-                    bar.style.height = '20px'; // Forced smaller height
-                    bar.style.lineHeight = '20px'; // Vertically center text
-                    bar.style.padding = '0 4px'; // Tighten padding
+                    bar.style.height = '20px';
+                    bar.style.lineHeight = '20px';
+                    bar.style.padding = '0 4px';
                     bar.style.backgroundColor = event.color || '#3B82F6';
-                    bar.style.pointerEvents = 'auto'; // Re-enable clicks
+                    bar.style.pointerEvents = 'auto';
                     bar.dataset.eventId = event.id.toString().startsWith('holiday-') ? event.id : event.id.split('-')[0];
                     bar.addEventListener('click', (e) => {
                         e.stopPropagation();
