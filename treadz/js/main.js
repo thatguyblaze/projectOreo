@@ -555,9 +555,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // robust size matching
             if (parsedSearch) {
-                // item.size is string like "225/60R16"
-                // parse it on the fly
-                const itemParsed = parseTireSize(item.size);
+                // item.size might be string or object
+                const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
+                const itemParsed = parseTireSize(itemSizeStr);
+
                 if (itemParsed &&
                     itemParsed.width === parsedSearch.width &&
                     itemParsed.rim === parsedSearch.rim &&
@@ -567,7 +568,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Text matching
-            const text = `${item.size} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
+            const sizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
+            const text = `${sizeStr} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
             return text.includes(searchTerm.toLowerCase());
         });
 
@@ -589,28 +591,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 </svg>
                 Local Inventory <span class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">${filtered.length}</span>
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-                ${filtered.map(item => `
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 relative overflow-hidden group hover:shadow-md transition-shadow">
-                        <div class="absolute top-0 right-0 p-2">
-                             <span class="text-[10px] font-bold px-2 py-1 rounded ${item.condition === 'new' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'} uppercase tracking-wide">${item.condition || 'Used'}</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+                ${filtered.map(item => {
+            const sizeDisplay = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
+            const isNew = item.condition === 'new';
+
+            return `
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                        <div class="flex items-center gap-3">
+                             <div class="w-1.5 h-10 rounded-full ${isNew ? 'bg-green-500' : 'bg-gray-400'}" title="${isNew ? 'New' : 'Used'}"></div>
+                             <div>
+                                 <h3 class="font-black text-xl text-gray-800 tracking-tight">${sizeDisplay}</h3>
+                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${item.condition || 'Used'}</p>
+                             </div>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mt-2">${item.size}</h3>
-                        <p class="text-gray-500 text-sm mb-4 font-medium">${item.brand || 'Generic Brand'}</p>
                         
-                        <div class="flex items-end justify-between border-t border-gray-100 pt-3">
-                            <div>
-                                <span class="text-3xl font-black text-blue-600 leading-none">${item.quantity}</span>
-                                <span class="text-xs font-bold text-gray-400 uppercase">Qty</span>
-                            </div>
-                            <button class="text-gray-400 hover:text-blue-600 p-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-100">
+                            <button onclick="window.updateInventoryQty('${item.id}', -1)" 
+                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
+                                -
+                            </button>
+                            <span class="font-mono font-bold text-lg w-8 text-center text-gray-800">${item.quantity}</span>
+                            <button onclick="window.updateInventoryQty('${item.id}', 1)" 
+                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-500 hover:text-green-600 hover:border-green-200 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
+                                +
                             </button>
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             </div>
         `;
+    };
+
+    window.updateInventoryQty = (id, change) => {
+        const idx = inventory.findIndex(i => i.id === id);
+        if (idx === -1) return;
+
+        inventory[idx].quantity += change;
+
+        if (inventory[idx].quantity <= 0) {
+            if (confirm('Remove this item from inventory?')) {
+                inventory.splice(idx, 1);
+                showToast('Item removed');
+            } else {
+                inventory[idx].quantity = 1; // Revert
+            }
+        } else {
+            // Optional: show toast for update? maybe too noisy
+        }
+
+        saveData();
+        renderInventory();
     };
 
     const populateFilters = () => {
