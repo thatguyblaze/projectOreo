@@ -1,0 +1,1353 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treadz - Receipt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/data-store.js"></script>
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* The Paper Receipt Look */
+        .paper-receipt {
+            font-family: "Times New Roman", Times, serif;
+            color: black;
+            background: white;
+            position: relative;
+        }
+
+        .paper-receipt input {
+            font-family: inherit;
+            color: inherit;
+        }
+
+        .paper-receipt input::placeholder {
+            color: #ccc;
+            font-style: italic;
+        }
+
+        /* Table Styling */
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid black;
+        }
+
+        .receipt-table th {
+            border-right: 2px solid black;
+            border-bottom: 2px solid black;
+            padding: 4px;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .receipt-table td {
+            border-right: 2px solid black;
+            border-bottom: 1px solid black;
+            padding: 4px;
+            font-size: 16px;
+            height: 32px;
+            /* Fixed height for rows */
+            vertical-align: middle;
+        }
+
+        .receipt-table tbody:last-child tr:last-child td {
+            border-bottom: none;
+        }
+
+        .receipt-table td.no-border-right {
+            border-right: none;
+        }
+
+        /* Totals Box */
+        .totals-box {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .totals-box td {
+            border: 1px solid black;
+            padding: 4px 8px;
+        }
+
+        .totals-box .label {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            text-align: right;
+            border-right: 2px solid black !important;
+            width: 90px;
+        }
+
+        .totals-box .amount {
+            font-weight: bold;
+            text-align: right;
+            font-size: 16px;
+        }
+
+        /* Screen only override for main layout */
+        @media screen {
+            #receipt-container {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        /* Print Override */
+        @media print {
+            @page {
+                margin: 0.25in;
+                size: letter;
+            }
+
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Hide UI scaffolding */
+            .main-nav,
+            #history-panel,
+            #upsell-panel,
+            .screen-only,
+            button,
+            .print-hidden,
+            .print\:hidden {
+                display: none !important;
+            }
+
+            #app,
+            main,
+            section {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                background: white !important;
+            }
+
+            #receipt-container {
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                min-height: 0 !important;
+                background: white !important;
+                display: block !important;
+            }
+
+            /* Clean up inputs for print */
+            input {
+                border: none !important;
+                background: transparent !important;
+                width: auto !important;
+                padding: 0 !important;
+            }
+
+            input::placeholder {
+                color: transparent !important;
+            }
+
+            /* Hide spinner on number inputs */
+            input[type=number]::-webkit-inner-spin-button,
+            input[type=number]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            .receipt-table,
+            .receipt-table td,
+            .receipt-table th,
+            .totals-box td {
+                border-color: black !important;
+            }
+
+            /* Specific fix for gray backgrounds in print */
+            .bg-gray-50,
+            .bg-gray-100,
+            .bg-gray-200,
+            .bg-gray-900 {
+                background-color: transparent !important;
+            }
+
+            /* Ensure Card Preview is hidden */
+            #card-total-preview-container {
+                display: none !important;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="antialiased h-screen flex flex-col overflow-hidden bg-gray-100">
+    <div id="app" class="flex-grow flex flex-col h-full">
+        <!-- Navigation -->
+        <!-- Navigation -->
+        <nav class="main-nav sticky top-0 z-40 p-4 w-full print:hidden flex-shrink-0">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <!-- LEFT: Logo & Global Navigation -->
+                <div class="flex items-center gap-4 lg:gap-8">
+                    <!-- Mobile Sidebar Toggle -->
+                    <button onclick="toggleSidebar()"
+                        class="lg:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
+                        title="View History">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 6h16M4 12h16M4 18h7" />
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        </svg>
+                    </button>
+
+                    <a href="../index.html" class="flex-shrink-0">
+                        <img src="../treadztntLogo.png" alt="Treadz" class="h-10 w-auto">
+                    </a>
+
+                    <!-- Vertical Divider -->
+                    <div class="hidden md:block h-6 w-px bg-white/20"></div>
+
+                    <!-- Global Nav Items -->
+                    <div class="hidden md:flex items-center gap-1">
+                        <a href="../index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Inventory</a>
+                        <a href="../towing/ticket/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Towing</a>
+                        <a href="../quote/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Quote</a>
+                        <a href="index.html"
+                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg">Receipts</a>
+                        <a href="../catalog/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Catalog</a>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Page-Specific Actions -->
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleServicesSidebar()"
+                        class="lg:hidden btn btn-secondary text-sm font-medium py-2 px-3 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11l3 3L22 4" />
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                        </svg>
+                        <span class="hidden xl:inline">Services</span>
+                    </button>
+                    <button onclick="reset()"
+                        class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2 shadow-sm whitespace-nowrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span class="hidden xl:inline">New Receipt</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Workspace -->
+        <main class="flex-grow flex flex-col lg:flex-row h-full overflow-hidden relative">
+
+            <!-- LEFT PANEL: History -->
+            <aside id="history-panel"
+                class="w-full sm:w-80 lg:w-80 bg-white border-r border-gray-200 flex flex-col shadow-lg z-30 flex-shrink-0 transition-transform duration-300 absolute lg:relative h-full lg:transform-none transform -translate-x-full">
+                <div class="p-4 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="text-blue-600">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            Recent Receipts
+                        </h3>
+                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="history-search" placeholder="Search..."
+                            oninput="renderHistory(this.value)"
+                            class="w-full pl-9 pr-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 outline-none">
+                    </div>
+                </div>
+                <div id="history-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50"></div>
+            </aside>
+
+            <!-- CENTER PANEL: Receipt Paper -->
+            <section class="flex-grow overflow-y-auto bg-gray-200 p-4 sm:p-8 flex flex-col items-center">
+
+                <!-- THE PAPER RECEIPT CONTAINER -->
+                <div id="receipt-container"
+                    class="paper-receipt w-full max-w-2xl bg-white p-8 sm:p-12 mb-8 flex flex-col"
+                    style="min-height: auto;">
+
+                    <!-- HEADER -->
+                    <div class="flex justify-between items-start mb-6">
+                        <!-- Left Logo/Address -->
+                        <div class="flex flex-col w-1/2">
+                            <img src="../treadztntLogo.png" class="h-16 w-auto object-contain self-start mb-2"
+                                alt="Treadz">
+                            <div class="pl-2 pt-1 text-lg leading-tight space-y-1">
+                                <div>409 Main Street E.</div>
+                                <div>Mt. Carmel, TN 37645</div>
+                            </div>
+                        </div>
+                        <!-- Right Info -->
+                        <div class="text-right w-1/2">
+                            <div class="text-4xl font-bold tracking-widest mb-2" id="receipt-id-display">--</div>
+                            <div class="text-2xl font-bold">423-357-4551</div>
+                        </div>
+                    </div>
+
+                    <!-- DATE -->
+                    <div class="flex items-end mb-6 text-xl">
+                        <span class="mr-2 font-serif">Date:</span>
+                        <div class="flex-grow border-b-2 border-black px-2 font-bold" id="receipt-date"></div>
+                    </div>
+
+                    <!-- CUSTOMER INFO LINES -->
+                    <div class="space-y-4 mb-8">
+                        <div class="relative">
+                            <input type="text" id="cust-name-input"
+                                class="w-full text-2xl font-bold border-b-2 border-black outline-none bg-transparent uppercase"
+                                placeholder="CUSTOMER NAME" autocomplete="off">
+                            <ul id="cust-suggestions"
+                                class="absolute left-0 top-full w-full bg-white border-2 border-black z-50 hidden shadow-xl print:hidden max-h-60 overflow-y-auto mt-1 list-none p-0 m-0">
+                            </ul>
+                        </div>
+                        <input type="text" id="cust-vehicle-input"
+                            class="w-full text-2xl font-bold border-b-2 border-black outline-none bg-transparent uppercase"
+                            placeholder="VEHICLE INFO">
+                    </div>
+
+                    <!-- TABLE -->
+                    <div class="mb-0">
+                        <table class="receipt-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">QTY</th>
+                                    <th>DESCRIPTION</th>
+                                    <th style="width: 100px;">UNIT PRICE</th>
+                                    <th style="width: 100px; border-right: none;">AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="static-items-body">
+                                <!-- Primary Input Row -->
+                                <tr>
+                                    <td class="p-0"><input type="number" id="qty-input" value="4"
+                                            class="w-full h-full text-center font-bold outline-none bg-transparent"
+                                            min="1"></td>
+                                    <td class="p-0"><input type="text" id="desc-input" placeholder="TIRE SIZE / BRAND"
+                                            class="w-full h-full px-2 font-bold outline-none bg-transparent uppercase">
+                                    </td>
+                                    <td class="p-0"><input type="number" id="price-input" placeholder="0.00"
+                                            class="w-full h-full text-right pr-2 font-bold outline-none bg-transparent"
+                                            step="0.01">
+                                    </td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="line-total-display">$0.00</td>
+                                </tr>
+                                <!-- Fees (Auto Filled — hidden until active) -->
+                                <tr id="row-state-fee" style="display: none;">
+                                    <td class="p-0 text-center align-middle">
+                                        <input type="number" id="fee-state-qty-input"
+                                            class="w-full h-full text-center outline-none bg-transparent appearance-none"
+                                            placeholder="0">
+                                    </td>
+                                    <td class="uppercase text-sm align-middle" id="fee-state-desc"></td>
+                                    <td class="text-right align-middle" id="fee-state-price"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="fee-state-total"></td>
+                                </tr>
+                                <tr id="row-disp-fee" style="display: none;">
+                                    <td class="p-0 text-center align-middle">
+                                        <input type="number" id="fee-disp-qty-input"
+                                            class="w-full h-full text-center outline-none bg-transparent appearance-none"
+                                            placeholder="0">
+                                    </td>
+                                    <td class="uppercase text-sm align-middle" id="fee-disp-desc"></td>
+                                    <td class="text-right align-middle" id="fee-disp-price"></td>
+                                    <td class="no-border-right text-right font-bold align-middle pr-2"
+                                        id="fee-disp-total"></td>
+                                </tr>
+                            </tbody>
+
+                            <!-- Dynamic Services Rows Container -->
+                            <tbody id="dynamic-services-body">
+                                <!-- Rows will be injected here by JS -->
+                            </tbody>
+
+            <!-- Filler Empty Rows (dynamically managed) -->
+                            <tbody id="filler-rows-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div class="flex border-2 border-t-0 border-black mt-0">
+                        <!-- Message (Boxed) -->
+                        <div class="flex-grow flex flex-col justify-between p-4 text-left border-r-2 border-black">
+                            <div>
+                                <p class="font-bold font-serif text-black uppercase tracking-wide text-sm mb-4">*
+                                    Re-Torque lugs after 150 miles.</p>
+                            </div>
+                            <div class="font-serif text-black text-sm leading-snug">
+                                <p class="font-bold">Thank you for your business!</p>
+                                <p class="text-xs mt-1">Please retain this invoice for your records.</p>
+                            </div>
+                        </div>
+                        <!-- Totals -->
+                        <div class="w-80">
+                            <table class="totals-box border-none w-full">
+                                <tr>
+                                    <td class="label border-t-0 border-l-0 border-b-2 py-2">SUBTOTAL</td>
+                                    <td class="amount border-t-0 border-r-0 border-b-2 py-2" id="subtotal-final">$0.00
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="label border-l-0 border-b-2 py-2">TAX</td>
+                                    <td class="amount border-r-0 border-b-2 py-2" id="tax-final">$0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="label border-l-0 border-b-2 py-2 text-lg">TOTAL</td>
+                                    <td class="amount border-r-0 border-b-2 text-2xl py-2" id="total-final">$0.00</td>
+                                </tr>
+                                <!-- Added Card Total Row for Print Visibility -->
+                                <tr class="hidden print:table-row">
+                                    <td class="label border-l-0 border-b-0 pb-0 pt-2 text-xs">CARD TOTAL</td>
+                                    <td class="amount border-r-0 border-b-0 pb-0 pt-2 text-lg" id="card-total-print">
+                                        $0.00</td>
+                                </tr>
+                            </table>
+                            <!-- Card Logic Hidden Calculation (Screen Only) -->
+                            <div id="card-total-preview-container"
+                                class="border-t-2 border-black p-2 text-right text-xs bg-gray-50 print:hidden text-gray-500">
+                                Card Total (+3.5%): <span id="card-total-preview" class="font-bold">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RANDOM TIP FOOTER -->
+                    <div class="mt-8 pt-4 border-t-2 border-black border-dashed text-center print:mt-4">
+                        <p class="font-serif text-black text-sm italic" id="random-tip-display">
+                            <!-- Tip will vary -->
+                        </p>
+                    </div>
+
+                </div>
+
+
+
+                <!-- SPACER FOR BUTTONS OVERLAP -->
+                <div class="h-32"></div>
+
+                <!-- BUTTONS STICKY FOOTER -->
+                <div
+                    class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 print:hidden z-30 flex justify-center gap-4 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)]">
+                    <div class="w-full max-w-2xl flex gap-4">
+                        <button onclick="reset()"
+                            class="btn px-6 py-4 rounded-xl text-gray-500 hover:text-red-500 font-bold bg-white border border-gray-200 shadow-sm">
+                            Reset
+                        </button>
+                        <button onclick="handlePrint()"
+                            class="flex-1 btn btn-primary py-4 rounded-xl text-xl shadow-xl flex items-center justify-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
+                                </path>
+                                <rect width="12" height="8" x="6" y="14"></rect>
+                            </svg>
+                            PRINT RECEIPT
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- RIGHT PANEL: Recommended Services (Checklist) -->
+            <aside id="upsell-panel"
+                class="fixed inset-y-0 right-0 w-[85%] sm:w-80 lg:w-72 bg-white border-l border-gray-200 shadow-2xl z-50 flex flex-col transform translate-x-full lg:translate-x-0 transition-transform duration-300 lg:relative lg:flex lg:shadow-xl lg:z-20">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-lg text-gray-800 font-sans">Services Performed</h3>
+                        <button onclick="toggleServicesSidebar()" class="lg:hidden text-gray-400 hover:text-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 font-sans">Check to add line items.</p>
+                    <label
+                        class="mt-3 flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all group">
+                        <span class="text-sm font-medium text-gray-700 font-sans group-hover:text-blue-700">Tax
+                            Exempt</span>
+                        <input type="checkbox" id="tax-exempt-checkbox" onchange="calculate()"
+                            class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                    </label>
+                </div>
+                <div class="p-6 space-y-4 overflow-y-auto flex-grow font-sans pb-24" id="services-list-container">
+                    <!-- Dynamic Services will be injected here -->
+                </div>
+            </aside>
+        </main>
+        <div class="text-center py-4 print:hidden">
+            <a href="../admin.html"
+                class="text-gray-300 hover:text-gray-500 text-xs no-underline transition-colors">Admin</a>
+        </div>
+    </div>
+
+    <script src="../js/treadz-core.js"></script>
+    <script src="../js/mobile-nav.js" defer></script>
+    <script>
+        // --- CONSTANTS REMOVED: Using TreadzConfig from treadz-core.js ---
+
+        // --- STATE MANAGEMENT ---
+        let currentEditingId = null; // Key for existing record
+        let autoSaveTimeout = null;
+
+        // ... (Active Services State map is fine)
+        let activeServicesState = {}; // Restored
+
+        // ... (getHistory and loadQuoteById are skipped here as they are above)
+
+        // ... (saveQuote is skipped here as it was just edited)
+
+
+
+        function reset() {
+            // if (!confirm("Start new receipt?")) return;
+
+            qtyInput.value = 4;
+            descInput.value = '';
+            priceInput.value = '';
+            custNameInput.value = '';
+            custVehicleInput.value = '';
+
+            // Clear Fees
+            feeStateQtyInput.value = '';
+            feeDispQtyInput.value = '';
+            isStateDirty = false;
+            isDispDirty = false;
+
+            // Clear active services
+            activeServicesState = {};
+
+            // Reset Tax Exempt Status
+            document.getElementById('tax-exempt-checkbox').checked = false;
+
+            // Re-render
+            renderServicesSidebar(); // Unchecks boxes
+            renderServiceRows(); // Clears rows
+
+            // Reset IDs for new session
+            currentEditingId = null;
+
+            // Preview Next (without incrementing until save)
+            // Stored ID is "Last Used" or "Current High Water Mark"
+            // So next one is +1
+            idDisplay.textContent = TreadzUtils.getNextGlobalId() + 1;
+
+            renderRandomTip();
+            calculate();
+        }
+
+        // --- HISTORY LOGIC ---
+        function getHistory() {
+            return TreadzData.getAll('receipt');
+        }
+
+        function loadQuoteById(id) {
+            const item = TreadzData.getById('receipt', id);
+            if (item) loadQuote(item);
+        }
+
+        function saveQuote(finalized = false) {
+            // 1. Determine ID
+            // If we are starting fresh (no currentEditingId), we need a new Sequential ID
+            if (!currentEditingId) {
+                currentEditingId = TreadzUtils.incrementGlobalId();
+                idDisplay.textContent = currentEditingId;
+            }
+
+            // Determine Status
+            let recordType = 'quote';
+            const existing = TreadzData.getById('receipt', currentEditingId);
+
+            if (finalized) {
+                recordType = 'receipt';
+            } else if (existing && existing.type === 'receipt') {
+                recordType = 'receipt'; // Don't downgrade if already sold
+            }
+
+            // 2. Build Data Object
+            const receiptData = {
+                id: currentEditingId,
+                displayId: currentEditingId,
+                type: recordType, // Analytics Tag
+                timestamp: new Date().toISOString(),
+                customer: custNameInput.value.trim() || 'Walk-In',
+                vehicle: custVehicleInput.value.trim(),
+                services: activeServicesState,
+                tireInfo: descInput.value,
+                pricePerTire: parseFloat(priceInput.value) || 0,
+                qty: parseInt(qtyInput.value) || 0,
+                taxExempt: document.getElementById('tax-exempt-checkbox').checked,
+                total: totalFinal.textContent
+            };
+
+            // 3. Use TreadzData Service
+            TreadzData.save('receipt', receiptData, 'Current User');
+            renderHistory();
+        }
+
+        function triggerAutoSave() {
+            if (autoSaveTimeout) clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                saveQuote(false); // Auto-save as draft/quote
+            }, 800);
+        }
+
+        function handlePrint() {
+            saveQuote(true); // Finalize as Receipt
+            window.print();
+        }
+
+
+
+        // --- DOM ELEMENTS ---
+        const qtyInput = document.getElementById('qty-input');
+        const descInput = document.getElementById('desc-input');
+        const priceInput = document.getElementById('price-input');
+        const custNameInput = document.getElementById('cust-name-input');
+        const custVehicleInput = document.getElementById('cust-vehicle-input');
+        const dateDisplay = document.getElementById('receipt-date');
+        const idDisplay = document.getElementById('receipt-id-display');
+
+        // Fees
+        const feeStateQtyInput = document.getElementById('fee-state-qty-input');
+        const feeStateDesc = document.getElementById('fee-state-desc');
+        const feeStatePrice = document.getElementById('fee-state-price');
+        const feeStateTotal = document.getElementById('fee-state-total');
+        const feeDispQtyInput = document.getElementById('fee-disp-qty-input');
+        const feeDispDesc = document.getElementById('fee-disp-desc');
+        const feeDispPrice = document.getElementById('fee-disp-price');
+        const feeDispTotal = document.getElementById('fee-disp-total');
+
+        let isStateDirty = false;
+        let isDispDirty = false;
+
+        // Totals
+        const subtotalFinal = document.getElementById('subtotal-final');
+        const taxFinal = document.getElementById('tax-final');
+        const totalFinal = document.getElementById('total-final');
+        const cardTotalPreview = document.getElementById('card-total-preview');
+
+        // Dynamic Containers
+        const dynamicServicesBody = document.getElementById('dynamic-services-body');
+        const servicesSidebarContainer = document.getElementById('services-list-container');
+
+
+        // --- RANDOM TIPS ---
+        const TireTips = [
+            "For the best life of your tires, we recommend rotating them every other oil change (approx. 5,000–6,000 miles).",
+            "Check your tire pressure monthly! Proper inflation improves gas mileage and prevents uneven wear.",
+            "If your steering wheel isn't centered or your car pulls to one side, ask us about an alignment check today.",
+            "Rapid temperature drops can lower tire pressure. Check your PSI whenever the weather changes significantly.",
+            "Don't get stranded! Check your spare tire's condition and pressure regularly—or ask us to do it for you.",
+            "Use the \"penny test.\" If you can see all of Lincoln's head, your tread is low and it's time for new tires.",
+            "Save our number: <strong>423-357-4551</strong>. We offer reliable towing services if you're ever in a jam.",
+            "Feeling a vibration at highway speeds? It could be a simple wheel balance issue. We can fix that!",
+            "Tires expire! Even with good tread, tires over 6-7 years old can be dangerous. Ask us to check your date codes.",
+            "Under-inflated tires increase rolling resistance, costing you more at the pump. Keep them filled to spec!",
+            "Hit a bad pothole? It can damage your internal tire structure or rim. Let us inspect it for hidden safety risks.",
+            "Cracked rubber valve stems can leak air slowly. We check and replace them with every new tire installation.",
+            "Noticed the inside of your tires wearing faster? This is often a suspension issue, not just a tire problem.",
+            "Worn tires lose their ability to channel water, increasing hydroplaning risk. Drive safely in the rain!",
+            "Is that yellow horseshoe light on? It means at least one tire is low. Stop by and we'll top it off for you.",
+            "Overloading your vehicle puts massive stress on your tires. Check your door jam sticker for load capacity limits.",
+            "Storing a car for months? Tires can develop flat spots. Move the vehicle occasionally or put it on jack stands.",
+            "Adding air every week isn't normal. You might have a nail or a bead leak. Let us find and patch it properly.",
+            "Happy with our service? Leaving us a 5-star Google review helps our local business grow. Thank you!",
+            "Walk around your vehicle weekly. Look for cuts, bulges, or objects embedded in the tread before you drive."
+        ];
+
+        let currentTipIndex = Math.floor(Math.random() * TireTips.length);
+
+        function renderRandomTip(index) {
+            const el = document.getElementById('random-tip-display');
+            if (el) {
+                if (typeof index !== 'undefined') {
+                    currentTipIndex = index;
+                }
+                // Wrap around logic
+                if (currentTipIndex < 0) currentTipIndex = TireTips.length - 1;
+                if (currentTipIndex >= TireTips.length) currentTipIndex = 0;
+
+                const tip = TireTips[currentTipIndex];
+                el.innerHTML = `${tip}`;
+            }
+        }
+
+        // Add Scroll Listener for Tip Cycling
+        document.addEventListener('DOMContentLoaded', () => {
+            const tipContainer = document.getElementById('random-tip-display');
+            // We attach to parent div for bigger hit area
+            const tipParent = tipContainer ? tipContainer.parentElement : null;
+
+            if (tipParent) {
+                tipParent.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY < 0 ? -1 : 1; // Up = previous, Down = next
+                    renderRandomTip(currentTipIndex + delta);
+                }, { passive: false });
+
+                // Also allow click to cycle
+                tipParent.addEventListener('click', () => {
+                    renderRandomTip(currentTipIndex + 1);
+                });
+
+                // Cursor pointer to indicate interactivity
+                tipParent.style.cursor = 'pointer';
+                tipParent.title = 'Scroll or click to cycle tips';
+            }
+        });
+
+        // --- INIT ---
+        function init() {
+            dateDisplay.textContent = new Date().toLocaleDateString();
+
+            // Only set ID if empty or placeholder
+            const currentIdText = idDisplay.textContent.trim();
+            if (currentIdText === '--' || currentIdText === '') {
+                // Preview Next Global ID
+                idDisplay.textContent = TreadzUtils.getNextGlobalId();
+            }
+
+            // Enable Standard Scroll Behavior
+            TreadzUtils.enableGlobalScroll();
+
+            // Attach Listeners
+            ['qty-input', 'desc-input', 'price-input', 'cust-name-input', 'cust-vehicle-input'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', () => {
+                    // If main qty changes, we might need to sync fees if they are not dirty
+                    calculate();
+                    triggerAutoSave();
+                });
+            });
+
+            // Fee Input Listeners (Scroll & Edit)
+            [feeStateQtyInput, feeDispQtyInput].forEach(el => {
+                if (!el) return;
+
+                // Track manual changes
+                el.addEventListener('input', () => {
+                    const qty = parseInt(qtyInput.value) || 0;
+                    const val = parseInt(el.value) || 0;
+
+                    // If user manually sets it back to match, cleary dirty flag
+                    if (el === feeStateQtyInput) isStateDirty = (val !== qty);
+                    if (el === feeDispQtyInput) isDispDirty = (val !== qty);
+
+                    calculate();
+                    triggerAutoSave();
+                });
+
+                // Wheel Scroll Logic
+                el.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const delta = e.deltaY < 0 ? 1 : -1;
+                    let val = parseInt(el.value) || 0;
+                    val += delta;
+                    if (val < 0) val = 0;
+                    el.value = val;
+                    el.dispatchEvent(new Event('input'));
+                }, { passive: false });
+            });
+
+            // --- AUTOCOMPLETE LOGIC ---
+            const suggestionsEl = document.getElementById('cust-suggestions');
+            // Build unique list from Data Store
+            const uniqueCustomers = new Set();
+
+            // 1. From Tow Tickets
+            try {
+                const tickets = TreadzData.getAll('ticket');
+                tickets.forEach(t => {
+                    const name = t.fields?.billTo || t.billTo || t.customer;
+                    if (name && name.length > 2) uniqueCustomers.add(name.trim().toUpperCase());
+                });
+            } catch (e) { console.error("Error loading ticket history", e); }
+
+            // 2. From Receipts
+            try {
+                const receipts = TreadzData.getAll('receipt');
+                receipts.forEach(r => {
+                    const name = r.customer;
+                    if (name && name.length > 2) uniqueCustomers.add(name.trim().toUpperCase());
+                });
+            } catch (e) { console.error("Error loading receipt history", e); }
+
+            const customerList = Array.from(uniqueCustomers).sort();
+
+            custNameInput.addEventListener('input', () => {
+                const val = custNameInput.value.toUpperCase();
+                const terms = val.split(/\s+/).filter(t => t.length > 0);
+
+                suggestionsEl.innerHTML = '';
+
+                if (terms.length === 0) {
+                    suggestionsEl.classList.add('hidden');
+                    return;
+                }
+
+                // Filter: Check if ALL terms are present in the candidate name
+                const matches = customerList.filter(name => {
+                    return terms.every(term => name.includes(term));
+                });
+
+                if (matches.length === 0) {
+                    suggestionsEl.classList.add('hidden');
+                    return;
+                }
+
+                suggestionsEl.classList.remove('hidden');
+
+                // Show top 5
+                matches.slice(0, 5).forEach(match => {
+                    const li = document.createElement('li');
+                    li.className = "px-4 py-2 hover:bg-gray-100 cursor-pointer text-lg font-bold border-b border-gray-100 last:border-0 font-sans text-black z-50 bg-white";
+                    li.textContent = match;
+                    li.onclick = () => {
+                        custNameInput.value = match;
+                        suggestionsEl.classList.add('hidden');
+                        triggerAutoSave();
+                    };
+                    suggestionsEl.appendChild(li);
+                });
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (e.target !== custNameInput && e.target !== suggestionsEl && !suggestionsEl.contains(e.target)) {
+                    suggestionsEl.classList.add('hidden');
+                }
+            });
+
+            // MAIN QTY Scroll Logic
+            qtyInput.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const delta = e.deltaY < 0 ? 1 : -1;
+                let val = parseInt(qtyInput.value) || 0;
+                val += delta;
+                if (val < 0) val = 0;
+                qtyInput.value = val;
+                qtyInput.dispatchEvent(new Event('input'));
+            }, { passive: false });
+
+            renderServicesSidebar();
+            renderHistory();
+            renderRandomTip();
+            calculate();
+        }
+
+        // --- CONFIG MANAGEMENT ---
+        function getServiceConfig() {
+            return JSON.parse(localStorage.getItem('treadzServicesConfig')) || TreadzConfig.DEFAULT_SERVICES;
+        }
+
+        function saveServiceConfig(config) {
+            localStorage.setItem('treadzServicesConfig', JSON.stringify(config));
+            renderServicesSidebar(); // Re-render sidebar to reflect changes
+        }
+
+        function addServiceConfig() {
+            const name = prompt("Enter Service Name:");
+            if (!name) return;
+            const priceStr = prompt("Enter Default Price:", "0.00");
+            const price = parseFloat(priceStr);
+            if (isNaN(price)) return;
+
+            const config = getServiceConfig();
+            const newId = 'srv_' + Date.now();
+            config.push({ id: newId, name: name, defaultPrice: price, defaultQty: 1 });
+            saveServiceConfig(config);
+        }
+
+        function editServiceConfig(id) {
+            const config = getServiceConfig();
+            const idx = config.findIndex(c => c.id === id);
+            if (idx === -1) return;
+
+            const service = config[idx];
+            const newName = prompt("Edit Service Name:", service.name);
+            if (newName === null) return; // Cancel
+
+            const newPriceStr = prompt("Edit Default Price:", service.defaultPrice);
+            if (newPriceStr === null) return;
+
+            const newPrice = parseFloat(newPriceStr);
+            if (isNaN(newPrice)) { alert("Invalid Price"); return; }
+
+            config[idx] = { ...service, name: newName, defaultPrice: newPrice };
+            saveServiceConfig(config);
+        }
+
+        function deleteServiceConfig(id) {
+            if (!confirm("Are you sure you want to delete this service template?")) return;
+            const config = getServiceConfig().filter(c => c.id !== id);
+            saveServiceConfig(config);
+            // Also uncheck it from active state if present
+            if (activeServicesState[id]) {
+                activeServicesState[id].checked = false;
+                renderServiceRows(); // Remove from receipt
+                calculate();
+                triggerAutoSave();
+            }
+        }
+
+
+        // --- RENDERING SIDEBAR ---
+        function renderServicesSidebar() {
+            const config = getServiceConfig();
+            servicesSidebarContainer.innerHTML = '';
+
+            config.forEach(svc => {
+                const isChecked = activeServicesState[svc.id] && activeServicesState[svc.id].checked;
+
+                const div = document.createElement('div');
+                div.className = 'group flex items-start justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors';
+
+                div.innerHTML = `
+                    <label class="flex items-start gap-3 cursor-pointer flex-grow">
+                        <input type="checkbox" class="mt-1 w-5 h-5 text-blue-600 rounded" 
+                            ${isChecked ? 'checked' : ''}
+                            onchange="toggleService('${svc.id}')">
+                        <div>
+                            <span class="block font-semibold text-gray-700">${svc.name}</span> 
+                            <span class="text-xs text-gray-400">Default: $${svc.defaultPrice.toFixed(2)}</span>
+                        </div>
+                    </label>
+                    <div class="flex gap-1 opacity-10 group-hover:opacity-100 transition-opacity">
+                         <button onclick="editServiceConfig('${svc.id}')" class="p-1 hover:text-blue-600 text-gray-400" title="Edit Default">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </button>
+                        <button onclick="deleteServiceConfig('${svc.id}')" class="p-1 hover:text-red-600 text-gray-400" title="Delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                `;
+                servicesSidebarContainer.appendChild(div);
+            });
+
+            // Add New Button
+            const addBtn = document.createElement('button');
+            addBtn.onclick = addServiceConfig;
+            addBtn.className = "w-full py-2 mt-2 text-sm text-blue-600 font-semibold border border-dashed border-blue-200 rounded hover:bg-blue-50 transition-colors";
+            addBtn.textContent = "+ Create New Service";
+            servicesSidebarContainer.appendChild(addBtn);
+        }
+
+
+        // --- LOGIC: TOGGLE SERVICE ---
+        function toggleService(id, shouldSave = true) {
+            const config = getServiceConfig();
+            const svc = config.find(c => c.id === id);
+
+            if (!activeServicesState[id]) {
+                activeServicesState[id] = { checked: false, qty: svc ? svc.defaultQty : 1, price: svc ? svc.defaultPrice : 0 };
+            }
+
+            // Toggle
+            activeServicesState[id].checked = !activeServicesState[id].checked;
+
+            renderServiceRows();
+            calculate();
+            if (shouldSave) triggerAutoSave();
+        }
+
+        // --- DYNAMIC ROWS ---
+        function renderServiceRows() {
+            dynamicServicesBody.innerHTML = '';
+            const config = getServiceConfig();
+
+            // We iterate based on the CONFIG order to maintain sort order
+            config.forEach(svc => {
+                const state = activeServicesState[svc.id];
+                if (state && state.checked) {
+                    const row = document.createElement('tr');
+                    // Ensure the state.price is a number
+                    const currentPrice = parseFloat(state.price) || 0;
+                    const currentQty = parseInt(state.qty) || 1;
+                    const total = round2(currentQty * currentPrice);
+
+                    row.innerHTML = `
+                        <td class="p-0"><input type="number" value="${currentQty}" 
+                            class="w-full h-full text-center outline-none bg-transparent service-qty-input"
+                            data-id="${svc.id}"></td>
+                        <td class="uppercase text-sm align-middle pl-1">${svc.name}</td>
+                        <td class="p-0"><input type="number" value="${currentPrice.toFixed(2)}" 
+                            class="w-full h-full text-right pr-2 outline-none bg-transparent service-price-input"
+                            step="0.01" data-id="${svc.id}"></td>
+                        <td class="no-border-right text-right font-bold align-middle pr-2 row-total">$${total.toFixed(2)}</td>
+                    `;
+                    dynamicServicesBody.appendChild(row);
+
+                    // Attach Listeners immediately
+                    const qInput = row.querySelector('.service-qty-input');
+                    const pInput = row.querySelector('.service-price-input');
+
+                    qInput.addEventListener('input', (e) => updateServiceRow(svc.id, e.target.value, null));
+                    pInput.addEventListener('input', (e) => updateServiceRow(svc.id, null, e.target.value));
+
+                    // Wheel Listener for Qty
+                    qInput.addEventListener('wheel', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const delta = e.deltaY < 0 ? 1 : -1;
+                        let val = parseInt(qInput.value) || 0;
+                        val += delta;
+                        if (val < 0) val = 0;
+                        qInput.value = val;
+                        qInput.dispatchEvent(new Event('input'));
+                    }, { passive: false });
+                }
+            });
+        }
+
+        function updateServiceRow(id, newQty, newPrice) {
+            if (!activeServicesState[id]) return;
+
+            if (newQty !== null) activeServicesState[id].qty = parseInt(newQty) || 0;
+            if (newPrice !== null) activeServicesState[id].price = parseFloat(newPrice) || 0;
+
+            // Update the specific row total immediately for UI responsiveness (optional, calculate does it all)
+            calculate(); // This recalculates math
+            triggerAutoSave();
+        }
+
+
+        // --- CALCULATION LOGIC ---
+        function round2(num) {
+            return Math.round((num + Number.EPSILON) * 100) / 100;
+        }
+
+        function calculate() {
+            // 1. Primary Line Item
+            const qty = parseInt(qtyInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
+            const lineTotal = round2(qty * price);
+            document.getElementById('line-total-display').textContent = formatMoney(lineTotal);
+
+            let currentSubtotal = lineTotal;
+
+            // 2. Fees
+            const descVal = descInput.value.trim();
+            const startsWithLetter = descVal.length > 0 && /^[a-zA-Z]/.test(descVal);
+
+            if (qty > 0 && (descVal.length > 0 || price > 0)) {
+
+                // Show fee rows (only if desc starts with a number / tire size)
+                if (startsWithLetter) {
+                    // Non-tire item — no state fee or disposal
+                    document.getElementById('row-state-fee').style.display = 'none';
+                    document.getElementById('row-disp-fee').style.display = 'none';
+                    feeStateQtyInput.value = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
+                    feeDispQtyInput.value = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
+                } else {
+                    document.getElementById('row-state-fee').style.display = '';
+                    document.getElementById('row-disp-fee').style.display = '';
+                }
+
+                // --- State Fee & Disposal (only when not starting with a letter) ---
+                let stateTotal = 0;
+                let dispTotal = 0;
+                if (!startsWithLetter) {
+                    if (!isStateDirty) feeStateQtyInput.value = qty;
+                    const sQty = parseInt(feeStateQtyInput.value) || 0;
+                    stateTotal = round2(sQty * TreadzConfig.FEES.TIRE_STATE);
+                    feeStateDesc.textContent = 'STATE TIRE FEE';
+                    feeStatePrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_STATE);
+                    feeStateTotal.textContent = formatMoney(stateTotal);
+
+                    if (!isDispDirty) feeDispQtyInput.value = qty;
+                    const dQty = parseInt(feeDispQtyInput.value) || 0;
+                    dispTotal = round2(dQty * TreadzConfig.FEES.TIRE_DISPOSAL);
+                    feeDispDesc.textContent = 'TIRE DISPOSAL';
+                    feeDispPrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
+                    feeDispTotal.textContent = formatMoney(dispTotal);
+                }
+
+                currentSubtotal = round2(currentSubtotal + stateTotal + dispTotal);
+            } else {
+                clearFees();
+            }
+
+            // 3. Dynamic Services
+            // Re-renders rows total display AND sums them up
+            let servicesSum = 0;
+            const config = getServiceConfig();
+
+            // Better strategy: "updateServiceRow" updates state. "calculate" updates the totals column.
+            const rows = dynamicServicesBody.querySelectorAll('tr');
+            let rowIndex = 0;
+
+            config.forEach(svc => {
+                const state = activeServicesState[svc.id];
+                if (state && state.checked) {
+                    const t = round2(state.qty * state.price);
+                    servicesSum = round2(servicesSum + t);
+
+                    if (rows[rowIndex]) {
+                        const totalCell = rows[rowIndex].querySelector('.row-total');
+                        if (totalCell) totalCell.textContent = formatMoney(t);
+                    }
+                    rowIndex++;
+                }
+            });
+
+            currentSubtotal = round2(currentSubtotal + servicesSum);
+
+            // 4. Totals
+            const isTaxExempt = document.getElementById('tax-exempt-checkbox').checked;
+            const taxRate = isTaxExempt ? 0 : TreadzConfig.TAX_RATE;
+            const tax = round2(currentSubtotal * taxRate);
+            const total = round2(currentSubtotal + tax);
+            const cardTotal = round2(total + (total * TreadzConfig.CARD_FEE_RATE));
+            // Show Card Total Logic just for preview
+            cardTotalPreview.textContent = formatMoney(cardTotal);
+            // Update Print Version
+            const cardPrintEl = document.getElementById('card-total-print');
+            if (cardPrintEl) cardPrintEl.textContent = formatMoney(cardTotal);
+
+            subtotalFinal.textContent = formatMoney(currentSubtotal);
+            taxFinal.textContent = formatMoney(tax);
+            totalFinal.textContent = formatMoney(total);
+
+            updateFillerRows();
+
+            // 5. Reorder table: if no primary tire data, move services above static items
+            const receiptTable = document.getElementById('static-items-body').closest('table');
+            const staticBody = document.getElementById('static-items-body');
+            const servicesBody = document.getElementById('dynamic-services-body');
+            const hasPrimaryData = descVal.length > 0 || price > 0;
+            const servicesFirst = !hasPrimaryData && servicesBody.children.length > 0;
+
+            // Only reorder DOM when layout state actually changes (avoids stealing focus)
+            const currentlyHidden = staticBody.style.display === 'none';
+            if (servicesFirst && !currentlyHidden) {
+                receiptTable.insertBefore(servicesBody, staticBody);
+                staticBody.style.display = 'none';
+            } else if (!servicesFirst && currentlyHidden) {
+                receiptTable.insertBefore(staticBody, servicesBody);
+                staticBody.style.display = '';
+            }
+        }
+
+
+        function clearFees() {
+            document.getElementById('row-state-fee').style.display = 'none';
+            document.getElementById('row-disp-fee').style.display = 'none';
+            feeStateQtyInput.value = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
+            feeDispQtyInput.value = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
+            updateFillerRows();
+        }
+
+        // Dynamically add filler rows so the table always has a consistent minimum height
+        function updateFillerRows() {
+            const fillerBody = document.getElementById('filler-rows-body');
+            fillerBody.innerHTML = '';
+            // Count visible content rows: 1 (primary) + fees + services
+            let contentRows = 1;
+            if (document.getElementById('row-state-fee').style.display !== 'none') contentRows++;
+            if (document.getElementById('row-disp-fee').style.display !== 'none') contentRows++;
+            contentRows += document.getElementById('dynamic-services-body').querySelectorAll('tr').length;
+            const targetRows = Math.max(0, 5 - contentRows); // aim for at least 5 visible rows total
+            for (let i = 0; i < targetRows; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>&nbsp;</td><td></td><td></td><td class="no-border-right"></td>';
+                fillerBody.appendChild(tr);
+            }
+        }
+
+        function formatMoney(amount) {
+            return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+
+        // --- HISTORY LOGIC ---
+
+
+        function renderHistory(filterText = '') {
+            const history = getHistory();
+            const container = document.getElementById('history-list');
+            if (!container) return;
+
+            const filteredHistory = history.filter(item => {
+                const searchStr = filterText.toLowerCase();
+                return (
+                    item.customer.toLowerCase().includes(searchStr) ||
+                    (item.vehicle && item.vehicle.toLowerCase().includes(searchStr)) ||
+                    (item.tireInfo && item.tireInfo.toLowerCase().includes(searchStr)) ||
+                    item.total.includes(searchStr) ||
+                    (item.displayId && item.displayId.toString().includes(searchStr)) ||
+                    (item.id && item.id.toString().includes(searchStr))
+                );
+            });
+
+            container.innerHTML = filteredHistory.map(item => {
+                const displayId = (item.displayId && item.displayId.toString().length > 5) ? item.displayId.toString().slice(-4) : (item.displayId || '---');
+                return `
+                <div onclick="loadQuoteById('${item.id}')" class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all ${item.id === currentEditingId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3">${item.customer}</div>
+                        <div class="text-xs font-mono text-gray-500">${new Date(item.timestamp).toLocaleDateString()}</div>
+                    </div>
+                    <div class="text-xs text-gray-600 truncate mb-1">${item.tireInfo || item.description || 'Item'}</div>
+                    <div class="flex justify-between items-center mt-1">
+                        <div class="font-bold text-blue-600 text-sm">${item.total}</div>
+                        <div class="text-xs text-gray-400">#${displayId}</div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function loadQuote(item) {
+            currentEditingId = item.id;
+
+            document.getElementById('tax-exempt-checkbox').checked = item.taxExempt || false;
+
+            custNameInput.value = item.customer;
+            custVehicleInput.value = item.vehicle;
+            descInput.value = item.tireInfo || item.description || '';
+            priceInput.value = item.pricePerTire || item.tirePrice || '';
+            qtyInput.value = item.qty || item.tireQty || 0;
+
+            const displayId = (item.displayId && item.displayId.toString().length > 5) ? item.displayId.toString().slice(-4) : (item.displayId || '---');
+            idDisplay.textContent = displayId;
+
+            activeServicesState = {};
+
+            // Handle Legacy Format vs New Format
+            if (item.services && Array.isArray(item.services)) {
+                item.services.forEach(svc => {
+                    // Check if this ID exists in config
+                    const config = getServiceConfig();
+                    const exists = config.some(c => c.id === svc.id);
+                    if (exists) {
+                        activeServicesState[svc.id] = { checked: true, qty: svc.qty, price: svc.price };
+                    }
+                });
+            } else if (item.services && typeof item.services === 'object') {
+                // New Format (Direct Map)
+                activeServicesState = JSON.parse(JSON.stringify(item.services));
+            } else if (item.upsells) {
+                // LEGACY MIGRATION
+                const legacyMap = {
+                    'rotation': 'srv_rotation',
+                    'balance': 'srv_balance',
+                    'stem': 'srv_stem',
+                    'sensor': 'srv_sensor',
+                    'patch': 'srv_patch',
+                    'plug': 'srv_plug'
+                };
+
+                const config = getServiceConfig();
+                Object.keys(item.upsells).forEach(key => {
+                    if (item.upsells[key]) {
+                        const newId = legacyMap[key];
+                        // Find default price for this service from config
+                        const defaults = config.find(c => c.id === newId);
+                        if (defaults) {
+                            activeServicesState[newId] = { checked: true, qty: defaults.defaultQty, price: defaults.defaultPrice };
+                        }
+                    }
+                });
+            }
+
+            // Randomize Tip on Load
+            currentTipIndex = Math.floor(Math.random() * TireTips.length);
+            renderRandomTip(currentTipIndex);
+
+            renderServicesSidebar();
+            renderServiceRows();
+            calculate();
+            renderHistory();
+            toggleSidebar(); // Close on mobile if open
+        }
+
+        // --- UI TOGGLES ---
+        function toggleSidebar() {
+            const panel = document.getElementById('history-panel');
+            if (panel) {
+                // If the panel is currently hidden (-translate-x-full), we remove that class to show it
+                // If it is shown (no class or translate-x-0), we add it back
+                // BUT, the default HTML has '-translate-x-full'.
+                // So toggling it works.
+                panel.classList.toggle('-translate-x-full');
+            }
+        }
+
+        function toggleServicesSidebar() {
+            const panel = document.getElementById('upsell-panel');
+            if (panel) {
+                // Default is translate-x-full (hidden to right)
+                panel.classList.toggle('translate-x-full');
+            }
+        }
+
+        init();
+    </script>

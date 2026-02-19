@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - Treadz Towing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            /* Slate 900 */
+            color: #e2e8f0;
+            overflow: hidden;
+            /* Force fit */
+            height: 100vh;
+            width: 100vw;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+        }
+
+        /* Innovation Card Hover Effect */
+        .innovation-card {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px dashed rgba(16, 185, 129, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .innovation-card:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* Standard Process Card */
+        .process-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .process-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            /* Sky 400 */
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        /* Connector Line Animation */
+        .connector-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #334155;
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+
+        /* Flow Animation */
+        .flow-particle {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+            transform: translateY(-50%);
+            animation: flow 3s infinite linear;
+            z-index: 1;
+        }
+
+        @keyframes flow {
+            0% {
+                left: -10%;
+            }
+
+            100% {
+                left: 110%;
+            }
+        }
+
+        .step-node {
+            transition: all 0.3s;
+        }
+
+        .step-container:hover .step-node {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        }
+
+        /* Scrollbar hide for safety if content overflows slightly on small screens */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col h-screen p-6 box-border">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-6 px-4">
+        <div>
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+                Towing Operations Pipeline
+            </h1>
+            <p class="text-slate-400 text-xs mt-1">End-to-End Workflow Visualization & Optimization Opportunities</p>
+        </div>
+        <div class="flex gap-4 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded bg-slate-800 border border-slate-600"></span>
+                <span class="text-slate-400">Current Standard</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded bg-emerald-900/30 border border-emerald-500/50 border-dashed"></span>
+                <span class="text-emerald-400">Future Optimization</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Diagram Container -->
+    <main class="flex-grow relative flex items-center justify-between w-full max-w-[1800px] mx-auto px-4">
+
+        <!-- Connecting Line Base -->
+        <div class="connector-line"></div>
+        <div class="flow-particle"></div>
+
+        <!-- STEP 1: INTAKE -->
+        <div class="step-container relative z-10 flex flex-col items-center justify-center w-1/6 group h-full">
+
+            <!-- Innovation (Top) -->
+            <div
+                class="mb-8 w-full px-2 opacity-50 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500">
+                <div class="innovation-card rounded-lg p-3 text-xs border border-dashed border-emerald-500/30">
+                    <div
+                        class="flex items-center gap-2 text-emerald-400 font-bold mb-1 uppercase tracking-wider text-[10px]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Automation
+                    </div>
+                    <ul class="text-emerald-100/80 space-y-1 list-disc list-inside text-[10px] leading-tight">
+                        <li>API integration with Police Dispatch (CAD)</li>
+                        <li>AI Voice assistant for 24/7 intake</li>
+                        <li>Auto-assign nearest driver via GPS</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Node (Center) -->
+            <div
+                class="step-node w-12 h-12 rounded-full bg-slate-900 border-2 border-blue-500 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.3)] z-20 relative">
+                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                    </path>
+                </svg>
+                <div class="absolute -bottom-8 text-center w-32">
+                    <span class="text-sm font-bold text-white tracking-wide">Intake</span>
+                </div>
+            </div>
+
+            <!-- Process (Bottom) -->
+            <div class="mt-12 w-full px-2">
+                <div class="process-card rounded-lg p-4 text-xs border-t-2 border-t-blue-500">
+                    <div class="text-slate-400 mb-2 uppercase text-[10px] font-bold">Standard Ops</div>
+                    <ul class="text-slate-300 space-y-1.5 list-none">
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-blue-500"></span>
+                            Call Received
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-blue-500"></span>
+                            Ticket Creation
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-blue-500"></span>
+                            Manual Driver Alert
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Connector Line Segment Override -->
+            <div class="absolute top-1/2 left-1/2 w-full h-[2px] bg-blue-900/50 -z-10"></div>
+        </div>
+
+        <!-- STEP 2: RECOVERY -->
+        <div class="step-container relative z-10 flex flex-col items-center justify-center w-1/6 group h-full">
+
+            <!-- Innovation -->
+            <div
+                class="mb-8 w-full px-2 opacity-50 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75">
+                <div class="innovation-card rounded-lg p-3 text-xs border border-dashed border-emerald-500/30">
+                    <div
+                        class="flex items-center gap-2 text-emerald-400 font-bold mb-1 uppercase tracking-wider text-[10px]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        Digital Field Ops
+                    </div>
+                    <ul class="text-emerald-100/80 space-y-1 list-disc list-inside text-[10px] leading-tight">
+                        <li>Driver App for Photo Uploads</li>
+                        <li>OCR Scanner for VIN/Plates</li>
+                        <li>Pre-arrival Digital Damage Forms</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Node -->
+            <div
+                class="step-node w-12 h-12 rounded-full bg-slate-900 border-2 border-indigo-500 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.3)] z-20 relative">
+                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                    </path>
+                </svg>
+                <div class="absolute -bottom-8 text-center w-32">
+                    <span class="text-sm font-bold text-white tracking-wide">Recovery</span>
+                </div>
+            </div>
+
+            <!-- Process -->
+            <div class="mt-12 w-full px-2">
+                <div class="process-card rounded-lg p-4 text-xs border-t-2 border-t-indigo-500">
+                    <div class="text-slate-400 mb-2 uppercase text-[10px] font-bold">Standard Ops</div>
+                    <ul class="text-slate-300 space-y-1.5 list-none">
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-indigo-500"></span>
+                            Asset Secured
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-indigo-500"></span>
+                            Photos Taken
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-indigo-500"></span>
+                            Conditions Logged
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- STEP 3: STORAGE -->
+        <div class="step-container relative z-10 flex flex-col items-center justify-center w-1/6 group h-full">
+
+            <!-- Innovation -->
+            <div
+                class="mb-8 w-full px-2 opacity-50 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500 delay-100">
+                <div class="innovation-card rounded-lg p-3 text-xs border border-dashed border-emerald-500/30">
+                    <div
+                        class="flex items-center gap-2 text-emerald-400 font-bold mb-1 uppercase tracking-wider text-[10px]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        IoT Tracking
+                    </div>
+                    <ul class="text-emerald-100/80 space-y-1 list-disc list-inside text-[10px] leading-tight">
+                        <li>RFID Yard Tracking</li>
+                        <li>Auto-SMS Owner on Arrival</li>
+                        <li>Dynamic Lot Capacity Mgmt</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Node -->
+            <div
+                class="step-node w-12 h-12 rounded-full bg-slate-900 border-2 border-amber-500 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.3)] z-20 relative">
+                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+                <div class="absolute -bottom-8 text-center w-32">
+                    <span class="text-sm font-bold text-white tracking-wide">Storage</span>
+                </div>
+            </div>
+
+            <!-- Process -->
+            <div class="mt-12 w-full px-2">
+                <div class="process-card rounded-lg p-4 text-xs border-t-2 border-t-amber-500">
+                    <div class="text-slate-400 mb-2 uppercase text-[10px] font-bold">Standard Ops</div>
+                    <ul class="text-slate-300 space-y-1.5 list-none">
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-amber-500"></span>
+                            Gate In Check
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-amber-500"></span>
+                            Review Inventory
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-amber-500"></span>
+                            Storage Clock Start
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- STEP 4: COMPLIANCE -->
+        <div class="step-container relative z-10 flex flex-col items-center justify-center w-1/6 group h-full">
+
+            <!-- Innovation -->
+            <div
+                class="mb-8 w-full px-2 opacity-50 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500 delay-150">
+                <div class="innovation-card rounded-lg p-3 text-xs border border-dashed border-emerald-500/30">
+                    <div
+                        class="flex items-center gap-2 text-emerald-400 font-bold mb-1 uppercase tracking-wider text-[10px]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Legal Tech
+                    </div>
+                    <ul class="text-emerald-100/80 space-y-1 list-disc list-inside text-[10px] leading-tight">
+                        <li>Direct DMV API Link</li>
+                        <li>Auto-Print USPS Certified Labels</li>
+                        <li>Automated Lien Deadlines</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Node -->
+            <div
+                class="step-node w-12 h-12 rounded-full bg-slate-900 border-2 border-red-500 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.3)] z-20 relative">
+                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="absolute -bottom-8 text-center w-32">
+                    <span class="text-sm font-bold text-white tracking-wide">Compliance</span>
+                </div>
+            </div>
+
+            <!-- Process -->
+            <div class="mt-12 w-full px-2">
+                <div class="process-card rounded-lg p-4 text-xs border-t-2 border-t-red-500">
+                    <div class="text-slate-400 mb-2 uppercase text-[10px] font-bold">Standard Ops</div>
+                    <ul class="text-slate-300 space-y-1.5 list-none">
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-red-500"></span>
+                            Day 4: VTS Required
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-red-500"></span>
+                            Wait for Title
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-red-500"></span>
+                            Day 30: Abandoned
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- STEP 5: FINANCE -->
+        <div class="step-container relative z-10 flex flex-col items-center justify-center w-1/6 group h-full">
+
+            <!-- Innovation -->
+            <div
+                class="mb-8 w-full px-2 opacity-50 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500 delay-200">
+                <div class="innovation-card rounded-lg p-3 text-xs border border-dashed border-emerald-500/30">
+                    <div
+                        class="flex items-center gap-2 text-emerald-400 font-bold mb-1 uppercase tracking-wider text-[10px]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                        FinTech
+                    </div>
+                    <ul class="text-emerald-100/80 space-y-1 list-disc list-inside text-[10px] leading-tight">
+                        <li>Customer Payment Portal</li>
+                        <li>Dynamic QR Code Invoices</li>
+                        <li>Auto-Split Ins/Cust Bills</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Node -->
+            <div
+                class="step-node w-12 h-12 rounded-full bg-slate-900 border-2 border-green-500 flex items-center justify-center shadow-[0_0_15px_rgba(34,197,94,0.3)] z-20 relative">
+                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                    </path>
+                </svg>
+                <div class="absolute -bottom-8 text-center w-32">
+                    <span class="text-sm font-bold text-white tracking-wide">Financial</span>
+                </div>
+            </div>
+
+            <!-- Process -->
+            <div class="mt-12 w-full px-2">
+                <div class="process-card rounded-lg p-4 text-xs border-t-2 border-t-green-500">
+                    <div class="text-slate-400 mb-2 uppercase text-[10px] font-bold">Standard Ops</div>
+                    <ul class="text-slate-300 space-y-1.5 list-none">
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-green-500"></span>
+                            Calculate Storage
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-green-500"></span>
+                            Apply Admin Fees
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-green-500"></span>
+                            Verify Payment
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- STEP 6: DISPOSITION -->
+        <div class="step-container relative z-10 flex flex-col items-center justify-center w-1/6 group h-full">
+
+            <!-- Innovation -->
+            <div
+                class="mb-8 w-full px-2 opacity-50 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500 delay-300">
+                <div class="innovation-card rounded-lg p-3 text-xs border border-dashed border-emerald-500/30">
+                    <div
+                        class="flex items-center gap-2 text-emerald-400 font-bold mb-1 uppercase tracking-wider text-[10px]">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4">
+                            </path>
+                        </svg>
+                        Cloud Archival
+                    </div>
+                    <ul class="text-emerald-100/80 space-y-1 list-disc list-inside text-[10px] leading-tight">
+                        <li>Paperless Digital Records</li>
+                        <li>Automated Audit Logs</li>
+                        <li>Searchable History</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Node -->
+            <div
+                class="step-node w-12 h-12 rounded-full bg-slate-900 border-2 border-purple-500 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.3)] z-20 relative">
+                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4">
+                    </path>
+                </svg>
+                <div class="absolute -bottom-8 text-center w-32">
+                    <span class="text-sm font-bold text-white tracking-wide">Disposition</span>
+                </div>
+            </div>
+
+            <!-- Process -->
+            <div class="mt-12 w-full px-2">
+                <div class="process-card rounded-lg p-4 text-xs border-t-2 border-t-purple-500">
+                    <div class="text-slate-400 mb-2 uppercase text-[10px] font-bold">Standard Ops</div>
+                    <ul class="text-slate-300 space-y-1.5 list-none">
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-purple-500"></span>
+                            Verify ID/Owner
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-purple-500"></span>
+                            Execute Release/Scrap
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-1 h-1 mt-1.5 rounded-full bg-purple-500"></span>
+                            Archive Record
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Navigation/Footer -->
+    <div class="absolute bottom-6 left-0 w-full text-center">
+        <a href="index.html"
+            class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all text-xs border border-slate-700">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+
+</body>
+
+</html>

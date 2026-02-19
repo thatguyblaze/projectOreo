@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Treadz - Advanced tank simulation and tactical warfare interface.">
+    <meta name="author" content="Blazinik">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:;">
+    <title>Treadz - Pro Tire Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="antialiased">
+    <div id="app">
+        <div id="toast" class="toast fixed top-5 right-5 z-50 p-4 shadow-lg flex items-center"></div>
+        <nav class="main-nav sticky top-0 z-40 p-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <!-- LEFT: Logo & Global Navigation -->
+                <div class="flex items-center gap-8">
+                    <a href="index.html" class="flex-shrink-0 relative group">
+                        <img src="treadztntLogo.png" alt="Treadz" class="h-10 w-auto">
+                        <!-- Hidden Admin Hotspot -->
+                        <div onclick="window.location.href='admin.html'" class="absolute inset-0 z-50 cursor-default"
+                            style="width: 20px; height: 20px; left: 0; top: 0;" title=""></div>
+                    </a>
+
+                    <!-- Vertical Divider -->
+                    <div class="hidden md:block h-6 w-px bg-white/20"></div>
+
+                    <!-- Global Nav Items -->
+                    <div class="hidden md:flex items-center gap-1">
+                        <a href="index.html"
+                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg">Inventory</a>
+                        <a href="towing/ticket/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Towing</a>
+                        <a href="quote/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Quote</a>
+                        <a href="receipt/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Receipts</a>
+                        <a href="catalog/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Catalog</a>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Page-Specific Actions -->
+                <div class="flex items-center gap-2">
+                    <button id="audit-history-btn"
+                        class="btn btn-secondary text-sm font-medium py-2 px-3 flex items-center gap-2">
+                        <span class="hidden xl:inline">History</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="xl:hidden">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="audit-btn"
+                        class="btn btn-secondary text-sm font-medium py-2 px-3 flex items-center gap-2">
+                        <span class="hidden xl:inline">Audit</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="xl:hidden">
+                            <path
+                                d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 9h6m-6 4h6m-6-8h6">
+                            </path>
+                        </svg>
+                    </button>
+                    <button id="add-tires-btn"
+                        class="btn btn-primary font-bold py-2 px-4 shadow-lg flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span class="hidden xl:inline">Add Tires</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+            <section class="mb-8 p-6 container-box">
+                <div class="search-bar-wrapper max-w-2xl mx-auto">
+                    <div class="search-bar flex items-center p-2">
+                        <input type="text" id="search-input"
+                            class="w-full bg-transparent text-xl focus:outline-none px-3"
+                            placeholder="Search or Add a tire size...">
+                    </div>
+                    <button id="clear-search-btn" class="clear-search-btn p-2 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div id="search-actions" class="max-w-2xl mx-auto mt-4"></div>
+                <div id="external-search-container" class="max-w-5xl mx-auto mt-6"></div>
+            </section>
+
+            <div id="search-results-container" class="mb-8"></div>
+
+            <div class="flex justify-end mb-4">
+                <select id="rim-filter-select" class="btn btn-secondary font-semibold py-2 px-4">
+                    <option value="all">Filter by Rim Size: ALL</option>
+                </select>
+            </div>
+
+            <section class="mb-8">
+                <button id="activity-log-toggle"
+                    class="w-full text-left p-4 rounded-xl bg-white border border-gray-200 shadow-sm flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
+                    <svg id="activity-log-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        class="transition-transform">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </button>
+                <div id="activity-log-section" class="analytics-section">
+                    <div id="activity-log" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>
+                </div>
+            </section>
+
+
+            <div id="inventory-container"></div>
+            <div id="empty-state" class="text-center py-20">
+                <h2 class="text-2xl font-semibold text-gray-800">Inventory is Empty</h2>
+                <p class="text-gray-500 mt-2">Add your first tire using the search bar above.</p>
+            </div>
+
+            <section class="mt-12">
+                <button id="analytics-toggle"
+                    class="w-full text-left p-4 rounded-xl bg-white border border-gray-200 shadow-sm flex justify-between items-center">
+                    <h2 class="text-xl font-semibold text-gray-800">Analytics</h2>
+                    <svg id="analytics-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        class="transition-transform">
+                        <path d="m6 9 6 6 6-6" />
+                    </svg>
+                </button>
+                <div id="analytics-section" class="analytics-section">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Most Searched Sizes</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="w-full h-64 md:h-80"><canvas id="analytics-chart"></canvas></div>
+                        <div id="most-searched-list" class="space-y-2"></div>
+                    </div>
+                </div>
+    </div>
+    </section>
+
+
+    </main>
+
+    </div>
+
+    <!-- ADD TIRES MODAL (Combined) -->
+    <div id="entry-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
+        style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col"
+            style="max-height: 90vh;">
+            <div class="flex justify-between items-start mb-4 border-b">
+                <div>
+                    <div id="modal-tab-batch" class="modal-tab inline-block active">Batch Entry</div>
+                    <div id="modal-tab-multiple" class="modal-tab inline-block">Quick Add</div>
+                </div>
+                <button id="close-entry-modal-btn" class="p-1 -mt-1 font-bold text-2xl">&times;</button>
+            </div>
+
+            <div id="batch-entry-view">
+                <div class="data-grid-header text-sm font-semibold text-gray-500 pb-2 mb-2 border-b">
+                    <span>Tire Size</span>
+                    <span>Quantity</span>
+                    <span>Condition</span>
+                    <span></span>
+                </div>
+                <div id="batch-grid" class="flex-grow overflow-y-auto space-y-2" style="max-height: 60vh;"></div>
+            </div>
+
+            <div id="add-multiple-view" class="hidden">
+                <div class="flex justify-end mb-4">
+                    <label class="toggle-label text-sm font-medium text-gray-700">
+                        USED
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="condition-toggle-modal">
+                            <span class="slider"></span>
+                        </div>
+                        NEW
+                    </label>
+                </div>
+                <textarea id="tire-input-modal" rows="10"
+                    class="w-full p-3 rounded-md bg-gray-50 border border-gray-300 focus:border-blue-500 focus:outline-none"
+                    placeholder="Enter one tire size per line or separate by commas. e.g., 255/55/16, 31105015..."></textarea>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <button id="cancel-entry-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="confirm-add-tires-btn" class="btn btn-primary font-semibold py-2 px-5">Add to
+                    Inventory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIT MODAL -->
+    <div id="audit-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
+        style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col"
+            style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Paste & Count Audit</h2>
+                <button id="close-audit-modal-btn" class="p-1 font-bold text-2xl">&times;</button>
+            </div>
+
+            <div id="audit-input-step">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <select id="audit-condition-select" class="data-input w-full">
+                        <option value="used" selected>Audit For: USED Tires</option>
+                        <option value="new">Audit For: NEW Tires</option>
+                    </select>
+                    <select id="audit-rim-select" class="data-input w-full">
+                        <option value="all" selected>Rim Size: ALL</option>
+                        <!-- Rim sizes will be populated here -->
+                    </select>
+                </div>
+                <textarea id="audit-paste-area" rows="12"
+                    class="w-full p-3 font-mono text-sm rounded-md bg-gray-50 border"
+                    placeholder="Paste your entire counted list here..."></textarea>
+            </div>
+
+            <div id="audit-summary-step" class="hidden flex-grow overflow-y-auto">
+                <div id="audit-summary-content" class="space-y-1" style="max-height: 55vh;"></div>
+            </div>
+
+            <div class="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <button id="cancel-audit-modal-btn" class="btn btn-secondary font-semibold py-2 px-5">Cancel</button>
+                <button id="process-audit-btn" class="btn btn-primary font-semibold py-2 px-5">Process & Review</button>
+                <button id="confirm-audit-btn" class="btn btn-primary font-semibold py-2 px-5 hidden">Confirm & Update
+                    Inventory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIT HISTORY MODAL -->
+    <div id="audit-history-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
+        style="background-color: rgba(33, 37, 41, 0.6);">
+        <div class="bg-white w-full max-w-6xl p-6 rounded-xl shadow-2xl m-4 border flex flex-col"
+            style="max-height: 90vh;">
+            <div class="flex justify-between items-center mb-4 border-b pb-4">
+                <h2 class="text-2xl font-bold">Audit History</h2>
+                <button id="close-audit-history-modal-btn" class="p-1 font-bold text-2xl">&times;</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow overflow-hidden">
+                <div id="audit-history-list" class="space-y-2 overflow-y-auto pr-2"></div>
+                <div id="audit-history-detail" class="md:col-span-2 bg-gray-50 p-4 rounded-lg overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js" defer></script>
+    <script src="js/mobile-nav.js" defer></script>
+</body>
+
+</html>
