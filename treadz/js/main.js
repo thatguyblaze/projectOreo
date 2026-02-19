@@ -54,6 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Purchase Order Logic
     const addToCart = (item, sizeStr, qty) => {
+        // Special Handling for Link-Only Distributors (e.g. Atlantic sFTP sites or direct links)
+        if (item._orderUrl) {
+            window.open(item._orderUrl, '_blank');
+            showToast(`Opening ${item.vendor_name} site...`);
+            return;
+        }
+
         const existing = purchaseOrderCart.find(i => i.item.model_id === item.model_id && i.sizeStr === sizeStr);
         if (existing) {
             existing.quantity += qty;
