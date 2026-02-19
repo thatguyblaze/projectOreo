@@ -315,7 +315,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const addLogEntry = (description, type = 'System', details = {}) => { /* ... */ }; // Kept minimal for context
+    const addLogEntry = (description, type = 'System', details = {}) => {
+        const entry = {
+            id: Date.now().toString(36),
+            timestamp: new Date().toISOString(),
+            description,
+            type,
+            details
+        };
+        activityLog.unshift(entry);
+        if (activityLog.length > 100) activityLog.pop();
+        saveData();
+        // renderActivityLog(); // If implemented
+    };
 
     const renderAll = () => {
         renderInventory();
@@ -523,7 +535,130 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const renderInventory = () => { /* ... existing inventory render logic ... */ };
+    const renderInventory = () => {
+        const container = getEl('inventory-container');
+        const emptyState = getEl('empty-state');
+        if (!container || !emptyState) return;
+
+        // If no inventory at all
+        if (inventory.length === 0) {
+            container.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        const searchTerm = getEl('search-input').value.trim();
+        const parsedSearch = parseTireSize(searchTerm);
+
+        const filtered = inventory.filter(item => {
+            if (!searchTerm) return true;
+
+            // robust size matching
+            if (parsedSearch) {
+                // item.size is string like "225/60R16"
+                // parse it on the fly
+                const itemParsed = parseTireSize(item.size);
+                if (itemParsed &&
+                    itemParsed.width === parsedSearch.width &&
+                    itemParsed.rim === parsedSearch.rim &&
+                    itemParsed.ratio === parsedSearch.ratio) {
+                    return true;
+                }
+            }
+
+            // Text matching
+            const text = `${item.size} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
+            return text.includes(searchTerm.toLowerCase());
+        });
+
+        if (filtered.length === 0) {
+            emptyState.classList.add('hidden');
+            container.innerHTML = `
+                <div class="text-center py-12 bg-gray-50 rounded-xl border border-gray-200 mb-8">
+                    <p class="text-gray-500">No local inventory matches found.</p>
+                </div>`;
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+
+        container.innerHTML = `
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                Local Inventory <span class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">${filtered.length}</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                ${filtered.map(item => `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div class="absolute top-0 right-0 p-2">
+                             <span class="text-[10px] font-bold px-2 py-1 rounded ${item.condition === 'new' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'} uppercase tracking-wide">${item.condition || 'Used'}</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mt-2">${item.size}</h3>
+                        <p class="text-gray-500 text-sm mb-4 font-medium">${item.brand || 'Generic Brand'}</p>
+                        
+                        <div class="flex items-end justify-between border-t border-gray-100 pt-3">
+                            <div>
+                                <span class="text-3xl font-black text-blue-600 leading-none">${item.quantity}</span>
+                                <span class="text-xs font-bold text-gray-400 uppercase">Qty</span>
+                            </div>
+                            <button class="text-gray-400 hover:text-blue-600 p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    };
+
+    const populateFilters = () => {
+        const brands = new Set();
+        const rims = new Set();
+        const distributors = new Set();
+
+        catalogItems.forEach(item => {
+            if (item.vendor_name) brands.add(item.vendor_name);
+            if (item._sourceId) distributors.add(item._sourceId);
+            (item.sizes || []).forEach(s => {
+                if (s.rim) rims.add(parseInt(s.rim));
+            });
+        });
+
+        // Distributors
+        const distSelect = getEl('filter-distributor');
+        if (distSelect) {
+            const current = distSelect.value;
+            distSelect.innerHTML = '<option value="">All Distributors</option>';
+            [...distributors].sort().forEach(d => {
+                distSelect.innerHTML += `<option value="${d}">${d}</option>`;
+            });
+            distSelect.value = current;
+        }
+
+        // Brands
+        const brandSelect = getEl('filter-brand');
+        if (brandSelect) {
+            const current = brandSelect.value;
+            brandSelect.innerHTML = '<option value="">All Brands</option>';
+            [...brands].sort().forEach(b => {
+                brandSelect.innerHTML += `<option value="${b}">${b}</option>`;
+            });
+            brandSelect.value = current;
+        }
+
+        // Rims
+        const rimSelect = getEl('filter-rim');
+        if (rimSelect) {
+            const current = rimSelect.value;
+            rimSelect.innerHTML = '<option value="">All Rims</option>';
+            [...rims].sort((a, b) => a - b).forEach(r => {
+                rimSelect.innerHTML += `<option value="${r}">${r}" Rim</option>`;
+            });
+            rimSelect.value = current;
+        }
+    };
 
     // Listeners
     getEl('search-input').addEventListener('input', renderAll);
@@ -544,6 +679,96 @@ document.addEventListener('DOMContentLoaded', () => {
             if (section.classList.contains('open')) renderAnalytics();
         });
     }
+
+    // Modal & Inventory Logic
+    const entryModal = getEl('entry-modal');
+    const addTiresBtn = getEl('add-tires-btn');
+    const closeEntryBtn = getEl('close-entry-modal-btn');
+    const cancelEntryBtn = getEl('cancel-entry-modal-btn');
+    const confirmAddBtn = getEl('confirm-add-tires-btn');
+    const tireInput = getEl('tire-input-modal');
+    const conditionToggle = getEl('condition-toggle-modal');
+
+    // Tabs
+    const tabBatch = getEl('modal-tab-batch');
+    const tabMultiple = getEl('modal-tab-multiple');
+    const viewBatch = getEl('batch-entry-view');
+    const viewMultiple = getEl('add-multiple-view');
+
+    if (addTiresBtn) addTiresBtn.addEventListener('click', () => {
+        if (entryModal) {
+            entryModal.classList.remove('hidden');
+            entryModal.classList.add('flex');
+        }
+    });
+
+    const closeEntryModal = () => {
+        if (entryModal) {
+            entryModal.classList.add('hidden');
+            entryModal.classList.remove('flex');
+        }
+    };
+
+    if (closeEntryBtn) closeEntryBtn.addEventListener('click', closeEntryModal);
+    if (cancelEntryBtn) cancelEntryBtn.addEventListener('click', closeEntryModal);
+
+    // Tab Switching
+    if (tabBatch && tabMultiple) {
+        tabBatch.addEventListener('click', () => {
+            tabBatch.classList.add('active');
+            tabMultiple.classList.remove('active');
+            viewBatch.classList.remove('hidden');
+            viewMultiple.classList.add('hidden');
+        });
+        tabMultiple.addEventListener('click', () => {
+            tabMultiple.classList.add('active');
+            tabBatch.classList.remove('active');
+            viewMultiple.classList.remove('hidden');
+            viewBatch.classList.add('hidden');
+        });
+    }
+
+    // Add Logic
+    if (confirmAddBtn) confirmAddBtn.addEventListener('click', () => {
+        // Handle Quick Add (Textarea) for now
+        // if (!viewMultiple.classList.contains('hidden')) { // simplified check
+        const text = tireInput ? tireInput.value.trim() : '';
+        if (!text) return;
+
+        const condition = conditionToggle && conditionToggle.checked ? 'new' : 'used';
+        const lines = text.split(/[\n,]+/).map(t => t.trim()).filter(t => t);
+
+        let addedCount = 0;
+        lines.forEach(rawSize => {
+            // Try to parse to standard format, or just keep as is
+            const parsed = parseTireSize(rawSize);
+            const sizeStr = parsed ? formatTireSize(parsed) : rawSize.toUpperCase();
+
+            const existing = inventory.find(i => i.size === sizeStr && i.condition === condition);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                inventory.push({
+                    id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+                    size: sizeStr,
+                    quantity: 1,
+                    condition: condition,
+                    brand: '',
+                    timestamp: new Date().toISOString()
+                });
+            }
+            addedCount++;
+        });
+
+        if (addedCount > 0) {
+            saveData();
+            renderInventory();
+            showToast(`Added ${addedCount} tires to inventory`);
+            if (tireInput) tireInput.value = '';
+            closeEntryModal();
+        }
+        // }
+    });
 
     loadData();
     populateFilters();
