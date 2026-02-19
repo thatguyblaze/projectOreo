@@ -343,7 +343,7 @@
                 </div>
             </div>
             <div class="flex gap-2 mb-2">
-                <button onclick="resetTicket()"
+                <button onclick="saveTicket(); resetTicket()"
                     class="w-full btn btn-sm bg-[#0047AB] text-white hover:bg-[#003380] shadow-md uppercase font-bold text-xs tracking-wide py-2 rounded-lg flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -919,6 +919,7 @@
     <script>
         // Init Logic
         let currentTicketId = null;
+        let isTicketPrinted = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             renderHistory();
@@ -948,6 +949,18 @@
             if (!id) return;
 
             // Gather Data (Paperless Record)
+            // If ticket was printed, we MUST branch to a new ID to avoid overwriting the printed record.
+            if (isTicketPrinted) {
+                // Generate new random ID (Collision unlikely for this use case, but could check)
+                const newId = Math.floor(Math.random() * 9000) + 1000;
+                document.querySelector('.param-ticket-id').innerText = newId;
+                id = newId; // Update local scope ID
+                currentTicketId = newId;
+                // Reset flag so subsequent edits to THIS new ticket don't branch again immediately
+                isTicketPrinted = false;
+                // Visual feedback? maybe
+            }
+
             const ticketData = {
                 id: id,
                 date: document.getElementById('tt-date').value,
@@ -996,7 +1009,12 @@
 
             // Validation: Don't save empty tickets (Must have Customer, Vehicle, or VIN)
             const hasContent = ticketData.billTo || ticketData.vehicle.trim() || ticketData.vin;
-            if (!hasContent) return;
+            if (!hasContent) {
+                // Smart Detect: If ticket is now empty, remove it to keep history clean
+                TreadzData.delete('ticket', id, 'System Auto-Cleanup');
+                renderHistory();
+                return;
+            }
 
             // Use Central Data Store (Handles Limits & Audit Log)
             TreadzData.save('ticket', ticketData, 'Current User');
@@ -1121,6 +1139,7 @@
         }
 
         function resetTicket() {
+            isTicketPrinted = false;
             // Generate New ID
             const id = Math.floor(Math.random() * 9000) + 1000;
             document.querySelector('.param-ticket-id').innerText = id;
@@ -1573,6 +1592,7 @@
 
         function printTowTicket() {
             saveTicket();
+            isTicketPrinted = true;
             populatePrintView();
             window.print();
         }

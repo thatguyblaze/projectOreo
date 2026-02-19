@@ -546,7 +546,7 @@
                         <div class="flex gap-3 print:hidden">
                             <button onclick="reset()"
                                 class="w-1/4 btn bg-white border border-gray-300 text-gray-700 font-semibold py-3 text-sm rounded-xl hover:bg-gray-50 active:scale-95 transition-all">
-                                Reset
+                                New Quote
                             </button>
                             <button onclick="handleSaveOnly()"
                                 class="w-1/4 btn bg-blue-50 border border-blue-200 text-blue-700 font-semibold py-3 text-sm rounded-xl hover:bg-blue-100 active:scale-95 transition-all">
@@ -640,6 +640,7 @@
         // Dirty Flags (to track if user manually overrode the fee qty)
         let isStateDirty = false;
         let isDisposalDirty = false;
+        let isQuotePrinted = false;
 
         // --- INIT ---
         // Enable global scroll behavior
@@ -660,6 +661,15 @@
 
         function saveQuote() {
             // Generate ID if not already generated for this session
+            // If quote was printed, we MUST branch to a new ID to avoid overwriting the printed record.
+            if (isQuotePrinted) {
+                const newId = TreadzUtils.incrementGlobalId();
+                document.getElementById('quote-id-display').textContent = '#' + newId;
+                currentQuoteId = newId;
+                // Reset flag so subsequent edits to THIS new quote don't branch again
+                isQuotePrinted = false;
+            }
+
             if (!currentQuoteId) {
                 currentQuoteId = TreadzUtils.incrementGlobalId();
                 document.getElementById('quote-id-display').textContent = '#' + currentQuoteId;
@@ -678,8 +688,26 @@
                 total: document.getElementById('total-card-display').textContent
             };
 
-            // Avoid saving empty junk
-            if (quote.pricePerTire === 0 && quote.tireInfo === '') return;
+            // Validation: Don't save empty junk.
+            // Check raw input values to avoid default 'Walk-In' masking.
+            const hasContent = custNameInput.value.trim() || custVehicleInput.value.trim() || tireInfoInput.value.trim() || (priceInput.value && parseFloat(priceInput.value) > 0);
+
+            if (!hasContent) {
+                // Smart Detect: If we have an ID (previously saved) but now empty, delete it to keep history clean
+                if (currentQuoteId) {
+                    TreadzData.delete('quote', currentQuoteId, 'System API');
+                }
+                return;
+            }
+
+            // Generate ID if not already generated for this session
+            if (!currentQuoteId) {
+                currentQuoteId = TreadzUtils.incrementGlobalId();
+                document.getElementById('quote-id-display').textContent = '#' + currentQuoteId;
+                // Update the quote object with new ID
+                quote.id = currentQuoteId;
+                quote.displayId = currentQuoteId;
+            }
 
             // Use TreadzData ('quote' maps to shared storage if configured)
             TreadzData.save('quote', quote, 'Current User');
@@ -711,6 +739,13 @@
             if (printDisp) printDisp.textContent = `(${dQty})`;
 
             saveQuote();
+            isQuotePrinted = true;
+            // Ensure tire info matches print visibility logic
+            if (tireInfoInput.value.trim() === '') {
+                tireInfoContainer.classList.add('print:hidden');
+            } else {
+                tireInfoContainer.classList.remove('print:hidden');
+            }
             window.print();
         }
 
@@ -906,7 +941,16 @@
             qtyInput.dispatchEvent(new Event('input'));
         }
 
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
         function reset() {
+            saveQuote();
             // if (confirm("Clear current quote?")) {
             priceInput.value = '';
             qtyInput.value = 4; // Default to 4
@@ -922,6 +966,7 @@
 
             // Clear ID
             currentQuoteId = null;
+            isQuotePrinted = false;
             document.getElementById('quote-id-display').textContent = '#--';
 
             calculate();
@@ -938,6 +983,16 @@
             if (!isStateDirty) stateFeeQtyInput.value = v;
             if (!isDisposalDirty) disposalFeeQtyInput.value = v;
             calculate();
+        });
+
+        // Auto-Save Listeners
+        const debouncedSaveQuote = debounce(() => saveQuote(), 1000);
+
+        [custNameInput, custVehicleInput, tireInfoInput, priceInput, qtyInput, stateFeeQtyInput, disposalFeeQtyInput].forEach(input => {
+            if (input) {
+                input.addEventListener('input', debouncedSaveQuote);
+                input.addEventListener('change', () => saveQuote());
+            }
         });
 
         // Track Dirty State
