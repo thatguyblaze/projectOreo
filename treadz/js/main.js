@@ -1,5 +1,7 @@
+// Created with <3 by Blazinik
+
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM ELEMENTS ---
+    
     const getEl = (id) => document.getElementById(id);
 
     let inventory = [];
@@ -19,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'NTW', urlTemplate: 'https://order.ntw.com/ntwtips/distribution/search/', queryFormat: 'none' }
     ];
 
-    // --- DATA MANAGEMENT ---
+    
     const loadData = () => {
         inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV7')) || [];
         activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('treadzAuditHistoryV7', JSON.stringify(auditHistory));
     };
 
-    // --- UTILITIES ---
+    
     const parseTireSize = (input) => {
         if (!input) return null;
         const cleaned = input.replace(/\D/g, '');
@@ -67,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => toast.classList.remove('show'), 3000);
     };
 
-    // --- CORE LOGIC ---
+    
     const addTire = (parsedSize, quantity = 1, condition = 'used', options = {}) => {
         const { fromSearch = false, suppressToast = false } = options;
         if (!parsedSize) return;
@@ -139,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Update section totals
+        
         const newTotal = inventory.filter(t => t.condition === 'new').reduce((sum, t) => sum + t.quantity, 0);
         const usedTotal = inventory.filter(t => t.condition === 'used').reduce((sum, t) => sum + t.quantity, 0);
         const newTitle = document.getElementById('new-tires-title');
@@ -148,12 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (usedTitle) usedTitle.textContent = `Used Tire Inventory (${usedTotal})`;
 
         if (getEl('inventory-container').querySelectorAll('.tire-card').length === 0) {
-            renderInventory(); // Fallback to full render if a filter makes it empty
+            renderInventory(); 
         }
     }
 
 
-    // --- MAIN RENDER ---
+    
     const renderAll = () => {
         renderInventory();
         renderSearchResults();
@@ -179,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filteredInventory.length === 0) {
             emptyState.classList.remove('hidden');
             container.classList.add('hidden');
-            if (inventory.length > 0) { // Show message if filtering results in empty
+            if (inventory.length > 0) { 
                 emptyState.querySelector('h2').textContent = `No tires found for Rim Size ${rimFilterValue}"`;
                 emptyState.querySelector('p').textContent = 'Select "ALL" to see your full inventory.';
             } else {
@@ -353,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const counts = activityLog.reduce((acc, log) => {
-            const term = log.term.split(' (')[0]; // Ignore condition for analytics
+            const term = log.term.split(' (')[0]; 
             if (log.action === 'Searched') acc[term] = (acc[term] || 0) + 1;
             return acc;
         }, {});
@@ -373,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- ENTRY MODAL LOGIC ---
+    
     const toggleEntryModal = (show) => {
         const modal = getEl('entry-modal');
         modal.classList.toggle('hidden', !show);
@@ -433,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleEntryModal(false);
     };
 
-    // --- AUDIT & HISTORY LOGIC ---
+    
     const toggleAuditModal = (show) => {
         const modal = getEl('audit-modal');
         modal.classList.toggle('hidden', !show);
@@ -607,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
 
-    // --- EVENT LISTENERS ---
+    
     getEl('search-input').addEventListener('input', () => {
         renderAll();
         const term = getEl('search-input').value.trim();
@@ -663,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = e.target;
             const parsed = parseTireSize(btn.dataset.sizeStr);
             if (parsed) {
-                addTire(parsed, 0, processedAuditData.auditCondition, { suppressToast: true }); // Add with 0 qty initially
+                addTire(parsed, 0, processedAuditData.auditCondition, { suppressToast: true }); 
                 showToast(`Added ${btn.dataset.sizeStr} to system. Quantity will be updated upon audit confirmation.`);
                 btn.textContent = 'Added'; btn.disabled = true;
             }
@@ -707,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isNaN(newQuantity) && newQuantity >= 0) {
             updateTireQuantity(size, condition, newQuantity);
         } else {
-            renderAll(); // Rerender to revert invalid input
+            renderAll(); 
         }
     };
 
@@ -741,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getEl('rim-filter-select').addEventListener('change', renderInventory);
 
-    // --- INITIALIZATION ---
+    
     loadData();
     renderAll();
 });

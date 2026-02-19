@@ -1,24 +1,11 @@
-/**
- * Treadz Tire Catalog Module
- * 
- * Manages distributor tire inventory imported from multiple sources:
- *  - TyresAddict API (database subscription)
- *  - Any generic REST API (custom endpoint)
- *  - Local file import (JSON / CSV — manual or via SFTP drop folder)
- * 
- * Data is cached in localStorage and can be auto-refreshed hourly.
- * 
- * Storage Key: treadzTireCatalogV1
- * Meta Key:    treadzTireCatalogMeta
- * Sources Key: treadzCatalogSources
- */
+// Created with <3 by Blazinik
 
 const TireCatalog = (() => {
     const STORAGE_KEY = 'treadzTireCatalogV1';
     const META_KEY = 'treadzTireCatalogMeta';
     const SOURCES_KEY = 'treadzCatalogSources';
 
-    // --- Internal Helpers ---
+    
     const _getAll = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     const _setAll = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
@@ -27,14 +14,14 @@ const TireCatalog = (() => {
         source: null,
         recordCount: 0,
         autoImport: false,
-        importIntervalMs: 3600000, // 1 hour
+        importIntervalMs: 3600000, 
         sftpPath: '',
         sftpAutoWatch: false
     };
     const _setMeta = (meta) => localStorage.setItem(META_KEY, JSON.stringify(meta));
 
-    // --- Source Management ---
-    // Each source: { id, name, type('tyresaddict'|'generic'|'sftp'), apiKey, baseUrl, lastImport, recordCount, enabled }
+    
+    
     const _getSources = () => JSON.parse(localStorage.getItem(SOURCES_KEY)) || [];
     const _setSources = (sources) => localStorage.setItem(SOURCES_KEY, JSON.stringify(sources));
 
@@ -42,21 +29,21 @@ const TireCatalog = (() => {
     let _sftpWatchTimer = null;
 
     return {
-        // ========================
-        // DATA ACCESS
-        // ========================
+        
+        
+        
 
-        /** Get all catalog tires */
+        
         getAll() {
             return _getAll();
         },
 
-        /** Get import metadata */
+        
         getMeta() {
             return _getMeta();
         },
 
-        /** Search catalog by query string (matches brand, model, size) */
+        
         search(query) {
             if (!query || !query.trim()) return _getAll();
             const q = query.toLowerCase().trim();
@@ -74,7 +61,7 @@ const TireCatalog = (() => {
             });
         },
 
-        /** Filter catalog by criteria */
+        
         filter({ brand, season, width, profile, rim, carType } = {}) {
             let results = _getAll();
             if (brand) results = results.filter(t => t.vendor_name?.toLowerCase() === brand.toLowerCase());
@@ -93,21 +80,21 @@ const TireCatalog = (() => {
             return results;
         },
 
-        /** Get unique brands in catalog */
+        
         getBrands() {
             const brands = new Set();
             _getAll().forEach(t => { if (t.vendor_name) brands.add(t.vendor_name); });
             return [...brands].sort();
         },
 
-        /** Get unique seasons */
+        
         getSeasons() {
             const seasons = new Set();
             _getAll().forEach(t => { if (t.season) seasons.add(t.season); });
             return [...seasons].sort();
         },
 
-        /** Get unique rim sizes across all tires */
+        
         getRimSizes() {
             const rims = new Set();
             _getAll().forEach(t => {
@@ -116,16 +103,16 @@ const TireCatalog = (() => {
             return [...rims].sort((a, b) => a - b);
         },
 
-        // ========================
-        // SOURCE MANAGEMENT
-        // ========================
+        
+        
+        
 
-        /** Get all configured import sources */
+        
         getSources() {
             return _getSources();
         },
 
-        /** Add or update an import source */
+        
         saveSource(source) {
             const sources = _getSources();
             const idx = sources.findIndex(s => s.id === source.id);
@@ -142,12 +129,12 @@ const TireCatalog = (() => {
             return source.id;
         },
 
-        /** Remove an import source */
+        
         removeSource(sourceId) {
             let sources = _getSources();
             sources = sources.filter(s => s.id !== sourceId);
             _setSources(sources);
-            // Remove catalog entries from this source
+            
             let catalog = _getAll();
             const before = catalog.length;
             catalog = catalog.filter(t => t._sourceId !== sourceId);
@@ -157,7 +144,7 @@ const TireCatalog = (() => {
             return before - catalog.length;
         },
 
-        /** Toggle a source enabled/disabled */
+        
         toggleSource(sourceId, enabled) {
             const sources = _getSources();
             const src = sources.find(s => s.id === sourceId);
@@ -167,11 +154,11 @@ const TireCatalog = (() => {
             }
         },
 
-        // ========================
-        // IMPORT: TyresAddict API
-        // ========================
+        
+        
+        
 
-        /** Import from TyresAddict API (requires API key) */
+        
         async importFromAPI(apiKey, sourceId) {
             const sources = _getSources();
             const source = sourceId ? sources.find(s => s.id === sourceId) : sources.find(s => s.type === 'tyresaddict');
@@ -182,12 +169,12 @@ const TireCatalog = (() => {
 
             const catalog = [];
 
-            // Step 1: Fetch all vendors
+            
             const vendorsRes = await fetch(`${base}/tyres/vendors?api_version=1&api_key=${key}`);
             const vendorsData = await vendorsRes.json();
             if (!vendorsData.result) throw new Error(vendorsData.message || 'Failed to fetch vendors');
 
-            // Step 2: For each vendor, fetch models
+            
             for (const vendor of vendorsData.vendors) {
                 const modelsRes = await fetch(`${base}/tyres/vendor_models?api_version=1&api_key=${key}&vendor_id=${vendor.vendor_id}`);
                 const modelsData = await modelsRes.json();
@@ -222,12 +209,12 @@ const TireCatalog = (() => {
                 }
             }
 
-            // Merge into catalog (replace entries from this source, keep others)
+            
             this._mergeSourceData(source?.id || 'tyresaddict', catalog, source?.name || 'TyresAddict API');
             return catalog.length;
         },
 
-        /** Import from a generic REST API endpoint */
+        
         async importFromGenericAPI(sourceId) {
             const sources = _getSources();
             const source = sources.find(s => s.id === sourceId);
@@ -264,11 +251,11 @@ const TireCatalog = (() => {
             return catalog.length;
         },
 
-        // ========================
-        // IMPORT: Local CSV / JSON
-        // ========================
+        
+        
+        
 
-        /** Import from a JSON file (File object or parsed array) */
+        
         importFromJSON(data, sourceId, sourceName) {
             let catalog;
             if (typeof data === 'string') {
@@ -298,7 +285,7 @@ const TireCatalog = (() => {
             return catalog.length;
         },
 
-        /** Import from CSV text */
+        
         importFromCSV(csvText, sourceId, sourceName) {
             const lines = csvText.trim().split('\n');
             if (lines.length < 2) throw new Error('CSV must have a header row and at least one data row');
@@ -350,33 +337,33 @@ const TireCatalog = (() => {
             return catalog.length;
         },
 
-        // ========================
-        // SFTP / LOCAL PATH IMPORT
-        // ========================
+        
+        
+        
 
-        /** Set SFTP watch folder path */
+        
         setSftpPath(path) {
             const meta = _getMeta();
             _setMeta({ ...meta, sftpPath: path });
         },
 
-        /** Get configured SFTP path */
+        
         getSftpPath() {
             return _getMeta().sftpPath || '';
         },
 
-        /** Import from a local file path (fetches via http-server since we're locally hosted) */
+        
         async importFromPath(filePath, sourceId) {
             if (!filePath) throw new Error('File path is required');
 
-            // Normalize — if absolute Windows path, convert to relative URL for http-server
+            
             let url = filePath;
             if (/^[A-Z]:\\/i.test(filePath)) {
-                // Can't fetch arbitrary local paths from browser — user must
-                // place file in the web root or use the SFTP endpoint
+                
+                
                 url = filePath;
             }
-            // If relative, prepend /
+            
             if (!url.startsWith('http') && !url.startsWith('/')) {
                 url = '/' + url;
             }
@@ -388,7 +375,7 @@ const TireCatalog = (() => {
             const sid = sourceId || 'sftp_import';
             const sname = 'SFTP File Import';
 
-            // Detect format
+            
             const trimmed = text.trim();
             if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
                 return this.importFromJSON(text, sid, sname);
@@ -397,7 +384,7 @@ const TireCatalog = (() => {
             }
         },
 
-        /** Start watching SFTP path (polls every hour) */
+        
         startSftpWatch() {
             this.stopSftpWatch();
             const meta = _getMeta();
@@ -406,7 +393,7 @@ const TireCatalog = (() => {
             meta.sftpAutoWatch = true;
             _setMeta(meta);
 
-            // Immediate first import
+            
             this.importFromPath(meta.sftpPath, 'sftp_auto').catch(e =>
                 console.warn('[TireCatalog] SFTP watch import failed:', e.message)
             );
@@ -423,7 +410,7 @@ const TireCatalog = (() => {
             return true;
         },
 
-        /** Stop SFTP watch */
+        
         stopSftpWatch() {
             if (_sftpWatchTimer) {
                 clearInterval(_sftpWatchTimer);
@@ -434,20 +421,20 @@ const TireCatalog = (() => {
             _setMeta(meta);
         },
 
-        // ========================
-        // MERGE HELPER
-        // ========================
+        
+        
+        
 
-        /** Merge data from a source into the main catalog (replaces that source's entries, keeps others) */
+        
         _mergeSourceData(sourceId, newData, sourceName) {
             let catalog = _getAll();
-            // Remove old entries from this source
+            
             catalog = catalog.filter(t => t._sourceId !== sourceId);
-            // Add new entries
+            
             catalog = catalog.concat(newData);
             _setAll(catalog);
 
-            // Update source record
+            
             const sources = _getSources();
             const src = sources.find(s => s.id === sourceId);
             if (src) {
@@ -456,7 +443,7 @@ const TireCatalog = (() => {
                 _setSources(sources);
             }
 
-            // Update global meta
+            
             const meta = _getMeta();
             _setMeta({
                 ...meta,
@@ -466,33 +453,33 @@ const TireCatalog = (() => {
             });
         },
 
-        // ========================
-        // CLEAR / RESET
-        // ========================
+        
+        
+        
 
-        /** Clear all catalog data */
+        
         clear() {
             localStorage.removeItem(STORAGE_KEY);
             const meta = _getMeta();
             _setMeta({ ...meta, recordCount: 0, lastImport: null, source: null });
         },
 
-        /** Clear data from a specific source only */
+        
         clearSource(sourceId) {
             let catalog = _getAll();
             catalog = catalog.filter(t => t._sourceId !== sourceId);
             _setAll(catalog);
             const meta = _getMeta();
             _setMeta({ ...meta, recordCount: catalog.length });
-            // Update source meta
+            
             const sources = _getSources();
             const src = sources.find(s => s.id === sourceId);
             if (src) { src.lastImport = null; src.recordCount = 0; _setSources(sources); }
         },
 
-        /** Save API key for legacy compat */
+        
         setApiKey(key) {
-            // Find or create tyresaddict source
+            
             let sources = _getSources();
             let src = sources.find(s => s.type === 'tyresaddict');
             if (src) {
@@ -503,11 +490,11 @@ const TireCatalog = (() => {
             }
         },
 
-        // ========================
-        // AUTO-IMPORT SCHEDULER
-        // ========================
+        
+        
+        
 
-        /** Start auto-import timer for all enabled API sources */
+        
         startAutoImport() {
             this.stopAutoImport();
             const meta = _getMeta();
@@ -534,7 +521,7 @@ const TireCatalog = (() => {
             return true;
         },
 
-        /** Stop auto-import */
+        
         stopAutoImport() {
             if (_autoImportTimer) {
                 clearInterval(_autoImportTimer);
@@ -545,11 +532,11 @@ const TireCatalog = (() => {
             _setMeta(meta);
         },
 
-        // ========================
-        // DEMO / SAMPLE DATA
-        // ========================
+        
+        
+        
 
-        /** Load realistic sample data matching TyresAddict schema */
+        
         loadSampleData() {
             const sampleCatalog = [
                 {
@@ -805,7 +792,7 @@ const TireCatalog = (() => {
                 }
             ];
 
-            // Add size_display to each
+            
             sampleCatalog.forEach(t => {
                 t.size_display = t.sizes.map(s => `${s.width}/${s.profile}R${s.rim}`).join(', ');
             });

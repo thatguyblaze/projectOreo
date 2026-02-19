@@ -1,44 +1,37 @@
-/**
- * Treadz Core Configuration & Utilities
- * 
- * This file centralizes all business logic constants and shared utility functions
- * to ensure consistency across the entire Treadz platform.
- * 
- * ENGINEERING STANDARD: Single Source of Truth
- */
+// Created with <3 by Blazinik
 
 const TreadzConfigDefault = {
-    // System
+    
     VERSION: '2.5.0',
 
-    // Business Info
+    
     BUSINESS_NAME: "Treadz Tire & Towing",
-    PHONE_NUMBER: "(423) 357-4551", // Verified via Web Search
-    // Addresses
+    PHONE_NUMBER: "(423) 357-4551", 
+    
     SHOP_ADDRESS: "409 E Main St, Mount Carmel, TN 37645",
-    SHOP_COORDS: { lat: 36.5602, lon: -82.6560 }, // Mount Carmel, TN
+    SHOP_COORDS: { lat: 36.5602, lon: -82.6560 }, 
 
-    // Financials
-    TAX_RATE: 0.0975, // 9.75% TN Sales Tax
-    CARD_FEE_RATE: 0.035, // 3.5% Card Processing Fee
+    
+    TAX_RATE: 0.0975, 
+    CARD_FEE_RATE: 0.035, 
 
-    // Standard Fees
+    
     FEES: {
-        TIRE_STATE: 1.35,  // State Tire Fee
-        TIRE_DISPOSAL: 4.00, // Disposal Fee
-        TOW_HOOK: 75.00,   // Standard Tow Hook Fee
-        TOW_RATE_PER_MILE: 4.00 // Standard Tow Mileage Rate
+        TIRE_STATE: 1.35,  
+        TIRE_DISPOSAL: 4.00, 
+        TOW_HOOK: 75.00,   
+        TOW_RATE_PER_MILE: 4.00 
     },
 
-    // Search Configuration
+    
     SEARCH: {
-        RADIUS_LOCAL_METERS: 50000,    // 50km (~30 miles)
-        RADIUS_REGIONAL_METERS: 800000, // 800km (~500 miles)
+        RADIUS_LOCAL_METERS: 50000,    
+        RADIUS_REGIONAL_METERS: 800000, 
         SUGGESTIONS_LOCAL_MAX: 5,
         SUGGESTIONS_TOTAL_MAX: 20
     },
 
-    // Default Services Checklist
+    
     DEFAULT_SERVICES: [
         { id: 'srv_rotation', name: 'Tire Rotation', defaultPrice: 20.00, defaultQty: 1 },
         { id: 'srv_balance', name: 'Tire Balance', defaultPrice: 20.00, defaultQty: 1 },
@@ -49,21 +42,17 @@ const TreadzConfigDefault = {
     ]
 };
 
-// Apply Overrides if present
+
 const savedConfig = localStorage.getItem('treadzConfigOverrides');
 let TreadzConfig = savedConfig ? { ...TreadzConfigDefault, ...JSON.parse(savedConfig) } : TreadzConfigDefault;
-// Re-bind FEES deep merge if needed
+
 if (savedConfig) {
     const overrides = JSON.parse(savedConfig);
     if (overrides.FEES) TreadzConfig.FEES = { ...TreadzConfigDefault.FEES, ...overrides.FEES };
 }
 
 const TreadzUtils = {
-    /**
-     * Format a number as currency string
-     * @param {number} amount 
-     * @returns {string} "$12.34"
-     */
+    
     formatMoney: (amount) => {
         return '$' + (amount || 0).toLocaleString('en-US', {
             minimumFractionDigits: 2,
@@ -71,18 +60,12 @@ const TreadzUtils = {
         });
     },
 
-    /**
-     * Calculate Distance between two points (Haversine formula approximation could go here if needed locally)
-     * For now, just a placeholder for future shared math.
-     */
+    
     calculateTax: (subtotal) => {
         return subtotal * TreadzConfig.TAX_RATE;
     },
 
-    /**
-     * Standardizes input behavior across the app.
-     * 1. Scroll Wheel on focused number inputs changes value by +/- 1
-     */
+    
     enableGlobalScroll: () => {
         document.addEventListener('wheel', (e) => {
             if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
@@ -94,29 +77,26 @@ const TreadzUtils = {
                     let currentVal = parseFloat(e.target.value) || 0;
                     let newVal = currentVal + delta;
 
-                    // Respect min attribute if present
+                    
                     if (e.target.min !== "" && newVal < parseFloat(e.target.min)) {
                         newVal = parseFloat(e.target.min);
                     }
 
-                    // For fields that might show decimals, keep them clean if they are whole numbers
-                    // But if it's a price field, it might render as 15.00
-                    // Since we are adding an integer 1, precision usually stays fine.
+                    
+                    
+                    
 
-                    e.target.value = newVal; // Or .toFixed(2) if strictly currency? 
-                    // Input values are strings, let's keep it simple unless it breaks formatting.
+                    e.target.value = newVal; 
+                    
 
-                    // Trigger input event so calculations update
+                    
                     e.target.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             }
         }, { passive: false });
     },
 
-    /**
-     * GLOBAL ID SYSTEM (Quotes & Receipts Linked)
-     * Starts at 1000.
-     */
+    
     getNextGlobalId: () => {
         const stored = localStorage.getItem('treadzGlobalSequenceId');
         if (!stored) {
@@ -134,5 +114,5 @@ const TreadzUtils = {
     }
 };
 
-// Freeze to prevent accidental modification at runtime
+
 Object.freeze(TreadzConfig);
