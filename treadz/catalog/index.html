@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treadz - Tire Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        .catalog-card {
+            background: #fff;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+        .catalog-card:hover {
+            box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1), 0 4px 10px -5px rgba(0,0,0,0.04);
+            transform: translateY(-2px);
+            border-color: #0047AB;
+        }
+        .season-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+        }
+        .season-all-season { background: #DBEAFE; color: #1E40AF; }
+        .season-summer { background: #FEF3C7; color: #92400E; }
+        .season-winter { background: #E0E7FF; color: #3730A3; }
+        .type-badge {
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            background: #F1F5F9;
+            color: #475569;
+        }
+        .size-chip {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: #F1F5F9;
+            color: #334155;
+            border: 1px solid #E2E8F0;
+            white-space: nowrap;
+        }
+        .size-chip.match { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+        .filter-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #E2E8F0;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-btn:hover { border-color: #0047AB; color: #0047AB; }
+        .filter-btn.active { background: #0047AB; color: #fff; border-color: #0047AB; }
+        .tire-icon {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #1E293B, #334155);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .tire-icon svg { width: 32px; height: 32px; color: #94A3B8; }
+        .catalog-empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748B;
+        }
+        #search-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(0, 71, 171, 0.3); border-color: #0047AB; }
+        .spec-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .spec-item { font-size: 0.65rem; color: #64748B; }
+        .spec-item strong { color: #334155; }
+        .expand-btn {
+            font-size: 0.7rem;
+            color: #0047AB;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+        .expand-btn:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body class="antialiased">
+    <div id="app">
+        <!-- NAV -->
+        <nav class="main-nav sticky top-0 z-40 p-4">
+            <div class="max-w-7xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-8">
+                    <a href="../index.html" class="flex-shrink-0">
+                        <img src="../treadztntLogo.png" alt="Treadz" class="h-10 w-auto">
+                    </a>
+                    <div class="hidden md:block h-6 w-px bg-white/20"></div>
+                    <div class="hidden md:flex items-center gap-1">
+                        <a href="../index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Inventory</a>
+                        <a href="../towing/ticket/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Towing</a>
+                        <a href="../quote/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Quote</a>
+                        <a href="../receipt/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Receipts</a>
+                        <a href="index.html"
+                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg">Catalog</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="catalog-count" class="text-gray-400 text-xs font-mono hidden md:inline"></span>
+                    <span id="last-sync" class="text-gray-500 text-xs hidden md:inline"></span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- MOBILE NAV -->
+        <div class="md:hidden sticky top-[68px] z-30 bg-[#0B1221] border-b border-white/10 px-4 py-2 flex gap-2 overflow-x-auto">
+            <a href="../index.html" class="text-gray-400 text-xs font-semibold whitespace-nowrap py-1 px-3 rounded-full border border-white/10">Inventory</a>
+            <a href="../towing/ticket/index.html" class="text-gray-400 text-xs font-semibold whitespace-nowrap py-1 px-3 rounded-full border border-white/10">Towing</a>
+            <a href="../quote/index.html" class="text-gray-400 text-xs font-semibold whitespace-nowrap py-1 px-3 rounded-full border border-white/10">Quote</a>
+            <a href="../receipt/index.html" class="text-gray-400 text-xs font-semibold whitespace-nowrap py-1 px-3 rounded-full border border-white/10">Receipts</a>
+            <a href="index.html" class="text-white text-xs font-semibold whitespace-nowrap py-1 px-3 rounded-full bg-[#0047AB]">Catalog</a>
+        </div>
+
+        <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+            <!-- HEADER -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-black text-gray-900 tracking-tight">Tire Catalog</h1>
+                <p class="text-gray-500 text-sm mt-1">Browse available tires from our distributor network</p>
+            </div>
+
+            <!-- SEARCH & FILTERS -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6 space-y-4">
+                <!-- Search Bar -->
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" id="search-input"
+                        class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm"
+                        placeholder="Search by brand, model, or tire size (e.g. 265/70R17, Michelin, all-terrain)...">
+                </div>
+
+                <!-- Filter Row -->
+                <div class="flex flex-wrap gap-4 items-center">
+                    <!-- Brand -->
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Brand</label>
+                        <select id="filter-brand" class="text-sm border border-gray-200 rounded-lg py-1.5 px-3 bg-white">
+                            <option value="">All Brands</option>
+                        </select>
+                    </div>
+                    <!-- Season -->
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Season</label>
+                        <div id="filter-season" class="flex gap-1 flex-wrap">
+                            <button class="filter-btn active" data-season="">All</button>
+                            <button class="filter-btn" data-season="all-season">All-Season</button>
+                            <button class="filter-btn" data-season="summer">Summer</button>
+                            <button class="filter-btn" data-season="winter">Winter</button>
+                        </div>
+                    </div>
+                    <!-- Rim Size -->
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Rim</label>
+                        <select id="filter-rim" class="text-sm border border-gray-200 rounded-lg py-1.5 px-3 bg-white">
+                            <option value="">All Sizes</option>
+                        </select>
+                    </div>
+                    <!-- Vehicle Type -->
+                    <div>
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Type</label>
+                        <select id="filter-type" class="text-sm border border-gray-200 rounded-lg py-1.5 px-3 bg-white">
+                            <option value="">All Types</option>
+                            <option value="passenger">Passenger</option>
+                            <option value="suv">SUV / Truck</option>
+                        </select>
+                    </div>
+                    <!-- Results Count -->
+                    <div class="ml-auto">
+                        <span id="results-count" class="text-sm text-gray-500 font-medium"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATALOG GRID -->
+            <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Cards rendered by JS -->
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div id="catalog-empty" class="catalog-empty hidden">
+                <div class="text-5xl mb-4">🔍</div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">No Tires Found</h2>
+                <p class="text-sm text-gray-500 max-w-md mx-auto mb-6">Try adjusting your filters or search terms.</p>
+            </div>
+
+            <!-- NO DATA STATE -->
+            <div id="no-data-state" class="catalog-empty hidden">
+                <div class="text-5xl mb-4">📦</div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Catalog Empty</h2>
+                <p class="text-sm text-gray-500 max-w-md mx-auto mb-6">No distributor data has been imported yet. Load sample data to preview or configure the API import in the admin panel.</p>
+                <div class="flex justify-center gap-3">
+                    <button onclick="loadSample()" class="bg-[#0047AB] hover:bg-[#003380] text-white px-5 py-2.5 rounded-lg font-bold text-sm transition-all active:scale-95">
+                        Load Sample Catalog
+                    </button>
+                    <a href="../admin.html" class="border border-gray-300 hover:border-gray-400 text-gray-700 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all">
+                        Admin Panel
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- TIRE DETAIL MODAL -->
+        <div id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background-color: rgba(33,37,41,0.6);">
+            <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col" style="max-height: 90vh;">
+                <div class="flex justify-between items-center p-5 border-b">
+                    <div>
+                        <h2 id="detail-brand" class="text-lg font-black text-gray-900"></h2>
+                        <p id="detail-model" class="text-sm text-gray-500"></p>
+                    </div>
+                    <button onclick="closeDetail()" class="p-1 text-2xl font-bold text-gray-400 hover:text-gray-700">&times;</button>
+                </div>
+                <div class="p-5 overflow-y-auto flex-grow space-y-5">
+                    <!-- Info Row -->
+                    <div class="flex gap-3 flex-wrap">
+                        <span id="detail-season" class="season-badge"></span>
+                        <span id="detail-type" class="type-badge"></span>
+                        <span id="detail-year" class="type-badge"></span>
+                    </div>
+                    <!-- Sizes Table -->
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Available Sizes</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-left text-xs text-gray-500 uppercase tracking-wider border-b">
+                                        <th class="pb-2 pr-4">Size</th>
+                                        <th class="pb-2 pr-4">Load</th>
+                                        <th class="pb-2 pr-4">Speed</th>
+                                        <th class="pb-2 pr-4">RunFlat</th>
+                                        <th class="pb-2">XL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-sizes"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t flex justify-end">
+                    <button onclick="closeDetail()" class="btn btn-secondary font-semibold py-2 px-5 border border-gray-300 rounded-lg text-sm">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/treadz-core.js"></script>
+    <script src="../js/tire-catalog.js"></script>
+    <script>
+        // --- STATE ---
+        let currentFilters = { search: '', brand: '', season: '', rim: '', type: '' };
+
+        // --- DOM ---
+        const searchInput = document.getElementById('search-input');
+        const brandSelect = document.getElementById('filter-brand');
+        const rimSelect = document.getElementById('filter-rim');
+        const typeSelect = document.getElementById('filter-type');
+        const seasonBtns = document.querySelectorAll('#filter-season .filter-btn');
+        const grid = document.getElementById('catalog-grid');
+        const emptyState = document.getElementById('catalog-empty');
+        const noDataState = document.getElementById('no-data-state');
+        const resultsCount = document.getElementById('results-count');
+        const catalogCount = document.getElementById('catalog-count');
+        const lastSync = document.getElementById('last-sync');
+
+        // --- INIT ---
+        function init() {
+            const all = TireCatalog.getAll();
+            const meta = TireCatalog.getMeta();
+
+            if (all.length === 0) {
+                noDataState.classList.remove('hidden');
+                grid.classList.add('hidden');
+                catalogCount.textContent = '';
+                lastSync.textContent = '';
+                return;
+            }
+
+            noDataState.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            // Populate filter dropdowns
+            populateFilters();
+
+            // Show sync info
+            catalogCount.textContent = `${all.length} models`;
+            if (meta.lastImport) {
+                const d = new Date(meta.lastImport);
+                lastSync.textContent = `Synced ${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            }
+
+            renderCatalog();
+        }
+
+        function populateFilters() {
+            // Brands
+            const brands = TireCatalog.getBrands();
+            brandSelect.innerHTML = '<option value="">All Brands</option>';
+            brands.forEach(b => {
+                brandSelect.innerHTML += `<option value="${b}">${b}</option>`;
+            });
+
+            // Rim sizes
+            const rims = TireCatalog.getRimSizes();
+            rimSelect.innerHTML = '<option value="">All Sizes</option>';
+            rims.forEach(r => {
+                rimSelect.innerHTML += `<option value="${r}">${r}"</option>`;
+            });
+        }
+
+        // --- RENDER ---
+        function renderCatalog() {
+            let results;
+
+            if (currentFilters.search) {
+                results = TireCatalog.search(currentFilters.search);
+            } else {
+                results = TireCatalog.getAll();
+            }
+
+            // Apply filters
+            if (currentFilters.brand) {
+                results = results.filter(t => t.vendor_name === currentFilters.brand);
+            }
+            if (currentFilters.season) {
+                results = results.filter(t => t.season === currentFilters.season);
+            }
+            if (currentFilters.type) {
+                results = results.filter(t => t.car_type_str === currentFilters.type);
+            }
+            if (currentFilters.rim) {
+                results = results.filter(t =>
+                    (t.sizes || []).some(s => String(s.rim) === String(currentFilters.rim))
+                );
+            }
+
+            // Sort: alphabetical by brand then model
+            results.sort((a, b) => {
+                const brand = (a.vendor_name || '').localeCompare(b.vendor_name || '');
+                if (brand !== 0) return brand;
+                return (a.model_name || '').localeCompare(b.model_name || '');
+            });
+
+            resultsCount.textContent = `${results.length} result${results.length !== 1 ? 's' : ''}`;
+
+            if (results.length === 0) {
+                grid.innerHTML = '';
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            grid.innerHTML = results.map(tire => renderCard(tire)).join('');
+        }
+
+        function renderCard(tire) {
+            const seasonClass = tire.season ? `season-${tire.season}` : 'season-all-season';
+            const seasonLabel = (tire.season || 'all-season').replace('-', ' ');
+            const typeLabel = tire.car_type_str || 'passenger';
+
+            // Show first 4 sizes, collapse rest
+            const allSizes = tire.sizes || [];
+            const visibleSizes = allSizes.slice(0, 4);
+            const hiddenCount = allSizes.length - 4;
+
+            const sizeChips = visibleSizes.map(s => {
+                const isMatch = currentFilters.rim && String(s.rim) === String(currentFilters.rim);
+                return `<span class="size-chip ${isMatch ? 'match' : ''}">${s.width}/${s.profile}R${s.rim}</span>`;
+            }).join('');
+
+            const moreLabel = hiddenCount > 0 ? `<span class="text-xs text-blue-600 font-semibold">+${hiddenCount} more</span>` : '';
+
+            return `
+                <div class="catalog-card cursor-pointer" onclick="showDetail('${tire.model_id}')">
+                    <div class="p-4">
+                        <div class="flex items-start gap-3 mb-3">
+                            <div class="tire-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <circle cx="12" cy="12" r="9"/>
+                                    <circle cx="12" cy="12" r="4"/>
+                                    <circle cx="12" cy="12" r="1"/>
+                                </svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold text-[#0047AB] uppercase tracking-wider">${tire.vendor_name || 'Unknown'}</p>
+                                <h3 class="text-sm font-bold text-gray-900 leading-tight truncate">${tire.model_name || 'Unknown Model'}</h3>
+                                <div class="flex gap-1.5 mt-1">
+                                    <span class="season-badge ${seasonClass}">${seasonLabel}</span>
+                                    <span class="type-badge">${typeLabel}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1 items-center">
+                            ${sizeChips}
+                            ${moreLabel}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- DETAIL MODAL ---
+        function showDetail(modelId) {
+            const tire = TireCatalog.getAll().find(t => t.model_id === modelId);
+            if (!tire) return;
+
+            document.getElementById('detail-brand').textContent = tire.vendor_name;
+            document.getElementById('detail-model').textContent = tire.model_name;
+
+            const seasonEl = document.getElementById('detail-season');
+            const seasonClass = tire.season ? `season-${tire.season}` : 'season-all-season';
+            seasonEl.className = `season-badge ${seasonClass}`;
+            seasonEl.textContent = (tire.season || 'all-season').replace('-', ' ');
+
+            document.getElementById('detail-type').textContent = tire.car_type_str || 'passenger';
+            document.getElementById('detail-year').textContent = tire.model_year ? `MY ${tire.model_year}` : '';
+
+            const tbody = document.getElementById('detail-sizes');
+            tbody.innerHTML = (tire.sizes || []).map(s => `
+                <tr class="border-b border-gray-100">
+                    <td class="py-2 pr-4 font-semibold">${s.width}/${s.profile}R${s.rim}</td>
+                    <td class="py-2 pr-4">${s.load_index || '-'}</td>
+                    <td class="py-2 pr-4">${s.speed_rating || '-'}</td>
+                    <td class="py-2 pr-4">${s.runflat_flag === 'on' ? '✓ Yes' : '-'}</td>
+                    <td class="py-2">${s.xl_flag === 'on' ? '✓ XL' : '-'}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+            document.getElementById('detail-modal').classList.add('flex');
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-modal').classList.add('hidden');
+            document.getElementById('detail-modal').classList.remove('flex');
+        }
+
+        // --- SAMPLE DATA ---
+        function loadSample() {
+            const count = TireCatalog.loadSampleData();
+            init();
+        }
+
+        // --- EVENT LISTENERS ---
+        let searchDebounce;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                currentFilters.search = searchInput.value.trim();
+                renderCatalog();
+            }, 200);
+        });
+
+        brandSelect.addEventListener('change', () => {
+            currentFilters.brand = brandSelect.value;
+            renderCatalog();
+        });
+
+        rimSelect.addEventListener('change', () => {
+            currentFilters.rim = rimSelect.value;
+            renderCatalog();
+        });
+
+        typeSelect.addEventListener('change', () => {
+            currentFilters.type = typeSelect.value;
+            renderCatalog();
+        });
+
+        seasonBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                seasonBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilters.season = btn.dataset.season;
+                renderCatalog();
+            });
+        });
+
+        // Close modal on backdrop click
+        document.getElementById('detail-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('detail-modal')) closeDetail();
+        });
+
+        // ESC to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDetail();
+        });
+
+        // --- BOOT ---
+        init();
+    </script>
+</body>
+
+</html>
