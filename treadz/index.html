@@ -14,64 +14,56 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/treadz-core.js"></script>
+    <script src="js/tire-catalog.js"></script>
+    <style>
+        .catalog-card {
+            transition: all 0.2s;
+        }
+
+        .catalog-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+    </style>
 </head>
 
-<body class="antialiased">
+<body class="antialiased bg-slate-50">
     <div id="app">
         <div id="toast" class="toast fixed top-5 right-5 z-50 p-4 shadow-lg flex items-center"></div>
-        <nav class="main-nav sticky top-0 z-40 p-4">
+        <nav class="main-nav sticky top-0 z-40 p-4 bg-[#0B1221] text-white shadow-md">
             <div class="max-w-7xl mx-auto flex items-center justify-between">
-                
+
                 <div class="flex items-center gap-8">
                     <a href="index.html" class="flex-shrink-0 relative group">
                         <img src="treadztntLogo.png" alt="Treadz" class="h-10 w-auto">
-                        
+
                         <div onclick="window.location.href='admin.html'" class="absolute inset-0 z-50 cursor-default"
                             style="width: 20px; height: 20px; left: 0; top: 0;" title=""></div>
                     </a>
 
-                    
+
                     <div class="hidden md:block h-6 w-px bg-white/20"></div>
 
-                    
+
                     <div class="hidden md:flex items-center gap-1">
                         <a href="index.html"
-                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg">Inventory</a>
+                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg bg-white/10 text-white">Tires</a>
                         <a href="towing/ticket/index.html"
                             class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Towing</a>
                         <a href="quote/index.html"
                             class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Quote</a>
                         <a href="receipt/index.html"
                             class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Receipts</a>
-                        <a href="catalog/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Catalog</a>
                     </div>
                 </div>
 
-                
+
                 <div class="flex items-center gap-2">
-                    <button id="audit-history-btn"
-                        class="btn btn-secondary text-sm font-medium py-2 px-3 flex items-center gap-2">
-                        <span class="hidden xl:inline">History</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="xl:hidden">
-                            <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
-                        </svg>
-                    </button>
-                    <button id="audit-btn"
-                        class="btn btn-secondary text-sm font-medium py-2 px-3 flex items-center gap-2">
-                        <span class="hidden xl:inline">Audit</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="xl:hidden">
-                            <path
-                                d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 9h6m-6 4h6m-6-8h6">
-                            </path>
-                        </svg>
-                    </button>
                     <button id="add-tires-btn"
-                        class="btn btn-primary font-bold py-2 px-4 shadow-lg flex items-center gap-2">
+                        class="btn btn-primary font-bold py-2 px-4 shadow-lg flex items-center gap-2 bg-[#FF6600] text-white hover:bg-[#e65c00]">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -84,34 +76,75 @@
         </nav>
 
         <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-            <section class="mb-8 p-6 container-box">
-                <div class="search-bar-wrapper max-w-2xl mx-auto">
-                    <div class="search-bar flex items-center p-2">
+            <section class="mb-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <div class="relative max-w-3xl mx-auto mb-4">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
                         <input type="text" id="search-input"
-                            class="w-full bg-transparent text-xl focus:outline-none px-3"
-                            placeholder="Search or Add a tire size...">
+                            class="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-lg shadow-sm"
+                            placeholder="Search Inventory & Catalog (e.g. 265/70R17, Michelin)...">
+                        <button id="clear-search-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center hidden">
+                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer"
+                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
                     </div>
-                    <button id="clear-search-btn" class="clear-search-btn p-2 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+
+
+                    <div class="flex flex-wrap items-center gap-3 justify-center">
+                        <select id="filter-distributor"
+                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
+                            <option value="">All Distributors</option>
+                        </select>
+                        <select id="filter-brand"
+                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
+                            <option value="">All Brands</option>
+                        </select>
+                        <select id="filter-rim"
+                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2"
+                            style="min-width: 100px;">
+                            <option value="">All Rims</option>
+                        </select>
+                        <select id="filter-type"
+                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
+                            <option value="">All Types</option>
+                            <option value="passenger">Passenger</option>
+                            <option value="suv">SUV / Truck</option>
+                            <option value="trailer">Trailer</option>
+                        </select>
+                        <select id="filter-ply"
+                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
+                            <option value="">Ply / Rating</option>
+                            <option value="xl">XL (Extra Load)</option>
+                            <option value="10">10-Ply (Load E)</option>
+                            <option value="12">12-Ply (Load F)</option>
+                        </select>
+                        <select id="filter-sort"
+                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2 ml-auto">
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="brand">Brand Name</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div id="search-actions" class="max-w-2xl mx-auto mt-4"></div>
-                <div id="external-search-container" class="max-w-5xl mx-auto mt-6"></div>
+                <div id="external-search-container" class="max-w-5xl mx-auto mt-2"></div>
             </section>
 
             <div id="search-results-container" class="mb-8"></div>
 
-            <div class="flex justify-end mb-4">
-                <select id="rim-filter-select" class="btn btn-secondary font-semibold py-2 px-4">
-                    <option value="all">Filter by Rim Size: ALL</option>
-                </select>
-            </div>
-
-            <section class="mb-8">
+            <section class="mb-8 hidden hidden">
                 <button id="activity-log-toggle"
                     class="w-full text-left p-4 rounded-xl bg-white border border-gray-200 shadow-sm flex justify-between items-center">
                     <h2 class="text-xl font-semibold text-gray-800">Activity Log</h2>
@@ -128,6 +161,49 @@
 
 
             <div id="inventory-container"></div>
+
+
+            <section id="catalog-section" class="mt-12">
+                <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            Distributor Catalog
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-1">Browse and add tires from connected distributors</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="catalog-count-badge"
+                            class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+
+                </div>
+
+                <div id="catalog-empty"
+                    class="hidden text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                    <div class="text-4xl mb-3">🔍</div>
+                    <h3 class="text-lg font-medium text-gray-900">No catalog items found</h3>
+                    <p class="text-gray-500">Try adjusting your filters or search terms.</p>
+                </div>
+
+                <div id="catalog-no-data" class="hidden text-center py-12 bg-blue-50 rounded-xl border border-blue-100">
+                    <div class="text-4xl mb-3">☁️</div>
+                    <h3 class="text-lg font-bold text-blue-900">Catalog is Empty</h3>
+                    <p class="text-blue-700 mb-4">Connect a distributor API or import a price list to see items here.
+                    </p>
+                    <a href="admin.html"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Go
+                        to Admin</a>
+                </div>
+            </section>
+
             <div id="empty-state" class="text-center py-20">
                 <h2 class="text-2xl font-semibold text-gray-800">Inventory is Empty</h2>
                 <p class="text-gray-500 mt-2">Add your first tire using the search bar above.</p>
@@ -158,7 +234,7 @@
 
     </div>
 
-    
+
     <div id="entry-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
         style="background-color: rgba(33, 37, 41, 0.6);">
         <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col"
@@ -205,7 +281,7 @@
         </div>
     </div>
 
-    
+
     <div id="audit-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
         style="background-color: rgba(33, 37, 41, 0.6);">
         <div class="bg-white w-full max-w-4xl p-6 rounded-xl shadow-2xl m-4 border border-gray-200 flex flex-col"
@@ -223,7 +299,7 @@
                     </select>
                     <select id="audit-rim-select" class="data-input w-full">
                         <option value="all" selected>Rim Size: ALL</option>
-                        
+
                     </select>
                 </div>
                 <textarea id="audit-paste-area" rows="12"
@@ -244,7 +320,7 @@
         </div>
     </div>
 
-    
+
     <div id="audit-history-modal" class="fixed inset-0 z-50 hidden items-center justify-center"
         style="background-color: rgba(33, 37, 41, 0.6);">
         <div class="bg-white w-full max-w-6xl p-6 rounded-xl shadow-2xl m-4 border flex flex-col"

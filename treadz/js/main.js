@@ -1,39 +1,55 @@
 // Created with <3 by Blazinik
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     const getEl = (id) => document.getElementById(id);
 
     let inventory = [];
     let activityLog = [];
     let auditHistory = [];
-    let processedAuditData = null;
-    let currentEntryMode = 'batch';
-    let analyticsChart = null;
 
-    const distributors = [
-        { name: 'ATD', urlTemplate: 'https://atdonline.com/es-search/refine?text={QUERY}', queryFormat: 'p-metric-no-slash' },
-        { name: 'BENTIRE', urlTemplate: 'https://bentire.tireweb.com/Search/{QUERY}', queryFormat: 'p-metric-no-slash' },
-        { name: 'ATLANTIC', urlTemplate: 'https://ecommerce.atlantic-tire.com/Search/ByTireSize/{QUERY}?snowTiresOnly=False', queryFormat: 'p-metric-no-slash' },
-        { name: 'S&S', urlTemplate: 'https://ss2.treadsearch.com/products/tires/#{QUERY}', queryFormat: 'p-metric-no-slash' },
-        { name: 'TIREHUB', urlTemplate: 'https://now.tirehub.com/tiresearch/result/?q={QUERY}', queryFormat: 'p-metric-no-slash' },
-        { name: 'Justice Tire', urlTemplate: 'https://www.justicetire.com/?token=u4fl716t4i', queryFormat: 'none' },
-        { name: 'NTW', urlTemplate: 'https://order.ntw.com/ntwtips/distribution/search/', queryFormat: 'none' }
-    ];
+    // Catalog State
+    let catalogItems = [];
+    let catalogFilters = {
+        distributor: '',
+        brand: '',
+        rim: '',
+        type: '',
+        ply: '',
+        sort: 'price_asc'
+    };
 
-    
     const loadData = () => {
         inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV7')) || [];
         activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
         auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV7')) || [];
+
+        // Initialize Catalog
+        if (typeof TireCatalog !== 'undefined') {
+            catalogItems = TireCatalog.getAll();
+            if (catalogItems.length === 0) {
+                TireCatalog.loadSampleData();
+                catalogItems = TireCatalog.getAll();
+            }
+            // Augment with mock prices for sorting if missing
+            catalogItems.forEach(item => {
+                if (!item._price) {
+                    // Mock price based on Rim size and randomness
+                    const base = 50;
+                    const rimFactor = (parseInt(item.sizes?.[0]?.rim) || 15) * 5;
+                    item._price = base + rimFactor + (Math.random() * 50);
+                }
+            });
+        }
     };
+
     const saveData = () => {
         localStorage.setItem('treadzTireInventoryV7', JSON.stringify(inventory));
         localStorage.setItem('treadzActivityLogV7', JSON.stringify(activityLog));
         localStorage.setItem('treadzAuditHistoryV7', JSON.stringify(auditHistory));
     };
 
-    
+
     const parseTireSize = (input) => {
         if (!input) return null;
         const cleaned = input.replace(/\D/g, '');
@@ -54,14 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (size.type === 'flotation') return `${size.diameter}x${size.width.toFixed(2)}R${size.rim}`;
         return `${size.width}/${size.ratio}R${size.rim}`;
     };
-    const formatQueryForDistributor = (rawInput, size, format) => {
-        if (format === 'none') return '';
-        if (format === 'p-metric-no-slash') {
-            if (size && size.type === 'p-metric') return `${size.width}${size.ratio}${size.rim}`;
-            return rawInput.replace(/[\s/rR.-]/g, '');
-        }
-        return rawInput;
-    };
+
     const showToast = (message) => {
         const toast = getEl('toast');
         toast.innerHTML = `<p class="font-medium">${message}</p>`;
@@ -69,20 +78,27 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => toast.classList.remove('show'), 3000);
     };
 
-    
+    const addLogEntry = (description, type = 'System', details = {}) => {
+        const entry = {
+            id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+            timestamp: new Date().toISOString(),
+            description, type, details
+        };
+        activityLog.unshift(entry);
+        if (activityLog.length > 50) activityLog.pop();
+        saveData();
+    };
+
     const addTire = (parsedSize, quantity = 1, condition = 'used', options = {}) => {
         const { fromSearch = false, suppressToast = false } = options;
         if (!parsedSize) return;
         const sizeString = JSON.stringify(parsedSize);
         const existingTire = inventory.find(t => JSON.stringify(t.size) === sizeString && t.condition === condition);
 
-        let isUpdate = false;
-
         if (existingTire) {
-            existingTire.quantity += quantity;
-            isUpdate = true;
+            existingTire.quantity += parseInt(quantity);
         } else {
-            inventory.unshift({ size: parsedSize, quantity: quantity, condition: condition });
+            inventory.unshift({ size: parsedSize, quantity: parseInt(quantity), condition: condition });
         }
 
         if (!suppressToast) {
@@ -92,12 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Added', { quantityAdded: quantity });
         saveData();
-
-        if (isUpdate) {
-            updateTireQuantityDOM(parsedSize, condition, existingTire.quantity);
-        } else {
-            renderAll();
-        }
+        renderAll();
     };
 
     const updateTireQuantity = (parsedSize, condition, newQuantity) => {
@@ -116,85 +127,107 @@ document.addEventListener('DOMContentLoaded', () => {
                     addLogEntry(`${formatTireSize(parsedSize)} (${condition})`, 'Sold', { quantitySold: -change });
                     showToast(`Sold ${-change}x ${formatTireSize(parsedSize)}.`);
                 }
-
                 saveData();
-                updateTireQuantityDOM(parsedSize, condition, newQuantity);
+                renderAll();
             }
         }
     };
 
-    const updateTireQuantityDOM = (parsedSize, condition, newQuantity) => {
-        const cardId = `card-${formatTireSize(parsedSize).replace(/[\/\sR.]/g, '')}-${condition}`;
-        const cardElement = document.getElementById(cardId);
-
-        if (newQuantity <= 0) {
-            inventory = inventory.filter(t => !(JSON.stringify(t.size) === JSON.stringify(parsedSize) && t.condition === condition));
-            if (cardElement) {
-                cardElement.remove();
-            }
-        } else {
-            if (cardElement) {
-                const display = cardElement.querySelector('.stock-quantity-display');
-                const input = cardElement.querySelector('.quantity-edit-input');
-                if (display) display.textContent = newQuantity;
-                if (input) input.value = newQuantity;
-            }
-        }
-
-        
-        const newTotal = inventory.filter(t => t.condition === 'new').reduce((sum, t) => sum + t.quantity, 0);
-        const usedTotal = inventory.filter(t => t.condition === 'used').reduce((sum, t) => sum + t.quantity, 0);
-        const newTitle = document.getElementById('new-tires-title');
-        const usedTitle = document.getElementById('used-tires-title');
-        if (newTitle) newTitle.textContent = `New Tire Inventory (${newTotal})`;
-        if (usedTitle) usedTitle.textContent = `Used Tire Inventory (${usedTotal})`;
-
-        if (getEl('inventory-container').querySelectorAll('.tire-card').length === 0) {
-            renderInventory(); 
-        }
-    }
-
-
-    
     const renderAll = () => {
         renderInventory();
-        renderSearchResults();
-        renderActivityLog();
+        renderCatalog();
         renderSearchActions();
-        renderExternalSearches();
-        renderAnalytics();
-        populateMainRimFilter();
-        getEl('clear-search-btn').style.display = getEl('search-input').value ? 'block' : 'none';
+        renderActivityLog();
+
+        const searchVal = getEl('search-input').value;
+        const clearBtn = getEl('clear-search-btn');
+        if (clearBtn) clearBtn.style.display = searchVal ? 'block' : 'none';
+
+        if (searchVal.trim() !== '') {
+            renderSearchResults();
+        } else {
+            getEl('search-results-container').innerHTML = '';
+        }
+    };
+
+    const populateFilters = () => {
+        if (!catalogItems.length) return;
+
+        // Populate Brands
+        const brandSelect = getEl('filter-brand');
+        const brands = new Set(catalogItems.map(i => i.vendor_name).filter(Boolean));
+        [...brands].sort().forEach(b => {
+            if (![...brandSelect.options].some(o => o.value === b)) {
+                const opt = document.createElement('option');
+                opt.value = b;
+                opt.textContent = b;
+                brandSelect.appendChild(opt);
+            }
+        });
+
+        // Populate Rims
+        const rimSelect = getEl('filter-rim');
+        const rims = new Set();
+        catalogItems.forEach(i => {
+            (i.sizes || []).forEach(s => { if (s.rim) rims.add(parseInt(s.rim)); });
+        });
+        [...rims].sort((a, b) => a - b).forEach(r => {
+            if (![...rimSelect.options].some(o => o.value == r)) {
+                const opt = document.createElement('option');
+                opt.value = r;
+                opt.textContent = `${r}"`;
+                rimSelect.appendChild(opt);
+            }
+        });
+
+        // Populate Distributor
+        const distSelect = getEl('filter-distributor');
+        if (typeof TireCatalog !== 'undefined' && TireCatalog.getSources) {
+            const sources = TireCatalog.getSources();
+            sources.forEach(s => {
+                if (![...distSelect.options].some(o => o.value === s.id)) {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.name;
+                    distSelect.appendChild(opt);
+                }
+            });
+        }
     };
 
     const renderInventory = () => {
         const container = getEl('inventory-container');
         container.innerHTML = '';
         const emptyState = getEl('empty-state');
-        const rimFilterValue = getEl('rim-filter-select').value;
 
-        let filteredInventory = inventory;
-        if (rimFilterValue !== 'all') {
-            filteredInventory = inventory.filter(t => t.size.rim == rimFilterValue);
-        }
+        const searchTerm = getEl('search-input').value.trim().toLowerCase();
+        const rimFilter = getEl('filter-rim').value;
 
-        if (filteredInventory.length === 0) {
-            emptyState.classList.remove('hidden');
-            container.classList.add('hidden');
-            if (inventory.length > 0) { 
-                emptyState.querySelector('h2').textContent = `No tires found for Rim Size ${rimFilterValue}"`;
-                emptyState.querySelector('p').textContent = 'Select "ALL" to see your full inventory.';
-            } else {
-                emptyState.querySelector('h2').textContent = 'Inventory is Empty';
-                emptyState.querySelector('p').textContent = 'Add your first tire using the search bar above.';
+        let filtered = inventory.filter(t => {
+            let match = true;
+            if (searchTerm) {
+                const searchStr = `${t.size.width}/${t.size.ratio}R${t.size.rim} ${t.condition}`.toLowerCase();
+                if (!searchStr.includes(searchTerm.replace(/[\/\s-]/g, ''))) match = false;
             }
+            if (match && rimFilter && t.size.rim != rimFilter) match = false;
+            return match;
+        });
+
+        if (inventory.length === 0) {
+            if (emptyState) emptyState.classList.remove('hidden');
             return;
         }
 
-        emptyState.classList.add('hidden');
+        if (filtered.length === 0 && searchTerm) {
+            container.innerHTML = `<div class="p-4 text-center text-gray-500 italic">No inventory matches for "${searchTerm}"</div>`;
+            if (emptyState) emptyState.classList.add('hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('hidden');
         container.classList.remove('hidden');
 
-        const sorted = [...filteredInventory].sort((a, b) => {
+        const sorted = [...filtered].sort((a, b) => {
             if (a.size.rim !== b.size.rim) return a.size.rim - b.size.rim;
             return (a.size.width || a.size.diameter) - (b.size.width || b.size.diameter);
         });
@@ -209,15 +242,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const createInventorySection = (title, tires) => {
         const section = document.createElement('section');
         section.className = 'mb-8';
-
         const total = tires.reduce((acc, t) => acc + t.quantity, 0);
         const titleId = title.toLowerCase().includes('new') ? 'new-tires-title' : 'used-tires-title';
-        section.innerHTML = `<h2 id="${titleId}" class="text-xl font-semibold mb-4" style="color: var(--primary-color);">${title} (${total})</h2>`;
-
+        section.innerHTML = `<h2 id="${titleId}" class="text-xl font-semibold mb-4 border-b pb-2 flex justify-between">
+            <span>${title}</span>
+            <span class="text-gray-500 text-sm font-normal self-center">${total} tires</span>
+        </h2>`;
         const grid = document.createElement('div');
-        grid.className = 'inventory-grid';
+        grid.className = 'inventory-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
         tires.forEach(tire => grid.appendChild(createTireCardElement(tire)));
-
         section.appendChild(grid);
         return section;
     };
@@ -226,30 +259,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardId = `card-${formatTireSize(tire.size).replace(/[\/\sR.]/g, '')}-${tire.condition}`;
         const card = document.createElement('div');
         card.id = cardId;
-        card.className = `tire-card p-4 flex justify-between items-center ${matchClass}`;
+        card.className = `tire-card bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex justify-between items-center ${matchClass}`;
+
+        const sizeStr = formatTireSize(tire.size);
+
         card.innerHTML = `
             <div class="pr-4">
-                <p class="font-mono text-lg font-semibold">
-                    ${formatTireSize(tire.size)}
-                    <span class="badge badge-${tire.condition} ml-2">${tire.condition.toUpperCase()}</span>
+                <p class="font-mono text-lg font-bold text-gray-800">
+                    ${sizeStr}
+                    <span class="ml-2 text-xs uppercase tracking-wider font-bold px-2 py-0.5 rounded ${tire.condition === 'new' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${tire.condition}</span>
                 </p>
-                <p class="text-xs text-gray-500 stock-quantity-wrapper" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
+                <p class="text-sm text-gray-500 stock-quantity-wrapper mt-1">
                     Stock: 
-                    <span class="stock-quantity-display font-semibold">${tire.quantity}</span>
-                    <input type="number" value="${tire.quantity}" class="quantity-edit-input hidden">
+                    <span class="stock-quantity-display font-semibold text-gray-900">${tire.quantity}</span>
                 </p>
             </div>
-            <div class="card-actions flex flex-col space-y-2" data-size='${JSON.stringify(tire.size)}' data-condition="${tire.condition}">
-                <button class="btn btn-secondary h-8 w-8 rounded-full font-bold text-lg adjust-qty-btn" data-amount="1">+</button>
-                <button class="btn btn-secondary h-8 w-8 rounded-full font-bold text-lg adjust-qty-btn" data-amount="-1">-</button>
+            <div class="flex items-center gap-2">
+                <button class="btn btn-secondary h-8 w-8 rounded-full flex items-center justify-center font-bold text-lg hover:bg-gray-200" onclick="window.handleQtyClick('${sizeStr}', '${tire.condition}', -1)">-</button>
+                <button class="btn btn-secondary h-8 w-8 rounded-full flex items-center justify-center font-bold text-lg hover:bg-gray-200" onclick="window.handleQtyClick('${sizeStr}', '${tire.condition}', 1)">+</button>
             </div>`;
         return card;
+    };
+
+    window.handleQtyClick = (sizeStr, condition, change) => {
+        const tire = inventory.find(t => formatTireSize(t.size) === sizeStr && t.condition === condition);
+        if (tire) {
+            updateTireQuantity(tire.size, condition, tire.quantity + change);
+        }
     };
 
     const renderSearchResults = () => {
         const term = getEl('search-input').value.trim();
         const searchSize = parseTireSize(term);
-        getEl('search-results-container').innerHTML = '';
+        const container = getEl('search-results-container');
+        container.innerHTML = '';
+
+        if (!term) return;
 
         let matches = [];
         if (searchSize) {
@@ -261,11 +306,170 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (matches.length === 0) return;
 
-        let html = '<h2 class="text-xl font-semibold text-gray-800 mb-4" style="color: var(--primary-color);">Search Results</h2>';
-        html += '<div class="space-y-3">';
-        matches.forEach(t => { html += createTireCardElement(t, 'exact-match').outerHTML; });
+        let html = '<h2 class="text-xl font-semibold text-gray-800 mb-4 px-1" style="color: var(--primary-color);">In Stock Results</h2>';
+        html += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+        matches.forEach(t => { html += createTireCardElement(t, 'border-blue-500 ring-1 ring-blue-500').outerHTML; });
         html += '</div>';
-        getEl('search-results-container').innerHTML = html;
+        container.innerHTML = html;
+    };
+
+    const renderCatalog = () => {
+        const grid = getEl('catalog-grid');
+        const empty = getEl('catalog-empty');
+        const noData = getEl('catalog-no-data');
+        const badge = getEl('catalog-count-badge');
+
+        if (catalogItems.length === 0) {
+            grid.innerHTML = '';
+            noData.classList.remove('hidden');
+            badge.textContent = '0';
+            return;
+        }
+        noData.classList.add('hidden');
+
+        const searchTerm = getEl('search-input').value.trim().toLowerCase();
+
+        let filtered = catalogItems.filter(item => {
+            if (searchTerm) {
+                const searchStr = [
+                    item.vendor_name,
+                    item.model_name,
+                    item.size_display,
+                    item.car_type_str,
+                    ...(item.sizes || []).map(s => `${s.width}/${s.profile}R${s.rim}`)
+                ].join(' ').toLowerCase();
+                const terms = searchTerm.split(/\s+/);
+                if (!terms.every(t => searchStr.includes(t))) return false;
+            }
+            if (catalogFilters.distributor && item._sourceId !== catalogFilters.distributor) return false;
+            if (catalogFilters.brand && item.vendor_name !== catalogFilters.brand) return false;
+            if (catalogFilters.type && item.car_type_str !== catalogFilters.type) return false;
+            if (catalogFilters.rim) {
+                if (!(item.sizes || []).some(s => s.rim == catalogFilters.rim)) return false;
+            }
+            if (catalogFilters.ply) {
+                const hasPly = (item.sizes || []).some(s => {
+                    if (catalogFilters.ply === 'xl') return s.xl_flag === 'on' || s.xl === 'on';
+                    const li = parseInt(s.load_index);
+                    if (catalogFilters.ply === '10') return li >= 115 && li <= 123;
+                    if (catalogFilters.ply === '12') return li > 123;
+                    return false;
+                });
+                if (!hasPly) return false;
+            }
+            return true;
+        });
+
+        badge.textContent = filtered.length;
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+        }
+        empty.classList.add('hidden');
+
+        filtered.sort((a, b) => {
+            if (catalogFilters.sort === 'brand') return (a.vendor_name || '').localeCompare(b.vendor_name || '');
+            if (catalogFilters.sort === 'price_desc') return (b._price || 0) - (a._price || 0);
+            return (a._price || 0) - (b._price || 0);
+        });
+
+        const displayItems = filtered.slice(0, 24);
+
+        grid.innerHTML = displayItems.map(item => {
+            const price = item._price ? `$${item._price.toFixed(2)}` : 'Call';
+
+            // Escape JSON properly for onclick attribute
+            const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+
+            return `
+             <div class="catalog-card bg-white rounded-xl border border-gray-200 p-4 flex flex-col justify-between h-full relative">
+                  <div class="absolute top-3 right-3 text-xs font-bold text-gray-400 uppercase tracking-widest">${item._sourceId || 'Local'}</div>
+                  <div class="mb-4">
+                       <h3 class="font-bold text-lg text-gray-900 leading-tight">${item.vendor_name}</h3>
+                       <p class="text-blue-600 font-medium">${item.model_name}</p>
+                       <div class="flex items-center gap-2 mt-2">
+                            <span class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded text-gray-600 capitalize">${item.car_type_str || 'Tire'}</span>
+                            <span class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded text-gray-600 capitalize">${item.season || 'All Season'}</span>
+                       </div>
+                  </div>
+                  <div>
+                      <div class="flex justify-between items-end mb-3">
+                          <div class="text-2xl font-bold text-gray-900">${price}</div>
+                          <div class="text-sm text-gray-500 mb-1">${(item.sizes || []).length} Sizes</div>
+                      </div>
+                      <button onclick='window.openSizeSelector(${itemJson})' 
+                          class="w-full btn btn-secondary hover:bg-blue-600 hover:text-white font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                          Add to Inventory
+                      </button>
+                  </div>
+             </div>
+             `;
+        }).join('');
+    };
+
+    window.openSizeSelector = (item) => {
+        const modalId = 'size-modal';
+        let modal = getEl(modalId);
+        if (modal) modal.remove();
+
+        const sizesHtml = (item.sizes || []).map(s => {
+            const str = `${s.width}/${s.profile}R${s.rim}`;
+            const specs = [s.load_index, s.speed_rating].filter(Boolean).join('');
+            const ext = [s.xl_flag === 'on' ? 'XL' : '', s.runflat_flag === 'on' ? 'RFT' : ''].filter(Boolean).join(' ');
+
+            return `
+              <div class="flex items-center justify-between p-3 border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                  <div>
+                      <span class="font-mono font-bold text-lg text-gray-800">${str}</span>
+                      <span class="text-gray-500 text-sm ml-2">${specs} ${ext}</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                       <button onclick="window.addToInvFromCatalog('${str}', 'used')" class="text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-full uppercase">Add Used</button>
+                       <button onclick="window.addToInvFromCatalog('${str}', 'new')" class="text-xs font-bold text-green-700 bg-green-100 hover:bg-green-200 px-3 py-1.5 rounded-full uppercase">Add New</button>
+                  </div>
+              </div>
+              `;
+        }).join('');
+
+        const html = `
+         <div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+              <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                   <div class="p-6 border-b border-gray-100 flex justify-between items-start">
+                        <div>
+                             <h3 class="text-2xl font-bold text-gray-900">${item.vendor_name} ${item.model_name}</h3>
+                             <p class="text-gray-500">Select a size to add to inventory</p>
+                        </div>
+                        <button onclick="document.getElementById('${modalId}').remove()" class="text-gray-400 hover:text-gray-600">
+                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                   </div>
+                   <div class="overflow-y-auto p-4">
+                        ${sizesHtml}
+                   </div>
+                   <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl text-center text-sm text-gray-400">
+                        Total ${item.sizes.length} sizes available
+                   </div>
+              </div>
+         </div>
+         `;
+
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        document.body.appendChild(div.firstElementChild);
+    };
+
+    window.addToInvFromCatalog = (sizeStr, condition) => {
+        const m = getEl('size-modal');
+        if (m) m.remove();
+        const parsed = parseTireSize(sizeStr);
+        if (parsed) {
+            addTire(parsed, 1, condition, { suppressToast: false });
+        } else {
+            showToast("Error parsing size");
+        }
     };
 
     const renderSearchActions = () => {
@@ -275,475 +479,89 @@ document.addEventListener('DOMContentLoaded', () => {
         if (parsed) {
             const formatted = formatTireSize(parsed);
             getEl('search-actions').innerHTML = `
-                <div class="flex items-center justify-center gap-4">
-                    <button id="add-single-btn" class="btn btn-primary flex-grow py-2.5 px-4 font-semibold">Add "${formatted}"</button>
-                    <label class="toggle-label text-sm font-medium text-gray-700">
-                        USED
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="condition-toggle-single">
-                            <span class="slider"></span>
-                        </div>
-                        NEW
-                    </label>
+                <div class="flex items-center justify-center gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <span class="font-medium text-blue-800">Quick Add:</span>
+                    <button id="add-single-btn-used" class="btn bg-white border border-gray-200 shadow-sm text-amber-600 hover:bg-amber-50 font-bold py-2 px-4 rounded-lg">Add USED ${formatted}</button>
+                    <button id="add-single-btn-new" class="btn bg-white border border-gray-200 shadow-sm text-green-600 hover:bg-green-50 font-bold py-2 px-4 rounded-lg">Add NEW ${formatted}</button>
                 </div>`;
-            getEl('add-single-btn').onclick = () => {
-                const condition = getEl('condition-toggle-single').checked ? 'new' : 'used';
-                addTire(parsed, 1, condition, { fromSearch: true });
-            };
+            getEl('add-single-btn-used').onclick = () => addTire(parsed, 1, 'used', { fromSearch: true });
+            getEl('add-single-btn-new').onclick = () => addTire(parsed, 1, 'new', { fromSearch: true });
         }
-    };
-
-    const renderExternalSearches = () => {
-        const term = getEl('search-input').value.trim();
-        const parsed = parseTireSize(term);
-        const container = getEl('external-search-container');
-        container.innerHTML = '';
-        if (term) {
-            const linksHTML = distributors.map(dist => {
-                const query = formatQueryForDistributor(term, parsed, dist.queryFormat);
-                if (dist.queryFormat !== 'none' && !query) return '';
-                const url = dist.urlTemplate.replace('{QUERY}', query);
-                return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="distributor-btn" data-distributor="${dist.name}"><span>${dist.name}</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`;
-            }).join('');
-            container.innerHTML = `<h3 class="text-sm font-semibold text-gray-500 mb-3 text-center">Check Distributors</h3><div class="flex flex-wrap gap-4 justify-center">${linksHTML}</div>`;
-        }
-    };
-
-    const addLogEntry = (term, action, details = {}) => {
-        if (action === 'Searched') {
-            const lastLog = activityLog[0];
-            if (lastLog && lastLog.term === term && lastLog.action === 'Searched') {
-                const now = new Date();
-                const lastLogTime = new Date(lastLog.timestamp);
-                if ((now - lastLogTime) / (1000 * 60) < 5) return;
-            }
-            const parsedSize = parseTireSize(term);
-            details.inStock = inventory.some(t => JSON.stringify(t.size) === JSON.stringify(parsedSize));
-        }
-        activityLog.unshift({ id: Date.now(), term, action, details, timestamp: new Date().toISOString() });
-        saveData();
-        renderActivityLog();
-        renderAnalytics();
     };
 
     const renderActivityLog = () => {
-        const container = getEl('activity-log');
-        container.innerHTML = activityLog.length ? '' : '<p class="text-gray-500 text-center w-full">No activity yet.</p>';
-        activityLog.slice(0, 50).forEach(log => {
-            const logEl = document.createElement('div');
-            logEl.className = 'log-item flex justify-between items-center bg-white p-2.5 rounded-lg border border-gray-200';
-            let detailsHTML = '';
-            if (log.action === 'Sold') {
-                detailsHTML = `<div class="font-semibold text-red-500">Sold ${log.details.quantitySold}</div>`;
-            } else if (log.action === 'Added') {
-                detailsHTML = `<div class="font-semibold text-green-600">Added ${log.details.quantityAdded}</div>`;
-            } else if (log.action === 'Audit') {
-                detailsHTML = `<div class="font-semibold text-blue-500">Audit Adj: ${log.details.adjustment}</div>`;
-            } else if (log.action === 'Searched') {
-                detailsHTML = log.details.inStock ? `<div class="font-semibold text-green-600">In Stock</div>` : `<div class="text-gray-500">Not In Stock</div>`;
-            }
-            logEl.innerHTML = `<div><p class="font-mono font-medium">${log.term}</p><p class="text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</p></div><div>${detailsHTML}</div>`;
-            container.appendChild(logEl);
-        });
-    };
+        const logContainer = getEl('activity-log');
+        if (!logContainer) return;
+        logContainer.innerHTML = '';
+        activityLog.forEach(entry => {
+            const div = document.createElement('div');
+            div.className = 'text-sm p-3 border-l-2 bg-gray-50 rounded-r border-gray-300';
+            const time = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const renderAnalytics = () => {
-        if (analyticsChart) analyticsChart.destroy();
-        const mostSearchedList = getEl('most-searched-list');
-        if (activityLog.length === 0) {
-            mostSearchedList.innerHTML = '<p class="text-gray-500">Not enough data yet.</p>';
-            return;
-        }
-        const counts = activityLog.reduce((acc, log) => {
-            const term = log.term.split(' (')[0]; 
-            if (log.action === 'Searched') acc[term] = (acc[term] || 0) + 1;
-            return acc;
-        }, {});
-        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        if (sorted.length === 0) {
-            mostSearchedList.innerHTML = '<p class="text-gray-500">No search data to analyze.</p>';
-            return;
-        }
-        mostSearchedList.innerHTML = sorted.map(([term, count]) => `<div class="flex justify-between items-center p-2 bg-gray-50 rounded-md"><span class="font-mono font-medium text-gray-700">${term}</span><span class="text-sm text-gray-500">${count} times</span></div>`).join('');
-        analyticsChart = new Chart(getEl('analytics-chart'), {
-            type: 'pie',
-            data: {
-                labels: sorted.map(item => item[0]),
-                datasets: [{ data: sorted.map(item => item[1]), backgroundColor: ['#0078D4', '#107C10', '#F7A923', '#7719AA', '#D83B01'] }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
-        });
-    };
+            let badgeClass = 'bg-gray-200 text-gray-700';
+            if (entry.description.toLowerCase().includes('added')) badgeClass = 'bg-green-100 text-green-800';
+            if (entry.description.toLowerCase().includes('sold')) badgeClass = 'bg-red-100 text-red-800';
 
-    
-    const toggleEntryModal = (show) => {
-        const modal = getEl('entry-modal');
-        modal.classList.toggle('hidden', !show);
-        modal.classList.toggle('flex', show);
-        if (show) {
-            switchEntryMode('batch');
-            getEl('batch-grid').innerHTML = '';
-            createBatchRow();
-            getEl('tire-input-modal').value = '';
-        }
-    };
-    const switchEntryMode = (mode) => {
-        currentEntryMode = mode;
-        getEl('modal-tab-batch').classList.toggle('active', mode === 'batch');
-        getEl('modal-tab-multiple').classList.toggle('active', mode === 'multiple');
-        getEl('batch-entry-view').classList.toggle('hidden', mode !== 'batch');
-        getEl('add-multiple-view').classList.toggle('hidden', mode !== 'multiple');
-    };
-    const createBatchRow = () => {
-        const row = document.createElement('div');
-        row.className = 'batch-grid-row';
-        row.innerHTML = `
-            <input type="text" class="data-input batch-size" placeholder="e.g., 2254517">
-            <input type="number" class="data-input batch-qty" value="1" min="1">
-            <select class="data-input batch-condition">
-                <option value="used" selected>Used</option>
-                <option value="new">New</option>
-            </select>
-            <button class="text-gray-400 hover:text-red-500 remove-batch-row text-2xl font-bold">&times;</button>
-        `;
-        getEl('batch-grid').appendChild(row);
-        row.querySelector('.batch-size').focus();
-    };
-    const processEntries = () => {
-        let addedCount = 0, processedTires = 0;
-        if (currentEntryMode === 'batch') {
-            getEl('batch-grid').querySelectorAll('.batch-grid-row').forEach(row => {
-                const parsed = parseTireSize(row.querySelector('.batch-size').value);
-                const qty = parseInt(row.querySelector('.batch-qty').value, 10);
-                if (parsed && qty > 0) {
-                    addTire(parsed, qty, row.querySelector('.batch-condition').value, { suppressToast: true });
-                    processedTires += qty; addedCount++;
-                }
-            });
-        } else {
-            const inputs = getEl('tire-input-modal').value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-            const condition = getEl('condition-toggle-modal').checked ? 'new' : 'used';
-            inputs.forEach(input => {
-                const parsed = parseTireSize(input);
-                if (parsed) {
-                    addTire(parsed, 1, condition, { suppressToast: true });
-                    processedTires++; addedCount++;
-                }
-            });
-        }
-        if (addedCount > 0) showToast(`Successfully added ${processedTires} tire(s) across ${addedCount} size(s).`);
-        toggleEntryModal(false);
-    };
-
-    
-    const toggleAuditModal = (show) => {
-        const modal = getEl('audit-modal');
-        modal.classList.toggle('hidden', !show);
-        modal.classList.toggle('flex', show);
-        if (show) {
-            getEl('audit-input-step').classList.remove('hidden');
-            getEl('audit-summary-step').classList.add('hidden');
-            getEl('process-audit-btn').classList.remove('hidden');
-            getEl('confirm-audit-btn').classList.add('hidden');
-            getEl('audit-paste-area').value = '';
-            processedAuditData = null;
-            populateAuditRimFilter();
-        }
-    };
-    const populateAuditRimFilter = () => {
-        const rimSizes = [...new Set(inventory.map(t => t.size.rim))].sort((a, b) => a - b);
-        const select = getEl('audit-rim-select');
-        select.innerHTML = '<option value="all" selected>Rim Size: ALL</option>';
-        rimSizes.forEach(rim => {
-            select.innerHTML += `<option value="${rim}">Rim Size: ${rim}"</option>`;
-        });
-    };
-    const populateMainRimFilter = () => {
-        const rimSizes = [...new Set(inventory.map(t => t.size.rim))].sort((a, b) => a - b);
-        const select = getEl('rim-filter-select');
-        const currentValue = select.value;
-        select.innerHTML = '<option value="all" selected>Filter by Rim Size: ALL</option>';
-        rimSizes.forEach(rim => {
-            select.innerHTML += `<option value="${rim}" ${currentValue == rim ? 'selected' : ''}>Rim Size: ${rim}"</option>`;
-        });
-    }
-    const generateDiscrepancyReportHTML = (summary) => {
-        let html = '';
-        const createRow = (d, type) => {
-            if (type === 'new') {
-                return `<div class="new-item-row" data-size-str="${d.sizeStr}"><span class="font-mono font-semibold">${d.sizeStr}</span><span class="text-center font-bold text-green-600">+${d.physicalQty}</span><span class="text-right"><button class="btn btn-secondary btn-sm quick-add-btn text-xs py-1 px-2" data-size-str="${d.sizeStr}">+ Add to System</button></span></div>`;
-            }
-            return `<div class="audit-summary-row ${d.variance > 0 ? 'surplus' : 'shortage'}" data-size-str="${d.sizeStr}"><span class="font-mono font-semibold">${d.sizeStr}</span><span class="text-center text-gray-500">${d.inventoryQty}</span><span class="text-center font-bold"><input type="number" value="${d.physicalQty}" class="audit-edit-qty" data-size-str="${d.sizeStr}" min="0"></span><span class="text-center variance-cell ${d.variance > 0 ? 'surplus' : 'shortage'}">${d.variance > 0 ? '+' : ''}${d.variance}</span></div>`;
-        };
-        if (summary.discrepancies.length > 0) html += '<div class="audit-summary-section"><h4>Discrepancies</h4>' + summary.discrepancies.map(d => createRow(d, 'discrepancy')).join('') + '</div>';
-        if (summary.uncountedItems.length > 0) html += '<div class="audit-summary-section"><h4>Uncounted Items (Shortages)</h4>' + summary.uncountedItems.map(d => createRow(d, 'uncounted')).join('') + '</div>';
-        if (summary.newItemsFound.length > 0) html += '<div class="audit-summary-section"><h4>New Items Found (Surpluses)</h4>' + summary.newItemsFound.map(d => createRow(d, 'new')).join('') + '</div>';
-        return html || `<div class="p-4 text-center">Perfect match! No discrepancies found for this scope.</div>`;
-    };
-    const processAndReviewAudit = () => {
-        const auditCondition = getEl('audit-condition-select').value;
-        const auditRim = getEl('audit-rim-select').value;
-        const entries = getEl('audit-paste-area').value.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-
-        const physicalCountMap = new Map();
-        entries.forEach(entry => {
-            const parsed = parseTireSize(entry);
-            if (parsed) {
-                const formatted = formatTireSize(parsed);
-                physicalCountMap.set(formatted, (physicalCountMap.get(formatted) || 0) + 1);
-            }
-        });
-
-        let inventoryScope = inventory.filter(t => t.condition === auditCondition);
-        if (auditRim !== 'all') inventoryScope = inventoryScope.filter(t => t.size.rim == auditRim);
-
-        const inventoryCountMap = new Map();
-        inventoryScope.forEach(tire => inventoryCountMap.set(formatTireSize(tire.size), tire.quantity));
-
-        const allSizes = new Set([...physicalCountMap.keys(), ...inventoryCountMap.keys()]);
-        const summary = { discrepancies: [], uncountedItems: [], newItemsFound: [] };
-
-        allSizes.forEach(sizeStr => {
-            const physicalQty = physicalCountMap.get(sizeStr) || 0;
-            const inventoryQty = inventoryCountMap.get(sizeStr) || 0;
-            const data = { sizeStr, physicalQty, inventoryQty, variance: physicalQty - inventoryQty };
-
-            if (physicalQty !== inventoryQty) {
-                if (inventoryQty > 0) {
-                    summary.discrepancies.push(data)
-                } else {
-                    summary.newItemsFound.push(data);
-                }
-            }
-        });
-
-        summary.uncountedItems = inventoryScope
-            .filter(t => !physicalCountMap.has(formatTireSize(t.size)))
-            .map(t => ({ sizeStr: formatTireSize(t.size), physicalQty: 0, inventoryQty: t.quantity, variance: -t.quantity }));
-
-        summary.discrepancies = summary.discrepancies.filter(d => !summary.uncountedItems.find(u => u.sizeStr === d.sizeStr));
-
-        getEl('audit-summary-content').innerHTML = generateDiscrepancyReportHTML(summary);
-        processedAuditData = { summary, auditCondition, auditRim };
-
-        getEl('audit-input-step').classList.add('hidden');
-        getEl('audit-summary-step').classList.remove('hidden');
-        getEl('process-audit-btn').classList.add('hidden');
-        getEl('confirm-audit-btn').classList.remove('hidden');
-    };
-    const confirmAndUpdateAudit = () => {
-        if (!processedAuditData) return;
-        const { summary, auditCondition, auditRim } = processedAuditData;
-        const allDiscrepancies = [...summary.discrepancies, ...summary.uncountedItems, ...summary.newItemsFound];
-
-        allDiscrepancies.forEach(d => {
-            const parsedSize = parseTireSize(d.sizeStr);
-            if (!parsedSize) return;
-
-            const sizeString = JSON.stringify(parsedSize);
-            const tireIndex = inventory.findIndex(t => JSON.stringify(t.size) === sizeString && t.condition === auditCondition);
-
-            if (tireIndex > -1) {
-                inventory[tireIndex].quantity = d.physicalQty;
-            } else if (d.physicalQty > 0) {
-                inventory.unshift({ size: parsedSize, quantity: d.physicalQty, condition: auditCondition });
-            }
-        });
-
-        inventory = inventory.filter(t => t.quantity > 0);
-
-        const auditRecord = {
-            timestamp: new Date().toISOString(),
-            condition: auditCondition,
-            rim: auditRim,
-            discrepancies: allDiscrepancies.filter(d => d.variance !== 0)
-        };
-        if (auditRecord.discrepancies.length > 0) auditHistory.unshift(auditRecord);
-
-        saveData();
-        renderAll();
-        toggleAuditModal(false);
-        showToast(`Audit confirmed. ${allDiscrepancies.length} adjustment(s) logged.`);
-    };
-
-    const toggleAuditHistoryModal = (show) => {
-        const modal = getEl('audit-history-modal');
-        modal.classList.toggle('hidden', !show);
-        modal.classList.toggle('flex', show);
-        if (show) renderAuditHistory();
-    };
-
-    const renderAuditHistory = () => {
-        const list = getEl('audit-history-list');
-        const detail = getEl('audit-history-detail');
-        list.innerHTML = '';
-        detail.innerHTML = '<p class="text-center text-gray-500">Select an audit from the left to view details.</p>';
-        if (auditHistory.length === 0) {
-            list.innerHTML = '<p class="text-center text-gray-500">No past audits found.</p>';
-            return;
-        }
-
-        auditHistory.forEach((record, index) => {
-            const item = document.createElement('div');
-            item.className = 'audit-history-list-item';
-            item.dataset.index = index;
-            const date = new Date(record.timestamp);
-            item.innerHTML = `
-                <p class="font-semibold">Audit of ${record.condition.toUpperCase()} Tires</p>
-                <p class="text-sm text-gray-500">${date.toLocaleString()}</p>
+            div.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <span class="font-medium ${badgeClass} px-1.5 py-0.5 rounded text-xs">${entry.type || 'Log'}</span>
+                    <span class="text-gray-400 text-xs">${time}</span>
+                </div>
+                <div class="mt-1 text-gray-700">${entry.description}</div>
             `;
-            item.addEventListener('click', () => {
-                renderAuditHistoryDetail(record);
-                document.querySelectorAll('.audit-history-list-item').forEach(el => el.classList.remove('active'));
-                item.classList.add('active');
-            });
-            list.appendChild(item);
+            logContainer.appendChild(div);
         });
     };
 
-    const renderAuditHistoryDetail = (record) => {
-        const summary = { discrepancies: record.discrepancies, uncountedItems: [], newItemsFound: [] };
-        getEl('audit-history-detail').innerHTML = `
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">Discrepancy Report</h3>
-            <div>${generateDiscrepancyReportHTML(summary)}</div>
-        `;
-    };
-
-    
+    // Listeners
     getEl('search-input').addEventListener('input', () => {
         renderAll();
-        const term = getEl('search-input').value.trim();
-        const parsed = parseTireSize(term);
-        if (parsed) {
-            addLogEntry(formatTireSize(parsed), 'Searched');
-        }
     });
-    getEl('clear-search-btn').addEventListener('click', () => { getEl('search-input').value = ''; renderAll(); });
-    getEl('add-tires-btn').addEventListener('click', () => toggleEntryModal(true));
-    getEl('close-entry-modal-btn').addEventListener('click', () => toggleEntryModal(false));
-    getEl('cancel-entry-modal-btn').addEventListener('click', () => toggleEntryModal(false));
-    getEl('entry-modal').addEventListener('click', (e) => { if (e.target === getEl('entry-modal')) toggleEntryModal(false); });
-    getEl('modal-tab-batch').addEventListener('click', () => switchEntryMode('batch'));
-    getEl('modal-tab-multiple').addEventListener('click', () => switchEntryMode('multiple'));
-    getEl('confirm-add-tires-btn').addEventListener('click', processEntries);
-    getEl('batch-grid').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target.classList.contains('batch-size')) { e.preventDefault(); createBatchRow(); }
+
+    getEl('clear-search-btn').addEventListener('click', () => {
+        getEl('search-input').value = '';
+        renderAll();
     });
-    getEl('batch-grid').addEventListener('click', (e) => {
-        if (e.target.matches('.remove-batch-row') && getEl('batch-grid').querySelectorAll('.batch-grid-row').length > 1) {
-            e.target.closest('.batch-grid-row').remove();
+
+    ['filter-distributor', 'filter-brand', 'filter-rim', 'filter-type', 'filter-ply', 'filter-sort'].forEach(id => {
+        const el = getEl(id);
+        if (el) {
+            el.addEventListener('change', (e) => {
+                const key = id.replace('filter-', '');
+                catalogFilters[key] = e.target.value;
+                renderAll();
+            });
         }
     });
 
-    getEl('audit-btn').addEventListener('click', () => toggleAuditModal(true));
-    getEl('close-audit-modal-btn').addEventListener('click', () => toggleAuditModal(false));
-    getEl('cancel-audit-modal-btn').addEventListener('click', () => toggleAuditModal(false));
-    getEl('process-audit-btn').addEventListener('click', processAndReviewAudit);
-    getEl('confirm-audit-btn').addEventListener('click', confirmAndUpdateAudit);
-    getEl('audit-history-btn').addEventListener('click', () => toggleAuditHistoryModal(true));
-    getEl('close-audit-history-modal-btn').addEventListener('click', () => toggleAuditHistoryModal(false));
-
-    getEl('audit-summary-content').addEventListener('input', (e) => {
-        if (e.target.classList.contains('audit-edit-qty')) {
-            const input = e.target;
-            const sizeStr = input.dataset.sizeStr;
-            const newQty = parseInt(input.value, 10) || 0;
-
-            const data = [...processedAuditData.summary.discrepancies, ...processedAuditData.summary.uncountedItems].find(d => d.sizeStr === sizeStr);
-            if (data) {
-                data.physicalQty = newQty;
-                data.variance = newQty - data.inventoryQty;
-
-                const row = input.closest('.audit-summary-row');
-                const varianceCell = row.querySelector('.variance-cell');
-                varianceCell.textContent = `${data.variance > 0 ? '+' : ''}${data.variance}`;
+    const logToggle = getEl('activity-log-toggle');
+    if (logToggle) {
+        logToggle.onclick = () => {
+            const sec = getEl('activity-log-section');
+            const arrow = getEl('activity-log-arrow');
+            if (sec.style.display === 'none' || !sec.style.display) {
+                sec.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                sec.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
             }
-        }
-    });
-    getEl('audit-summary-content').addEventListener('click', (e) => {
-        if (e.target.classList.contains('quick-add-btn')) {
-            const btn = e.target;
-            const parsed = parseTireSize(btn.dataset.sizeStr);
-            if (parsed) {
-                addTire(parsed, 0, processedAuditData.auditCondition, { suppressToast: true }); 
-                showToast(`Added ${btn.dataset.sizeStr} to system. Quantity will be updated upon audit confirmation.`);
-                btn.textContent = 'Added'; btn.disabled = true;
-            }
-        }
-    });
+        };
+        getEl('activity-log-section').style.display = 'none';
+    }
 
-    document.addEventListener('click', e => {
-        if (e.target.matches('.adjust-qty-btn')) {
-            const group = e.target.closest('[data-size]');
-            const size = JSON.parse(group.dataset.size);
-            const condition = group.dataset.condition;
-            const amount = parseInt(e.target.dataset.amount);
-            const tire = inventory.find(t => JSON.stringify(t.size) === JSON.stringify(size) && t.condition === condition);
-            if (tire) {
-                const newQuantity = tire.quantity + amount;
-                if (newQuantity >= 0) {
-                    updateTireQuantity(size, condition, newQuantity);
-                }
-            }
-        }
-        if (e.target.closest('.distributor-btn')) {
-            const term = formatTireSize(parseTireSize(getEl('search-input').value));
-            if (term) addLogEntry(term, 'Checked Distributor', { distributor: e.target.closest('.distributor-btn').dataset.distributor });
-        }
-        if (e.target.closest('#analytics-toggle')) {
-            getEl('analytics-section').classList.toggle('open');
-            getEl('analytics-arrow').classList.toggle('rotate-180');
-        }
-        if (e.target.closest('#activity-log-toggle')) {
-            getEl('activity-log-section').classList.toggle('open');
-            getEl('activity-log-arrow').classList.toggle('rotate-180');
-        }
-    });
+    if (getEl('add-tires-btn')) {
+        getEl('add-tires-btn').addEventListener('click', () => {
+            getEl('search-input').focus();
+            showToast('Type a size to add (e.g. 225/60/16)');
+        });
+    }
 
-    const handleQuantityUpdate = (input) => {
-        const wrapper = input.closest('.stock-quantity-wrapper');
-        if (!wrapper) return;
-        const newQuantity = parseInt(input.value, 10);
-        const size = JSON.parse(wrapper.dataset.size);
-        const condition = wrapper.dataset.condition;
-        if (!isNaN(newQuantity) && newQuantity >= 0) {
-            updateTireQuantity(size, condition, newQuantity);
-        } else {
-            renderAll(); 
-        }
-    };
-
-    getEl('inventory-container').addEventListener('click', e => {
-        if (e.target.classList.contains('stock-quantity-display')) {
-            const wrapper = e.target.closest('.stock-quantity-wrapper');
-            const display = wrapper.querySelector('.stock-quantity-display');
-            const input = wrapper.querySelector('.quantity-edit-input');
-            display.classList.add('hidden');
-            input.classList.remove('hidden');
-            input.focus();
-            input.select();
-        }
-    });
-
-    getEl('inventory-container').addEventListener('focusout', e => {
-        if (e.target.classList.contains('quantity-edit-input')) {
-            handleQuantityUpdate(e.target);
-        }
-    });
-
-    getEl('inventory-container').addEventListener('keydown', e => {
-        if (e.key === 'Enter' && e.target.classList.contains('quantity-edit-input')) {
-            handleQuantityUpdate(e.target);
-        } else if (e.key === 'Escape' && e.target.classList.contains('quantity-edit-input')) {
-            const display = e.target.previousElementSibling;
-            display.classList.remove('hidden');
-            e.target.classList.add('hidden');
-        }
-    });
-
-    getEl('rim-filter-select').addEventListener('change', renderInventory);
-
-    
     loadData();
+    populateFilters();
     renderAll();
+
+    if (inventory.length === 0) {
+        showToast("Welcome! Try searching or adding mock inventory.");
+    }
 });
