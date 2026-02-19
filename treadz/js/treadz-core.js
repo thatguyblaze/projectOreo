@@ -8,6 +8,9 @@
  */
 
 const TreadzConfigDefault = {
+    // System
+    VERSION: '2.5.0',
+
     // Business Info
     BUSINESS_NAME: "Treadz Tire & Towing",
     PHONE_NUMBER: "(423) 357-4551", // Verified via Web Search

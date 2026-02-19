@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/data-store.js"></script>
     <script src="js/treadz-core.js"></script>
+    <script src="js/tire-catalog.js"></script>
+    <script src="js/auth.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -86,10 +88,14 @@
                     Authenticate
                 </button>
             </form>
-            <p id="login-error"
-                class="text-red-600 text-xs mt-4 text-center hidden font-bold animate-pulse bg-red-50 p-2 rounded">
-                ACCESS DENIED: Invalid Credentials
+            <p id="login-error" class="text-red-600 text-xs mt-4 text-center hidden font-bold bg-red-50 p-2 rounded">
             </p>
+            <div id="login-spinner" class="hidden mt-4 text-center">
+                <div
+                    class="inline-block w-5 h-5 border-2 border-[#0047AB] border-t-transparent rounded-full animate-spin">
+                </div>
+                <span class="text-xs text-slate-500 ml-2">Authenticating...</span>
+            </div>
         </div>
     </div>
 
@@ -104,15 +110,21 @@
                         <div class="hidden md:block h-8 w-px bg-white/20"></div>
                         <div>
                             <h1 class="text-xl font-bold text-white tracking-widest uppercase">Admin Command</h1>
-                            <span class="text-[10px] text-gray-400 font-mono block">SYS.VER.2.4.0 // CONNECTED</span>
+                            <span id="sys-version-tag" class="text-[10px] text-gray-400 font-mono block">SYS.VER.-.-._
+                                // LOADING</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="hidden md:block text-right mr-4">
                             <div class="text-xs text-[#FF6600] font-bold uppercase">Shop Status</div>
-                            <div class="text-white text-sm font-bold flex items-center justify-end gap-2">
-                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> OPERATIONAL
+                            <div id="shop-status-indicator"
+                                class="text-white text-sm font-bold flex items-center justify-end gap-2">
+                                <span class="w-2 h-2 rounded-full bg-gray-500"></span> LOADING
                             </div>
+                        </div>
+                        <div class="hidden md:block text-right mr-2 border-r border-white/10 pr-4">
+                            <div class="text-[10px] text-gray-400 font-mono uppercase">Operator</div>
+                            <div id="nav-user-name" class="text-white text-sm font-bold">---</div>
                         </div>
                         <button onclick="openSettings()"
                             class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded text-sm font-bold flex items-center gap-2 transition-all border border-white/20">
@@ -135,6 +147,17 @@
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
                             Export
+                        </button>
+                        <button onclick="handleLogout()"
+                            class="bg-red-600/80 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold transition-colors border border-red-500/30 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Logout
                         </button>
                         <a href="index.html"
                             class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded text-sm font-bold transition-colors border border-white/20">Exit</a>
@@ -340,9 +363,11 @@
                             <div
                                 class="absolute inset-0 bg-blue-100 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity">
                             </div>
-                            <div class="text-6xl font-black text-slate-800 relative z-10 font-mono">~3.5</div>
+                            <div id="stat-avg-release-days"
+                                class="text-6xl font-black text-slate-800 relative z-10 font-mono">--</div>
                         </div>
                         <div class="text-sm font-bold uppercase tracking-wider text-[#FF6600] mt-2">Days</div>
+                        <div id="stat-avg-release-detail" class="text-[10px] text-slate-400 font-mono mt-1"></div>
                     </div>
                 </div>
             </div>
@@ -522,7 +547,7 @@
                 <div
                     class="bg-slate-50 px-6 py-3 border-t border-slate-200 text-xs text-slate-500 flex justify-between font-mono">
                     <span id="record-count-display">Initializing...</span>
-                    <span>LOCAL_STORAGE :: SYNCED</span>
+                    <span id="storage-status-display">LOCAL_STORAGE :: CHECKING</span>
                 </div>
             </div>
 
@@ -737,6 +762,279 @@
                     </div>
                 </div>
 
+                <!-- Employee Management (Admin Only) -->
+                <div id="employee-mgmt-section" class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                    <h3 class="text-sm font-bold text-amber-800 uppercase mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-amber-600">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Employee Access Management
+                    </h3>
+
+                    <!-- Current Employees -->
+                    <div id="employee-list" class="space-y-2 mb-4 max-h-48 overflow-y-auto"></div>
+
+                    <!-- Add Employee Form -->
+                    <div class="bg-white p-3 rounded-lg border border-amber-200">
+                        <h4 class="text-xs font-bold text-amber-700 uppercase mb-3">Add New Employee</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Employee ID</label>
+                                <input type="text" id="new-emp-id" placeholder="e.g. 002"
+                                    class="w-full mt-1 p-2 border border-slate-300 rounded text-sm font-mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Name</label>
+                                <input type="text" id="new-emp-name" placeholder="John Doe"
+                                    class="w-full mt-1 p-2 border border-slate-300 rounded text-sm">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Password</label>
+                                <input type="password" id="new-emp-pass" placeholder="Min 6 characters"
+                                    class="w-full mt-1 p-2 border border-slate-300 rounded text-sm">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Role</label>
+                                <select id="new-emp-role"
+                                    class="w-full mt-1 p-2 border border-slate-300 rounded text-sm">
+                                    <option value="employee">Employee</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="addNewEmployee()"
+                            class="mt-3 w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 rounded shadow-sm transition-colors">
+                            + Add Employee
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tire Catalog Import -->
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
+                    <h3 class="text-sm font-bold text-emerald-800 uppercase mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-emerald-600">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 6v6l4 2" />
+                        </svg>
+                        Tire Catalog Import
+                    </h3>
+
+                    <!-- Global Status Bar -->
+                    <div id="catalog-import-status" class="bg-white p-3 rounded-lg border border-emerald-200 mb-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-xs font-bold text-slate-600">Catalog Status</p>
+                                <p id="catalog-status-text" class="text-sm font-mono text-emerald-700">Checking...</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-bold text-slate-600">Total Records</p>
+                                <p id="catalog-record-count" class="text-sm font-mono font-bold text-slate-800">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==================== -->
+                    <!-- API SOURCES SECTION  -->
+                    <!-- ==================== -->
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4
+                                class="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9" />
+                                </svg>
+                                API Database Sources
+                            </h4>
+                            <button onclick="showAddSourceForm()"
+                                class="text-[10px] font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="3">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                                Add Source
+                            </button>
+                        </div>
+
+                        <!-- Connected Sources List -->
+                        <div id="api-sources-list" class="space-y-2 mb-3">
+                            <!-- Rendered by JS -->
+                        </div>
+
+                        <!-- Add Source Form (hidden by default) -->
+                        <div id="add-source-form"
+                            class="hidden bg-white p-3 rounded-lg border border-emerald-300 space-y-3">
+                            <h5 class="text-xs font-bold text-emerald-800 uppercase flex items-center justify-between">
+                                New API Source
+                                <button onclick="hideAddSourceForm()"
+                                    class="text-slate-400 hover:text-red-500 text-lg leading-none">&times;</button>
+                            </h5>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Source Name</label>
+                                    <input type="text" id="new-src-name" placeholder="e.g. TyresAddict"
+                                        class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Type</label>
+                                    <select id="new-src-type"
+                                        class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs">
+                                        <option value="tyresaddict">TyresAddict Database</option>
+                                        <option value="generic">Generic REST API</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">API Key</label>
+                                <input type="password" id="new-src-apikey" placeholder="Paste your API key"
+                                    class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Endpoint URL <span
+                                        class="text-slate-400 font-normal">(auto-filled for TyresAddict)</span></label>
+                                <input type="text" id="new-src-url" placeholder="https://api.example.com/tires"
+                                    value="http://tyresaddict.ru/api"
+                                    class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                            </div>
+                            <button onclick="addAPISource()"
+                                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 rounded transition-colors">
+                                + Connect Source
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ======================== -->
+                    <!-- SFTP / FILE DROP SECTION -->
+                    <!-- ======================== -->
+                    <div class="mb-4">
+                        <h4
+                            class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                            </svg>
+                            SFTP / Local File Drop
+                        </h4>
+                        <div class="bg-white p-3 rounded-lg border border-emerald-200 space-y-3">
+                            <p class="text-[10px] text-slate-500 leading-relaxed">
+                                Point to a file your distributor drops via SFTP. Place the file inside the web server
+                                root
+                                (e.g. <code
+                                    class="bg-slate-100 px-1 rounded text-[10px]">imports/distributor.json</code>) and
+                                enter the relative path below.
+                                Enable hourly watch to auto-reimport when the file updates.
+                            </p>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">File Path (relative to
+                                    site root)</label>
+                                <div class="flex gap-2 mt-0.5">
+                                    <input type="text" id="sftp-path-input" placeholder="imports/distributor-feed.json"
+                                        class="flex-1 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                                    <button onclick="saveSftpPath()"
+                                        class="bg-slate-600 hover:bg-slate-700 text-white text-[10px] font-bold px-2.5 rounded transition-colors">Save</button>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="triggerSftpImport()"
+                                    class="flex-1 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold py-1.5 rounded transition-colors flex items-center justify-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="16 16 12 12 8 16" />
+                                        <line x1="12" y1="12" x2="12" y2="21" />
+                                        <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3" />
+                                    </svg>
+                                    Import Now
+                                </button>
+                                <label
+                                    class="flex-1 bg-slate-600 hover:bg-slate-700 text-white text-xs font-bold py-1.5 rounded transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                        <polyline points="17 8 12 3 7 8" />
+                                        <line x1="12" y1="3" x2="12" y2="15" />
+                                    </svg>
+                                    Upload File
+                                    <input type="file" id="catalog-file-input" accept=".json,.csv" class="hidden"
+                                        onchange="handleCatalogFile(event)">
+                                </label>
+                            </div>
+                            <!-- SFTP Watch Toggle -->
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-700">Auto-Watch (Hourly)</p>
+                                    <p id="sftp-watch-status" class="text-[9px] text-slate-400">Re-imports from the path
+                                        every hour</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="sftp-auto-watch" class="sr-only peer"
+                                        onchange="toggleSftpWatch()">
+                                    <div
+                                        class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600">
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================== -->
+                    <!-- GLOBAL CONTROLS    -->
+                    <!-- ================== -->
+                    <div
+                        class="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200 mb-4">
+                        <div>
+                            <p class="text-xs font-bold text-slate-700">Auto-Import All APIs (Hourly)</p>
+                            <p class="text-[10px] text-slate-400">Pull all enabled API sources every hour</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="catalog-auto-import" class="sr-only peer"
+                                onchange="toggleAutoImport()">
+                            <div
+                                class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600">
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="flex gap-2">
+                        <button onclick="loadSampleCatalog()"
+                            class="text-xs text-emerald-700 font-semibold hover:underline">Load Sample Data</button>
+                        <span class="text-slate-300">|</span>
+                        <button onclick="clearCatalog()"
+                            class="text-xs text-red-600 font-semibold hover:underline">Clear All Catalog Data</button>
+                        <span class="text-slate-300">|</span>
+                        <a href="catalog/index.html" class="text-xs text-blue-600 font-semibold hover:underline">View
+                            Catalog &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Demo Data Toggle -->
+                <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                    <h3 class="text-sm font-bold text-orange-800 uppercase mb-2 flex items-center gap-2">
+                        📊 Demo Data
+                    </h3>
+                    <p class="text-xs text-orange-600 mb-3">Toggle sample tow tickets and tire records on or off. Your
+                        manually-created records are never affected.</p>
+                    <div class="flex items-center gap-4">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="demo-toggle" class="sr-only peer"
+                                onchange="handleDemoToggle(this.checked)">
+                            <div
+                                class="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#FF6600] shadow-inner">
+                            </div>
+                        </label>
+                        <span id="demo-toggle-label" class="text-gray-500 text-xs font-semibold">OFF</span>
+                    </div>
+                </div>
+
                 <!-- Dangerous Zone -->
                 <div class="bg-red-50 p-4 rounded-xl border border-red-200">
                     <h3 class="text-sm font-bold text-red-800 uppercase mb-2 flex items-center gap-2">
@@ -768,23 +1066,65 @@
     </div>
 
     <script>
-        // --- AUTHENTICATION ---
-        function handleLogin(e) {
-            e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
+        // --- AUTHENTICATION (Secure - SHA-256 hashed, salted, rate-limited) ---
 
-            if (u === 'admin' && p === 'admin') {
-                const modal = document.getElementById('login-modal');
-                modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
-                    initDashboard();
-                }, 300);
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
+        // On page load: seed default account & check existing session
+        (async function initAuth() {
+            await TreadzAuth.seedIfEmpty();
+            const session = TreadzAuth.checkSession();
+            if (session.valid) {
+                showDashboard();
             }
+        })();
+
+        function showDashboard() {
+            const modal = document.getElementById('login-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                initDashboard();
+            }, 300);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+            const spinner = document.getElementById('login-spinner');
+
+            errorEl.classList.add('hidden');
+            spinner.classList.remove('hidden');
+
+            // Disable button during auth
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            try {
+                const result = await TreadzAuth.login(u, p);
+
+                if (result.success) {
+                    showDashboard();
+                } else {
+                    errorEl.textContent = result.error;
+                    errorEl.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorEl.textContent = 'Authentication system error.';
+                errorEl.classList.remove('hidden');
+                console.error('Auth error:', err);
+            } finally {
+                spinner.classList.add('hidden');
+                btn.disabled = false;
+                btn.textContent = 'Authenticate';
+            }
+        }
+
+        function handleLogout() {
+            TreadzAuth.logout();
+            location.reload();
         }
 
         // --- DASHBOARD STATE ---
@@ -803,13 +1143,372 @@
         // --- INITIALIZATION ---
         function initDashboard() {
             // Load Data
-            allTowData = TreadzData.getAll('ticket');
-            allTireData = TreadzData.getAll('receipt');
+            // ONE-TIME FULL DATA WIPE — nukes raw localStorage keys
+            if (!localStorage.getItem('treadz_v2_wiped')) {
+                localStorage.removeItem('treadzTowHistoryV1');
+                localStorage.removeItem('treadzQuoteHistoryV1');
+                localStorage.removeItem('treadzTowHistory');
+                localStorage.removeItem('treadz_tow_history');
+                localStorage.removeItem('treadzQuoteHistory');
+                localStorage.removeItem('treadz_quote_history');
+                localStorage.removeItem('treadzReceiptHistory');
+                localStorage.removeItem('treadzTireInventoryV7');
+                localStorage.removeItem('treadzActivityLogV7');
+                localStorage.removeItem('treadzDemoEnabled');
+                localStorage.setItem('treadz_v2_wiped', 'true');
+                allTowData = [];
+                allTireData = [];
+            } else {
+                allTowData = TreadzData.getAll('ticket');
+                allTireData = TreadzData.getAll('receipt');
+            }
 
+            // Auto-purge demo data if toggle is OFF (or never set)
+            const demoEnabled = localStorage.getItem('treadzDemoEnabled') === 'true';
+            const hasDemoData = allTowData.some(t => t._demoSeed) || allTireData.some(r => r._demoSeed);
+            if (!demoEnabled && hasDemoData) {
+                allTowData.forEach(t => { if (t._demoSeed) TreadzData.delete('ticket', t.id); });
+                allTireData.forEach(r => { if (r._demoSeed) TreadzData.delete('receipt', r.id); });
+                allTowData = TreadzData.getAll('ticket');
+                allTireData = TreadzData.getAll('receipt');
+            }
+
+            // Sync demo toggle in Settings
+            const demoToggle = document.getElementById('demo-toggle');
+            const demoLabel = document.getElementById('demo-toggle-label');
+            const demoActive = allTowData.some(t => t._demoSeed) || allTireData.some(r => r._demoSeed);
+
+            demoToggle.checked = demoActive;
+            demoLabel.textContent = demoActive ? 'ON — sample records loaded' : 'OFF';
+            demoLabel.className = demoActive ? 'text-[#FF6600] text-xs font-semibold' : 'text-gray-500 text-xs font-semibold';
+
+            renderSystemInfo();
             renderStats();
             renderAdvStats();
             renderTables();
             initChart();
+        }
+
+        // --- DEMO TOGGLE HANDLER ---
+        function handleDemoToggle(isOn) {
+            localStorage.setItem('treadzDemoEnabled', isOn ? 'true' : 'false');
+            if (isOn) {
+                seedDemoData(true); // silent mode — no confirm/alert
+            } else {
+                unloadDemoData(true); // silent mode
+            }
+        }
+
+        // --- DEMO DATA SEEDER ---
+        function seedDemoData(silent) {
+            const hasDemoAlready = allTowData.some(t => t._demoSeed) || allTireData.some(r => r._demoSeed);
+            if (hasDemoAlready) { initDashboard(); return; } // already loaded, just sync
+            if (!silent && allTowData.length > 0 || allTireData.length > 0) {
+                if (!confirm('You already have data. Loading demo data will ADD more records. Continue?')) return;
+            }
+
+            const drivers = ['Tyler', 'David', 'Bucky'];
+            const makes = ['Ford', 'Chevrolet', 'Toyota', 'Honda', 'Nissan', 'Dodge', 'Hyundai', 'Kia', 'BMW', 'Jeep'];
+            const models = {
+                'Ford': ['F-150', 'Explorer', 'Mustang', 'Escape', 'Fusion'],
+                'Chevrolet': ['Silverado', 'Malibu', 'Equinox', 'Tahoe', 'Camaro'],
+                'Toyota': ['Camry', 'Corolla', 'RAV4', 'Tacoma', 'Highlander'],
+                'Honda': ['Civic', 'Accord', 'CR-V', 'Pilot', 'Odyssey'],
+                'Nissan': ['Altima', 'Rogue', 'Sentra', 'Frontier', 'Maxima'],
+                'Dodge': ['Ram 1500', 'Charger', 'Challenger', 'Durango', 'Journey'],
+                'Hyundai': ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Kona'],
+                'Kia': ['Forte', 'Optima', 'Sportage', 'Sorento', 'Soul'],
+                'BMW': ['3 Series', '5 Series', 'X3', 'X5', '330i'],
+                'Jeep': ['Wrangler', 'Cherokee', 'Grand Cherokee', 'Compass', 'Renegade']
+            };
+            const colors = ['Black', 'White', 'Silver', 'Red', 'Blue', 'Gray', 'Green'];
+            const agencies = ['Hawkins', 'KPD', 'THP', undefined];
+            const statuses = ['In Lot', 'Released', 'Released', 'Released', 'In Lot', 'Insurance', 'Released', 'Scrapped'];
+            const lots = ['Lot 1', 'Lot 2', 'Lot 1', 'Lot 1'];
+            const accounts = ['State Farm', 'Geico', 'Progressive', 'Cash/Private', 'Cash/Private', 'Cash/Private', 'AAA', 'Allstate', 'Farmers Insurance'];
+            const customers = ['John Smith', 'Sarah Johnson', 'Mike Williams', 'Emily Davis', 'Robert Brown', 'Jessica Wilson', 'David Miller', 'Ashley Taylor', 'Chris Anderson', 'Amanda Thomas', 'Walk-In'];
+
+            const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            const randBetween = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+            const randVIN = () => {
+                const chars = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789';
+                let vin = '';
+                for (let i = 0; i < 17; i++) vin += chars[Math.floor(Math.random() * chars.length)];
+                return vin;
+            };
+
+            // Generate 15 tow tickets spread over 60 days
+            for (let i = 0; i < 15; i++) {
+                const daysAgo = randBetween(0, 60);
+                const ticketDate = new Date();
+                ticketDate.setDate(ticketDate.getDate() - daysAgo);
+
+                const make = rand(makes);
+                const model = rand(models[make]);
+                const year = String(randBetween(2008, 2025));
+                const color = rand(colors);
+                const status = rand(statuses);
+                const driver = rand(drivers);
+                const account = rand(accounts);
+                const lot = rand(lots);
+                const vin = randVIN();
+                const hookFee = TreadzConfig.FEES.TOW_HOOK;
+                const miles = randBetween(3, 45);
+                const mileageFee = miles * TreadzConfig.FEES.TOW_RATE_PER_MILE;
+                const winchFee = Math.random() > 0.7 ? randBetween(50, 150) : 0;
+                const adminFee = Math.random() > 0.5 ? 25 : 0;
+                const subtotal = hookFee + mileageFee + winchFee + adminFee;
+                const total = '$' + subtotal.toFixed(2);
+                const id = String(randBetween(1000, 9999));
+
+                const storeStart = new Date(ticketDate);
+                storeStart.setHours(randBetween(6, 20), randBetween(0, 59));
+
+                let storeEnd = '';
+                let storeDays = '0';
+                if (status === 'Released' || status === 'Scrapped') {
+                    const releaseDaysLater = randBetween(1, 14);
+                    const releaseDate = new Date(storeStart);
+                    releaseDate.setDate(releaseDate.getDate() + releaseDaysLater);
+                    storeEnd = releaseDate.toISOString().slice(0, 16);
+                    storeDays = String(releaseDaysLater);
+                }
+
+                const ticketData = {
+                    id: id,
+                    date: ticketDate.toLocaleDateString(),
+                    billTo: account,
+                    vehicle: year + ' ' + make + ' ' + model,
+                    vin: vin,
+                    total: total,
+                    timestamp: ticketDate.toISOString(),
+                    fields: {
+                        billTo: account,
+                        address: randBetween(100, 9999) + ' Main St',
+                        phone: '(423) ' + randBetween(200, 999) + '-' + String(randBetween(1000, 9999)),
+                        location: randBetween(100, 9999) + ' ' + rand(['Main St', 'Highway 11W', 'Broad St', 'Church Hill Hwy', 'Elm St']),
+                        delivered: lot,
+                        year: year,
+                        make: make,
+                        model: model,
+                        tag: String.fromCharCode(65 + randBetween(0, 25)) + String.fromCharCode(65 + randBetween(0, 25)) + randBetween(1000, 9999),
+                        color: color,
+                        mileage: String(randBetween(30000, 250000)),
+                        vin: vin,
+                        feeBase: String(hookFee),
+                        feeWinch: String(winchFee),
+                        feeClean: '0',
+                        feeAdmin: String(adminFee),
+                        feeLabor: '0',
+                        feeMileage: String(mileageFee),
+                        feeGate: '0',
+                        feeMisc: '0',
+                        agency: rand(agencies),
+                        otherAgency: '',
+                        storeRate: rand(['35', '40', '45']),
+                        storeStart: storeStart.toISOString().slice(0, 16),
+                        storeEnd: storeEnd,
+                        storeDays: storeDays,
+                        notes: '',
+                        vtsSent: daysAgo > 5 ? Math.random() > 0.3 : false,
+                        titleReceived: daysAgo > 35 ? Math.random() > 0.5 : false,
+                        driver: driver,
+                        status: status,
+                        signature: ''
+                    }
+                };
+
+                ticketData._demoSeed = true;
+                TreadzData.save('ticket', ticketData, 'DemoSeed');
+            }
+
+            // Generate 10 tire receipts/quotes spread over 45 days
+            for (let i = 0; i < 10; i++) {
+                const daysAgo = randBetween(0, 45);
+                const recDate = new Date();
+                recDate.setDate(recDate.getDate() - daysAgo);
+
+                const isReceipt = Math.random() > 0.3; // 70% receipts, 30% quotes
+                const customer = rand(customers);
+                const make = rand(makes);
+                const model = rand(models[make]);
+                const year = String(randBetween(2010, 2025));
+                const tireDescs = ['205/55R16 Michelin Defender', '265/70R17 BF Goodrich KO2', '225/65R17 Continental CrossContact', '245/45R18 Pirelli P7', '215/60R16 Goodyear Assurance', '275/55R20 Nitto Ridge Grappler'];
+                const tireInfo = rand(tireDescs);
+                const pricePerTire = randBetween(89, 249);
+                const qty = rand([2, 4, 4, 4, 1]);
+                const tireSubtotal = pricePerTire * qty;
+                const services = {
+                    'srv_rotation': { checked: Math.random() > 0.5, qty: 1, price: 20 },
+                    'srv_balance': { checked: Math.random() > 0.4, qty: qty, price: 20 },
+                    'srv_stem': { checked: Math.random() > 0.7, qty: 4, price: 0 }
+                };
+                let serviceTotal = 0;
+                Object.values(services).forEach(s => { if (s.checked) serviceTotal += s.price * s.qty; });
+                const subtotal = tireSubtotal + serviceTotal + (TreadzConfig.FEES.TIRE_DISPOSAL * qty) + (TreadzConfig.FEES.TIRE_STATE * qty);
+                const tax = subtotal * TreadzConfig.TAX_RATE;
+                const grandTotal = subtotal + tax;
+                const totalStr = '$' + grandTotal.toFixed(2);
+
+                const receiptId = TreadzUtils.incrementGlobalId();
+
+                const receiptData = {
+                    id: receiptId,
+                    displayId: receiptId,
+                    type: isReceipt ? 'receipt' : 'quote',
+                    timestamp: recDate.toISOString(),
+                    customer: customer,
+                    vehicle: year + ' ' + make + ' ' + model,
+                    services: services,
+                    tireInfo: tireInfo,
+                    pricePerTire: pricePerTire,
+                    qty: qty,
+                    taxExempt: false,
+                    total: totalStr
+                };
+
+                receiptData._demoSeed = true;
+                TreadzData.save('receipt', receiptData, 'DemoSeed');
+            }
+
+            if (!silent) alert('Demo data loaded: 15 tow tickets + 10 tire records.');
+            initDashboard();
+        }
+
+        // --- UNLOAD DEMO DATA ---
+        function unloadDemoData(silent) {
+            if (!silent && !confirm('This will remove ALL demo data. Your manual records will be kept. Continue?')) return;
+
+            // Remove tickets tagged as demo
+            let towRemoved = 0;
+            const allTickets = TreadzData.getAll('ticket');
+            allTickets.forEach(t => {
+                if (t._demoSeed) {
+                    TreadzData.delete('ticket', t.id);
+                    towRemoved++;
+                }
+            });
+
+            // Remove receipts tagged as demo
+            let tireRemoved = 0;
+            const allReceipts = TreadzData.getAll('receipt');
+            allReceipts.forEach(r => {
+                if (r._demoSeed) {
+                    TreadzData.delete('receipt', r.id);
+                    tireRemoved++;
+                }
+            });
+
+            if (!silent) alert(`Removed ${towRemoved} tow tickets and ${tireRemoved} tire records.`);
+            initDashboard();
+        }
+
+        // --- SYSTEM INFO (Real Data) ---
+        function renderSystemInfo() {
+            // Version Tag
+            const ver = TreadzConfig.VERSION || '?.?.?';
+            document.getElementById('sys-version-tag').textContent = `SYS.VER.${ver} // CONNECTED`;
+
+            // Logged-in user
+            const session = TreadzAuth.checkSession();
+            if (session.valid) {
+                document.getElementById('nav-user-name').textContent = session.employee.name;
+            }
+
+            // Shop Status — based on system health checks
+            const statusEl = document.getElementById('shop-status-indicator');
+            const totalRecords = allTowData.length + allTireData.length;
+            const hasConfig = !!TreadzConfig;
+            const hasAuth = TreadzAuth.listEmployees().length > 0;
+
+            // Compute storage usage
+            let storageUsed = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                storageUsed += (localStorage.getItem(key) || '').length * 2; // UTF-16 = 2 bytes/char
+            }
+            const storageMB = (storageUsed / (1024 * 1024)).toFixed(2);
+            const storageCapMB = 5; // ~5MB typical localStorage limit
+            const storagePercent = Math.round((storageUsed / (storageCapMB * 1024 * 1024)) * 100);
+
+            // Determine status
+            let shopStatus = 'OPERATIONAL';
+            let statusColor = 'bg-green-500';
+            let statusPulse = 'animate-pulse';
+
+            if (storagePercent > 90) {
+                shopStatus = 'STORAGE CRITICAL';
+                statusColor = 'bg-red-500';
+            } else if (storagePercent > 70) {
+                shopStatus = 'STORAGE WARNING';
+                statusColor = 'bg-amber-500';
+            } else if (!hasAuth) {
+                shopStatus = 'AUTH MISSING';
+                statusColor = 'bg-red-500';
+            } else if (totalRecords === 0) {
+                shopStatus = 'NO DATA';
+                statusColor = 'bg-gray-400';
+                statusPulse = '';
+            }
+
+            statusEl.innerHTML = `<span class="w-2 h-2 rounded-full ${statusColor} ${statusPulse}"></span> ${shopStatus}`;
+
+            // Footer storage status
+            const storageDisplay = document.getElementById('storage-status-display');
+            storageDisplay.textContent = `LOCAL_STORAGE :: ${storageMB}MB / ${storageCapMB}MB (${storagePercent}%) :: ${totalRecords} RECORDS`;
+
+            // Avg Time to Release — computed from actual released tickets
+            computeAvgReleaseTime();
+        }
+
+        function computeAvgReleaseTime() {
+            const releasedTickets = allTowData.filter(t => {
+                const status = t.fields?.status || '';
+                return status === 'Released';
+            });
+
+            const el = document.getElementById('stat-avg-release-days');
+            const detailEl = document.getElementById('stat-avg-release-detail');
+
+            if (releasedTickets.length === 0) {
+                el.textContent = 'N/A';
+                el.classList.remove('text-6xl');
+                el.classList.add('text-4xl');
+                detailEl.textContent = 'No released tickets';
+                return;
+            }
+
+            let totalDays = 0;
+            let counted = 0;
+
+            releasedTickets.forEach(t => {
+                const inDate = new Date(t.timestamp || t.date);
+                // Try to find release date from fields or updatedAt
+                const outDate = t.fields?.releaseDate
+                    ? new Date(t.fields.releaseDate)
+                    : (t.updatedAt ? new Date(t.updatedAt) : null);
+
+                if (outDate && !isNaN(inDate) && !isNaN(outDate)) {
+                    const diffDays = Math.max(0, Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)));
+                    // Sanity check: ignore if > 365 days (data error)
+                    if (diffDays <= 365) {
+                        totalDays += diffDays;
+                        counted++;
+                    }
+                }
+            });
+
+            if (counted === 0) {
+                el.textContent = 'N/A';
+                el.classList.remove('text-6xl');
+                el.classList.add('text-4xl');
+                detailEl.textContent = `${releasedTickets.length} released (no date range)`;
+                return;
+            }
+
+            const avg = (totalDays / counted).toFixed(1);
+            el.textContent = `~${avg}`;
+            detailEl.textContent = `Based on ${counted} released ticket${counted !== 1 ? 's' : ''}`;
         }
 
         // --- TABS & FILTERING ---
@@ -849,7 +1548,8 @@
             if (currentTab === 'tow') data = allTowData;
             else if (currentTab === 'tire') data = allTireData;
             else if (currentTab === 'vts') {
-                // FIXED: Include 'In Lot' status for VTS
+                // VTS = all tickets currently in storage/on premises
+                // Real statuses from ticket system: "In Lot", "Insurance" (still on lot)
                 data = allTowData.filter(t => {
                     const f = t.fields || {};
 
@@ -858,8 +1558,8 @@
                     const lot = (f.delivered || '').toLowerCase();
                     if (lotFilter !== 'all' && !lot.includes(lotFilter.toLowerCase())) return false;
 
-                    const status = f.status || t.status || '';
-                    return status === 'In Lot' || status === 'Impound' || status.includes('Storage') || status === 'Compliance';
+                    const status = (f.status || '').trim();
+                    return status === 'In Lot' || status === 'Insurance';
                 });
             }
 
@@ -920,7 +1620,9 @@
 
                 if (type === 'vts') {
                     const f = item.fields || {};
-                    const enteredDate = new Date(dateRaw);
+                    // Use storeStart if available (actual storage start), otherwise ticket date
+                    const storageStartRaw = f.storeStart || dateRaw;
+                    const enteredDate = new Date(storageStartRaw);
                     const diffTime = Math.abs(new Date() - enteredDate);
                     // Safe Days Calculation
                     const daysInStorage = isNaN(diffTime) ? 0 : Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -992,8 +1694,8 @@
                                 <div class="text-xs text-slate-500 font-mono">${date}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-bold text-slate-800">${item.vehicle || f.vehicle || 'Unknown'}</div>
-                                <div class="text-xs text-slate-500 font-mono">${f.vin || 'VIN: N/A'}</div>
+                                <div class="text-sm font-bold text-slate-800">${item.vehicle || (f.year || f.make || f.model ? `${f.year || ''} ${f.make || ''} ${f.model || ''}`.trim() : 'Unknown')}</div>
+                                <div class="text-xs text-slate-500 font-mono">${f.vin || item.vin || 'VIN: N/A'}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 ${lotBadge}
@@ -1016,9 +1718,9 @@
 
                 if (type === 'tow') {
                     const f = item.fields || {};
-                    const status = f.status || 'Draft';
+                    const status = (f.status || '').trim();
 
-                    // Smart Status Logic
+                    // Smart Status Logic — matches real ticket statuses: In Lot, Released, Insurance, Scrapped
                     let statusBadge = '';
                     let actionBtn = '';
                     let rowClass = 'hover:bg-slate-50 border-b border-gray-100 last:border-0 group transition-colors';
@@ -1032,25 +1734,42 @@
                             </div>`;
                         actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-slate-500 hover:text-blue-600 bg-white border border-slate-200 hover:border-blue-300 px-3 py-1 rounded shadow-sm transition-all">View</button>`;
                     }
-                    else if (status === 'In Lot' || status === 'Impound') {
+                    else if (status === 'In Lot') {
                         statusBadge = `
                             <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-red-50 border border-red-100 text-red-700 animate-pulse">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                                <span class="text-[10px] font-bold uppercase tracking-wide">Impound</span>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">In Lot</span>
                             </div>`;
                         actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-slate-800 text-white px-3 py-1 rounded hover:bg-black transition-colors shadow-sm">Manage</button>`;
                     }
-                    else if (status === 'Draft') {
+                    else if (status === 'Insurance') {
+                        statusBadge = `
+                            <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">Insurance</span>
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-amber-600 text-white px-3 py-1 rounded hover:bg-amber-700 transition-colors shadow-sm">Manage</button>`;
+                    }
+                    else if (status === 'Scrapped') {
+                        statusBadge = `
+                            <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-wide">Scrapped</span>
+                            </div>`;
+                        actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-slate-500 hover:text-blue-600 bg-white border border-slate-200 hover:border-blue-300 px-3 py-1 rounded shadow-sm transition-all">View</button>`;
+                    }
+                    else if (!status) {
+                        // No status set = Draft/new ticket
                         statusBadge = `
                             <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 text-gray-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                 <span class="text-[10px] font-bold uppercase tracking-wide">Draft</span>
                             </div>`;
-                        if (daysOld > 7) rowClass += ' opacity-60'; // Fade old drafts
+                        if (daysOld > 7) rowClass += ' opacity-60';
                         actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded transition-colors">Resume</button>`;
                     }
                     else {
-                        // Active / Dispatched
+                        // Any other status value
                         statusBadge = `
                             <div class="flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg bg-blue-50 border border-blue-100 text-blue-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -1059,11 +1778,16 @@
                         actionBtn = `<button onclick="openEditor('ticket', '${item.id}')" class="text-[10px] uppercase font-bold bg-[#0047AB] text-white px-3 py-1 rounded hover:bg-[#003380] transition-colors shadow-sm">Open</button>`;
                     }
 
-                    // Account styling
-                    const isAccount = item.billTo && item.billTo !== 'Cash/Private';
+                    // Account styling — check both top-level and fields billTo
+                    const customerName = item.billTo || f.billTo || '';
+                    const isAccount = customerName && customerName !== 'Cash/Private';
                     const billToDisplay = isAccount
-                        ? `<div class="flex items-center gap-1 text-[#0047AB]"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M17 21v-8.5a2.5 2.5 0 0 0-5 0V21"/></svg>${item.billTo}</div>`
-                        : `<span class="text-slate-600">${f.billTo || 'Private'}</span>`;
+                        ? `<div class="flex items-center gap-1 text-[#0047AB]"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M17 21v-8.5a2.5 2.5 0 0 0-5 0V21"/></svg>${customerName}</div>`
+                        : `<span class="text-slate-600">${customerName || 'Private'}</span>`;
+
+                    // Build vehicle display from fields if top-level is missing
+                    const vehicleDisplay = item.vehicle
+                        || (f.year || f.make || f.model ? `${f.year || ''} ${f.make || ''} ${f.model || ''}`.trim() : '-');
 
 
                     return `
@@ -1075,8 +1799,8 @@
                             <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500 font-mono">${date}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${billToDisplay}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                                ${item.vehicle || f.vehicle || '-'}
-                                <div class="text-[10px] text-slate-400 font-mono">${f.vin ? 'VIN: ' + f.vin.slice(-6) : ''}</div>
+                                ${vehicleDisplay}
+                                <div class="text-[10px] text-slate-400 font-mono">${f.vin ? 'VIN: ' + f.vin.slice(-6) : (item.vin ? 'VIN: ' + item.vin.slice(-6) : '')}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 ${statusBadge}
@@ -1169,17 +1893,25 @@
                 towRev += cleanMoney(t.total);
 
                 const f = t.fields || {};
-                const status = f.status || 'Draft';
+                const status = (f.status || '').trim();
 
-                // FIXED: Status matching
-                if (status === 'Draft') intakeCount++; // Assuming Drafts are intakes
+                // Ticket statuses from the ticket page: "In Lot", "Released", "Insurance", "Scrapped"
+                // No status = new/draft ticket
+                if (!status) {
+                    // Draft/new — count as intake
+                    intakeCount++;
+                } else if (status === 'In Lot') {
+                    storageCount++;
+                } else if (status === 'Released' || status === 'Scrapped') {
+                    releasedCount++;
+                } else if (status === 'Insurance') {
+                    // Insurance claims stay in workflow, count as storage
+                    storageCount++;
+                }
 
-                // Count tickets created today as "Intake"
+                // Also count any ticket created today as intake (even if it has a status)
                 const tDate = new Date(t.timestamp || t.date);
-                if (tDate >= startOfDay) intakeCount++;
-
-                if (status === 'In Lot' || status === 'Impound' || status.includes('Storage')) storageCount++;
-                if (status === 'Released') releasedCount++;
+                if (tDate >= startOfDay && status) intakeCount++;
             });
 
             allTireData.forEach(t => {
@@ -1249,16 +1981,12 @@
 
             document.getElementById('driver-stats-list').innerHTML = driverHTML || '<p class="text-xs text-gray-400 italic">No activity recorded</p>';
 
-
-            // --- Top Accounts (Towing & Tire Sales) ---
-
-
             // --- Top Accounts (Towing & Tire Sales) ---
             const accountRev = {};
 
-            // 1. Towing
+            // 1. Towing — use top-level billTo (set by ticket save), fallback to fields.billTo
             allTowData.forEach(t => {
-                const acc = t.fields?.billTo || 'Cash/Private';
+                const acc = t.billTo || t.fields?.billTo || 'Cash/Private';
                 accountRev[acc] = (accountRev[acc] || 0) + cleanMoney(t.total);
             });
 
@@ -1287,13 +2015,15 @@
             let lot1Count = 0;
             let lot2Count = 0;
             allTowData.forEach(t => {
-                const status = t.fields?.status;
-                const delivered = t.fields?.delivered;
-                // Only count active vehicles
-                if (status === 'In Lot' || status === 'Impound' || status === 'Storage') {
-                    if (delivered === 'Lot 1') lot1Count++;
-                    else if (delivered === 'Lot 2') lot2Count++;
-                    else lot1Count++; // Default to Lot 1 if not specified
+                const status = (t.fields?.status || '').trim();
+                const delivered = (t.fields?.delivered || '').toLowerCase();
+                // Only count active vehicles ("In Lot" or "Insurance" — still on premises)
+                if (status === 'In Lot' || status === 'Insurance') {
+                    if (delivered.includes('2') || delivered.includes('lot 2') || delivered.includes('storage')) {
+                        lot2Count++;
+                    } else {
+                        lot1Count++; // Default to Lot 1 (main lot)
+                    }
                 }
             });
 
@@ -1314,7 +2044,16 @@
             document.getElementById('stat-conversion').textContent = `${conversion}%`;
 
             // --- Monthly Avg ---
-            const monthsActive = new Set(allTowData.map(t => (t.timestamp || t.date).substring(0, 7))).size || 1;
+            // Use proper date parsing to extract YYYY-MM, handle both ISO and locale date formats
+            const monthKeys = new Set();
+            allTowData.forEach(t => {
+                const d = new Date(t.timestamp || t.date);
+                if (!isNaN(d)) {
+                    const ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                    monthKeys.add(ym);
+                }
+            });
+            const monthsActive = monthKeys.size || 1;
             const avg = Math.round(allTowData.length / monthsActive);
             document.getElementById('stat-avg-tows').textContent = avg;
 
@@ -1322,8 +2061,11 @@
             const monthCounts = {};
             allTowData.forEach(t => {
                 const d = new Date(t.timestamp || t.date);
-                const k = d.toLocaleDateString('en-US', { month: 'long' });
-                monthCounts[k] = (monthCounts[k] || 0) + 1;
+                if (!isNaN(d)) {
+                    // Include year to avoid cross-year merging
+                    const k = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    monthCounts[k] = (monthCounts[k] || 0) + 1;
+                }
             });
             const topMonth = Object.entries(monthCounts).sort((a, b) => b[1] - a[1])[0];
             document.getElementById('stat-busy-month').textContent = topMonth ? topMonth[0] : '-';
@@ -1361,14 +2103,20 @@
 
             // 1. Towing
             allTowData.forEach(t => {
-                const dateKey = new Date(t.timestamp || t.date).toISOString().split('T')[0];
-                dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + cleanMoney(t.total);
+                const d = new Date(t.timestamp || t.date);
+                if (!isNaN(d)) {
+                    const dateKey = d.toISOString().split('T')[0];
+                    dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + cleanMoney(t.total);
+                }
             });
             // 2. Tires (Receipts only)
             allTireData.forEach(t => {
                 if (t.type === 'receipt') {
-                    const dateKey = new Date(t.timestamp || t.date).toISOString().split('T')[0];
-                    dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + cleanMoney(t.total);
+                    const d = new Date(t.timestamp || t.date);
+                    if (!isNaN(d)) {
+                        const dateKey = d.toISOString().split('T')[0];
+                        dailyRevenue[dateKey] = (dailyRevenue[dateKey] || 0) + cleanMoney(t.total);
+                    }
                 }
             });
 
@@ -1504,31 +2252,38 @@
             // Re-use logic but fix filtering
             const data = allTowData.filter(t => {
                 const f = t.fields || {};
-                const status = f.status || t.status || '';
-                return status === 'In Lot' || status === 'Impound' || status.includes('Storage') || status === 'Compliance';
+                const status = (f.status || '').trim();
+                return status === 'In Lot' || status === 'Insurance';
             });
 
             if (data.length === 0) { alert('No active VTS records to export.'); return; }
 
-            const headers = ['Ticket ID', 'Date In', 'Days in Storage', 'Vehicle', 'VIN', 'Original Total', 'Accrued Fees', 'Current Total', 'Status Action'];
+            const headers = ['Ticket ID', 'Date In', 'Storage Start', 'Days in Storage', 'Vehicle', 'VIN', 'Driver', 'Original Total', 'Accrued Fees', 'Current Total', 'Status Action'];
             const rows = data.map(item => {
                 const dateRaw = item.timestamp || item.date;
-                const enteredDate = new Date(dateRaw);
+                const f = item.fields || {};
+                const storageStart = f.storeStart || dateRaw;
+                const enteredDate = new Date(storageStart);
                 const diffTime = Math.abs(new Date() - enteredDate);
-                const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                const fees = days * 45;
+                const days = isNaN(diffTime) ? 0 : Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const dailyRate = parseFloat(f.storeRate) || 45;
+                const fees = days * dailyRate;
                 const total = cleanMoney(item.total) + fees;
+                const vehicleName = item.vehicle || (f.year || f.make || f.model ? `${f.year || ''} ${f.make || ''} ${f.model || ''}`.trim() : 'Unknown');
 
                 let action = 'Monitor';
                 if (days >= 3 && days < 30) action = 'SEND LETTER';
                 if (days >= 30) action = 'TITLE ELIGIBLE';
+                if (f.vtsSent) action += ' (VTS SENT)';
 
                 return [
                     item.id,
                     new Date(dateRaw).toLocaleDateString(),
+                    new Date(storageStart).toLocaleDateString(),
                     days,
-                    (item.vehicle || item.fields?.vehicle || 'Unknown').replace(/,/g, ' '),
-                    (item.fields?.vin || ''),
+                    vehicleName.replace(/,/g, ' '),
+                    (f.vin || item.vin || ''),
+                    (f.driver || 'Unassigned'),
                     cleanMoney(item.total).toFixed(2),
                     fees.toFixed(2),
                     total.toFixed(2),
@@ -1557,9 +2312,251 @@
             initDashboard();
         }
 
+        // --- CATALOG IMPORT MANAGEMENT ---
+        function refreshCatalogStatus() {
+            const meta = TireCatalog.getMeta();
+            const statusEl = document.getElementById('catalog-status-text');
+            const countEl = document.getElementById('catalog-record-count');
+            const autoEl = document.getElementById('catalog-auto-import');
+            const sftpPathEl = document.getElementById('sftp-path-input');
+            const sftpWatchEl = document.getElementById('sftp-auto-watch');
+
+            if (!statusEl) return;
+
+            // Global status
+            countEl.textContent = String(meta.recordCount || 0);
+            if (meta.lastImport) {
+                const d = new Date(meta.lastImport);
+                statusEl.textContent = `Last: ${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} \u2014 ${meta.source || 'Unknown'}`;
+                statusEl.classList.remove('text-amber-600');
+                statusEl.classList.add('text-emerald-700');
+            } else {
+                statusEl.textContent = 'No import yet';
+                statusEl.classList.remove('text-emerald-700');
+                statusEl.classList.add('text-amber-600');
+            }
+            if (autoEl) autoEl.checked = !!meta.autoImport;
+            if (sftpPathEl) sftpPathEl.value = meta.sftpPath || '';
+            if (sftpWatchEl) sftpWatchEl.checked = !!meta.sftpAutoWatch;
+
+            // Render API sources list
+            renderAPISources();
+        }
+
+        function renderAPISources() {
+            const container = document.getElementById('api-sources-list');
+            if (!container) return;
+            const sources = TireCatalog.getSources();
+
+            if (sources.length === 0) {
+                container.innerHTML = `<div class="text-center py-3 text-[10px] text-slate-400">No API sources connected. Click &ldquo;Add Source&rdquo; to get started.</div>`;
+                return;
+            }
+
+            container.innerHTML = sources.map(src => {
+                const typeLabel = src.type === 'tyresaddict' ? 'TyresAddict DB' : 'REST API';
+                const typeBg = src.type === 'tyresaddict' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
+                const statusColor = src.lastImport ? 'text-emerald-600' : 'text-slate-400';
+                const statusText = src.lastImport
+                    ? new Date(src.lastImport).toLocaleDateString() + ' ' + new Date(src.lastImport).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : 'Never synced';
+                const keyMasked = src.apiKey ? '\u2022\u2022\u2022\u2022' + src.apiKey.slice(-4) : 'No key';
+
+                return `
+                    <div class="bg-white rounded-lg border ${src.enabled ? 'border-emerald-200' : 'border-slate-200 opacity-60'} p-2.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <span class="text-xs font-bold text-slate-800 truncate">${src.name || 'Unnamed'}</span>
+                                    <span class="text-[9px] font-bold ${typeBg} px-1.5 py-0.5 rounded-full">${typeLabel}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px]">
+                                    <span class="text-slate-400">Key: <span class="font-mono">${keyMasked}</span></span>
+                                    <span class="text-slate-300">|</span>
+                                    <span class="${statusColor}">${statusText}</span>
+                                    <span class="text-slate-300">|</span>
+                                    <span class="text-slate-500">${src.recordCount || 0} models</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 flex-shrink-0">
+                                <button onclick="importFromSource('${src.id}')" title="Import now" class="p-1 rounded hover:bg-emerald-100 text-emerald-600 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                                </button>
+                                <button onclick="editSource('${src.id}')" title="Edit" class="p-1 rounded hover:bg-slate-100 text-slate-400 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                </button>
+                                <button onclick="deleteSource('${src.id}')" title="Remove" class="p-1 rounded hover:bg-red-100 text-red-400 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14H7L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        // --- Add / Edit Source Form ---
+        let _editingSourceId = null;
+
+        function showAddSourceForm() {
+            _editingSourceId = null;
+            document.getElementById('new-src-name').value = '';
+            document.getElementById('new-src-type').value = 'tyresaddict';
+            document.getElementById('new-src-apikey').value = '';
+            document.getElementById('new-src-url').value = 'http://tyresaddict.ru/api';
+            document.getElementById('add-source-form').classList.remove('hidden');
+        }
+
+        function hideAddSourceForm() {
+            document.getElementById('add-source-form').classList.add('hidden');
+            _editingSourceId = null;
+        }
+
+        function editSource(srcId) {
+            const sources = TireCatalog.getSources();
+            const src = sources.find(s => s.id === srcId);
+            if (!src) return;
+            _editingSourceId = srcId;
+            document.getElementById('new-src-name').value = src.name || '';
+            document.getElementById('new-src-type').value = src.type || 'tyresaddict';
+            document.getElementById('new-src-apikey').value = src.apiKey || '';
+            document.getElementById('new-src-url').value = src.baseUrl || '';
+            document.getElementById('add-source-form').classList.remove('hidden');
+        }
+
+        function addAPISource() {
+            const name = document.getElementById('new-src-name').value.trim();
+            const type = document.getElementById('new-src-type').value;
+            const apiKey = document.getElementById('new-src-apikey').value.trim();
+            const baseUrl = document.getElementById('new-src-url').value.trim();
+
+            if (!name) return alert('Enter a source name.');
+            if (!apiKey) return alert('Enter an API key.');
+
+            const source = {
+                id: _editingSourceId || undefined,
+                name, type, apiKey, baseUrl,
+                enabled: true
+            };
+            TireCatalog.saveSource(source);
+            hideAddSourceForm();
+            refreshCatalogStatus();
+        }
+
+        function deleteSource(srcId) {
+            const sources = TireCatalog.getSources();
+            const src = sources.find(s => s.id === srcId);
+            if (!confirm(`Remove "${src?.name || srcId}" and its ${src?.recordCount || 0} catalog entries?`)) return;
+            TireCatalog.removeSource(srcId);
+            refreshCatalogStatus();
+        }
+
+        async function importFromSource(srcId) {
+            const sources = TireCatalog.getSources();
+            const src = sources.find(s => s.id === srcId);
+            if (!src) return;
+            const statusEl = document.getElementById('catalog-status-text');
+            try {
+                statusEl.textContent = `Importing from ${src.name}...`;
+                let count;
+                if (src.type === 'tyresaddict') {
+                    count = await TireCatalog.importFromAPI(null, srcId);
+                } else {
+                    count = await TireCatalog.importFromGenericAPI(srcId);
+                }
+                alert(`Imported ${count} tire models from ${src.name}.`);
+            } catch (e) {
+                alert(`Import from ${src.name} failed: ${e.message}`);
+            }
+            refreshCatalogStatus();
+        }
+
+        // --- SFTP / File Path ---
+        function saveSftpPath() {
+            const path = document.getElementById('sftp-path-input').value.trim();
+            if (!path) return alert('Enter a file path.');
+            TireCatalog.setSftpPath(path);
+            alert('SFTP file path saved: ' + path);
+        }
+
+        async function triggerSftpImport() {
+            const path = TireCatalog.getSftpPath();
+            if (!path) return alert('Set a file path first.');
+            const statusEl = document.getElementById('catalog-status-text');
+            try {
+                statusEl.textContent = 'Importing from SFTP file...';
+                const count = await TireCatalog.importFromPath(path, 'sftp_manual');
+                alert(`Imported ${count} tire models from ${path}.`);
+            } catch (e) {
+                alert('SFTP import failed: ' + e.message);
+            }
+            refreshCatalogStatus();
+        }
+
+        function toggleSftpWatch() {
+            const checked = document.getElementById('sftp-auto-watch').checked;
+            if (checked) {
+                if (!TireCatalog.getSftpPath()) {
+                    document.getElementById('sftp-auto-watch').checked = false;
+                    return alert('Set a file path before enabling auto-watch.');
+                }
+                TireCatalog.startSftpWatch();
+            } else {
+                TireCatalog.stopSftpWatch();
+            }
+        }
+
+        function handleCatalogFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    let count;
+                    if (file.name.endsWith('.json')) {
+                        count = TireCatalog.importFromJSON(e.target.result, 'file_upload', 'File Upload: ' + file.name);
+                    } else if (file.name.endsWith('.csv')) {
+                        count = TireCatalog.importFromCSV(e.target.result, 'file_upload', 'File Upload: ' + file.name);
+                    } else {
+                        return alert('Unsupported file type. Use .json or .csv');
+                    }
+                    alert(`Imported ${count} tire models from ${file.name}.`);
+                    refreshCatalogStatus();
+                } catch (err) {
+                    alert('File import failed: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // --- Global Toggles ---
+        function toggleAutoImport() {
+            const checked = document.getElementById('catalog-auto-import').checked;
+            if (checked) {
+                TireCatalog.startAutoImport();
+            } else {
+                TireCatalog.stopAutoImport();
+            }
+        }
+
+        function loadSampleCatalog() {
+            const count = TireCatalog.loadSampleData();
+            alert(`Loaded ${count} sample tire models.`);
+            refreshCatalogStatus();
+        }
+
+        function clearCatalog() {
+            if (!confirm('Clear ALL distributor catalog data from every source?')) return;
+            TireCatalog.clear();
+            alert('Catalog cleared.');
+            refreshCatalogStatus();
+        }
+
         // --- SETTINGS MANAGEMENT ---
         function openSettings() {
             document.getElementById('settings-modal').classList.remove('hidden');
+            refreshCatalogStatus();
+            renderEmployeeList();
             // Load current
             document.getElementById('sets-tax').value = TreadzConfig.TAX_RATE;
             document.getElementById('sets-card').value = TreadzConfig.CARD_FEE_RATE;
@@ -1595,8 +2592,109 @@
             const phrase = prompt("Type 'DELETE EVERYTHING' to confirm factory reset. This will wipe ALL history.");
             if (phrase === 'DELETE EVERYTHING') {
                 localStorage.clear();
+                sessionStorage.clear();
                 alert('System Wiped. Rebooting...');
                 location.reload();
+            }
+        }
+
+        // --- EMPLOYEE MANAGEMENT ---
+        function renderEmployeeList() {
+            const container = document.getElementById('employee-list');
+            const employees = TreadzAuth.listEmployees();
+            const currentUser = TreadzAuth.checkSession();
+
+            // Hide entire section if not admin
+            const section = document.getElementById('employee-mgmt-section');
+            if (currentUser.valid && currentUser.employee.role !== 'admin') {
+                section.classList.add('hidden');
+                return;
+            } else {
+                section.classList.remove('hidden');
+            }
+
+            if (employees.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 italic">No employees configured.</p>';
+                return;
+            }
+
+            container.innerHTML = employees.map(emp => {
+                const isSelf = currentUser.valid && currentUser.employee.id === emp.id;
+                const lockBadge = emp.locked
+                    ? '<span class="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">LOCKED</span>'
+                    : '';
+                const roleBadge = emp.role === 'admin'
+                    ? '<span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">ADMIN</span>'
+                    : '<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">EMPLOYEE</span>';
+
+                return `
+                    <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-amber-100 ${isSelf ? 'ring-2 ring-amber-300' : ''}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-mono font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded">${emp.id}</span>
+                            <div>
+                                <span class="text-sm font-bold text-slate-800">${emp.name}</span>
+                                ${isSelf ? '<span class="text-[10px] text-amber-600 font-bold ml-1">(You)</span>' : ''}
+                                <div class="flex gap-1 mt-0.5">${roleBadge} ${lockBadge}</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-1">
+                            ${emp.locked ? `<button onclick="unlockEmp('${emp.id}')" class="text-[10px] bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded font-bold transition-colors">Unlock</button>` : ''}
+                            <button onclick="resetEmpPassword('${emp.id}')" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-1 rounded font-bold transition-colors">Reset PW</button>
+                            ${!isSelf ? `<button onclick="removeEmp('${emp.id}')" class="text-[10px] bg-red-100 hover:bg-red-200 text-red-600 px-2 py-1 rounded font-bold transition-colors">Remove</button>` : ''}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        async function addNewEmployee() {
+            const id = document.getElementById('new-emp-id').value.trim();
+            const name = document.getElementById('new-emp-name').value.trim();
+            const pass = document.getElementById('new-emp-pass').value;
+            const role = document.getElementById('new-emp-role').value;
+
+            if (!id || !name || !pass) {
+                alert('All fields are required.');
+                return;
+            }
+
+            const result = await TreadzAuth.addEmployee(id, name, pass, role);
+            if (result.success) {
+                document.getElementById('new-emp-id').value = '';
+                document.getElementById('new-emp-name').value = '';
+                document.getElementById('new-emp-pass').value = '';
+                renderEmployeeList();
+            } else {
+                alert(result.error);
+            }
+        }
+
+        async function removeEmp(id) {
+            if (!confirm(`Remove employee ${id}? This cannot be undone.`)) return;
+            const result = TreadzAuth.removeEmployee(id);
+            if (result.success) {
+                renderEmployeeList();
+            } else {
+                alert(result.error);
+            }
+        }
+
+        async function resetEmpPassword(id) {
+            const newPass = prompt(`Enter new password for employee ${id} (min 6 characters):`);
+            if (!newPass) return;
+            const result = await TreadzAuth.resetPassword(id, newPass);
+            if (result.success) {
+                alert('Password reset successfully.');
+            } else {
+                alert(result.error);
+            }
+        }
+
+        function unlockEmp(id) {
+            const result = TreadzAuth.unlockEmployee(id);
+            if (result.success) {
+                renderEmployeeList();
+            } else {
+                alert(result.error);
             }
         }
 
@@ -1610,12 +2708,18 @@
             const subject = document.getElementById('email-subject');
             const body = document.getElementById('email-body');
 
-            // Find logic
+            // Find ticket and pull real field data
             const ticket = allTowData.find(t => t.id == id);
-            const veh = ticket?.vehicle || 'Vehicle';
+            const f = ticket?.fields || {};
+            const veh = ticket?.vehicle || (f.year || f.make || f.model ? `${f.year || ''} ${f.make || ''} ${f.model || ''}`.trim() : 'Vehicle');
+            const vin = f.vin || ticket?.vin || 'N/A';
+            const driver = f.driver || 'N/A';
+            const lotLocation = f.delivered || 'On premises';
+            const impoundDate = new Date(ticket?.timestamp || ticket?.date).toLocaleDateString();
+            const customerName = ticket?.billTo || f.billTo || 'Vehicle Owner';
 
             subject.value = `Urgent: VTS Notification - Ticket #${id}`;
-            body.value = `To Whom It May Concern,\n\nPlease find attached the required VTS Notification Packet regarding the impound of:\n\nVehicle: ${veh}\nImpound Date: ${new Date(ticket?.timestamp).toLocaleDateString()}\nTicket ID: #${id}\n\nPlease review the attached documents immediately.\n\nThank you,\nTreadz Towing & Recovery`;
+            body.value = `To Whom It May Concern,\n\nPlease find attached the required VTS Notification Packet regarding the impound of:\n\nVehicle: ${veh}\nVIN: ${vin}\nLocation: ${lotLocation}\nImpound Date: ${impoundDate}\nTicket ID: #${id}\nCustomer: ${customerName}\nDriver: ${driver}\n\nPlease review the attached documents immediately.\n\nThank you,\n${TreadzConfig.BUSINESS_NAME}\n${TreadzConfig.PHONE_NUMBER}`;
 
             modal.classList.remove('hidden');
         }
@@ -1644,7 +2748,7 @@
             const backup = {
                 metadata: {
                     exportedAt: new Date().toISOString(),
-                    version: '2.4.0',
+                    version: TreadzConfig.VERSION || '2.5.0',
                     appName: 'TreadzTireTow'
                 },
                 data: {

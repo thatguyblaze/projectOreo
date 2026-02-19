@@ -246,6 +246,8 @@
                             class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Quote</a>
                         <a href="index.html"
                             class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg">Receipts</a>
+                        <a href="../catalog/index.html"
+                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Catalog</a>
                     </div>
                 </div>
 
@@ -391,8 +393,8 @@
                                     <td class="no-border-right text-right font-bold align-middle pr-2"
                                         id="line-total-display">$0.00</td>
                                 </tr>
-                                <!-- Fees (Auto Filled) -->
-                                <tr id="row-state-fee">
+                                <!-- Fees (Auto Filled — hidden until active) -->
+                                <tr id="row-state-fee" style="display: none;">
                                     <td class="p-0 text-center align-middle">
                                         <input type="number" id="fee-state-qty-input"
                                             class="w-full h-full text-center outline-none bg-transparent appearance-none"
@@ -403,7 +405,7 @@
                                     <td class="no-border-right text-right font-bold align-middle pr-2"
                                         id="fee-state-total"></td>
                                 </tr>
-                                <tr id="row-disp-fee">
+                                <tr id="row-disp-fee" style="display: none;">
                                     <td class="p-0 text-center align-middle">
                                         <input type="number" id="fee-disp-qty-input"
                                             class="w-full h-full text-center outline-none bg-transparent appearance-none"
@@ -421,26 +423,8 @@
                                 <!-- Rows will be injected here by JS -->
                             </tbody>
 
-                            <!-- Filler Empty Rows to fill page -->
+            <!-- Filler Empty Rows (dynamically managed) -->
                             <tbody id="filler-rows-body">
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="no-border-right"></td>
-                                </tr>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="no-border-right"></td>
-                                </tr>
-                                <tr>
-                                    <td>&nbsp;</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="no-border-right"></td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1111,25 +1095,41 @@
             let currentSubtotal = lineTotal;
 
             // 2. Fees
-            if (qty > 0 && (descInput.value.length > 0 || price > 0)) {
+            const descVal = descInput.value.trim();
+            const startsWithLetter = descVal.length > 0 && /^[a-zA-Z]/.test(descVal);
 
-                // --- State Fee ---
-                if (!isStateDirty) feeStateQtyInput.value = qty;
-                const sQty = parseInt(feeStateQtyInput.value) || 0;
+            if (qty > 0 && (descVal.length > 0 || price > 0)) {
 
-                const stateTotal = round2(sQty * TreadzConfig.FEES.TIRE_STATE);
-                feeStateDesc.textContent = 'STATE TIRE FEE';
-                feeStatePrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_STATE);
-                feeStateTotal.textContent = formatMoney(stateTotal);
+                // Show fee rows (only if desc starts with a number / tire size)
+                if (startsWithLetter) {
+                    // Non-tire item — no state fee or disposal
+                    document.getElementById('row-state-fee').style.display = 'none';
+                    document.getElementById('row-disp-fee').style.display = 'none';
+                    feeStateQtyInput.value = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
+                    feeDispQtyInput.value = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
+                } else {
+                    document.getElementById('row-state-fee').style.display = '';
+                    document.getElementById('row-disp-fee').style.display = '';
+                }
 
-                // --- Disposal Fee ---
-                if (!isDispDirty) feeDispQtyInput.value = qty;
-                const dQty = parseInt(feeDispQtyInput.value) || 0;
+                // --- State Fee & Disposal (only when not starting with a letter) ---
+                let stateTotal = 0;
+                let dispTotal = 0;
+                if (!startsWithLetter) {
+                    if (!isStateDirty) feeStateQtyInput.value = qty;
+                    const sQty = parseInt(feeStateQtyInput.value) || 0;
+                    stateTotal = round2(sQty * TreadzConfig.FEES.TIRE_STATE);
+                    feeStateDesc.textContent = 'STATE TIRE FEE';
+                    feeStatePrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_STATE);
+                    feeStateTotal.textContent = formatMoney(stateTotal);
 
-                const dispTotal = round2(dQty * TreadzConfig.FEES.TIRE_DISPOSAL);
-                feeDispDesc.textContent = 'TIRE DISPOSAL';
-                feeDispPrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
-                feeDispTotal.textContent = formatMoney(dispTotal);
+                    if (!isDispDirty) feeDispQtyInput.value = qty;
+                    const dQty = parseInt(feeDispQtyInput.value) || 0;
+                    dispTotal = round2(dQty * TreadzConfig.FEES.TIRE_DISPOSAL);
+                    feeDispDesc.textContent = 'TIRE DISPOSAL';
+                    feeDispPrice.textContent = formatMoney(TreadzConfig.FEES.TIRE_DISPOSAL);
+                    feeDispTotal.textContent = formatMoney(dispTotal);
+                }
 
                 currentSubtotal = round2(currentSubtotal + stateTotal + dispTotal);
             } else {
@@ -1176,12 +1176,51 @@
             subtotalFinal.textContent = formatMoney(currentSubtotal);
             taxFinal.textContent = formatMoney(tax);
             totalFinal.textContent = formatMoney(total);
+
+            updateFillerRows();
+
+            // 5. Reorder table: if no primary tire data, move services above static items
+            const receiptTable = document.getElementById('static-items-body').closest('table');
+            const staticBody = document.getElementById('static-items-body');
+            const servicesBody = document.getElementById('dynamic-services-body');
+            const hasPrimaryData = descVal.length > 0 || price > 0;
+            const servicesFirst = !hasPrimaryData && servicesBody.children.length > 0;
+
+            // Only reorder DOM when layout state actually changes (avoids stealing focus)
+            const currentlyHidden = staticBody.style.display === 'none';
+            if (servicesFirst && !currentlyHidden) {
+                receiptTable.insertBefore(servicesBody, staticBody);
+                staticBody.style.display = 'none';
+            } else if (!servicesFirst && currentlyHidden) {
+                receiptTable.insertBefore(staticBody, servicesBody);
+                staticBody.style.display = '';
+            }
         }
 
 
         function clearFees() {
+            document.getElementById('row-state-fee').style.display = 'none';
+            document.getElementById('row-disp-fee').style.display = 'none';
             feeStateQtyInput.value = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
             feeDispQtyInput.value = ''; feeDispDesc.textContent = ''; feeDispPrice.textContent = ''; feeDispTotal.textContent = '';
+            updateFillerRows();
+        }
+
+        // Dynamically add filler rows so the table always has a consistent minimum height
+        function updateFillerRows() {
+            const fillerBody = document.getElementById('filler-rows-body');
+            fillerBody.innerHTML = '';
+            // Count visible content rows: 1 (primary) + fees + services
+            let contentRows = 1;
+            if (document.getElementById('row-state-fee').style.display !== 'none') contentRows++;
+            if (document.getElementById('row-disp-fee').style.display !== 'none') contentRows++;
+            contentRows += document.getElementById('dynamic-services-body').querySelectorAll('tr').length;
+            const targetRows = Math.max(0, 5 - contentRows); // aim for at least 5 visible rows total
+            for (let i = 0; i < targetRows; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>&nbsp;</td><td></td><td></td><td class="no-border-right"></td>';
+                fillerBody.appendChild(tr);
+            }
         }
 
         function formatMoney(amount) {
