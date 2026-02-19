@@ -1068,25 +1068,13 @@
         // --- INITIALIZATION ---
         function initDashboard() {
             // Load Data
-            // ONE-TIME FULL DATA WIPE — nukes raw localStorage keys
+            // REMOVED: Destructive wipe logic. Always load existing data.
             if (!localStorage.getItem('treadz_v2_wiped')) {
-                localStorage.removeItem('treadzTowHistoryV1');
-                localStorage.removeItem('treadzQuoteHistoryV1');
-                localStorage.removeItem('treadzTowHistory');
-                localStorage.removeItem('treadz_tow_history');
-                localStorage.removeItem('treadzQuoteHistory');
-                localStorage.removeItem('treadz_quote_history');
-                localStorage.removeItem('treadzReceiptHistory');
-                localStorage.removeItem('treadzTireInventoryV7');
-                localStorage.removeItem('treadzActivityLogV7');
-                localStorage.removeItem('treadzDemoEnabled');
-                localStorage.setItem('treadz_v2_wiped', 'true');
-                allTowData = [];
-                allTireData = [];
-            } else {
-                allTowData = TreadzData.getAll('ticket');
-                allTireData = TreadzData.getAll('receipt');
+                localStorage.setItem('treadz_v2_wiped', 'true'); // Set flag silently to prevent future issues if this logic is restored elsewhere
             }
+            
+            allTowData = TreadzData.getAll('ticket');
+            allTireData = TreadzData.getAll('receipt');
 
             // Auto-purge demo data if toggle is OFF (or never set)
             const demoEnabled = localStorage.getItem('treadzDemoEnabled') === 'true';
