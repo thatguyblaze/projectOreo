@@ -380,40 +380,47 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.innerHTML = displayItems.map(item => {
             const price = item._price ? `$${item._price.toFixed(2)}` : 'Call';
 
-            // Escape JSON properly for onclick attribute
+            // Escape attributes
             const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+            const imgUrl = item.photo || 'https://placehold.co/400x300/e2e8f0/1e293b?text=Tire+Image';
 
             return `
-             <div class="catalog-card bg-white rounded-xl border border-gray-200 p-4 flex flex-col justify-between h-full relative">
-                  <div class="absolute top-3 right-3 text-xs font-bold text-gray-400 uppercase tracking-widest">${item._sourceId || 'Local'}</div>
-                  <div class="mb-4">
-                       <h3 class="font-bold text-lg text-gray-900 leading-tight">${item.vendor_name}</h3>
-                       <p class="text-blue-600 font-medium">${item.model_name}</p>
-                       <div class="flex items-center gap-2 mt-2">
-                            <span class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded text-gray-600 capitalize">${item.car_type_str || 'Tire'}</span>
-                            <span class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded text-gray-600 capitalize">${item.season || 'All Season'}</span>
+             <div onclick='window.openProductModal(${itemJson})' 
+                  class="catalog-card cursor-pointer bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                  <div class="relative h-48 bg-gray-100 overflow-hidden">
+                       <img src="${imgUrl}" alt="${item.model_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                       <div class="absolute top-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm uppercase tracking-wider">
+                           ${item._sourceId || 'Local'}
                        </div>
                   </div>
-                  <div>
-                      <div class="flex justify-between items-end mb-3">
-                          <div class="text-2xl font-bold text-gray-900">${price}</div>
-                          <div class="text-sm text-gray-500 mb-1">${(item.sizes || []).length} Sizes</div>
-                      </div>
-                      <button onclick='window.openSizeSelector(${itemJson})' 
-                          class="w-full btn btn-secondary hover:bg-blue-600 hover:text-white font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                          Add to Inventory
-                      </button>
+                  <div class="p-4">
+                       <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900 leading-tight">${item.vendor_name}</h3>
+                                <p class="text-blue-600 font-medium">${item.model_name}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-gray-900">${price}</div>
+                            </div>
+                       </div>
+                       <div class="flex items-center gap-2 mt-3 text-sm text-gray-500">
+                            <span class="bg-gray-100 px-2 py-1 rounded text-xs uppercase font-semibold text-gray-600">${item.car_type_str || 'Tire'}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded text-xs uppercase font-semibold text-gray-600">${item.season || 'All Season'}</span>
+                            <span class="ml-auto text-xs">${(item.sizes || []).length} Sizes</span>
+                       </div>
                   </div>
              </div>
              `;
         }).join('');
     };
 
-    window.openSizeSelector = (item) => {
-        const modalId = 'size-modal';
+    // Product Detail Modal (Customer Facing)
+    window.openProductModal = (item) => {
+        const modalId = 'product-modal';
         let modal = getEl(modalId);
         if (modal) modal.remove();
+
+        const imgUrl = item.photo || 'https://placehold.co/600x400/e2e8f0/1e293b?text=Tire+Details';
 
         const sizesHtml = (item.sizes || []).map(s => {
             const str = `${s.width}/${s.profile}R${s.rim}`;
@@ -421,39 +428,70 @@ document.addEventListener('DOMContentLoaded', () => {
             const ext = [s.xl_flag === 'on' ? 'XL' : '', s.runflat_flag === 'on' ? 'RFT' : ''].filter(Boolean).join(' ');
 
             return `
-              <div class="flex items-center justify-between p-3 border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                  <div>
-                      <span class="font-mono font-bold text-lg text-gray-800">${str}</span>
-                      <span class="text-gray-500 text-sm ml-2">${specs} ${ext}</span>
+              <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group/item">
+                  <div class="flex items-center gap-4">
+                      <div class="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-500 text-xs shadow-inner">
+                          ${s.rim}"
+                      </div>
+                      <div>
+                          <p class="font-mono font-bold text-lg text-gray-900 tracking-tight">${str}</p>
+                          <p class="text-gray-400 text-xs uppercase tracking-wide font-semibold">${specs} ${ext}</p>
+                      </div>
                   </div>
-                  <div class="flex items-center gap-3">
-                       <button onclick="window.addToInvFromCatalog('${str}', 'used')" class="text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-full uppercase">Add Used</button>
-                       <button onclick="window.addToInvFromCatalog('${str}', 'new')" class="text-xs font-bold text-green-700 bg-green-100 hover:bg-green-200 px-3 py-1.5 rounded-full uppercase">Add New</button>
+                  <div class="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                       <button onclick="window.addToInvFromCatalog('${str}', 'used')" class="text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-lg transition-colors">Add Used</button>
+                       <button onclick="window.addToInvFromCatalog('${str}', 'new')" class="text-xs font-bold text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 px-3 py-1.5 rounded-lg transition-colors">Add New</button>
                   </div>
               </div>
               `;
         }).join('');
 
         const html = `
-         <div id="${modalId}" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-              <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-                   <div class="p-6 border-b border-gray-100 flex justify-between items-start">
-                        <div>
-                             <h3 class="text-2xl font-bold text-gray-900">${item.vendor_name} ${item.model_name}</h3>
-                             <p class="text-gray-500">Select a size to add to inventory</p>
+         <div id="${modalId}" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" style="backdrop-filter: blur(16px); background-color: rgba(255, 255, 255, 0.4);">
+              <div class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col md:flex-row overflow-hidden border border-gray-100 relative animate-fade-in-up">
+                   
+                   <button onclick="document.getElementById('${modalId}').remove()" class="absolute top-4 right-4 z-20 bg-white/80 hover:bg-white text-gray-500 hover:text-gray-800 p-2 rounded-full backdrop-blur shadow-sm transition-all focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                   </button>
+
+                   <div class="w-full md:w-2/5 bg-slate-50 p-8 flex flex-col justify-center items-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50"></div>
+                        <img src="${imgUrl}" class="relative z-10 w-full max-w-sm drop-shadow-2xl rounded-lg transform transition-transform duration-700 hover:scale-105" alt="${item.model_name}">
+                        <div class="relative z-10 mt-8 text-center">
+                            <h2 class="text-3xl font-black text-gray-900 tracking-tight mb-1">${item.vendor_name}</h2>
+                            <p class="text-xl text-blue-600 font-bold tracking-tight">${item.model_name}</p>
+                            <div class="flex flex-wrap justify-center gap-2 mt-4">
+                                <span class="px-3 py-1 bg-white shadow-sm rounded-full text-xs font-bold text-gray-600 uppercase tracking-widest border border-gray-100">${item.car_type_str || 'Standard'}</span>
+                                <span class="px-3 py-1 bg-white shadow-sm rounded-full text-xs font-bold text-gray-600 uppercase tracking-widest border border-gray-100">${item.season || 'All Season'}</span>
+                            </div>
                         </div>
-                        <button onclick="document.getElementById('${modalId}').remove()" class="text-gray-400 hover:text-gray-600">
-                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
                    </div>
-                   <div class="overflow-y-auto p-4">
-                        ${sizesHtml}
-                   </div>
-                   <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl text-center text-sm text-gray-400">
-                        Total ${item.sizes.length} sizes available
+
+                   <div class="w-full md:w-3/5 flex flex-col h-full bg-white relative z-10">
+                        <div class="p-6 border-b border-gray-100 bg-white">
+                            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></span>
+                                Available Sizes
+                            </h3>
+                            <p class="text-gray-400 text-sm mt-1 pl-9">Technical specifications and inventory status.</p>
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-0 scrollbar-thin scrollbar-thumb-gray-200">
+                            <div class="divide-y divide-gray-100">
+                                ${sizesHtml}
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gray-50 border-t border-gray-100 text-center text-xs text-gray-400 font-medium">
+                            Treadz Digital Catalog
+                        </div>
                    </div>
               </div>
          </div>
+         <style>
+            .animate-fade-in-up { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px) scale(0.98); }
+            @keyframes fadeInUp { to { opacity: 1; transform: translateY(0) scale(1); } }
+            .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+            .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+         </style>
          `;
 
         const div = document.createElement('div');
@@ -462,8 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.addToInvFromCatalog = (sizeStr, condition) => {
-        const m = getEl('size-modal');
-        if (m) m.remove();
         const parsed = parseTireSize(sizeStr);
         if (parsed) {
             addTire(parsed, 1, condition, { suppressToast: false });
@@ -479,10 +515,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (parsed) {
             const formatted = formatTireSize(parsed);
             getEl('search-actions').innerHTML = `
-                <div class="flex items-center justify-center gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <div class="flex items-center justify-center gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm">
                     <span class="font-medium text-blue-800">Quick Add:</span>
-                    <button id="add-single-btn-used" class="btn bg-white border border-gray-200 shadow-sm text-amber-600 hover:bg-amber-50 font-bold py-2 px-4 rounded-lg">Add USED ${formatted}</button>
-                    <button id="add-single-btn-new" class="btn bg-white border border-gray-200 shadow-sm text-green-600 hover:bg-green-50 font-bold py-2 px-4 rounded-lg">Add NEW ${formatted}</button>
+                    <button id="add-single-btn-used" class="btn bg-white border border-gray-200 shadow-sm text-amber-600 hover:bg-amber-50 font-bold py-2 px-4 rounded-lg transition-all transform hover:translate-y-px">Add USED ${formatted}</button>
+                    <button id="add-single-btn-new" class="btn bg-white border border-gray-200 shadow-sm text-green-600 hover:bg-green-50 font-bold py-2 px-4 rounded-lg transition-all transform hover:translate-y-px">Add NEW ${formatted}</button>
                 </div>`;
             getEl('add-single-btn-used').onclick = () => addTire(parsed, 1, 'used', { fromSearch: true });
             getEl('add-single-btn-new').onclick = () => addTire(parsed, 1, 'new', { fromSearch: true });
