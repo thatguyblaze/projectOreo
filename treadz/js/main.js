@@ -29,10 +29,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize Catalog
         if (typeof TireCatalog !== 'undefined') {
             catalogItems = TireCatalog.getAll();
+
+            // Force robust mock data if TireCatalog returns empty (e.g., cleared storage)
             if (catalogItems.length === 0) {
-                TireCatalog.loadSampleData();
-                catalogItems = TireCatalog.getAll();
+                const mocks = [
+                    { vendor_name: 'Michelin', model_name: 'Defender T+H', car_type_str: 'Passenger', season: 'All Season', _sourceId: 'ATD', _price: 185.00, sizes: [{ width: 225, profile: 60, rim: 16, load_index: 98, speed_rating: 'H' }, { width: 215, profile: 55, rim: 17, load_index: 94, speed_rating: 'V' }], photo: 'https://images.tirebuyer.com/visual-aids/michelin/defendert+h/michelin_defendert+h_r01_sidewall.jpg' },
+                    { vendor_name: 'Goodyear', model_name: 'Assurance WeatherReady', car_type_str: 'Passenger', season: 'All Weather', _sourceId: 'TireHub', _price: 170.50, sizes: [{ width: 205, profile: 55, rim: 16, load_index: 91, speed_rating: 'H' }], photo: 'https://images.tirebuyer.com/visual-aids/goodyear/assuranceweatherready/goodyear_assuranceweatherready_r01_sidewall.jpg' },
+                    { vendor_name: 'Bridgestone', model_name: 'Blizzak WS90', car_type_str: 'Passenger', season: 'Winter', _sourceId: 'US Auto', _price: 155.00, sizes: [{ width: 195, profile: 65, rim: 15, load_index: 91, speed_rating: 'T' }], photo: 'https://images.tirebuyer.com/visual-aids/bridgestone/blizzakws90/bridgestone_blizzakws90_r01_sidewall.jpg' },
+                    { vendor_name: 'BFGoodrich', model_name: 'All-Terrain T/A KO2', car_type_str: 'Truck/SUV', season: 'All Terrain', _sourceId: 'ATD', _price: 245.99, sizes: [{ width: 265, profile: 70, rim: 17, load_index: 121, speed_rating: 'R', xl_flag: 'on' }, { width: 285, profile: 70, rim: 17, load_index: 121, speed_rating: 'R' }], photo: 'https://images.tirebuyer.com/visual-aids/bfgoodrich/allterraintako2/bfgoodrich_allterraintako2_r01_sidewall.jpg' },
+                    { vendor_name: 'Continental', model_name: 'ExtremeContact DWS06 Plus', car_type_str: 'Passenger', season: 'All Season', _sourceId: 'US Auto', _price: 210.00, sizes: [{ width: 245, profile: 40, rim: 19, load_index: 98, speed_rating: 'Y', xl_flag: 'on' }], photo: 'https://images.tirebuyer.com/visual-aids/continental/extremecontactdws06plus/continental_extremecontactdws06plus_r01_sidewall.jpg' },
+                    { vendor_name: 'Pirelli', model_name: 'Cinturato P7 All Season Plus II', car_type_str: 'Passenger', season: 'Touring', _sourceId: 'TireHub', _price: 165.00, sizes: [{ width: 225, profile: 45, rim: 17, load_index: 94, speed_rating: 'V' }], photo: 'https://images.tirebuyer.com/visual-aids/pirelli/cinturatop7allseasonplusii/pirelli_cinturatop7allseasonplusii_r01_sidewall.jpg' },
+                    { vendor_name: 'Hankook', model_name: 'Dynapro AT2', car_type_str: 'Truck/SUV', season: 'All Terrain', _sourceId: 'ATD', _price: 195.00, sizes: [{ width: 275, profile: 55, rim: 20, load_index: 113, speed_rating: 'T' }], photo: 'https://images.tirebuyer.com/visual-aids/hankook/dynaproat2rf11/hankook_dynaproat2rf11_r01_sidewall.jpg' },
+                    { vendor_name: 'Falken', model_name: 'Wildpeak A/T3W', car_type_str: 'Truck/SUV', season: 'All Terrain', _sourceId: 'Atlantic', _price: 220.00, _orderUrl: 'https://www.atlantictire.com/falken', sizes: [{ width: 265, profile: 75, rim: 16, load_index: 116, speed_rating: 'T' }], photo: 'https://images.tirebuyer.com/visual-aids/falken/wildpeakat3w/falken_wildpeakat3w_r01_sidewall.jpg' },
+                    { vendor_name: 'Toyo', model_name: 'Open Country A/T III', car_type_str: 'Truck/SUV', season: 'All Terrain', _sourceId: 'US Auto', _price: 230.50, sizes: [{ width: 285, profile: 75, rim: 16, load_index: 126, speed_rating: 'R' }], photo: 'https://images.tirebuyer.com/visual-aids/toyo/opencountryat3/toyo_opencountryat3_r01_sidewall.jpg' },
+                    { vendor_name: 'Kumho', model_name: 'Crugen HP71', car_type_str: 'SUV', season: 'All Season', _sourceId: 'TireHub', _price: 145.00, sizes: [{ width: 235, profile: 60, rim: 18, load_index: 103, speed_rating: 'V' }], photo: 'https://images.tirebuyer.com/visual-aids/kumho/crugenhp71/kumho_crugenhp71_r01_sidewall.jpg' }
+                ];
+                TireCatalog.setAll(mocks);
+                catalogItems = mocks;
             }
+
             // Augment with mock prices for sorting
             catalogItems.forEach(item => {
                 if (!item._price) {
@@ -249,13 +264,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const parseTireSize = (input) => {
         if (!input) return null;
-        const cleaned = input.replace(/\D/g, '');
-        const flotationMatch = cleaned.match(/^(\d{2})(\d{4})(\d{2})$/);
+        // Normalize: remove all non-alphanumeric chars first to handle 255/55R18 vs 2555518
+        const cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+        // Pattern 1: Standard P-Metric without slash (e.g. 2555518, 25555R18)
+        // If length is 7-8 and ends with 2 digits for rim
+        // 255 55 18 -> 3 + 2 + 2 = 7 digits
+        // 255 55 R 18 -> 3 + 2 + 1 + 2 = 8 chars
+
+        const simpleNumeric = cleaned.replace(/[A-Z]/g, '');
+
+        // P-Metric: Width(3) + Ratio(2) + Rim(2) = 7 digits (e.g. 2256016)
+        if (simpleNumeric.length === 7) {
+            const width = parseInt(simpleNumeric.substr(0, 3));
+            const ratio = parseInt(simpleNumeric.substr(3, 2));
+            const rim = parseInt(simpleNumeric.substr(5, 2));
+            return { type: 'p-metric', width, ratio, rim };
+        }
+
+        // Flotation: Diameter(2) + Width(4) + Rim(2) = 8 digits (e.g. 35125020 for 35x12.50R20)
+        // Or Diameter(2) + Width(3) + Rim(2) = 7 digits? (e.g. 33125015 is usually written fully)
+        // Let's stick to standard regex for more complex cases if simple length check fails
+
+        const flotationMatch = input.replace(/\D/g, '').match(/^(\d{2})(\d{4})(\d{2})$/);
         if (flotationMatch) {
             const [_, diameter, widthRaw, rim] = flotationMatch;
             return { type: 'flotation', diameter: parseInt(diameter, 10), width: parseFloat((parseInt(widthRaw, 10) / 100).toFixed(2)), rim: parseInt(rim, 10) };
         }
-        const pMetricMatch = cleaned.match(/^(\d{3})(\d{2})(\d{2})$/);
+
+        const pMetricMatch = input.replace(/\D/g, '').match(/^(\d{3})(\d{2})(\d{2})$/);
         if (pMetricMatch) {
             const [_, width, ratio, rim] = pMetricMatch;
             return { type: 'p-metric', width: parseInt(width, 10), ratio: parseInt(ratio, 10), rim: parseInt(rim, 10) };
@@ -286,6 +323,59 @@ document.addEventListener('DOMContentLoaded', () => {
         // renderActivityLog();
     };
 
+    const renderAnalytics = () => {
+        const list = getEl('most-searched-list');
+        const ctx = getEl('analytics-chart');
+        if (!list || !ctx) return;
+
+        // Mock data for analytics based on "searches" or sales
+        // In a real app, this would come from a backend or aggregated logs
+        const data = [
+            { size: '205/55R16', count: 45 },
+            { size: '225/65R17', count: 38 },
+            { size: '265/70R17', count: 32 },
+            { size: '275/55R20', count: 28 },
+            { size: '195/65R15', count: 20 }
+        ];
+
+        // List
+        list.innerHTML = data.map((d, i) => `
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div class="flex items-center gap-3">
+                    <span class="font-bold text-gray-400 text-sm">#${i + 1}</span>
+                    <span class="font-mono font-bold text-gray-800">${d.size}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="h-1.5 w-24 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 rounded-full" style="width: ${(d.count / data[0].count) * 100}%"></div>
+                    </div>
+                    <span class="text-xs font-bold text-gray-500 w-8 text-right">${d.count}</span>
+                </div>
+            </div>
+        `).join('');
+
+        // Chart
+        if (window.analyticsChartInstance) window.analyticsChartInstance.destroy();
+        window.analyticsChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(d => d.size),
+                datasets: [{
+                    data: data.map(d => d.count),
+                    backgroundColor: ['#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { usePointStyle: true, font: { family: "'Inter', sans-serif" } } }
+                }
+            }
+        });
+    };
+
     // --- Render Catalog (Updated for Purchase System) ---
     const renderCatalog = () => {
         const grid = getEl('catalog-grid');
@@ -298,16 +388,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         noData.classList.add('hidden');
 
-        const searchTerm = getEl('search-input').value.trim().toLowerCase();
+        const searchTerm = getEl('search-input').value.trim();
+        const parsedSearch = parseTireSize(searchTerm);
 
         let filtered = catalogItems.filter(item => {
             if (searchTerm) {
-                const searchStr = [
-                    item.vendor_name, item.model_name, item.size_display, item.car_type_str,
-                    ...(item.sizes || []).map(s => `${s.width}/${s.profile}R${s.rim}`)
-                ].join(' ').toLowerCase();
-                const terms = searchTerm.split(/\s+/);
-                if (!terms.every(t => searchStr.includes(t))) return false;
+                // If the search term looks like a specific tire size, filter by exact dimensions
+                if (parsedSearch) {
+                    const hasMatchingSize = (item.sizes || []).some(s =>
+                        s.width === parsedSearch.width &&
+                        s.profile === parsedSearch.ratio &&
+                        s.rim === parsedSearch.rim
+                    );
+                    if (!hasMatchingSize) return false;
+                } else {
+                    // Otherwise standard text search
+                    const searchStr = [
+                        item.vendor_name, item.model_name, item.size_display, item.car_type_str,
+                        ...(item.sizes || []).map(s => `${s.width}/${s.profile}R${s.rim}`)
+                    ].join(' ').toLowerCase();
+                    const terms = searchTerm.toLowerCase().split(/\s+/);
+                    if (!terms.every(t => searchStr.includes(t))) return false;
+                }
             }
             if (catalogFilters.distributor && item._sourceId !== catalogFilters.distributor) return false;
             if (catalogFilters.brand && item.vendor_name !== catalogFilters.brand) return false;
@@ -368,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const str = `${s.width}/${s.profile}R${s.rim}`;
             const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
             return `
-              <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group/item">
+              <div class="flex items-center justify-between p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors group/item relative">
                   <div class="flex items-center gap-4">
                       <div class="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center font-bold text-gray-500 text-xs shadow-inner">${s.rim}"</div>
                       <div>
@@ -431,6 +533,17 @@ document.addEventListener('DOMContentLoaded', () => {
             catalogFilters[id.replace('filter-', '')] = e.target.value; renderAll();
         });
     });
+
+    const analyticsBtn = getEl('analytics-toggle');
+    if (analyticsBtn) {
+        analyticsBtn.addEventListener('click', () => {
+            const section = getEl('analytics-section');
+            const arrow = getEl('analytics-arrow');
+            section.classList.toggle('open');
+            arrow.style.transform = section.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+            if (section.classList.contains('open')) renderAnalytics();
+        });
+    }
 
     loadData();
     populateFilters();
