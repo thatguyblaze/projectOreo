@@ -1,11 +1,11 @@
 // Created with <3 by Blazinik
 
 const TireCatalog = (() => {
-    const STORAGE_KEY = 'treadzTireCatalogV1';
+    const STORAGE_KEY = 'treadzTireCatalog';
     const META_KEY = 'treadzTireCatalogMeta';
     const SOURCES_KEY = 'treadzCatalogSources';
 
-    
+
     const _getAll = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     const _setAll = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 
@@ -14,14 +14,14 @@ const TireCatalog = (() => {
         source: null,
         recordCount: 0,
         autoImport: false,
-        importIntervalMs: 3600000, 
+        importIntervalMs: 3600000,
         sftpPath: '',
         sftpAutoWatch: false
     };
     const _setMeta = (meta) => localStorage.setItem(META_KEY, JSON.stringify(meta));
 
-    
-    
+
+
     const _getSources = () => JSON.parse(localStorage.getItem(SOURCES_KEY)) || [];
     const _setSources = (sources) => localStorage.setItem(SOURCES_KEY, JSON.stringify(sources));
 
@@ -29,21 +29,21 @@ const TireCatalog = (() => {
     let _sftpWatchTimer = null;
 
     return {
-        
-        
-        
 
-        
+
+
+
+
         getAll() {
             return _getAll();
         },
 
-        
+
         getMeta() {
             return _getMeta();
         },
 
-        
+
         search(query) {
             if (!query || !query.trim()) return _getAll();
             const q = query.toLowerCase().trim();
@@ -61,7 +61,7 @@ const TireCatalog = (() => {
             });
         },
 
-        
+
         filter({ brand, season, width, profile, rim, carType } = {}) {
             let results = _getAll();
             if (brand) results = results.filter(t => t.vendor_name?.toLowerCase() === brand.toLowerCase());
@@ -80,21 +80,21 @@ const TireCatalog = (() => {
             return results;
         },
 
-        
+
         getBrands() {
             const brands = new Set();
             _getAll().forEach(t => { if (t.vendor_name) brands.add(t.vendor_name); });
             return [...brands].sort();
         },
 
-        
+
         getSeasons() {
             const seasons = new Set();
             _getAll().forEach(t => { if (t.season) seasons.add(t.season); });
             return [...seasons].sort();
         },
 
-        
+
         getRimSizes() {
             const rims = new Set();
             _getAll().forEach(t => {
@@ -103,16 +103,16 @@ const TireCatalog = (() => {
             return [...rims].sort((a, b) => a - b);
         },
 
-        
-        
-        
 
-        
+
+
+
+
         getSources() {
             return _getSources();
         },
 
-        
+
         saveSource(source) {
             const sources = _getSources();
             const idx = sources.findIndex(s => s.id === source.id);
@@ -129,12 +129,12 @@ const TireCatalog = (() => {
             return source.id;
         },
 
-        
+
         removeSource(sourceId) {
             let sources = _getSources();
             sources = sources.filter(s => s.id !== sourceId);
             _setSources(sources);
-            
+
             let catalog = _getAll();
             const before = catalog.length;
             catalog = catalog.filter(t => t._sourceId !== sourceId);
@@ -144,7 +144,7 @@ const TireCatalog = (() => {
             return before - catalog.length;
         },
 
-        
+
         toggleSource(sourceId, enabled) {
             const sources = _getSources();
             const src = sources.find(s => s.id === sourceId);
@@ -154,11 +154,11 @@ const TireCatalog = (() => {
             }
         },
 
-        
-        
-        
 
-        
+
+
+
+
         async importFromAPI(apiKey, sourceId) {
             const sources = _getSources();
             const source = sourceId ? sources.find(s => s.id === sourceId) : sources.find(s => s.type === 'tyresaddict');
@@ -169,12 +169,12 @@ const TireCatalog = (() => {
 
             const catalog = [];
 
-            
+
             const vendorsRes = await fetch(`${base}/tyres/vendors?api_version=1&api_key=${key}`);
             const vendorsData = await vendorsRes.json();
             if (!vendorsData.result) throw new Error(vendorsData.message || 'Failed to fetch vendors');
 
-            
+
             for (const vendor of vendorsData.vendors) {
                 const modelsRes = await fetch(`${base}/tyres/vendor_models?api_version=1&api_key=${key}&vendor_id=${vendor.vendor_id}`);
                 const modelsData = await modelsRes.json();
@@ -209,12 +209,12 @@ const TireCatalog = (() => {
                 }
             }
 
-            
+
             this._mergeSourceData(source?.id || 'tyresaddict', catalog, source?.name || 'TyresAddict API');
             return catalog.length;
         },
 
-        
+
         async importFromGenericAPI(sourceId) {
             const sources = _getSources();
             const source = sources.find(s => s.id === sourceId);
@@ -251,11 +251,11 @@ const TireCatalog = (() => {
             return catalog.length;
         },
 
-        
-        
-        
 
-        
+
+
+
+
         importFromJSON(data, sourceId, sourceName) {
             let catalog;
             if (typeof data === 'string') {
@@ -285,7 +285,7 @@ const TireCatalog = (() => {
             return catalog.length;
         },
 
-        
+
         importFromCSV(csvText, sourceId, sourceName) {
             const lines = csvText.trim().split('\n');
             if (lines.length < 2) throw new Error('CSV must have a header row and at least one data row');
@@ -337,33 +337,33 @@ const TireCatalog = (() => {
             return catalog.length;
         },
 
-        
-        
-        
 
-        
+
+
+
+
         setSftpPath(path) {
             const meta = _getMeta();
             _setMeta({ ...meta, sftpPath: path });
         },
 
-        
+
         getSftpPath() {
             return _getMeta().sftpPath || '';
         },
 
-        
+
         async importFromPath(filePath, sourceId) {
             if (!filePath) throw new Error('File path is required');
 
-            
+
             let url = filePath;
             if (/^[A-Z]:\\/i.test(filePath)) {
-                
-                
+
+
                 url = filePath;
             }
-            
+
             if (!url.startsWith('http') && !url.startsWith('/')) {
                 url = '/' + url;
             }
@@ -375,7 +375,7 @@ const TireCatalog = (() => {
             const sid = sourceId || 'sftp_import';
             const sname = 'SFTP File Import';
 
-            
+
             const trimmed = text.trim();
             if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
                 return this.importFromJSON(text, sid, sname);
@@ -384,7 +384,7 @@ const TireCatalog = (() => {
             }
         },
 
-        
+
         startSftpWatch() {
             this.stopSftpWatch();
             const meta = _getMeta();
@@ -393,7 +393,7 @@ const TireCatalog = (() => {
             meta.sftpAutoWatch = true;
             _setMeta(meta);
 
-            
+
             this.importFromPath(meta.sftpPath, 'sftp_auto').catch(e =>
                 console.warn('[TireCatalog] SFTP watch import failed:', e.message)
             );
@@ -410,7 +410,7 @@ const TireCatalog = (() => {
             return true;
         },
 
-        
+
         stopSftpWatch() {
             if (_sftpWatchTimer) {
                 clearInterval(_sftpWatchTimer);
@@ -421,20 +421,20 @@ const TireCatalog = (() => {
             _setMeta(meta);
         },
 
-        
-        
-        
 
-        
+
+
+
+
         _mergeSourceData(sourceId, newData, sourceName) {
             let catalog = _getAll();
-            
+
             catalog = catalog.filter(t => t._sourceId !== sourceId);
-            
+
             catalog = catalog.concat(newData);
             _setAll(catalog);
 
-            
+
             const sources = _getSources();
             const src = sources.find(s => s.id === sourceId);
             if (src) {
@@ -443,7 +443,7 @@ const TireCatalog = (() => {
                 _setSources(sources);
             }
 
-            
+
             const meta = _getMeta();
             _setMeta({
                 ...meta,
@@ -453,33 +453,33 @@ const TireCatalog = (() => {
             });
         },
 
-        
-        
-        
 
-        
+
+
+
+
         clear() {
             localStorage.removeItem(STORAGE_KEY);
             const meta = _getMeta();
             _setMeta({ ...meta, recordCount: 0, lastImport: null, source: null });
         },
 
-        
+
         clearSource(sourceId) {
             let catalog = _getAll();
             catalog = catalog.filter(t => t._sourceId !== sourceId);
             _setAll(catalog);
             const meta = _getMeta();
             _setMeta({ ...meta, recordCount: catalog.length });
-            
+
             const sources = _getSources();
             const src = sources.find(s => s.id === sourceId);
             if (src) { src.lastImport = null; src.recordCount = 0; _setSources(sources); }
         },
 
-        
+
         setApiKey(key) {
-            
+
             let sources = _getSources();
             let src = sources.find(s => s.type === 'tyresaddict');
             if (src) {
@@ -490,11 +490,11 @@ const TireCatalog = (() => {
             }
         },
 
-        
-        
-        
 
-        
+
+
+
+
         startAutoImport() {
             this.stopAutoImport();
             const meta = _getMeta();
@@ -521,7 +521,7 @@ const TireCatalog = (() => {
             return true;
         },
 
-        
+
         stopAutoImport() {
             if (_autoImportTimer) {
                 clearInterval(_autoImportTimer);
@@ -532,11 +532,11 @@ const TireCatalog = (() => {
             _setMeta(meta);
         },
 
-        
-        
-        
 
-        
+
+
+
+
         loadSampleData() {
             const sampleCatalog = [
                 {
@@ -792,9 +792,11 @@ const TireCatalog = (() => {
                 }
             ];
 
-            
+
+            const sources = ['ATD', 'TireHub', 'US Auto', 'Atlantic'];
             sampleCatalog.forEach(t => {
                 t.size_display = t.sizes.map(s => `${s.width}/${s.profile}R${s.rim}`).join(', ');
+                t._sourceId = sources[Math.floor(Math.random() * sources.length)];
             });
 
             _setAll(sampleCatalog);

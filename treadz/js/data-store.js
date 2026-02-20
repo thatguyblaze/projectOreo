@@ -2,18 +2,18 @@
 
 const TreadzData = {
 
-    
+
     CONFIG: {
         KEYS: {
             'ticket': 'treadzTowHistoryV1',
-            'receipt': 'treadzQuoteHistoryV1', 
+            'receipt': 'treadzQuoteHistoryV1',
             'quote': 'treadzQuoteHistoryV1',
             'audit': 'treadz_audit_logs'
         }
     },
 
-    
-    
+
+
 
     _getStorage: (collectionDesc) => {
         const key = TreadzData.CONFIG.KEYS[collectionDesc] || `treadz_${collectionDesc}`;
@@ -32,25 +32,25 @@ const TreadzData = {
             localStorage.setItem(key, JSON.stringify(data));
         } catch (e) {
             console.error(`Error saving ${collectionDesc}:`, e);
-            
+
         }
     },
 
-    
 
-    
+
+
     getAll: (collection) => {
         return TreadzData._getStorage(collection);
     },
 
-    
+
     getById: (collection, id) => {
         const records = TreadzData._getStorage(collection);
-        
+
         return records.find(r => r.id == id);
     },
 
-    
+
     save: (collection, record, user = 'System') => {
         const records = TreadzData._getStorage(collection);
         const index = records.findIndex(r => r.id == record.id);
@@ -58,13 +58,13 @@ const TreadzData = {
         let action = '';
         let oldRecord = null;
 
-        
+
         const now = new Date().toISOString();
 
         if (index >= 0) {
             action = 'UPDATE';
             oldRecord = records[index];
-            
+
             records[index] = {
                 ...oldRecord,
                 ...record,
@@ -76,21 +76,21 @@ const TreadzData = {
             record.createdAt = now;
             record.updatedAt = now;
             record.version = 1;
-            records.unshift(record); 
+            records.unshift(record);
         }
 
-        
+
         if (records.length > 200) records.pop();
 
         TreadzData._setStorage(collection, records);
 
-        
+
         TreadzData.logAudit(collection, record.id, action, user, oldRecord ? 'Record updated' : 'New record created');
 
         return records[index >= 0 ? index : 0];
     },
 
-    
+
     delete: (collection, id, user = 'System') => {
         let records = TreadzData._getStorage(collection);
         const record = records.find(r => r.id == id);
@@ -104,7 +104,7 @@ const TreadzData = {
         return false;
     },
 
-    
+
 
     logAudit: (targetCollection, targetId, action, user, details) => {
         const logs = TreadzData._getStorage('audit');
@@ -114,14 +114,14 @@ const TreadzData = {
             timestamp: new Date().toISOString(),
             targetCollection,
             targetId,
-            action, 
+            action,
             user,
             details
         };
 
         logs.unshift(logEntry);
 
-        
+
         if (logs.length > 500) logs.pop();
 
         TreadzData._setStorage('audit', logs);
@@ -136,9 +136,9 @@ const TreadzData = {
         );
     },
 
-    
 
-    
+
+
     search: (query, collections = ['ticket']) => {
         if (!query || query.length < 2) return [];
         const lowerQ = query.toLowerCase();
@@ -148,12 +148,12 @@ const TreadzData = {
         collections.forEach(col => {
             const records = TreadzData.getAll(col);
             const matches = records.filter(item => {
-                
+
                 const searchable = item.fields ? JSON.stringify(Object.values(item.fields)) : JSON.stringify(Object.values(item));
                 return searchable.toLowerCase().includes(lowerQ);
             });
 
-            
+
             const colResults = matches.map(m => ({
                 id: m.id,
                 type: col,
@@ -169,7 +169,7 @@ const TreadzData = {
         return results;
     },
 
-    
+
     exportToCSV: (collection) => {
         const records = TreadzData.getAll(collection);
         if (!records.length) return '';
@@ -184,7 +184,7 @@ const TreadzData = {
         return [headers, ...rows].join('\n');
     },
 
-    
+
     migrateLegacyData: () => {
         const legacyMap = {
             'ticket': ['treadzTowHistory', 'treadz_tow_history'],
@@ -196,7 +196,7 @@ const TreadzData = {
 
         Object.entries(TreadzData.CONFIG.KEYS).forEach(([type, currentKey]) => {
             const currentData = localStorage.getItem(currentKey);
-            
+
             if (!currentData || JSON.parse(currentData).length === 0) {
                 const legacyKeys = legacyMap[type];
                 if (legacyKeys) {
@@ -207,10 +207,10 @@ const TreadzData = {
                             try {
                                 const parsed = JSON.parse(oldData);
                                 if (Array.isArray(parsed) && parsed.length > 0) {
-                                    localStorage.setItem(currentKey, oldData); 
+                                    localStorage.setItem(currentKey, oldData);
                                     migratedCount += parsed.length;
-                                    
-                                    break; 
+
+                                    break;
                                 }
                             } catch (e) {
                                 console.error(`[Migration] Failed to parse legacy ${oldKey}`, e);

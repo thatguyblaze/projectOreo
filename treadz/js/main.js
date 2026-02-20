@@ -21,7 +21,68 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadData = () => {
-        inventory = JSON.parse(localStorage.getItem('treadzTireInventoryV7')) || [];
+        // Inventory: Pull from BOTH V7 and V5 regardless (Merge Strategy)
+        const v7Raw = localStorage.getItem('treadzTireInventoryV7');
+        const v5Raw = localStorage.getItem('treadzTireInventoryV5');
+
+        let v7Inventory = v7Raw ? JSON.parse(v7Raw) : [];
+        let v5Inventory = v5Raw ? JSON.parse(v5Raw) : [];
+
+        // Ensure arrays
+        if (!Array.isArray(v7Inventory)) v7Inventory = [];
+        if (!Array.isArray(v5Inventory)) v5Inventory = [];
+
+        // Merge V5 and V7 with smart deduplication and quantity reconciliation
+        const mergedInventory = [...v7Inventory];
+        const v7Ids = new Set(v7Inventory.map(i => i.id));
+
+        v5Inventory.forEach(v5Item => {
+            // Case 1: ID Match - Skip (assume V7 is the more recent version of this exact record)
+            if (v5Item.id && v7Ids.has(v5Item.id)) return;
+
+            // Case 2: No ID Match - Check for content match (same tire size/condition)
+            // This handles cases where data was re-entered or IDs were lost/changed
+            const matchIndex = mergedInventory.findIndex(v7Item =>
+                v7Item.size === v5Item.size &&
+                v7Item.condition === v5Item.condition
+            );
+
+            if (matchIndex >= 0) {
+                // If found, add the V5 quantity to the existing item's quantity
+                mergedInventory[matchIndex].quantity += v5Item.quantity;
+            } else {
+                // Completely new item, add it
+                mergedInventory.push(v5Item);
+            }
+        });
+
+        // Fallback to legacy unversioned if absolutely nothing found
+        if (mergedInventory.length === 0) {
+            const legacyData = localStorage.getItem('treadzTireInventory');
+            if (legacyData) {
+                try {
+                    const parsed = JSON.parse(legacyData);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        console.log('Migrating legacy data from treadzTireInventory');
+                        mergedInventory.push(...parsed);
+                    }
+                } catch (e) { }
+            }
+        }
+
+        // Activity Log Migration
+        if (!localStorage.getItem('treadzActivityLogV7')) {
+            const legacyLog = localStorage.getItem('treadzActivityLog');
+            if (legacyLog) localStorage.setItem('treadzActivityLogV7', legacyLog);
+        }
+
+        // Audit History Migration
+        if (!localStorage.getItem('treadzAuditHistoryV7')) {
+            const legacyAudit = localStorage.getItem('treadzAuditHistory');
+            if (legacyAudit) localStorage.setItem('treadzAuditHistoryV7', legacyAudit);
+        }
+
+        inventory = mergedInventory;
         activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
         auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV7')) || [];
         purchaseOrderCart = JSON.parse(localStorage.getItem('treadzPOCart')) || [];
@@ -29,6 +90,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize Catalog
         if (typeof TireCatalog !== 'undefined') {
             catalogItems = TireCatalog.getAll();
+
+            // Patch missing sourceIds for legacy catalog data
+            if (catalogItems.length > 0) {
+                const sources = ['ATD', 'TireHub', 'US Auto', 'Atlantic'];
+                catalogItems.forEach(item => {
+                    if (!item._sourceId) {
+                        item._sourceId = sources[Math.floor(Math.random() * sources.length)];
+                    }
+                });
+            }
 
             // Force robust mock data if TireCatalog returns empty (e.g., cleared storage)
             if (catalogItems.length === 0) {
@@ -408,9 +479,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // If the search term looks like a specific tire size, filter by exact dimensions
                 if (parsedSearch) {
                     const hasMatchingSize = (item.sizes || []).some(s =>
-                        s.width === parsedSearch.width &&
-                        s.profile === parsedSearch.ratio &&
-                        s.rim === parsedSearch.rim
+                        s.width == parsedSearch.width &&
+                        (s.profile == parsedSearch.ratio || s.ratio == parsedSearch.ratio) &&
+                        s.rim == parsedSearch.rim
                     );
                     if (!hasMatchingSize) return false;
                 } else {
@@ -560,9 +631,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const itemParsed = parseTireSize(itemSizeStr);
 
                 if (itemParsed &&
-                    itemParsed.width === parsedSearch.width &&
-                    itemParsed.rim === parsedSearch.rim &&
-                    itemParsed.ratio === parsedSearch.ratio) {
+                    itemParsed.width == parsedSearch.width &&
+                    itemParsed.rim == parsedSearch.rim &&
+                    itemParsed.ratio == parsedSearch.ratio) {
                     return true;
                 }
             }
