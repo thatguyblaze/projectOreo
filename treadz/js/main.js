@@ -329,7 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const parseTireSize = (input) => {
         if (!input) return null;
         // Normalize: remove all non-alphanumeric chars first to handle 255/55R18 vs 2555518
-        const cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        // Ensure string to prevent crashes on numeric values
+        const cleaned = String(input).toUpperCase().replace(/[^A-Z0-9]/g, '');
 
         // Pattern 1: Standard P-Metric without slash (e.g. 2555518, 25555R18)
         // If length is 7-8 and ends with 2 digits for rim
@@ -742,6 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Collect Local Inventory Rims
         inventory.forEach(item => {
+            if (!item) return;
             const s = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
             const p = parseTireSize(s);
             if (p && p.rim) localRims.add(parseInt(p.rim));
