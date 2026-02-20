@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Catalog & PO System State
     let catalogItems = [];
     let purchaseOrderCart = []; // Array of { id, item, sizeStr, quantity, distributor }
+    let searchStats = {};
     let catalogFilters = {
         distributor: '',
         brand: '',
@@ -76,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
         auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV7')) || [];
         purchaseOrderCart = JSON.parse(localStorage.getItem('treadzPOCart')) || [];
+        searchStats = JSON.parse(localStorage.getItem('treadzSearchStats')) || {};
 
         // Initialize Catalog
         if (typeof TireCatalog !== 'undefined') {
@@ -126,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('treadzActivityLogV7', JSON.stringify(activityLog));
         localStorage.setItem('treadzAuditHistoryV7', JSON.stringify(auditHistory));
         localStorage.setItem('treadzPOCart', JSON.stringify(purchaseOrderCart));
+        localStorage.setItem('treadzSearchStats', JSON.stringify(searchStats));
     };
 
     // Purchase Order Logic
@@ -393,6 +396,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderAll = () => {
         renderInventory();
         renderCatalog();
+        const analyticsSection = getEl('analytics-section');
+        if (analyticsSection && analyticsSection.classList.contains('open')) {
+            renderAnalytics();
+        }
         // renderActivityLog();
     };
 
@@ -401,18 +408,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = getEl('analytics-chart');
         if (!list || !ctx) return;
 
-        // Mock data for analytics based on "searches" or sales
-        // In a real app, this would come from a backend or aggregated logs
-        const data = [
-            { size: '205/55R16', count: 45 },
-            { size: '225/65R17', count: 38 },
-            { size: '265/70R17', count: 32 },
-            { size: '275/55R20', count: 28 },
-            { size: '195/65R15', count: 20 }
-        ];
+        // Real Data Aggregation from Search Stats
+        // Use persistent search statistics instead of inventory counts
+        let data = Object.entries(searchStats)
+            .map(([size, count]) => ({ size, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5);
+
+        if (data.length === 0) {
+            data = [{ size: 'No Search Data', count: 0 }];
+        }
+
+        const maxCount = data[0].count || 1; // Prevent division by zero
 
         // List
-        list.innerHTML = data.map((d, i) => `
+        list.innerHTML = data.map((d, i) => {
+            const percentage = ((d.count / maxCount) * 100).toFixed(1);
+            return `
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
                 <div class="flex items-center gap-3">
                     <span class="font-bold text-gray-400 text-sm">#${i + 1}</span>
@@ -420,12 +432,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="flex items-center gap-2">
                     <div class="h-1.5 w-24 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-blue-500 rounded-full" style="width: ${(d.count / data[0].count) * 100}%"></div>
+                        <div class="h-full bg-blue-500 rounded-full" style="width: ${percentage}%"></div>
                     </div>
                     <span class="text-xs font-bold text-gray-500 w-8 text-right">${d.count}</span>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
 
         // Chart
         if (window.analyticsChartInstance) window.analyticsChartInstance.destroy();
@@ -611,12 +623,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = getEl('search-input').value.trim();
         const parsedSearch = parseTireSize(searchTerm);
 
+        // Local Rim Filter
+        const rimFilterEl = getEl('inventory-filter-rim');
+        const rimFilter = rimFilterEl ? rimFilterEl.value : '';
+
         const filtered = inventory.filter(item => {
+            // 1. Rim Filter
+            if (rimFilter) {
+                const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
+                const p = parseTireSize(itemSizeStr);
+                if (!p || p.rim != rimFilter) return false;
+            }
+
+            // 2. Search Text
             if (!searchTerm) return true;
 
             // robust size matching
             if (parsedSearch) {
-                // item.size might be string or object
                 const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
                 const itemParsed = parseTireSize(itemSizeStr);
 
@@ -635,46 +658,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (filtered.length === 0) {
-            emptyState.classList.add('hidden');
-            container.innerHTML = `
-                <div class="text-center py-12 bg-gray-50 rounded-xl border border-gray-200 mb-8">
-                    <p class="text-gray-500">No local inventory matches found.</p>
-                </div>`;
+            emptyState.classList.remove('hidden');
+            container.innerHTML = '';
+            // Update empty state text based on context
+            const h2 = emptyState.querySelector('h2');
+            const p = emptyState.querySelector('p');
+            if (h2) h2.textContent = 'No matching inventory';
+            if (p) p.textContent = 'Try adjusting filters.';
             return;
         }
 
         emptyState.classList.add('hidden');
 
         container.innerHTML = `
-            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
-                Local Inventory <span class="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">${filtered.length}</span>
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100 shadow-sm">
                 ${filtered.map(item => {
             const sizeDisplay = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
             const isNew = item.condition === 'new';
 
             return `
-                    <div class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
-                        <div class="flex items-center gap-3">
-                             <div class="w-1.5 h-10 rounded-full ${isNew ? 'bg-green-500' : 'bg-gray-400'}" title="${isNew ? 'New' : 'Used'}"></div>
+                    <div class="group p-4 flex items-center justify-between hover:bg-blue-50/30 transition-colors">
+                        <div class="flex items-center gap-4">
+                             <div class="flex flex-col items-center justify-center w-8">
+                                <span class="block w-2 h-8 rounded-full ${isNew ? 'bg-gradient-to-b from-green-400 to-green-600' : 'bg-gradient-to-b from-gray-300 to-gray-400'}" title="${isNew ? 'New' : 'Used'}"></span>
+                             </div>
                              <div>
-                                 <h3 class="font-black text-xl text-gray-800 tracking-tight">${sizeDisplay}</h3>
-                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${item.condition || 'Used'}</p>
+                                 <div class="font-black text-xl text-gray-800 tracking-tight font-mono leading-none">${sizeDisplay}</div>
+                                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">${item.condition || 'Used'}</div>
                              </div>
                         </div>
                         
-                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-100">
+                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-200 group-hover:bg-white group-hover:border-blue-200 transition-colors">
                             <button onclick="window.updateInventoryQty('${item.id}', -1)" 
-                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
+                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
                                 -
                             </button>
                             <span class="font-mono font-bold text-lg w-8 text-center text-gray-800">${item.quantity}</span>
                             <button onclick="window.updateInventoryQty('${item.id}', 1)" 
-                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-500 hover:text-green-600 hover:border-green-200 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
+                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-200 hover:bg-green-50 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
                                 +
                             </button>
                         </div>
@@ -709,6 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const brands = new Set();
         const rims = new Set();
         const distributors = new Set();
+        const localRims = new Set();
 
         catalogItems.forEach(item => {
             if (item.vendor_name) brands.add(item.vendor_name);
@@ -717,6 +739,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (s.rim) rims.add(parseInt(s.rim));
             });
         });
+
+        // Collect Local Inventory Rims
+        inventory.forEach(item => {
+            const s = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
+            const p = parseTireSize(s);
+            if (p && p.rim) localRims.add(parseInt(p.rim));
+        });
+
+        // Local Rim Filter
+        const localRimSelect = getEl('inventory-filter-rim');
+        if (localRimSelect) {
+            const current = localRimSelect.value;
+            localRimSelect.innerHTML = '<option value="">All Rims</option>';
+            [...localRims].sort((a, b) => a - b).forEach(r => {
+                localRimSelect.innerHTML += `<option value="${r}">${r}" Rim</option>`;
+            });
+            localRimSelect.value = current;
+        }
 
         // Distributors
         const distSelect = getEl('filter-distributor');
@@ -753,13 +793,40 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Listeners
-    getEl('search-input').addEventListener('input', renderAll);
+    getEl('search-input').addEventListener('input', (e) => {
+        renderAll();
+        trackSearch(e.target.value);
+    });
     getEl('clear-search-btn').addEventListener('click', () => { getEl('search-input').value = ''; renderAll(); });
     ['filter-distributor', 'filter-brand', 'filter-rim', 'filter-type', 'filter-ply', 'filter-sort'].forEach(id => {
         const el = getEl(id); if (el) el.addEventListener('change', (e) => {
             catalogFilters[id.replace('filter-', '')] = e.target.value; renderAll();
         });
     });
+
+    // Local Inventory Filter Listener
+    const localRimFilter = getEl('inventory-filter-rim');
+    if (localRimFilter) {
+        localRimFilter.addEventListener('change', renderInventory);
+    }
+
+    let searchDebounce;
+    const trackSearch = (term) => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            if (!term) return;
+            const parsed = parseTireSize(term);
+            if (parsed) {
+                const standardized = formatTireSize(parsed);
+                searchStats[standardized] = (searchStats[standardized] || 0) + 1;
+                saveData();
+                const analyticsSection = getEl('analytics-section');
+                if (analyticsSection && analyticsSection.classList.contains('open')) {
+                    renderAnalytics();
+                }
+            }
+        }, 2000); // 2 second delay to capture "intent" rather than "typing"
+    };
 
     const analyticsBtn = getEl('analytics-toggle');
     if (analyticsBtn) {
