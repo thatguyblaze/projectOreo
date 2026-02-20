@@ -37,23 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const v7Ids = new Set(v7Inventory.map(i => i.id));
 
         v5Inventory.forEach(v5Item => {
-            // Case 1: ID Match - Skip (assume V7 is the more recent version of this exact record)
-            if (v5Item.id && v7Ids.has(v5Item.id)) return;
-
-            // Case 2: No ID Match - Check for content match (same tire size/condition)
-            // This handles cases where data was re-entered or IDs were lost/changed
-            const matchIndex = mergedInventory.findIndex(v7Item =>
-                v7Item.size === v5Item.size &&
-                v7Item.condition === v5Item.condition
-            );
-
-            if (matchIndex >= 0) {
-                // If found, add the V5 quantity to the existing item's quantity
-                mergedInventory[matchIndex].quantity += v5Item.quantity;
-            } else {
-                // Completely new item, add it
-                mergedInventory.push(v5Item);
-            }
+            // FORCE ADD EVERYTHING from V5 as new records
+            // Generate new ID to ensure no conflicts
+            const newItem = {
+                ...v5Item,
+                id: Date.now().toString(36) + Math.random().toString(36).substr(2) + '_v5'
+            };
+            mergedInventory.push(newItem);
         });
 
         // Fallback to legacy unversioned if absolutely nothing found
