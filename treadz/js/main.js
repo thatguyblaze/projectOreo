@@ -328,40 +328,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const parseTireSize = (input) => {
         if (!input) return null;
-        // Normalize: remove all non-alphanumeric chars first to handle 255/55R18 vs 2555518
-        // Ensure string to prevent crashes on numeric values
-        const cleaned = String(input).toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const raw = String(input).toUpperCase();
+        // Extract JUST digits for sequential matching (e.g. 2555520)
+        const digits = raw.replace(/\D/g, '');
 
-        // Pattern 1: Standard P-Metric without slash (e.g. 2555518, 25555R18)
-        // If length is 7-8 and ends with 2 digits for rim
-        // 255 55 18 -> 3 + 2 + 2 = 7 digits
-        // 255 55 R 18 -> 3 + 2 + 1 + 2 = 8 chars
-
-        const simpleNumeric = cleaned.replace(/[A-Z]/g, '');
-
-        // P-Metric: Width(3) + Ratio(2) + Rim(2) = 7 digits (e.g. 2256016)
-        if (simpleNumeric.length === 7) {
-            const width = parseInt(simpleNumeric.substr(0, 3));
-            const ratio = parseInt(simpleNumeric.substr(3, 2));
-            const rim = parseInt(simpleNumeric.substr(5, 2));
-            return { type: 'p-metric', width, ratio, rim };
+        // P-Metric: 2256517 (7 digits)
+        if (digits.length === 7) {
+            return {
+                type: 'p-metric',
+                width: parseInt(digits.substring(0, 3)),
+                ratio: parseInt(digits.substring(3, 5)),
+                rim: parseInt(digits.substring(5, 7))
+            };
         }
 
-        // Flotation: Diameter(2) + Width(4) + Rim(2) = 8 digits (e.g. 35125020 for 35x12.50R20)
-        // Or Diameter(2) + Width(3) + Rim(2) = 7 digits? (e.g. 33125015 is usually written fully)
-        // Let's stick to standard regex for more complex cases if simple length check fails
-
-        const flotationMatch = input.replace(/\D/g, '').match(/^(\d{2})(\d{4})(\d{2})$/);
-        if (flotationMatch) {
-            const [_, diameter, widthRaw, rim] = flotationMatch;
-            return { type: 'flotation', diameter: parseInt(diameter, 10), width: parseFloat((parseInt(widthRaw, 10) / 100).toFixed(2)), rim: parseInt(rim, 10) };
+        // Flotation: 35125020 (8 digits)
+        if (digits.length === 8) {
+            return {
+                type: 'flotation',
+                diameter: parseInt(digits.substring(0, 2)),
+                width: parseFloat((parseInt(digits.substring(2, 6)) / 100).toFixed(2)),
+                rim: parseInt(digits.substring(6, 8))
+            };
         }
 
-        const pMetricMatch = input.replace(/\D/g, '').match(/^(\d{3})(\d{2})(\d{2})$/);
+        // Partial P-Metric: 22565 (5 digits)
+        if (digits.length === 5) {
+            return {
+                type: 'p-metric',
+                width: parseInt(digits.substring(0, 3)),
+                ratio: parseInt(digits.substring(3, 5)),
+                rim: null,
+                partial: true
+            };
+        }
+
+        // Regex Fallback for formatted strings
+        const pMetricMatch = raw.match(/(\d{3})[\/\s](\d{2})R?(\d{2})/);
         if (pMetricMatch) {
-            const [_, width, ratio, rim] = pMetricMatch;
-            return { type: 'p-metric', width: parseInt(width, 10), ratio: parseInt(ratio, 10), rim: parseInt(rim, 10) };
+            return { type: 'p-metric', width: parseInt(pMetricMatch[1]), ratio: parseInt(pMetricMatch[2]), rim: parseInt(pMetricMatch[3]) };
         }
+
+        const floatMatch = raw.match(/(\d{2})[X\s](\d{2,4})R?(\d{2})/);
+        if (floatMatch) {
+            const diam = parseInt(floatMatch[1]);
+            let width = parseFloat(floatMatch[2]);
+            if (width > 100) width = width / 100; // handle 1250 vs 12.50
+            return { type: 'flotation', diameter: diam, width: width, rim: parseInt(floatMatch[3]) };
+        }
+
         return null;
     };
 
@@ -479,23 +494,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let filtered = catalogItems.filter(item => {
             if (searchTerm) {
-                // If the search term looks like a specific tire size, filter by exact dimensions
+                const searchClean = searchTerm.replace(/\D/g, '');
+
+                // 1. Precise Size Matching
                 if (parsedSearch) {
                     const hasMatchingSize = (item.sizes || []).some(s =>
                         s.width == parsedSearch.width &&
-                        (s.profile == parsedSearch.ratio || s.ratio == parsedSearch.ratio) &&
+                        (s.profile == parsedSearch.ratio || s.ratio == parsedSearch.ratio || s.diameter == parsedSearch.diameter) &&
                         s.rim == parsedSearch.rim
                     );
-                    if (!hasMatchingSize) return false;
-                } else {
-                    // Otherwise standard text search
-                    const searchStr = [
-                        item.vendor_name, item.model_name, item.size_display, item.car_type_str,
-                        ...(item.sizes || []).map(s => `${s.width}/${s.profile}R${s.rim}`)
-                    ].join(' ').toLowerCase();
-                    const terms = searchTerm.toLowerCase().split(/\s+/);
-                    if (!terms.every(t => searchStr.includes(t))) return false;
+                    if (hasMatchingSize) return true;
                 }
+
+                // 2. Sequential Digit Matching (e.g. 2555520 matches 255/55R20)
+                if (searchClean.length >= 5) {
+                    const itemClean = (item.size_display || '').replace(/\D/g, '');
+                    if (itemClean.includes(searchClean)) return true;
+
+                    // Also check individual sizes within the object
+                    const hasDigitMatch = (item.sizes || []).some(s => {
+                        const sDigits = `${s.width}${s.profile || s.ratio || s.diameter}${s.rim}`;
+                        return sDigits.includes(searchClean);
+                    });
+                    if (hasDigitMatch) return true;
+                }
+
+                // 3. Standard Text Search
+                const searchStr = [
+                    item.vendor_name, item.model_name, item.size_display, item.car_type_str,
+                    ...(item.sizes || []).map(s => `${s.width}/${s.profile || s.ratio}R${s.rim}`)
+                ].join(' ').toLowerCase();
+                const terms = searchTerm.toLowerCase().split(/\s+/);
+                return terms.every(t => searchStr.includes(t));
             }
             if (catalogFilters.distributor && item._sourceId !== catalogFilters.distributor) return false;
             if (catalogFilters.brand && item.vendor_name !== catalogFilters.brand) return false;
@@ -614,6 +644,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const emptyState = getEl('empty-state');
         if (!container || !emptyState) return;
 
+        console.log(`[Treadz] Rendering Inventory. Total items: ${inventory.length}`);
+
         // If no inventory at all
         if (inventory.length === 0) {
             container.innerHTML = '';
@@ -628,34 +660,66 @@ document.addEventListener('DOMContentLoaded', () => {
         const rimFilterEl = getEl('inventory-filter-rim');
         const rimFilter = rimFilterEl ? rimFilterEl.value : '';
 
-        const filtered = inventory.filter(item => {
+        let filtered = inventory.filter(item => {
+            // Check for valid item to prevent crashes
+            if (!item) return false;
+
+            const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
+
             // 1. Rim Filter
             if (rimFilter) {
-                const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
                 const p = parseTireSize(itemSizeStr);
-                if (!p || p.rim != rimFilter) return false;
+                if (!p || !p.rim || p.rim != rimFilter) return false;
             }
 
             // 2. Search Text
             if (!searchTerm) return true;
 
-            // robust size matching
+            const searchClean = searchTerm.replace(/\D/g, '');
+            const itemClean = itemSizeStr.replace(/\D/g, '');
+
+            // A. Robust sequential digit matching (e.g. "2555520")
+            if (searchClean.length >= 5 && itemClean.includes(searchClean)) return true;
+
+            // B. Structured Size matching
             if (parsedSearch) {
-                const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
                 const itemParsed = parseTireSize(itemSizeStr);
 
-                if (itemParsed &&
-                    itemParsed.width == parsedSearch.width &&
-                    itemParsed.rim == parsedSearch.rim &&
-                    itemParsed.ratio == parsedSearch.ratio) {
-                    return true;
+                if (itemParsed) {
+                    // If user typed partial (5 digits e.g. 25535), only match width/ratio
+                    if (parsedSearch.partial) {
+                        if (itemParsed.width == parsedSearch.width &&
+                            itemParsed.ratio == parsedSearch.ratio) {
+                            return true;
+                        }
+                    } else {
+                        // Full matching
+                        if (itemParsed.width == parsedSearch.width &&
+                            itemParsed.rim == parsedSearch.rim &&
+                            (itemParsed.ratio == parsedSearch.ratio || !parsedSearch.ratio)) {
+                            return true;
+                        }
+                    }
                 }
             }
 
-            // Text matching
-            const sizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
-            const text = `${sizeStr} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
+            // C. Text matching fallback
+            const text = `${itemSizeStr} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
             return text.includes(searchTerm.toLowerCase());
+        });
+
+        console.log(`[Treadz] Filtered items: ${filtered.length}`);
+
+        // Sorting: Rim Asc, then Width Desc, then Ratio Desc
+        filtered.sort((a, b) => {
+            const sA = typeof a.size === 'object' ? formatTireSize(a.size) : a.size;
+            const sB = typeof b.size === 'object' ? formatTireSize(b.size) : b.size;
+            const pA = parseTireSize(sA) || { width: 0, ratio: 0, rim: 0 };
+            const pB = parseTireSize(sB) || { width: 0, ratio: 0, rim: 0 };
+
+            if (pA.rim !== pB.rim) return pA.rim - pB.rim; // Rim Asc (16, 17, 18...)
+            if (pA.width !== pB.width) return pB.width - pA.width; // Width Desc (285, 275...)
+            return pB.ratio - pA.ratio; // Ratio Desc (70, 65...)
         });
 
         if (filtered.length === 0) {
@@ -671,34 +735,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         emptyState.classList.add('hidden');
 
+        // Use Grid Layout (3 Columns on md and up)
         container.innerHTML = `
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden divide-y divide-gray-100 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 ${filtered.map(item => {
             const sizeDisplay = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
             const isNew = item.condition === 'new';
 
             return `
-                    <div class="group p-4 flex items-center justify-between hover:bg-blue-50/30 transition-colors">
-                        <div class="flex items-center gap-4">
-                             <div class="flex flex-col items-center justify-center w-8">
-                                <span class="block w-2 h-8 rounded-full ${isNew ? 'bg-gradient-to-b from-green-400 to-green-600' : 'bg-gradient-to-b from-gray-300 to-gray-400'}" title="${isNew ? 'New' : 'Used'}"></span>
-                             </div>
-                             <div>
-                                 <div class="font-black text-xl text-gray-800 tracking-tight font-mono leading-none">${sizeDisplay}</div>
-                                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">${item.condition || 'Used'}</div>
-                             </div>
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-2">
+                             <div class="w-2 h-2 rounded-full ${isNew ? 'bg-green-500' : 'bg-gray-300'}" title="${isNew ? 'New' : 'Used'}"></div>
                         </div>
                         
-                        <div class="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-200 group-hover:bg-white group-hover:border-blue-200 transition-colors">
-                            <button onclick="window.updateInventoryQty('${item.id}', -1)" 
-                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
-                                -
-                            </button>
-                            <span class="font-mono font-bold text-lg w-8 text-center text-gray-800">${item.quantity}</span>
-                            <button onclick="window.updateInventoryQty('${item.id}', 1)" 
-                                class="w-8 h-8 rounded-md bg-white border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-200 hover:bg-green-50 flex items-center justify-center font-bold text-lg transition-all shadow-sm active:scale-95">
-                                +
-                            </button>
+                        <div class="mb-3">
+                            <h3 class="font-black text-2xl text-gray-800 tracking-tight font-mono">${sizeDisplay}</h3>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">${item.condition || 'Used'}</p>
+                        </div>
+                        
+                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
+                            <div class="pl-1">
+                                <span class="text-xs text-gray-400 font-medium">Qty</span>
+                                <span class="font-mono text-xl font-bold text-gray-800 ml-1">${item.quantity}</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-1">
+                                <button onclick="window.updateInventoryQty('${item.id}', -1)" 
+                                    class="w-8 h-8 rounded bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center font-bold text-lg transition-all active:scale-95 shadow-sm">
+                                    -
+                                </button>
+                                <button onclick="window.updateInventoryQty('${item.id}', 1)" 
+                                    class="w-8 h-8 rounded bg-gray-50 border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-200 hover:bg-green-50 flex items-center justify-center font-bold text-lg transition-all active:scale-95 shadow-sm">
+                                    +
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `}).join('')}
