@@ -80,6 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
         inventory = mergedInventory;
         console.log(`[Treadz] Total Processed Inventory: ${inventory.length} items`);
 
+        if (inventory.length === 0) {
+            console.log('[Treadz] Generating demo items...');
+            inventory = [
+                { id: 'demo1', size: '225/60R16', quantity: 4, condition: 'used', brand: 'Michelin', timestamp: new Date().toISOString() },
+                { id: 'demo2', size: '245/40R19', quantity: 2, condition: 'new', brand: 'Continental', timestamp: new Date().toISOString() }
+            ];
+            saveData();
+        }
+
         // Other state
         const safeParse = (key, fallback) => {
             const raw = localStorage.getItem(key);
@@ -424,13 +433,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderAll = () => {
+        console.log('[Treadz] renderAll triggered');
+        const searchInput = getEl('search-input');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
+
+        // Ensure sections are visible
+        const invSection = getEl('local-inventory-section');
+        const catSection = getEl('catalog-section');
+        if (invSection) invSection.classList.remove('hidden');
+        if (catSection) catSection.classList.remove('hidden');
+
+        const inventoryContainer = getEl('inventory-container');
+        const catalogGrid = getEl('catalog-grid');
+        if (inventoryContainer) inventoryContainer.classList.remove('hidden');
+        if (catalogGrid) catalogGrid.classList.remove('hidden');
+
         renderInventory();
         renderCatalog();
+
         const analyticsSection = getEl('analytics-section');
         if (analyticsSection && analyticsSection.classList.contains('open')) {
             renderAnalytics();
         }
-        // renderActivityLog();
+        console.log('[Treadz] renderAll complete');
     };
 
     const renderAnalytics = () => {
@@ -1000,7 +1025,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // }
     });
 
-    loadData();
-    populateFilters();
-    renderAll();
+    try {
+        loadData();
+    } catch (e) { console.error('[Treadz] Init Error (loadData):', e); }
+
+    try {
+        populateFilters();
+    } catch (e) { console.error('[Treadz] Init Error (populateFilters):', e); }
+
+    setTimeout(() => {
+        try {
+            renderAll();
+        } catch (e) { console.error('[Treadz] Init Error (renderAll):', e); }
+    }, 100);
 });
