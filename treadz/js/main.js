@@ -352,12 +352,12 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        // Partial P-Metric: 22565 (5 digits)
-        if (digits.length === 5) {
+        // Partial P-Metric: 2357 (4 digits) or 22565 (5 digits)
+        if (digits.length === 4 || digits.length === 5) {
             return {
                 type: 'p-metric',
                 width: parseInt(digits.substring(0, 3)),
-                ratio: parseInt(digits.substring(3, 5)),
+                ratio: parseInt(digits.substring(3)), // 1 or 2 digits
                 rim: null,
                 partial: true
             };
@@ -506,8 +506,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (hasMatchingSize) return true;
                 }
 
-                // 2. Sequential Digit Matching (e.g. 2555520 matches 255/55R20)
-                if (searchClean.length >= 5) {
+                // 2. Sequential Digit Matching (e.g. 2357 matches 235/75)
+                if (searchClean.length >= 3) {
                     const itemClean = (item.size_display || '').replace(/\D/g, '');
                     if (itemClean.includes(searchClean)) return true;
 
@@ -678,8 +678,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchClean = searchTerm.replace(/\D/g, '');
             const itemClean = itemSizeStr.replace(/\D/g, '');
 
-            // A. Robust sequential digit matching (e.g. "2555520")
-            if (searchClean.length >= 5 && itemClean.includes(searchClean)) return true;
+            // A. Robust sequential digit matching (e.g. "2357" matches "23575")
+            if (searchClean.length >= 3 && itemClean.includes(searchClean)) return true;
 
             // B. Structured Size matching
             if (parsedSearch) {
