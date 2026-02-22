@@ -22,66 +22,80 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadData = () => {
-        // Inventory: Pull from BOTH V7 and V5 regardless (Merge Strategy)
-        const v7Raw = localStorage.getItem('treadzTireInventoryV7');
-        const v5Raw = localStorage.getItem('treadzTireInventoryV5');
+        console.log('[Treadz] Initializing Data Load...');
+        let mergedInventory = [];
 
-        let v7Inventory = v7Raw ? JSON.parse(v7Raw) : [];
-        let v5Inventory = v5Raw ? JSON.parse(v5Raw) : [];
+        try {
+            // Inventory: Pull from BOTH V7 and V5
+            const v7Raw = localStorage.getItem('treadzTireInventoryV7');
+            const v5Raw = localStorage.getItem('treadzTireInventoryV5');
 
-        // Ensure arrays
-        if (!Array.isArray(v7Inventory)) v7Inventory = [];
-        if (!Array.isArray(v5Inventory)) v5Inventory = [];
+            let v7Inventory = [];
+            let v5Inventory = [];
 
-        // Merge V5 and V7 with smart deduplication and quantity reconciliation
-        const mergedInventory = [...v7Inventory];
-        const v7Ids = new Set(v7Inventory.map(i => i.id));
-
-        v5Inventory.forEach(v5Item => {
-            // FORCE ADD EVERYTHING from V5 as new records
-            // Generate new ID to ensure no conflicts
-            const newItem = {
-                ...v5Item,
-                id: Date.now().toString(36) + Math.random().toString(36).substr(2) + '_v5'
-            };
-            mergedInventory.push(newItem);
-        });
-
-        // Fallback to legacy unversioned if absolutely nothing found
-        if (mergedInventory.length === 0) {
-            const legacyData = localStorage.getItem('treadzTireInventory');
-            if (legacyData) {
+            if (v7Raw) {
                 try {
-                    const parsed = JSON.parse(legacyData);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        console.log('Migrating legacy data from treadzTireInventory');
-                        mergedInventory.push(...parsed);
-                    }
-                } catch (e) { }
+                    const p = JSON.parse(v7Raw);
+                    v7Inventory = Array.isArray(p) ? p : [];
+                    console.log(`[Treadz] Loaded V7 Inventory: ${v7Inventory.length} items`);
+                } catch (e) { console.error('[Treadz] V7 Parse Error:', e); }
             }
-        }
 
-        // Activity Log Migration
-        if (!localStorage.getItem('treadzActivityLogV7')) {
-            const legacyLog = localStorage.getItem('treadzActivityLog');
-            if (legacyLog) localStorage.setItem('treadzActivityLogV7', legacyLog);
-        }
+            if (v5Raw) {
+                try {
+                    const p = JSON.parse(v5Raw);
+                    v5Inventory = Array.isArray(p) ? p : [];
+                    console.log(`[Treadz] Loaded V5 Inventory: ${v5Inventory.length} items`);
+                } catch (e) { console.error('[Treadz] V5 Parse Error:', e); }
+            }
 
-        // Audit History Migration
-        if (!localStorage.getItem('treadzAuditHistoryV7')) {
-            const legacyAudit = localStorage.getItem('treadzAuditHistory');
-            if (legacyAudit) localStorage.setItem('treadzAuditHistoryV7', legacyAudit);
+            mergedInventory = [...v7Inventory];
+
+            // Merge V5 items
+            v5Inventory.forEach(v5Item => {
+                const newItem = {
+                    ...v5Item,
+                    id: v5Item.id || (Date.now().toString(36) + Math.random().toString(36).substr(2) + '_v5')
+                };
+                mergedInventory.push(newItem);
+            });
+
+            // Fallback to legacy unversioned if absolutely nothing found
+            if (mergedInventory.length === 0) {
+                const legacyData = localStorage.getItem('treadzTireInventory');
+                if (legacyData) {
+                    try {
+                        const parsed = JSON.parse(legacyData);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            console.log('[Treadz] Migrating legacy data:', parsed.length);
+                            mergedInventory.push(...parsed);
+                        }
+                    } catch (e) { console.error('[Treadz] Legacy Parse Error:', e); }
+                }
+            }
+        } catch (globalE) {
+            console.error('[Treadz] Global Load Error:', globalE);
         }
 
         inventory = mergedInventory;
-        activityLog = JSON.parse(localStorage.getItem('treadzActivityLogV7')) || [];
-        auditHistory = JSON.parse(localStorage.getItem('treadzAuditHistoryV7')) || [];
-        purchaseOrderCart = JSON.parse(localStorage.getItem('treadzPOCart')) || [];
-        searchStats = JSON.parse(localStorage.getItem('treadzSearchStats')) || {};
+        console.log(`[Treadz] Total Processed Inventory: ${inventory.length} items`);
+
+        // Other state
+        const safeParse = (key, fallback) => {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            try { return JSON.parse(raw); } catch (e) { console.error(`[Treadz] Error parsing ${key}:`, e); return fallback; }
+        };
+
+        activityLog = safeParse('treadzActivityLogV7', []);
+        auditHistory = safeParse('treadzAuditHistoryV7', []);
+        purchaseOrderCart = safeParse('treadzPOCart', []);
+        searchStats = safeParse('treadzSearchStats', {});
 
         // Initialize Catalog
         if (typeof TireCatalog !== 'undefined') {
-            catalogItems = TireCatalog.getAll();
+            catalogItems = TireCatalog.getAll() || [];
+            console.log(`[Treadz] Catalog Items: ${catalogItems.length}`);
 
             // Patch missing sourceIds for legacy catalog data
             if (catalogItems.length > 0) {
@@ -642,18 +656,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderInventory = () => {
         const container = getEl('inventory-container');
         const emptyState = getEl('empty-state');
-        if (!container || !emptyState) return;
+        if (!container || !emptyState) {
+            console.error('[Treadz] Missing inventory DOM elements');
+            return;
+        }
 
-        console.log(`[Treadz] Rendering Inventory. Total items: ${inventory.length}`);
+        console.log(`[Treadz] Rendering Inventory. State Count: ${inventory.length}`);
+
+        // Default: hide empty state
+        emptyState.classList.add('hidden');
 
         // If no inventory at all
         if (inventory.length === 0) {
             container.innerHTML = '';
             emptyState.classList.remove('hidden');
+            const h2 = emptyState.querySelector('h2');
+            const p = emptyState.querySelector('p');
+            if (h2) h2.textContent = 'Inventory is Empty';
+            if (p) p.textContent = 'Click "Add Tires" to stock your shop.';
             return;
         }
 
-        const searchTerm = getEl('search-input').value.trim();
+        const searchTerm = (getEl('search-input')?.value || '').trim();
         const parsedSearch = parseTireSize(searchTerm);
 
         // Local Rim Filter
@@ -661,15 +685,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const rimFilter = rimFilterEl ? rimFilterEl.value : '';
 
         let filtered = inventory.filter(item => {
-            // Check for valid item to prevent crashes
             if (!item) return false;
-
-            const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
+            const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : String(item.size);
 
             // 1. Rim Filter
             if (rimFilter) {
                 const p = parseTireSize(itemSizeStr);
-                if (!p || !p.rim || p.rim != rimFilter) return false;
+                if (!p || !p.rim || String(p.rim) !== String(rimFilter)) return false;
             }
 
             // 2. Search Text
@@ -678,87 +700,66 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchClean = searchTerm.replace(/\D/g, '');
             const itemClean = itemSizeStr.replace(/\D/g, '');
 
-            // A. Robust sequential digit matching (e.g. "2357" matches "23575")
             if (searchClean.length >= 3 && itemClean.includes(searchClean)) return true;
 
-            // B. Structured Size matching
             if (parsedSearch) {
                 const itemParsed = parseTireSize(itemSizeStr);
-
                 if (itemParsed) {
-                    // If user typed partial (5 digits e.g. 25535), only match width/ratio
                     if (parsedSearch.partial) {
-                        if (itemParsed.width == parsedSearch.width &&
-                            itemParsed.ratio == parsedSearch.ratio) {
-                            return true;
-                        }
+                        if (itemParsed.width == parsedSearch.width && itemParsed.ratio == parsedSearch.ratio) return true;
                     } else {
-                        // Full matching
-                        if (itemParsed.width == parsedSearch.width &&
-                            itemParsed.rim == parsedSearch.rim &&
-                            (itemParsed.ratio == parsedSearch.ratio || !parsedSearch.ratio)) {
-                            return true;
-                        }
+                        if (itemParsed.width == parsedSearch.width && itemParsed.rim == parsedSearch.rim && (itemParsed.ratio == parsedSearch.ratio || !parsedSearch.ratio)) return true;
                     }
                 }
             }
 
-            // C. Text matching fallback
             const text = `${itemSizeStr} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
             return text.includes(searchTerm.toLowerCase());
         });
 
-        console.log(`[Treadz] Filtered items: ${filtered.length}`);
+        console.log(`[Treadz] Inventory filtered to ${filtered.length} items`);
 
-        // Sorting: Rim Asc, then Width Desc, then Ratio Desc
+        // Sorting
         filtered.sort((a, b) => {
             const sA = typeof a.size === 'object' ? formatTireSize(a.size) : a.size;
             const sB = typeof b.size === 'object' ? formatTireSize(b.size) : b.size;
             const pA = parseTireSize(sA) || { width: 0, ratio: 0, rim: 0 };
             const pB = parseTireSize(sB) || { width: 0, ratio: 0, rim: 0 };
-
-            if (pA.rim !== pB.rim) return pA.rim - pB.rim; // Rim Asc (16, 17, 18...)
-            if (pA.width !== pB.width) return pB.width - pA.width; // Width Desc (285, 275...)
-            return pB.ratio - pA.ratio; // Ratio Desc (70, 65...)
+            if (pA.rim !== pB.rim) return (pA.rim || 0) - (pB.rim || 0);
+            if (pA.width !== pB.width) return (pB.width || 0) - (pA.width || 0);
+            return (pB.ratio || 0) - (pA.ratio || 0);
         });
 
         if (filtered.length === 0) {
             emptyState.classList.remove('hidden');
             container.innerHTML = '';
-            // Update empty state text based on context
             const h2 = emptyState.querySelector('h2');
             const p = emptyState.querySelector('p');
             if (h2) h2.textContent = 'No matching inventory';
-            if (p) p.textContent = 'Try adjusting filters.';
+            if (p) p.textContent = 'Try adjusting filters or clearing search.';
             return;
         }
 
-        emptyState.classList.add('hidden');
-
-        // Use Grid Layout (3 Columns on md and up)
+        // Use Grid Layout
         container.innerHTML = `
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 ${filtered.map(item => {
             const sizeDisplay = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
             const isNew = item.condition === 'new';
-
             return `
                     <div class="bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-2">
                              <div class="w-2 h-2 rounded-full ${isNew ? 'bg-green-500' : 'bg-gray-300'}" title="${isNew ? 'New' : 'Used'}"></div>
                         </div>
-                        
                         <div class="mb-3">
                             <h3 class="font-black text-2xl text-gray-800 tracking-tight font-mono">${sizeDisplay}</h3>
                             <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">${item.condition || 'Used'}</p>
                         </div>
-                        
                         <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
                             <div class="pl-1">
                                 <span class="text-xs text-gray-400 font-medium">Qty</span>
                                 <span class="font-mono text-xl font-bold text-gray-800 ml-1">${item.quantity}</span>
                             </div>
-                            
                             <div class="flex items-center gap-1">
                                 <button onclick="window.updateInventoryQty('${item.id}', -1)" 
                                     class="w-8 h-8 rounded bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center font-bold text-lg transition-all active:scale-95 shadow-sm">
@@ -770,8 +771,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </button>
                             </div>
                         </div>
-                    </div>
-                `}).join('')}
+                    </div>`;
+        }).join('')}
             </div>
         `;
     };
