@@ -229,7 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.removeFromCart = (id) => {
-        purchaseOrderCart = purchaseOrderCart.filter(i => i.id !== id);
+        const targetId = String(id);
+        purchaseOrderCart = purchaseOrderCart.filter(i => String(i.id) !== targetId);
         saveData();
         updateCartCount();
         renderCartDrawer();
@@ -311,6 +312,10 @@ document.addEventListener('DOMContentLoaded', () => {
                      <span id="cart-total-items">0 items</span>
                      <button onclick="window.clearCart()" class="text-red-500 hover:text-red-700 underline">Clear All</button>
                 </div>
+                <button onclick="window.receiveAllOrders()" class="w-full mb-3 flex items-center justify-center gap-2 py-3 px-4 bg-green-50 text-green-700 rounded-lg font-bold border border-green-200 hover:bg-green-100 transition-all">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Receive All into Stock
+                </button>
                 <button onclick="window.processOrders()" class="w-full btn btn-primary py-4 text-lg font-bold shadow-lg flex justify-center items-center gap-2 bg-[#FF6600] border-[#FF6600] text-white hover:bg-[#e65c00]">
                     Submit Orders
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
@@ -653,17 +658,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             }).join('');
 
-            // Improved Wheel-to-Horizontal Scroll Logic
+            // HIGH-SENSITIVITY Wheel-to-Horizontal Scroll Logic
             if (!listContainer._wheelBound) {
                 listContainer.addEventListener('wheel', (e) => {
-                    // Check if scrolling primarily vertically
                     if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                        // Increase sensitivity for a smoother experience
-                        const scrollAmount = e.deltaY * 1.5;
-                        listContainer.scrollLeft += scrollAmount;
+                        const scrollForce = e.deltaY * 3.5;
+                        listContainer.scrollLeft += scrollForce;
 
-                        // Prevent page scroll only if we're actually scrolling the catalog
-                        if (e.cancelable) e.preventDefault();
+                        const maxScroll = listContainer.scrollWidth - listContainer.clientWidth;
+                        const atStart = listContainer.scrollLeft <= 0 && e.deltaY < 0;
+                        const atEnd = listContainer.scrollLeft >= maxScroll && e.deltaY > 0;
+
+                        if (!atStart && !atEnd && e.cancelable) {
+                            e.preventDefault();
+                        }
                     }
                 }, { passive: false });
                 listContainer._wheelBound = true;
@@ -1045,28 +1053,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Add Logic
+    // Improved Inventory Add Logic
     if (confirmAddBtn) confirmAddBtn.addEventListener('click', () => {
-        // Handle Quick Add (Textarea) for now
-        // if (!viewMultiple.classList.contains('hidden')) { // simplified check
         const text = tireInput ? tireInput.value.trim() : '';
-        if (!text) return;
+        if (!text) {
+            showToast('Please enter tire sizes first');
+            return;
+        }
 
         const condition = conditionToggle && conditionToggle.checked ? 'new' : 'used';
         const lines = text.split(/[\n,]+/).map(t => t.trim()).filter(t => t);
-
         let addedCount = 0;
+
         lines.forEach(rawSize => {
-            // Try to parse to standard format, or just keep as is
             const parsed = parseTireSize(rawSize);
             const sizeStr = parsed ? formatTireSize(parsed) : rawSize.toUpperCase();
 
-            const existing = inventory.find(i => i.size === sizeStr && i.condition === condition);
+            // Use robust find to handle any case or type variations
+            const existing = inventory.find(i =>
+                (typeof i.size === 'object' ? formatTireSize(i.size) === sizeStr : String(i.size).toUpperCase() === sizeStr.toUpperCase())
+                && i.condition === condition
+            );
+
             if (existing) {
-                existing.quantity++;
+                existing.quantity = (parseInt(existing.quantity) || 0) + 1;
             } else {
                 inventory.push({
-                    id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+                    id: 'man_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
                     size: sizeStr,
                     quantity: 1,
                     condition: condition,
@@ -1080,12 +1093,49 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addedCount > 0) {
             saveData();
             renderInventory();
-            showToast(`Added ${addedCount} tires to inventory`);
+            showToast(`Inventory updated: ${addedCount} items added`);
             if (tireInput) tireInput.value = '';
             closeEntryModal();
         }
-        // }
     });
+
+    window.receiveAllOrders = () => {
+        if (purchaseOrderCart.length === 0) return;
+        if (!confirm(`Add ${purchaseOrderCart.length} orders to local stock?`)) return;
+
+        let receiveCount = 0;
+        purchaseOrderCart.forEach(order => {
+            const sizeStr = order.sizeStr;
+            const qty = parseInt(order.quantity) || 1;
+            const condition = 'new';
+
+            const existing = inventory.find(i =>
+                (typeof i.size === 'object' ? formatTireSize(i.size) === sizeStr : String(i.size).toUpperCase() === sizeStr.toUpperCase())
+                && i.condition === condition
+            );
+
+            if (existing) {
+                existing.quantity = (parseInt(existing.quantity) || 0) + qty;
+            } else {
+                inventory.push({
+                    id: 'po_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    size: sizeStr,
+                    quantity: qty,
+                    condition: condition,
+                    brand: order.item.vendor_name || '',
+                    timestamp: new Date().toISOString()
+                });
+            }
+            receiveCount += qty;
+        });
+
+        purchaseOrderCart = [];
+        saveData();
+        renderInventory();
+        updateCartCount();
+        renderCartDrawer();
+        showToast(`Stock received: +${receiveCount} tires`);
+    };
 
     try {
         loadData();
