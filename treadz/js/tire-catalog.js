@@ -39,6 +39,13 @@ const TireCatalog = (() => {
         },
 
 
+        setAll(data) {
+            _setAll(data);
+            const meta = _getMeta();
+            _setMeta({ ...meta, recordCount: data.length });
+        },
+
+
         getMeta() {
             return _getMeta();
         },
@@ -47,17 +54,46 @@ const TireCatalog = (() => {
         search(query) {
             if (!query || !query.trim()) return _getAll();
             const q = query.toLowerCase().trim();
-            const terms = q.split(/\s+/);
+
+            // Normalize slashes and 'x' in search query for sizes like 31/10.50/15 or 31x10.5
+            const normalizedQuery = q.replace(/[\/xX]/g, ' ').replace(/\s+/g, ' ');
+            const terms = normalizedQuery.split(/\s+/);
+
             return _getAll().filter(tire => {
+                // Generate searchable string with multiple delimiters for sizes
+                const sizeStrings = (tire.sizes || []).flatMap(s => {
+                    const w = s.width;
+                    const p = s.profile;
+                    const r = s.rim;
+                    // Also include variations with/without trailing zeros for decimals
+                    const wFloat = parseFloat(w);
+                    const pFloat = parseFloat(p);
+                    const w2 = isNaN(wFloat) ? w : wFloat.toFixed(2);
+                    const p2 = isNaN(pFloat) ? p : pFloat.toFixed(2);
+
+                    return [
+                        `${w}/${p}R${r}`,
+                        `${w} ${p} ${r}`,
+                        `${w}x${p}R${r}`,
+                        `${w2}/${p2}R${r}`,
+                        `${w2}x${p2}R${r}`
+                    ];
+                });
+
                 const searchable = [
                     tire.vendor_name,
                     tire.model_name,
                     tire.size_display,
                     tire.season,
                     tire.car_type_str,
-                    ...(tire.sizes || []).map(s => `${s.width}/${s.profile}R${s.rim}`)
+                    ...sizeStrings
                 ].join(' ').toLowerCase();
-                return terms.every(t => searchable.includes(t));
+
+                // Check if terms match, also handle direct string match for original query
+                const originalMatch = searchable.includes(q);
+                const termsMatch = terms.every(t => searchable.includes(t));
+
+                return originalMatch || termsMatch;
             });
         },
 

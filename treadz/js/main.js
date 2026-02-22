@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return { type: 'p-metric', width: parseInt(pMetricMatch[1]), ratio: parseInt(pMetricMatch[2]), rim: parseInt(pMetricMatch[3]) };
         }
 
-        const floatMatch = raw.match(/(\d{2})[X\s](\d{2,4})R?(\d{2})/);
+        const floatMatch = raw.match(/(\d{2})[X\s\/](\d{2,4})R?[X\s\/]?(\d{2})/);
         if (floatMatch) {
             const diam = parseInt(floatMatch[1]);
             let width = parseFloat(floatMatch[2]);
@@ -788,7 +788,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const isNew = item.condition === 'new';
             return `
                     <div class="bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-2">
+                        <div class="absolute top-0 right-0 p-2 flex gap-1">
+                             <button onclick="window.deleteInventoryItem('${item.id}')" 
+                                class="opacity-0 group-hover:opacity-100 w-6 h-6 rounded bg-white text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm border border-gray-100">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                             </button>
                              <div class="w-2 h-2 rounded-full ${isNew ? 'bg-green-500' : 'bg-gray-300'}" title="${isNew ? 'New' : 'Used'}"></div>
                         </div>
                         <div class="mb-3">
@@ -824,18 +828,23 @@ document.addEventListener('DOMContentLoaded', () => {
         inventory[idx].quantity += change;
 
         if (inventory[idx].quantity <= 0) {
-            if (confirm('Remove this item from inventory?')) {
-                inventory.splice(idx, 1);
-                showToast('Item removed');
-            } else {
-                inventory[idx].quantity = 1; // Revert
-            }
+            window.deleteInventoryItem(id, true);
         } else {
-            // Optional: show toast for update? maybe too noisy
+            saveData();
+            renderInventory();
         }
+    };
 
-        saveData();
-        renderInventory();
+    window.deleteInventoryItem = (id, skipConfirm = false) => {
+        const idx = inventory.findIndex(i => i.id === id);
+        if (idx === -1) return;
+
+        if (skipConfirm || confirm('Permanently remove this item from inventory?')) {
+            inventory.splice(idx, 1);
+            saveData();
+            renderInventory();
+            showToast('Item removed');
+        }
     };
 
     const populateFilters = () => {
