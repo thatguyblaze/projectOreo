@@ -506,52 +506,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = getEl('search-input').value.trim();
         const parsedSearch = parseTireSize(searchTerm);
 
-        let filtered = catalogItems.filter(item => {
+        const filtered = catalogItems.filter(item => {
+            // 1. Search Matching
             if (searchTerm) {
-                const searchClean = searchTerm.replace(/\D/g, '');
+                const sClean = searchTerm.toLowerCase();
+                const sDigits = (searchTerm.replace(/\D/g, ''));
+                const pSearch = parseTireSize(searchTerm);
 
-                // 1. Precise Size Matching
-                if (parsedSearch) {
-                    const hasMatchingSize = (item.sizes || []).some(s =>
-                        s.width == parsedSearch.width &&
-                        (s.profile == parsedSearch.ratio || s.ratio == parsedSearch.ratio || s.diameter == parsedSearch.diameter) &&
-                        s.rim == parsedSearch.rim
+                const itemStr = `${item.vendor_name} ${item.model_name} ${item.size_display}`.toLowerCase();
+                const itemDigits = (item.size_display || '').replace(/\D/g, '');
+
+                let isMatch = itemStr.includes(sClean);
+
+                if (!isMatch && sDigits.length >= 3 && itemDigits.includes(sDigits)) isMatch = true;
+
+                if (!isMatch && pSearch) {
+                    isMatch = (item.sizes || []).some(s =>
+                        String(s.width) === String(pSearch.width) &&
+                        (String(s.profile) === String(pSearch.ratio) || String(s.rim) === String(pSearch.rim))
                     );
-                    if (hasMatchingSize) return true;
                 }
 
-                // 2. Sequential Digit Matching (e.g. 2357 matches 235/75)
-                if (searchClean.length >= 3) {
-                    const itemClean = (item.size_display || '').replace(/\D/g, '');
-                    if (itemClean.includes(searchClean)) return true;
-
-                    // Also check individual sizes within the object
-                    const hasDigitMatch = (item.sizes || []).some(s => {
-                        const sDigits = `${s.width}${s.profile || s.ratio || s.diameter}${s.rim}`;
-                        return sDigits.includes(searchClean);
-                    });
-                    if (hasDigitMatch) return true;
-                }
-
-                // 3. Standard Text Search
-                const searchStr = [
-                    item.vendor_name, item.model_name, item.size_display, item.car_type_str,
-                    ...(item.sizes || []).map(s => `${s.width}/${s.profile || s.ratio}R${s.rim}`)
-                ].join(' ').toLowerCase();
-                const terms = searchTerm.toLowerCase().split(/\s+/);
-                return terms.every(t => searchStr.includes(t));
+                if (!isMatch) return false;
             }
+
+            // 2. Additional Filters
             if (catalogFilters.distributor && item._sourceId !== catalogFilters.distributor) return false;
             if (catalogFilters.brand && item.vendor_name !== catalogFilters.brand) return false;
-            if (catalogFilters.rim && !(item.sizes || []).some(s => s.rim == catalogFilters.rim)) return false;
-            // ... other filters omitted for brevity but logic remains same
+            if (catalogFilters.rim && !(item.sizes || []).some(s => String(s.rim) === String(catalogFilters.rim))) return false;
+            if (catalogFilters.type && item.car_type_str !== catalogFilters.type) return false;
+
             return true;
         });
 
+        console.log(`[Treadz] renderCatalog: search="${searchTerm}", filtered=${filtered.length}`);
+
         badge.textContent = filtered.length;
-        if (filtered.length === 0) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+        if (filtered.length === 0) {
+            grid.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+        }
+
         empty.classList.add('hidden');
 
+        // Sort & Display
         filtered.sort((a, b) => {
             if (catalogFilters.sort === 'brand') return (a.vendor_name || '').localeCompare(b.vendor_name || '');
             if (catalogFilters.sort === 'price_desc') return (b._price || 0) - (a._price || 0);
@@ -559,29 +558,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const displayItems = filtered.slice(0, 24);
-
         grid.innerHTML = displayItems.map(item => {
             const price = item._price ? `$${item._price.toFixed(2)}` : 'Call';
             const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-            const imgUrl = item.photo || 'https://placehold.co/400x300/e2e8f0/1e293b?text=Tire+Image';
+            const imgUrl = item.photo || `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.vendor_name)}`;
 
             return `
-             <div class="catalog-card bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full bg-white">
+             <div class="catalog-card bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
                   <div onclick='window.openProductModal(${itemJson})' class="cursor-pointer relative h-48 bg-gray-100 overflow-hidden">
                        <img src="${imgUrl}" alt="${item.model_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                       <div class="absolute top-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded backdrop-blur-sm uppercase tracking-wider">
+                       <div class="absolute top-2 right-2 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm uppercase tracking-wider">
                            ${item._sourceId || 'Local'}
                        </div>
                   </div>
                   <div class="p-4 flex-grow flex flex-col justify-between">
                        <div onclick='window.openProductModal(${itemJson})' class="cursor-pointer mb-4">
                             <h3 class="font-bold text-lg text-gray-900 leading-tight">${item.vendor_name}</h3>
-                            <p class="text-blue-600 font-medium">${item.model_name}</p>
+                            <p class="text-blue-600 font-medium text-sm line-clamp-1">${item.model_name}</p>
                             <div class="text-xl font-bold text-gray-900 mt-2">${price}</div>
                        </div>
-                       <button onclick='window.openProductModal(${itemJson})' class="w-full bg-[#FF6600]/10 text-[#FF6600] border border-[#FF6600]/20 hover:bg-[#FF6600] hover:text-white font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                            Order
+                       <button onclick='window.openProductModal(${itemJson})' class="w-full bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                            Order Options
                        </button>
                   </div>
              </div>`;
@@ -656,14 +654,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderInventory = () => {
         const container = getEl('inventory-container');
         const emptyState = getEl('empty-state');
-        if (!container || !emptyState) {
-            console.error('[Treadz] Missing inventory DOM elements');
-            return;
-        }
+        if (!container || !emptyState) return;
 
-        console.log(`[Treadz] Rendering Inventory. State Count: ${inventory.length}`);
-
-        // Default: hide empty state
+        console.log(`[Treadz] renderInventory: count=${inventory.length}`);
         emptyState.classList.add('hidden');
 
         // If no inventory at all
@@ -684,40 +677,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const rimFilterEl = getEl('inventory-filter-rim');
         const rimFilter = rimFilterEl ? rimFilterEl.value : '';
 
-        let filtered = inventory.filter(item => {
+        const filtered = inventory.filter(item => {
             if (!item) return false;
             const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : String(item.size);
 
-            // 1. Rim Filter
-            if (rimFilter) {
+            // 1. Local Rim Filter
+            if (rimFilter && !itemSizeStr.includes(rimFilter)) {
                 const p = parseTireSize(itemSizeStr);
-                if (!p || !p.rim || String(p.rim) !== String(rimFilter)) return false;
+                if (!p || String(p.rim) !== String(rimFilter)) return false;
             }
 
-            // 2. Search Text
-            if (!searchTerm) return true;
+            // 2. Search Matching
+            if (searchTerm) {
+                const sClean = searchTerm.toLowerCase();
+                const itemStr = `${itemSizeStr} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
+                const itemDigits = itemSizeStr.replace(/\D/g, '');
+                const sDigits = (searchTerm.replace(/\D/g, ''));
 
-            const searchClean = searchTerm.replace(/\D/g, '');
-            const itemClean = itemSizeStr.replace(/\D/g, '');
+                let isMatch = itemStr.includes(sClean);
+                if (!isMatch && sDigits.length >= 3 && itemDigits.includes(sDigits)) isMatch = true;
 
-            if (searchClean.length >= 3 && itemClean.includes(searchClean)) return true;
-
-            if (parsedSearch) {
-                const itemParsed = parseTireSize(itemSizeStr);
-                if (itemParsed) {
-                    if (parsedSearch.partial) {
-                        if (itemParsed.width == parsedSearch.width && itemParsed.ratio == parsedSearch.ratio) return true;
-                    } else {
-                        if (itemParsed.width == parsedSearch.width && itemParsed.rim == parsedSearch.rim && (itemParsed.ratio == parsedSearch.ratio || !parsedSearch.ratio)) return true;
+                if (!isMatch) {
+                    const parsedSearch = parseTireSize(searchTerm);
+                    if (parsedSearch) {
+                        const itemParsed = parseTireSize(itemSizeStr);
+                        if (itemParsed) {
+                            if (parsedSearch.partial) {
+                                isMatch = (itemParsed.width == parsedSearch.width && itemParsed.ratio == parsedSearch.ratio);
+                            } else {
+                                isMatch = (itemParsed.width == parsedSearch.width && itemParsed.rim == parsedSearch.rim && (itemParsed.ratio == parsedSearch.ratio || !parsedSearch.ratio));
+                            }
+                        }
                     }
                 }
+                if (!isMatch) return false;
             }
-
-            const text = `${itemSizeStr} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
-            return text.includes(searchTerm.toLowerCase());
+            return true;
         });
 
-        console.log(`[Treadz] Inventory filtered to ${filtered.length} items`);
+        console.log(`[Treadz] renderInventory: count=${filtered.length} (Total: ${inventory.length})`);
 
         // Sorting
         filtered.sort((a, b) => {
