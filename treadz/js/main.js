@@ -586,19 +586,28 @@ document.addEventListener('DOMContentLoaded', () => {
             return (a._price || 0) - (b._price || 0);
         });
 
-        const displayItems = filtered.slice(0, 30); // Show more in horizontal scrolling view
+        const displayItems = filtered.slice(0, 30);
         if (listContainer) {
             listContainer.innerHTML = displayItems.map(item => {
                 const price = item._price ? `$${item._price.toFixed(2)}` : 'Call';
                 const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
                 const imgUrl = item.photo || `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.vendor_name)}`;
 
+                // Extract specs from sizes if available
+                const firstSize = (item.sizes && item.sizes.length > 0) ? item.sizes[0] : {};
+                const loadSpeed = (firstSize.load_index || '') + (firstSize.speed_rating || '');
+                const stock = item._availability || 0;
+                const isLowStock = stock > 0 && stock <= 4;
+
                 return `
-                <div class="catalog-card-vertical">
+                <div class="catalog-card-vertical group">
                     <div class="image-area cursor-pointer" onclick='window.openProductModal(${itemJson})'>
                         <img src="${imgUrl}" alt="${item.model_name}" loading="lazy">
                         <div class="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-md uppercase tracking-wider z-10">
                             ${item._sourceId || 'Global'}
+                        </div>
+                        <div class="stock-badge ${isLowStock ? 'low' : ''}">
+                            ${stock > 0 ? `${stock} IN STOCK` : 'OUT OF STOCK'}
                         </div>
                     </div>
                     
@@ -606,10 +615,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="brand-label">${item.vendor_name}</div>
                         <h3 class="model-name">${item.model_name}</h3>
                         
+                        <div class="utqg-row">
+                            <span class="load-speed">${loadSpeed}</span>
+                            ${item.sidewall ? `<span>• ${item.sidewall}</span>` : ''}
+                            ${item.warranty ? `<span>• ${item.warranty} mi</span>` : ''}
+                        </div>
+
                         <div class="spec-badges">
                             <span class="spec-badge">${item.car_type_str || 'Passenger'}</span>
                             <span class="spec-badge">${item.season || 'All Season'}</span>
-                            ${item.speed_rating ? `<span class="spec-badge">${item.performance_str || 'Performance'}</span>` : ''}
                         </div>
                         
                         <div class="price-area">
@@ -630,7 +644,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
             }).join('');
+
+            // CRITICAL: Add wheel listener for horizontal scroll
+            if (!listContainer._wheelBound) {
+                listContainer.addEventListener('wheel', (e) => {
+                    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                        e.preventDefault();
+                        listContainer.scrollLeft += e.deltaY;
+                    }
+                }, { passive: false });
+                listContainer._wheelBound = true;
+            }
         }
+    };
+
+    window.scrollCatalog = (direction) => {
+        const list = getEl('catalog-list');
+        if (!list) return;
+        const width = list.clientWidth;
+        list.scrollBy({ left: direction * (width * 0.8), behavior: 'smooth' });
     };
 
     // Product Modal with Order Actions

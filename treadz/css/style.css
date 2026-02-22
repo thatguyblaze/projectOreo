@@ -428,24 +428,58 @@ input:checked+.slider:before {
     padding: 0.5rem 0.25rem 1.5rem 0.25rem;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 #catalog-list::-webkit-scrollbar {
-    height: 6px;
+    display: none;
+    /* Chrome, Safari, Edge */
 }
 
-#catalog-list::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 10px;
+/* Catalog Navigation Wrapper */
+.catalog-nav-wrapper {
+    position: relative;
+    width: 100%;
 }
 
-#catalog-list::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
+.catalog-scroll-btn {
+    position: absolute;
+    top: calc(50% - 20px);
+    transform: translateY(-50%);
+    z-index: 30;
+    width: 44px;
+    height: 44px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
 }
 
-#catalog-list::-webkit-scrollbar-thumb:hover {
+.catalog-nav-wrapper:hover .catalog-scroll-btn {
+    opacity: 1;
+}
+
+.catalog-scroll-btn:hover {
     background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-50%) scale(1.15);
+}
+
+.catalog-scroll-btn.prev {
+    left: -22px;
+}
+
+.catalog-scroll-btn.next {
+    right: -22px;
 }
 
 .catalog-card-vertical {
@@ -510,7 +544,44 @@ input:checked+.slider:before {
     font-weight: 800;
     color: var(--text-dark);
     line-height: 1.2;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.catalog-card-vertical .stock-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #059669;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(4px);
+    z-index: 10;
+    border: 1px solid rgba(5, 150, 105, 0.1);
+}
+
+.catalog-card-vertical .stock-badge.low {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fee2e2;
+}
+
+.catalog-card-vertical .utqg-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.catalog-card-vertical .load-speed {
+    color: var(--primary-color);
+    font-weight: 900;
 }
 
 .catalog-card-vertical .spec-badges {
