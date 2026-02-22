@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return (a._price || 0) - (b._price || 0);
         });
 
-        const displayItems = filtered.slice(0, 15); // Show top 15 in horizontal view
+        const displayItems = filtered.slice(0, 30); // Show more in horizontal scrolling view
         if (listContainer) {
             listContainer.innerHTML = displayItems.map(item => {
                 const price = item._price ? `$${item._price.toFixed(2)}` : 'Call';
@@ -594,35 +594,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 const imgUrl = item.photo || `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.vendor_name)}`;
 
                 return `
-                <div class="catalog-card-horizontal">
+                <div class="catalog-card-vertical">
                     <div class="image-area cursor-pointer" onclick='window.openProductModal(${itemJson})'>
-                        <img src="${imgUrl}" alt="${item.model_name}">
-                        <div class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase">
+                        <img src="${imgUrl}" alt="${item.model_name}" loading="lazy">
+                        <div class="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-md uppercase tracking-wider z-10">
                             ${item._sourceId || 'Global'}
                         </div>
                     </div>
+                    
                     <div class="info-area">
-                        <div class="flex justify-between items-start">
+                        <div class="brand-label">${item.vendor_name}</div>
+                        <h3 class="model-name">${item.model_name}</h3>
+                        
+                        <div class="spec-badges">
+                            <span class="spec-badge">${item.car_type_str || 'Passenger'}</span>
+                            <span class="spec-badge">${item.season || 'All Season'}</span>
+                            ${item.speed_rating ? `<span class="spec-badge">${item.performance_str || 'Performance'}</span>` : ''}
+                        </div>
+                        
+                        <div class="price-area">
                             <div>
-                                <h3 class="text-xl font-bold text-gray-900">${item.vendor_name}</h3>
-                                <p class="text-blue-600 font-semibold">${item.model_name}</p>
-                                <div class="mt-2 flex gap-2">
-                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded font-bold text-gray-500">${item.car_type_str || 'Passenger'}</span>
-                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded font-bold text-gray-500">${item.season || 'All Season'}</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
                                 <div class="price-tag">${price}</div>
-                                <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Per Tire + Tax</div>
+                                <div class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Per Tire + Tax</div>
                             </div>
                         </div>
-                        <div class="flex items-center justify-end gap-3 mt-4">
-                             <button onclick='window.openProductModal(${itemJson})' class="px-6 py-2.5 bg-blue-50 text-blue-600 rounded-lg font-bold hover:bg-blue-600 hover:text-white transition-all flex items-center gap-2">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+
+                        <div class="actions-area">
+                             <button onclick='window.openProductModal(${itemJson})' class="py-2.5 bg-gray-50 text-gray-600 rounded-lg font-bold text-xs hover:bg-gray-100 transition-all border border-gray-200">
                                 Details
                              </button>
-                             <button onclick='window.openProductModal(${itemJson})' class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md transition-all flex items-center gap-2">
-                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                             <button onclick='window.openProductModal(${itemJson})' class="py-2.5 bg-blue-600 text-white rounded-lg font-bold text-xs hover:bg-blue-700 shadow-sm transition-all">
                                 Order Now
                              </button>
                         </div>
