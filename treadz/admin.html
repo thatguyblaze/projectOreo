@@ -886,27 +886,43 @@
                                 </div>
                                 <div>
                                     <label class="text-[10px] font-bold text-slate-500 uppercase">Type</label>
-                                    <select id="new-src-type"
+                                    <select id="new-src-type" onchange="toggleSourceFields(this.value)"
                                         class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs">
                                         <option value="tyresaddict">TyresAddict Database</option>
                                         <option value="generic">Generic REST API</option>
+                                        <option value="deepconnect">DeepConnect (ATD) API</option>
                                     </select>
                                 </div>
                             </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">API Key</label>
-                                <input type="password" id="new-src-apikey" placeholder="Paste your API key"
-                                    class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                            <div id="api-field-group-standard" class="space-y-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">API Key</label>
+                                    <input type="password" id="new-src-apikey" placeholder="Paste your API key"
+                                        class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Endpoint URL <span
+                                            class="text-slate-400 font-normal">(auto-filled for
+                                            TyresAddict)</span></label>
+                                    <input type="text" id="new-src-url" placeholder="https://api.example.com/v1"
+                                        value="http://tyresaddict.ru/api"
+                                        class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Endpoint URL <span
-                                        class="text-slate-400 font-normal">(auto-filled for TyresAddict)</span></label>
-                                <input type="text" id="new-src-url" placeholder="https://api.example.com/tires"
-                                    value="http://tyresaddict.ru/api"
-                                    class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                            <div id="api-field-group-deepconnect" class="hidden grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Branch Code</label>
+                                    <input type="text" id="new-src-branch" placeholder="e.g. 101"
+                                        class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase">Client ID</label>
+                                    <input type="text" id="new-src-clientid" placeholder="Client Tracking ID"
+                                        class="w-full mt-0.5 p-1.5 border border-slate-300 rounded text-xs font-mono">
+                                </div>
                             </div>
                             <button onclick="addAPISource()"
-                                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 rounded transition-colors">
+                                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 rounded transition-colors shadow-md">
                                 + Connect Source
                             </button>
                         </div>
@@ -2344,8 +2360,17 @@
             }
 
             container.innerHTML = sources.map(src => {
-                const typeLabel = src.type === 'tyresaddict' ? 'TyresAddict DB' : 'REST API';
-                const typeBg = src.type === 'tyresaddict' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700';
+                let typeLabel = 'REST API';
+                let typeBg = 'bg-purple-100 text-purple-700';
+
+                if (src.type === 'tyresaddict') {
+                    typeLabel = 'TyresAddict DB';
+                    typeBg = 'bg-blue-100 text-blue-700';
+                } else if (src.type === 'deepconnect') {
+                    typeLabel = 'DeepConnect';
+                    typeBg = 'bg-orange-100 text-orange-700';
+                }
+
                 const statusColor = src.lastImport ? 'text-emerald-600' : 'text-slate-400';
                 const statusText = src.lastImport
                     ? new Date(src.lastImport).toLocaleDateString() + ' ' + new Date(src.lastImport).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -2387,12 +2412,29 @@
 
         let _editingSourceId = null;
 
+        function toggleSourceFields(type) {
+            const standard = document.getElementById('api-field-group-standard');
+            const deep = document.getElementById('api-field-group-deepconnect');
+            const urlInput = document.getElementById('new-src-url');
+
+            if (type === 'deepconnect') {
+                deep.classList.remove('hidden');
+            } else {
+                deep.classList.add('hidden');
+            }
+
+            if (type === 'tyresaddict') {
+                urlInput.value = 'http://tyresaddict.ru/api';
+            }
+        }
+
         function showAddSourceForm() {
             _editingSourceId = null;
             document.getElementById('new-src-name').value = '';
             document.getElementById('new-src-type').value = 'tyresaddict';
             document.getElementById('new-src-apikey').value = '';
             document.getElementById('new-src-url').value = 'http://tyresaddict.ru/api';
+            toggleSourceFields('tyresaddict');
             document.getElementById('add-source-form').classList.remove('hidden');
         }
 
@@ -2410,6 +2452,10 @@
             document.getElementById('new-src-type').value = src.type || 'tyresaddict';
             document.getElementById('new-src-apikey').value = src.apiKey || '';
             document.getElementById('new-src-url').value = src.baseUrl || '';
+            document.getElementById('new-src-branch').value = src.branchCode || '';
+            document.getElementById('new-src-clientid').value = src.clientId || '';
+
+            toggleSourceFields(src.type);
             document.getElementById('add-source-form').classList.remove('hidden');
         }
 
@@ -2418,6 +2464,8 @@
             const type = document.getElementById('new-src-type').value;
             const apiKey = document.getElementById('new-src-apikey').value.trim();
             const baseUrl = document.getElementById('new-src-url').value.trim();
+            const branchCode = document.getElementById('new-src-branch').value.trim();
+            const clientId = document.getElementById('new-src-clientid').value.trim();
 
             if (!name) return alert('Enter a source name.');
             if (!apiKey) return alert('Enter an API key.');
@@ -2425,6 +2473,7 @@
             const source = {
                 id: _editingSourceId || undefined,
                 name, type, apiKey, baseUrl,
+                branchCode, clientId,
                 enabled: true
             };
             TireCatalog.saveSource(source);
@@ -2446,16 +2495,25 @@
             if (!src) return;
             const statusEl = document.getElementById('catalog-status-text');
             try {
-                statusEl.textContent = `Importing from ${src.name}...`;
+                statusEl.textContent = `Syncing ${src.name}...`;
                 let count;
                 if (src.type === 'tyresaddict') {
                     count = await TireCatalog.importFromAPI(null, srcId);
+                } else if (src.type === 'deepconnect') {
+                    // Update the connector config before syncing
+                    TreadzConfig.API.DEEPCONNECT.ENABLED = true;
+                    TreadzConfig.API.DEEPCONNECT.BASE_URL = src.baseUrl;
+                    TreadzConfig.API.DEEPCONNECT.API_KEY = src.apiKey;
+                    TreadzConfig.API.DEEPCONNECT.BRANCH_CODE = src.branchCode;
+                    TreadzConfig.API.DEEPCONNECT.CLIENT_ID = src.clientId;
+
+                    count = await TireCatalog.syncWithConnector();
                 } else {
                     count = await TireCatalog.importFromGenericAPI(srcId);
                 }
-                alert(`Imported ${count} tire models from ${src.name}.`);
+                alert(`Successfully synced ${count} items from ${src.name}.`);
             } catch (e) {
-                alert(`Import from ${src.name} failed: ${e.message}`);
+                alert(`Sync failed for ${src.name}: ${e.message}`);
             }
             refreshCatalogStatus();
         }

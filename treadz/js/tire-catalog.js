@@ -252,6 +252,26 @@ const TireCatalog = (() => {
         },
 
 
+        /**
+         * Dynamic Sync with TireAPIConnector (e.g. DeepConnect)
+         * This uses the newly created abstraction to fetch from external APIs
+         */
+        async syncWithConnector(query = {}) {
+            if (typeof TireAPIConnector === 'undefined') {
+                console.error('[TireCatalog] TireAPIConnector not loaded.');
+                return 0;
+            }
+
+            const items = await TireAPIConnector.fetchItems(query);
+            if (items && items.length > 0) {
+                // Merge with existing catalog under the designated source
+                this._mergeSourceData('ATD', items, 'DeepConnect API');
+                return items.length;
+            }
+            return 0;
+        },
+
+
 
 
 

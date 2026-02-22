@@ -17,6 +17,7 @@
 
     <script src="js/treadz-core.js"></script>
     <script src="js/tire-catalog.js"></script>
+    <script src="js/tire-api-connector.js"></script>
     <style>
         .catalog-card {
             transition: all 0.2s;
@@ -172,7 +173,74 @@
             </section>
 
 
-            <section id="local-inventory-section" class="mt-8 mb-12">
+            <section id="catalog-section" class="mt-8">
+                <div
+                    class="flex flex-col md:flex-row md:items-end justify-between mb-6 border-b border-gray-200 pb-4 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            Distributor Catalog
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-1">Browse and add tires from connected distributors</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-bold text-gray-400 px-1">Distributor</label>
+                            <select id="catalog-filter-distributor"
+                                class="text-xs font-bold border-gray-200 rounded-lg bg-gray-50 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 min-w-[130px]">
+                                <option value="">All Sources</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-bold text-gray-400 px-1">Brand</label>
+                            <select id="catalog-filter-brand"
+                                class="text-xs font-bold border-gray-200 rounded-lg bg-gray-50 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 min-w-[130px]">
+                                <option value="">All Brands</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-bold text-gray-400 px-1">Sort By</label>
+                            <select id="catalog-filter-sort"
+                                class="text-xs font-bold border-gray-200 rounded-lg bg-gray-50 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 min-w-[130px]">
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
+                                <option value="brand">Brand: A-Z</option>
+                            </select>
+                        </div>
+                        <div class="pt-5">
+                            <span id="catalog-count-badge"
+                                class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-full">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catalog Horizontal List Container -->
+                <div id="catalog-list" class="flex flex-col gap-4"></div>
+
+                <div id="catalog-empty"
+                    class="hidden text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+                    <div class="text-4xl mb-3">🔍</div>
+                    <h3 class="text-lg font-medium text-gray-900">No catalog items found</h3>
+                    <p class="text-gray-500">Try adjusting your filters or search terms.</p>
+                </div>
+
+                <div id="catalog-no-data" class="hidden text-center py-12 bg-blue-50 rounded-xl border border-blue-100">
+                    <div class="text-4xl mb-3">☁️</div>
+                    <h3 class="text-lg font-bold text-blue-900">Catalog is Empty</h3>
+                    <p class="text-blue-700 mb-4">Connect a distributor API or import a price list to see items here.
+                    </p>
+                    <a href="admin.html"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Go
+                        to Admin</a>
+                </div>
+            </section>
+
+            <section id="local-inventory-section" class="mt-16 mb-12">
                 <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -199,47 +267,6 @@
                     class="hidden text-center py-20 bg-gray-50 rounded-xl border border-dashed border-gray-300">
                     <h2 class="text-xl font-semibold text-gray-800">No matching inventory</h2>
                     <p class="text-gray-500 mt-2">Try adjusting the rim filter or search terms.</p>
-                </div>
-            </section>
-
-            <section id="catalog-section" class="mt-12">
-                <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-600" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                            Distributor Catalog
-                        </h2>
-                        <p class="text-sm text-gray-500 mt-1">Browse and add tires from connected distributors</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span id="catalog-count-badge"
-                            class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Loading...</span>
-                    </div>
-                </div>
-
-                <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-
-                </div>
-
-                <div id="catalog-empty"
-                    class="hidden text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
-                    <div class="text-4xl mb-3">🔍</div>
-                    <h3 class="text-lg font-medium text-gray-900">No catalog items found</h3>
-                    <p class="text-gray-500">Try adjusting your filters or search terms.</p>
-                </div>
-
-                <div id="catalog-no-data" class="hidden text-center py-12 bg-blue-50 rounded-xl border border-blue-100">
-                    <div class="text-4xl mb-3">☁️</div>
-                    <h3 class="text-lg font-bold text-blue-900">Catalog is Empty</h3>
-                    <p class="text-blue-700 mb-4">Connect a distributor API or import a price list to see items here.
-                    </p>
-                    <a href="admin.html"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Go
-                        to Admin</a>
                 </div>
             </section>
 

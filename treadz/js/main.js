@@ -444,9 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (catSection) catSection.classList.remove('hidden');
 
         const inventoryContainer = getEl('inventory-container');
-        const catalogGrid = getEl('catalog-grid');
+        const catalogList = getEl('catalog-list');
         if (inventoryContainer) inventoryContainer.classList.remove('hidden');
-        if (catalogGrid) catalogGrid.classList.remove('hidden');
+        if (catalogList) catalogList.classList.remove('hidden');
 
         renderInventory();
         renderCatalog();
@@ -518,18 +518,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Render Catalog (Updated for Purchase System) ---
     const renderCatalog = () => {
-        const grid = getEl('catalog-grid');
+        const listContainer = getEl('catalog-list');
         const empty = getEl('catalog-empty');
         const noData = getEl('catalog-no-data');
         const badge = getEl('catalog-count-badge');
 
         if (catalogItems.length === 0) {
-            grid.innerHTML = ''; noData.classList.remove('hidden'); badge.textContent = '0'; return;
+            if (listContainer) listContainer.innerHTML = '';
+            if (noData) noData.classList.remove('hidden');
+            if (badge) badge.textContent = '0'; return;
         }
-        noData.classList.add('hidden');
+        if (noData) noData.classList.add('hidden');
 
-        const searchTerm = getEl('search-input').value.trim();
-        const parsedSearch = parseTireSize(searchTerm);
+        const searchInput = getEl('search-input');
+        const searchTerm = searchInput ? searchInput.value.trim() : '';
 
         const filtered = catalogItems.filter(item => {
             // 1. Search Matching
@@ -564,51 +566,66 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         });
 
-        console.log(`[Treadz] renderCatalog: search="${searchTerm}", filtered=${filtered.length}`);
-
-        badge.textContent = filtered.length;
+        if (badge) badge.textContent = filtered.length;
         if (filtered.length === 0) {
-            grid.innerHTML = '';
-            empty.classList.remove('hidden');
+            if (listContainer) listContainer.innerHTML = '';
+            if (empty) empty.classList.remove('hidden');
             return;
         }
 
-        empty.classList.add('hidden');
+        if (empty) empty.classList.add('hidden');
 
-        // Sort & Display
+        // Sort
         filtered.sort((a, b) => {
             if (catalogFilters.sort === 'brand') return (a.vendor_name || '').localeCompare(b.vendor_name || '');
             if (catalogFilters.sort === 'price_desc') return (b._price || 0) - (a._price || 0);
             return (a._price || 0) - (b._price || 0);
         });
 
-        const displayItems = filtered.slice(0, 24);
-        grid.innerHTML = displayItems.map(item => {
-            const price = item._price ? `$${item._price.toFixed(2)}` : 'Call';
-            const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-            const imgUrl = item.photo || `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.vendor_name)}`;
+        const displayItems = filtered.slice(0, 15); // Show top 15 in horizontal view
+        if (listContainer) {
+            listContainer.innerHTML = displayItems.map(item => {
+                const price = item._price ? `$${item._price.toFixed(2)}` : 'Call';
+                const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                const imgUrl = item.photo || `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.vendor_name)}`;
 
-            return `
-             <div class="catalog-card bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
-                  <div onclick='window.openProductModal(${itemJson})' class="cursor-pointer relative h-48 bg-gray-100 overflow-hidden">
-                       <img src="${imgUrl}" alt="${item.model_name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                       <div class="absolute top-2 right-2 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded backdrop-blur-sm uppercase tracking-wider">
-                           ${item._sourceId || 'Local'}
-                       </div>
-                  </div>
-                  <div class="p-4 flex-grow flex flex-col justify-between">
-                       <div onclick='window.openProductModal(${itemJson})' class="cursor-pointer mb-4">
-                            <h3 class="font-bold text-lg text-gray-900 leading-tight">${item.vendor_name}</h3>
-                            <p class="text-blue-600 font-medium text-sm line-clamp-1">${item.model_name}</p>
-                            <div class="text-xl font-bold text-gray-900 mt-2">${price}</div>
-                       </div>
-                       <button onclick='window.openProductModal(${itemJson})' class="w-full bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-600 hover:text-white font-bold py-2 rounded-lg transition-all flex items-center justify-center gap-2">
-                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                            Order Options
-                       </button>
-                  </div>
-             </div>`;
-        }).join('');
+                return `
+                <div class="catalog-card-horizontal">
+                    <div class="image-area cursor-pointer" onclick='window.openProductModal(${itemJson})'>
+                        <img src="${imgUrl}" alt="${item.model_name}">
+                        <div class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase">
+                            ${item._sourceId || 'Global'}
+                        </div>
+                    </div>
+                    <div class="info-area">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">${item.vendor_name}</h3>
+                                <p class="text-blue-600 font-semibold">${item.model_name}</p>
+                                <div class="mt-2 flex gap-2">
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded font-bold text-gray-500">${item.car_type_str || 'Passenger'}</span>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded font-bold text-gray-500">${item.season || 'All Season'}</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="price-tag">${price}</div>
+                                <div class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Per Tire + Tax</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-3 mt-4">
+                             <button onclick='window.openProductModal(${itemJson})' class="px-6 py-2.5 bg-blue-50 text-blue-600 rounded-lg font-bold hover:bg-blue-600 hover:text-white transition-all flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                Details
+                             </button>
+                             <button onclick='window.openProductModal(${itemJson})' class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-md transition-all flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                                Order Now
+                             </button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
     };
 
     // Product Modal with Order Actions
@@ -855,10 +872,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Distributors
-        const distSelect = getEl('filter-distributor');
+        const distSelect = getEl('catalog-filter-distributor');
         if (distSelect) {
             const current = distSelect.value;
-            distSelect.innerHTML = '<option value="">All Distributors</option>';
+            distSelect.innerHTML = '<option value="">All Sources</option>';
             [...distributors].sort().forEach(d => {
                 distSelect.innerHTML += `<option value="${d}">${d}</option>`;
             });
@@ -866,7 +883,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Brands
-        const brandSelect = getEl('filter-brand');
+        const brandSelect = getEl('catalog-filter-brand');
         if (brandSelect) {
             const current = brandSelect.value;
             brandSelect.innerHTML = '<option value="">All Brands</option>';
@@ -894,9 +911,14 @@ document.addEventListener('DOMContentLoaded', () => {
         trackSearch(e.target.value);
     });
     getEl('clear-search-btn').addEventListener('click', () => { getEl('search-input').value = ''; renderAll(); });
-    ['filter-distributor', 'filter-brand', 'filter-rim', 'filter-type', 'filter-ply', 'filter-sort'].forEach(id => {
-        const el = getEl(id); if (el) el.addEventListener('change', (e) => {
-            catalogFilters[id.replace('filter-', '')] = e.target.value; renderAll();
+
+    // Catalog Filter Listeners
+    ['catalog-filter-distributor', 'catalog-filter-brand', 'catalog-filter-sort'].forEach(id => {
+        const el = getEl(id);
+        if (el) el.addEventListener('change', (e) => {
+            const key = id.replace('catalog-filter-', '');
+            catalogFilters[key] = e.target.value;
+            renderCatalog();
         });
     });
 
