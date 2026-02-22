@@ -399,32 +399,6 @@
                 </div>
 
 
-                <div class="mb-4 no-print block">
-                    <label class="form-label mb-2">VTS COMPLIANCE</label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        <button class="toggle-btn" id="btn-vts-sent" onclick="toggleVts(this, 'tt-vts-sent')">
-                            VTS Sent
-                        </button>
-                        <button class="toggle-btn" id="btn-title-rec" onclick="toggleVts(this, 'tt-title-received')">
-                            Title Received
-                        </button>
-                        <button
-                            class="toggle-btn bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 flex items-center justify-center gap-2"
-                            onclick="sendVTSEmail()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
-                                </path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            Email Clerk
-                        </button>
-                    </div>
-
-                    <input type="checkbox" id="tt-vts-sent" class="hidden">
-                    <input type="checkbox" id="tt-title-received" class="hidden">
-                </div>
 
 
                 <div class="mb-6">
@@ -1005,8 +979,8 @@
                     storeEnd: document.getElementById('tt-store-end').value,
                     storeDays: document.getElementById('tt-store-days').value,
                     notes: document.getElementById('tt-notes').value,
-                    vtsSent: document.getElementById('tt-vts-sent').checked,
-                    titleReceived: document.getElementById('tt-title-received').checked,
+                    vtsSent: TreadzData.get('ticket', id)?.fields?.vtsSent || false,
+                    titleReceived: TreadzData.get('ticket', id)?.fields?.titleReceived || false,
                     driver: document.getElementById('tt-driver').value,
                     status: document.querySelector('.toggle-btn[data-group="tk-status"].active')?.dataset.value || 'In Lot',
                     signature: document.getElementById('sig-result').classList.contains('hidden') ? '' : document.getElementById('sig-image').src
@@ -1099,20 +1073,6 @@
                 }
 
 
-                document.getElementById('tt-vts-sent').checked = f.vtsSent || false;
-                document.getElementById('tt-title-received').checked = f.titleReceived || false;
-
-
-                const btnVts = document.getElementById('btn-vts-sent');
-                const btnTitle = document.getElementById('btn-title-rec');
-                if (btnVts) {
-                    if (f.vtsSent) btnVts.classList.add('active');
-                    else btnVts.classList.remove('active');
-                }
-                if (btnTitle) {
-                    if (f.titleReceived) btnTitle.classList.add('active');
-                    else btnTitle.classList.remove('active');
-                }
 
 
                 const st = f.status || 'In Lot';
@@ -1170,12 +1130,6 @@
                 b.classList.remove('active');
                 if (b.dataset.value === 'In Lot') b.classList.add('active');
             });
-            document.getElementById('tt-vts-sent').checked = false;
-            document.getElementById('tt-title-received').checked = false;
-            const btnVts = document.getElementById('btn-vts-sent');
-            const btnTitle = document.getElementById('btn-title-rec');
-            if (btnVts) btnVts.classList.remove('active');
-            if (btnTitle) btnTitle.classList.remove('active');
 
             const otherInput = document.getElementById('other-agency-input');
             if (otherInput) otherInput.classList.add('hidden');
@@ -1429,32 +1383,6 @@
 
 
 
-        function toggleVts(btn, inputId) {
-            const isActive = !btn.classList.contains('active');
-
-
-            if (inputId === 'tt-title-received' && isActive) {
-
-                const vtsBtn = document.getElementById('btn-vts-sent');
-                const vtsInput = document.getElementById('tt-vts-sent');
-                if (vtsBtn) vtsBtn.classList.remove('active');
-                if (vtsInput) vtsInput.checked = false;
-            } else if (inputId === 'tt-vts-sent' && isActive) {
-
-                const titleBtn = document.getElementById('btn-title-rec');
-                const titleInput = document.getElementById('tt-title-received');
-                if (titleBtn) titleBtn.classList.remove('active');
-                if (titleInput) titleInput.checked = false;
-            }
-
-
-            btn.classList.toggle('active');
-            const input = document.getElementById(inputId);
-            if (input) {
-                input.checked = btn.classList.contains('active');
-                if (typeof saveTicket === 'function') saveTicket();
-            }
-        }
 
         function toggleBtn(btn) {
 
@@ -1706,49 +1634,6 @@
             }, 200);
         }
 
-        function sendVTSEmail() {
-
-            const id = document.querySelector('.param-ticket-id').innerText;
-            const vin = document.getElementById('tt-vin').value || 'N/A';
-            const make = document.getElementById('tt-make').value || '';
-            const model = document.getElementById('tt-model').value || '';
-            const year = document.getElementById('tt-year').value || '';
-            const date = document.getElementById('tt-date').value;
-            const vehicle = `${year} ${make} ${model}`.trim();
-
-            const subject = `VTS Request - Ticket #${id} - ${vehicle}`;
-            const body = `Please process VTS for the following vehicle:\n\nTicket #: ${id}\nDate Towed: ${date}\nVehicle: ${vehicle}\nVIN: ${vin}\n\nSee attached PDF for full details.`;
-
-
-            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            window.location.href = mailtoLink;
-
-
-
-            setTimeout(() => {
-                downloadTowTicket();
-
-
-                setTimeout(() => {
-                    document.getElementById('vts-modal').classList.remove('hidden');
-                }, 1000);
-            }, 500);
-        }
-
-        function closeVtsModal(confirmed) {
-            document.getElementById('vts-modal').classList.add('hidden');
-            if (confirmed) {
-                document.getElementById('tt-vts-sent').checked = true;
-                document.getElementById('btn-vts-sent').classList.add('active');
-
-
-                document.getElementById('tt-title-received').checked = false;
-                const btnTitle = document.getElementById('btn-title-rec');
-                if (btnTitle) btnTitle.classList.remove('active');
-
-                saveTicket();
-            }
-        }
 
 
 
@@ -1767,7 +1652,8 @@
         }
 
         async function fetchSuggestions(text) {
-            const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=${encodeURIComponent(text)}&f=json&maxSuggestions=5`;
+            // Priority location: Mt. Carmel, TN (-82.684, 36.568)
+            const url = `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest?text=${encodeURIComponent(text)}&location=-82.684,36.568&distance=50000&f=json&maxSuggestions=5`;
             try {
                 const response = await fetch(url);
                 const data = await response.json();
@@ -2179,24 +2065,6 @@
 
 
 
-    <div id="vts-modal"
-        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 text-black font-sans">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center mx-4">
-            <h3 class="font-bold text-lg mb-3">VTS Process Started</h3>
-            <div class="text-left text-sm text-gray-600 mb-6 space-y-2">
-                <p>1. <strong>Attach the PDF</strong> (just downloaded) to the email.</p>
-                <p>2. Send the email.</p>
-                <p>3. Click "Mark Sent" below.</p>
-            </div>
-            <div class="flex gap-3 justify-center">
-                <button onclick="closeVtsModal(false)"
-                    class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-50 font-medium">Cancel</button>
-                <button onclick="closeVtsModal(true)"
-                    class="px-4 py-2 bg-blue-600 text-white rounded font-bold hover:bg-blue-700 shadow">Mark
-                    Sent</button>
-            </div>
-        </div>
-    </div>
 
 </body>
 

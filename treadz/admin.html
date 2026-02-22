@@ -1652,10 +1652,20 @@
                     const vtsSent = f.vtsSent === true;
                     const titleRec = f.titleReceived === true;
 
+                    const complianceActions = `
+                        <div class="flex flex-col gap-1 w-full mt-1">
+                            <button onclick="toggleVtsSent('${item.id}')" class="text-[9px] uppercase font-bold px-2 py-1 rounded border transition-all ${vtsSent ? 'bg-green-600 text-white border-green-700' : 'bg-white text-slate-400 border-slate-200 hover:border-green-300 hover:text-green-600'}" title="${vtsSent ? 'VTS has been sent' : 'Mark VTS as sent'}">
+                                ${vtsSent ? 'VTS Sent ✓' : 'Mark VTS Sent'}
+                            </button>
+                            <button onclick="toggleTitleReceived('${item.id}')" class="text-[9px] uppercase font-bold px-2 py-1 rounded border transition-all ${titleRec ? 'bg-blue-600 text-white border-blue-700' : 'bg-white text-slate-400 border-slate-200 hover:border-blue-300 hover:text-blue-600'}" title="${titleRec ? 'Title has been received' : 'Mark title as received'}">
+                                ${titleRec ? 'Title Rec ✓' : 'Mark Title Rec'}
+                            </button>
+                        </div>
+                    `;
 
-                    const emailBtn = `<button onclick="emailVTS('${item.id}')" class="text-[10px] uppercase font-bold bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-1 w-full mb-1">
+                    const emailBtn = `<button onclick="emailVTS('${item.id}')" class="text-[10px] uppercase font-bold bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded hover:bg-slate-50 transition-colors shadow-sm flex items-center justify-center gap-1 w-full">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-                                        Email
+                                        Email Clerk
                                       </button>`;
 
 
@@ -1716,6 +1726,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right flex flex-col items-end gap-1">
                                 ${emailBtn}
+                                ${complianceActions}
                                 ${actionBtn}
                             </td>
                         </tr>
@@ -2770,6 +2781,24 @@
             body.value = `To Whom It May Concern,\n\nPlease find attached the required VTS Notification Packet regarding the impound of:\n\nVehicle: ${veh}\nVIN: ${vin}\nLocation: ${lotLocation}\nImpound Date: ${impoundDate}\nTicket ID: #${id}\nCustomer: ${customerName}\nDriver: ${driver}\n\nPlease review the attached documents immediately.\n\nThank you,\n${TreadzConfig.BUSINESS_NAME}\n${TreadzConfig.PHONE_NUMBER}`;
 
             modal.classList.remove('hidden');
+        }
+
+        function toggleVtsSent(id) {
+            const ticket = TreadzData.get('ticket', id);
+            if (!ticket) return;
+            if (!ticket.fields) ticket.fields = {};
+            ticket.fields.vtsSent = !ticket.fields.vtsSent;
+            TreadzData.save('ticket', ticket, 'VTS Update');
+            initDashboard();
+        }
+
+        function toggleTitleReceived(id) {
+            const ticket = TreadzData.get('ticket', id);
+            if (!ticket) return;
+            if (!ticket.fields) ticket.fields = {};
+            ticket.fields.titleReceived = !ticket.fields.titleReceived;
+            TreadzData.save('ticket', ticket, 'Title Update');
+            initDashboard();
         }
 
         function confirmSendEmail() {
