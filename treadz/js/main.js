@@ -23,11 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Define Global Actions Early
     window.updateInventoryQty = (id, change) => {
-        const idx = inventory.findIndex(i => i.id === id);
-        if (idx === -1) return;
-        inventory[idx].quantity += change;
+        const targetId = String(id);
+        const idx = inventory.findIndex(i => String(i.id) === targetId);
+        if (idx === -1) {
+            console.warn(`[Treadz] Qty update failed: ID ${targetId} not found`);
+            return;
+        }
+
+        inventory[idx].quantity = Math.max(0, (parseInt(inventory[idx].quantity) || 0) + change);
+
         if (inventory[idx].quantity <= 0) {
-            window.deleteInventoryItem(id, true);
+            window.deleteInventoryItem(targetId, true);
         } else {
             saveData();
             renderInventory();
@@ -35,13 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.deleteInventoryItem = (id, skipConfirm = false) => {
-        const idx = inventory.findIndex(i => i.id === id);
+        const targetId = String(id);
+        const idx = inventory.findIndex(i => String(i.id) === targetId);
         if (idx === -1) return;
+
         if (skipConfirm || confirm('Permanently remove this item from inventory?')) {
             inventory.splice(idx, 1);
             saveData();
             renderInventory();
-            showToast('Item removed');
+            if (!skipConfirm) showToast('Item removed from inventory');
         }
     };
 
@@ -645,12 +653,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             }).join('');
 
-            // CRITICAL: Add wheel listener for horizontal scroll
+            // Improved Wheel-to-Horizontal Scroll Logic
             if (!listContainer._wheelBound) {
                 listContainer.addEventListener('wheel', (e) => {
+                    // Check if scrolling primarily vertically
                     if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                        e.preventDefault();
-                        listContainer.scrollLeft += e.deltaY;
+                        // Increase sensitivity for a smoother experience
+                        const scrollAmount = e.deltaY * 1.5;
+                        listContainer.scrollLeft += scrollAmount;
+
+                        // Prevent page scroll only if we're actually scrolling the catalog
+                        if (e.cancelable) e.preventDefault();
                     }
                 }, { passive: false });
                 listContainer._wheelBound = true;
@@ -661,8 +674,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollCatalog = (direction) => {
         const list = getEl('catalog-list');
         if (!list) return;
-        const width = list.clientWidth;
-        list.scrollBy({ left: direction * (width * 0.8), behavior: 'smooth' });
+        // Scroll by a significant amount (75% of container width)
+        const scrollStep = list.clientWidth * 0.75;
+        list.scrollBy({ left: direction * scrollStep, behavior: 'smooth' });
     };
 
     // Product Modal with Order Actions
