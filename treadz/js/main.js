@@ -21,6 +21,30 @@ document.addEventListener('DOMContentLoaded', () => {
         sort: 'price_asc'
     };
 
+    // Define Global Actions Early
+    window.updateInventoryQty = (id, change) => {
+        const idx = inventory.findIndex(i => i.id === id);
+        if (idx === -1) return;
+        inventory[idx].quantity += change;
+        if (inventory[idx].quantity <= 0) {
+            window.deleteInventoryItem(id, true);
+        } else {
+            saveData();
+            renderInventory();
+        }
+    };
+
+    window.deleteInventoryItem = (id, skipConfirm = false) => {
+        const idx = inventory.findIndex(i => i.id === id);
+        if (idx === -1) return;
+        if (skipConfirm || confirm('Permanently remove this item from inventory?')) {
+            inventory.splice(idx, 1);
+            saveData();
+            renderInventory();
+            showToast('Item removed');
+        }
+    };
+
     const loadData = () => {
         console.log('[Treadz] Initializing Data Load...');
         let mergedInventory = [];
@@ -533,30 +557,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchInput = getEl('search-input');
         const searchTerm = searchInput ? searchInput.value.trim() : '';
 
-        const filtered = catalogItems.filter(item => {
-            // 1. Search Matching
-            if (searchTerm) {
-                const sClean = searchTerm.toLowerCase();
-                const sDigits = (searchTerm.replace(/\D/g, ''));
-                const pSearch = parseTireSize(searchTerm);
+        // NEW: and CRITICAL - use TireCatalog.search for the catalog items to ensure consistent logic
+        let itemsToFilter = searchTerm ? TireCatalog.search(searchTerm) : catalogItems;
 
-                const itemStr = `${item.vendor_name} ${item.model_name} ${item.size_display}`.toLowerCase();
-                const itemDigits = (item.size_display || '').replace(/\D/g, '');
-
-                let isMatch = itemStr.includes(sClean);
-
-                if (!isMatch && sDigits.length >= 3 && itemDigits.includes(sDigits)) isMatch = true;
-
-                if (!isMatch && pSearch) {
-                    isMatch = (item.sizes || []).some(s =>
-                        String(s.width) === String(pSearch.width) &&
-                        (String(s.profile) === String(pSearch.ratio) || String(s.rim) === String(pSearch.rim))
-                    );
-                }
-
-                if (!isMatch) return false;
-            }
-
+        const filtered = itemsToFilter.filter(item => {
             // 2. Additional Filters
             if (catalogFilters.distributor && item._sourceId !== catalogFilters.distributor) return false;
             if (catalogFilters.brand && item.vendor_name !== catalogFilters.brand) return false;
@@ -732,26 +736,31 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. Search Matching
             if (searchTerm) {
                 const sClean = searchTerm.toLowerCase();
+                const itemSizeStr = typeof item.size === 'object' ? formatTireSize(item.size) : String(item.size);
                 const itemStr = `${itemSizeStr} ${item.brand || ''} ${item.condition || ''}`.toLowerCase();
-                const itemDigits = itemSizeStr.replace(/\D/g, '');
-                const sDigits = (searchTerm.replace(/\D/g, ''));
 
-                let isMatch = itemStr.includes(sClean);
-                if (!isMatch && sDigits.length >= 3 && itemDigits.includes(sDigits)) isMatch = true;
+                // Use normalized search like the catalog
+                const qNormalized = sClean.replace(/[\/xX]/g, ' ').replace(/\s+/g, ' ');
+                const terms = qNormalized.split(/\s+/);
 
-                if (!isMatch) {
-                    const parsedSearch = parseTireSize(searchTerm);
-                    if (parsedSearch) {
-                        const itemParsed = parseTireSize(itemSizeStr);
-                        if (itemParsed) {
-                            if (parsedSearch.partial) {
-                                isMatch = (itemParsed.width == parsedSearch.width && itemParsed.ratio == parsedSearch.ratio);
-                            } else {
-                                isMatch = (itemParsed.width == parsedSearch.width && itemParsed.rim == parsedSearch.rim && (itemParsed.ratio == parsedSearch.ratio || !parsedSearch.ratio));
-                            }
-                        }
-                    }
+                // Create a searchable string that includes variations
+                const pItem = parseTireSize(itemSizeStr);
+                const variations = [itemSizeStr];
+                if (pItem) {
+                    variations.push(`${pItem.width} ${pItem.ratio} ${pItem.rim}`);
+                    variations.push(`${pItem.width}x${pItem.ratio}R${pItem.rim}`);
                 }
+                const searchable = (itemStr + ' ' + variations.join(' ')).toLowerCase();
+
+                let isMatch = terms.every(t => searchable.includes(t));
+
+                // Fallback to digit matching for serial-like inputs
+                if (!isMatch) {
+                    const sDigits = searchTerm.replace(/\D/g, '');
+                    const itemDigits = itemSizeStr.replace(/\D/g, '');
+                    if (sDigits.length >= 3 && itemDigits.includes(sDigits)) isMatch = true;
+                }
+
                 if (!isMatch) return false;
             }
             return true;
@@ -821,32 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
 
-    window.updateInventoryQty = (id, change) => {
-        const idx = inventory.findIndex(i => i.id === id);
-        if (idx === -1) return;
-
-        inventory[idx].quantity += change;
-
-        if (inventory[idx].quantity <= 0) {
-            window.deleteInventoryItem(id, true);
-        } else {
-            saveData();
-            renderInventory();
-        }
-    };
-
-    window.deleteInventoryItem = (id, skipConfirm = false) => {
-        const idx = inventory.findIndex(i => i.id === id);
-        if (idx === -1) return;
-
-        if (skipConfirm || confirm('Permanently remove this item from inventory?')) {
-            inventory.splice(idx, 1);
-            saveData();
-            renderInventory();
-            showToast('Item removed');
-        }
-    };
-
+    // Local Rim Filter
     const populateFilters = () => {
         const brands = new Set();
         const rims = new Set();
