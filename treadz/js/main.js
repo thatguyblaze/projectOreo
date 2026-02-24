@@ -57,45 +57,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const sanitizeInventory = (data) => {
+        if (!Array.isArray(data)) return [];
+
+        const uniqueItems = new Map();
+        const processed = [];
+
+        // 1. Merge duplicates by Size + Condition
+        data.forEach(item => {
+            if (!item) return;
+            const sizeStr = (typeof item.size === 'object' ? formatTireSize(item.size) : String(item.size)).toUpperCase().trim();
+            const condition = (item.condition || 'used').toLowerCase();
+            const key = `${sizeStr}|${condition}`;
+
+            if (uniqueItems.has(key)) {
+                // Merge quantity into existing entry
+                const existing = uniqueItems.get(key);
+                existing.quantity = (parseInt(existing.quantity) || 0) + (parseInt(item.quantity) || 0);
+                if (!existing.brand && item.brand) existing.brand = item.brand;
+            } else {
+                // Create new unified entry
+                const newItem = {
+                    ...item,
+                    id: generateId(item.id && String(item.id).startsWith('mig') ? 'idx' : 'item'),
+                    size: sizeStr,
+                    condition: condition,
+                    quantity: parseInt(item.quantity) || 0,
+                    timestamp: item.timestamp || new Date().toISOString()
+                };
+                uniqueItems.set(key, newItem);
+            }
+        });
+
+        return Array.from(uniqueItems.values()).filter(i => i.quantity > 0);
+    };
+
     const loadData = () => {
         console.log('[Treadz] Initializing Data Load...');
-        let mergedInventory = [];
+        let rawInventory = [];
 
         try {
             const v7Raw = localStorage.getItem('treadzTireInventoryV7');
             if (v7Raw) {
-                const parsed = JSON.parse(v7Raw);
-                mergedInventory = Array.isArray(parsed) ? parsed : [];
-                console.log(`[Treadz] Loaded V7 Inventory: ${mergedInventory.length} items`);
+                rawInventory = JSON.parse(v7Raw);
+                console.log(`[Treadz] Loaded V7 Inventory: ${rawInventory.length} items`);
             } else {
-                // Migration path: only run if V7 doesn't exist
                 const v5Raw = localStorage.getItem('treadzTireInventoryV5');
                 const legacyRaw = localStorage.getItem('treadzTireInventory');
 
-                if (v5Raw) {
-                    const parsed = JSON.parse(v5Raw);
-                    mergedInventory = Array.isArray(parsed) ? parsed : [];
-                    console.log(`[Treadz] Migrated V5 Inventory: ${mergedInventory.length} items`);
-                } else if (legacyRaw) {
-                    const parsed = JSON.parse(legacyRaw);
-                    mergedInventory = Array.isArray(parsed) ? parsed : [];
-                    console.log(`[Treadz] Migrated Legacy Inventory: ${mergedInventory.length} items`);
-                }
+                if (v5Raw) rawInventory = JSON.parse(v5Raw);
+                else if (legacyRaw) rawInventory = JSON.parse(legacyRaw);
 
-                if (mergedInventory.length > 0) {
-                    // Ensure all items have robust IDs
-                    mergedInventory.forEach(item => {
-                        if (!item.id) item.id = generateId('mig');
-                    });
-                    localStorage.setItem('treadzTireInventoryV7', JSON.stringify(mergedInventory));
-                }
+                console.log(`[Treadz] Migrated Legacy Inventory: ${rawInventory.length} items`);
             }
-        } catch (globalE) {
-            console.error('[Treadz] Global Load Error:', globalE);
+        } catch (e) {
+            console.error('[Treadz] Load Error:', e);
         }
 
-        inventory = mergedInventory;
-        console.log(`[Treadz] Total Processed Inventory: ${inventory.length} items`);
+        // Always sanitize to fix potential corruption/duplicates
+        inventory = sanitizeInventory(rawInventory);
+        console.log(`[Treadz] Sanitized Inventory: ${inventory.length} items`);
+
+        // Save cleaned data back
+        if (rawInventory.length > 0) saveData();
 
         if (inventory.length === 0) {
             console.log('[Treadz] Generating demo items...');
