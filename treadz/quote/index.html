@@ -109,10 +109,10 @@
             .print-header {
                 display: flex !important;
                 justify-content: space-between;
-                align-items: flex-end;
-                margin-bottom: 2rem;
+                align-items: flex-start;
+                margin-bottom: 1.5rem;
                 padding-bottom: 1rem;
-                border-bottom: 3px solid #000;
+                border-bottom: 2px solid #333;
             }
 
             .print-header img {
@@ -121,16 +121,23 @@
             }
 
             .print-header h2 {
-                font-size: 28pt !important;
+                font-size: 24pt !important;
                 font-weight: 900 !important;
                 text-transform: uppercase;
                 margin: 0 !important;
                 color: black !important;
+                line-height: 1 !important;
             }
 
             #quote-id-display {
                 color: black !important;
-                font-weight: 900 !important;
+                font-weight: 800 !important;
+            }
+
+            .print-date-text {
+                font-size: 10pt !important;
+                color: #666 !important;
+                margin-top: 4pt !important;
             }
 
             /* Customer/Vehicle Info */
@@ -142,13 +149,25 @@
             #cust-name,
             #cust-vehicle,
             #tire-info-input {
-                font-size: 14pt !important;
-                font-weight: 800 !important;
-                border-bottom: 2px solid #000 !important;
-                margin-bottom: 1rem !important;
+                font-size: 13pt !important;
+                font-weight: 700 !important;
+                border: none !important;
+                border-bottom: 1px solid #ccc !important;
+                margin-bottom: 0.75rem !important;
+                padding-bottom: 4pt !important;
                 color: black !important;
                 display: block !important;
                 width: 100% !important;
+                background: transparent !important;
+            }
+
+            .label-uppercase {
+                font-size: 8pt !important;
+                text-transform: uppercase !important;
+                color: #888 !important;
+                font-weight: 700 !important;
+                margin-bottom: 2pt !important;
+                display: block !important;
             }
 
             /* Summary Rows */
@@ -156,8 +175,8 @@
                 display: flex !important;
                 justify-content: space-between !important;
                 align-items: center !important;
-                padding: 8pt 0 !important;
-                border-bottom: 1pt dashed #ccc !important;
+                padding: 6pt 0 !important;
+                border-bottom: 1px solid #eee !important;
                 width: 100% !important;
             }
 
@@ -179,9 +198,9 @@
 
             /* Totals Bar */
             .totals-section {
-                border-top: 3px solid #000 !important;
-                margin-top: 2rem !important;
-                padding-top: 1rem !important;
+                border-top: 2px solid #333 !important;
+                margin-top: 1.5rem !important;
+                padding-top: 0.5rem !important;
             }
 
             .print-simple-total {
@@ -197,8 +216,15 @@
 
             #total-cash-display,
             #total-card-display {
-                font-size: 22pt !important;
+                font-size: 18pt !important;
+                font-weight: 900 !important;
                 color: black !important;
+            }
+
+            .print-simple-total span:first-child {
+                font-size: 12pt !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
             }
 
             .print-add-fee::after {
@@ -208,11 +234,11 @@
             }
 
             .print-footer {
-                margin-top: 3rem !important;
+                margin-top: 2rem !important;
                 text-align: center !important;
                 font-size: 10pt !important;
                 color: #666 !important;
-                border-top: 1pt solid #eee !important;
+                border-top: 1px solid #eee !important;
                 padding-top: 1rem !important;
             }
         }
@@ -392,7 +418,7 @@
                                         <h2 class="text-2xl font-bold text-gray-900 mb-1">QUOTE <span
                                                 id="quote-id-display"
                                                 class="text-gray-500 font-normal ml-2 text-lg">#--</span></h2>
-                                        <div class="text-sm text-gray-600" id="print-date"></div>
+                                        <div class="print-date-text" id="print-date"></div>
                                     </div>
                                 </div>
                             </div>
@@ -408,15 +434,13 @@
                             <div
                                 class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50/50 rounded-xl border border-dashed border-gray-200 print:p-0 print:bg-transparent print:border-none print:gap-4 print:mb-4">
                                 <div>
-                                    <label
-                                        class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">Customer
+                                    <label class="label-uppercase">Customer
                                         Name</label>
                                     <input type="text" id="cust-name" placeholder="Enter Name..."
                                         class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none py-1.5 font-semibold text-base text-gray-800 placeholder-gray-300 print:border-b-2 print:border-gray-800">
                                 </div>
                                 <div>
-                                    <label
-                                        class="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-widest">Vehicle
+                                    <label class="label-uppercase">Vehicle
                                         / Notes</label>
                                     <input type="text" id="cust-vehicle" placeholder="Vehicle Year/Make/Model..."
                                         class="w-full bg-transparent border-b border-gray-300 focus:border-blue-500 outline-none py-1.5 font-semibold text-base text-gray-800 placeholder-gray-300 print:border-b-2 print:border-gray-800">
@@ -425,8 +449,7 @@
 
 
                             <div id="tire-info-container">
-                                <label
-                                    class="block text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tire
+                                <label class="label-uppercase">Tire
                                     Info</label>
                                 <input type="text" id="tire-info-input" placeholder="e.g. 205/55R16 Michelin Defender"
                                     class="calc-input w-full px-4 py-3 text-lg font-semibold bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none print:bg-transparent print:border-none print:px-0 print:text-left print:shadow-none placeholder:font-normal">
