@@ -747,11 +747,16 @@
 
             const filteredHistory = history.filter(item => {
                 const searchStr = filterText.toLowerCase();
+                const customer = (item.customer || '').toLowerCase();
+                const vehicle = (item.vehicle || '').toLowerCase();
+                const tireInfo = (item.tireInfo || '').toLowerCase();
+                const total = (item.total || '').toLowerCase();
+
                 return (
-                    item.customer.toLowerCase().includes(searchStr) ||
-                    (item.vehicle && item.vehicle.toLowerCase().includes(searchStr)) ||
-                    (item.tireInfo && item.tireInfo.toLowerCase().includes(searchStr)) ||
-                    item.total.includes(searchStr)
+                    customer.includes(searchStr) ||
+                    vehicle.includes(searchStr) ||
+                    tireInfo.includes(searchStr) ||
+                    total.includes(searchStr)
                 );
             });
 
@@ -1030,6 +1035,7 @@
             if (window.TreadzData) {
                 TreadzData.migrateLegacyData();
             }
+            const phoneEl = document.getElementById('shop-phone-display');
             if (phoneEl && TreadzConfig.PHONE_NUMBER) {
                 phoneEl.textContent = TreadzConfig.PHONE_NUMBER;
             }
