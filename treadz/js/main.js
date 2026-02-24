@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const generateId = (prefix = 'item') => {
+        return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    };
+
     window.deleteInventoryItem = (id, skipConfirm = false) => {
         const targetId = String(id);
         const idx = inventory.findIndex(i => String(i.id) === targetId);
@@ -58,51 +62,32 @@ document.addEventListener('DOMContentLoaded', () => {
         let mergedInventory = [];
 
         try {
-            // Inventory: Pull from BOTH V7 and V5
             const v7Raw = localStorage.getItem('treadzTireInventoryV7');
-            const v5Raw = localStorage.getItem('treadzTireInventoryV5');
-
-            let v7Inventory = [];
-            let v5Inventory = [];
-
             if (v7Raw) {
-                try {
-                    const p = JSON.parse(v7Raw);
-                    v7Inventory = Array.isArray(p) ? p : [];
-                    console.log(`[Treadz] Loaded V7 Inventory: ${v7Inventory.length} items`);
-                } catch (e) { console.error('[Treadz] V7 Parse Error:', e); }
-            }
+                const parsed = JSON.parse(v7Raw);
+                mergedInventory = Array.isArray(parsed) ? parsed : [];
+                console.log(`[Treadz] Loaded V7 Inventory: ${mergedInventory.length} items`);
+            } else {
+                // Migration path: only run if V7 doesn't exist
+                const v5Raw = localStorage.getItem('treadzTireInventoryV5');
+                const legacyRaw = localStorage.getItem('treadzTireInventory');
 
-            if (v5Raw) {
-                try {
-                    const p = JSON.parse(v5Raw);
-                    v5Inventory = Array.isArray(p) ? p : [];
-                    console.log(`[Treadz] Loaded V5 Inventory: ${v5Inventory.length} items`);
-                } catch (e) { console.error('[Treadz] V5 Parse Error:', e); }
-            }
+                if (v5Raw) {
+                    const parsed = JSON.parse(v5Raw);
+                    mergedInventory = Array.isArray(parsed) ? parsed : [];
+                    console.log(`[Treadz] Migrated V5 Inventory: ${mergedInventory.length} items`);
+                } else if (legacyRaw) {
+                    const parsed = JSON.parse(legacyRaw);
+                    mergedInventory = Array.isArray(parsed) ? parsed : [];
+                    console.log(`[Treadz] Migrated Legacy Inventory: ${mergedInventory.length} items`);
+                }
 
-            mergedInventory = [...v7Inventory];
-
-            // Merge V5 items
-            v5Inventory.forEach(v5Item => {
-                const newItem = {
-                    ...v5Item,
-                    id: v5Item.id || (Date.now().toString(36) + Math.random().toString(36).substr(2) + '_v5')
-                };
-                mergedInventory.push(newItem);
-            });
-
-            // Fallback to legacy unversioned if absolutely nothing found
-            if (mergedInventory.length === 0) {
-                const legacyData = localStorage.getItem('treadzTireInventory');
-                if (legacyData) {
-                    try {
-                        const parsed = JSON.parse(legacyData);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            console.log('[Treadz] Migrating legacy data:', parsed.length);
-                            mergedInventory.push(...parsed);
-                        }
-                    } catch (e) { console.error('[Treadz] Legacy Parse Error:', e); }
+                if (mergedInventory.length > 0) {
+                    // Ensure all items have robust IDs
+                    mergedInventory.forEach(item => {
+                        if (!item.id) item.id = generateId('mig');
+                    });
+                    localStorage.setItem('treadzTireInventoryV7', JSON.stringify(mergedInventory));
                 }
             }
         } catch (globalE) {
@@ -184,6 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('treadzAuditHistoryV7', JSON.stringify(auditHistory));
         localStorage.setItem('treadzPOCart', JSON.stringify(purchaseOrderCart));
         localStorage.setItem('treadzSearchStats', JSON.stringify(searchStats));
+
+        // Sync filters whenever data changes
+        populateFilters();
     };
 
     // Purchase Order Logic
@@ -1020,10 +1008,143 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewBatch = getEl('batch-entry-view');
     const viewMultiple = getEl('add-multiple-view');
 
+    // Batch Entry Logic
+    let batchRows = [{ id: Date.now(), size: '', qty: 4, condition: 'used' }];
+
+    const renderBatchGrid = () => {
+        const grid = getEl('batch-grid');
+        if (!grid) return;
+
+        grid.innerHTML = batchRows.map((row, idx) => `
+            <div class="batch-grid-row py-2 border-b border-gray-50 bg-white">
+                <input type="text" value="${row.size}" placeholder="e.g. 255/55R17" 
+                    oninput="window.updateBatchRow(${row.id}, 'size', this.value)"
+                    class="p-2 border border-gray-200 rounded text-sm font-mono uppercase">
+                <input type="number" value="${row.qty}" min="1"
+                    oninput="window.updateBatchRow(${row.id}, 'qty', this.value)"
+                    class="p-2 border border-gray-200 rounded text-sm text-center">
+                <select onchange="window.updateBatchRow(${row.id}, 'condition', this.value)"
+                    class="p-2 border border-gray-200 rounded text-xs font-bold uppercase">
+                    <option value="used" ${row.condition === 'used' ? 'selected' : ''}>USED</option>
+                    <option value="new" ${row.condition === 'new' ? 'selected' : ''}>NEW</option>
+                </select>
+                <div class="flex gap-1">
+                    <button onclick="window.removeBatchRow(${row.id})" class="text-gray-300 hover:text-red-500 p-1">
+                        &times;
+                    </button>
+                    ${idx === batchRows.length - 1 ? `
+                        <button onclick="window.addBatchRow()" class="text-blue-500 font-bold p-1 text-lg">
+                            +
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    };
+
+    window.updateBatchRow = (id, field, value) => {
+        const row = batchRows.find(r => r.id === id);
+        if (row) row[field] = value;
+    };
+
+    window.addBatchRow = () => {
+        batchRows.push({ id: Date.now() + Math.random(), size: '', qty: 4, condition: 'used' });
+        renderBatchGrid();
+    };
+
+    window.removeBatchRow = (id) => {
+        if (batchRows.length <= 1) {
+            batchRows = [{ id: Date.now(), size: '', qty: 4, condition: 'used' }];
+        } else {
+            batchRows = batchRows.filter(r => r.id !== id);
+        }
+        renderBatchGrid();
+    };
+
+    if (confirmAddBtn) confirmAddBtn.addEventListener('click', () => {
+        const activeTab = tabBatch && tabBatch.classList.contains('active') ? 'batch' : 'multiple';
+        let addedCount = 0;
+
+        if (activeTab === 'batch') {
+            batchRows.forEach(row => {
+                if (!row.size.trim()) return;
+
+                const parsed = parseTireSize(row.size);
+                const sizeStr = parsed ? formatTireSize(parsed) : row.size.trim().toUpperCase();
+                const qty = parseInt(row.qty) || 1;
+                const condition = row.condition;
+
+                const existing = inventory.find(i =>
+                    (typeof i.size === 'object' ? formatTireSize(i.size) === sizeStr : String(i.size).toUpperCase() === sizeStr.toUpperCase())
+                    && i.condition === condition
+                );
+
+                if (existing) {
+                    existing.quantity = (parseInt(existing.quantity) || 0) + qty;
+                } else {
+                    inventory.push({
+                        id: generateId('man'),
+                        size: sizeStr,
+                        quantity: qty,
+                        condition: condition,
+                        brand: '',
+                        timestamp: new Date().toISOString()
+                    });
+                }
+                addedCount += qty;
+            });
+            // Reset batch rows
+            batchRows = [{ id: Date.now(), size: '', qty: 4, condition: 'used' }];
+            renderBatchGrid();
+        } else {
+            const text = tireInput ? tireInput.value.trim() : '';
+            if (!text) {
+                showToast('Please enter tire sizes first');
+                return;
+            }
+
+            const condition = conditionToggle && conditionToggle.checked ? 'new' : 'used';
+            const lines = text.split(/[\n,]+/).map(t => t.trim()).filter(t => t);
+
+            lines.forEach(rawSize => {
+                const parsed = parseTireSize(rawSize);
+                const sizeStr = parsed ? formatTireSize(parsed) : rawSize.toUpperCase();
+
+                const existing = inventory.find(i =>
+                    (typeof i.size === 'object' ? formatTireSize(i.size) === sizeStr : String(i.size).toUpperCase() === sizeStr.toUpperCase())
+                    && i.condition === condition
+                );
+
+                if (existing) {
+                    existing.quantity = (parseInt(existing.quantity) || 0) + 1;
+                } else {
+                    inventory.push({
+                        id: generateId('man'),
+                        size: sizeStr,
+                        quantity: 1,
+                        condition: condition,
+                        brand: '',
+                        timestamp: new Date().toISOString()
+                    });
+                }
+                addedCount++;
+            });
+            if (tireInput) tireInput.value = '';
+        }
+
+        if (addedCount > 0) {
+            saveData();
+            renderInventory();
+            showToast(`Inventory updated: ${addedCount} items added`);
+            closeEntryModal();
+        }
+    });
+
     if (addTiresBtn) addTiresBtn.addEventListener('click', () => {
         if (entryModal) {
             entryModal.classList.remove('hidden');
             entryModal.classList.add('flex');
+            renderBatchGrid(); // Ensure grid is rendered when opened
         }
     });
 
@@ -1044,6 +1165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tabMultiple.classList.remove('active');
             viewBatch.classList.remove('hidden');
             viewMultiple.classList.add('hidden');
+            renderBatchGrid();
         });
         tabMultiple.addEventListener('click', () => {
             tabMultiple.classList.add('active');
@@ -1052,52 +1174,6 @@ document.addEventListener('DOMContentLoaded', () => {
             viewBatch.classList.add('hidden');
         });
     }
-
-    // Improved Inventory Add Logic
-    if (confirmAddBtn) confirmAddBtn.addEventListener('click', () => {
-        const text = tireInput ? tireInput.value.trim() : '';
-        if (!text) {
-            showToast('Please enter tire sizes first');
-            return;
-        }
-
-        const condition = conditionToggle && conditionToggle.checked ? 'new' : 'used';
-        const lines = text.split(/[\n,]+/).map(t => t.trim()).filter(t => t);
-        let addedCount = 0;
-
-        lines.forEach(rawSize => {
-            const parsed = parseTireSize(rawSize);
-            const sizeStr = parsed ? formatTireSize(parsed) : rawSize.toUpperCase();
-
-            // Use robust find to handle any case or type variations
-            const existing = inventory.find(i =>
-                (typeof i.size === 'object' ? formatTireSize(i.size) === sizeStr : String(i.size).toUpperCase() === sizeStr.toUpperCase())
-                && i.condition === condition
-            );
-
-            if (existing) {
-                existing.quantity = (parseInt(existing.quantity) || 0) + 1;
-            } else {
-                inventory.push({
-                    id: 'man_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                    size: sizeStr,
-                    quantity: 1,
-                    condition: condition,
-                    brand: '',
-                    timestamp: new Date().toISOString()
-                });
-            }
-            addedCount++;
-        });
-
-        if (addedCount > 0) {
-            saveData();
-            renderInventory();
-            showToast(`Inventory updated: ${addedCount} items added`);
-            if (tireInput) tireInput.value = '';
-            closeEntryModal();
-        }
-    });
 
     window.receiveAllOrders = () => {
         if (purchaseOrderCart.length === 0) return;
@@ -1118,7 +1194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 existing.quantity = (parseInt(existing.quantity) || 0) + qty;
             } else {
                 inventory.push({
-                    id: 'po_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    id: generateId('po'),
                     size: sizeStr,
                     quantity: qty,
                     condition: condition,

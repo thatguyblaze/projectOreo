@@ -632,7 +632,7 @@
         let isStateDirty = false;
         let isDisposalDirty = false;
         let isQuotePrinted = false;
-        let lastSavedMajorHash = ''; // To detect "major" changes
+        let lastSavedMajorHash = '';
 
 
 
@@ -658,10 +658,32 @@
                 return;
             }
 
+            // DUPLICATE CHECK
+            const history = TreadzData.getAll('quote');
+            const name = custNameInput.value.trim() || 'Walk-In';
+            const vehicle = custVehicleInput.value.trim();
+            const tireInfo = tireInfoInput.value.trim();
+            const price = parseFloat(priceInput.value) || 0;
+            const qty = parseInt(qtyInput.value) || 0;
+
+            const isDuplicate = history.some(item =>
+                item.id !== currentQuoteId && // Don't match self if editing
+                item.customer === name &&
+                item.vehicle === vehicle &&
+                item.tireInfo === tireInfo &&
+                item.pricePerTire === price &&
+                item.qty === qty
+            );
+
+            if (isDuplicate) {
+                console.log('[Quote] Save skipped - duplicate entry detected.');
+                return;
+            }
+
             // Detect major changes to create a NEW quote instead of overwriting
             const currentHash = generateMajorHash();
             if (currentQuoteId && lastSavedMajorHash && lastSavedMajorHash !== currentHash) {
-                currentQuoteId = null; // Reset ID to force a new entry
+                currentQuoteId = null;
             }
 
             if (!currentQuoteId) {
@@ -675,11 +697,11 @@
                 displayId: currentQuoteId,
                 type: 'quote',
                 timestamp: new Date().toISOString(),
-                customer: custNameInput.value.trim() || 'Walk-In',
-                vehicle: custVehicleInput.value.trim(),
-                tireInfo: tireInfoInput.value.trim(),
-                pricePerTire: parseFloat(priceInput.value) || 0,
-                qty: parseInt(qtyInput.value) || 0,
+                customer: name,
+                vehicle: vehicle,
+                tireInfo: tireInfo,
+                pricePerTire: price,
+                qty: qty,
                 total: document.getElementById('total-card-display').textContent
             };
 
@@ -739,19 +761,25 @@
             }
 
             historyList.innerHTML = filteredHistory.map(item => {
+                const date = new Date(item.timestamp).toLocaleDateString();
+                const quoteId = item.displayId || item.id || '--';
                 return `
                 <div onclick="loadQuoteById('${item.id}')" class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 hover:shadow-md transition-all group ${item.id === currentQuoteId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
-                    <div class="flex justify-between items-start mb-1">
-                        <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3 capitalize">${item.customer}</div>
-                        <div class="text-[10px] font-mono text-gray-400">${new Date(item.timestamp).toLocaleDateString()}</div>
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">#${quoteId}</div>
+                        <div class="text-[10px] font-medium text-gray-400">${date}</div>
                     </div>
-                    <div class="text-xs font-semibold text-blue-600 truncate mb-1">${item.tireInfo || '-'}</div>
-                    <div class="text-[10px] text-gray-500 truncate mb-2">${item.vehicle || '-'}</div>
+                    
+                    <div class="font-bold text-gray-900 text-sm truncate capitalize mb-0.5">${item.customer}</div>
+                    <div class="text-[11px] text-gray-500 truncate leading-tight mb-2">${item.tireInfo || '-'}</div>
+                    
                     <div class="flex justify-between items-center pt-2 border-t border-gray-50">
-                        <div class="font-bold text-gray-900 text-sm">${item.total}</div>
-                        <button onclick="event.stopPropagation(); deleteQuote('${item.id}')" class="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                        </button>
+                        <div class="font-black text-gray-900 text-sm">${item.total}</div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="event.stopPropagation(); deleteQuote('${item.id}')" class="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 `;
@@ -784,7 +812,6 @@
 
             calculate();
             renderHistory();
-            // Removed blue flash per user request
 
             // Auto close on mobile
             if (window.innerWidth < 1024) {
@@ -999,8 +1026,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-
-            const phoneEl = document.getElementById('shop-phone-display');
+            // Force legacy data migration to pull in old quotes/history
+            if (window.TreadzData) {
+                TreadzData.migrateLegacyData();
+            }
             if (phoneEl && TreadzConfig.PHONE_NUMBER) {
                 phoneEl.textContent = TreadzConfig.PHONE_NUMBER;
             }
@@ -1008,7 +1037,6 @@
             // Name field behavior
             if (custNameInput) {
                 custNameInput.addEventListener('focus', () => {
-                    // Instantly remove it and let me put a new name in
                     if (custNameInput.value.trim() !== '') {
                         custNameInput.value = '';
                     }
