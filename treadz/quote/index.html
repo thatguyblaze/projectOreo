@@ -60,7 +60,8 @@
                 print-color-adjust: exact !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 100% !important;
+                width: 7.5in !important;
+                /* Fixed width for standard paper minus some safety */
             }
 
             #app,
@@ -84,10 +85,11 @@
             }
 
             .w-full.max-w-2xl {
-                max-width: 100% !important;
-                width: 100% !important;
-                padding: 0 0.5in !important;
-                /* Increased padding to prevent clipping */
+                max-width: 6.8in !important;
+                /* Slightly narrower than paper */
+                width: 6.8in !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
                 box-sizing: border-box !important;
             }
 
@@ -113,18 +115,21 @@
 
             .print-header h1,
             .print-header h2 {
-                font-size: 24px !important;
-                font-weight: 800 !important;
+                font-size: 28px !important;
+                font-weight: 900 !important;
                 text-transform: uppercase;
                 letter-spacing: -0.5px;
                 margin: 0 !important;
+                color: black !important;
             }
 
             .print-info-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem;
+                display: block !important;
                 margin-bottom: 2rem;
+            }
+
+            .print-info-grid>div {
+                margin-bottom: 1rem;
             }
 
             /* Main Table Look */
@@ -144,10 +149,28 @@
                 border-bottom: 1px solid #ddd;
             }
 
+            /* Main Table/Row Styling */
+            .summary-row {
+                display: flex !important;
+                justify-content: space-between !important;
+                padding: 10px 0 !important;
+                border-bottom: 1px dashed #ccc !important;
+                width: 100% !important;
+            }
+
+            .summary-row div,
+            .summary-row span {
+                color: black !important;
+                font-size: 14px !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+
             .invoice-table td {
                 padding: 0.75rem 0;
                 border-bottom: 1px solid #eee;
                 font-size: 14px;
+                color: black !important;
             }
 
             /* Tire Info Styling - Make it look like a major line item if present */
@@ -207,20 +230,35 @@
             .totals-row.final {
                 margin-top: 0.5rem;
                 padding-top: 0.5rem;
-                border-top: 1px solid #ddd;
+                border-top: 2px solid #000;
                 font-weight: bold;
-                font-size: 18px;
+                font-size: 20px !important;
                 color: black !important;
             }
 
+            /* Force visibility for all key IDs */
             #quote-id-display,
             #total-cash-display,
             #total-card-display,
             #subtotal-display,
             #tax-display,
             #state-fee-display,
-            #disposal-fee-display {
+            #disposal-fee-display,
+            #print-qty,
+            #print-price,
+            #cust-name,
+            #cust-vehicle,
+            #tire-info-input {
                 color: black !important;
+                -webkit-text-fill-color: black !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: inline-block !important;
+            }
+
+            #quote-id-display {
+                font-weight: bold !important;
+                margin-left: 5px !important;
             }
 
             .print-simple-total {
