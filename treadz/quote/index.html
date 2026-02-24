@@ -60,6 +60,7 @@
                 print-color-adjust: exact !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                width: 100% !important;
             }
 
             #app,
@@ -85,7 +86,9 @@
             .w-full.max-w-2xl {
                 max-width: 100% !important;
                 width: 100% !important;
-                padding: 0 0.1in !important;
+                padding: 0 0.5in !important;
+                /* Increased padding to prevent clipping */
+                box-sizing: border-box !important;
             }
 
             .glass-panel {
@@ -108,11 +111,13 @@
                 border-bottom: 2px solid #000;
             }
 
-            .print-header h1 {
+            .print-header h1,
+            .print-header h2 {
                 font-size: 24px !important;
                 font-weight: 800 !important;
                 text-transform: uppercase;
                 letter-spacing: -0.5px;
+                margin: 0 !important;
             }
 
             .print-info-grid {
@@ -161,9 +166,7 @@
             }
 
             /* Hiding original breakdown visual clutter */
-            .print-hide-math,
-            .print-hide-labels span.rounded,
-            .print-hide-labels span.bg-blue-100 {
+            .print-hide-math {
                 display: none !important;
             }
 
@@ -207,6 +210,17 @@
                 border-top: 1px solid #ddd;
                 font-weight: bold;
                 font-size: 18px;
+                color: black !important;
+            }
+
+            #quote-id-display,
+            #total-cash-display,
+            #total-card-display,
+            #subtotal-display,
+            #tax-display,
+            #state-fee-display,
+            #disposal-fee-display {
+                color: black !important;
             }
 
             .print-simple-total {
@@ -217,9 +231,10 @@
                 flex-direction: row !important;
                 justify-content: space-between !important;
                 width: 100% !important;
-                padding: 0 !important;
+                padding: 0.25rem 0 !important;
                 margin: 0 !important;
                 text-align: right !important;
+                color: black !important;
             }
 
             /* Hide the decorative grid gap in print */
@@ -539,24 +554,23 @@
 
                             <div
                                 class="bg-gray-50/80 rounded-xl p-6 space-y-2 border border-gray-100 print:bg-white print:border-none print:p-0">
-                                <div
-                                    class="summary-row flex justify-between items-center text-gray-600 p-0.5 print-hide-math">
+                                <div class="summary-row flex justify-between items-center text-gray-600 p-0.5">
                                     <div>
                                         <div class="text-xs font-medium">Tires Subtotal</div>
-                                        <div id="subtotal-math" class="text-[10px] text-gray-400 font-mono"></div>
+                                        <div id="subtotal-math"
+                                            class="text-[10px] text-gray-400 font-mono print-hide-math"></div>
                                     </div>
                                     <span id="subtotal-display" class="font-medium text-sm">$0.00</span>
                                 </div>
 
-                                <div
-                                    class="summary-row flex justify-between items-center text-gray-600 p-0.5 print-hide-math print-hide-labels">
+                                <div class="summary-row flex justify-between items-center text-gray-600 p-0.5">
                                     <div>
                                         <div class="flex items-center gap-2 text-xs font-medium">
                                             State Tire Fee
 
                                         </div>
                                         <div id="state-fee-math"
-                                            class="text-[10px] text-gray-400 font-mono flex items-center gap-1 cursor-text hover:text-blue-600 transition-colors"
+                                            class="text-[10px] text-gray-400 font-mono flex items-center gap-1 cursor-text hover:text-blue-600 transition-colors print-hide-math"
                                             title="Click to edit quantity">
                                             <input type="number" id="state-fee-qty"
                                                 class="w-4 bg-transparent text-right outline-none p-0 m-0 h-auto leading-none text-gray-500 hover:text-blue-600 focus:text-blue-600 font-mono focus:w-8 transition-all"
@@ -568,15 +582,14 @@
                                     <span id="state-fee-display" class="font-medium text-sm">$0.00</span>
                                 </div>
 
-                                <div
-                                    class="summary-row flex justify-between items-center text-gray-600 p-0.5 print-hide-math print-hide-labels">
+                                <div class="summary-row flex justify-between items-center text-gray-600 p-0.5">
                                     <div>
                                         <div class="flex items-center gap-2 text-xs font-medium">
                                             Disposal Fee
 
                                         </div>
                                         <div id="disposal-fee-math"
-                                            class="text-[10px] text-gray-400 font-mono flex items-center gap-1 cursor-text hover:text-blue-600 transition-colors"
+                                            class="text-[10px] text-gray-400 font-mono flex items-center gap-1 cursor-text hover:text-blue-600 transition-colors print-hide-math"
                                             title="Click to edit quantity">
                                             <input type="number" id="disposal-fee-qty"
                                                 class="w-4 bg-transparent text-right outline-none p-0 m-0 h-auto leading-none text-gray-500 hover:text-blue-600 focus:text-blue-600 font-mono focus:w-8 transition-all"
@@ -588,15 +601,15 @@
                                     <span id="disposal-fee-display" class="font-medium text-sm">$0.00</span>
                                 </div>
 
-                                <div
-                                    class="summary-row flex justify-between items-center text-gray-600 p-0.5 print-hide-math print-hide-labels">
+                                <div class="summary-row flex justify-between items-center text-gray-600 p-0.5">
                                     <div>
                                         <div class="flex items-center gap-2 text-xs font-medium">
                                             Sales Tax
                                             <span
                                                 class="text-[9px] bg-blue-100 text-blue-700 px-1 py-0.5 rounded print-hidden">9.75%</span>
                                         </div>
-                                        <div id="tax-math" class="text-[10px] text-gray-400 font-mono"></div>
+                                        <div id="tax-math" class="text-[10px] text-gray-400 font-mono print-hide-math">
+                                        </div>
                                     </div>
                                     <span id="tax-display" class="font-medium text-sm">$0.00</span>
                                 </div>
@@ -863,8 +876,7 @@
 
             calculate();
             renderHistory();
-            document.body.classList.add('bg-blue-50');
-            setTimeout(() => document.body.classList.remove('bg-blue-50'), 300);
+            // Removed blue flash per user request
 
             // Auto close on mobile
             if (window.innerWidth < 1024) {
