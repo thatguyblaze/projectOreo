@@ -4,142 +4,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treadz - Digital Signage</title>
+    <title>Treadz - Shop Display</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --primary: #3b82f6;
-            --secondary: #6366f1;
-            --accent: #f59e0b;
-            --bg: #030712;
+            --primary: #0047AB;
+            --orange: #FF6600;
+            --bg-dark: #0B1221;
+            --border: #E2E8F0;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg);
-            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #ffffff;
             overflow: hidden;
             margin: 0;
             cursor: none;
         }
 
-        /* Ambient Background */
-        .ambient-bg {
+        /* Background Pattern - subtle industrial grid */
+        .bg-pattern {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            inset: 0;
+            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+            background-size: 40px 40px;
             z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #111827 0%, #030712 100%);
         }
 
-        .blob {
-            position: absolute;
-            width: 80vw;
-            height: 80vw;
-            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-            opacity: 0.1;
-            filter: blur(100px);
-            animation: move 25s infinite alternate ease-in-out;
-        }
-
-        @keyframes move {
-            0% {
-                transform: translate(-10%, -10%) scale(1);
-            }
-
-            100% {
-                transform: translate(20%, 20%) scale(1.1);
-            }
-        }
-
-        /* Full Screen Card System */
-        .info-card {
+        /* Slide System - Sharp, bold transitions */
+        .slide {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            inset: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 5vw;
-            text-align: center;
-            transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+            padding: 5%;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            transform: translateX(100%);
             z-index: 10;
         }
 
-        .card-hidden {
-            opacity: 0;
-            transform: scale(1.2) rotate(2deg);
-            filter: blur(20px);
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .card-visible {
+        .slide.active {
             opacity: 1;
-            transform: scale(1) rotate(0deg);
-            filter: blur(0);
+            transform: translateX(0);
             z-index: 20;
         }
 
-        /* Clock Overlay */
-        .system-clock {
+        .slide.previous {
+            opacity: 0;
+            transform: translateX(-100%);
+            z-index: 5;
+        }
+
+        /* Brand Containers */
+        .content-box {
+            background: rgba(11, 18, 33, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 8px solid var(--orange);
+            padding: 4rem;
+            width: 90%;
+            max-width: 1400px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+        }
+
+        .header-accent {
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem 2rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            font-size: 1.5rem;
+            display: inline-block;
+            margin-bottom: 2rem;
+            border-radius: 4px;
+        }
+
+        .text-hero {
+            font-size: clamp(4rem, 8vw, 10rem);
+            font-weight: 900;
+            line-height: 0.85;
+            text-transform: uppercase;
+            letter-spacing: -0.04em;
+            margin-bottom: 2rem;
+        }
+
+        .text-sub {
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Clock Overlay - Grounded like the site nav */
+        .status-overlay {
             position: fixed;
-            top: 3rem;
-            right: 4rem;
-            text-align: right;
-            z-index: 100;
-            opacity: 0.8;
-            pointer-events: none;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-dark);
+            border-bottom: 4px solid var(--orange);
+            padding: 1rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .glow-text {
-            text-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        .clock-display {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #fff;
         }
 
-        /* Glass Utility */
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 3rem;
-        }
-
-        /* Progress Bar */
-        .progress-bar {
+        /* Progress Line */
+        .progress-line {
             position: fixed;
             bottom: 0;
             left: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            height: 10px;
+            background: var(--orange);
             width: 0%;
-            z-index: 1000;
             transition: width 0.1s linear;
+            z-index: 1001;
         }
 
-        /* Typography Highlights */
-        .text-huge {
-            font-size: clamp(4rem, 10vw, 12rem);
-            line-height: 0.9;
+        /* Brand Grid */
+        .brand-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4rem;
+            margin-top: 4rem;
+        }
+
+        .brand-item {
+            font-size: 2.5rem;
             font-weight: 900;
-            letter-spacing: -0.05em;
+            color: #fff;
+            opacity: 0.9;
         }
 
-        .promo-badge {
-            background: white;
-            color: black;
+        /* Accent Red Alert style for Rights slide */
+        .rights-box {
+            border-bottom-color: #ef4444;
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .quote-badge {
+            background: #fff;
+            color: #000;
             padding: 1.5rem 3rem;
-            border-radius: 1rem;
-            font-size: 4rem;
+            border-radius: 8px;
+            font-size: 3.5rem;
             font-weight: 900;
-            transform: rotate(-2deg);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: inline-block;
+            margin: 3rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         #music-container {
@@ -155,106 +181,125 @@
 </head>
 
 <body>
-    <div class="ambient-bg">
-        <div class="blob"></div>
-    </div>
+    <div class="bg-pattern"></div>
 
-    <!-- Minimal Header Overlay -->
-    <div class="system-clock">
-        <div id="current-time" class="text-6xl font-black mb-1">12:00 PM</div>
-        <div id="current-date" class="text-xl text-slate-400 font-bold uppercase tracking-[0.2em]">FEBRUARY 25, 2026
+    <!-- Top Status Bar -->
+    <div class="status-overlay">
+        <div class="flex items-center gap-8">
+            <img src="../../treadztntLogo.png" alt="Treadz" class="h-16">
+            <div class="text-xl font-black uppercase tracking-widest text-blue-400">Shop Display</div>
+        </div>
+        <div class="flex items-end flex-col">
+            <div id="current-time" class="clock-display">12:00 PM</div>
+            <div id="current-date" class="text-sm font-bold text-slate-400 uppercase tracking-widest">FEBRUARY 25, 2026
+            </div>
         </div>
     </div>
 
-    <!-- Main Display Engine -->
+    <!-- Slides Area -->
     <main id="display-engine">
 
-        <!-- Welcome Slide -->
-        <div id="slide-welcome" class="info-card card-visible">
-            <span class="text-blue-500 font-black text-2xl mb-6 tracking-widest uppercase">Now Serving</span>
-            <h1 class="text-huge glow-text mb-12">MOUNT CARMEL</h1>
-            <div class="flex gap-8">
-                <div class="glass p-10 min-w-[300px]">
-                    <div class="text-5xl font-black text-blue-400 mb-2">24/7</div>
-                    <div class="text-sm font-bold uppercase tracking-widest text-slate-400">Towing Service</div>
-                </div>
-                <div class="glass p-10 min-w-[300px]">
-                    <div class="text-5xl font-black text-amber-500 mb-2">1,000+</div>
-                    <div class="text-sm font-bold uppercase tracking-widest text-slate-400">Tires In Stock</div>
+        <!-- Welcome -->
+        <div id="slide-welcome" class="slide active">
+            <div class="content-box text-center">
+                <div class="header-accent">Premium Service</div>
+                <h1 class="text-hero">Tire & Towing <br> Experts</h1>
+                <p class="text-sub">Mount Carmel's most trusted automotive recovery and tire specialists since 2021.</p>
+
+                <div class="flex justify-center gap-12 mt-16">
+                    <div class="text-left border-l-4 border-l-blue-500 pl-8">
+                        <div class="text-6xl font-black text-blue-400">24/7</div>
+                        <div class="text-xl font-bold uppercase tracking-widest">Towing Service</div>
+                    </div>
+                    <div class="text-left border-l-4 border-l-orange-500 pl-8">
+                        <div class="text-6xl font-black text-orange-500">1000+</div>
+                        <div class="text-xl font-bold uppercase tracking-widest">Tires In Stock</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Brands Slide -->
-        <div id="slide-brands" class="info-card card-hidden">
-            <span class="text-blue-500 font-black text-2xl mb-8 tracking-widest uppercase">Premium Selection</span>
-            <h2 class="text-huge glow-text mb-16">THE BRANDS <br>YOU TRUST</h2>
-            <div class="grid grid-cols-5 gap-x-12 gap-y-16 opacity-80 max-w-6xl">
-                <div class="text-3xl font-black">MICHELIN</div>
-                <div class="text-3xl font-black text-slate-500">GOODYEAR</div>
-                <div class="text-3xl font-black">CONTINENTAL</div>
-                <div class="text-3xl font-black text-slate-500">PIRELLI</div>
-                <div class="text-3xl font-black">BRIDGESTONE</div>
-                <div class="text-3xl font-black text-slate-500">BFGOODRICH</div>
-                <div class="text-3xl font-black">HANKOOK</div>
-                <div class="text-3xl font-black text-slate-500">FALKEN</div>
-                <div class="text-3xl font-black">TOYO</div>
-                <div class="text-3xl font-black text-slate-500">KUMHO</div>
+        <!-- Brands -->
+        <div id="slide-brands" class="slide">
+            <div class="content-box text-center">
+                <div class="header-accent">The Best Brands</div>
+                <h2 class="text-hero" style="font-size: 6vw;">Top Quality Tire Selection</h2>
+                <div class="brand-grid">
+                    <div class="brand-item">MICHELIN</div>
+                    <div class="brand-item">GOODYEAR</div>
+                    <div class="brand-item">PIRELLI</div>
+                    <div class="brand-item">HANKOOK</div>
+                    <div class="brand-item">TOYO</div>
+                    <div class="brand-item">BRIDGESTONE</div>
+                    <div class="brand-item">BFGOODRICH</div>
+                    <div class="brand-item">KUMHO</div>
+                    <div class="brand-item">CONTINENTAL</div>
+                    <div class="brand-item">FALKEN</div>
+                </div>
+                <div class="mt-16 text-2xl font-bold text-slate-400 uppercase italic">
+                    Most tires available with Next-Day installation
+                </div>
             </div>
         </div>
 
-        <!-- Towing Slide -->
-        <div id="slide-towing" class="info-card card-hidden">
-            <span class="text-amber-500 font-black text-2xl mb-6 tracking-widest uppercase">Emergency Service</span>
-            <h2 class="text-huge glow-text mb-12">24/7 TOWING</h2>
-            <div class="glass p-16 max-w-4xl">
-                <div class="grid grid-cols-2 gap-12 text-left">
-                    <ul class="space-y-6 text-2xl font-bold">
-                        <li class="flex items-center gap-4 text-blue-400"><span
-                                class="w-4 h-4 rounded-full bg-blue-500"></span> Damage-Free Recovery</li>
-                        <li class="flex items-center gap-4"><span class="w-4 h-4 rounded-full bg-slate-600"></span>
-                            Flatbed Service</li>
-                        <li class="flex items-center gap-4 text-blue-400"><span
-                                class="w-4 h-4 rounded-full bg-blue-500"></span> Local & Long Distance</li>
-                    </ul>
-                    <div class="flex flex-col justify-center">
-                        <p class="text-3xl font-black leading-tight italic text-slate-300">
-                            "Your vehicle is our top priority. We're on the way."
+        <!-- Towing -->
+        <div id="slide-towing" class="slide">
+            <div class="content-box text-left">
+                <div class="header-accent">Professional Recovery</div>
+                <h2 class="text-hero">24/7 TOWING</h2>
+                <div class="grid grid-cols-2 gap-12">
+                    <div class="space-y-8">
+                        <div class="text-4xl font-black flex items-center gap-6">
+                            <span class="w-6 h-6 bg-blue-500"></span> Damage-Free Recovery
+                        </div>
+                        <div class="text-4xl font-black flex items-center gap-6">
+                            <span class="w-6 h-6 bg-slate-500"></span> Flatbed Service
+                        </div>
+                        <div class="text-4xl font-black flex items-center gap-6">
+                            <span class="w-6 h-6 bg-blue-500"></span> Professional Licensed Operators
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/50 p-12 border-l-4 border-l-blue-400">
+                        <p class="text-4xl font-bold italic leading-tight">
+                            "When you're stranded, we're your first call. Trusted by the community for professional
+                            recovery."
                         </p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Rights & Promo Slide -->
-        <div id="slide-promo" class="info-card card-hidden">
-            <div class="glass p-20 border-l-[20px] border-l-red-600 bg-red-600/5 max-w-6xl">
-                <h2 class="text-7xl font-black mb-8 leading-tight">IN AN ACCIDENT? <br> IT'S <span
-                        class="text-red-600 underline underline-offset-8">YOUR</span> CHOICE.</h2>
-                <p class="text-4xl text-slate-300 font-bold mb-16">
-                    Tell law enforcement:
+        <!-- Rights -->
+        <div id="slide-promo" class="slide">
+            <div class="content-box rights-box text-center">
+                <div class="header-accent" style="background:#ef4444">In An Accident?</div>
+                <h2 class="text-hero" style="line-height: 1;">It's YOUR <br> Choice.</h2>
+                <p class="text-4xl font-extrabold text-slate-200 mt-8">
+                    You have the legal right to pick your tow service. <br> Tell law enforcement:
                 </p>
-                <div class="promo-badge mb-16">
+                <div class="quote-badge">
                     "I REQUEST TREADZ"
                 </div>
-                <div class="flex justify-center gap-4 text-3xl font-black uppercase italic">
-                    <span class="text-blue-500">SAY TREADZ</span>
-                    <span class="text-slate-500">TO SAVE ON SERVICE</span>
+                <div class="mt-8 text-5xl font-black uppercase text-blue-400 italic">
+                    Say "TREADZ" for a discount!
                 </div>
             </div>
         </div>
 
-        <!-- Neighbors Slide -->
-        <div id="slide-activity" class="info-card card-hidden">
-            <h2 class="text-huge glow-text mb-16">TRUSTED BY <br> NEIGHBORS</h2>
-            <div id="activity-ticker" class="w-full max-w-4xl space-y-6">
-                <!-- JS Populated -->
+        <!-- Neighbors -->
+        <div id="slide-activity" class="slide">
+            <div class="content-box text-center">
+                <div class="header-accent">Community Feedback</div>
+                <h2 class="text-hero">Trusted By Your Neighbors</h2>
+                <div id="activity-ticker" class="space-y-6 mt-12 text-left max-w-5xl mx-auto">
+                    <!-- JS Populated -->
+                </div>
             </div>
         </div>
 
     </main>
 
-    <div id="progress-bar" class="progress-bar"></div>
+    <div id="progress-line" class="progress-line"></div>
 
     <div id="music-container">
         <iframe id="youtube-music" width="100%" height="100%"
@@ -262,15 +307,15 @@
             frameborder="0" allow="autoplay"></iframe>
     </div>
 
-    <!-- Activation Overlay -->
+    <!-- Landing Overlay -->
     <div id="overlay-start"
-        class="fixed inset-0 z-[2000] bg-black bg-opacity-90 flex flex-col justify-center items-center text-center">
-        <img src="../../treadztntLogo.png" alt="Treadz" class="h-48 mb-12">
+        class="fixed inset-0 z-[2000] bg-[#0B1221] flex flex-col justify-center items-center text-center">
+        <img src="../../treadztntLogo.png" alt="Treadz" class="h-64 mb-12">
         <button id="activate-show"
-            class="glass px-12 py-6 text-2xl font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition-all duration-500">
-            Start Cinematic Show
+            class="bg-[#0047AB] px-16 py-8 text-3xl font-black uppercase tracking-[0.3em] hover:bg-[#FF6600] transition-all duration-300 rounded shadow-2xl">
+            Start Shop Display
         </button>
-        <p class="mt-8 text-slate-500 font-bold uppercase tracking-widest text-sm">Best viewed on shop display TVs</p>
+        <p class="mt-12 text-slate-400 font-bold uppercase tracking-widest">Designed for Workshop TV Displays</p>
     </div>
 
     <script src="../../js/data-store.js"></script>
@@ -282,19 +327,11 @@
             const slideDuration = 12000;
             let lastUpdate = Date.now();
 
-            const progressBar = document.getElementById('progress-bar');
-
-            const slideMap = {
-                'welcome': document.getElementById('slide-welcome'),
-                'brands': document.getElementById('slide-brands'),
-                'towing': document.getElementById('slide-towing'),
-                'promo': document.getElementById('slide-promo'),
-                'activity': document.getElementById('slide-activity')
-            };
+            const progressLine = document.getElementById('progress-line');
+            const slideElements = slides.map(id => document.getElementById(`slide-${id}`));
 
             function updateClock() {
                 const now = new Date();
-                // 12-hour format with AM/PM
                 const timeString = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
                 document.getElementById('current-time').textContent = timeString;
                 document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, {
@@ -307,35 +344,28 @@
             updateClock();
 
             function nextSlide() {
-                const currentId = slides[currentSlideIndex];
-                slideMap[currentId].classList.remove('card-visible');
-                slideMap[currentId].classList.add('card-hidden');
-
+                // Determine previous, current, next
+                const prevIndex = currentSlideIndex;
                 currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-                const nextId = slides[currentSlideIndex];
 
-                if (nextId === 'activity') prepareActivitySlide();
+                // Animation clean up
+                slideElements.forEach(el => {
+                    el.classList.remove('active', 'previous');
+                });
 
-                setTimeout(() => {
-                    // Force hide all others just in case of any overlap logic issues
-                    Object.values(slideMap).forEach(el => {
-                        if (el.id !== nextId) {
-                            el.classList.add('card-hidden');
-                            el.classList.remove('card-visible');
-                        }
-                    });
+                slideElements[prevIndex].classList.add('previous');
+                slideElements[currentSlideIndex].classList.add('active');
 
-                    slideMap[nextId].classList.remove('card-hidden');
-                    slideMap[nextId].classList.add('card-visible');
-                    lastUpdate = Date.now();
-                }, 800);
+                if (slides[currentSlideIndex] === 'activity') prepareActivitySlide();
+
+                lastUpdate = Date.now();
             }
 
             function updateProgress() {
                 const now = Date.now();
                 const elapsed = now - lastUpdate;
                 const progress = (elapsed / slideDuration) * 100;
-                progressBar.style.width = Math.min(progress, 100) + '%';
+                progressLine.style.width = Math.min(progress, 100) + '%';
 
                 if (elapsed >= slideDuration) {
                     nextSlide();
@@ -345,29 +375,26 @@
 
             function prepareActivitySlide() {
                 const container = document.getElementById('activity-ticker');
-                const quotes = TreadzData.getAll('quote').slice(0, 4);
+                const quotes = TreadzData.getAll('quote').slice(0, 3);
 
                 let combined = quotes.map(q => ({
-                    text: `Quote for ${q.customer || 'Customer'}`,
+                    text: `Quote for ${q.customer || 'Local Customer'}`,
                     sub: q.tireInfo || 'Tire Package',
-                    icon: '🏷️'
+                    icon: '✔️'
                 }));
 
                 if (combined.length === 0) {
                     combined = [
-                        { text: "Mount Carmel's Choice", sub: "Over 500 local residents served", icon: "⭐" },
-                        { text: "Open 24/7 For Towing", sub: "Professional recovery anywhere", icon: "🪝" },
-                        { text: "Premium Tire Tech", sub: "Digital balancing & mounting", icon: "🛠️" }
+                        { text: "Mount Carmel's Choice", sub: "Proudly serving local residents for years", icon: "✔️" },
+                        { text: "Professional Towing", sub: "Licensed and insured operators 24/7", icon: "✔️" },
+                        { text: "Expert Tire Tech", sub: "Precision mounting and digital balancing", icon: "✔️" }
                     ];
                 }
 
                 container.innerHTML = combined.map(item => `
-                    <div class="glass p-8 flex items-center gap-10 text-left border-l-8 border-l-blue-500">
-                        <div class="text-6xl">${item.icon}</div>
-                        <div>
-                            <div class="text-3xl font-black text-white">${item.text}</div>
-                            <div class="text-xl font-bold text-slate-400 uppercase tracking-widest">${item.sub}</div>
-                        </div>
+                    <div class="bg-white/5 p-8 border-l-8 border-l-blue-500">
+                        <div class="text-3xl font-black text-white">${item.text}</div>
+                        <div class="text-xl font-bold text-slate-400 uppercase tracking-widest mt-2">${item.sub}</div>
                     </div>
                 `).join('');
             }
