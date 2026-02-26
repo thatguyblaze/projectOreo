@@ -23,7 +23,6 @@
             overflow: hidden;
             margin: 0;
             cursor: none;
-            /* Hide cursor for TV mode */
         }
 
         /* Ambient Background */
@@ -34,119 +33,115 @@
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            overflow: hidden;
             background: radial-gradient(circle at 50% 50%, #111827 0%, #030712 100%);
         }
 
         .blob {
             position: absolute;
-            width: 600px;
-            height: 600px;
+            width: 80vw;
+            height: 80vw;
             background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
-            opacity: 0.15;
-            filter: blur(80px);
-            animation: move 20s infinite alternate cubic-bezier(0.45, 0, 0.55, 1);
-        }
-
-        .blob-2 {
-            background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
-            animation-delay: -5s;
-            width: 500px;
-            height: 500px;
+            opacity: 0.1;
+            filter: blur(100px);
+            animation: move 25s infinite alternate ease-in-out;
         }
 
         @keyframes move {
             0% {
-                transform: translate(-20%, -20%) scale(1);
+                transform: translate(-10%, -10%) scale(1);
             }
 
             100% {
-                transform: translate(40%, 40%) scale(1.2);
+                transform: translate(20%, 20%) scale(1.1);
             }
         }
 
-        /* Glassmorphism Classes */
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 2rem;
-        }
-
-        /* Info Display Card */
+        /* Full Screen Card System */
         .info-card {
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            position: absolute;
-            width: 100%;
-            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 4rem;
+            padding: 5vw;
             text-align: center;
+            transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 10;
         }
 
         .card-hidden {
             opacity: 0;
-            transform: translateY(50px) scale(0.95);
+            transform: scale(1.2) rotate(2deg);
+            filter: blur(20px);
             pointer-events: none;
+            z-index: 5;
         }
 
         .card-visible {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: scale(1) rotate(0deg);
+            filter: blur(0);
+            z-index: 20;
+        }
+
+        /* Clock Overlay */
+        .system-clock {
+            position: fixed;
+            top: 3rem;
+            right: 4rem;
+            text-align: right;
+            z-index: 100;
+            opacity: 0.8;
+            pointer-events: none;
         }
 
         .glow-text {
-            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
         }
 
-        /* Sidebar/Quick Stats */
-        .quick-stat {
-            background: rgba(255, 255, 255, 0.02);
-            border-left: 4px solid var(--primary);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 0.5rem 1.5rem 1.5rem 0.5rem;
+        /* Glass Utility */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 3rem;
         }
 
-        /* Animated Progress Bar */
-        .progress-container {
+        /* Progress Bar */
+        .progress-bar {
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .progress-bar {
-            height: 100%;
+            height: 6px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             width: 0%;
+            z-index: 1000;
             transition: width 0.1s linear;
         }
 
-        /* Floating Animation */
-        .float {
-            animation: float 6s ease-in-out infinite;
+        /* Typography Highlights */
+        .text-huge {
+            font-size: clamp(4rem, 10vw, 12rem);
+            line-height: 0.9;
+            font-weight: 900;
+            letter-spacing: -0.05em;
         }
 
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
+        .promo-badge {
+            background: white;
+            color: black;
+            padding: 1.5rem 3rem;
+            border-radius: 1rem;
+            font-size: 4rem;
+            font-weight: 900;
+            transform: rotate(-2deg);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        /* Video Background Iframe Hack for Music */
         #music-container {
             position: fixed;
             top: -100px;
@@ -159,272 +154,132 @@
     </style>
 </head>
 
-<body class="flex h-screen overflow-hidden">
+<body>
     <div class="ambient-bg">
         <div class="blob"></div>
-        <div class="blob blob-2" style="top: 40%; left: 60%;"></div>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="flex-grow flex flex-col relative">
-        <!-- Logo & Header -->
-        <header class="p-12 flex justify-between items-start z-20">
-            <div class="flex items-center gap-6">
-                <img src="../../treadztntLogo.png" alt="Treadz" class="h-24 w-auto drop-shadow-2xl float">
-                <div>
-                    <h1 class="text-4xl font-black uppercase tracking-tighter leading-none glow-text">Treadz</h1>
-                    <p class="text-blue-400 font-bold tracking-widest uppercase text-xs mt-1">Tire & Towing</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <div id="current-time" class="text-5xl font-black mb-1">00:00</div>
-                <div id="current-date" class="text-lg text-slate-400 font-medium uppercase tracking-widest">February 25,
-                    2026</div>
-            </div>
-        </header>
-
-        <!-- Display Stage -->
-        <main class="flex-grow relative overflow-hidden px-12 pb-12">
-            <div id="display-engine" class="w-full h-full relative glass overflow-hidden shadow-2xl">
-
-                <!-- Slide Template: Welcome -->
-                <div id="slide-welcome" class="info-card card-visible">
-                    <div class="max-w-4xl">
-                        <span class="text-blue-500 font-black text-xl mb-4 block tracking-widest uppercase">Welcome
-                            To</span>
-                        <h2 class="text-8xl font-black mb-8 leading-tight glow-text">Mount Carmel's Premium Tire Shop
-                        </h2>
-                        <p class="text-2xl text-slate-400 font-light leading-relaxed">Expert service, quality tires, and
-                            professional towing. We keep you moving forward.</p>
-
-                        <div class="grid grid-cols-3 gap-8 mt-16">
-                            <div class="glass p-8 bg-blue-500/10 border-blue-500/30">
-                                <div class="text-4xl font-black text-blue-400 mb-2">24/7</div>
-                                <div class="text-xs uppercase font-bold tracking-widest text-slate-300">Towing Service
-                                </div>
-                            </div>
-                            <div class="glass p-8 bg-amber-500/10 border-amber-500/30">
-                                <div class="text-4xl font-black text-amber-400 mb-2">1,000+</div>
-                                <div class="text-xs uppercase font-bold tracking-widest text-slate-300">Tires In Stock
-                                </div>
-                            </div>
-                            <div class="glass p-8 bg-emerald-500/10 border-emerald-500/30">
-                                <div class="text-4xl font-black text-emerald-400 mb-2">30m</div>
-                                <div class="text-xs uppercase font-bold tracking-widest text-slate-300">Avg Response
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide Template: Tire Brands -->
-                <div id="slide-brands" class="info-card card-hidden">
-                    <div class="max-w-5xl">
-                        <span class="text-blue-500 font-black text-xl mb-4 block tracking-widest uppercase">Premium
-                            Selection</span>
-                        <h2 class="text-8xl font-black mb-12 glow-text tracking-tighter">THE BRANDS YOU TRUST</h2>
-                        <div class="grid grid-cols-3 md:grid-cols-5 gap-12 mt-8 opacity-80">
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">MICHELIN</div>
-                                <div class="h-1 w-12 bg-blue-500"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">GOODYEAR</div>
-                                <div class="h-1 w-12 bg-amber-500"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">CONTINENTAL</div>
-                                <div class="h-1 w-12 bg-white"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">BRIDGESTONE</div>
-                                <div class="h-1 w-12 bg-red-500"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">PIRELLI</div>
-                                <div class="h-1 w-12 bg-yellow-500"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">BFGOODRICH</div>
-                                <div class="h-1 w-12 bg-blue-600"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">HANKOOK</div>
-                                <div class="h-1 w-12 bg-orange-500"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">FALKEN</div>
-                                <div class="h-1 w-12 bg-indigo-500"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">TOYO</div>
-                                <div class="h-1 w-12 bg-blue-400"></div>
-                            </div>
-                            <div class="flex flex-col items-center">
-                                <div class="text-2xl font-black text-white mb-2">KUMHO</div>
-                                <div class="h-1 w-12 bg-emerald-500"></div>
-                            </div>
-                        </div>
-
-                        <div class="mt-16 glass p-8 inline-block">
-                            <p class="text-2xl font-light text-slate-400 italic">"Over 1,000 tires in stock.
-                                Professional mounting & balancing."</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide Template: Towing Advertising -->
-                <div id="slide-towing" class="info-card card-hidden">
-                    <div class="max-w-5xl">
-                        <span class="text-amber-500 font-bold tracking-[0.3em] uppercase mb-4 block">Professional
-                            Recovery Services</span>
-                        <h2 class="text-9xl font-black mb-8 glow-text tracking-tighter">24/7 TOWING</h2>
-                        <div class="grid grid-cols-2 gap-12 mt-12 text-left">
-                            <div class="glass p-12 relative overflow-hidden">
-                                <div class="absolute -right-8 -bottom-8 opacity-10">
-                                    <svg class="w-48 h-48" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M19 11h-2V9a1 1 0 00-2 0v2h-2a1 1 0 000 2h2v2a1 1 0 002 0v-2h2a1 1 0 000-2zM15 5h-1V4a1 1 0 00-1-1h-2a1 1 0 00-1-1h-2a1 1 0 00-1 1v1H9a1 1 0 00-1 1v12a1 1 0 001 1h6a1 1 0 001-1V6a1 1 0 00-1-1zM11 5h2v2h-2V5z" />
-                                    </svg>
-                                </div>
-                                <h3 class="text-3xl font-black mb-6 uppercase text-blue-400">Why Treadz?</h3>
-                                <ul class="space-y-6 text-xl text-slate-300 font-medium">
-                                    <li class="flex items-center gap-4"><span
-                                            class="w-3 h-3 rounded-full bg-blue-500"></span> Damage-Free Flatbed Towing
-                                    </li>
-                                    <li class="flex items-center gap-4"><span
-                                            class="w-3 h-3 rounded-full bg-blue-500"></span> Local & Long Distance Needs
-                                    </li>
-                                    <li class="flex items-center gap-4"><span
-                                            class="w-3 h-3 rounded-full bg-blue-500"></span> Licensed & Insured
-                                        Operators</li>
-                                    <li class="flex items-center gap-4"><span
-                                            class="w-3 h-3 rounded-full bg-blue-500"></span> Preferred Shop Rates</li>
-                                </ul>
-                            </div>
-                            <div class="glass p-12 relative overflow-hidden flex flex-col justify-center">
-                                <div class="space-y-8">
-                                    <div class="text-4xl font-black text-white leading-tight">
-                                        TRUSTED BY <br>
-                                        <span class="text-blue-500">MOUNT CARMEL</span> <br>
-                                        SINCE <span class="text-amber-500">2021</span>
-                                    </div>
-                                    <p class="text-xl text-slate-400 font-medium">
-                                        Professional recovery for any vehicle, anytime, anywhere.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide Template: Rights & Promo -->
-                <div id="slide-promo" class="info-card card-hidden">
-                    <div class="max-w-6xl">
-                        <div class="glass p-16 border-l-8 border-l-red-500 bg-red-500/5">
-                            <span class="text-red-500 font-black text-2xl mb-6 block tracking-widest uppercase">Know
-                                Your Rights</span>
-                            <h2 class="text-7xl font-black mb-10 leading-tight">IN AN ACCIDENT? <br> IT'S <span
-                                    class="text-red-500 underline underline-offset-8">YOUR</span> CHOICE.</h2>
-                            <p class="text-3xl text-slate-200 font-bold mb-12 leading-relaxed">
-                                You have the legal right to choose your towing service. <br>
-                                Don't let someone else decide. Tell law enforcement:
-                            </p>
-                            <div
-                                class="bg-white text-black px-12 py-8 rounded-2xl inline-block transform -rotate-1 shadow-2xl">
-                                <span class="text-6xl font-black tracking-tighter italic uppercase">"I REQUEST
-                                    TREADZ"</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-16 grid grid-cols-2 gap-12">
-                            <div class="glass p-10 bg-emerald-500/10 border-emerald-500/30">
-                                <h3 class="text-2xl font-black text-emerald-400 mb-4 uppercase tracking-widest">Shop
-                                    Local</h3>
-                                <p class="text-slate-300 font-bold text-lg leading-snug">Support the business that
-                                    supports your community.</p>
-                            </div>
-                            <div class="glass p-10 bg-blue-500/10 border-blue-500/30 border-2 border-dashed">
-                                <h3 class="text-2xl font-black text-blue-400 mb-2 uppercase tracking-widest">Special
-                                    Offer</h3>
-                                <div class="text-4xl font-black text-white mt-4 italic animate-pulse">
-                                    "SAY TREADZ" <span class="text-blue-400 text-6xl">!</span>
-                                </div>
-                                <p class="text-slate-400 font-bold text-sm mt-3 uppercase">MENTION THIS SCREEN FOR A
-                                    DISCOUNT ON SERVICE</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Slide Template: Recent Activity -->
-                <div id="slide-activity" class="info-card card-hidden">
-                    <div class="max-w-4xl w-full">
-                        <span class="text-blue-500 font-black text-xl mb-4 block tracking-widest uppercase">Trusted By
-                            Your Neighbors</span>
-                        <h2 class="text-7xl font-black mb-12 glow-text">Recent Shop Activity</h2>
-
-                        <div id="activity-ticker" class="space-y-4 text-left">
-                            <!-- Injected by JS -->
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </main>
-
-        <!-- Footer Bar -->
-        <footer
-            class="p-12 border-t border-white/5 bg-black/40 backdrop-blur-xl flex justify-between items-center z-20">
-            <div class="flex gap-16">
-                <div>
-                    <div class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Location</div>
-                    <div class="text-xl font-bold">409 E Main St, Mount Carmel</div>
-                </div>
-                <div>
-                    <div class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Call Now</div>
-                    <div class="text-5xl font-black text-blue-400">(423) 357-4551</div>
-                </div>
-            </div>
-            <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <div class="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Status</div>
-                    <div class="flex items-center gap-2 justify-end">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-                        <span class="font-bold text-emerald-500 uppercase text-xs tracking-tighter">SYSTEMS
-                            OPERATIONAL</span>
-                    </div>
-                </div>
-            </div>
-        </footer>
-
-        <div class="progress-container">
-            <div id="progress-bar" class="progress-bar"></div>
+    <!-- Minimal Header Overlay -->
+    <div class="system-clock">
+        <div id="current-time" class="text-6xl font-black mb-1">12:00 PM</div>
+        <div id="current-date" class="text-xl text-slate-400 font-bold uppercase tracking-[0.2em]">FEBRUARY 25, 2026
         </div>
     </div>
 
-    <!-- Music Iframe -->
+    <!-- Main Display Engine -->
+    <main id="display-engine">
+
+        <!-- Welcome Slide -->
+        <div id="slide-welcome" class="info-card card-visible">
+            <span class="text-blue-500 font-black text-2xl mb-6 tracking-widest uppercase">Now Serving</span>
+            <h1 class="text-huge glow-text mb-12">MOUNT CARMEL</h1>
+            <div class="flex gap-8">
+                <div class="glass p-10 min-w-[300px]">
+                    <div class="text-5xl font-black text-blue-400 mb-2">24/7</div>
+                    <div class="text-sm font-bold uppercase tracking-widest text-slate-400">Towing Service</div>
+                </div>
+                <div class="glass p-10 min-w-[300px]">
+                    <div class="text-5xl font-black text-amber-500 mb-2">1,000+</div>
+                    <div class="text-sm font-bold uppercase tracking-widest text-slate-400">Tires In Stock</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brands Slide -->
+        <div id="slide-brands" class="info-card card-hidden">
+            <span class="text-blue-500 font-black text-2xl mb-8 tracking-widest uppercase">Premium Selection</span>
+            <h2 class="text-huge glow-text mb-16">THE BRANDS <br>YOU TRUST</h2>
+            <div class="grid grid-cols-5 gap-x-12 gap-y-16 opacity-80 max-w-6xl">
+                <div class="text-3xl font-black">MICHELIN</div>
+                <div class="text-3xl font-black text-slate-500">GOODYEAR</div>
+                <div class="text-3xl font-black">CONTINENTAL</div>
+                <div class="text-3xl font-black text-slate-500">PIRELLI</div>
+                <div class="text-3xl font-black">BRIDGESTONE</div>
+                <div class="text-3xl font-black text-slate-500">BFGOODRICH</div>
+                <div class="text-3xl font-black">HANKOOK</div>
+                <div class="text-3xl font-black text-slate-500">FALKEN</div>
+                <div class="text-3xl font-black">TOYO</div>
+                <div class="text-3xl font-black text-slate-500">KUMHO</div>
+            </div>
+        </div>
+
+        <!-- Towing Slide -->
+        <div id="slide-towing" class="info-card card-hidden">
+            <span class="text-amber-500 font-black text-2xl mb-6 tracking-widest uppercase">Emergency Service</span>
+            <h2 class="text-huge glow-text mb-12">24/7 TOWING</h2>
+            <div class="glass p-16 max-w-4xl">
+                <div class="grid grid-cols-2 gap-12 text-left">
+                    <ul class="space-y-6 text-2xl font-bold">
+                        <li class="flex items-center gap-4 text-blue-400"><span
+                                class="w-4 h-4 rounded-full bg-blue-500"></span> Damage-Free Recovery</li>
+                        <li class="flex items-center gap-4"><span class="w-4 h-4 rounded-full bg-slate-600"></span>
+                            Flatbed Service</li>
+                        <li class="flex items-center gap-4 text-blue-400"><span
+                                class="w-4 h-4 rounded-full bg-blue-500"></span> Local & Long Distance</li>
+                    </ul>
+                    <div class="flex flex-col justify-center">
+                        <p class="text-3xl font-black leading-tight italic text-slate-300">
+                            "Your vehicle is our top priority. We're on the way."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rights & Promo Slide -->
+        <div id="slide-promo" class="info-card card-hidden">
+            <div class="glass p-20 border-l-[20px] border-l-red-600 bg-red-600/5 max-w-6xl">
+                <h2 class="text-7xl font-black mb-8 leading-tight">IN AN ACCIDENT? <br> IT'S <span
+                        class="text-red-600 underline underline-offset-8">YOUR</span> CHOICE.</h2>
+                <p class="text-4xl text-slate-300 font-bold mb-16">
+                    Tell law enforcement:
+                </p>
+                <div class="promo-badge mb-16">
+                    "I REQUEST TREADZ"
+                </div>
+                <div class="flex justify-center gap-4 text-3xl font-black uppercase italic">
+                    <span class="text-blue-500">SAY TREADZ</span>
+                    <span class="text-slate-500">TO SAVE ON SERVICE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neighbors Slide -->
+        <div id="slide-activity" class="info-card card-hidden">
+            <h2 class="text-huge glow-text mb-16">TRUSTED BY <br> NEIGHBORS</h2>
+            <div id="activity-ticker" class="w-full max-w-4xl space-y-6">
+                <!-- JS Populated -->
+            </div>
+        </div>
+
+    </main>
+
+    <div id="progress-bar" class="progress-bar"></div>
+
     <div id="music-container">
-        <!-- The user can change this ID to any YouTube music mix -->
         <iframe id="youtube-music" width="100%" height="100%"
             src="https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute=0&loop=1&playlist=5qap5aO4i9A"
             frameborder="0" allow="autoplay"></iframe>
     </div>
 
-    <!-- Activation Button (Browsers block autoplay music until interaction) -->
-    <button id="activate-show"
-        class="fixed bottom-6 right-6 z-[100] glass px-8 py-4 font-black uppercase tracking-widest hover:bg-blue-600 transition-all text-sm border-blue-500/50">
-        Start Cinematic Mode
-    </button>
+    <!-- Activation Overlay -->
+    <div id="overlay-start"
+        class="fixed inset-0 z-[2000] bg-black bg-opacity-90 flex flex-col justify-center items-center text-center">
+        <img src="../../treadztntLogo.png" alt="Treadz" class="h-48 mb-12">
+        <button id="activate-show"
+            class="glass px-12 py-6 text-2xl font-black uppercase tracking-[0.3em] hover:bg-blue-600 transition-all duration-500">
+            Start Cinematic Show
+        </button>
+        <p class="mt-8 text-slate-500 font-bold uppercase tracking-widest text-sm">Best viewed on shop display TVs</p>
+    </div>
 
     <script src="../../js/data-store.js"></script>
     <script src="../../js/treadz-core.js"></script>
-    <script src="../../js/tire-catalog.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const slides = ['welcome', 'brands', 'towing', 'promo', 'activity'];
             let currentSlideIndex = 0;
-            const slideDuration = 12000; // 12 seconds per slide for better reading
+            const slideDuration = 12000;
             let lastUpdate = Date.now();
 
             const progressBar = document.getElementById('progress-bar');
@@ -437,16 +292,20 @@
                 'activity': document.getElementById('slide-activity')
             };
 
-            // Time & Date Updater
             function updateClock() {
                 const now = new Date();
-                document.getElementById('current-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-                document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+                // 12-hour format with AM/PM
+                const timeString = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+                document.getElementById('current-time').textContent = timeString;
+                document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
             }
             setInterval(updateClock, 1000);
             updateClock();
 
-            // Display Engine
             function nextSlide() {
                 const currentId = slides[currentSlideIndex];
                 slideMap[currentId].classList.remove('card-visible');
@@ -458,6 +317,14 @@
                 if (nextId === 'activity') prepareActivitySlide();
 
                 setTimeout(() => {
+                    // Force hide all others just in case of any overlap logic issues
+                    Object.values(slideMap).forEach(el => {
+                        if (el.id !== nextId) {
+                            el.classList.add('card-hidden');
+                            el.classList.remove('card-visible');
+                        }
+                    });
+
                     slideMap[nextId].classList.remove('card-hidden');
                     slideMap[nextId].classList.add('card-visible');
                     lastUpdate = Date.now();
@@ -478,51 +345,49 @@
 
             function prepareActivitySlide() {
                 const container = document.getElementById('activity-ticker');
-                const quotes = TreadzData.getAll('quote').slice(0, 5);
-                const tickets = TreadzData.getAll('ticket').slice(0, 5);
+                const quotes = TreadzData.getAll('quote').slice(0, 4);
 
-                let combined = [
-                    ...quotes.map(q => ({ text: `Quote Prepared: ${q.tireInfo || 'New Tires'} for ${q.customer}`, icon: '🏷️' })),
-                    ...tickets.map(t => ({ text: `Towing Service: ${t.vehicle || 'Vehicle'} picked up in ${t.location || 'Local Area'}`, icon: '🪝' }))
-                ];
-
-                combined = combined.sort(() => Math.random() - 0.5).slice(0, 4);
+                let combined = quotes.map(q => ({
+                    text: `Quote for ${q.customer || 'Customer'}`,
+                    sub: q.tireInfo || 'Tire Package',
+                    icon: '🏷️'
+                }));
 
                 if (combined.length === 0) {
                     combined = [
-                        { text: "Fresh Inventory Received: New Michelin All-Seasons", icon: "📦" },
-                        { text: "Roadside Rescue Completed on Hwy 11W", icon: "🛣️" },
-                        { text: "New Shop Equipment Installed for Faster Balancing", icon: "🛠️" },
-                        { text: "Trusted by the Mount Carmel Community Since 2021", icon: "⭐" }
+                        { text: "Mount Carmel's Choice", sub: "Over 500 local residents served", icon: "⭐" },
+                        { text: "Open 24/7 For Towing", sub: "Professional recovery anywhere", icon: "🪝" },
+                        { text: "Premium Tire Tech", sub: "Digital balancing & mounting", icon: "🛠️" }
                     ];
                 }
 
                 container.innerHTML = combined.map(item => `
-                    <div class="glass p-6 flex items-center gap-6 border-l-4 border-l-blue-500 animate-fade-in-right">
-                        <div class="text-4xl">${item.icon}</div>
-                        <div class="text-2xl font-bold text-slate-200">${item.text}</div>
+                    <div class="glass p-8 flex items-center gap-10 text-left border-l-8 border-l-blue-500">
+                        <div class="text-6xl">${item.icon}</div>
+                        <div>
+                            <div class="text-3xl font-black text-white">${item.text}</div>
+                            <div class="text-xl font-bold text-slate-400 uppercase tracking-widest">${item.sub}</div>
+                        </div>
                     </div>
                 `).join('');
             }
 
-            // Activation Handler
             document.getElementById('activate-show').addEventListener('click', function () {
-                this.classList.add('opacity-0', 'pointer-events-none');
+                document.getElementById('overlay-start').style.display = 'none';
                 const iframe = document.getElementById('youtube-music');
                 iframe.src = iframe.src.replace('mute=1', 'mute=0');
                 if (document.documentElement.requestFullscreen) {
                     document.documentElement.requestFullscreen();
                 }
+                lastUpdate = Date.now();
                 requestAnimationFrame(updateProgress);
             });
 
-            // Prevent sleep
             if ('wakeLock' in navigator) {
                 let wakeLock = null;
-                const requestWakeLock = async () => {
+                document.getElementById('activate-show').addEventListener('click', async () => {
                     try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { }
-                };
-                document.getElementById('activate-show').addEventListener('click', requestWakeLock);
+                });
             }
         });
     </script>
