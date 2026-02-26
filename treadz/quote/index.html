@@ -632,7 +632,6 @@
         let isStateDirty = false;
         let isDisposalDirty = false;
         let isQuotePrinted = false;
-        let lastSavedMajorHash = '';
 
 
 
@@ -641,15 +640,14 @@
 
         let currentQuoteId = null;
 
-        function generateMajorHash() {
-            return `${tireInfoInput.value.trim().toLowerCase()}|${parseFloat(priceInput.value) || 0}|${parseInt(qtyInput.value) || 0}`;
-        }
 
         function saveQuote() {
-            const hasContent = custNameInput.value.trim() || custVehicleInput.value.trim() || tireInfoInput.value.trim() || (priceInput.value && parseFloat(priceInput.value) > 0);
+            // A quote must have at least tire info or a price to be considered valid.
+            // This prevents saving "empty tax only" quotes when only a name is entered.
+            const hasProductInfo = tireInfoInput.value.trim() || (priceInput.value && parseFloat(priceInput.value) > 0);
 
-            // If it isn't filled out, it should go away
-            if (!hasContent) {
+            // If it isn't filled out with product info, it should not be saved (or should be deleted if it was previously saved)
+            if (!hasProductInfo) {
                 if (currentQuoteId) {
                     TreadzData.delete('quote', currentQuoteId, 'System API');
                     currentQuoteId = null;
@@ -675,21 +673,16 @@
                 item.qty === qty
             );
 
-            if (isDuplicate) {
+            if (isDuplicate && !currentQuoteId) {
                 console.log('[Quote] Save skipped - duplicate entry detected.');
                 return;
             }
 
-            // Detect major changes to create a NEW quote instead of overwriting
-            const currentHash = generateMajorHash();
-            if (currentQuoteId && lastSavedMajorHash && lastSavedMajorHash !== currentHash) {
-                currentQuoteId = null;
-            }
-
+            // If we don't have an ID yet, create one.
+            // We removed the logic that triggers a NEW ID on major changes to prevent accidental duplicates while typing.
             if (!currentQuoteId) {
                 currentQuoteId = TreadzUtils.incrementGlobalId();
                 document.getElementById('quote-id-display').textContent = '#' + currentQuoteId;
-                lastSavedMajorHash = currentHash;
             }
 
             const quote = {
@@ -706,7 +699,6 @@
             };
 
             TreadzData.save('quote', quote, 'Current User');
-            lastSavedMajorHash = currentHash;
             renderHistory();
         }
 
@@ -807,8 +799,6 @@
             tireInfoInput.value = item.tireInfo || '';
             priceInput.value = item.pricePerTire !== undefined ? item.pricePerTire : '';
             qtyInput.value = item.qty !== undefined ? item.qty : 4;
-
-            lastSavedMajorHash = generateMajorHash();
 
             stateFeeQtyInput.value = item.qty !== undefined ? item.qty : 4;
             disposalFeeQtyInput.value = item.qty !== undefined ? item.qty : 4;
@@ -941,7 +931,6 @@
             isDisposalDirty = false;
 
             currentQuoteId = null;
-            lastSavedMajorHash = '';
             isQuotePrinted = false;
             document.getElementById('quote-id-display').textContent = '#--';
 
