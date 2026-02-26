@@ -4,419 +4,510 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Treadz - Shop Display</title>
+    <title>TREADZ // SHOP DISPLAY v3.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Montserrat:wght@300;400;700;900&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --primary: #0047AB;
-            --orange: #FF6600;
-            --bg-dark: #0B1221;
-            --border: #E2E8F0;
+            --brand-blue: #002147;
+            --brand-blue-dark: #00152e;
+            --brand-orange: #f58025;
+            --brand-orange-bright: #ff9100;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: #ffffff;
-            overflow: hidden;
+        body,
+        html {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
             cursor: none;
         }
 
-        /* Background Pattern - subtle industrial grid */
-        .bg-pattern {
-            position: fixed;
+        /* Cinematic Background Engine */
+        .bg-layer {
+            position: absolute;
             inset: 0;
-            background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
-            background-size: 40px 40px;
-            z-index: -1;
+            z-index: 1;
+            overflow: hidden;
         }
 
-        /* Slide System - Sharp, bold transitions */
-        .slide {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 5%;
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        .bg-image {
+            position: absolute;
+            width: 110%;
+            height: 110%;
+            top: -5%;
+            left: -5%;
+            object-fit: cover;
+            filter: brightness(0.4) contrast(1.2) saturate(0.8);
+            transition: opacity 1.5s ease-in-out;
             opacity: 0;
-            transform: translateX(100%);
-            z-index: 10;
         }
 
-        .slide.active {
+        .bg-image.active {
             opacity: 1;
-            transform: translateX(0);
-            z-index: 20;
+            animation: kenBurns 20s linear infinite alternate;
         }
 
-        .slide.previous {
-            opacity: 0;
-            transform: translateX(-100%);
-            z-index: 5;
+        @keyframes kenBurns {
+            0% {
+                transform: scale(1) translate(0, 0);
+            }
+
+            100% {
+                transform: scale(1.1) translate(-2%, -2%);
+            }
         }
 
-        /* Brand Containers */
-        .content-box {
-            background: rgba(11, 18, 33, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 8px solid var(--orange);
-            padding: 4rem;
-            width: 90%;
-            max-width: 1400px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+        .digital-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+            z-index: 2;
+            pointer-events: none;
         }
 
-        .header-accent {
-            background: var(--primary);
-            color: white;
-            padding: 0.5rem 2rem;
-            text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: 0.2em;
-            font-size: 1.5rem;
-            display: inline-block;
-            margin-bottom: 2rem;
-            border-radius: 4px;
+        .scanlines {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0.3;
         }
 
-        .text-hero {
-            font-size: clamp(4rem, 8vw, 10rem);
-            font-weight: 900;
-            line-height: 0.85;
-            text-transform: uppercase;
-            letter-spacing: -0.04em;
-            margin-bottom: 2rem;
-        }
-
-        .text-sub {
-            font-size: 2rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* Clock Overlay - Grounded like the site nav */
-        .status-overlay {
-            position: fixed;
+        /* Top Bar */
+        .status-bar {
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            background: var(--bg-dark);
-            border-bottom: 4px solid var(--orange);
-            padding: 1rem 4rem;
+            height: 60px;
+            background: linear-gradient(to bottom, rgba(0, 33, 71, 0.9), transparent);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 1000;
+            padding: 0 40px;
+            z-index: 100;
+            border-bottom: 2px solid rgba(245, 128, 37, 0.3);
+            backdrop-filter: blur(10px);
         }
 
-        .clock-display {
-            font-size: 2.5rem;
+        .brand-logo {
+            height: 35px;
+            filter: drop-shadow(0 0 10px rgba(245, 128, 37, 0.5));
+        }
+
+        .clock-container {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            color: var(--brand-orange);
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Ad Slides Engine */
+        .slide-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 10%;
+        }
+
+        .slide {
+            position: absolute;
+            visibility: hidden;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            max-width: 800px;
+        }
+
+        .slide.active {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Cinematic Text Styles */
+        .text-accent-box {
+            background: var(--brand-orange);
+            color: white;
+            padding: 10px 25px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 1.2rem;
+            display: inline-block;
+            transform: skewX(-15deg);
+            margin-bottom: 20px;
+            box-shadow: 10px 10px 0 var(--brand-blue);
+        }
+
+        .text-accent-box span {
+            display: inline-block;
+            transform: skewX(15deg);
+        }
+
+        .slide-title {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 6rem;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 30px;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .slide-desc {
+            font-weight: 300;
+            font-size: 1.8rem;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            border-left: 6px solid var(--brand-orange);
+            padding-left: 30px;
+            margin-top: 20px;
+        }
+
+        .slide-sub {
+            color: var(--brand-orange);
             font-weight: 900;
-            color: #fff;
-        }
-
-        /* Progress Line */
-        .progress-line {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            height: 10px;
-            background: var(--orange);
-            width: 0%;
-            transition: width 0.1s linear;
-            z-index: 1001;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 15px;
         }
 
         /* Brand Grid */
-        .brand-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 4rem;
-            margin-top: 4rem;
+        .brand-strip {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            right: 40px;
+            height: 100px;
+            background: rgba(0, 33, 71, 0.5);
+            backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 40px;
+            z-index: 100;
+            transform: skewX(-5deg);
         }
 
-        .brand-item {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #fff;
-            opacity: 0.9;
+        .brand-strip img {
+            height: 40px;
+            filter: brightness(0) invert(1) opacity(0.7);
+            transition: all 0.3s;
+            transform: skewX(5deg);
         }
 
-        /* Accent Red Alert style for Rights slide */
-        .rights-box {
-            border-bottom-color: #ef4444;
-            background: rgba(239, 68, 68, 0.05);
-        }
-
-        .quote-badge {
-            background: #fff;
-            color: #000;
-            padding: 1.5rem 3rem;
-            border-radius: 8px;
-            font-size: 3.5rem;
-            font-weight: 900;
-            display: inline-block;
-            margin: 3rem 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        #music-container {
-            position: fixed;
+        /* YouTube Music Integration */
+        #yt-player-container {
+            position: absolute;
             top: -100px;
             left: -100px;
             width: 1px;
             height: 1px;
-            opacity: 0.01;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* Start Overlay */
+        #start-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--brand-blue-dark);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: var(--brand-orange);
+            color: white;
+            font-family: 'Oswald', sans-serif;
+            font-size: 2rem;
+            padding: 20px 60px;
+            border: none;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 5px;
+            cursor: pointer;
+            transition: all 0.4s;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+            box-shadow: 0 0 30px rgba(245, 128, 37, 0.4);
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1);
+            background: var(--brand-orange-bright);
+            box-shadow: 0 0 50px rgba(245, 128, 37, 0.6);
+        }
+
+        .loading-ring {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--brand-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 40px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Tire Track Background Decor */
+        .track-decor {
+            position: absolute;
+            bottom: -100px;
+            right: -100px;
+            width: 600px;
+            opacity: 0.1;
+            transform: rotate(-15deg);
             pointer-events: none;
         }
     </style>
 </head>
 
 <body>
-    <div class="bg-pattern"></div>
+
+    <div id="start-overlay">
+        <img src="../../../treadzSiteAlt/images/mainLogo.png" alt="Treadz" class="mb-12 h-20">
+        <button class="start-btn" onclick="startApp()">Enter Shop Display</button>
+        <div class="loading-ring"></div>
+        <p class="mt-8 text-slate-500 font-mono text-xs uppercase tracking-widest italic opacity-50">Authorized
+            Personnel Only // Display Engine v3.0</p>
+    </div>
 
     <!-- Top Status Bar -->
-    <div class="status-overlay">
-        <div class="flex items-center gap-8">
-            <img src="../../treadztntLogo.png" alt="Treadz" class="h-16">
-            <div class="text-xl font-black uppercase tracking-widest text-blue-400">Shop Display</div>
-        </div>
-        <div class="flex items-end flex-col">
-            <div id="current-time" class="clock-display">12:00 PM</div>
-            <div id="current-date" class="text-sm font-bold text-slate-400 uppercase tracking-widest">FEBRUARY 25, 2026
-            </div>
+    <div class="status-bar">
+        <img src="../../../treadzSiteAlt/images/mainLogo.png" alt="Treadz" class="brand-logo">
+        <div class="clock-container">
+            <div id="status-date" class="text-white opacity-40 text-sm mt-1">FEB 26 // THURSDAY</div>
+            <div id="status-time">12:00:00 PM</div>
         </div>
     </div>
 
-    <!-- Slides Area -->
-    <main id="display-engine">
-
-        <!-- Welcome -->
-        <div id="slide-welcome" class="slide active">
-            <div class="content-box text-center">
-                <div class="header-accent">Premium Service</div>
-                <h1 class="text-hero">Tire & Towing <br> Experts</h1>
-                <p class="text-sub">Mount Carmel's most trusted automotive recovery and tire specialists since 2021.</p>
-
-                <div class="flex justify-center gap-12 mt-16">
-                    <div class="text-left border-l-4 border-l-blue-500 pl-8">
-                        <div class="text-6xl font-black text-blue-400">24/7</div>
-                        <div class="text-xl font-bold uppercase tracking-widest">Towing Service</div>
-                    </div>
-                    <div class="text-left border-l-4 border-l-orange-500 pl-8">
-                        <div class="text-6xl font-black text-orange-500">1000+</div>
-                        <div class="text-xl font-bold uppercase tracking-widest">Tires In Stock</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Brands -->
-        <div id="slide-brands" class="slide">
-            <div class="content-box text-center">
-                <div class="header-accent">The Best Brands</div>
-                <h2 class="text-hero" style="font-size: 6vw;">Top Quality Tire Selection</h2>
-                <div class="brand-grid">
-                    <div class="brand-item">MICHELIN</div>
-                    <div class="brand-item">GOODYEAR</div>
-                    <div class="brand-item">PIRELLI</div>
-                    <div class="brand-item">HANKOOK</div>
-                    <div class="brand-item">TOYO</div>
-                    <div class="brand-item">BRIDGESTONE</div>
-                    <div class="brand-item">BFGOODRICH</div>
-                    <div class="brand-item">KUMHO</div>
-                    <div class="brand-item">CONTINENTAL</div>
-                    <div class="brand-item">FALKEN</div>
-                </div>
-                <div class="mt-16 text-2xl font-bold text-slate-400 uppercase italic">
-                    Most tires available with Next-Day installation
-                </div>
-            </div>
-        </div>
-
-        <!-- Towing -->
-        <div id="slide-towing" class="slide">
-            <div class="content-box text-left">
-                <div class="header-accent">Professional Recovery</div>
-                <h2 class="text-hero">24/7 TOWING</h2>
-                <div class="grid grid-cols-2 gap-12">
-                    <div class="space-y-8">
-                        <div class="text-4xl font-black flex items-center gap-6">
-                            <span class="w-6 h-6 bg-blue-500"></span> Damage-Free Recovery
-                        </div>
-                        <div class="text-4xl font-black flex items-center gap-6">
-                            <span class="w-6 h-6 bg-slate-500"></span> Flatbed Service
-                        </div>
-                        <div class="text-4xl font-black flex items-center gap-6">
-                            <span class="w-6 h-6 bg-blue-500"></span> Professional Licensed Operators
-                        </div>
-                    </div>
-                    <div class="bg-slate-800/50 p-12 border-l-4 border-l-blue-400">
-                        <p class="text-4xl font-bold italic leading-tight">
-                            "When you're stranded, we're your first call. Trusted by the community for professional
-                            recovery."
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Rights -->
-        <div id="slide-promo" class="slide">
-            <div class="content-box rights-box text-center">
-                <div class="header-accent" style="background:#ef4444">In An Accident?</div>
-                <h2 class="text-hero" style="line-height: 1;">It's YOUR <br> Choice.</h2>
-                <p class="text-4xl font-extrabold text-slate-200 mt-8">
-                    You have the legal right to pick your tow service. <br> Tell law enforcement:
-                </p>
-                <div class="quote-badge">
-                    "I REQUEST TREADZ"
-                </div>
-                <div class="mt-8 text-5xl font-black uppercase text-blue-400 italic">
-                    Say "TREADZ" for a discount!
-                </div>
-            </div>
-        </div>
-
-        <!-- Neighbors -->
-        <div id="slide-activity" class="slide">
-            <div class="content-box text-center">
-                <div class="header-accent">Community Feedback</div>
-                <h2 class="text-hero">Trusted By Your Neighbors</h2>
-                <div id="activity-ticker" class="space-y-6 mt-12 text-left max-w-5xl mx-auto">
-                    <!-- JS Populated -->
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <div id="progress-line" class="progress-line"></div>
-
-    <div id="music-container">
-        <iframe id="youtube-music" width="100%" height="100%"
-            src="https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute=0&loop=1&playlist=5qap5aO4i9A"
-            frameborder="0" allow="autoplay"></iframe>
+    <!-- Cinematic Background Container -->
+    <div class="bg-layer">
+        <img src="../../../images/gsp4.png" id="bg-0" class="bg-image active"
+            onerror="this.src='https://placehold.co/1920x1080/002147/ffffff?text=TREADZ+WELCOME'">
+        <img src="../../../images/pR2.png" id="bg-1" class="bg-image"
+            onerror="this.src='https://placehold.co/1920x1080/002147/ffffff?text=24/7+TOWING'">
+        <img src="../../../images/pR1.png" id="bg-2" class="bg-image"
+            onerror="this.src='https://placehold.co/1920x1080/002147/ffffff?text=PREMIER+BRANDS'">
+        <img src="../../../images/smp1.png" id="bg-3" class="bg-image"
+            onerror="this.src='https://placehold.co/1920x1080/002147/ffffff?text=COMMUNITY+DRIVEN'">
+        <img src="../../../images/gsp1.png" id="bg-4" class="bg-image"
+            onerror="this.src='https://placehold.co/1920x1080/002147/ffffff?text=KNOW+YOUR+RIGHTS'">
+        <div class="digital-vignette"></div>
+        <div class="scanlines"></div>
+        <img src="../../../treadzSiteAlt/images/tireTracks.png" class="track-decor">
     </div>
 
-    <!-- Landing Overlay -->
-    <div id="overlay-start"
-        class="fixed inset-0 z-[2000] bg-[#0B1221] flex flex-col justify-center items-center text-center">
-        <img src="../../treadztntLogo.png" alt="Treadz" class="h-64 mb-12">
-        <button id="activate-show"
-            class="bg-[#0047AB] px-16 py-8 text-3xl font-black uppercase tracking-[0.3em] hover:bg-[#FF6600] transition-all duration-300 rounded shadow-2xl">
-            Start Shop Display
-        </button>
-        <p class="mt-12 text-slate-400 font-bold uppercase tracking-widest">Designed for Workshop TV Displays</p>
+    <!-- Slide Content -->
+    <div class="slide-container">
+
+        <!-- Welcome Slide -->
+        <article class="slide active" id="slide-0">
+            <div class="text-accent-box"><span>Welcome to Treadz</span></div>
+            <h1 class="slide-title">Precision<br>Care For<br>Your Ride</h1>
+            <p class="slide-desc">Family owned and operated. We treat every vehicle like it belongs to our own family.
+            </p>
+        </article>
+
+        <!-- Towing Slide -->
+        <article class="slide" id="slide-1">
+            <div class="text-accent-box"><span>24/7 Support</span></div>
+            <h1 class="slide-title">Stranded?<br>We Roll<br>Anytime</h1>
+            <p class="slide-desc">Full service towing and roadside recovery across the Tri-Cities region.</p>
+            <div class="slide-sub">423.357.4551</div>
+        </article>
+
+        <!-- Brands Slide -->
+        <article class="slide" id="slide-2">
+            <div class="text-accent-box"><span>Tire Selection</span></div>
+            <h1 class="slide-title">Premier<br>Tire<br>Brands</h1>
+            <p class="slide-desc">Unbeatable prices on Michelin, Goodyear, Falken, and Milestar tires.</p>
+            <div class="mt-8 flex gap-4">
+                <div class="px-4 py-2 border border-white/20 rounded bg-white/5 font-bold uppercase text-xs">Installed
+                    While You Wait</div>
+                <div class="px-4 py-2 border border-white/20 rounded bg-white/5 font-bold uppercase text-xs">Free
+                    Alignment Check</div>
+            </div>
+        </article>
+
+        <!-- Community Slide -->
+        <article class="slide" id="slide-3">
+            <div class="text-accent-box"><span>Local Roots</span></div>
+            <h1 class="slide-title">Tri-Cities<br>Community<br>Driven</h1>
+            <p class="slide-desc">Built in Mount Carmel, serving Kingsport and the surrounding Tennessee area for
+                generations.</p>
+        </article>
+
+        <!-- Rights Slide -->
+        <article class="slide" id="slide-4">
+            <div class="text-accent-box"><span>Know Your Rights</span></div>
+            <h1 class="slide-title">You Pick<br>The Tow<br>Service</h1>
+            <p class="slide-desc">In an accident? You have the legal right to choose your tow provider. Tell the
+                officer: <b>"Call Treadz"</b></p>
+            <div
+                class="mt-8 bg-orange-600/80 text-white p-6 font-black uppercase italic text-center rounded-lg shadow-2xl backdrop-blur-md">
+                Say "Treadz" for a special discount
+            </div>
+        </article>
+
     </div>
 
-    <script src="../../js/data-store.js"></script>
-    <script src="../../js/treadz-core.js"></script>
+    <!-- Bottom Brand Strip -->
+    <div class="brand-strip">
+        <img src="../../../treadzSiteAlt/images/tireBrands/michelin.png" alt="Michelin">
+        <img src="../../../treadzSiteAlt/images/tireBrands/goodyear.png" alt="Goodyear">
+        <img src="../../../treadzSiteAlt/images/tireBrands/falken.png" alt="Falken">
+        <img src="../../../treadzSiteAlt/images/tireBrands/milestar.png" alt="Milestar">
+        <img src="../../../treadzSiteAlt/images/tireBrands/yokohama.png" alt="Yokohama">
+        <img src="../../../treadzSiteAlt/images/tireBrands/blackhawk.png" alt="Blackhawk">
+    </div>
+
+    <!-- Background Music -->
+    <div id="yt-player-container">
+        <div id="player"></div>
+    </div>
+
+    <!-- Critical Logic Engine -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const slides = ['welcome', 'brands', 'towing', 'promo', 'activity'];
-            let currentSlideIndex = 0;
-            const slideDuration = 12000;
-            let lastUpdate = Date.now();
+        let currentSlide = 0;
+        const totalSlides = 5;
+        const slideInterval = 12000; // 12 seconds per slide for cinematic feel
 
-            const progressLine = document.getElementById('progress-line');
-            const slideElements = slides.map(id => document.getElementById(`slide-${id}`));
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', {
+                hour12: true,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateStr = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'short',
+                day: 'numeric'
+            }).toUpperCase();
 
-            function updateClock() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
-                document.getElementById('current-time').textContent = timeString;
-                document.getElementById('current-date').textContent = now.toLocaleDateString(undefined, {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric'
-                });
+            document.getElementById('status-time').textContent = timeStr;
+            document.getElementById('status-date').textContent = dateStr;
+        }
+
+        function rotateSlides() {
+            // Deactivate current
+            const prevSlide = document.getElementById(`slide-${currentSlide}`);
+            const prevBg = document.getElementById(`bg-${currentSlide}`);
+
+            if (prevSlide) prevSlide.classList.remove('active');
+            if (prevBg) prevBg.classList.remove('active');
+
+            // Increment
+            currentSlide = (currentSlide + 1) % totalSlides;
+
+            // Activate next
+            const nextSlide = document.getElementById(`slide-${currentSlide}`);
+            const nextBg = document.getElementById(`bg-${currentSlide}`);
+
+            if (nextSlide) nextSlide.classList.add('active');
+            if (nextBg) nextBg.classList.add('active');
+        }
+
+        // Initialize YouTube Engine
+        let player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: 'jfKfPfyJRdk',
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': 'jfKfPfyJRdk'
+                },
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            event.target.setVolume(20);
+        }
+
+        async function startApp() {
+            document.getElementById('start-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-overlay').style.display = 'none';
+            }, 500);
+
+            // Start full screen
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen();
+                }
+            } catch (e) { }
+
+            // Request Wake Lock
+            try {
+                if ('wakeLock' in navigator) {
+                    await navigator.wakeLock.request('screen');
+                }
+            } catch (err) { }
+
+            // Start Audio
+            if (player && player.playVideo) {
+                player.playVideo();
             }
+
+            // Kick off timing
             setInterval(updateClock, 1000);
             updateClock();
+            setInterval(rotateSlides, slideInterval);
+        }
 
-            function nextSlide() {
-                // Determine previous, current, next
-                const prevIndex = currentSlideIndex;
-                currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+        // Load YT API
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-                // Animation clean up
-                slideElements.forEach(el => {
-                    el.classList.remove('active', 'previous');
-                });
-
-                slideElements[prevIndex].classList.add('previous');
-                slideElements[currentSlideIndex].classList.add('active');
-
-                if (slides[currentSlideIndex] === 'activity') prepareActivitySlide();
-
-                lastUpdate = Date.now();
-            }
-
-            function updateProgress() {
-                const now = Date.now();
-                const elapsed = now - lastUpdate;
-                const progress = (elapsed / slideDuration) * 100;
-                progressLine.style.width = Math.min(progress, 100) + '%';
-
-                if (elapsed >= slideDuration) {
-                    nextSlide();
-                }
-                requestAnimationFrame(updateProgress);
-            }
-
-            function prepareActivitySlide() {
-                const container = document.getElementById('activity-ticker');
-                const quotes = TreadzData.getAll('quote').slice(0, 3);
-
-                let combined = quotes.map(q => ({
-                    text: `Quote for ${q.customer || 'Local Customer'}`,
-                    sub: q.tireInfo || 'Tire Package',
-                    icon: '✔️'
-                }));
-
-                if (combined.length === 0) {
-                    combined = [
-                        { text: "Mount Carmel's Choice", sub: "Proudly serving local residents for years", icon: "✔️" },
-                        { text: "Professional Towing", sub: "Licensed and insured operators 24/7", icon: "✔️" },
-                        { text: "Expert Tire Tech", sub: "Precision mounting and digital balancing", icon: "✔️" }
-                    ];
-                }
-
-                container.innerHTML = combined.map(item => `
-                    <div class="bg-white/5 p-8 border-l-8 border-l-blue-500">
-                        <div class="text-3xl font-black text-white">${item.text}</div>
-                        <div class="text-xl font-bold text-slate-400 uppercase tracking-widest mt-2">${item.sub}</div>
-                    </div>
-                `).join('');
-            }
-
-            document.getElementById('activate-show').addEventListener('click', function () {
-                document.getElementById('overlay-start').style.display = 'none';
-                const iframe = document.getElementById('youtube-music');
-                iframe.src = iframe.src.replace('mute=1', 'mute=0');
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                }
-                lastUpdate = Date.now();
-                requestAnimationFrame(updateProgress);
-            });
-
-            if ('wakeLock' in navigator) {
-                let wakeLock = null;
-                document.getElementById('activate-show').addEventListener('click', async () => {
-                    try { wakeLock = await navigator.wakeLock.request('screen'); } catch (err) { }
-                });
-            }
-        });
     </script>
 </body>
 
