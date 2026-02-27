@@ -738,6 +738,9 @@
             if (!historyList) return;
 
             const filteredHistory = history.filter(item => {
+                // Only show quotes on the Quote page (or legacy items with no type)
+                if (item.type && item.type !== 'quote') return false;
+
                 const searchStr = filterText.toLowerCase();
                 const customer = (item.customer || '').toLowerCase();
                 const vehicle = (item.vehicle || '').toLowerCase();

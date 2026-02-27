@@ -187,45 +187,56 @@ const TreadzData = {
 
     migrateLegacyData: () => {
         const legacyMap = {
-            'ticket': ['treadzTowHistory', 'treadz_tow_history'],
-            'receipt': ['treadzQuoteHistory', 'treadz_quote_history', 'treadzReceiptHistory'],
-            'quote': ['treadzQuoteHistory', 'treadz_quote_history']
+            'ticket': [
+                'treadzTowHistory', 'treadz_tow_history',
+                'treadzTowHistoryV4', 'treadzTowHistoryv4', 'treadzTowHistoryv5'
+            ],
+            'receipt': [
+                'treadzQuoteHistory', 'treadz_quote_history', 'treadzReceiptHistory',
+                'treadzQuoteHistoryV4', 'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
+            ],
+            'quote': [
+                'treadzQuoteHistory', 'treadz_quote_history',
+                'treadzQuoteHistoryV4', 'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
+            ]
         };
 
-        let migratedCount = 0;
-
         Object.entries(TreadzData.CONFIG.KEYS).forEach(([type, currentKey]) => {
-            const currentData = localStorage.getItem(currentKey);
+            const legacyKeys = legacyMap[type] || [];
+            let currentDataArr = TreadzData.getAll(type);
+            let migrationHappened = false;
 
-            if (!currentData || JSON.parse(currentData).length === 0) {
-                const legacyKeys = legacyMap[type];
-                if (legacyKeys) {
-                    for (const oldKey of legacyKeys) {
-                        const oldData = localStorage.getItem(oldKey);
-                        if (oldData) {
-                            console.log(`[Migration] Found legacy data for ${type} in ${oldKey}`);
-                            try {
-                                const parsed = JSON.parse(oldData);
-                                if (Array.isArray(parsed) && parsed.length > 0) {
-                                    localStorage.setItem(currentKey, oldData);
-                                    migratedCount += parsed.length;
+            legacyKeys.forEach(legacyKey => {
+                if (legacyKey === currentKey) return;
 
-                                    break;
+                const rawLegacyData = localStorage.getItem(legacyKey);
+                if (rawLegacyData) {
+                    try {
+                        const legacyItems = JSON.parse(rawLegacyData);
+                        if (Array.isArray(legacyItems) && legacyItems.length > 0) {
+                            console.log(`[DataStore] Migrating ${legacyItems.length} records from ${legacyKey} to ${currentKey}`);
+
+                            legacyItems.forEach(item => {
+                                // Double-check for duplicates by ID
+                                if (!currentDataArr.find(r => r.id == item.id)) {
+                                    if (!item.type) item.type = (type === 'quote' || type === 'receipt') ? 'quote' : type;
+                                    currentDataArr.push(item);
                                 }
-                            } catch (e) {
-                                console.error(`[Migration] Failed to parse legacy ${oldKey}`, e);
-                            }
+                            });
+                            migrationHappened = true;
                         }
+                        // Clean up legacy key
+                        localStorage.removeItem(legacyKey);
+                    } catch (e) {
+                        console.error(`[DataStore] Migration failed for ${legacyKey}:`, e);
                     }
                 }
+            });
+
+            if (migrationHappened) {
+                TreadzData._setStorage(type, currentDataArr);
             }
         });
-
-        if (migratedCount > 0) {
-            console.log(`[Migration] Successfully migrated ${migratedCount} records.`);
-            return true;
-        }
-        return false;
     }
 };
 
