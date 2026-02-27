@@ -4,17 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TREADZ // SHOP DISPLAY v3.5</title>
+    <title>TREADZ // SHOP DISPLAY</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Montserrat:wght@300;400;700;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;700;900&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --brand-blue: #002147;
-            --brand-blue-dark: #00152e;
-            --brand-orange: #f58025;
-            --brand-orange-bright: #ff9100;
+            --brand-blue: #0A1428;
+            --brand-orange: #FF6600;
+            --brand-white: #FFFFFF;
         }
 
         body,
@@ -24,500 +23,425 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #000;
+            background-color: var(--brand-blue);
             font-family: 'Montserrat', sans-serif;
-            color: #fff;
+            color: var(--brand-white);
             cursor: none;
         }
 
-        /* Cinematic Background Engine */
-        .bg-layer {
+        /* Background Pattern */
+        .bg-pattern {
             position: absolute;
             inset: 0;
+            background-image: url('../../images/tireTracks.png');
+            background-size: 800px;
+            opacity: 0.03;
             z-index: 1;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--brand-blue-dark) 0%, #000 100%);
-        }
-
-        .bg-image {
-            position: absolute;
-            width: 110%;
-            height: 110%;
-            top: -5%;
-            left: -5%;
-            object-fit: cover;
-            filter: brightness(0.35) contrast(1.1) saturate(0.6);
-            transition: opacity 1.5s ease-in-out;
-            opacity: 0;
-        }
-
-        .bg-image.active {
-            opacity: 1;
-            animation: kenBurns 20s linear infinite alternate;
-        }
-
-        @keyframes kenBurns {
-            0% {
-                transform: scale(1) translate(0, 0);
-            }
-
-            100% {
-                transform: scale(1.1) translate(-2%, -2%);
-            }
-        }
-
-        .digital-vignette {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle, transparent 30%, rgba(0, 0, 0, 0.9) 100%);
-            z-index: 2;
             pointer-events: none;
         }
 
-        .scanlines {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-            background-size: 100% 4px, 3px 100%;
-            z-index: 3;
-            pointer-events: none;
-            opacity: 0.2;
-        }
-
-        /* Top Bar */
-        .status-bar {
+        /* Top Navigation Bar */
+        .top-bar {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 70px;
-            background: rgba(0, 21, 46, 0.8);
+            height: 100px;
+            background: #000;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 50px;
+            padding: 0 60px;
             z-index: 100;
-            border-bottom: 3px solid var(--brand-orange);
-            backdrop-filter: blur(15px);
+            border-bottom: 5px solid var(--brand-orange);
         }
 
-        .brand-logo {
-            height: 40px;
-            filter: drop-shadow(0 0 10px rgba(245, 128, 37, 0.3));
+        .main-logo {
+            height: 50px;
         }
 
-        .clock-container {
-            font-family: 'Oswald', sans-serif;
-            font-weight: 600;
-            color: var(--brand-orange);
-            letter-spacing: 1px;
-            font-size: 1.3rem;
+        .clock-section {
             display: flex;
-            gap: 25px;
             align-items: center;
+            gap: 30px;
+            font-family: 'Oswald', sans-serif;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            padding-left: 30px;
         }
 
-        /* Ad Slides Engine */
-        .slide-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
+        #time-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--brand-orange);
+            letter-spacing: -1px;
+        }
+
+        #date-display {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.6;
+        }
+
+        /* Main Display Engine */
+        .content-area {
+            position: absolute;
+            inset: 100px 0 120px 0;
             z-index: 10;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            padding-left: 12%;
+            justify-content: center;
         }
 
         .slide {
             position: absolute;
+            width: 80%;
+            max-width: 1200px;
             visibility: hidden;
             opacity: 0;
-            transform: translateX(120px) skewX(-5deg);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            max-width: 850px;
+            transform: translateX(40px);
+            transition: all 0.6s ease-out;
+            text-align: left;
         }
 
         .slide.active {
             visibility: visible;
             opacity: 1;
-            transform: translateX(0) skewX(0deg);
+            transform: translateX(0);
         }
 
-        /* Cinematic Text Styles */
-        .text-accent-box {
-            background: var(--brand-orange);
-            color: white;
-            padding: 12px 30px;
-            font-family: 'Oswald', sans-serif;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            font-size: 1.3rem;
-            display: inline-block;
-            transform: skewX(-15deg);
-            margin-bottom: 25px;
-            box-shadow: 12px 12px 0 var(--brand-blue);
-        }
-
-        .text-accent-box span {
-            display: inline-block;
-            transform: skewX(15deg);
-        }
-
-        .slide-title {
-            font-family: 'Oswald', sans-serif;
-            font-weight: 700;
-            font-size: 6.5rem;
-            line-height: 0.95;
-            text-transform: uppercase;
-            letter-spacing: -3px;
-            margin-bottom: 35px;
-            text-shadow: 0 15px 45px rgba(0, 0, 0, 0.9);
-        }
-
-        .slide-desc {
-            font-weight: 300;
-            font-size: 2rem;
-            line-height: 1.5;
-            color: rgba(255, 255, 255, 0.95);
-            max-width: 650px;
-            border-left: 8px solid var(--brand-orange);
-            padding-left: 35px;
-            margin-top: 25px;
-            background: rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(5px);
-        }
-
-        .slide-sub {
+        .category-label {
             color: var(--brand-orange);
-            font-weight: 900;
-            font-size: 2.5rem;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-top: 20px;
-            text-shadow: 0 0 20px rgba(245, 128, 37, 0.4);
+            letter-spacing: 4px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: block;
         }
 
-        /* Brand Grid */
-        .brand-strip {
+        .slide-heading {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 7rem;
+            line-height: 0.9;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
+
+        .slide-text {
+            font-size: 2.2rem;
+            font-weight: 400;
+            line-height: 1.4;
+            max-width: 800px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Trivia Feature */
+        .trivia-card {
+            background: #fff;
+            color: #000;
+            padding: 60px;
+            border-radius: 4px;
+            box-shadow: 20px 20px 0 var(--brand-orange);
+            width: 100%;
+        }
+
+        .trivia-timer {
+            height: 10px;
+            background: #eee;
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--brand-orange);
+            width: 100%;
+            transform-origin: left;
+        }
+
+        .timer-active {
+            animation: timerBurn 10s linear forwards;
+        }
+
+        @keyframes timerBurn {
+            0% {
+                transform: scaleX(1);
+            }
+
+            100% {
+                transform: scaleX(0);
+            }
+        }
+
+        .answer-box {
+            margin-top: 40px;
+            height: 0;
+            overflow: hidden;
+            transition: height 0.5s ease;
+        }
+
+        .active .answer-box.revealed {
+            height: 120px;
+        }
+
+        /* Bottom Brand Bar */
+        .brand-footer {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 110px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            height: 120px;
+            background: var(--brand-white);
             display: flex;
             align-items: center;
             justify-content: space-around;
             padding: 0 60px;
             z-index: 100;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .brand-strip img {
-            height: 45px;
-            filter: brightness(0) invert(1) opacity(0.65);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        .brand-logo-unit {
+            height: 60px;
+            width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .brand-strip img:hover {
-            filter: brightness(1) invert(0) opacity(1);
+        .brand-logo-unit img {
+            max-height: 50px;
+            max-width: 100%;
+            filter: grayscale(1);
+            opacity: 0.4;
+            transition: all 0.3s;
+        }
+
+        .brand-logo-unit img.active-logo {
+            filter: grayscale(0);
+            opacity: 1;
             transform: scale(1.1);
         }
 
-        /* YouTube Music Integration */
-        #yt-player-container {
-            position: absolute;
-            top: -500px;
-            left: -500px;
-            width: 1px;
-            height: 1px;
-            pointer-events: none;
-            opacity: 0;
-        }
-
         /* Start Overlay */
-        #start-overlay {
+        #launch-gate {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, var(--brand-blue-dark), #000);
+            background: var(--brand-blue);
             z-index: 1000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
         }
 
-        .start-btn {
+        .btn-launch {
             background: var(--brand-orange);
             color: white;
             font-family: 'Oswald', sans-serif;
             font-size: 2.5rem;
-            padding: 25px 80px;
+            padding: 30px 80px;
             border: none;
             text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: 8px;
+            font-weight: 700;
+            letter-spacing: 5px;
             cursor: pointer;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            clip-path: polygon(15% 0, 100% 0, 85% 100%, 0% 100%);
-            box-shadow: 0 0 50px rgba(245, 128, 37, 0.5);
+            transition: transform 0.2s;
         }
 
-        .start-btn:hover {
-            transform: scale(1.05) translateY(-5px);
-            background: var(--brand-orange-bright);
-            box-shadow: 0 20px 70px rgba(245, 128, 37, 0.7);
-        }
-
-        .loading-ring {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.05);
-            border-top: 5px solid var(--brand-orange);
-            border-radius: 50%;
-            animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            margin-top: 50px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Tire Track Background Decor */
-        .track-decor {
-            position: absolute;
-            bottom: -50px;
-            right: -150px;
-            width: 800px;
-            opacity: 0.05;
-            transform: rotate(-20deg);
-            pointer-events: none;
-            filter: invert(1);
+        .btn-launch:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
 
 <body>
 
-    <div id="start-overlay">
-        <img src="../../images/mainLogo.png" alt="Treadz" class="mb-14 h-24">
-        <button class="start-btn" onclick="startApp()">Start Shop Display</button>
-        <div class="loading-ring"></div>
-        <p class="mt-12 text-blue-400 font-mono text-[10px] uppercase tracking-[0.3em] font-bold opacity-40">System
-            Node: TRDZ-DISP-01 // Network Stable</p>
+    <!-- Landing Screen -->
+    <div id="launch-gate">
+        <img src="../../images/mainLogo.png" class="h-32 mb-20">
+        <button class="btn-launch" onclick="launchDisplay()">Launch Shop Display</button>
+        <p class="mt-10 font-mono text-xs opacity-30 tracking-widest uppercase">Treadz Digital Signage System v5.0</p>
     </div>
 
-    <!-- Top Status Bar -->
-    <div class="status-bar">
-        <img src="../../images/mainLogo.png" alt="Treadz" class="brand-logo">
-        <div class="clock-container">
-            <div id="status-date" class="text-white/40 text-xs uppercase tracking-[0.2em] font-bold">...</div>
-            <div id="status-time" class="tabular-nums">00:00:00</div>
-        </div>
-    </div>
+    <div class="bg-pattern"></div>
 
-    <!-- Cinematic Background Container -->
-    <div class="bg-layer">
-        <!-- Static Fallbacks with Ken Burns -->
-        <div id="bg-0" class="bg-image active flex items-center justify-center">
-            <img src="../../images/tireTracks.png" class="w-full h-full object-cover opacity-20">
+    <!-- Header -->
+    <header class="top-bar">
+        <img src="../../images/mainLogo.png" alt="Treadz" class="main-logo">
+        <div class="clock-section">
+            <div id="date-display">Thursday, Feb 26</div>
+            <div id="time-display">12:00:00 PM</div>
         </div>
-        <div id="bg-1" class="bg-image">
-            <img src="../../images/tireTracks.png" class="w-full h-full object-cover opacity-20 rotate-180">
-        </div>
-        <div id="bg-2" class="bg-image">
-            <img src="../../images/tireTracks.png" class="w-full h-full object-cover opacity-20 rotate-90">
-        </div>
-        <div id="bg-3" class="bg-image">
-            <img src="../../images/tireTracks.png" class="w-full h-full object-cover opacity-20 -rotate-90">
-        </div>
-        <div id="bg-4" class="bg-image">
-            <img src="../../images/tireTracks.png" class="w-full h-full object-cover opacity-20">
+    </header>
+
+    <!-- Display Engine -->
+    <main class="content-area">
+
+        <!-- Welcome -->
+        <div id="slide-0" class="slide active">
+            <span class="category-label">Serving the Tri-Cities</span>
+            <h1 class="slide-heading">Precision<br>Service For<br>Every Mile</h1>
+            <p class="slide-text">Family owned and operated. We treat your vehicle with the same care we give our own
+                families.</p>
         </div>
 
-        <!-- Note: Photos were not found in treadmill/images. Using dynamic textures. -->
-
-        <div class="digital-vignette"></div>
-        <div class="scanlines"></div>
-        <img src="../../images/tireTracks.png" class="track-decor">
-    </div>
-
-    <!-- Slide Content -->
-    <div class="slide-container">
-
-        <!-- Welcome Slide -->
-        <article class="slide active" id="slide-0">
-            <div class="text-accent-box"><span>Welcome to Treadz</span></div>
-            <h1 class="slide-title">Precision<br>Care For<br>Your Ride</h1>
-            <p class="slide-desc">Family owned and operated. We treat every vehicle like it belongs to our own family.
+        <!-- Towing -->
+        <div id="slide-1" class="slide">
+            <span class="category-label">24/7 Support</span>
+            <h1 class="slide-heading">Don't Get<br>Stranded<br>Call Us</h1>
+            <p class="slide-text">Fast response towing and roadside recovery across the region. We're always on call.
             </p>
-        </article>
+            <div class="mt-10 text-5xl font-black text-orange-500 font-sans">423.357.4551</div>
+        </div>
 
-        <!-- Towing Slide -->
-        <article class="slide" id="slide-1">
-            <div class="text-accent-box"><span>24/7 Support</span></div>
-            <h1 class="slide-title">Stranded?<br>We Roll<br>Anytime</h1>
-            <p class="slide-desc">Full service towing and roadside recovery across the Tri-Cities region.</p>
-            <div class="slide-sub">423.357.4551</div>
-        </article>
-
-        <!-- Brands Slide -->
-        <article class="slide" id="slide-2">
-            <div class="text-accent-box"><span>Tire Selection</span></div>
-            <h1 class="slide-title">Premier<br>Tire<br>Brands</h1>
-            <p class="slide-desc">Unbeatable prices on Michelin, Goodyear, Falken, and Milestar tires.</p>
-            <div class="mt-10 flex gap-6">
-                <div
-                    class="px-6 py-3 border border-white/10 rounded-sm bg-white/5 font-black uppercase text-xs tracking-widest backdrop-blur-md">
-                    Expert Installation</div>
-                <div
-                    class="px-6 py-3 border-l-4 border-orange-500 bg-orange-600/10 font-black uppercase text-xs tracking-widest backdrop-blur-md">
-                    Price Match Guarantee</div>
+        <!-- Trivia 1 -->
+        <div id="slide-2" class="slide">
+            <div class="trivia-card">
+                <span class="category-label" style="margin-bottom: 5px;">Shop Trivia</span>
+                <h2 class="text-6xl font-black uppercase font-sans leading-tight">When should you<br>rotate your tires?
+                </h2>
+                <div class="trivia-timer">
+                    <div id="t1-fill" class="timer-fill"></div>
+                </div>
+                <div id="t1-answer" class="answer-box">
+                    <div class="text-orange-500 font-bold uppercase text-xl mb-2">The Expert Answer:</div>
+                    <div class="text-4xl font-black">Every 5,000 to 7,500 Miles</div>
+                </div>
             </div>
-        </article>
+        </div>
 
-        <!-- Community Slide -->
-        <article class="slide" id="slide-3">
-            <div class="text-accent-box"><span>Local Roots</span></div>
-            <h1 class="slide-title">Tri-Cities<br>Community<br>Driven</h1>
-            <p class="slide-desc">Built in Mount Carmel, serving Kingsport and the surrounding Tennessee area for
-                generations.</p>
-        </article>
+        <!-- Brands -->
+        <div id="slide-3" class="slide">
+            <span class="category-label">Authorized Dealer</span>
+            <h1 class="slide-heading">Premier<br>Tire<br>Solutions</h1>
+            <p class="slide-text">Unbeatable selection of Michelin, Goodyear, and more—at prices that beat the big box
+                stores.</p>
+        </div>
 
-        <!-- Rights Slide -->
-        <article class="slide" id="slide-4">
-            <div class="text-accent-box"><span>Know Your Rights</span></div>
-            <h1 class="slide-title">You Pick<br>The Tow<br>Service</h1>
-            <p class="slide-desc">In an accident? You have the legal right to choose your tow provider. Tell the
-                officer: <b>"Call Treadz"</b></p>
-            <div
-                class="mt-10 p-8 border-l-8 border-orange-500 bg-slate-900/80 backdrop-blur-xl rounded-r-2xl shadow-2xl">
-                <p class="text-orange-500 font-black text-2xl uppercase italic tracking-tighter">Ask for the "Treadz"
-                    Discount</p>
+        <!-- Rights -->
+        <div id="slide-4" class="slide">
+            <span class="category-label">Know Your Rights</span>
+            <h1 class="slide-heading">You Choose<br>The Towing<br>Service</h1>
+            <p class="slide-text">In an accident? You have the legal right to choose your provider. Tell the officer:
+                <b>"Call Treadz"</b></p>
+        </div>
+
+        <!-- Trivia 2 -->
+        <div id="slide-5" class="slide">
+            <div class="trivia-card">
+                <span class="category-label" style="margin-bottom: 5px;">Shop Trivia</span>
+                <h2 class="text-6xl font-black uppercase font-sans leading-tight">What does the<br>'R' mean in tire
+                    size?</h2>
+                <div class="trivia-timer">
+                    <div id="t2-fill" class="timer-fill"></div>
+                </div>
+                <div id="t2-answer" class="answer-box">
+                    <div class="text-orange-500 font-bold uppercase text-xl mb-2">The Expert Answer:</div>
+                    <div class="text-4xl font-black">Radial Construction</div>
+                </div>
             </div>
-        </article>
+        </div>
 
-    </div>
+    </main>
 
-    <!-- Bottom Brand Strip -->
-    <div class="brand-strip">
-        <img src="../../images/tireBrands/michelin.png" alt="Michelin" onerror="this.style.display='none'">
-        <img src="../../images/tireBrands/goodyear.png" alt="Goodyear" onerror="this.style.display='none'">
-        <img src="../../images/tireBrands/falken.png" alt="Falken" onerror="this.style.display='none'">
-        <img src="../../images/tireBrands/milestar.png" alt="Milestar" onerror="this.style.display='none'">
-        <img src="../../images/tireBrands/yokohama.png" alt="Yokohama" onerror="this.style.display='none'">
-        <img src="../../images/tireBrands/blackhawk.png" alt="Blackhawk" onerror="this.style.display='none'">
-    </div>
+    <!-- Footer Logos -->
+    <footer class="brand-footer">
+        <div class="brand-logo-unit" id="brand-0"><img src="../../images/tireBrands/michelin.png" alt="Michelin"></div>
+        <div class="brand-logo-unit" id="brand-1"><img src="../../images/tireBrands/goodyear.png" alt="Goodyear"></div>
+        <div class="brand-logo-unit" id="brand-2"><img src="../../images/tireBrands/falken.png" alt="Falken"></div>
+        <div class="brand-logo-unit" id="brand-3"><img src="../../images/tireBrands/milestar.png" alt="Milestar"></div>
+        <div class="brand-logo-unit" id="brand-4"><img src="../../images/tireBrands/yokohama.png" alt="Yokohama"></div>
+        <div class="brand-logo-unit" id="brand-5"><img src="../../images/tireBrands/blackhawk.png" alt="Blackhawk">
+        </div>
+    </footer>
 
-    <!-- Background Music -->
-    <div id="yt-player-container">
-        <div id="player"></div>
-    </div>
+    <!-- Audio -->
+    <div id="player-mount"></div>
 
-    <!-- Critical Logic Engine -->
     <script>
-        let currentSlide = 0;
-        const totalSlides = 5;
-        const slideInterval = 12000;
+        let slideIdx = 0;
+        const slideMax = 6;
+        const slideDuration = 12000;
 
-        function updateClock() {
+        function runClock() {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', {
-                hour12: true,
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            const dateStr = now.toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'short',
-                day: 'numeric'
-            }).toUpperCase();
-
-            document.getElementById('status-time').textContent = timeStr;
-            document.getElementById('status-date').textContent = dateStr;
+            document.getElementById('time-display').textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
         }
 
-        function rotateSlides() {
-            const prevSlide = document.getElementById(`slide-${currentSlide}`);
-            const prevBg = document.getElementById(`bg-${currentSlide}`);
+        function switchSlide() {
+            // Deactivate
+            document.getElementById(`slide-${slideIdx}`).classList.remove('active');
 
-            if (prevSlide) prevSlide.classList.remove('active');
-            if (prevBg) prevBg.classList.remove('active');
+            // Increment
+            slideIdx = (slideIdx + 1) % slideMax;
 
-            currentSlide = (currentSlide + 1) % totalSlides;
+            // Activate
+            const nextSlide = document.getElementById(`slide-${slideIdx}`);
+            nextSlide.classList.add('active');
 
-            const nextSlide = document.getElementById(`slide-${currentSlide}`);
-            const nextBg = document.getElementById(`bg-${currentSlide}`);
+            // Reset Trivia
+            document.querySelectorAll('.timer-fill').forEach(f => f.classList.remove('timer-active'));
+            document.querySelectorAll('.answer-box').forEach(a => a.classList.remove('revealed'));
 
-            if (nextSlide) nextSlide.classList.add('active');
-            if (nextBg) nextBg.classList.add('active');
-        }
-
-        let player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '0',
-                width: '0',
-                videoId: 'jfKfPfyJRdk',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'loop': 1,
-                    'playlist': 'jfKfPfyJRdk'
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            event.target.setVolume(15);
-        }
-
-        async function startApp() {
-            document.getElementById('start-overlay').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('start-overlay').style.display = 'none';
-            }, 500);
-
-            try {
-                if (document.documentElement.requestFullscreen) {
-                    await document.documentElement.requestFullscreen();
-                }
-            } catch (e) { }
-
-            try {
-                if ('wakeLock' in navigator) {
-                    await navigator.wakeLock.request('screen');
-                }
-            } catch (err) { }
-
-            if (player && player.playVideo) {
-                player.playVideo();
+            // Start Trivia if needed
+            if (slideIdx === 2) {
+                setTimeout(() => {
+                    document.getElementById('t1-fill').classList.add('timer-active');
+                    setTimeout(() => {
+                        document.getElementById('t1-answer').classList.add('revealed');
+                    }, 10000);
+                }, 100);
+            }
+            if (slideIdx === 5) {
+                setTimeout(() => {
+                    document.getElementById('t2-fill').classList.add('timer-active');
+                    setTimeout(() => {
+                        document.getElementById('t2-answer').classList.add('revealed');
+                    }, 10000);
+                }, 100);
             }
 
-            setInterval(updateClock, 1000);
-            updateClock();
-            setInterval(rotateSlides, slideInterval);
+            // Sync Footer Logos
+            document.querySelectorAll('.brand-logo-unit img').forEach(img => img.classList.remove('active-logo'));
+            const logo = document.getElementById(`brand-${slideIdx % 6}`);
+            if (logo) logo.querySelector('img').classList.add('active-logo');
+        }
+
+        let ytPlayer;
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('player-mount', {
+                height: '0', width: '0',
+                videoId: 'jfKfPfyJRdk',
+                playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': 'jfKfPfyJRdk' },
+                events: { 'onReady': (e) => e.target.setVolume(20) }
+            });
+        }
+
+        async function launchDisplay() {
+            document.getElementById('launch-gate').style.display = 'none';
+
+            try {
+                if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+                if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
+            } catch (e) { }
+
+            if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+
+            setInterval(runClock, 1000);
+            runClock();
+            setInterval(switchSlide, slideDuration);
         }
 
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
+        document.head.appendChild(tag);
     </script>
 </body>
 
