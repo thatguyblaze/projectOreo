@@ -528,19 +528,9 @@
             </p>
         </div>
 
-        <!-- Slide 5: Trivia 2 -->
+        <!-- Slide 5: Video Interlude (15 Minutes) - MOVED FOR TESTING -->
         <div id="slide-5" class="slide-frame">
-            <div class="trivia-box">
-                <span class="accent-pill">Expert Knowledge</span>
-                <h2 class="text-7xl font-black uppercase text-black">What does the<br>'R' mean in tire size?</h2>
-                <div class="trivia-timer-track">
-                    <div id="t2-progress" class="timer-progress"></div>
-                </div>
-                <div id="t2-reveal" class="reveal-answer">
-                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
-                    <div class="text-6xl font-black text-black">Radial Construction</div>
-                </div>
-            </div>
+            <div id="video-slide-container"></div>
         </div>
 
         <!-- Slide 6: Trivia 3 -->
@@ -904,9 +894,19 @@
                     class="big-highlight">Rapid Service</span>.</p>
         </div>
 
-        <!-- Slide 35: Video Interlude (15 Minutes) -->
+        <!-- Slide 35: Trivia 2 - MOVED FROM SLIDE 5 -->
         <div id="slide-35" class="slide-frame">
-            <div id="video-slide-container"></div>
+            <div class="trivia-box">
+                <span class="accent-pill">Expert Knowledge</span>
+                <h2 class="text-7xl font-black uppercase text-black">What does the<br>'R' mean in tire size?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t2-progress" class="timer-progress"></div>
+                </div>
+                <div id="t2-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Radial Construction</div>
+                </div>
+            </div>
         </div>
 
     </main>
@@ -925,7 +925,8 @@
 
     <script>
         let cur = 0;
-        const total = 36; // 0-34 slides, 35 is video
+        const total = 36;
+        const videoSlideIndex = 5; // TEST MODE: Video is now the 6th slide (index 5)
         const dur = 14000;
         const videoDur = 15 * 60 * 1000; // 15 Minutes
         let stepTimer;
@@ -943,8 +944,11 @@
             if (prevSlide) prevSlide.classList.remove('active', 'answer-visible');
             if (prevStage) prevStage.classList.remove('active');
 
-            if (cur === 35) {
-                if (contentYT && contentYT.pauseVideo) contentYT.pauseVideo();
+            if (cur === videoSlideIndex) {
+                if (contentYT) {
+                    contentYT.pauseVideo();
+                    contentYT.mute();
+                }
             }
 
             const prevSlot = document.getElementById(`slot-${cur % 6}`);
@@ -965,16 +969,19 @@
             // Clear old timer
             if (stepTimer) clearTimeout(stepTimer);
 
-            if (cur === 35) {
+            if (cur === videoSlideIndex) {
                 // Video Slide
-                if (contentYT && contentYT.playVideo) contentYT.playVideo();
+                if (contentYT) {
+                    contentYT.unMute();
+                    contentYT.playVideo();
+                }
                 stepTimer = setTimeout(step, videoDur);
             } else {
                 // Regular Slide
                 stepTimer = setTimeout(step, dur);
 
                 // Interactive Reveal Delay
-                const triviaSlides = [2, 5, 6, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29];
+                const triviaSlides = [2, 6, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29, 35];
                 if (triviaSlides.includes(cur)) {
                     setTimeout(() => {
                         const activeSlide = document.getElementById(`slide-${cur}`);
@@ -1001,9 +1008,11 @@
             // Main Content Video
             contentYT = new YT.Player('video-slide-container', {
                 height: '100%', width: '100%', videoId: videoId,
-                playerVars: { 'autoplay': 0, 'controls': 0, 'start': startTime },
+                playerVars: { 'autoplay': 1, 'controls': 0, 'start': startTime, 'mute': 1 },
                 events: {
-                    'onReady': (e) => e.target.mute() // Mute background if playing? Or let user hear video?
+                    'onReady': (e) => {
+                        // Pre-load logic: Video starts muted to clear ads
+                    }
                 }
             });
         }
@@ -1015,6 +1024,15 @@
                 if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
             } catch (e) { }
             if (bgYT && bgYT.playVideo) bgYT.playVideo();
+
+            // Ad-Clearing Phase: Let it play muted for 60s, then pause and reset to start
+            setTimeout(() => {
+                if (cur !== videoSlideIndex && contentYT) {
+                    contentYT.pauseVideo();
+                    contentYT.seekTo(startTime);
+                }
+            }, 60000);
+
             setInterval(clockBeat, 1000); clockBeat();
             step(); // Start first step
         }
