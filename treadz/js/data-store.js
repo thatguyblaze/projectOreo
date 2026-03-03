@@ -1,205 +1,117 @@
-// Created with <3 by Blazinik
+/**
+ * Treadz Data Store - V1
+ * High-speed local persistence with legacy migration support.
+ */
 
 const TreadzData = {
-
-
     CONFIG: {
         KEYS: {
             'ticket': 'treadzTowHistoryV1',
             'receipt': 'treadzQuoteHistoryV1',
             'quote': 'treadzQuoteHistoryV1',
-            'audit': 'treadz_audit_logs'
+            'inventory': 'treadzTireInventoryV7',
+            'inventoryV5': 'treadzTireInventoryV5',
+            'logs': 'treadz_audit_logs',
+            'employees': 'treadz_employees'
         }
     },
 
-
-
-
-    _getStorage: (collectionDesc) => {
-        const key = TreadzData.CONFIG.KEYS[collectionDesc] || `treadz_${collectionDesc}`;
+    getAll: (type) => {
+        const key = TreadzData.CONFIG.KEYS[type] || type;
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
         try {
-            const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : [];
+            return JSON.parse(raw);
         } catch (e) {
-            console.error(`Error loading ${collectionDesc}:`, e);
+            console.error(`[DataStore] Failed to parse ${key}:`, e);
             return [];
         }
     },
 
-    _setStorage: (collectionDesc, data) => {
-        const key = TreadzData.CONFIG.KEYS[collectionDesc] || `treadz_${collectionDesc}`;
-        try {
-            localStorage.setItem(key, JSON.stringify(data));
-        } catch (e) {
-            console.error(`Error saving ${collectionDesc}:`, e);
-
-        }
+    getById: (type, id) => {
+        const all = TreadzData.getAll(type);
+        return all.find(item => item.id == id);
     },
 
+    save: (type, data, user = 'System') => {
+        const key = TreadzData.CONFIG.KEYS[type] || type;
+        let all = TreadzData.getAll(type);
 
-
-
-    getAll: (collection) => {
-        return TreadzData._getStorage(collection);
-    },
-
-
-    getById: (collection, id) => {
-        const records = TreadzData._getStorage(collection);
-
-        return records.find(r => r.id == id);
-    },
-
-
-    save: (collection, record, user = 'System') => {
-        const records = TreadzData._getStorage(collection);
-        const index = records.findIndex(r => r.id == record.id);
-
-        let action = '';
-        let oldRecord = null;
-
-
-        const now = new Date().toISOString();
-
+        const index = all.findIndex(item => item.id == data.id);
         if (index >= 0) {
-            action = 'UPDATE';
-            oldRecord = records[index];
-
-            records[index] = {
-                ...oldRecord,
-                ...record,
-                updatedAt: now,
-                version: (oldRecord.version || 1) + 1
-            };
+            all[index] = { ...all[index], ...data, updatedAt: new Date().toISOString(), updatedBy: user };
         } else {
-            action = 'CREATE';
-            record.createdAt = now;
-            record.updatedAt = now;
-            record.version = 1;
-            records.unshift(record);
+            all.push({ ...data, createdAt: new Date().toISOString(), CreatedBy: user });
         }
 
-
-        if (records.length > 200) records.pop();
-
-        TreadzData._setStorage(collection, records);
-
-
-        TreadzData.logAudit(collection, record.id, action, user, oldRecord ? 'Record updated' : 'New record created');
-
-        return records[index >= 0 ? index : 0];
+        TreadzData._setStorage(type, all);
+        TreadzData.log(user, `Saved ${type} #${data.id}`, { id: data.id });
     },
 
-
-    delete: (collection, id, user = 'System') => {
-        let records = TreadzData._getStorage(collection);
-        const record = records.find(r => r.id == id);
-
-        if (record) {
-            records = records.filter(r => r.id != id);
-            TreadzData._setStorage(collection, records);
-            TreadzData.logAudit(collection, id, 'DELETE', user, 'Record permanently deleted');
-            return true;
-        }
-        return false;
+    delete: (type, id, user = 'System') => {
+        let all = TreadzData.getAll(type);
+        const filtered = all.filter(item => item.id != id);
+        TreadzData._setStorage(type, filtered);
+        TreadzData.log(user, `Deleted ${type} #${id}`, { id: id });
     },
 
+    _setStorage: (type, data) => {
+        const key = TreadzData.CONFIG.KEYS[type] || type;
+        localStorage.setItem(key, JSON.stringify(data));
+    },
 
-
-    logAudit: (targetCollection, targetId, action, user, details) => {
-        const logs = TreadzData._getStorage('audit');
-
-        const logEntry = {
-            id: Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+    log: (user, action, details = {}) => {
+        const logs = TreadzData.getAll('logs');
+        logs.unshift({
             timestamp: new Date().toISOString(),
-            targetCollection,
-            targetId,
-            action,
             user,
+            action,
             details
-        };
-
-        logs.unshift(logEntry);
-
-
-        if (logs.length > 500) logs.pop();
-
-        TreadzData._setStorage('audit', logs);
-        console.log(`[AUDIT] ${action} on ${targetCollection} #${targetId}`);
-    },
-
-    getAuditLogs: (collection, recordId) => {
-        const logs = TreadzData._getStorage('audit');
-        return logs.filter(l =>
-            (!collection || l.targetCollection === collection) &&
-            (!recordId || l.targetId == recordId)
-        );
-    },
-
-
-
-
-    search: (query, collections = ['ticket']) => {
-        if (!query || query.length < 2) return [];
-        const lowerQ = query.toLowerCase();
-
-        let results = [];
-
-        collections.forEach(col => {
-            const records = TreadzData.getAll(col);
-            const matches = records.filter(item => {
-
-                const searchable = item.fields ? JSON.stringify(Object.values(item.fields)) : JSON.stringify(Object.values(item));
-                return searchable.toLowerCase().includes(lowerQ);
-            });
-
-
-            const colResults = matches.map(m => ({
-                id: m.id,
-                type: col,
-                title: m.billTo || m.customer || (m.fields ? m.fields.billTo : 'Unknown'),
-                subtitle: m.vehicle || (m.fields ? m.fields.vehicle : 'Unknown Item'),
-                date: m.date || m.timestamp,
-                raw: m
-            }));
-
-            results = [...results, ...colResults];
         });
-
-        return results;
+        // Limit logs to last 1000
+        TreadzData._setStorage('logs', logs.slice(0, 1000));
     },
 
+    exportToCSV: (type) => {
+        const data = TreadzData.getAll(type);
+        if (data.length === 0) return '';
 
-    exportToCSV: (collection) => {
-        const records = TreadzData.getAll(collection);
-        if (!records.length) return '';
-
-        const headers = Object.keys(records[0]).join(',');
-        const rows = records.map(r =>
-            Object.values(r).map(v =>
-                typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : JSON.stringify(v)
-            ).join(',')
+        // Extract all unique headers
+        const headers = Array.from(new Set(data.flatMap(item => Object.keys(item))));
+        const rows = data.map(item =>
+            headers.map(header => {
+                const v = item[header];
+                if (typeof v === 'object') return JSON.stringify(v).replace(/"/g, '""');
+                return typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v;
+            }).join(',')
         );
 
-        return [headers, ...rows].join('\n');
+        return [headers.join(','), ...rows].join('\n');
     },
-
 
     migrateLegacyData: () => {
         const legacyMap = {
             'ticket': [
-                'treadzTowHistory', 'treadz_tow_history',
-                'treadzTowHistoryV4', 'treadzTowHistoryv4', 'treadzTowHistoryv5'
+                'treadzTowHistory', 'treadz_tow_history', 'treadz_v2_tow_history',
+                'treadzTowHistoryV4', 'treadzTowHistoryV5', 'treadzTowHistoryV6',
+                'treadzTowHistoryV7', 'treadzTowHistoryV8', 'treadzTowHistoryV9', 'treadzTowHistoryV10',
+                'treadzTowHistoryv4', 'treadzTowHistoryv5'
             ],
             'receipt': [
-                'treadzQuoteHistory', 'treadz_quote_history', 'treadzReceiptHistory',
-                'treadzQuoteHistoryV4', 'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
+                'treadzQuoteHistory', 'treadz_quote_history', 'treadzReceiptHistory', 'treadz_v2_quote_history',
+                'treadzQuoteHistoryV4', 'treadzQuoteHistoryV5', 'treadzQuoteHistoryV6',
+                'treadzQuoteHistoryV7', 'treadzQuoteHistoryV8', 'treadzQuoteHistoryV9', 'treadzQuoteHistoryV10',
+                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
             ],
             'quote': [
-                'treadzQuoteHistory', 'treadz_quote_history',
-                'treadzQuoteHistoryV4', 'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
+                'treadzQuoteHistory', 'treadz_quote_history', 'treadz_v2_quote_history',
+                'treadzQuoteHistoryV4', 'treadzQuoteHistoryV5', 'treadzQuoteHistoryV6',
+                'treadzQuoteHistoryV7', 'treadzQuoteHistoryV8', 'treadzQuoteHistoryV9', 'treadzQuoteHistoryV10',
+                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
             ]
         };
+
+        const processedKeys = new Set();
 
         Object.entries(TreadzData.CONFIG.KEYS).forEach(([type, currentKey]) => {
             const legacyKeys = legacyMap[type] || [];
@@ -207,25 +119,37 @@ const TreadzData = {
             let migrationHappened = false;
 
             legacyKeys.forEach(legacyKey => {
-                if (legacyKey === currentKey) return;
+                if (legacyKey === currentKey || processedKeys.has(legacyKey)) return;
 
                 const rawLegacyData = localStorage.getItem(legacyKey);
                 if (rawLegacyData) {
                     try {
                         const legacyItems = JSON.parse(rawLegacyData);
                         if (Array.isArray(legacyItems) && legacyItems.length > 0) {
-                            console.log(`[DataStore] Migrating ${legacyItems.length} records from ${legacyKey} to ${currentKey}`);
+                            console.log(`[DataStore] Migrating ${legacyItems.length} records from ${legacyKey} to ${currentKey} (${type})`);
 
                             legacyItems.forEach(item => {
                                 // Double-check for duplicates by ID
                                 if (!currentDataArr.find(r => r.id == item.id)) {
-                                    if (!item.type) item.type = (type === 'quote' || type === 'receipt') ? 'quote' : type;
+                                    // Intelligent type assignment
+                                    if (!item.type) {
+                                        if (type === 'quote' || type === 'receipt') {
+                                            // If it has a displayId or specific receipt fields, mark it as a receipt
+                                            const isProbablyReceipt = item.displayId || item.isPaid || (item.total && item.total.includes('$'));
+                                            item.type = isProbablyReceipt ? 'receipt' : 'quote';
+                                        } else {
+                                            item.type = type;
+                                        }
+                                    }
                                     currentDataArr.push(item);
                                 }
                             });
                             migrationHappened = true;
                         }
-                        // Clean up legacy key
+                        // Mark as processed so we don't migrate the same key for multiple collections (like quote/receipt)
+                        processedKeys.add(legacyKey);
+                        // Optional: remove legacy key after successful migration
+                        // localStorage.removeItem(legacyKey);
                         localStorage.removeItem(legacyKey);
                     } catch (e) {
                         console.error(`[DataStore] Migration failed for ${legacyKey}:`, e);
@@ -240,12 +164,11 @@ const TreadzData = {
     }
 };
 
-
+// Auto-run migration on load
 try {
     TreadzData.migrateLegacyData();
 } catch (e) {
-    console.warn("Migration failed or already run", e);
+    console.warn("[DataStore] Migration system errored", e);
 }
-
 
 window.TreadzData = TreadzData;
