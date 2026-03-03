@@ -16,7 +16,14 @@ const TreadzData = {
         }
     },
 
+    _migrationChecked: false,
+
     getAll: (type) => {
+        // Safe check for migration only once when first accessing data
+        if (!TreadzData._migrationChecked && typeof TreadzConfig !== 'undefined') {
+            TreadzData.migrateLegacyData();
+        }
+
         const key = TreadzData.CONFIG.KEYS[type] || type;
         const raw = localStorage.getItem(key);
         if (!raw) return [];
@@ -90,6 +97,9 @@ const TreadzData = {
     },
 
     migrateLegacyData: () => {
+        if (TreadzData._migrationChecked) return;
+        TreadzData._migrationChecked = true;
+
         const legacyMap = {
             'ticket': [
                 'treadzTowHistory', 'treadz_tow_history', 'treadz_v2_tow_history',
@@ -115,7 +125,7 @@ const TreadzData = {
 
         Object.entries(TreadzData.CONFIG.KEYS).forEach(([type, currentKey]) => {
             const legacyKeys = legacyMap[type] || [];
-            let currentDataArr = TreadzData.getAll(type);
+            let currentDataArr = TreadzData.getAll(type); // Recursive through getAll but flag prevents loop
             let migrationHappened = false;
 
             legacyKeys.forEach(legacyKey => {
@@ -134,7 +144,6 @@ const TreadzData = {
                                     // Intelligent type assignment
                                     if (!item.type) {
                                         if (type === 'quote' || type === 'receipt') {
-                                            // If it has a displayId or specific receipt fields, mark it as a receipt
                                             const isProbablyReceipt = item.displayId || item.isPaid || (item.total && item.total.includes('$'));
                                             item.type = isProbablyReceipt ? 'receipt' : 'quote';
                                         } else {
@@ -146,10 +155,7 @@ const TreadzData = {
                             });
                             migrationHappened = true;
                         }
-                        // Mark as processed so we don't migrate the same key for multiple collections (like quote/receipt)
                         processedKeys.add(legacyKey);
-                        // Optional: remove legacy key after successful migration
-                        // localStorage.removeItem(legacyKey);
                         localStorage.removeItem(legacyKey);
                     } catch (e) {
                         console.error(`[DataStore] Migration failed for ${legacyKey}:`, e);
@@ -163,12 +169,5 @@ const TreadzData = {
         });
     }
 };
-
-// Auto-run migration on load
-try {
-    TreadzData.migrateLegacyData();
-} catch (e) {
-    console.warn("[DataStore] Migration system errored", e);
-}
 
 window.TreadzData = TreadzData;

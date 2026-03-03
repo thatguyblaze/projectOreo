@@ -858,7 +858,7 @@
             <p class="sub-text">Every oil change includes a complimentary <span class="big-highlight">Brake
                     Inspection</span>. We look out for you.</p>
         </div>
-        </div>
+
 
         <!-- Slide 33: Digital Inspection -->
         <div id="slide-33" class="slide-frame">
@@ -906,6 +906,8 @@
         const dur = 14000;
         const videoDur = 15 * 60 * 1000; // 15 Minutes
         let stepTimer;
+
+
 
         function clockBeat() {
             const now = new Date();
@@ -999,6 +1001,10 @@
                 if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
                 if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
             } catch (e) { }
+
+            // Clear any default active slides before randomizing
+            document.querySelectorAll('.slide-frame.active').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.stage-bg.active').forEach(s => s.classList.remove('active'));
 
             // Randomize starting slide
             cur = Math.floor(Math.random() * total);
