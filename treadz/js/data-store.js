@@ -7,8 +7,8 @@ const TreadzData = {
     CONFIG: {
         KEYS: {
             'ticket': 'treadzTowHistoryV1',
-            'receipt': 'treadzQuoteHistoryV1',
-            'quote': 'treadzQuoteHistoryV1',
+            'receipt': 'quotehistoryv1',
+            'quote': 'quotehistoryv1',
             'inventory': 'treadzTireInventoryV7',
             'inventoryV5': 'treadzTireInventoryV5',
             'logs': 'treadz_audit_logs',
@@ -111,13 +111,13 @@ const TreadzData = {
                 'treadzQuoteHistory', 'treadz_quote_history', 'treadzReceiptHistory', 'treadz_v2_quote_history',
                 'treadzQuoteHistoryV4', 'treadzQuoteHistoryV5', 'treadzQuoteHistoryV6',
                 'treadzQuoteHistoryV7', 'treadzQuoteHistoryV8', 'treadzQuoteHistoryV9', 'treadzQuoteHistoryV10',
-                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
+                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5', 'treadzQuoteHistoryV1'
             ],
             'quote': [
                 'treadzQuoteHistory', 'treadz_quote_history', 'treadz_v2_quote_history',
                 'treadzQuoteHistoryV4', 'treadzQuoteHistoryV5', 'treadzQuoteHistoryV6',
                 'treadzQuoteHistoryV7', 'treadzQuoteHistoryV8', 'treadzQuoteHistoryV9', 'treadzQuoteHistoryV10',
-                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5'
+                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5', 'treadzQuoteHistoryV1'
             ]
         };
 
