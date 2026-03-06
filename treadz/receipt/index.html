@@ -291,7 +291,7 @@
                                 <line x1="16" y1="17" x2="8" y2="17"></line>
                                 <polyline points="10 9 9 9 8 9"></polyline>
                             </svg>
-                            Recent Receipts
+                            Available Quotes
                         </h3>
                         <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-gray-800">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -604,37 +604,25 @@
 
 
         function getHistory() {
-            return TreadzData.getAll('receipt');
+            return TreadzData.getAll('quote');
         }
 
         function loadQuoteById(id) {
-            const item = TreadzData.getById('receipt', id);
+            const item = TreadzData.getById('quote', id);
             if (item) loadQuote(item);
         }
 
         function saveQuote(finalized = false) {
-
-
             if (!currentEditingId) {
                 currentEditingId = TreadzUtils.incrementGlobalId();
                 idDisplay.textContent = currentEditingId;
             }
 
-
-            let recordType = 'quote';
-            const existing = TreadzData.getById('receipt', currentEditingId);
-
-            if (finalized) {
-                recordType = 'receipt';
-            } else if (existing && existing.type === 'receipt') {
-                recordType = 'receipt';
-            }
-
-
             const receiptData = {
                 id: currentEditingId,
                 displayId: currentEditingId,
-                type: recordType,
+                type: finalized ? 'receipt' : 'quote',
+                isPaid: finalized,
                 timestamp: new Date().toISOString(),
                 customer: custNameInput.value.trim() || 'Walk-In',
                 vehicle: custVehicleInput.value.trim(),
@@ -646,8 +634,18 @@
                 total: totalFinal.textContent
             };
 
+            if (finalized) {
+                // Save to the new local data key for paid tickets
+                TreadzData.save('paid_receipt', receiptData, 'Current User');
+                // Delete from the active quotes key
+                TreadzData.delete('quote', currentEditingId, 'System (Paid)');
+                // Reset session so we don't keep editing a deleted quote
+                setTimeout(() => reset(), 100);
+            } else {
+                // Save to active quotes
+                TreadzData.save('quote', receiptData, 'Current User');
+            }
 
-            TreadzData.save('receipt', receiptData, 'Current User');
             renderHistory();
         }
 

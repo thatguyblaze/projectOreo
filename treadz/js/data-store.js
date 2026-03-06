@@ -4,6 +4,7 @@ const TreadzData = {
             'ticket': 'treadzTowHistoryV1',
             'receipt': 'quotehistoryv1',
             'quote': 'quotehistoryv1',
+            'paid_receipt': 'treadz_paid_tickets_v1',
             'inventory': 'tireinventoryv7',
             'logs': 'activity_log_v7',
             'employees': 'treadz_employees'
@@ -97,6 +98,56 @@ const TreadzData = {
     migrateLegacyData: () => {
         if (TreadzData._migrationChecked) return;
         TreadzData._migrationChecked = true;
+
+        // Configuration of which legacy keys map to which current types
+        const migrationMap = {
+            'ticket': ['towhistoryv1'],
+            'quote': ['receipthistoryv1', 'quotehistoryv1'],
+            'receipt': ['receipthistoryv1', 'quotehistoryv1'],
+            'paid_receipt': ['receipthistoryv1']
+        };
+
+        Object.keys(migrationMap).forEach(type => {
+            const targetKey = TreadzData.CONFIG.KEYS[type];
+            const legacyKeys = migrationMap[type];
+
+            legacyKeys.forEach(legacyKey => {
+                // Skip if the legacy key is the same as the current target key (prevents duplication loops)
+                if (legacyKey === targetKey) return;
+
+                const rawLegacy = localStorage.getItem(legacyKey);
+                if (rawLegacy) {
+                    try {
+                        const legacyData = JSON.parse(rawLegacy);
+                        if (Array.isArray(legacyData) && legacyData.length > 0) {
+                            // Get existing data from current target key
+                            let currentRaw = [];
+                            try {
+                                const raw = localStorage.getItem(targetKey);
+                                if (raw) currentRaw = JSON.parse(raw);
+                            } catch (e) { }
+                            if (!Array.isArray(currentRaw)) currentRaw = [];
+
+                            // Filter out duplicates and merge
+                            let added = 0;
+                            legacyData.forEach(item => {
+                                if (!currentRaw.find(i => i.id == item.id)) {
+                                    currentRaw.push(item);
+                                    added++;
+                                }
+                            });
+
+                            if (added > 0) {
+                                localStorage.setItem(targetKey, JSON.stringify(currentRaw));
+                                console.log(`[Migration] Migrated ${added} records from ${legacyKey} to ${targetKey}`);
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`[Migration] Error migrating ${legacyKey}:`, e);
+                    }
+                }
+            });
+        });
     }
 };
 if (typeof window !== 'undefined') {

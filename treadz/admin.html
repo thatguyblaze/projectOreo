@@ -1167,7 +1167,21 @@
             }
 
             allTowData = TreadzData.getAll('ticket');
-            allTireData = TreadzData.getAll('receipt');
+
+            // Merge all tire-related data (quotes, receipts, and the new paid receipts key)
+            const quotes = TreadzData.getAll('quote');
+            const legacyReceipts = TreadzData.getAll('receipt');
+            const paidReceipts = TreadzData.getAll('paid_receipt');
+
+            const tireMap = new Map();
+            [...quotes, ...legacyReceipts, ...paidReceipts].forEach(item => {
+                tireMap.set(item.id, item);
+            });
+            allTireData = Array.from(tireMap.values()).sort((a, b) => {
+                const dA = new Date(a.timestamp || a.date || a.createdAt || 0);
+                const dB = new Date(b.timestamp || b.date || b.createdAt || 0);
+                return dB - dA;
+            });
 
 
             const demoEnabled = localStorage.getItem('treadzDemoEnabled') === 'true';
