@@ -12,18 +12,22 @@ const TreadzData = {
     _migrationChecked: false,
     getAll: (type) => {
         const key = TreadzData.CONFIG.KEYS[type] || type;
-        const raw = localStorage.getItem(key);
-        if (!raw) return [];
         try {
-            const data = JSON.parse(raw);
+            const raw = localStorage.getItem(key);
+            if (!raw) return [];
+            let data = JSON.parse(raw);
             if (!Array.isArray(data)) return [];
+            let results = data;
             if (type === 'quote') {
-                return data.filter(item => item.type !== 'receipt' && !item.isPaid);
+                results = data.filter(i => i.type === 'quote' || (!i.type && !i.isPaid));
+            } else if (type === 'receipt') {
+                results = data.filter(i => i.type === 'receipt' || i.isPaid === true);
             }
-            if (type === 'receipt') {
-                return data.filter(item => item.type === 'receipt' || item.isPaid === true);
-            }
-            return data;
+            return results.sort((a, b) => {
+                const dA = new Date(a.timestamp || a.createdAt || 0);
+                const dB = new Date(b.timestamp || b.createdAt || 0);
+                return dB - dA;
+            });
         } catch (e) {
             console.error(e);
             return [];
@@ -35,53 +39,46 @@ const TreadzData = {
     },
     save: (type, data, user = 'System') => {
         const key = TreadzData.CONFIG.KEYS[type] || type;
-        const raw = localStorage.getItem(key);
-        let all;
+        let all = [];
         try {
-            all = raw ? JSON.parse(raw) : [];
-        } catch (e) {
-            all = [];
-        }
-        if (!data.type && (type === 'quote' || type === 'receipt')) {
-            data.type = type;
-        }
+            const raw = localStorage.getItem(key);
+            if (raw) all = JSON.parse(raw);
+        } catch (e) { }
+        if (!Array.isArray(all)) all = [];
+        const timestamp = new Date().toISOString();
+        if (!data.timestamp) data.timestamp = timestamp;
+        if (!data.type && (type === 'quote' || type === 'receipt')) data.type = type;
         const index = all.findIndex(item => item.id == data.id);
         if (index >= 0) {
-            all[index] = { ...all[index], ...data, updatedAt: new Date().toISOString(), updatedBy: user };
+            all[index] = { ...all[index], ...data, updatedAt: timestamp, updatedBy: user };
         } else {
-            all.push({ ...data, id: data.id || Date.now(), createdAt: new Date().toISOString(), CreatedBy: user });
+            all.push({ ...data, id: data.id || Date.now(), createdAt: timestamp, CreatedBy: user });
         }
         localStorage.setItem(key, JSON.stringify(all));
         TreadzData.log(user, `Saved ${type} #${data.id}`, { id: data.id });
     },
     delete: (type, id, user = 'System') => {
         const key = TreadzData.CONFIG.KEYS[type] || type;
-        const raw = localStorage.getItem(key);
-        let all;
+        let all = [];
         try {
-            all = raw ? JSON.parse(raw) : [];
-        } catch (e) {
-            all = [];
+            const raw = localStorage.getItem(key);
+            if (raw) all = JSON.parse(raw);
+        } catch (e) { }
+        if (Array.isArray(all)) {
+            const filtered = all.filter(item => item.id != id);
+            localStorage.setItem(key, JSON.stringify(filtered));
+            TreadzData.log(user, `Deleted ${type} #${id}`, { id: id });
         }
-        const filtered = all.filter(item => item.id != id);
-        localStorage.setItem(key, JSON.stringify(filtered));
-        TreadzData.log(user, `Deleted ${type} #${id}`, { id: id });
     },
     log: (user, action, details = {}) => {
         const key = TreadzData.CONFIG.KEYS['logs'];
         let logs = [];
         try {
             const raw = localStorage.getItem(key);
-            logs = raw ? JSON.parse(raw) : [];
-        } catch (e) {
-            logs = [];
-        }
-        logs.unshift({
-            timestamp: new Date().toISOString(),
-            user,
-            action,
-            details
-        });
+            if (raw) logs = JSON.parse(raw);
+        } catch (e) { }
+        if (!Array.isArray(logs)) logs = [];
+        logs.unshift({ timestamp: new Date().toISOString(), user, action, details });
         localStorage.setItem(key, JSON.stringify(logs.slice(0, 1000)));
     },
     exportToCSV: (type) => {

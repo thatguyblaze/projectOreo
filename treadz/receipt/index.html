@@ -1239,10 +1239,10 @@
             const filteredHistory = history.filter(item => {
                 const searchStr = filterText.toLowerCase();
                 return (
-                    item.customer.toLowerCase().includes(searchStr) ||
+                    (item.customer || '').toLowerCase().includes(searchStr) ||
                     (item.vehicle && item.vehicle.toLowerCase().includes(searchStr)) ||
                     (item.tireInfo && item.tireInfo.toLowerCase().includes(searchStr)) ||
-                    item.total.includes(searchStr) ||
+                    (item.total && item.total.includes(searchStr)) ||
                     (item.displayId && item.displayId.toString().includes(searchStr)) ||
                     (item.id && item.id.toString().includes(searchStr))
                 );
@@ -1251,10 +1251,10 @@
             container.innerHTML = filteredHistory.map(item => {
                 const displayId = (item.displayId && item.displayId.toString().length > 5) ? item.displayId.toString().slice(-4) : (item.displayId || '---');
                 return `
-                <div onclick="loadQuoteById('${item.id}')" class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all ${item.id === currentEditingId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
+                <div onclick="loadQuoteById('${item.id}')" class="bg-white p-3 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition-all ${item.id == currentEditingId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
                     <div class="flex justify-between items-start mb-1">
-                        <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3">${item.customer}</div>
-                        <div class="text-xs font-mono text-gray-500">${new Date(item.timestamp).toLocaleDateString()}</div>
+                        <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3">${item.customer || 'Walk-In'}</div>
+                        <div class="text-xs font-mono text-gray-500">${new Date(item.timestamp || item.createdAt || 0).toLocaleDateString()}</div>
                     </div>
                     <div class="text-xs text-gray-600 truncate mb-1">${item.tireInfo || item.description || 'Item'}</div>
                     <div class="flex justify-between items-center mt-1">

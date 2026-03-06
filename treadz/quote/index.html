@@ -758,12 +758,12 @@
             }
 
             historyList.innerHTML = filteredHistory.map(item => {
-                const date = new Date(item.timestamp).toLocaleDateString();
+                const date = new Date(item.timestamp || item.createdAt || 0).toLocaleDateString();
                 const quoteId = item.displayId || item.id || '--';
                 return `
-                <div onclick="loadQuoteById('${item.id}')" class="bg-white p-2.5 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 hover:shadow-md transition-all group ${item.id === currentQuoteId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
+                <div onclick="loadQuoteById('${item.id}')" class="bg-white p-2.5 rounded border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 hover:shadow-md transition-all group ${item.id == currentQuoteId ? 'border-blue-500 ring-1 ring-blue-500' : ''}">
                     <div class="flex justify-between items-start mb-1">
-                        <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3 capitalize">${item.customer}</div>
+                        <div class="font-bold text-gray-800 text-sm truncate pr-2 w-2/3 capitalize">${item.customer || 'Unnamed'}</div>
                         <div class="text-[10px] font-mono text-gray-400">${date}</div>
                     </div>
                     
