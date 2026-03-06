@@ -527,7 +527,14 @@
                     </div>
                     <p class="text-xs text-gray-500 font-sans">Check to add line items.</p>
                     <label
-                        class="mt-3 flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all group">
+                        class="mb-2 flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all group">
+                        <span class="text-sm font-medium text-gray-700 font-sans group-hover:text-blue-700">Apply Tire
+                            Fees</span>
+                        <input type="checkbox" id="tire-fees-toggle" checked onchange="calculate()"
+                            class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                    </label>
+                    <label
+                        class="mt-1 flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all group">
                         <span class="text-sm font-medium text-gray-700 font-sans group-hover:text-blue-700">Tax
                             Exempt</span>
                         <input type="checkbox" id="tax-exempt-checkbox" onchange="calculate()"
@@ -585,6 +592,7 @@
 
 
             document.getElementById('tax-exempt-checkbox').checked = false;
+            document.getElementById('tire-fees-toggle').checked = true;
 
 
             renderServicesSidebar();
@@ -631,6 +639,7 @@
                 pricePerTire: parseFloat(priceInput.value) || 0,
                 qty: parseInt(qtyInput.value) || 0,
                 taxExempt: document.getElementById('tax-exempt-checkbox').checked,
+                applyTireFees: document.getElementById('tire-fees-toggle').checked,
                 total: totalFinal.textContent
             };
 
@@ -1096,11 +1105,20 @@
             const descVal = descInput.value.trim();
             const startsWithLetter = descVal.length > 0 && /^[a-zA-Z]/.test(descVal);
 
+            // Respect the Tire Fees toggle
+            const feeToggle = document.getElementById('tire-fees-toggle');
+            let showTireFees = feeToggle.checked;
+
             if (qty > 0 && (descVal.length > 0 || price > 0)) {
+                // Auto-toggle off if both are manually set to 0
+                const curSQty = parseInt(feeStateQtyInput.value) || 0;
+                const curDQty = parseInt(feeDispQtyInput.value) || 0;
+                if (showTireFees && (isStateDirty || isDispDirty) && curSQty === 0 && curDQty === 0) {
+                    showTireFees = false;
+                    feeToggle.checked = false;
+                }
 
-
-                if (startsWithLetter) {
-
+                if (startsWithLetter || !showTireFees) {
                     document.getElementById('row-state-fee').style.display = 'none';
                     document.getElementById('row-disp-fee').style.display = 'none';
                     feeStateQtyInput.value = ''; feeStateDesc.textContent = ''; feeStatePrice.textContent = ''; feeStateTotal.textContent = '';
@@ -1110,10 +1128,9 @@
                     document.getElementById('row-disp-fee').style.display = '';
                 }
 
-
                 let stateTotal = 0;
                 let dispTotal = 0;
-                if (!startsWithLetter) {
+                if (!startsWithLetter && showTireFees) {
                     if (!isStateDirty) feeStateQtyInput.value = qty;
                     const sQty = parseInt(feeStateQtyInput.value) || 0;
                     stateTotal = round2(sQty * TreadzConfig.FEES.TIRE_STATE);
@@ -1267,6 +1284,7 @@
             currentEditingId = item.id;
 
             document.getElementById('tax-exempt-checkbox').checked = item.taxExempt || false;
+            document.getElementById('tire-fees-toggle').checked = (item.applyTireFees !== undefined) ? item.applyTireFees : true;
 
             custNameInput.value = item.customer;
             custVehicleInput.value = item.vehicle;
