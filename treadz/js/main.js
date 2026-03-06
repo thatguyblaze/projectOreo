@@ -139,8 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try { return JSON.parse(raw); } catch (e) { console.error(`[Treadz] Error parsing ${key}:`, e); return fallback; }
         };
 
-        activityLog = safeParse('treadzActivityLogV7', []);
-        auditHistory = safeParse('treadzAuditHistoryV7', []);
+        activityLog = safeParse('activity_log_v7', []);
+        auditHistory = safeParse('audit_history_v7', []);
         purchaseOrderCart = safeParse('treadzPOCart', []);
         searchStats = safeParse('treadzSearchStats', {});
 
@@ -191,8 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const saveData = () => {
         localStorage.setItem('tireinventoryv7', JSON.stringify(inventory));
-        localStorage.setItem('treadzActivityLogV7', JSON.stringify(activityLog));
-        localStorage.setItem('treadzAuditHistoryV7', JSON.stringify(auditHistory));
+        localStorage.setItem('activity_log_v7', JSON.stringify(activityLog));
+        localStorage.setItem('audit_history_v7', JSON.stringify(auditHistory));
         localStorage.setItem('treadzPOCart', JSON.stringify(purchaseOrderCart));
         localStorage.setItem('treadzSearchStats', JSON.stringify(searchStats));
 

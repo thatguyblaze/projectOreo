@@ -1237,12 +1237,6 @@
             if (!container) return;
 
             const filteredHistory = history.filter(item => {
-                // Only show receipts on the receipt page (or potential receipts without a type)
-                if (item.type && item.type !== 'receipt' && item.type !== 'quote') return false;
-                if (item.type === 'quote' && !item.isPaid) return false; // Hide pure quotes if we want to be strict, but let's be inclusive.
-                // Simplified: Show if type is receipt OR if type is missing.
-                if (item.type === 'quote') return false;
-
                 const searchStr = filterText.toLowerCase();
                 return (
                     item.customer.toLowerCase().includes(searchStr) ||
