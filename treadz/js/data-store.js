@@ -9,8 +9,7 @@ const TreadzData = {
             'ticket': 'treadzTowHistoryV1',
             'receipt': 'quotehistoryv1',
             'quote': 'quotehistoryv1',
-            'inventory': 'treadzTireInventoryV7',
-            'inventoryV5': 'treadzTireInventoryV5',
+            'inventory': 'tireinventoryv7',
             'logs': 'treadz_audit_logs',
             'employees': 'treadz_employees'
         }
@@ -19,11 +18,6 @@ const TreadzData = {
     _migrationChecked: false,
 
     getAll: (type) => {
-        // Safe check for migration only once when first accessing data
-        if (!TreadzData._migrationChecked && typeof TreadzConfig !== 'undefined') {
-            TreadzData.migrateLegacyData();
-        }
-
         const key = TreadzData.CONFIG.KEYS[type] || type;
         const raw = localStorage.getItem(key);
         if (!raw) return [];
@@ -48,7 +42,12 @@ const TreadzData = {
         if (index >= 0) {
             all[index] = { ...all[index], ...data, updatedAt: new Date().toISOString(), updatedBy: user };
         } else {
-            all.push({ ...data, createdAt: new Date().toISOString(), CreatedBy: user });
+            // Ensure type is set if not present
+            const finalData = { ...data, createdAt: new Date().toISOString(), CreatedBy: user };
+            if (!finalData.type && (type === 'quote' || type === 'receipt')) {
+                finalData.type = type;
+            }
+            all.push(finalData);
         }
 
         TreadzData._setStorage(type, all);
@@ -97,77 +96,16 @@ const TreadzData = {
     },
 
     migrateLegacyData: () => {
+        // User requested not to worry about legacy data.
         if (TreadzData._migrationChecked) return;
         TreadzData._migrationChecked = true;
-
-        const legacyMap = {
-            'ticket': [
-                'treadzTowHistory', 'treadz_tow_history', 'treadz_v2_tow_history',
-                'treadzTowHistoryV4', 'treadzTowHistoryV5', 'treadzTowHistoryV6',
-                'treadzTowHistoryV7', 'treadzTowHistoryV8', 'treadzTowHistoryV9', 'treadzTowHistoryV10',
-                'treadzTowHistoryv4', 'treadzTowHistoryv5'
-            ],
-            'receipt': [
-                'treadzQuoteHistory', 'treadz_quote_history', 'treadzReceiptHistory', 'treadz_v2_quote_history',
-                'treadzQuoteHistoryV4', 'treadzQuoteHistoryV5', 'treadzQuoteHistoryV6',
-                'treadzQuoteHistoryV7', 'treadzQuoteHistoryV8', 'treadzQuoteHistoryV9', 'treadzQuoteHistoryV10',
-                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5', 'treadzQuoteHistoryV1'
-            ],
-            'quote': [
-                'treadzQuoteHistory', 'treadz_quote_history', 'treadz_v2_quote_history',
-                'treadzQuoteHistoryV4', 'treadzQuoteHistoryV5', 'treadzQuoteHistoryV6',
-                'treadzQuoteHistoryV7', 'treadzQuoteHistoryV8', 'treadzQuoteHistoryV9', 'treadzQuoteHistoryV10',
-                'treadzQuoteHistoryv4', 'treadzQuoteHistoryv5', 'treadzQuoteHistoryV1'
-            ]
-        };
-
-        const processedKeys = new Set();
-
-        Object.entries(TreadzData.CONFIG.KEYS).forEach(([type, currentKey]) => {
-            const legacyKeys = legacyMap[type] || [];
-            let currentDataArr = TreadzData.getAll(type); // Recursive through getAll but flag prevents loop
-            let migrationHappened = false;
-
-            legacyKeys.forEach(legacyKey => {
-                if (legacyKey === currentKey || processedKeys.has(legacyKey)) return;
-
-                const rawLegacyData = localStorage.getItem(legacyKey);
-                if (rawLegacyData) {
-                    try {
-                        const legacyItems = JSON.parse(rawLegacyData);
-                        if (Array.isArray(legacyItems) && legacyItems.length > 0) {
-                            console.log(`[DataStore] Migrating ${legacyItems.length} records from ${legacyKey} to ${currentKey} (${type})`);
-
-                            legacyItems.forEach(item => {
-                                // Double-check for duplicates by ID
-                                if (!currentDataArr.find(r => r.id == item.id)) {
-                                    // Intelligent type assignment
-                                    if (!item.type) {
-                                        if (type === 'quote' || type === 'receipt') {
-                                            const isProbablyReceipt = item.displayId || item.isPaid || (item.total && item.total.includes('$'));
-                                            item.type = isProbablyReceipt ? 'receipt' : 'quote';
-                                        } else {
-                                            item.type = type;
-                                        }
-                                    }
-                                    currentDataArr.push(item);
-                                }
-                            });
-                            migrationHappened = true;
-                        }
-                        processedKeys.add(legacyKey);
-                        localStorage.removeItem(legacyKey);
-                    } catch (e) {
-                        console.error(`[DataStore] Migration failed for ${legacyKey}:`, e);
-                    }
-                }
-            });
-
-            if (migrationHappened) {
-                TreadzData._setStorage(type, currentDataArr);
-            }
-        });
+        console.log('[DataStore] Unified storage active');
     }
 };
+
+// Auto-run migration check once
+if (typeof window !== 'undefined') {
+    setTimeout(() => { TreadzData.migrateLegacyData(); }, 100);
+}
 
 window.TreadzData = TreadzData;

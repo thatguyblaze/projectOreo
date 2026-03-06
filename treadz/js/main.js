@@ -97,15 +97,17 @@ document.addEventListener('DOMContentLoaded', () => {
         let rawInventory = [];
 
         try {
-            const v7Raw = localStorage.getItem('treadzTireInventoryV7');
+            const v7Raw = localStorage.getItem('tireinventoryv7');
             if (v7Raw) {
                 rawInventory = JSON.parse(v7Raw);
                 console.log(`[Treadz] Loaded V7 Inventory: ${rawInventory.length} items`);
             } else {
                 const v5Raw = localStorage.getItem('treadzTireInventoryV5');
                 const legacyRaw = localStorage.getItem('treadzTireInventory');
+                const v7OldRaw = localStorage.getItem('treadzTireInventoryV7');
 
-                if (v5Raw) rawInventory = JSON.parse(v5Raw);
+                if (v7OldRaw) rawInventory = JSON.parse(v7OldRaw);
+                else if (v5Raw) rawInventory = JSON.parse(v5Raw);
                 else if (legacyRaw) rawInventory = JSON.parse(legacyRaw);
 
                 console.log(`[Treadz] Migrated Legacy Inventory: ${rawInventory.length} items`);
@@ -188,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const saveData = () => {
-        localStorage.setItem('treadzTireInventoryV7', JSON.stringify(inventory));
+        localStorage.setItem('tireinventoryv7', JSON.stringify(inventory));
         localStorage.setItem('treadzActivityLogV7', JSON.stringify(activityLog));
         localStorage.setItem('treadzAuditHistoryV7', JSON.stringify(auditHistory));
         localStorage.setItem('treadzPOCart', JSON.stringify(purchaseOrderCart));
