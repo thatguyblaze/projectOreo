@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TREADZ // SHOP DISPLAY v6.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Montserrat:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #0A1428;
+            --brand-orange: #FF6600;
+            --brand-white: #FFFFFF;
+            --brand-slate: #1A2233;
+            --light-bg: #f8f9fa;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--light-bg);
+            font-family: 'Montserrat', sans-serif;
+            color: #000;
+            cursor: none;
+        }
+
+        /* Dynamic Environment System */
+        .stage {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .stage-bg {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1.1);
+        }
+
+        .stage-bg.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* All Light Backgrounds Now */
+        .bg-generic {
+            background: var(--light-bg);
+        }
+
+        .bg-0 {
+            background: radial-gradient(circle at center, #ffffff 0%, #eef2f7 100%);
+        }
+
+        .bg-1 {
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+        }
+
+        .bg-2 {
+            background: #fff;
+        }
+
+        .bg-3 {
+            background: linear-gradient(to right, #ffffff, #f7f9fc);
+        }
+
+        .bg-4 {
+            background: radial-gradient(circle at 70% 30%, #fff 0%, #eee 100%);
+        }
+
+        .bg-5 {
+            background: #fff;
+            border-left: 25px solid var(--brand-orange);
+        }
+
+        /* Decorative Patterns */
+        .tire-texture {
+            position: absolute;
+            inset: 0;
+            background-image: url('../../images/tireTracks.png');
+            background-size: 600px;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 140px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 60px;
+            z-index: 100;
+            border-bottom: 6px solid var(--brand-orange);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .brand-logo-main {
+            height: 120px;
+        }
+
+        .time-panel {
+            font-family: 'Oswald', sans-serif;
+            text-align: right;
+            border-left: 4px solid var(--brand-orange);
+            padding-left: 40px;
+        }
+
+        #time-text {
+            font-size: 4.5rem;
+            line-height: 1;
+            font-weight: 700;
+            color: #000;
+        }
+
+        #date-text {
+            font-size: 1.2rem;
+            opacity: 0.6;
+            margin-bottom: 5px;
+        }
+
+        /* Display Engine */
+        .display-kiosk {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 140px 0 0 0;
+            /* Removed footer padding */
+        }
+
+        .slide-frame {
+            position: absolute;
+            width: 90%;
+            max-width: 1500px;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide-frame.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+        }
+
+        /* Content Styles */
+        .accent-pill {
+            background: var(--brand-orange);
+            color: #fff;
+            padding: 10px 35px;
+            display: inline-block;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .hero-text {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 8rem;
+            line-height: 0.95;
+            text-transform: uppercase;
+            letter-spacing: -3px;
+            margin-bottom: 40px;
+            color: #000;
+        }
+
+        .sub-text {
+            font-size: 2.5rem;
+            font-weight: 400;
+            line-height: 1.4;
+            max-width: 1100px;
+            color: #444;
+            animation: fadeInBlur 1s ease forwards;
+        }
+
+        /* Engagement Animations */
+        @keyframes fadeInBlur {
+            from {
+                opacity: 0;
+                filter: blur(10px);
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        .active .hero-text {
+            animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .big-highlight {
+            color: var(--brand-orange);
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .info-card {
+            background: #fff;
+            padding: 60px;
+            border-left: 20px solid var(--brand-orange);
+            box-shadow: 20px 20px 0 rgba(0, 0, 0, 0.05);
+            width: 100%;
+        }
+
+        /* Trivia Interaction */
+        .trivia-box {
+            background: #fff;
+            color: #000;
+            padding: 80px;
+            border: 1px solid #ddd;
+            width: 100%;
+            box-shadow: 40px 40px 0 var(--brand-orange);
+        }
+
+        .trivia-timer-track {
+            height: 15px;
+            background: #f0f0f0;
+            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--brand-orange);
+            width: 100%;
+            transform-origin: left;
+        }
+
+        .active .timer-progress {
+            animation: burnAway 10s linear forwards;
+        }
+
+        @keyframes burnAway {
+            0% {
+                transform: scaleX(1);
+            }
+
+            100% {
+                transform: scaleX(0);
+            }
+        }
+
+        .reveal-answer {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            margin-top: 50px;
+            border-top: 5px solid #eee;
+            padding-top: 40px;
+        }
+
+        .answer-visible .reveal-answer {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Brands Marquee */
+        /* Brands Marquee - TRULY Edge to Edge */
+        .brands-marquee {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            overflow: hidden;
+            background: white;
+            padding: 5rem 0;
+            border-top: 6px solid var(--brand-orange);
+            border-bottom: 6px solid var(--brand-orange);
+            margin-top: 5rem;
+        }
+
+        .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marquee 30s linear infinite;
+            align-items: center;
+        }
+
+        .brand-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 500px;
+            /* Even wider spacing */
+            padding: 0 60px;
+        }
+
+        .brand-item img {
+            height: 150px;
+            /* MUCH LARGER LOGOS */
+            width: auto;
+            object-fit: contain;
+            filter: grayscale(1);
+            opacity: 0.9;
+            transition: all 0.5s ease;
+        }
+
+        .brand-item:hover img {
+            filter: grayscale(0);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        #launch-panel {
+            position: fixed;
+            inset: 0;
+            background: var(--brand-blue);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-start {
+            background: var(--brand-orange);
+            color: white;
+            padding: 30px 100px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .slide-frame[id="slide-5"] {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            transform: none !important;
+            padding: 0 !important;
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 500 !important;
+            background: #000;
+        }
+
+        #video-slide-container {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="launch-panel">
+        <img src="../../images/mainLogo.png" class="h-40 mb-14">
+        <button class="btn-start" onclick="initiateSignage()">Start Display</button>
+    </div>
+
+    <!-- Background Stages (All now light) -->
+    <div class="stage">
+        <div id="stage-0" class="stage-bg active bg-0">
+            <div class="tire-texture"></div>
+        </div>
+        <div id="stage-1" class="stage-bg bg-1">
+            <div class="tire-texture"></div>
+        </div>
+        <div id="stage-2" class="stage-bg bg-2">
+            <div class="tire-texture" style="opacity: 0.02;"></div>
+        </div>
+        <div id="stage-3" class="stage-bg bg-3">
+            <div class="tire-texture"></div>
+        </div>
+        <div id="stage-4" class="stage-bg bg-4">
+            <div class="tire-texture"></div>
+        </div>
+        <div id="stage-5" class="stage-bg bg-5">
+            <div class="tire-texture"></div>
+        </div>
+        <div id="stage-6" class="stage-bg bg-1">
+            <div class="tire-texture"></div>
+        </div>
+        <div id="stage-7" class="stage-bg bg-2">
+            <div class="tire-texture"></div>
+        </div>
+        <div id="stage-8" class="stage-bg bg-3">
+            <div class="tire-texture"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="top-nav" id="main-header">
+        <img src="../../images/mainLogo.png" class="brand-logo-main">
+        <div class="time-panel">
+            <div id="date-text" class="text-xs uppercase tracking-widest opacity-60">Thursday, Feb 26</div>
+            <div id="time-text">00:00:00</div>
+        </div>
+    </header>
+
+    <!-- Content Engine -->
+    <main class="display-kiosk">
+
+        <!-- Slide 0: Welcome -->
+        <div id="slide-0" class="slide-frame active">
+            <span class="accent-pill">Precision Service</span>
+            <h1 class="hero-text">Quality Service<br>Every Mile</h1>
+            <p class="sub-text">Treadz is family owned and operated. We treat your vehicle with the same care we give
+                our own families.</p>
+        </div>
+
+        <!-- Slide 1: Towing -->
+        <div id="slide-1" class="slide-frame">
+            <span class="accent-pill">24/7 Dispatch</span>
+            <h1 class="hero-text">Stranded?<br>Call Our<br>Dispatch</h1>
+            <p class="sub-text">Fast response towing and recovery across the region. We're always on call for you.</p>
+            <div class="mt-10 text-8xl font-black text-orange-500">423.357.4551</div>
+        </div>
+
+        <!-- Slide 2: Trivia 1 -->
+        <div id="slide-2" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Shop Trivia</span>
+                <h2 class="text-7xl font-black uppercase text-black">When should you<br>rotate your tires?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t1-progress" class="timer-progress"></div>
+                </div>
+                <div id="t1-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">8k every other oil change</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Brands -->
+        <div id="slide-3" class="slide-frame text-center" style="width: 100%; max-width: none;">
+            <span class="accent-pill">New Tires</span>
+            <h1 class="hero-text">Preferred Tire Brands</h1>
+            <p class="sub-text mx-auto">We carry the best names in the industry. Quality you can trust, prices you'll
+                love.</p>
+            <div class="brands-marquee">
+                <div class="marquee-track">
+                    <div class="brand-item"><img src="../../images/tireBrands/michelin.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/goodyear.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/falken.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/milestar.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/yokohama.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/blackhawk.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/michelin.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/goodyear.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/falken.png"></div>
+                    <div class="brand-item"><img src="../../images/tireBrands/milestar.png"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Rights -->
+        <div id="slide-4" class="slide-frame">
+            <span class="accent-pill">Know Your Rights</span>
+            <h1 class="hero-text">You Choose<br>The Towing<br>Provider</h1>
+            <p class="sub-text">In an accident? You have the legal right to choose your provider. Tell the officer:
+                <br><span class="big-highlight">"Call Treadz"</span>
+            </p>
+        </div>
+
+        <!-- Slide 5: Video Interlude (15 Minutes) - MOVED FOR TESTING -->
+        <div id="slide-5" class="slide-frame">
+            <div id="video-slide-container"></div>
+        </div>
+
+        <!-- Slide 6: Trivia 3 -->
+        <div id="slide-6" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Safety First</span>
+                <h2 class="text-7xl font-black uppercase text-black">What is the most common cause of tire failure?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t3-progress" class="timer-progress"></div>
+                </div>
+                <div id="t3-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Under-inflation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Next Day -->
+        <div id="slide-7" class="slide-frame">
+            <div class="info-card">
+                <span class="accent-pill">Fast Service</span>
+                <h1 class="hero-text">Tires In<br>24 Hours</h1>
+                <p class="sub-text">Need a specific brand? Most non-stock tires arrive <span class="big-highlight">Next
+                        Day</span>. We get you back on the road fast.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Trivia 4 -->
+        <div id="slide-8" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Brake Trivia</span>
+                <h2 class="text-7xl font-black uppercase text-black">How often should your brakes be checked?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t4-progress" class="timer-progress"></div>
+                </div>
+                <div id="t4-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Every 6 months or 6,000 miles</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Used Tires -->
+        <div id="slide-9" class="slide-frame">
+            <span class="accent-pill">Budget Friendly</span>
+            <h1 class="hero-text">Quality<br>Used Tires</h1>
+            <p class="sub-text">We stock a selection of quality used tires. Great tread, even better prices. Starting at
+                just <span class="big-highlight">$35</span>.</p>
+        </div>
+
+        <!-- Slide 10: Trivia 5 -->
+        <div id="slide-10" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Maintenance</span>
+                <h2 class="text-7xl font-black uppercase text-black">What is the most important fluid in your car?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t5-progress" class="timer-progress"></div>
+                </div>
+                <div id="t5-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Engine Oil</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Trivia 6 -->
+        <div id="slide-11" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Expert Advice</span>
+                <h2 class="text-7xl font-black uppercase text-black">What causes a high-pitched squeal when braking?
+                </h2>
+                <div class="trivia-timer-track">
+                    <div id="t6-progress" class="timer-progress"></div>
+                </div>
+                <div id="t6-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Worn Brake Pads (Wear Indicator)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Oil Packages -->
+        <div id="slide-12" class="slide-frame">
+            <div class="info-card">
+                <span class="accent-pill">Expert Oil Change</span>
+                <h1 class="hero-text">Oil Care<br>Specialists</h1>
+                <p class="sub-text">We do one thing—maintenance—and we do it right. Ask about our <span
+                        class="big-highlight">Full Synthetic</span> packages.</p>
+            </div>
+        </div>
+
+        <!-- Slide 13: Trivia 7 -->
+        <div id="slide-13" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Tire Safety</span>
+                <h2 class="text-7xl font-black uppercase text-black">Where do you find a tire's birth date?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t7-progress" class="timer-progress"></div>
+                </div>
+                <div id="t7-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">The DOT Code on the Sidewall</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Trivia 8 -->
+        <div id="slide-14" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Brake Health</span>
+                <h2 class="text-7xl font-black uppercase text-black">What causes the steering wheel to shake when
+                    braking?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t8-progress" class="timer-progress"></div>
+                </div>
+                <div id="t8-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Warped Brake Rotors</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Pressure Check -->
+        <div id="slide-15" class="slide-frame">
+            <span class="accent-pill">Free Service</span>
+            <h1 class="hero-text">Always<br>Free Air</h1>
+            <p class="sub-text">TPMS light on? Stop by for a <span class="big-highlight">Free Pressure Check</span>
+                anytime. Safety is our priority.</p>
+        </div>
+
+        <!-- Slide 16: Trivia 9 -->
+        <div id="slide-16" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Oil Trivia</span>
+                <h2 class="text-7xl font-black uppercase text-black">What does the 'W' in 5W-30 stand for?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t9-progress" class="timer-progress"></div>
+                </div>
+                <div id="t9-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Winter</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Trivia 10 -->
+        <div id="slide-17" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">DIY Tips</span>
+                <h2 class="text-7xl font-black uppercase text-black">Which US President is used to check tire tread?
+                </h2>
+                <div class="trivia-timer-track">
+                    <div id="t10-progress" class="timer-progress"></div>
+                </div>
+                <div id="t10-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Abraham Lincoln (The Penny Test)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: Seasonal Prep -->
+        <div id="slide-18" class="slide-frame">
+            <div class="info-card">
+                <span class="accent-pill">Stay Ready</span>
+                <h1 class="hero-text">Rain & Road<br>Performance</h1>
+                <p class="sub-text">Don't wait for the first storm. Let us check your <span class="big-highlight">Tread
+                        Depth</span> today for peace of mind.</p>
+            </div>
+        </div>
+
+        <!-- Slide 19: Trivia 11 -->
+        <div id="slide-19" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Maintenance</span>
+                <h2 class="text-7xl font-black uppercase text-black">Why does brake fluid need to be changed?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t11-progress" class="timer-progress"></div>
+                </div>
+                <div id="t11-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">It Absorbs Moisture Over Time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 20: Trivia 12 -->
+        <div id="slide-20" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Safety Trivia</span>
+                <h2 class="text-7xl font-black uppercase text-black">What is it called when tires lose contact with wet
+                    roads?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t12-progress" class="timer-progress"></div>
+                </div>
+                <div id="t12-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Hydroplaning</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 21: Refer a Friend -->
+        <div id="slide-21" class="slide-frame">
+            <span class="accent-pill">Treadz Family</span>
+            <h1 class="hero-text">Friends &<br>Family<br>Program</h1>
+            <p class="sub-text">Love our service? <span class="big-highlight">Refer a Friend</span> and help us keep
+                this community rolling safely.</p>
+        </div>
+
+        <!-- Slide 22: Trivia 13 -->
+        <div id="slide-22" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Tech Trivia</span>
+                <h2 class="text-7xl font-black uppercase text-black">What does the TPMS warning light monitor?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t13-progress" class="timer-progress"></div>
+                </div>
+                <div id="t13-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Tire Pressure</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 23: Trivia 14 -->
+        <div id="slide-23" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Quick Tip</span>
+                <h2 class="text-7xl font-black uppercase text-black">Where is the correct PSI listed for your car?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t14-progress" class="timer-progress"></div>
+                </div>
+                <div id="t14-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Driver's Side Door Jam Sticker</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 24: Brake Experts -->
+        <div id="slide-24" class="slide-frame">
+            <div class="info-card">
+                <span class="accent-pill">Brake Specialists</span>
+                <h1 class="hero-text">Stopping<br>Power</h1>
+                <p class="sub-text">Brakes are the most critical safety system. We use <span
+                        class="big-highlight">Premium Pads</span> for maximum reliability.</p>
+            </div>
+        </div>
+
+        <!-- Slide 25: Trivia 15 -->
+        <div id="slide-25" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Safety Quiz</span>
+                <h2 class="text-7xl font-black uppercase text-black">What is the legal minimum tire tread depth?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t15-progress" class="timer-progress"></div>
+                </div>
+                <div id="t15-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">2/32 of an inch</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 26: Trivia 16 -->
+        <div id="slide-26" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Tire Wisdom</span>
+                <h2 class="text-7xl font-black uppercase text-black">What small part is replaced during every tire
+                    install?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t16-progress" class="timer-progress"></div>
+                </div>
+                <div id="t16-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">The Valve Stem</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 27: Local History -->
+        <div id="slide-27" class="slide-frame">
+            <span class="accent-pill">Shop History</span>
+            <h1 class="hero-text">Rooted In<br>The Region</h1>
+            <p class="sub-text">Treadz has been the trusted name for <span class="big-highlight">Tires & Brakes</span>.
+                Thank you for making us #1.</p>
+        </div>
+
+        <!-- Slide 28: Trivia 17 -->
+        <div id="slide-28" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Service Trivia</span>
+                <h2 class="text-7xl font-black uppercase text-black">How often should your oil filter be replaced?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t17-progress" class="timer-progress"></div>
+                </div>
+                <div id="t17-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Every Oil Change</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 29: Trivia 18 -->
+        <div id="slide-29" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Emergency Quiz</span>
+                <h2 class="text-7xl font-black uppercase text-black">What is the max speed for most 'donut' spares?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t18-progress" class="timer-progress"></div>
+                </div>
+                <div id="t18-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">50 MPH</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 30: Oil Quality -->
+        <div id="slide-30" class="slide-frame">
+            <div class="info-card">
+                <span class="accent-pill">Why Oil Matters</span>
+                <h1 class="hero-text">Engine<br>Longveity</h1>
+                <p class="sub-text">Clean oil is the <span class="big-highlight">Lifeblood</span> of your engine.
+                    Regular changes prevent costly repairs.</p>
+            </div>
+        </div>
+
+        <!-- Slide 31: Stock Inventory -->
+        <div id="slide-31" class="slide-frame">
+            <span class="accent-pill">Instant Install</span>
+            <h1 class="hero-text">Hundreds In<br>Stock Now</h1>
+            <p class="sub-text">We carry most common sizes <span class="big-highlight">In-Stock</span>. No waiting for
+                delivery on popular models.</p>
+        </div>
+
+        <!-- Slide 32: Quality Check -->
+        <div id="slide-32" class="slide-frame">
+            <span class="accent-pill">Expertise</span>
+            <h1 class="hero-text">The Treadz<br>Standard</h1>
+            <p class="sub-text">Every oil change includes a complimentary <span class="big-highlight">Brake
+                    Inspection</span>. We look out for you.</p>
+        </div>
+
+
+        <!-- Slide 33: Digital Inspection -->
+        <div id="slide-33" class="slide-frame">
+            <div class="info-card">
+                <span class="accent-pill">Transparency</span>
+                <h1 class="hero-text">Know Your<br>Vehicle</h1>
+                <p class="sub-text">We'll show you exactly what we find. No hidden fees, just <span
+                        class="big-highlight">Honest Service</span>.</p>
+            </div>
+        </div>
+
+        <!-- Slide 34: Fast Brakes -->
+        <div id="slide-34" class="slide-frame">
+            <span class="accent-pill">Efficiency</span>
+            <h1 class="hero-text">Brake Jobs<br>While You Wait</h1>
+            <p class="sub-text">Professional brake service doesn't have to take all day. We aim for <span
+                    class="big-highlight">Rapid Service</span>.</p>
+        </div>
+
+        <!-- Slide 35: Trivia 2 - MOVED FROM SLIDE 5 -->
+        <div id="slide-35" class="slide-frame">
+            <div class="trivia-box">
+                <span class="accent-pill">Expert Knowledge</span>
+                <h2 class="text-7xl font-black uppercase text-black">What does the<br>'R' mean in tire size?</h2>
+                <div class="trivia-timer-track">
+                    <div id="t2-progress" class="timer-progress"></div>
+                </div>
+                <div id="t2-reveal" class="reveal-answer">
+                    <div class="text-orange-500 font-bold uppercase text-2xl">The Answer:</div>
+                    <div class="text-6xl font-black text-black">Radial Construction</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Removed per request -->
+
+    <div id="player-container"></div>
+
+    <script>
+        let cur = 0;
+        const total = 36;
+        const videoSlideIndex = 5; // TEST MODE: Video is now the 6th slide (index 5)
+        const dur = 14000;
+        const videoDur = 15 * 60 * 1000; // 15 Minutes
+        let stepTimer;
+
+
+
+        function clockBeat() {
+            const now = new Date();
+            document.getElementById('time-text').textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('date-text').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        }
+
+        function step() {
+            // Outbound
+            const prevSlide = document.getElementById(`slide-${cur}`);
+            const prevStage = document.getElementById(`stage-${cur % 9}`);
+            if (prevSlide) prevSlide.classList.remove('active', 'answer-visible');
+            if (prevStage) prevStage.classList.remove('active');
+
+            if (cur === videoSlideIndex) {
+                if (contentYT) {
+                    contentYT.pauseVideo();
+                    contentYT.mute();
+                }
+            }
+
+            const prevSlot = document.getElementById(`slot-${cur % 6}`);
+            if (prevSlot) prevSlot.classList.remove('active-brand');
+
+            // Next
+            cur = (cur + 1) % total;
+
+            // Inbound
+            const nextSlide = document.getElementById(`slide-${cur}`);
+            const nextStage = document.getElementById(`stage-${cur % 9}`);
+            if (nextStage) nextStage.classList.add('active');
+            if (nextSlide) nextSlide.classList.add('active');
+
+            const nextSlot = document.getElementById(`slot-${cur % 6}`);
+            if (nextSlot) nextSlot.classList.add('active-brand');
+
+            // Clear old timer
+            if (stepTimer) clearTimeout(stepTimer);
+
+            if (cur === videoSlideIndex) {
+                // Video Slide
+                if (contentYT) {
+                    contentYT.unMute();
+                    contentYT.playVideo();
+                }
+                stepTimer = setTimeout(step, videoDur);
+            } else {
+                // Regular Slide
+                stepTimer = setTimeout(step, dur);
+
+                // Interactive Reveal Delay
+                const triviaSlides = [2, 6, 8, 10, 11, 13, 14, 16, 17, 19, 20, 22, 23, 25, 26, 28, 29, 35];
+                if (triviaSlides.includes(cur)) {
+                    setTimeout(() => {
+                        const activeSlide = document.getElementById(`slide-${cur}`);
+                        if (activeSlide && activeSlide.classList.contains('active')) {
+                            activeSlide.classList.add('answer-visible');
+                        }
+                    }, 10000);
+                }
+            }
+        }
+
+        let bgYT, contentYT;
+        const videoId = 'xUd1ThnLF8w';
+        const startTime = 523;
+
+        function onYouTubeIframeAPIReady() {
+            // Background Audio/Video
+            bgYT = new YT.Player('player-container', {
+                height: '0', width: '0', videoId: 'jfKfPfyJRdk',
+                playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': 'jfKfPfyJRdk' },
+                events: { 'onReady': (e) => e.target.setVolume(15) }
+            });
+
+            // Main Content Video
+            contentYT = new YT.Player('video-slide-container', {
+                height: '100%', width: '100%', videoId: videoId,
+                playerVars: { 'autoplay': 1, 'controls': 0, 'start': startTime, 'mute': 1 },
+                events: {
+                    'onReady': (e) => {
+                        // Pre-load logic: Video starts muted to clear ads
+                    }
+                }
+            });
+        }
+
+        async function initiateSignage() {
+            document.getElementById('launch-panel').style.display = 'none';
+            try {
+                if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen();
+                if ('wakeLock' in navigator) await navigator.wakeLock.request('screen');
+            } catch (e) { }
+
+            // Clear any default active slides before randomizing
+            document.querySelectorAll('.slide-frame.active').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.stage-bg.active').forEach(s => s.classList.remove('active'));
+
+            // Randomize starting slide
+            cur = Math.floor(Math.random() * total);
+            // Ensure we update classes for the randomly chosen slide
+            const nextSlide = document.getElementById(`slide-${cur}`);
+            const nextStage = document.getElementById(`stage-${cur % 9}`);
+            if (nextStage) nextStage.classList.add('active');
+            if (nextSlide) nextSlide.classList.add('active');
+
+            if (bgYT && bgYT.playVideo) bgYT.playVideo();
+
+            // Ad-Clearing Phase
+            setTimeout(() => {
+                if (cur !== videoSlideIndex && contentYT) {
+                    contentYT.pauseVideo();
+                    contentYT.seekTo(startTime);
+                }
+            }, 60000);
+
+            setInterval(clockBeat, 1000); clockBeat();
+            // Start the step timer for subsequent slides
+            stepTimer = setTimeout(step, dur);
+
+            // If the random start is the video, handle it
+            if (cur === videoSlideIndex && contentYT) {
+                contentYT.unMute();
+                contentYT.playVideo();
+                clearTimeout(stepTimer);
+                stepTimer = setTimeout(step, videoDur);
+            }
+        }
+
+        const scr = document.createElement('script');
+        scr.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(scr);
+    </script>
+</body>
+
+</html>
