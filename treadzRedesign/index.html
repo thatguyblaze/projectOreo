@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/uswds-theme.css">
 
     <script src="js/treadz-core.js"></script>
     <script src="js/tire-catalog.js"></script>
@@ -31,40 +32,43 @@
     </style>
 </head>
 
-<body class="antialiased bg-slate-50">
+<body class="antialiased">
     <div id="app">
+        <!-- Official Government Banner -->
+        <section class="usa-banner" aria-label="Official government website">
+            <div class="usa-banner__inner">
+                <img class="usa-banner__header-flag" src="https://designsystem.digital.gov/assets/img/us_flag_small.png"
+                    alt="U.S. flag">
+                <div class="usa-banner__header-text">
+                    An official website of the United States government
+                </div>
+            </div>
+        </section>
+
         <div id="toast" class="toast fixed top-5 right-5 z-50 p-4 shadow-lg flex items-center"></div>
-        <nav class="main-nav sticky top-0 z-40 p-4 bg-[#0B1221] text-white shadow-md">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
 
+        <!-- USWDS Header Redesign -->
+        <header class="usa-header">
+            <div class="usa-header__inner">
                 <div class="flex items-center gap-8">
-                    <a href="index.html" class="flex-shrink-0 relative group" title="Open Admin Menu">
-                        <img src="images/mainLogo.png" alt="Treadz" class="h-10 w-auto">
-
-                        <div onclick="window.location.href='admin.html'" class="absolute inset-0 z-50 cursor-default"
-                            style="width: 20px; height: 20px; left: 0; top: 0;" title=""></div>
+                    <a href="index.html" class="usa-logo" title="Treadz Home">
+                        <img src="images/mainLogo.png" alt="Treadz logo">
+                        <span class="usa-logo-text">Treadz</span>
                     </a>
 
-
-                    <div class="hidden md:block h-6 w-px bg-white/20"></div>
-
-
-                    <div class="hidden md:flex items-center gap-1">
-                        <a href="index.html"
-                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg bg-white/10 text-white">Tires</a>
-                        <a href="towing/ticket/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Towing</a>
-                        <a href="quote/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Quote</a>
-                        <a href="receipt/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Receipts</a>
-                    </div>
+                    <nav class="hidden md:block">
+                        <ul class="usa-nav-list">
+                            <li><a href="index.html" class="usa-nav-link active">Tires</a></li>
+                            <li><a href="towing/ticket/index.html" class="usa-nav-link">Towing</a></li>
+                            <li><a href="quote/index.html" class="usa-nav-link">Quote</a></li>
+                            <li><a href="receipt/index.html" class="usa-nav-link">Receipts</a></li>
+                        </ul>
+                    </nav>
                 </div>
 
-
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
                     <button id="po-cart-btn" onclick="window.toggleCartDrawer()"
-                        class="btn bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-3 rounded-lg flex items-center gap-2 transition-all relative group">
+                        class="usa-button usa-button--outline font-bold flex items-center gap-2 relative">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -72,11 +76,10 @@
                         </svg>
                         <span class="hidden xl:inline">Orders</span>
                         <div id="cart-count-badge"
-                            class="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden shadow-sm border border-white/20">
+                            class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">
                             0</div>
                     </button>
-                    <button id="add-tires-btn"
-                        class="btn btn-primary font-bold py-2 px-4 shadow-lg flex items-center gap-2 bg-[#FF6600] text-white hover:bg-[#e65c00]">
+                    <button id="add-tires-btn" class="usa-button usa-button--primary font-bold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -86,76 +89,67 @@
                     </button>
                 </div>
             </div>
-        </nav>
+        </header>
 
-        <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-            <section class="mb-4">
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                    <div class="relative max-w-3xl mx-auto mb-4">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <input type="text" id="search-input"
-                            class="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-lg shadow-sm"
-                            placeholder="Search Inventory & Catalog (e.g. 265/70R17, Michelin)...">
-                        <button id="clear-search-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center hidden">
-                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer"
-                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </div>
+        <!-- USWDS Search Redesign -->
+        <section class="usa-search-section">
+            <div class="usa-search-container">
+                <div class="usa-search-group">
+                    <label class="usa-sr-only" for="search-input">Search Inventory & Catalog</label>
+                    <input type="text" id="search-input" class="usa-search-input"
+                        placeholder="Search Inventory & Catalog (e.g. 265/70R17, Michelin)...">
+                    <button id="search-submit-btn" class="usa-search-button" aria-label="Search">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </div>
 
-
-                    <div class="flex flex-wrap items-center gap-3 justify-center">
-                        <select id="filter-distributor"
-                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
+                <div class="mt-6 flex flex-wrap items-center gap-4 justify-center">
+                    <div class="flex flex-col">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase px-1 mb-1">Distributor</label>
+                        <select id="filter-distributor" class="usa-filter-select font-semibold">
                             <option value="">All Distributors</option>
                         </select>
-                        <select id="filter-brand"
-                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase px-1 mb-1">Brand</label>
+                        <select id="filter-brand" class="usa-filter-select font-semibold">
                             <option value="">All Brands</option>
                         </select>
-                        <select id="filter-rim"
-                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2"
-                            style="min-width: 100px;">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase px-1 mb-1">Rim Size</label>
+                        <select id="filter-rim" class="usa-filter-select font-semibold min-w-[100px]">
                             <option value="">All Rims</option>
                         </select>
-                        <select id="filter-type"
-                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase px-1 mb-1">Type</label>
+                        <select id="filter-type" class="usa-filter-select font-semibold">
                             <option value="">All Types</option>
                             <option value="passenger">Passenger</option>
                             <option value="suv">SUV / Truck</option>
                             <option value="trailer">Trailer</option>
                         </select>
-                        <select id="filter-ply"
-                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2">
-                            <option value="">Ply / Rating</option>
-                            <option value="xl">XL (Extra Load)</option>
-                            <option value="10">10-Ply (Load E)</option>
-                            <option value="12">12-Ply (Load F)</option>
-                        </select>
-                        <select id="filter-sort"
-                            class="text-sm font-semibold border-gray-200 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 p-2 ml-auto">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[11px] font-bold text-gray-500 uppercase px-1 mb-1">Sort By</label>
+                        <select id="filter-sort" class="usa-filter-select font-semibold">
                             <option value="price_asc">Price: Low to High</option>
                             <option value="price_desc">Price: High to Low</option>
                             <option value="brand">Brand Name</option>
                         </select>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div id="search-actions" class="max-w-2xl mx-auto mt-4"></div>
-                <div id="external-search-container" class="max-w-5xl mx-auto mt-2"></div>
-            </section>
-
+        <main class="main-content">
             <div id="search-results-container" class="mb-8"></div>
+
 
             <section class="mb-8 hidden hidden">
                 <button id="activity-log-toggle"
@@ -307,11 +301,31 @@
                 </div>
             </section>
         </main>
-    </div>
 
-
-    </main>
-
+        <!-- USWDS Footer Redesign -->
+        <footer class="usa-footer-redesign">
+            <div class="usa-footer-redesign__inner">
+                <div>
+                    <h3 class="usa-logo-text font-bold text-xl mb-4 text-primary">Treadz</h3>
+                    <p class="text-sm text-gray-600 max-w-xs">
+                        Advanced tire inventory and management system for official government use.
+                    </p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <h4 class="font-bold uppercase text-xs text-gray-500">Links</h4>
+                    <a href="index.html" class="text-sm hover:underline">Inventory</a>
+                    <a href="quote/index.html" class="text-sm hover:underline">Quote System</a>
+                    <a href="receipt/index.html" class="text-sm hover:underline">Receipt History</a>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <h4 class="font-bold uppercase text-xs text-gray-500">Contact</h4>
+                    <p class="text-sm">Support: internal-treadz-support@agency.gov</p>
+                </div>
+            </div>
+            <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-200 text-center text-xs text-gray-500">
+                &copy; 2026 Treadz. All rights reserved. An official agency tool.
+            </div>
+        </footer>
     </div>
 
 

@@ -620,53 +620,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 const itemJson = JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
                 const imgUrl = item.photo || `https://placehold.co/400x300/e2e8f0/1e293b?text=${encodeURIComponent(item.vendor_name)}`;
 
-                // Extract specs from sizes if available
                 const firstSize = (item.sizes && item.sizes.length > 0) ? item.sizes[0] : {};
                 const loadSpeed = (firstSize.load_index || '') + (firstSize.speed_rating || '');
                 const stock = item._availability || 0;
                 const isLowStock = stock > 0 && stock <= 4;
 
                 return `
-                <div class="catalog-card-vertical group">
-                    <div class="image-area cursor-pointer" onclick='window.openProductModal(${itemJson})'>
+                <div class="usa-card-redesign group">
+                    <div class="usa-card-redesign__img cursor-pointer" onclick='window.openProductModal(${itemJson})'>
                         <img src="${imgUrl}" alt="${item.model_name}" loading="lazy">
-                        <div class="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-md uppercase tracking-wider z-10">
+                        <div class="absolute top-3 left-3 bg-blue-700 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wider z-10">
                             ${item._sourceId || 'Global'}
                         </div>
-                        <div class="stock-badge ${isLowStock ? 'low' : ''}">
+                        <div class="stock-badge ${isLowStock ? 'low' : ''}" style="position: absolute; bottom: 12px; right: 12px; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; color: ${isLowStock ? '#d83931' : '#00a94d'};">
                             ${stock > 0 ? `${stock} IN STOCK` : 'OUT OF STOCK'}
                         </div>
                     </div>
                     
-                    <div class="info-area">
-                        <div class="brand-label">${item.vendor_name}</div>
-                        <h3 class="model-name">${item.model_name}</h3>
+                    <div class="usa-card-redesign__body">
+                        <div class="brand-label text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">${item.vendor_name}</div>
+                        <h3 class="usa-card-redesign__title">${item.model_name}</h3>
                         
-                        <div class="utqg-row">
-                            <span class="load-speed">${loadSpeed}</span>
-                            ${item.sidewall ? `<span>• ${item.sidewall}</span>` : ''}
-                            ${item.warranty ? `<span>• ${item.warranty} mi</span>` : ''}
-                        </div>
-
-                        <div class="spec-badges">
-                            <span class="spec-badge">${item.car_type_str || 'Passenger'}</span>
-                            <span class="spec-badge">${item.season || 'All Season'}</span>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs font-bold text-blue-800 bg-blue-50 px-2 py-1 rounded">${loadSpeed}</span>
+                            <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded">${item.car_type_str || 'Passenger'}</span>
+                            <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded">${item.season || 'All Season'}</span>
                         </div>
                         
-                        <div class="price-area">
+                        <div class="flex justify-between items-end mt-auto">
                             <div>
-                                <div class="price-tag">${price}</div>
-                                <div class="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Per Tire + Tax</div>
+                                <div class="text-2xl font-black text-gray-900">${price}</div>
+                                <div class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">Per Tire + Tax</div>
                             </div>
-                        </div>
-
-                        <div class="actions-area">
-                             <button onclick='window.openProductModal(${itemJson})' class="py-2.5 bg-gray-50 text-gray-600 rounded-lg font-bold text-xs hover:bg-gray-100 transition-all border border-gray-200">
-                                Details
-                             </button>
-                             <button onclick='window.openProductModal(${itemJson})' class="py-2.5 bg-blue-600 text-white rounded-lg font-bold text-xs hover:bg-blue-700 shadow-sm transition-all">
-                                Order Now
-                             </button>
+                            <div class="flex gap-2">
+                                <button onclick='window.openProductModal(${itemJson})' class="usa-button usa-button--outline font-bold text-xs" style="padding: 0.5rem 1rem;">
+                                    Details
+                                </button>
+                                <button onclick='window.openProductModal(${itemJson})' class="usa-button usa-button--primary font-bold text-xs" style="padding: 0.5rem 1rem;">
+                                    Order
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>`;
@@ -858,39 +851,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Use Grid Layout
+        // Use Grid Layout with USWDS Cards
         container.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 ${filtered.map(item => {
             const sizeDisplay = typeof item.size === 'object' ? formatTireSize(item.size) : item.size;
             const isNew = item.condition === 'new';
             return `
-                    <div class="bg-white rounded-lg border border-gray-200 p-4 flex flex-col justify-between shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-2 flex gap-1">
+                    <div class="usa-card-redesign group relative">
+                        <div class="absolute top-0 right-0 p-3 flex gap-2 z-10">
                              <button onclick="window.deleteInventoryItem('${item.id}')" 
-                                class="opacity-0 group-hover:opacity-100 w-6 h-6 rounded bg-white text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-all shadow-sm border border-gray-100">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-full bg-white text-gray-400 hover:text-red-700 shadow-md flex items-center justify-center transition-all border border-gray-200">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                              </button>
-                             <div class="w-2 h-2 rounded-full ${isNew ? 'bg-green-500' : 'bg-gray-300'}" title="${isNew ? 'New' : 'Used'}"></div>
+                             <div class="w-3 h-3 rounded-full shadow-sm ${isNew ? 'bg-green-500' : 'bg-gray-300'}" title="${isNew ? 'New' : 'Used'}"></div>
                         </div>
-                        <div class="mb-3">
-                            <h3 class="font-black text-2xl text-gray-800 tracking-tight font-mono">${sizeDisplay}</h3>
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">${item.condition || 'Used'}</p>
-                        </div>
-                        <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
-                            <div class="pl-1">
-                                <span class="text-xs text-gray-400 font-medium">Qty</span>
-                                <span class="font-mono text-xl font-bold text-gray-800 ml-1">${item.quantity}</span>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="window.updateInventoryQty('${item.id}', -1)" 
-                                    class="w-8 h-8 rounded bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center font-bold text-lg transition-all active:scale-95 shadow-sm">
-                                    -
-                                </button>
-                                <button onclick="window.updateInventoryQty('${item.id}', 1)" 
-                                    class="w-8 h-8 rounded bg-gray-50 border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-200 hover:bg-green-50 flex items-center justify-center font-bold text-lg transition-all active:scale-95 shadow-sm">
-                                    +
-                                </button>
+                        
+                        <div class="usa-card-redesign__body">
+                            <p class="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-1">${item.condition || 'Used'}</p>
+                            <h3 class="text-3xl font-black text-gray-900 tracking-tighter mb-4 font-mono">${sizeDisplay}</h3>
+                            
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                <div>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Available Stock</span>
+                                    <span class="font-mono text-3xl font-black text-gray-900">${item.quantity}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="window.updateInventoryQty('${item.id}', -1)" 
+                                        class="usa-button usa-button--outline" style="min-width: 44px; height: 44px; padding: 0; font-size: 1.5rem;">
+                                        -
+                                    </button>
+                                    <button onclick="window.updateInventoryQty('${item.id}', 1)" 
+                                        class="usa-button usa-button--primary" style="min-width: 44px; height: 44px; padding: 0; font-size: 1.5rem;">
+                                        +
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>`;

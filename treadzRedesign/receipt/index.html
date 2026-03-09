@@ -10,11 +10,11 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
-    <script src="../js/data-store.js"></script>
+    <link rel="stylesheet" href="../css/uswds-theme.css">
     <style>
         /* Base styles */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Public Sans', sans-serif;
         }
 
         /* The Paper Receipt Look */
@@ -23,6 +23,7 @@
             color: black;
             background: white;
             position: relative;
+            border: 1px solid #ddd;
         }
 
         .paper-receipt input {
@@ -58,12 +59,7 @@
             padding: 4px;
             font-size: 16px;
             height: 32px;
-            /* Fixed height for rows */
             vertical-align: middle;
-        }
-
-        .receipt-table tbody:last-child tr:last-child td {
-            border-bottom: none;
         }
 
         .receipt-table td.no-border-right {
@@ -96,13 +92,6 @@
             font-size: 16px;
         }
 
-        /* Screen only override for main layout */
-        @media screen {
-            #receipt-container {
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            }
-        }
-
         /* Print Override */
         @media print {
             @page {
@@ -116,57 +105,27 @@
                 print-color-adjust: exact;
             }
 
-            /* Hide UI scaffolding */
-            .main-nav,
+            .usa-banner,
+            .usa-header,
             #history-panel,
             #upsell-panel,
+            #receipt-controls,
             .screen-only,
             button,
-            .print-hidden,
-            .print\:hidden {
+            .print-hidden {
                 display: none !important;
-            }
-
-            #app,
-            main,
-            section {
-                display: block !important;
-                height: auto !important;
-                overflow: visible !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 100% !important;
-                background: white !important;
             }
 
             #receipt-container {
                 box-shadow: none !important;
                 width: 100% !important;
                 max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                min-height: 0 !important;
-                background: white !important;
-                display: block !important;
+                border: none !important;
             }
 
-            /* Clean up inputs for print */
             input {
                 border: none !important;
                 background: transparent !important;
-                width: auto !important;
-                padding: 0 !important;
-            }
-
-            input::placeholder {
-                color: transparent !important;
-            }
-
-            /* Hide spinner on number inputs */
-            input[type=number]::-webkit-inner-spin-button,
-            input[type=number]::-webkit-outer-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
             }
 
             .receipt-table,
@@ -174,19 +133,6 @@
             .receipt-table th,
             .totals-box td {
                 border-color: black !important;
-            }
-
-            /* Specific fix for gray backgrounds in print */
-            .bg-gray-50,
-            .bg-gray-100,
-            .bg-gray-200,
-            .bg-gray-900 {
-                background-color: transparent !important;
-            }
-
-            /* Ensure Card Preview is hidden */
-            #card-total-preview-container {
-                display: none !important;
             }
         }
 
@@ -203,67 +149,60 @@
             background: #c1c1c1;
             border-radius: 3px;
         }
-
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 
-<body class="antialiased h-screen flex flex-col overflow-hidden bg-gray-100">
+<body class="antialiased h-screen flex flex-col overflow-hidden">
     <div id="app" class="flex-grow flex flex-col h-full">
+        <!-- Official Government Banner -->
+        <section class="usa-banner" aria-label="Official government website">
+            <div class="usa-banner__inner">
+                <img class="usa-banner__header-flag" src="https://designsystem.digital.gov/assets/img/us_flag_small.png"
+                    alt="U.S. flag">
+                <div class="usa-banner__header-text">
+                    An official website of the United States government
+                </div>
+            </div>
+        </section>
 
-
-        <nav class="main-nav sticky top-0 z-40 p-4 w-full print:hidden flex-shrink-0">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
-
-                <div class="flex items-center gap-4 lg:gap-8">
-
-                    <button onclick="toggleSidebar()"
-                        class="lg:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
-                        title="View History">
+        <!-- USWDS Header Redesign -->
+        <header class="usa-header print:hidden">
+            <div class="usa-header__inner">
+                <div class="flex items-center gap-8">
+                    <button onclick="toggleSidebar()" class="lg:hidden usa-button usa-button--outline font-bold p-2"
+                        style="margin:0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2.5">
                             <path d="M4 6h16M4 12h16M4 18h7" />
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                         </svg>
                     </button>
-
-                    <a href="../index.html" class="flex-shrink-0">
-                        <img src="../images/mainLogo.png" alt="Treadz" class="h-10 w-auto">
+                    <a href="../index.html" class="usa-logo" title="Treadz Home">
+                        <img src="../images/mainLogo.png" alt="Treadz logo">
+                        <span class="usa-logo-text">Treadz</span>
                     </a>
 
-
-                    <div class="hidden md:block h-6 w-px bg-white/20"></div>
-
-
-                    <div class="hidden md:flex items-center gap-1">
-                        <a href="../index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Tires</a>
-                        <a href="../towing/ticket/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Towing</a>
-                        <a href="../quote/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Quote</a>
-                        <a href="index.html"
-                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg">Receipts</a>
-                    </div>
+                    <nav class="hidden md:block">
+                        <ul class="usa-nav-list">
+                            <li><a href="../index.html" class="usa-nav-link">Tires</a></li>
+                            <li><a href="../towing/ticket/index.html" class="usa-nav-link">Towing</a></li>
+                            <li><a href="../quote/index.html" class="usa-nav-link">Quote</a></li>
+                            <li><a href="index.html" class="usa-nav-link active">Receipts</a></li>
+                        </ul>
+                    </nav>
                 </div>
 
-
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-3">
                     <button onclick="toggleServicesSidebar()"
-                        class="lg:hidden btn btn-secondary text-sm font-medium py-2 px-3 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        class="lg:hidden usa-button usa-button--outline font-bold p-2" style="margin:0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
                             <path d="M9 11l3 3L22 4" />
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                         </svg>
-                        <span class="hidden xl:inline">Services</span>
                     </button>
-                    <button onclick="reset()"
-                        class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2 shadow-sm whitespace-nowrap">
+                    <button onclick="reset()" class="usa-button usa-button--primary font-bold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
@@ -271,7 +210,7 @@
                     </button>
                 </div>
             </div>
-        </nav>
+        </header>
 
 
         <main class="flex-grow flex flex-col lg:flex-row h-full overflow-hidden relative">
@@ -279,23 +218,14 @@
 
             <aside id="history-panel"
                 class="w-full sm:w-80 lg:w-80 bg-white border-r border-gray-200 flex flex-col shadow-lg z-30 flex-shrink-0 transition-transform duration-300 absolute lg:relative h-full lg:transform-none transform -translate-x-full">
-                <div class="p-4 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="text-blue-600">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
-                            </svg>
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-900 flex items-center gap-2 uppercase tracking-widest text-xs">
                             Available Quotes
                         </h3>
-                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-gray-800">
+                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-gray-900 p-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
                                 stroke-linejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -303,18 +233,12 @@
                         </button>
                     </div>
                     <div class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
                         <input type="text" id="history-search" placeholder="Search..."
-                            oninput="renderHistory(this.value)"
-                            class="w-full pl-9 pr-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 outline-none">
+                            oninput="renderHistory(this.value)" class="usa-search-input w-full"
+                            style="height: 40px; padding-left: 12px; font-size: 14px;">
                     </div>
                 </div>
-                <div id="history-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50 pb-24"></div>
+                <div id="history-list" class="flex-grow overflow-y-auto p-4 space-y-3 bg-gray-50/30 pb-24"></div>
             </aside>
 
 
@@ -486,17 +410,18 @@
                 <div class="h-32"></div>
 
 
-                <div
-                    class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 print:hidden z-30 flex justify-center gap-4 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)]">
+                <div id="receipt-controls"
+                    class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-6 print:hidden z-30 flex justify-center gap-4 shadow-[0_-5px_30px_-5px_rgba(0,0,0,0.1)]">
                     <div class="w-full max-w-2xl flex gap-4">
-                        <button onclick="reset()"
-                            class="btn px-6 py-4 rounded-xl text-gray-500 hover:text-red-500 font-bold bg-white border border-gray-200 shadow-sm">
-                            Reset
+                        <button onclick="reset()" class="usa-button usa-button--outline flex-1"
+                            style="height: 56px; font-weight: 800;">
+                            RESET
                         </button>
                         <button onclick="handlePrint()"
-                            class="flex-1 btn btn-primary py-4 rounded-xl text-xl shadow-xl flex items-center justify-center gap-3">
+                            class="usa-button usa-button--primary flex-[3] flex justify-center items-center gap-4"
+                            style="height: 56px; font-weight: 800; font-size: 1.1rem;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
                                 stroke-linejoin="round">
                                 <polyline points="6 9 6 2 18 2 18 9"></polyline>
                                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
@@ -513,36 +438,35 @@
 
             <aside id="upsell-panel"
                 class="fixed inset-y-0 right-0 w-[85%] sm:w-80 lg:w-72 bg-white border-l border-gray-200 shadow-2xl z-50 flex flex-col transform translate-x-full lg:translate-x-0 transition-transform duration-300 lg:relative lg:flex lg:shadow-xl lg:z-20">
-                <div class="p-6 border-b border-gray-200">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-bold text-lg text-gray-800 font-sans">Services Performed</h3>
-                        <button onclick="toggleServicesSidebar()" class="lg:hidden text-gray-400 hover:text-gray-800">
+                <div class="p-8 border-b border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-900 uppercase tracking-widest text-xs">Services Performed</h3>
+                        <button onclick="toggleServicesSidebar()" class="lg:hidden text-gray-400 hover:text-gray-900">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
                                 stroke-linejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
                         </button>
                     </div>
-                    <p class="text-xs text-gray-500 font-sans">Check to add line items.</p>
-                    <label
-                        class="mb-2 flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all group">
-                        <span class="text-sm font-medium text-gray-700 font-sans group-hover:text-blue-700">Apply Tire
-                            Fees</span>
-                        <input type="checkbox" id="tire-fees-toggle" checked onchange="calculate()"
-                            class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
-                    </label>
-                    <label
-                        class="mt-1 flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all group">
-                        <span class="text-sm font-medium text-gray-700 font-sans group-hover:text-blue-700">Tax
-                            Exempt</span>
-                        <input type="checkbox" id="tax-exempt-checkbox" onchange="calculate()"
-                            class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
-                    </label>
+
+                    <div class="space-y-3">
+                        <label
+                            class="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all">
+                            <span class="text-sm font-bold text-gray-700">Apply Tire Fees</span>
+                            <input type="checkbox" id="tire-fees-toggle" checked onchange="calculate()"
+                                class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                        </label>
+                        <label
+                            class="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition-all">
+                            <span class="text-sm font-bold text-gray-700">Tax Exempt</span>
+                            <input type="checkbox" id="tax-exempt-checkbox" onchange="calculate()"
+                                class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+                        </label>
+                    </div>
                 </div>
                 <div class="p-6 space-y-4 overflow-y-auto flex-grow font-sans pb-24" id="services-list-container">
-
                 </div>
             </aside>
         </main>

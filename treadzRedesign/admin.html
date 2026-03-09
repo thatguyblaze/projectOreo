@@ -9,14 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/data-store.js"></script>
-    <script src="js/treadz-core.js"></script>
-    <script src="js/tire-catalog.js"></script>
-    <script src="js/auth.js"></script>
+    <link rel="stylesheet" href="css/uswds-theme.css">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F8FAFC;
+            font-family: 'Public Sans', sans-serif;
+            background-color: #f0f0f0;
         }
 
         /* Bespoke Scrollbar */
@@ -38,192 +35,149 @@
             background: #94a3b8;
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .nav-header {
-            background-color: #0B1221;
-            border-bottom: 4px solid #FF6600;
-        }
-
-        .brand-gradient-text {
-            background: linear-gradient(135deg, #FF6600, #FF9933);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .dashboard-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 
-<body class="min-h-screen font-sans flex flex-col text-slate-800">
+<body class="min-h-screen font-sans flex flex-col text-gray-900">
 
+    <!-- Official Government Banner -->
+    <section class="usa-banner" aria-label="Official government website">
+        <div class="usa-banner__inner">
+            <img class="usa-banner__header-flag" src="https://designsystem.digital.gov/assets/img/us_flag_small.png"
+                alt="U.S. flag">
+            <div class="usa-banner__header-text">
+                An official website of the United States government
+            </div>
+        </div>
+    </section>
 
     <div id="login-modal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1221] bg-opacity-95 transition-all duration-500 backdrop-blur-sm">
-        <div
-            class="bg-white p-10 rounded-2xl shadow-2xl w-96 transform transition-all scale-100 border-t-8 border-[#FF6600]">
-            <div class="flex justify-center mb-6">
+        class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-95 backdrop-blur-sm">
+        <div class="bg-white p-10 rounded-xl shadow-2xl w-full max-w-md border-t-8 border-[#0047AB]">
+            <div class="flex justify-center mb-8">
                 <img src="images/mainLogo.png" alt="Treadz" class="h-12 w-auto">
             </div>
-            <h2 class="text-2xl font-bold mb-6 text-center text-slate-800 uppercase tracking-wider">Command Access</h2>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
+            <h2 class="text-2xl font-black mb-8 text-center text-gray-900 uppercase tracking-tighter">Command
+                Authentication</h2>
+            <form onsubmit="handleLogin(event)" class="space-y-6">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">ID</label>
-                    <input type="text" id="username"
-                        class="block w-full rounded-lg border-slate-300 bg-slate-50 shadow-sm p-3 border focus:border-[#0047AB] focus:ring-1 focus:ring-[#0047AB] outline-none transition-all font-mono"
-                        required>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Employee
+                        ID</label>
+                    <input type="text" id="username" class="usa-search-input w-full font-mono"
+                        style="height: 48px; border-radius: 6px; padding-left: 12px;" required>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Key</label>
-                    <input type="password" id="password"
-                        class="block w-full rounded-lg border-slate-300 bg-slate-50 shadow-sm p-3 border focus:border-[#0047AB] focus:ring-1 focus:ring-[#0047AB] outline-none transition-all"
-                        required>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-1">Security
+                        Key</label>
+                    <input type="password" id="password" class="usa-search-input w-full"
+                        style="height: 48px; border-radius: 6px; padding-left: 12px;" required>
                 </div>
-                <button type="submit"
-                    class="w-full bg-[#0047AB] hover:bg-[#003380] text-white py-3 rounded-lg transition-all font-bold shadow-lg mt-4 uppercase tracking-widest text-sm transform hover:-translate-y-0.5">
-                    Authenticate
+                <button type="submit" class="usa-button usa-button--primary w-full font-bold"
+                    style="height: 56px; font-size: 1rem; margin-top: 2rem;">
+                    AUTHENTICATE
                 </button>
             </form>
-            <p id="login-error" class="text-red-600 text-xs mt-4 text-center hidden font-bold bg-red-50 p-2 rounded">
+            <p id="login-error"
+                class="text-red-700 text-xs mt-6 text-center hidden font-bold bg-red-50 p-3 rounded border border-red-200 uppercase tracking-tight">
             </p>
-            <div id="login-spinner" class="hidden mt-4 text-center">
-                <div
-                    class="inline-block w-5 h-5 border-2 border-[#0047AB] border-t-transparent rounded-full animate-spin">
-                </div>
-                <span class="text-xs text-slate-500 ml-2">Authenticating...</span>
-            </div>
         </div>
     </div>
 
 
     <div id="dashboard" class="hidden flex-grow flex flex-col">
+        <!-- USWDS Header Redesign -->
+        <header class="usa-header">
+            <div class="usa-header__inner">
+                <div class="flex items-center gap-8">
+                    <a href="index.html" class="usa-logo" title="Treadz Home">
+                        <img src="images/mainLogo.png" alt="Treadz logo">
+                        <span class="usa-logo-text">Treadz</span>
+                    </a>
 
-        <nav class="nav-header shadow-2xl sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 md:px-8">
-                <div class="flex justify-between h-20 items-center">
-                    <div class="flex items-center gap-6">
-                        <img src="images/mainLogo.png" alt="Treadz" class="h-10 w-auto">
-                        <div class="hidden md:block h-8 w-px bg-white/20"></div>
-                        <div>
-                            <h1 class="text-xl font-bold text-white tracking-widest uppercase">Admin Command</h1>
-                            <span id="sys-version-tag" class="text-[10px] text-gray-400 font-mono block">SYS.VER.-.-._
-                                // LOADING</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="hidden md:block text-right mr-4">
-                            <div class="text-xs text-[#FF6600] font-bold uppercase">Shop Status</div>
-                            <div id="shop-status-indicator"
-                                class="text-white text-sm font-bold flex items-center justify-end gap-2">
-                                <span class="w-2 h-2 rounded-full bg-gray-500"></span> LOADING
-                            </div>
-                        </div>
-                        <div class="hidden md:block text-right mr-2 border-r border-white/10 pr-4">
-                            <div class="text-[10px] text-gray-400 font-mono uppercase">Operator</div>
-                            <div id="nav-user-name" class="text-white text-sm font-bold">---</div>
-                        </div>
-                        <button onclick="openSettings()"
-                            class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded text-sm font-bold flex items-center gap-2 transition-all border border-white/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path
-                                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z">
-                                </path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
-                        <button onclick="exportData()"
-                            class="bg-[#0047AB] hover:bg-[#003380] text-white px-4 py-2 rounded text-sm font-bold flex items-center gap-2 shadow-md transition-all active:scale-95 border border-white/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                            Export
-                        </button>
-                        <button onclick="handleLogout()"
-                            class="bg-red-600/80 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold transition-colors border border-red-500/30 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                <polyline points="16 17 21 12 16 7"></polyline>
-                                <line x1="21" y1="12" x2="9" y2="12"></line>
-                            </svg>
-                            Logout
-                        </button>
-                        <a href="index.html"
-                            class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded text-sm font-bold transition-colors border border-white/20">Exit</a>
+                    <div class="hidden md:block h-8 w-px bg-gray-200"></div>
+                    <div>
+                        <h1 class="text-sm font-bold text-gray-700 tracking-widest uppercase">Admin Command</h1>
+                        <span id="sys-version-tag"
+                            class="text-[10px] text-gray-400 font-mono block">SYS.VER.LATEST</span>
                     </div>
                 </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="hidden lg:flex flex-col text-right mr-4 border-r pr-4 border-gray-100">
+                        <div class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Shop Status</div>
+                        <div id="shop-status-indicator"
+                            class="text-gray-900 text-xs font-bold flex items-center justify-end gap-1.5 uppercase">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> ONLINE
+                        </div>
+                    </div>
+
+                    <button onclick="openSettings()" class="usa-button usa-button--outline font-bold p-2"
+                        style="margin:0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                            </path>
+                        </svg>
+                    </button>
+                    <button onclick="handleLogout()" class="usa-button usa-button--outline font-bold" style="margin:0">
+                        LOGOUT
+                    </button>
+                    <a href="index.html" class="usa-button usa-button--primary font-bold" style="margin:0">EXIT</a>
+                </div>
             </div>
-        </nav>
+        </header>
 
         <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8 w-full flex-grow">
 
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-
-                <div
-                    class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-2 flex flex-col relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0047AB] to-[#FF6600]"></div>
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-slate-800 font-bold text-lg flex items-center gap-2 uppercase tracking-wide">
-                            <span class="w-2 h-2 rounded-full bg-[#0047AB]"></span>
-                            Gross Revenue
+                <!-- Main Revenue Chart -->
+                <div class="dashboard-card p-8 lg:col-span-2 flex flex-col relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-10">
+                        <h3 class="text-gray-900 font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#0047AB]"></span>
+                            Gross Revenue Yield
                         </h3>
-                        <div class="flex bg-slate-100 rounded-lg p-1">
+                        <div class="flex gap-1 bg-gray-100 p-1 rounded-md">
                             <button onclick="updateChartRange(7)"
-                                class="text-xs font-bold px-3 py-1 rounded-md bg-white text-slate-700 shadow-sm transition-colors chart-filter active"
-                                id="filter-7d">7D</button>
+                                class="usa-button usa-button--outline font-bold py-1 px-3 text-[10px] chart-filter active"
+                                id="filter-7d" style="margin:0; min-width: 44px; height: 32px;">7D</button>
                             <button onclick="updateChartRange(30)"
-                                class="text-xs font-bold px-3 py-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-white/50 transition-colors chart-filter"
-                                id="filter-30d">30D</button>
+                                class="usa-button usa-button--outline font-bold py-1 px-3 text-[10px] chart-filter"
+                                id="filter-30d" style="margin:0; min-width: 44px; height: 32px;">30D</button>
                             <button onclick="updateChartRange(180)"
-                                class="text-xs font-bold px-3 py-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-white/50 transition-colors chart-filter"
-                                id="filter-180d">6M</button>
-                            <button onclick="updateChartRange(365)"
-                                class="text-xs font-bold px-3 py-1 rounded-md text-slate-500 hover:text-slate-700 hover:bg-white/50 transition-colors chart-filter"
-                                id="filter-365d">1Y</button>
+                                class="usa-button usa-button--outline font-bold py-1 px-3 text-[10px] chart-filter"
+                                id="filter-180d" style="margin:0; min-width: 44px; height: 32px;">6M</button>
                         </div>
                     </div>
-                    <div class="flex-grow w-full h-64 relative">
+                    <div class="flex-grow w-full h-80 relative">
                         <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
 
-
                 <div class="space-y-6 flex flex-col">
+                    <!-- Total Sales Hero -->
+                    <div class="bg-[#0047AB] p-8 rounded-lg shadow-xl text-white relative overflow-hidden">
+                        <h3 class="text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-2">Aggregate Sales
+                        </h3>
+                        <div class="text-5xl font-black tracking-tighter" id="stat-total-revenue">$0.00</div>
 
-                    <div class="bg-[#0047AB] p-6 rounded-xl shadow-lg text-white relative overflow-hidden group">
-                        <div
-                            class="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/10 group-hover:bg-white/20 transition-all">
-                        </div>
-                        <div class="absolute -left-6 -bottom-6 w-32 h-32 rounded-full bg-white/5"></div>
-
-                        <h3 class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-2 relative z-10">Total
-                            Sales</h3>
-                        <div class="text-4xl font-black relative z-10 tracking-tight" id="stat-total-revenue">$0.00
-                        </div>
-
-                        <div
-                            class="mt-6 flex justify-between text-xs text-blue-100 relative z-10 pt-4 border-t border-blue-500/50">
+                        <div class="mt-10 flex justify-between pt-6 border-t border-white/20">
                             <div>
-                                <span class="block font-bold text-white text-lg" id="stat-tow-rev-small">$0.00</span>
-                                <span class="opacity-75 uppercase text-[10px] font-bold tracking-wider">Towing</span>
+                                <span class="block font-black text-2xl" id="stat-tow-rev-small">$0.00</span>
+                                <span class="text-blue-200 text-[9px] font-bold uppercase tracking-widest">Towing</span>
                             </div>
                             <div class="text-right">
-                                <span class="block font-bold text-white text-lg" id="stat-tire-rev-small">$0.00</span>
-                                <span class="opacity-75 uppercase text-[10px] font-bold tracking-wider">Tire
-                                    Sales</span>
+                                <span class="block font-black text-2xl" id="stat-tire-rev-small">$0.00</span>
+                                <span class="text-blue-200 text-[9px] font-bold uppercase tracking-widest">Tires</span>
                             </div>
                         </div>
                     </div>
@@ -373,44 +327,30 @@
             </div>
 
 
-            <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-
+            <div class="dashboard-card overflow-hidden">
                 <div
-                    class="border-b border-slate-200 bg-slate-50 p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
-
-
-                    <div class="flex bg-slate-200/60 p-1.5 rounded-lg w-full md:w-auto gap-1">
+                    class="border-b border-gray-200 bg-gray-50/50 p-6 flex flex-col md:flex-row justify-between md:items-center gap-6">
+                    <div class="flex gap-2 p-1 bg-gray-200 rounded-lg">
                         <button onclick="switchTab('tow')" id="tab-tow"
-                            class="flex-1 md:flex-none px-6 py-2 rounded-md text-sm font-bold bg-white text-[#0047AB] shadow-sm transition-all border border-transparent">
-                            TOWING
-                        </button>
+                            class="usa-button usa-button--outline font-bold py-2 px-6 text-xs bg-white shadow-sm"
+                            style="margin:0; border:none;">TOWING</button>
                         <button onclick="switchTab('tire')" id="tab-tire"
-                            class="flex-1 md:flex-none px-6 py-2 rounded-md text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-white/50 transition-all border border-transparent">
-                            TIRES
-                        </button>
+                            class="usa-button usa-button--outline font-bold py-2 px-6 text-xs"
+                            style="margin:0; border:none; background:transparent; color:#666;">TIRES</button>
                         <button onclick="switchTab('vts')" id="tab-vts"
-                            class="flex-1 md:flex-none px-6 py-2 rounded-md text-sm font-bold text-red-600 hover:bg-red-50 transition-all border border-transparent flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                            VTS / STORAGE
-                        </button>
+                            class="usa-button usa-button--outline font-bold py-2 px-6 text-xs text-red-600"
+                            style="margin:0; border:none; background:transparent;">STORAGE</button>
                     </div>
 
-
-                    <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                        <div class="relative flex-grow md:w-64">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </span>
-                            <input type="text" id="table-search" oninput="filterTable()" placeholder="Search records..."
-                                class="pl-10 text-sm shadow-sm focus:ring-2 focus:ring-[#0047AB]/20 focus:border-[#0047AB] block w-full border-slate-300 rounded-lg p-2.5 border outline-none transition-all">
+                    <div class="flex flex-col md:flex-row gap-4 flex-grow max-w-2xl">
+                        <div class="relative flex-grow">
+                            <input type="text" id="table-search" oninput="filterTable()"
+                                placeholder="Search identifiers..." class="usa-search-input w-full"
+                                style="height: 48px; padding-left: 12px; font-size: 14px;">
                         </div>
-                        <select id="date-filter" onchange="filterTable()"
-                            class="text-sm border-slate-300 rounded-lg shadow-sm p-2.5 border outline-none focus:ring-2 focus:ring-[#0047AB]/20 focus:border-[#0047AB] bg-white text-slate-700 font-medium cursor-pointer">
-                            <option value="all">All Time</option>
+                        <select id="date-filter" onchange="filterTable()" class="usa-filter-select"
+                            style="max-width: 180px; height: 48px; border-radius: 6px;">
+                            <option value="all">All Records</option>
                             <option value="30">Last 30 Days</option>
                             <option value="7">Last 7 Days</option>
                             <option value="1">Today</option>
@@ -422,62 +362,61 @@
                 <div class="p-0">
 
                     <div id="view-tow" class="overflow-x-auto min-h-[300px]">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        ID</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Date</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Customer</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Vehicle Details</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Status</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Total</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-100" id="table-tow-body"></tbody>
+                        <thead class="bg-gray-100/50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                    ID</th>
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                    Date</th>
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                    Customer</th>
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                    Vehicle</th>
+                                <th scope="col"
+                                    class="px-6 py-4 text-center text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                    Status</th>
+                                <th scope="col"
+                                    class="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                    Yield</th>
+                                <th scope="col"
+                                    class="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                    Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100" id="table-tow-body"></tbody>
                         </table>
                     </div>
 
 
                     <div id="view-tire" class="hidden overflow-x-auto min-h-[300px]">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-100/50">
                                 <tr>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
                                         ID</th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
                                         Date</th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
                                         Customer</th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-6 py-4 text-left text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
                                         Items</th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        class="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
                                         Type</th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Total</th>
+                                        class="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                        Yield</th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        Actions</th>
+                                        class="px-6 py-4 text-right text-[10px] font-black text-gray-500 uppercase tracking-widest border-b">
+                                        Manage</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-100" id="table-tire-body"></tbody>
@@ -518,26 +457,26 @@
                         <thead class="bg-red-50/50">
                             <tr>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-bold text-red-900/50 uppercase tracking-wider">
-                                    Ticket / In Date</th>
+                                    class="px-6 py-4 text-left text-[10px] font-black text-red-900/50 uppercase tracking-widest border-b border-red-100">
+                                    Packet / Influx</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-bold text-red-900/50 uppercase tracking-wider">
+                                    class="px-6 py-4 text-left text-[10px] font-black text-red-900/50 uppercase tracking-widest border-b border-red-100">
                                     Vehicle</th>
                                 <th
-                                    class="px-6 py-3 text-center text-xs font-bold text-red-900/50 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-[10px] font-black text-red-900/50 uppercase tracking-widest border-b border-red-100">
                                     Lot</th>
                                 <th
-                                    class="px-6 py-3 text-center text-xs font-bold text-red-900/50 uppercase tracking-wider">
-                                    Days Stored</th>
+                                    class="px-6 py-4 text-center text-[10px] font-black text-red-900/50 uppercase tracking-widest border-b border-red-100">
+                                    Stored</th>
                                 <th
-                                    class="px-6 py-3 text-center text-xs font-bold text-red-900/50 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-[10px] font-black text-red-900/50 uppercase tracking-widest border-b border-red-100">
                                     Compliance</th>
                                 <th
-                                    class="px-6 py-3 text-right text-xs font-bold text-red-900/50 uppercase tracking-wider">
-                                    Est. Fees ($45/day)</th>
+                                    class="px-6 py-4 text-right text-[10px] font-black text-red-900/50 uppercase tracking-widest border-b border-red-100">
+                                    Fees</th>
                                 <th
-                                    class="px-6 py-3 text-right text-xs font-bold text-red-900/50 uppercase tracking-wider">
-                                    Actions</th>
+                                    class="px-6 py-4 text-right text-[10px] font-black text-red-900/50 uppercase tracking-widest border-b border-red-100">
+                                    Manage</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-red-50" id="table-vts-body"></tbody>
@@ -545,9 +484,9 @@
                 </div>
 
                 <div
-                    class="bg-slate-50 px-6 py-3 border-t border-slate-200 text-xs text-slate-500 flex justify-between font-mono">
-                    <span id="record-count-display">Initializing...</span>
-                    <span id="storage-status-display">LOCAL_STORAGE :: CHECKING</span>
+                    class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-[10px] text-gray-400 flex justify-between font-mono uppercase tracking-widest">
+                    <span id="record-count-display">Syncing...</span>
+                    <span id="storage-status-display">DATABASE_LOCAL_OK</span>
                 </div>
             </div>
 

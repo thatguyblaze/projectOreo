@@ -8,9 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/uswds-theme.css">
     <style>
-        /* Additional glassmorphism and animation styles for the calculator */
-
         /* Hide Spinners */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
@@ -29,7 +28,6 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 resize: none !important;
-                /* Force appearance */
                 -webkit-appearance: none !important;
                 -moz-appearance: none !important;
                 appearance: none !important;
@@ -42,7 +40,6 @@
                 margin: 0.4in;
             }
 
-            /* Global Print Reset - Strip all web app feeling */
             *,
             *::before,
             *::after {
@@ -57,7 +54,7 @@
             body {
                 background: white !important;
                 color: black !important;
-                font-family: 'Inter', system-ui, sans-serif !important;
+                font-family: 'Public Sans', sans-serif !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
@@ -76,29 +73,14 @@
                 overflow: visible !important;
             }
 
-            .main-nav,
+            .usa-banner,
+            .usa-header,
             #history-sidebar,
             button,
-            .print-hidden,
-            .print-hidden-force {
+            .print-hidden {
                 display: none !important;
             }
 
-            /* Main Document Container */
-            .w-full.max-w-2xl {
-                max-width: 100% !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            .glass-panel {
-                background: white !important;
-                border: none !important;
-                padding: 0 !important;
-            }
-
-            /* Professional Header */
             .print-header {
                 display: flex !important;
                 justify-content: space-between;
@@ -113,32 +95,6 @@
                 width: auto !important;
             }
 
-            .print-header h2 {
-                font-size: 20pt !important;
-                font-weight: 800 !important;
-                margin: 0 !important;
-                text-align: right;
-            }
-
-            .print-date-text {
-                font-size: 9pt;
-                color: #555;
-                text-align: right;
-            }
-
-            /* Info Grid Styling */
-            .grid-cols-1,
-            .md\:grid-cols-2 {
-                display: flex !important;
-                gap: 20pt !important;
-                margin-bottom: 15pt !important;
-            }
-
-            .grid-cols-1>div,
-            .md\:grid-cols-2>div {
-                flex: 1 !important;
-            }
-
             .label-uppercase {
                 font-size: 8pt !important;
                 font-weight: 700 !important;
@@ -147,39 +103,6 @@
                 margin-bottom: 2pt !important;
             }
 
-            #cust-name,
-            #cust-vehicle,
-            #tire-info-input {
-                font-size: 12pt !important;
-                font-weight: 600 !important;
-                border: none !important;
-                border-bottom: 1px solid #ddd !important;
-                padding: 4pt 0 !important;
-                color: black !important;
-                width: 100% !important;
-            }
-
-            /* Line Item/Summary Styling */
-            .summary-row {
-                display: flex !important;
-                justify-content: space-between !important;
-                padding: 4pt 0 !important;
-                border-bottom: 1px dotted #eee !important;
-            }
-
-            .summary-row div:first-child {
-                font-size: 10pt !important;
-            }
-
-            .summary-row span:last-child {
-                font-weight: 600 !important;
-            }
-
-            .print-hide-math {
-                display: none !important;
-            }
-
-            /* The "Inline" Totals System */
             .totals-section {
                 border-top: 2px solid #000 !important;
                 margin-top: 15pt !important;
@@ -187,89 +110,6 @@
                 display: flex !important;
                 justify-content: flex-end !important;
                 gap: 40pt !important;
-            }
-
-            .print-simple-total {
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                padding: 0 !important;
-                border: none !important;
-                min-width: 100pt;
-            }
-
-            .print-simple-total span:first-child {
-                font-size: 9pt !important;
-                font-weight: 800 !important;
-                text-transform: uppercase !important;
-                color: #444 !important;
-                margin-bottom: 2pt !important;
-            }
-
-            #total-cash-display,
-            #total-card-display {
-                font-size: 16pt !important;
-                font-weight: 900 !important;
-                color: black !important;
-            }
-
-            .print-footer {
-                margin-top: 30pt !important;
-                text-align: center !important;
-                font-size: 9pt !important;
-                color: #777 !important;
-                border-top: 1px solid #eee !important;
-                padding-top: 10pt !important;
-            }
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        }
-
-        .calc-input {
-            transition: all 0.3s ease;
-        }
-
-        .calc-input:focus {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.15);
-        }
-
-        .summary-row {
-            transition: all 0.3s ease;
-        }
-
-        .summary-row:hover {
-            background-color: rgba(243, 244, 246, 0.8);
-            padding-left: 0.5rem;
-            padding-right: 0.5rem;
-            border-radius: 0.5rem;
-            margin-left: -0.5rem;
-            margin-right: -0.5rem;
-        }
-
-        /* Sidebar Styles */
-        aside#history-sidebar {
-            transition: transform 0.3s ease;
-            z-index: 40;
-        }
-
-        @media (max-width: 1024px) {
-            aside#history-sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100%;
-                transform: translateX(-100%);
-            }
-
-            aside#history-sidebar.active {
-                transform: translateX(0);
             }
         }
 
@@ -289,73 +129,70 @@
     </style>
 </head>
 
-<body class="antialiased h-screen flex flex-col bg-slate-50 overflow-hidden">
+<body class="antialiased h-screen flex flex-col overflow-hidden">
     <div id="app" class="flex-grow flex flex-col h-full">
+        <!-- Official Government Banner -->
+        <section class="usa-banner" aria-label="Official government website">
+            <div class="usa-banner__inner">
+                <img class="usa-banner__header-flag" src="https://designsystem.digital.gov/assets/img/us_flag_small.png"
+                    alt="U.S. flag">
+                <div class="usa-banner__header-text">
+                    An official website of the United States government
+                </div>
+            </div>
+        </section>
 
-        <nav class="main-nav sticky top-0 z-40 p-4 w-full print:hidden flex-shrink-0">
-            <div class="max-w-7xl mx-auto flex items-center justify-between">
-
-                <div class="flex items-center gap-4 lg:gap-8">
-                    <button onclick="toggleSidebar()"
-                        class="lg:hidden text-white hover:bg-white/10 p-2 rounded-lg transition-colors"
-                        title="View History">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 6h16M4 12h16M4 18h7" />
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        </svg>
-                    </button>
-
-                    <a href="../index.html" class="flex-shrink-0">
-                        <img src="../images/mainLogo.png" alt="Treadz" class="h-10 w-auto">
+        <!-- USWDS Header Redesign -->
+        <header class="usa-header print:hidden">
+            <div class="usa-header__inner">
+                <div class="flex items-center gap-8">
+                    <a href="../index.html" class="usa-logo" title="Treadz Home">
+                        <img src="../images/mainLogo.png" alt="Treadz logo">
+                        <span class="usa-logo-text">Treadz</span>
                     </a>
 
-                    <div class="hidden md:block h-6 w-px bg-white/20"></div>
-
-                    <div class="hidden md:flex items-center gap-1">
-                        <a href="../index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Tires</a>
-                        <a href="../towing/ticket/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Towing</a>
-                        <a href="index.html"
-                            class="btn btn-secondary active font-semibold py-2 px-4 rounded-lg">Quote</a>
-                        <a href="../receipt/index.html"
-                            class="btn btn-secondary text-gray-300 hover:text-white hover:bg-white/10 font-medium py-2 px-4 rounded-lg transition-all">Receipts</a>
-                    </div>
+                    <nav class="hidden md:block">
+                        <ul class="usa-nav-list">
+                            <li><a href="../index.html" class="usa-nav-link">Tires</a></li>
+                            <li><a href="../towing/ticket/index.html" class="usa-nav-link">Towing</a></li>
+                            <li><a href="index.html" class="usa-nav-link active">Quote</a></li>
+                            <li><a href="../receipt/index.html" class="usa-nav-link">Receipts</a></li>
+                        </ul>
+                    </nav>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <button onclick="reset()"
-                        class="btn btn-primary font-semibold py-2 px-4 flex items-center gap-2 shadow-sm whitespace-nowrap">
+                <div class="flex items-center gap-3">
+                    <button onclick="reset()" class="usa-button usa-button--primary font-bold flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
                         <span class="hidden xl:inline">New Quote</span>
                     </button>
+                    <button onclick="toggleSidebar()" class="lg:hidden usa-button usa-button--outline font-bold p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="M4 6h16M4 12h16M4 18h7" />
+                        </svg>
+                    </button>
                 </div>
             </div>
-        </nav>
+        </header>
 
 
         <main class="flex-grow flex flex-col lg:flex-row min-h-0 overflow-hidden relative">
 
             <aside id="history-sidebar"
                 class="w-80 bg-white border-r border-gray-200 flex flex-col shadow-lg lg:shadow-none flex-shrink-0 absolute lg:relative min-h-0 transition-transform duration-300">
-                <div class="p-4 border-b border-gray-100 bg-gray-50/50">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" class="text-blue-600">
-                                <path d="M12 20v-6M6 20V10M18 20V4" />
-                            </svg>
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-gray-900 flex items-center gap-2 uppercase tracking-widest text-xs">
                             Quote History
                         </h3>
-                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-gray-600">
+                        <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-gray-900 p-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
                                 stroke-linejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -363,50 +200,25 @@
                         </button>
                     </div>
                     <div class="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
                         <input type="text" id="history-search" placeholder="Search customer, vehicle..."
-                            oninput="renderHistory(this.value)"
-                            class="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/50 outline-none">
+                            oninput="renderHistory(this.value)" class="usa-search-input w-full"
+                            style="height: 40px; padding-left: 12px; font-size: 14px;">
                     </div>
                 </div>
-                <div id="history-list" class="flex-grow overflow-y-auto p-2 space-y-2 bg-gray-50/30">
+                <div id="history-list" class="flex-grow overflow-y-auto p-4 space-y-3 bg-gray-50/30">
                 </div>
             </aside>
 
             <section class="flex-grow overflow-y-auto p-4 sm:p-8 flex flex-col items-center">
                 <div class="w-full max-w-2xl">
 
-                    <div class="glass-panel rounded-2xl p-6 md:p-8 animate-[fadeIn_0.5s_ease-out]">
-                        <div class="text-center mb-6">
-
-                            <div class="hidden print:block mb-6">
-                                <div class="print-header">
-                                    <div>
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <img src="../images/mainLogo.png" alt="Treadz" class="h-16 w-auto">
-                                        </div>
-                                        <div class="text-sm font-bold text-gray-800 mt-1" id="shop-phone-display">
-
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <h2 class="text-2xl font-bold text-gray-900 mb-1">QUOTE <span
-                                                id="quote-id-display"
-                                                class="text-gray-500 font-normal ml-2 text-lg">#--</span></h2>
-                                        <div class="print-date-text" id="print-date"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h2 class="text-2xl font-bold text-gray-800 mb-2 print:hidden">Tire Quote</h2>
-                            <p class="text-sm text-gray-500 print:hidden">Quickly estimate total costs including fees
-                                and
-                                tax.</p>
+                    <div
+                        class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 md:p-12 animate-[fadeIn_0.5s_ease-out]">
+                        <div class="text-center mb-10">
+                            <h2 class="text-3xl font-black text-gray-900 mb-2 tracking-tighter print:hidden uppercase">
+                                Tire Quote</h2>
+                            <p class="text-sm text-gray-500 font-medium print:hidden">Official government cost
+                                estimation tool.</p>
                         </div>
 
                         <div class="grid gap-6">
@@ -429,35 +241,38 @@
 
 
                             <div id="tire-info-container">
-                                <label class="label-uppercase">Tire
-                                    Info</label>
+                                <label
+                                    class="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2 px-1">Tire
+                                    Information</label>
                                 <input type="text" id="tire-info-input" placeholder="e.g. 205/55R16 Michelin Defender"
-                                    class="calc-input w-full px-4 py-3 text-lg font-semibold bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none print:bg-transparent print:border-none print:px-0 print:text-left print:shadow-none placeholder:font-normal">
+                                    class="usa-search-input w-full font-bold" style="height: 56px; border-radius: 8px;">
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 print:hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 print:hidden">
                                 <div>
                                     <label
-                                        class="block text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Price
+                                        class="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2 px-1">Price
                                         Per Tire</label>
                                     <div class="relative">
                                         <span
-                                            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">$</span>
+                                            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
                                         <input type="number" id="tire-price" placeholder="0.00" min="0" step="0.01"
-                                            class="calc-input w-full pl-8 pr-4 py-3 text-2xl font-semibold bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                                            class="usa-search-input w-full pl-8 font-black text-2xl"
+                                            style="height: 64px; border-radius: 8px;">
                                     </div>
                                 </div>
 
                                 <div>
                                     <label
-                                        class="block text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">Quantity</label>
-                                    <div class="flex items-center gap-2 h-[58px]">
-                                        <button onclick="adjustQuantity(-1)"
-                                            class="h-full px-5 rounded-xl bg-gray-100 hover:bg-gray-200 text-2xl font-bold text-gray-600 transition-colors active:scale-95">-</button>
+                                        class="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2 px-1">Quantity</label>
+                                    <div class="flex items-center gap-3">
+                                        <button onclick="adjustQuantity(-1)" class="usa-button usa-button--outline"
+                                            style="min-width: 64px; height: 64px; margin: 0; padding: 0; font-size: 1.5rem;">-</button>
                                         <input type="number" id="quantity" value="4" min="1"
-                                            class="calc-input h-full w-full text-center text-2xl font-semibold bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
-                                        <button onclick="adjustQuantity(1)"
-                                            class="h-full px-5 rounded-xl bg-gray-100 hover:bg-gray-200 text-2xl font-bold text-gray-600 transition-colors active:scale-95">+</button>
+                                            class="usa-search-input w-full text-center font-black text-2xl"
+                                            style="height: 64px; border-radius: 8px;">
+                                        <button onclick="adjustQuantity(1)" class="usa-button usa-button--primary"
+                                            style="min-width: 64px; height: 64px; margin: 0; padding: 0; font-size: 1.5rem;">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -572,26 +387,27 @@
                                 <p class="text-xs">Quote valid for 7 days. Thank you for your business!</p>
                             </div>
 
-                            <div class="flex gap-3 print:hidden">
-                                <button onclick="reset()"
-                                    class="w-1/4 btn bg-white border border-gray-300 text-gray-700 font-semibold py-3 text-sm rounded-xl hover:bg-gray-50 active:scale-95 transition-all">
-                                    New Quote
+                            <div class="flex flex-wrap gap-4 mt-8 print:hidden">
+                                <button onclick="reset()" class="usa-button usa-button--outline flex-1"
+                                    style="height: 56px; font-weight: 800;">
+                                    RESET
                                 </button>
-                                <button onclick="handleSaveOnly()"
-                                    class="w-1/4 btn bg-blue-50 border border-blue-200 text-blue-700 font-semibold py-3 text-sm rounded-xl hover:bg-blue-100 active:scale-95 transition-all">
-                                    Save
+                                <button onclick="handleSaveOnly()" class="usa-button usa-button--outline flex-1"
+                                    style="height: 56px; font-weight: 800;">
+                                    SAVE RECORD
                                 </button>
                                 <button onclick="handlePrint()"
-                                    class="w-2/4 btn btn-primary font-bold py-3 text-sm rounded-xl shadow-lg hover:shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    class="usa-button usa-button--primary flex-[2] flex justify-center items-center gap-3"
+                                    style="height: 56px; font-weight: 800; font-size: 1rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
                                         stroke-linejoin="round">
                                         <polyline points="6 9 6 2 18 2 18 9" />
                                         <path
                                             d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                                         <rect width="12" height="8" x="6" y="14" />
                                     </svg>
-                                    Print Quote
+                                    PRINT QUOTE
                                 </button>
                             </div>
                         </div>
